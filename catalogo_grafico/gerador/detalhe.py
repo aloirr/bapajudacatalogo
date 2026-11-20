@@ -206,7 +206,8 @@ def preencher_aplicacao(fams):
     for fn in ('BASE_BAP_UNIFICADA_PRODUTOS_BAP_v8.xlsx',):
         try:
             b = pd.read_excel(os.path.join(AQUI, 'entradas', fn), 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'APLICACAO'])
-            base.update({str(c).strip().upper(): str(a).strip() for c, a in zip(b.CODIGO_BAP, b.APLICACAO) if isinstance(a, str) and a.strip()})
+            base.update({str(c).strip().upper(): str(a).strip() for c, a in zip(b.CODIGO_BAP, b.APLICACAO)
+                         if isinstance(a, str) and a.strip() and 'R$' not in a})   # preço nunca entra (v8 do TER556556: 'R$ 103.88+ Detalhes')
         except Exception:
             pass
     for f in fams:
