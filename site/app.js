@@ -801,8 +801,8 @@
   function blocoPecas(sec, recentes) {
     const lst = recentes || destaques();
     sec.removeAttribute("aria-busy");
-    sec.innerHTML = `<div class="rec-topo"><div><h2>${recentes ? "Pesquisas recentes" : "Destaques"}</h2>
-        <p class="sub">${recentes ? "As mais abertas nos últimos 7 dias" : "Peças com foto e ficha completa"}</p></div>
+    sec.innerHTML = `<div class="rec-topo"><div><h2>${recentes ? "Mais vistas" : "Destaques"}</h2>
+        <p class="sub">${recentes ? "Peças mais abertas nos últimos 7 dias" : "Peças com foto e ficha completa"}</p></div>
         <a class="rec-todos" href="#/busca">Ver todos<span class="so-pc"> os produtos</span> <span aria-hidden="true">›</span></a></div>
       <ul class="rec-lista">${lst.map(pecaHtml).join("")}</ul>`;
   }
