@@ -1,11 +1,13 @@
-// Serviço de consulta por placa (T-0005). Node 18+, sem dependências.
+// Serviço de consulta por placa (T-0005) e contador de aberturas (T-0018).
+// Node 18+, sem dependências.
 // Regras: a chave só vem de API_PLACAS_TOKEN; o log nunca leva placa, IP,
-// headers, URL da API, chave ou mensagem de erro.
+// código aberto, headers, URL da API, chave ou mensagem de erro.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { criarContador, criarCatalogo, normalizarCodigo, JANELA_MAX } from './contador.mjs';
 
 // Endereço FIXO. Só os testes (NODE_ENV=test) podem trocar.
 const API_FIXA = 'https://wdapi2.com.br/v3/basico/';
@@ -21,6 +23,10 @@ const CORPO_MAX = 1024;
 const RESPOSTA_MAX = 256 * 1024;
 const H24 = 24 * 60 * 60 * 1000;
 const FUSO_MANAUS = -4 * 60 * 60 * 1000;
+// Contador (T-0018) [SUPOSIÇÃO: números a confirmar com o Alexandre].
+const CONTAR_IP_MINUTO = 30;    // aberturas contadas por IP por minuto
+const CONTAR_TETO_MINUTO = 120; // aberturas contadas no serviço inteiro por minuto
+const MAIS_VISTOS = 4;
 
 const semente = crypto.randomBytes(32);
 const chave = (placa) => crypto.createHmac('sha256', semente).update(placa).digest('hex');
@@ -30,8 +36,17 @@ const guardados = new Map(); // chave -> dados (vindos do disco)
 const emVoo = new Map();     // chave -> Promise
 const porIp = new Map();     // HMAC(ip) -> { min, contMin, dia, contDia } (IP nunca cru)
 let teto = { dia: -1, cont: 0 };
+const contarPorIp = new Map(); // HMAC(ip) -> { min, cont } (só memória, nunca em disco nem log)
+let contarTeto = { min: -1, cont: 0 };
 
 const log = (msg) => console.log(msg);
+
+const contador = criarContador({ pasta: process.env.PASTA_GUARDA || null, log });
+function urlDoCatalogo() {
+  if (process.env.NODE_ENV === 'test' && process.env.CATALOGO_URL_TESTE) return process.env.CATALOGO_URL_TESTE;
+  try { return new URL('/data/produtos.json', process.env.ORIGEM_PERMITIDA).href; } catch { return null; }
+}
+const catalogo = criarCatalogo({ url: urlDoCatalogo(), log });
 
 // ---------- guarda em disco (opcional) ----------
 let arquivoGuarda = null;
@@ -143,6 +158,8 @@ const faxina = setInterval(() => {
   for (const [k, v] of cache) if (v.expira <= agora) cache.delete(k);
   const min = Math.floor(agora / 60000), dia = diaManaus(agora);
   for (const [k, v] of porIp) if (v.dia !== dia || (v.min !== min && v.contDia === 0)) porIp.delete(k);
+  for (const [k, v] of contarPorIp) if (v.min !== min) contarPorIp.delete(k);
+  contador.faxina(agora);
 }, 60000);
 faxina.unref();
 
@@ -211,6 +228,20 @@ async function consultar(placa, ipChave, agora) {
   return p;
 }
 
+// Limite do /contar: janela de 1 minuto, por IP (HMAC, só memória) e do serviço.
+// Todo pedido de origem certa conta, até o inválido.
+function limiteContar(ipChave, agora) {
+  const min = Math.floor(agora / 60000);
+  const espera = Math.max(1, Math.ceil(((min + 1) * 60000 - agora) / 1000));
+  if (contarTeto.min !== min) contarTeto = { min, cont: 0 };
+  let r = contarPorIp.get(ipChave);
+  if (!r || r.min !== min) { r = { min, cont: 0 }; contarPorIp.set(ipChave, r); }
+  if (r.cont >= CONTAR_IP_MINUTO) return { erro: 'limite', espera };
+  if (contarTeto.cont >= CONTAR_TETO_MINUTO) return { erro: 'teto', espera };
+  r.cont++; contarTeto.cont++;
+  return null;
+}
+
 // ---------- HTTP ----------
 function responder(res, status, obj, extra = {}) {
   const corpo = JSON.stringify(obj);
@@ -252,6 +283,8 @@ async function tratar(req, res) {
     if (req.method !== 'GET' && req.method !== 'HEAD') return responder(res, 405, { erro: 'metodo' }, { Allow: 'GET' });
     return responder(res, 200, { ok: true });
   }
+  if (rota === '/contar') return tratarContar(req, res, cors, origem, inicio);
+  if (rota === '/mais-vistos') return tratarMaisVistos(req, res, cors, origem, inicio);
   if (rota !== '/veiculo') return responder(res, 404, { erro: 'rota' });
 
   if (req.method === 'OPTIONS') {
@@ -291,8 +324,67 @@ async function tratar(req, res) {
   return fim(503, { erro: 'indisponivel' });
 }
 
+// POST /contar {"codigo":"AMT7183"} -> 204. Só da origem do catálogo (o Origin
+// é obrigatório). Guarda só {codigo: n} do dia; nada de quem abriu.
+async function tratarContar(req, res, cors, origem, inicio) {
+  const okOrigem = Boolean(cors['Access-Control-Allow-Origin']);
+  if (req.method === 'OPTIONS') {
+    if (!okOrigem) return responder(res, 403, { erro: 'origem' }, cors);
+    res.writeHead(204, {
+      ...cors,
+      'Access-Control-Allow-Methods': 'POST',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '600',
+    });
+    return res.end();
+  }
+  if (req.method !== 'POST') return responder(res, 405, { erro: 'metodo' }, { ...cors, Allow: 'POST, OPTIONS' });
+  const fim = (status, obj, extra = {}) => {
+    log(`contar ${status} ${Date.now() - inicio}ms`);
+    if (status === 204) {
+      res.writeHead(204, { ...cors, 'Cache-Control': 'no-store', ...extra });
+      return res.end();
+    }
+    return responder(res, status, obj, { ...cors, ...extra });
+  };
+  if (!origem || !okOrigem) { req.resume(); return fim(403, { erro: 'origem' }); }
+  const lim = limiteContar(chave(ipDoPedido(req)), Date.now());
+  if (lim) { req.resume(); return fim(429, { erro: lim.erro }, { 'Retry-After': String(lim.espera) }); }
+  const bruto = await lerCorpo(req);
+  if (bruto === null) return fim(413, { erro: 'codigo_invalido' });
+  let codigo = null;
+  if (!(req.url || '').includes('?')) {
+    try { codigo = normalizarCodigo(JSON.parse(bruto)?.codigo); } catch { codigo = null; }
+  }
+  if (!catalogo.pronto()) return fim(503, { erro: 'indisponivel' });
+  if (!codigo || !catalogo.tem(codigo)) return fim(400, { erro: 'codigo_invalido' });
+  contador.contar(codigo);
+  return fim(204);
+}
+
+// GET /mais-vistos?dias=7 -> {"total": N, "itens": [{"codigo","n"}]} (até 4).
+async function tratarMaisVistos(req, res, cors, origem, inicio) {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return responder(res, 405, { erro: 'metodo' }, { ...cors, Allow: 'GET' });
+  const fim = (status, obj) => {
+    log(`mais-vistos ${status} ${Date.now() - inicio}ms`);
+    return responder(res, status, obj, cors);
+  };
+  if (origem && !cors['Access-Control-Allow-Origin']) return fim(403, { erro: 'origem' });
+  let dias = 7;
+  const q = new URLSearchParams((req.url || '').split('?')[1] || '');
+  if (q.has('dias')) {
+    const d = q.get('dias');
+    dias = /^[0-9]{1,2}$/.test(d) ? Number(d) : 0;
+  }
+  if (dias < 1 || dias > JANELA_MAX) return fim(400, { erro: 'dias_invalido' });
+  const valido = catalogo.pronto() ? catalogo.tem : null;
+  return fim(200, contador.maisVistos(dias, { valido, quantos: MAIS_VISTOS }));
+}
+
 export function iniciar(porta = process.env.PORT !== undefined ? Number(process.env.PORT) : 10000) {
   abrirGuarda();
+  contador.abrir();
+  catalogo.iniciar();
   const srv = http.createServer((req, res) => {
     tratar(req, res).catch(() => {
       log('veiculo 503');
@@ -304,6 +396,10 @@ export function iniciar(porta = process.env.PORT !== undefined ? Number(process.
   srv.requestTimeout = 15000;
   srv.headersTimeout = 10000;
   srv.listen(porta, () => log(`placas ouvindo ${srv.address().port}`));
+  // Deploy ou reinício no Render: grava as contagens do dia antes de sair.
+  const sair = () => { contador.gravarJa(); process.exit(0); };
+  process.once('SIGTERM', sair);
+  process.once('SIGINT', sair);
   return srv;
 }
 

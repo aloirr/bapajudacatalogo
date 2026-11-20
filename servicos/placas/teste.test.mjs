@@ -46,6 +46,21 @@ before(async () => {
 });
 after(() => api.close());
 
+// ---------- catálogo falso (simula o site/data/produtos.json publicado) ----------
+const CODIGOS = ['AMT7183', 'CXD13062', 'CXD13027', 'ROL3204-2RS', 'ROL2780/2720', 'TER5597000', 'SAIU0001'];
+let catalogoUrl;
+let catalogoSrv;
+before(async () => {
+  catalogoSrv = http.createServer((req, res) => {
+    if (req.url !== '/data/produtos.json') { res.writeHead(404); return res.end(); }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ total: CODIGOS.length, produtos: CODIGOS.filter((c) => c !== 'SAIU0001').map((c) => ({ c, d: 'PECA' })) }));
+  });
+  await new Promise((r) => catalogoSrv.listen(0, '127.0.0.1', r));
+  catalogoUrl = `http://127.0.0.1:${catalogoSrv.address().port}/data/produtos.json`;
+});
+after(() => catalogoSrv.close());
+
 const chamadasDe = (placa) => chamadas.filter((c) => c.placa === placa).length;
 
 // Pastas temporárias: todas apagadas no fim.
@@ -63,8 +78,9 @@ after(() => {
   for (const d of temporarias) fs.rmSync(d, { recursive: true, force: true });
 });
 
-function subir({ token = CHAVE, guarda, cwd = AQUI } = {}) {
+function subir({ token = CHAVE, guarda, cwd = AQUI, catalogo = catalogoUrl } = {}) {
   const env = { PATH: process.env.PATH, NODE_ENV: 'test', PLACAS_API_TESTE: apiUrl, PORT: '0', ORIGEM_PERMITIDA: ORIGEM };
+  if (catalogo) env.CATALOGO_URL_TESTE = catalogo;
   if (token) env.API_PLACAS_TOKEN = token;
   if (guarda) env.PASTA_GUARDA = guarda;
   const filho = spawn(process.execPath, [path.join(AQUI, 'server.mjs')], { env, cwd, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -321,4 +337,185 @@ test('CORS só para a origem permitida; /saude não chama a API; outra rota 404,
   assert.equal((await fetch(s.url + '/veiculo')).status, 405);
   assert.equal((await fetch(s.url + '/veiculo?placa=ABC1D23', { method: 'POST', body: '{"placa":"ABC1D23"}' })).status, 400);
   await s.parar();
+});
+
+// ---------- contador de aberturas (T-0018) ----------
+const H24 = 24 * 60 * 60 * 1000;
+const hojeManaus = () => Math.floor((Date.now() - 4 * 60 * 60 * 1000) / H24);
+const nomeDia = (atras) => new Date((hojeManaus() - atras) * H24).toISOString().slice(0, 10) + '.json';
+
+const contar = (s, codigo, { ip = '198.51.100.20', origem = ORIGEM, corpo } = {}) => fetch(s.url + '/contar', {
+  method: 'POST',
+  headers: { 'X-Forwarded-For': ip, ...(origem ? { Origin: origem } : {}) },
+  body: corpo ?? JSON.stringify({ codigo }),
+});
+const maisVistos = async (s, dias) => {
+  const r = await fetch(s.url + '/mais-vistos' + (dias === undefined ? '' : `?dias=${dias}`), { headers: { Origin: ORIGEM } });
+  return { status: r.status, corpo: await r.json(), cors: r.headers.get('access-control-allow-origin') };
+};
+async function esperarCatalogo(s) {
+  for (let i = 0; i < 100 && !/catalogo (ok|indisponivel)/.test(s.logs()); i++) await new Promise((r) => setTimeout(r, 20));
+  assert.match(s.logs(), /catalogo ok 6\b/);
+}
+// Os limites usam a janela do minuto do relógio: não começa nos últimos 8 s do minuto.
+async function longeDaVirada() {
+  const resto = 60000 - (Date.now() % 60000);
+  if (resto < 8000) await new Promise((r) => setTimeout(r, resto + 50));
+}
+
+test('contar: código do catálogo dá 204; inválido, fora do catálogo ou na query dá 400', async () => {
+  const s = await subir();
+  await esperarCatalogo(s);
+  const r = await contar(s, 'AMT7183');
+  assert.equal(r.status, 204);
+  assert.equal(await r.text(), '');
+  assert.equal(r.headers.get('access-control-allow-origin'), ORIGEM);
+  assert.equal((await contar(s, ' amt7183 ')).status, 204, 'aceita espaço nas pontas e minúsculas');
+  assert.equal((await contar(s, 'ROL2780/2720')).status, 204);
+  for (const c of ['NAOEXISTE1', 'SAIU0001', '', 'A'.repeat(60), 123, null]) {
+    const x = await contar(s, c);
+    assert.equal(x.status, 400, String(c));
+    assert.deepEqual(await x.json(), { erro: 'codigo_invalido' });
+  }
+  assert.equal((await contar(s, null, { corpo: 'nao-e-json' })).status, 400);
+  assert.equal((await contar(s, null, { corpo: '{"codigo":"' + 'x'.repeat(2000) + '"}' })).status, 413);
+  const q = await fetch(s.url + '/contar?codigo=AMT7183', { method: 'POST', headers: { Origin: ORIGEM }, body: '{"codigo":"AMT7183"}' });
+  assert.equal(q.status, 400);
+  assert.equal((await fetch(s.url + '/contar', { headers: { Origin: ORIGEM } })).status, 405);
+  const m = await maisVistos(s, 7);
+  assert.deepEqual(m.corpo, { total: 3, itens: [{ codigo: 'AMT7183', n: 2 }, { codigo: 'ROL2780/2720', n: 1 }] });
+  await s.parar();
+});
+
+test('contar: origem errada ou sem Origin dá 403 e não conta', async () => {
+  const s = await subir();
+  await esperarCatalogo(s);
+  const r = await contar(s, 'AMT7183', { origem: 'https://outro.invalid' });
+  assert.equal(r.status, 403);
+  assert.equal(r.headers.get('access-control-allow-origin'), null);
+  assert.equal((await contar(s, 'AMT7183', { origem: null })).status, 403);
+  const pre = await fetch(s.url + '/contar', { method: 'OPTIONS', headers: { Origin: 'https://outro.invalid' } });
+  assert.equal(pre.status, 403);
+  const preOk = await fetch(s.url + '/contar', { method: 'OPTIONS', headers: { Origin: ORIGEM } });
+  assert.equal(preOk.status, 204);
+  assert.equal(preOk.headers.get('access-control-allow-origin'), ORIGEM);
+  assert.equal((await fetch(s.url + '/mais-vistos', { headers: { Origin: 'https://outro.invalid' } })).status, 403);
+  assert.deepEqual((await maisVistos(s, 7)).corpo, { total: 0, itens: [] });
+  await s.parar();
+});
+
+test('contar: sem o catálogo carregado dá 503 (não conta às cegas)', async () => {
+  const s = await subir({ catalogo: 'http://127.0.0.1:9/data/produtos.json' });
+  for (let i = 0; i < 100 && !/catalogo indisponivel/.test(s.logs()); i++) await new Promise((r) => setTimeout(r, 20));
+  const r = await contar(s, 'AMT7183');
+  assert.equal(r.status, 503);
+  assert.deepEqual(await r.json(), { erro: 'indisponivel' });
+  assert.equal((await veiculo(s, 'CAT1A23')).status, 200, 'a placa segue funcionando');
+  await s.parar();
+});
+
+test('contar: limite de 30 por IP e 120 no serviço, por minuto, com 429 e Retry-After', async () => {
+  await longeDaVirada();
+  const s = await subir();
+  await esperarCatalogo(s);
+  for (let i = 0; i < 30; i++) assert.equal((await contar(s, 'CXD13062', { ip: '203.0.113.1' })).status, 204, `pedido ${i + 1}`);
+  const r = await contar(s, 'CXD13062', { ip: '10.1.1.1, 203.0.113.1' }); // vale o ÚLTIMO X-Forwarded-For
+  assert.equal(r.status, 429);
+  assert.deepEqual(await r.json(), { erro: 'limite' });
+  assert.ok(Number(r.headers.get('retry-after')) >= 1);
+  // Outros IPs até o teto do serviço (120 no minuto).
+  for (let i = 0; i < 90; i++) assert.equal((await contar(s, 'CXD13062', { ip: `203.0.113.${10 + Math.floor(i / 30)}` })).status, 204);
+  const t = await contar(s, 'CXD13062', { ip: '203.0.113.99' });
+  assert.equal(t.status, 429);
+  assert.deepEqual(await t.json(), { erro: 'teto' });
+  assert.equal((await maisVistos(s, 1)).corpo.total, 120, 'o 429 não contou');
+  await s.parar();
+});
+
+test('mais-vistos: janela de 7 dias, os 4 mais abertos, dias de 1 a 30', async () => {
+  const dir = pastaTemp();
+  fs.writeFileSync(path.join(dir, nomeDia(1)), JSON.stringify({ AMT7183: 5, CXD13062: 1 }));
+  fs.writeFileSync(path.join(dir, nomeDia(6)), JSON.stringify({ CXD13027: 4, TER5597000: 2, 'ROL3204-2RS': 2 }));
+  fs.writeFileSync(path.join(dir, nomeDia(7)), JSON.stringify({ CXD13062: 50 }));
+  fs.writeFileSync(path.join(dir, nomeDia(20)), JSON.stringify({ SAIU0001: 99, TER5597000: 10 }));
+  const s = await subir({ guarda: dir });
+  await esperarCatalogo(s);
+  assert.equal((await contar(s, 'AMT7183')).status, 204);
+  const m = await maisVistos(s, 7);
+  assert.equal(m.status, 200);
+  assert.equal(m.cors, ORIGEM);
+  assert.deepEqual(m.corpo, {
+    total: 15,
+    itens: [{ codigo: 'AMT7183', n: 6 }, { codigo: 'CXD13027', n: 4 }, { codigo: 'ROL3204-2RS', n: 2 }, { codigo: 'TER5597000', n: 2 }],
+  });
+  assert.deepEqual(await maisVistos(s), m, 'sem dias = 7');
+  const m8 = await maisVistos(s, 8);
+  assert.equal(m8.corpo.total, 65);
+  assert.deepEqual(m8.corpo.itens[0], { codigo: 'CXD13062', n: 51 });
+  const m30 = await maisVistos(s, 30);
+  assert.equal(m30.corpo.total, 75, 'código que saiu do catálogo não entra');
+  assert.ok(!JSON.stringify(m30.corpo).includes('SAIU0001'));
+  assert.deepEqual((await maisVistos(s, 1)).corpo, { total: 1, itens: [{ codigo: 'AMT7183', n: 1 }] });
+  for (const d of ['0', '31', '-1', 'abc', '7.5', '']) {
+    const x = await fetch(s.url + '/mais-vistos?dias=' + d);
+    assert.equal(x.status, 400, d);
+    assert.deepEqual(await x.json(), { erro: 'dias_invalido' });
+  }
+  await s.parar();
+});
+
+test('disco: um arquivo por dia só com {codigo: n}, sobrevive ao reinício; limpeza de 30 dias', async () => {
+  const dir = pastaTemp();
+  for (const atras of [29, 30, 31, 45]) fs.writeFileSync(path.join(dir, nomeDia(atras)), JSON.stringify({ TER5597000: 1 }));
+  fs.writeFileSync(path.join(dir, nomeDia(2)), '{quebrado');
+  fs.writeFileSync(path.join(dir, nomeDia(0) + '.tmp'), 'sobra de escrita interrompida');
+  fs.writeFileSync(path.join(dir, 'veiculos.jsonl'), '');
+  fs.writeFileSync(path.join(dir, 'outro.json'), '{}');
+  const a = await subir({ guarda: dir });
+  await esperarCatalogo(a);
+  assert.ok(!fs.existsSync(path.join(dir, nomeDia(31))), '31 dias: apagado');
+  assert.ok(!fs.existsSync(path.join(dir, nomeDia(45))), '45 dias: apagado');
+  assert.ok(fs.existsSync(path.join(dir, nomeDia(30))), '30 dias: fica');
+  assert.ok(fs.existsSync(path.join(dir, nomeDia(29))));
+  assert.ok(!fs.existsSync(path.join(dir, nomeDia(0) + '.tmp')), 'sobra .tmp apagada');
+  assert.ok(fs.existsSync(path.join(dir, 'veiculos.jsonl')) && fs.existsSync(path.join(dir, 'outro.json')), 'não mexe no que não é do contador');
+  for (let i = 0; i < 3; i++) assert.equal((await contar(a, 'AMT7183', { ip: '192.0.2.123' })).status, 204);
+  assert.equal((await contar(a, 'CXD13062', { ip: '192.0.2.124' })).status, 204);
+  await a.parar(); // SIGTERM grava antes de sair
+  const hoje = fs.readFileSync(path.join(dir, nomeDia(0)), 'utf8');
+  assert.deepEqual(JSON.parse(hoje), { AMT7183: 3, CXD13062: 1 });
+  const b = await subir({ guarda: dir });
+  await esperarCatalogo(b);
+  assert.equal((await contar(b, 'AMT7183', { ip: '192.0.2.123' })).status, 204);
+  assert.deepEqual((await maisVistos(b, 7)).corpo, { total: 5, itens: [{ codigo: 'AMT7183', n: 4 }, { codigo: 'CXD13062', n: 1 }] });
+  await b.parar();
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(dir, nomeDia(0)), 'utf8')), { AMT7183: 4, CXD13062: 1 });
+});
+
+test('contador: nada de IP, origem, hora ou placa no disco nem no log', async () => {
+  const dir = pastaTemp();
+  const s = await subir({ guarda: dir });
+  await esperarCatalogo(s);
+  await veiculo(s, 'PRV1A23', { ip: '192.0.2.201' });
+  for (const c of ['AMT7183', 'ROL3204-2RS', 'NAOEXISTE1']) await contar(s, c, { ip: '192.0.2.201' });
+  await contar(s, 'AMT7183', { ip: '192.0.2.202', origem: 'https://outro.invalid' });
+  await maisVistos(s, 7);
+  await s.parar();
+  const arquivos = fs.readdirSync(dir).sort();
+  assert.deepEqual(arquivos, [nomeDia(0), 'veiculos.jsonl'].sort());
+  const dia = fs.readFileSync(path.join(dir, nomeDia(0)), 'utf8');
+  assert.deepEqual(JSON.parse(dia), { AMT7183: 1, 'ROL3204-2RS': 1 });
+  const tudo = arquivos.map((f) => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n');
+  for (const proibido of ['192.0.2', '127.0.0.1', 'outro.invalid', ORIGEM, 'NAOEXISTE1', 'PRV1A23', CHAVE]) {
+    assert.ok(!dia.includes(proibido), 'contador vazou no disco: ' + proibido);
+  }
+  assert.ok(!tudo.includes('192.0.2'), 'IP no disco');
+  const log = s.logs();
+  for (const proibido of ['AMT7183', 'ROL3204', 'NAOEXISTE1', 'PRV1A23', '192.0.2', 'outro.invalid', catalogoUrl]) {
+    assert.ok(!log.includes(proibido), 'log vazou: ' + proibido);
+  }
+  assert.match(log, /contar 204 \d+ms/);
+  assert.match(log, /contar 400 \d+ms/);
+  assert.match(log, /contar 403 \d+ms/);
+  assert.match(log, /mais-vistos 200 \d+ms/);
 });
