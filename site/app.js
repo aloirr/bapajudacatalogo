@@ -2,11 +2,18 @@
    Os dados vêm de data/produtos.json, gerado por scripts/gerar_site.py a partir da base unificada.
    Rotas: #/  ·  #/busca?q=&si=&fa=&li=&ca=  ·  #/produto/<CODIGO>  ·  #/sobre
    (os links antigos com cod=, mo=, modelo= e ano= viram q=: ver rotaAntiga)
-   Consulta por placa (API PLACAS): reservada para a próxima fase (ver docs/ROADMAP.md). */
+   Busca por placa (T-0005): chama o serviço bapajudacatalogo-placas (integracao-placas), que guarda a chave da
+   API PLACAS. O site só conhece a URL pública abaixo; nenhuma chave entra aqui. LGPD: a placa não vai para o
+   endereço (#/...), nem para o localStorage/sessionStorage, nem para o console. */
 (function () {
   "use strict";
 
+  // [SUPOSIÇÃO] endereço que o Render dá ao serviço bapajudacatalogo-placas (contrato: POST {"placa":"ABC1D23"})
+  const PLACAS_URL = "https://bapajudacatalogo-placas.onrender.com/veiculo";
+  const PLACAS_TIMEOUT_MS = 75000; // o serviço grátis do Render dorme; acordar pode levar quase 1 minuto
+  const PLACAS_ACORDANDO_MS = 5000;
   const POR_PAGINA = 24;
+  let VEICULO_PLACA = null;  // { q, texto } do último veículo achado pela placa (só em memória e sem a placa)
   const app = document.getElementById("app");
   let BASE = null;           // { gerado_em, total, produtos }
   let POR_COD = new Map();   // código → produto
@@ -410,7 +417,7 @@
   }
 
   // Cartão de busca com 2 abas (decisão do Alexandre, 20/11/2026): 1) código, descrição ou aplicação, num campo só,
-  // palavra por palavra; 2) placa (fase 3, T-0005: por enquanto só o aviso, sem chamar nada).
+  // palavra por palavra; 2) placa (T-0005): o serviço devolve o veículo e ele vira o q da aba 1 (mesmo casador()).
   function montarBusca(container, pr) {
     container.insertAdjacentHTML("beforeend", `<section class="cartao-busca" aria-label="Buscar produtos">
       <div class="abas" role="tablist" aria-label="Tipo de busca">
@@ -423,7 +430,9 @@
             <input name="q" type="search" enterkeyhint="search" placeholder="Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S, 15W40"></label>
         </div>
         <div class="campos" data-campos="placa" id="painel-placa" role="tabpanel" aria-labelledby="aba-placa" hidden>
-          <p class="aviso" style="font-size:15px;margin:4px 0 8px"><b>Em breve.</b> Digite a placa do veículo e veja todos os produtos do catálogo que servem nele.</p>
+          <label class="campo largo"><span>Placa do veículo</span>
+            <input id="campo-placa" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="8" enterkeyhint="search" placeholder="Ex.: ABC1D23 ou ABC1234" aria-describedby="status-placa"></label>
+          <p class="aviso" id="status-placa" role="status" aria-live="polite" style="font-size:15px;margin:4px 0 8px">Digite a placa do veículo e veja os produtos do catálogo que servem nele.</p>
         </div>
         <div class="botoes">
           <button type="reset" class="bt bt-claro">Limpar</button>
@@ -434,14 +443,17 @@
     const cartao = container.querySelector(".cartao-busca");
     const form = cartao.querySelector("form");
     const abas = [...cartao.querySelectorAll(".abas button")];
-    const botoes = cartao.querySelector(".botoes");
+    const campoPlaca = cartao.querySelector("#campo-placa");
+    const statusPlaca = cartao.querySelector("#status-placa");
+    const btBuscar = cartao.querySelector('.botoes button[type="submit"]');
+    let aba = "texto";
     const mostrar = (a, foco) => {
+      aba = a;
       abas.forEach((b) => { const sel = b.dataset.aba === a; b.setAttribute("aria-selected", String(sel)); b.tabIndex = sel ? 0 : -1; if (sel && foco) b.focus(); });
       cartao.querySelectorAll(".campos").forEach((c) => (c.hidden = c.dataset.campos !== a));
-      botoes.style.display = a === "texto" ? "" : "none"; // a aba placa ainda não busca
     };
     abas.forEach((b, i) => {
-      b.addEventListener("click", () => { mostrar(b.dataset.aba); if (b.dataset.aba === "texto") form.elements.q.focus(); });
+      b.addEventListener("click", () => { mostrar(b.dataset.aba); (b.dataset.aba === "texto" ? form.elements.q : campoPlaca).focus(); });
       // teclado: setas, Home e End trocam de aba
       b.addEventListener("keydown", (ev) => {
         const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: abas.length - 1 }[ev.key];
@@ -451,12 +463,96 @@
       });
     });
     if (pr && pr.get("q")) form.elements.q.value = pr.get("q");
-    mostrar("texto");
-    form.addEventListener("reset", () => setTimeout(() => { if (lerRota().caminho === "/busca") irPara("/busca"); }, 0));
+    // resultado de uma placa: volta na aba placa, com o veículo achado (a placa não fica guardada)
+    const daPlaca = !!(pr && VEICULO_PLACA && pr.get("q") === VEICULO_PLACA.q);
+    if (daPlaca) statusPlaca.innerHTML = `Veículo encontrado: <b>${esc(VEICULO_PLACA.texto)}</b>`;
+    mostrar(daPlaca ? "placa" : "texto");
+    campoPlaca.addEventListener("input", () => { campoPlaca.value = campoPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7); });
+    form.addEventListener("reset", () => setTimeout(() => {
+      statusPlaca.textContent = "Digite a placa do veículo e veja os produtos do catálogo que servem nele.";
+      if (lerRota().caminho === "/busca") irPara("/busca");
+    }, 0));
+    let consultando = false;
     form.addEventListener("submit", (ev) => {
       ev.preventDefault();
-      irPara("/busca", { q: form.elements.q.value.trim() });
+      if (aba === "texto") { irPara("/busca", { q: form.elements.q.value.trim() }); return; }
+      if (consultando) return;
+      const placa = campoPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (!PLACA_OK.test(placa)) { statusPlaca.innerHTML = "<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23."; campoPlaca.focus(); return; }
+      consultando = true;
+      btBuscar.disabled = true;
+      cartao.setAttribute("aria-busy", "true");
+      statusPlaca.textContent = "Consultando…";
+      const acordando = setTimeout(() => { statusPlaca.textContent = "Acordando o serviço, aguarde…"; }, PLACAS_ACORDANDO_MS);
+      consultarPlaca(placa).then((v) => {
+        const achado = veiculoDaPlaca(v);
+        if (!achado.q) throw Object.assign(new Error("vazio"), { status: 404 });
+        VEICULO_PLACA = achado;
+        campoPlaca.value = "";
+        if (lerRota().caminho === "/busca" && lerRota().params.toString() === new URLSearchParams({ q: achado.q }).toString()) render();
+        else irPara("/busca", { q: achado.q });
+      }).catch((e) => {
+        const msg = { 400: "<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23.", 404: "<b>Placa não encontrada.</b>",
+          429: "<b>Muitas consultas, tente em alguns minutos.</b>" }[e && e.status]
+          || "<b>Busca por placa indisponível agora;</b> use a busca por código, descrição ou aplicação.";
+        statusPlaca.innerHTML = msg;
+      }).finally(() => {
+        clearTimeout(acordando);
+        consultando = false;
+        btBuscar.disabled = false;
+        cartao.removeAttribute("aria-busy");
+      });
     });
+  }
+
+  // ---------- busca por placa (T-0005) ----------
+  const PLACA_OK = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/; // ABC1234 (antiga) e ABC1D23 (Mercosul)
+  // POST ao serviço; erro HTTP vira { status }; rede, timeout ou resposta estranha vira status 503.
+  async function consultarPlaca(placa) {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), PLACAS_TIMEOUT_MS);
+    try {
+      let r;
+      try {
+        r = await fetch(PLACAS_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ placa }),
+          signal: ctl.signal, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" });
+      } catch (e) { throw Object.assign(new Error("rede"), { status: 503 }); }
+      if (!r.ok) throw Object.assign(new Error("HTTP"), { status: [400, 404, 429].includes(r.status) ? r.status : 503 });
+      try { return await r.json(); } catch (e) { throw Object.assign(new Error("json"), { status: 503 }); }
+    } finally { clearTimeout(t); }
+  }
+  // Versão do modelo: cilindrada (1.6), válvulas (16V) e siglas de motor/câmbio/acabamento ficam fora do nome.
+  const VERSAO = /^(?:\d+[.,]\d+|\d+V|FLEX|TOTALFLEX|TOTAL|MSI|TSI|MPI|MPFI|TFSI|TDI|TURBO|AT|MT|CVT|AUT|MEC|GASOLINA|ALCOOL|DIESEL|CD|CS|CE|4X4|4X2)$/;
+  function nomeDoModelo(txt, montadora) {
+    let s = norm(txt);
+    if (s.includes("/")) s = s.slice(s.indexOf("/") + 1).trim(); // "VW/GOL 1.6 MSI" → "GOL 1.6 MSI"
+    const mo = norm(montadora);
+    if (mo && s.startsWith(mo + " ")) s = s.slice(mo.length + 1);
+    const nome = [];
+    for (const w of s.split(/[\s-]+/).filter(Boolean)) {
+      if (VERSAO.test(w)) break;
+      if (nome.length && !ehVeiculo(w)) break; // 2ª palavra só se for nome de veículo ("GRAND SIENA"; "GOL TRENDLINE" fica GOL)
+      nome.push(w);
+      if (nome.length === 2) break;
+    }
+    return nome.join(" ");
+  }
+  // Resposta 200 → texto para mostrar ("VOLKSWAGEN GOL 2018/2019 1.6") e q da busca (montadora + modelo + ano_modelo).
+  function veiculoDaPlaca(v) {
+    v = v || {};
+    const montadora = norm(String(v.montadora || "").split(/\s*[\/]\s*|\s+-\s+/)[0]);
+    const lista = Array.isArray(v.modelo_lista) ? v.modelo_lista : String(v.modelo_lista || "").split(/\s*[;,|]\s*/);
+    const primeiro = lista.map((x) => String(x || "").trim()).find(Boolean);
+    const modelo = nomeDoModelo(primeiro || v.modelo, montadora) || nomeDoModelo(v.modelo, montadora);
+    const ano = (String(v.ano || "").match(/\d{4}/) || [""])[0];
+    const anoModelo = (String(v.ano_modelo || "").match(/\d{4}/) || [""])[0] || ano;
+    let cil = String(v.cilindradas || "").trim();
+    if (/^\d{3,4}$/.test(cil)) cil = (Number(cil) / 1000).toFixed(1); // [SUPOSIÇÃO] 1598 (cm³) → 1.6
+    const anos = ano && anoModelo && ano !== anoModelo ? ano + "/" + anoModelo : anoModelo;
+    return {
+      q: [montadora, modelo, anoModelo].filter(Boolean).join(" "),
+      texto: [montadora, modelo, anos, cil].filter(Boolean).join(" "),
+    };
   }
 
   // ---------- telas ----------
