@@ -6,12 +6,12 @@
   "use strict";
 
   const POR_PAGINA = 24;
-  // SIMULAÇÃO T-0014 (sai na entrega final, fica só a versão e o tamanho escolhidos pelo Alexandre):
-  //   ?v=A  página do produto com "Voltar" (padrão)  ·  ?v=B  produto numa janela por cima da lista
-  //   ?t=30 texto da página do produto 30% menor      ·  ?t=50  50% menor  ·  sem ?t, o tamanho de hoje
-  const SIM = new URLSearchParams(location.search);
-  const VERSAO = SIM.get("v") === "B" ? "B" : "A";
-  if (SIM.get("t") === "30" || SIM.get("t") === "50") document.documentElement.classList.add("t" + SIM.get("t"));
+  // SIMULAÇÃO T-0014 (sai na entrega final, fica só a versão escolhida pelo Alexandre para o celular):
+  //   no computador (mais de 640 px), o produto aberto da lista vem sempre numa janela por cima da lista;
+  //   no celular (até 640 px), ?v=B (padrão) abre a janela e ?v=A abre a página do produto com "Voltar".
+  const SIM_V = new URLSearchParams(location.search).get("v");
+  const CELULAR = window.matchMedia("(max-width: 640px)");
+  const usaJanela = () => !CELULAR.matches || SIM_V !== "A";
   const app = document.getElementById("app");
   let BASE = null;           // { gerado_em, total, produtos }
   let POR_COD = new Map();   // código → produto
@@ -204,14 +204,16 @@
       </div></a>`;
   }
 
-  // Etiquetas do cartão (T-0014): só o código das referências cruzadas da concorrência, sem a marca.
+  // Etiquetas do cartão (T-0014): só o código, sem a marca. Primeiro o código original da montadora (marca "OEM"
+  // ou "CÓD. ORIGINAL"), depois as referências da concorrência, na ordem da base.
   // Fica fora o código da própria BAP (marca "BAP PN_2", "BAPTA PN" e o código igual ao do produto).
   const MAX_ETIQUETAS = 12; // no DOM; o que não couber em 2 linhas vira "+N" (ajustarEtiquetas)
   function codigosConcorrencia(p) {
     const vistos = new Set([normCod(p.c)]);
     const out = [];
-    for (const x of p.r || []) {
-      if (!x.c || /^BAP/i.test(x.m || "")) continue;
+    const ehOem = (x) => /^\s*(OEM|C[ÓO]D(IGO)?\.?\s*ORIGINAL|ORIGINAL)\b/i.test(x.m || "");
+    const refs = (p.r || []).filter((x) => x.c && !/^BAP/i.test(x.m || ""));
+    for (const x of [...refs.filter(ehOem), ...refs.filter((x) => !ehOem(x))]) {
       // vários códigos no mesmo campo: " / ", ",", ";", "|", quebra de linha ou " OU " (a "/" grudada fica: CU20006/1)
       const pedacos = String(x.c).split(/\s*[;,|\n]\s*|\s+\/\s*|\/\s+|\s+OU\s+/i)
         .map((c) => c.replace(/^[^:]*:\s*/, "").replace(/\s*\([^)]*\)\s*$/, "").trim()) // tira "REFERENCIAS ...:" e "(SCANIA)"
@@ -395,7 +397,7 @@
     return String(txt || "").split(/\s*[·,;/|]\s*|\s+/).map((c) => c.trim()).filter((c) => c && POR_COD.has(normCod(c)));
   }
 
-  // Conteúdo do produto (T-0014), igual na página (A) e na janela (B). Na janela os títulos descem um nível
+  // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
     const H = naJanela ? "h2" : "h1", H2 = naJanela ? "h3" : "h2";
@@ -417,7 +419,10 @@
       : `<div class="prod-dados um"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`;
     return `<div class="so-impressao cab-pdf"><img src="assets/logo_escuro.png" alt="BAP componentes de qualidade"><span>Ficha do produto · Catálogo BAP</span></div>
       <div class="prod">
-        <div class="prod-foto">${fotoHtml(p, true)}</div>
+        <div class="prod-foto-box">${p.i
+          ? `<div class="prod-foto"><button class="foto-zoom" type="button" aria-haspopup="dialog" aria-label="Ampliar a foto do ${esc(p.c)}">${fotoHtml(p, true)}</button></div>
+            <p class="foto-dica nao-imprime">Clique na foto para ampliar.</p>`
+          : `<div class="prod-foto">${fotoHtml(p, true)}</div>`}</div>
         <div class="prod-info">
           <div class="prod-cab">
             <${H} id="${naJanela ? "janela-tit" : "produto-tit"}">${esc(p.c)}</${H}>
@@ -444,7 +449,50 @@
     // "Salvar em PDF": a impressão do navegador, com a folha A4 do styles.css (@media print); o vendedor escolhe
     // "Salvar como PDF". Sem biblioteca e sem servidor.
     raiz.querySelector(".bt-pdf").addEventListener("click", () => window.print());
+    const bz = raiz.querySelector(".foto-zoom");
+    if (bz) bz.addEventListener("click", () => abrirZoom(bz));
   }
+
+  // ---------- foto ampliada (T-0014) ----------
+  // Clicar na foto do produto abre a foto em tela cheia, por cima da página ou da janela. <dialog> com
+  // showModal(): o fundo fica inerte e o foco fica no X. Fecha com o X, o Esc, o clique fora da foto e o voltar
+  // do celular (uma entrada no histórico com o mesmo endereço; o voltar não muda a rota). O foco volta à foto.
+  let ZOOM = null; // { dlg, volta: botão da foto }
+  function abrirZoom(bt) {
+    const img = bt.querySelector("img:not(.sem-foto img)");
+    if (!img || ZOOM) return;
+    let dlg = document.getElementById("zoom-foto");
+    if (!dlg) {
+      dlg = document.createElement("dialog");
+      dlg.id = "zoom-foto";
+      dlg.className = "zoom";
+      dlg.setAttribute("aria-modal", "true");
+      document.body.appendChild(dlg);
+      dlg.addEventListener("cancel", (ev) => { ev.preventDefault(); fecharZoom(true); }); // Esc
+      dlg.addEventListener("click", (ev) => { if (!ev.target.closest(".zoom-img, .zoom-leg, .zoom-x")) fecharZoom(true); }); // fora da foto
+      dlg.addEventListener("close", () => { if (ZOOM) fecharZoom(true); }); // fechou sem passar pelo cancel
+    }
+    dlg.setAttribute("aria-label", "Foto ampliada: " + img.alt);
+    dlg.innerHTML = `<button class="zoom-x" type="button" aria-label="Fechar a foto ampliada">✕</button>
+      <figure class="zoom-fig"><img class="zoom-img" src="${esc(img.getAttribute("src"))}" alt="${esc(img.alt)}"><figcaption class="zoom-leg">${esc(img.alt)}</figcaption></figure>`;
+    dlg.querySelector(".zoom-x").addEventListener("click", () => fecharZoom(true));
+    history.pushState({ zoom: true }, "", location.href);
+    ZOOM = { dlg, volta: bt };
+    document.documentElement.classList.add("com-zoom");
+    dlg.showModal();
+    dlg.querySelector(".zoom-x").focus();
+  }
+  // pelo X, Esc ou clique fora: volta a entrada do histórico e o popstate fecha (igual ao voltar do celular)
+  function fecharZoom(pelaTela) {
+    if (!ZOOM) return;
+    if (pelaTela) { history.back(); return; }
+    const { dlg, volta } = ZOOM;
+    ZOOM = null;
+    if (dlg.open) dlg.close();
+    document.documentElement.classList.remove("com-zoom");
+    if (volta.isConnected) volta.focus({ preventScroll: true });
+  }
+  window.addEventListener("popstate", () => { if (ZOOM) fecharZoom(false); });
 
   function telaProduto(codigo) {
     const p = POR_COD.get(normCod(codigo));
@@ -465,7 +513,7 @@
     ligarAcoes(app);
   }
 
-  // ---------- janela do produto (versão B da simulação) ----------
+  // ---------- janela do produto (no computador; no celular, a versão B da simulação) ----------
   // Abre por cima da lista sem sair dela. A rota continua #/produto/<CODIGO> (o endereço serve para mandar o
   // link), então o voltar do celular fecha a janela. <dialog> com showModal(): o fundo fica inerte (o foco
   // não sai da janela) e o Esc fecha. Ao fechar, o foco volta ao cartão.
@@ -528,9 +576,11 @@
     const { caminho, params } = lerRota();
     const ehProduto = caminho.startsWith("/produto/");
     const cod = ehProduto ? decodeURIComponent(caminho.slice(9)) : "";
-    // versão B: da lista, o produto abre na janela e a lista fica por baixo, do jeito que estava
-    if (VERSAO === "B") {
-      const listaNaTela = ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL;
+    // janela: da lista, o produto abre na janela e a lista fica por baixo, do jeito que estava
+    if (usaJanela()) {
+      // só o clique no cartão abre a janela; o endereço digitado ou colado abre a página
+      const listaNaTela = ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && CLICOU_CARTAO;
+      CLICOU_CARTAO = false;
       if (ehProduto && (JANELA || listaNaTela) && abrirJanela(cod)) return;
       if (JANELA) {
         const voltouNaLista = ESTADO_LISTA && location.hash === ESTADO_LISTA.hash;
@@ -559,7 +609,9 @@
   }
 
   window.addEventListener("hashchange", render);
+  let CLICOU_CARTAO = false; // o cartão da lista foi clicado (mouse, toque ou Enter) sem Ctrl, Shift ou Cmd
   document.addEventListener("click", (ev) => {
+    CLICOU_CARTAO = !!ev.target.closest(".lista .item") && !(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) && ev.button === 0;
     const a = ev.target.closest('a[href="#contato"]');
     if (a) { ev.preventDefault(); document.getElementById("contato").scrollIntoView({ behavior: "smooth" }); }
   });
