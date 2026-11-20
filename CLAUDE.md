@@ -26,6 +26,20 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
 5. O BAP Ajuda 2.0 (`aloirr/bapajuda2.0`) **não é mexido daqui**: ele vai ser reformulado como aplicativo.
 6. A BAP Central (`aloirr/bapcentral`) só lê a base. Avise o Alexandre quando a base mudar de formato.
 
+## Time e quadro
+- **8 agentes** em `.claude/agents/`; como trabalham: `.coord/README.md`.
+  - `po`: o **único** que conversa com o Alexandre. Transforma o pedido em tarefa e colhe o "aprovado".
+  - `gerente-projetos`: divide em passos, chama os agentes, cobra testes e revisão, abre o PR.
+  - Donos de pasta: `catalogo-dados` (`dados/`), `catalogo-grafico` (`catalogo_grafico/`), `web-site` (`site/` e `scripts/gerar_site.py`), `integracao-placas` (`servicos/placas/`, fase 3).
+  - Conferência: `testes` (gerar_site, buscas, prints 1366 e 390 px) e `revisor-codigo` (revisão independente de cada PR).
+- **Quadro:** `.coord/quadro.md`, uma tarefa por arquivo em `.coord/tarefas/T-nnnn.md`.
+  - Cada tarefa tem o pedido **literal** do Alexandre, a especificação e os critérios de aceite.
+- **Donos:** `.coord/donos.json`. Só o dono mexe na pasta.
+  - `.claude/**`, `.coord/donos.json`, `render.yaml`, `.github/**`, `CLAUDE.md` e `.gitignore` são do **Alexandre**.
+- **Caminho:** pedido → `po` → tarefa → `gerente-projetos` → donos → `testes` → `revisor-codigo` → PR → `po` → Alexandre.
+  - Nenhum PR vai para o `main` sem o **"aprovado"** do Alexandre. O merge é dele.
+  - **"autorizo"** libera, só naquela tarefa, o que a regra trava (ex.: a `TRAVA` ou a `FICHA`).
+
 ## Testar antes de entregar
 - `py -3 scripts/gerar_site.py` deve rodar sem erro e sem `[PARADO]`.
 - Abra o site com `py -3 -m http.server 8000 -d site`.
