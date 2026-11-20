@@ -729,43 +729,160 @@
   }
 
   // ---------- telas ----------
+  // Início (T-0018, opção 4b, R-20261120-140100): faixa da marca com a busca geral e, ao lado, a placa Mercosul; 3 fatos
+  // do catálogo e o bloco de 4 peças. Sem preço e sem estoque.
+  // Contador (R-20261120-141600, "2) a"): o serviço bapajudacatalogo-placas conta a abertura do produto pelo código
+  // (POST /contar) e devolve os mais vistos (GET /mais-vistos?dias=7). Fica DESLIGADO até o deploy do serviço
+  // (R-20261120-142100): com false, nenhuma chamada sai e o bloco é sempre "Destaques".
+  // Contrato confirmado pelo integracao-placas: POST /contar {"codigo"} → 204; GET /mais-vistos?dias=7 → 200
+  // {"total":N,"itens":[{"codigo","n"}]}, até 4 itens, do mais aberto para o menos aberto.
+  const CONTADOR_LIGADO = false;
+  const SERVICO = PLACAS_URL.replace(/\/veiculo$/, ""); // a mesma URL base da placa
+  const RECENTES_MIN = 20, RECENTES_MS = 3000; // menos de 20 aberturas em 7 dias, erro ou mais de 3 s: "Destaques"
+  let MAIS_VISTOS = null; // a resposta, uma vez por carga da página (só em memória)
+  const CONTADOS = new Set(); // [SUPOSIÇÃO] cada código conta uma vez por carga da página
+  // fire-and-forget: sem credenciais, sem esperar a resposta e sem travar a tela; a falha não aparece
+  function contarAbertura(p) {
+    if (!CONTADOR_LIGADO || !p || CONTADOS.has(p.c)) return;
+    CONTADOS.add(p.c);
+    try {
+      // sem Content-Type (text/plain): sem a pré-checagem do CORS; keepalive: o pedido segue se a página sair
+      fetch(SERVICO + "/contar", { method: "POST", body: JSON.stringify({ codigo: p.c }), keepalive: true,
+        cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" }).catch(() => {});
+    } catch (e) { /* sem contador */ }
+  }
+  // os 4 mais vistos que estão no catálogo, ou null (desligado, erro, mais de 3 s, total < 20 ou menos de 4 no catálogo)
+  function maisVistos() {
+    if (!CONTADOR_LIGADO) return Promise.resolve(null);
+    if (!MAIS_VISTOS) {
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), RECENTES_MS);
+      MAIS_VISTOS = fetch(SERVICO + "/mais-vistos?dias=7", { signal: ctl.signal, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          if (!j || !(Number(j.total) >= RECENTES_MIN) || !Array.isArray(j.itens)) return null;
+          const lst = [...new Set(j.itens.map((x) => POR_COD.get(normCod(x && x.codigo))).filter(Boolean))].slice(0, 4);
+          return lst.length === 4 ? lst : null;
+        })
+        .catch(() => null)
+        .finally(() => clearTimeout(t));
+    }
+    return MAIS_VISTOS;
+  }
+  // Destaques (critério fixo): foto, aplicação, referência cruzada, ficha técnica, diferencial BAP e ofereça junto;
+  // um por sistema, dos sistemas com mais produtos; no sistema, o menor código. Sem 4 assim, afrouxa nessa ordem:
+  // sem o diferencial, sem o ofereça junto, e depois repete sistema.
+  let DESTAQUES = null;
+  function destaques() {
+    if (DESTAQUES) return DESTAQUES;
+    const ordemSi = new Map(contar(BASE.produtos, "si").map(([s], i) => [s, i]));
+    const base = BASE.produtos.filter((p) => p.i && p.a && (p.r || []).some((x) => x.c) && (p.x || []).length)
+      .sort((a, b) => (ordemSi.get(a.si) - ordemSi.get(b.si)) || (a.c < b.c ? -1 : a.c > b.c ? 1 : 0));
+    const niveis = [(p) => p.df && p.oj, (p) => p.oj, () => true];
+    const escolha = [];
+    for (const ok of niveis) {
+      for (const p of base) if (escolha.length < 4 && ok(p) && !escolha.some((e) => e.si === p.si)) escolha.push(p);
+      if (escolha.length === 4) break;
+    }
+    for (const p of base) if (escolha.length < 4 && !escolha.includes(p)) escolha.push(p);
+    return (DESTAQUES = escolha);
+  }
+  const pecaHtml = (p) => `<a class="destaque" href="#/produto/${encodeURIComponent(p.c)}">
+      <div class="d-foto">${fotoHtml(p)}</div>
+      <div class="d-txt"><b class="d-cod">${esc(p.c)}</b><span class="d-desc">${esc(titulo(p.d))}</span></div></a>`;
+  function blocoPecas(sec, recentes) {
+    const lst = recentes || destaques();
+    sec.removeAttribute("aria-busy");
+    sec.innerHTML = `<div class="dest-topo"><div><h2>${recentes ? "Pesquisas recentes" : "Destaques"}</h2>
+        <p class="sub">${recentes ? "As 4 peças mais pesquisadas nos últimos 7 dias" : "Peças com foto e ficha completa no catálogo"}</p></div>
+        <a class="bt bt-claro bt-mini" href="#/busca">Ver todos os produtos</a></div>
+      <div class="destaques">${lst.map(pecaHtml).join("")}</div>`;
+  }
+  // o topo escuro e o logo branco só no início (a troca de rota volta ao topo claro antes do render)
+  const topoInicio = (sim) => {
+    document.body.classList.toggle("inicio-marca", sim);
+    const logo = document.querySelector(".topo .marca img");
+    if (logo) logo.src = sim ? "assets/logo_branco.png" : "assets/logo_escuro.png";
+  };
+  window.addEventListener("hashchange", () => topoInicio(false));
   function telaInicio() {
     const sistemas = contar(BASE.produtos, "si");
-    const comFoto = BASE.produtos.filter((p) => p.i).length;
+    topoInicio(true);
     app.innerHTML = `
-      <section class="hero">
-        <div class="hero-in">
-          <div>
-            <h1>Encontre a peça certa<br>com a <em>qualidade BAP</em></h1>
-            <p>Busque pelo código BAP, pela referência do concorrente ou do original, pelo veículo ou pela aplicação.</p>
-            <div class="hero-num">
-              <div><b>${fmt(BASE.total)}</b><span>produtos no catálogo</span></div>
-              <div><b>${fmt(sistemas.length)}</b><span>sistemas</span></div>
-              <div><b>${fmt(comFoto)}</b><span>com foto</span></div>
-            </div>
+      <section class="marca-faixa">
+        <div class="marca-faixa-in">
+          <div class="mf-texto">
+            <span class="mf-selo">bap · componentes de qualidade</span>
+            <h1>Componentes de qualidade <br class="so-pc">para a sua <em>oficina</em></h1>
+            <p>Ache a peça pelo código, pela referência, pelo veículo ou pela placa.</p>
           </div>
-          <div class="hero-fotos" aria-hidden="true">
-            <img class="f1" src="assets/hero.png" alt="">
-            <img class="f2" src="assets/card2.png" alt="">
+          <div class="mf-foto" aria-hidden="true"><img src="assets/hero.png" alt=""></div>
+          <div class="mf-busca">
+            <form class="mf-bloco mf-geral" id="form-geral" role="search" autocomplete="off" aria-label="Buscar produtos">
+              <label class="v-rot" for="campo-q">Código, descrição ou aplicação</label>
+              <div class="mf-linha">
+                <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S">
+                <button type="submit" class="bt">Buscar</button>
+              </div>
+            </form>
+            <form class="mf-bloco v-placa" id="form-placa" autocomplete="off" aria-label="Buscar pela placa">
+              <label class="v-rot" for="campo-placa">Placa do veículo</label>
+              <div class="v-placa-linha">
+                <div class="v-placa-campo">
+                  <span class="v-placa-faixa" aria-hidden="true">BR</span>
+                  <input id="campo-placa" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="8" enterkeyhint="search" placeholder="ABC1D23" aria-describedby="status-placa">
+                </div>
+                <button type="submit" class="bt">Buscar</button>
+              </div>
+              <p class="status-placa" id="status-placa" role="status" aria-live="polite" hidden></p>
+            </form>
           </div>
         </div>
       </section>
-      <div id="busca-home"></div>
-      <section class="bloco">
-        <h2>Navegue por sistema</h2>
-        <p class="sub">Toque em um sistema para ver todos os produtos dele.</p>
-        <div class="sistemas">${sistemas.map(([s, n]) => `<a class="sistema" href="#/busca?si=${encodeURIComponent(s)}"><i></i><b>${esc(titulo(s))}</b><span>${fmt(n)} produtos</span></a>`).join("")}</div>
+      <section class="difs" aria-label="O que o catálogo oferece">
+        <div class="dif"><b>${fmt(BASE.total)}</b><span>produtos no catálogo, em ${fmt(sistemas.length)} sistemas</span></div>
+        <div class="dif"><b>Busca por placa</b><span>Digite a placa e veja as peças do veículo</span></div>
+        <div class="dif"><b>Referência cruzada</b><span>Ache pelo código do original ou do concorrente</span></div>
       </section>
-      <section class="bloco">
-        <h2>Fique por dentro</h2>
-        <p class="sub">Linhas em destaque no portfólio BAP.</p>
-        <div class="novidades">
-          <a class="novidade" href="#/busca?si=TRANSMISS%C3%83O"><div class="img"><img src="assets/card2.png" alt="Kit de embreagem BAP" loading="lazy"></div><div class="txt"><h3>Transmissão e embreagem</h3><p>Kits de embreagem, atuadores e rolamentos para linha leve e pesada.</p><span class="ver">Ver produtos →</span></div></a>
-          <a class="novidade" href="#/busca?ca=LUBRIFICANTES"><div class="img"><img src="assets/card3.png" alt="Óleos BAP ProActive" loading="lazy"></div><div class="txt"><h3>Lubrificantes BAP ProActive</h3><p>Óleos sintéticos, semissintéticos e minerais para o seu motor.</p><span class="ver">Ver produtos →</span></div></a>
-          <a class="novidade" href="#/busca?si=FREIO"><div class="img"><img src="assets/card4.png" alt="Catraca de freio BAP" loading="lazy"></div><div class="txt"><h3>Freio</h3><p>Pastilhas, discos, tambores e catracas com a garantia BAP.</p><span class="ver">Ver produtos →</span></div></a>
-        </div>
-      </section>`;
-    montarBusca(document.getElementById("busca-home"));
+      <section class="bloco destaques-bloco" aria-busy="true"><div class="destaques espera" aria-hidden="true">${"<div class=\"destaque\"><div class=\"d-foto\"></div><div class=\"d-txt\"></div></div>".repeat(4)}</div></section>`;
+    const sec = app.querySelector(".destaques-bloco");
+    if (!CONTADOR_LIGADO) blocoPecas(sec, null);
+    else maisVistos().then((lst) => { if (sec.isConnected) blocoPecas(sec, lst); });
+
+    // os 2 botões fazem a mesma busca do quadro da busca (montarBusca, T-0014): placa vazia, busca o texto; com a placa,
+    // consulta o veículo e leva o texto junto. LGPD: a placa vai só no corpo do POST (consultarPlaca: credentials omit)
+    // e fica só em memória (VEICULO_PLACA); no endereço vai o veículo, nunca a placa.
+    const fG = app.querySelector("#form-geral");
+    const fP = app.querySelector("#form-placa"), cP = fP.querySelector("#campo-placa"), st = fP.querySelector("#status-placa");
+    const bts = app.querySelectorAll(".mf-busca button");
+    const aviso = (h) => { st.hidden = false; st.innerHTML = h; };
+    cP.addEventListener("input", () => { cP.value = cP.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7); });
+    let consultando = false;
+    const buscarInicio = (ev) => {
+      ev.preventDefault();
+      if (consultando) return;
+      const q = fG.elements.q.value.trim();
+      if (!cP.value.trim()) { VEICULO_PLACA = null; irPara("/busca", { q }); return; }
+      const placa = cP.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (!PLACA_OK.test(placa)) { aviso("<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23."); cP.focus(); return; }
+      consultando = true; bts.forEach((b) => { b.disabled = true; }); fP.setAttribute("aria-busy", "true");
+      aviso("Consultando…");
+      const acordando = setTimeout(() => { aviso("Acordando o serviço, aguarde…"); }, PLACAS_ACORDANDO_MS);
+      consultarPlaca(placa).then((v) => {
+        const achado = veiculoDaPlaca(v);
+        if (!achado.q) throw Object.assign(new Error("vazio"), { status: 404 });
+        cP.value = "";
+        const daPlaca = { vm: achado.bruto.mo, vmo: achado.bruto.modelo, va: achado.bruto.ano, vmt: achado.bruto.cil, vv: achado.bruto.versao };
+        VEICULO_PLACA = { placa, chave: chaveVeiculo(daPlaca) };
+        irPara("/busca", new URLSearchParams(Object.entries(Object.assign(daPlaca, { q })).filter(([, x]) => x)));
+      }).catch((e) => {
+        aviso({ 400: "<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23.", 404: "<b>Placa não encontrada.</b>",
+          429: "<b>Muitas consultas, tente em alguns minutos.</b>" }[e && e.status]
+          || "<b>Busca por placa indisponível agora;</b> use a busca por código, descrição ou aplicação.");
+      }).finally(() => { clearTimeout(acordando); consultando = false; bts.forEach((b) => { b.disabled = false; }); fP.removeAttribute("aria-busy"); });
+    };
+    fG.addEventListener("submit", buscarInicio);
+    fP.addEventListener("submit", buscarInicio);
   }
 
   function telaBusca(pr) {
@@ -1302,6 +1419,7 @@
       return;
     }
     document.title = p.c + " · " + p.d + " · Catálogo BAP";
+    contarAbertura(p); // T-0018 (desligado até o deploy do contador)
     const daLista = ROTA_ANTERIOR && ROTA_ANTERIOR.startsWith("#/busca");
     app.innerHTML = `<div class="pagina-produto produto-conteudo">
       <div class="prod-topo nao-imprime">
@@ -1331,7 +1449,7 @@
     if (!JANELA) JANELA = { dlg, pilha: [], cod: p.c };
     const pilha = JANELA.pilha;
     if (pilha.length > 1 && pilha[pilha.length - 2] === location.hash) pilha.pop(); // voltar do celular
-    else if (pilha[pilha.length - 1] !== location.hash) pilha.push(location.hash);
+    else if (pilha[pilha.length - 1] !== location.hash) { pilha.push(location.hash); contarAbertura(p); } // T-0018
     dlg.innerHTML = `<div class="janela-barra nao-imprime"><span>Produto</span><button class="janela-x" type="button" aria-label="Fechar a janela do produto">✕</button></div>
       <div class="janela-corpo produto-conteudo">${produtoHtml(p, true)}</div>`;
     dlg.querySelector(".janela-x").addEventListener("click", () => fecharJanela(true));

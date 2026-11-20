@@ -422,3 +422,87 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .lista-veiculos { display: none !important; }
   .rod-pdf { margin-top: 5mm; padding-top: 2mm; border-top: 1px solid var(--linha); font-size: 7.5pt; color: var(--texto-2); }
 }
+
+/* ===== Início (T-0018, opção 4b): faixa da marca, busca geral e placa Mercosul lado a lado, Destaques ===== */
+/* só tokens do :root; o verde translúcido é o --verde misturado (color-mix), com o fundo liso antes, de reserva */
+.inicio-marca .topo { background: var(--escuro); border-bottom-color: var(--escuro); }
+.inicio-marca .marca img { height: 52px; }
+.inicio-marca .marca span { color: var(--borda-campo); border-left-color: var(--texto-2); }
+.inicio-marca .menu a { color: var(--linha); }
+.inicio-marca .menu a:hover { color: var(--verde); }
+.inicio-marca .topo :focus-visible { outline-color: var(--verde); } /* no escuro, 3:1 ou mais */
+.marca-faixa { color: var(--branco); position: relative; overflow: hidden; background: var(--escuro);
+  background: radial-gradient(900px 420px at 88% 30%, color-mix(in srgb, var(--verde) 35%, transparent) 0%, transparent 65%),
+              linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%); }
+.marca-faixa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--verde); }
+.marca-faixa-in { max-width: 1200px; margin: 0 auto; padding: 26px 16px 34px; display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "txt foto" "busca busca"; gap: 18px 32px; align-items: center; }
+.mf-texto { grid-area: txt; }
+.mf-selo { display: inline-block; margin: 0 0 14px; padding: 4px 12px; border-radius: 999px; background: color-mix(in srgb, var(--verde) 16%, transparent); color: var(--verde); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.marca-faixa h1 { font-size: clamp(28px, 3.3vw, 42px); line-height: 1.12; font-weight: 700; margin: 0 0 12px; }
+.marca-faixa h1 em { font-style: normal; color: var(--verde); }
+.marca-faixa p { margin: 0; color: var(--borda-campo); font-size: 16px; max-width: 520px; }
+.mf-foto { grid-area: foto; display: flex; justify-content: center; }
+.mf-foto img { max-height: 190px; width: auto; filter: drop-shadow(0 18px 24px var(--veu)); }
+.mf-busca { grid-area: busca; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: 14px; align-items: stretch; }
+.mf-bloco { background: var(--branco); border-radius: var(--raio); padding: 14px 16px 16px; box-shadow: var(--sombra-janela); color: var(--texto); min-width: 0; }
+.v-rot { display: block; font-size: 12px; font-weight: 600; color: var(--texto-2); text-transform: uppercase; letter-spacing: .05em; margin: 0 0 6px; }
+.mf-linha, .v-placa-linha { display: flex; gap: 10px; }
+.mf-geral input { flex: 1; min-width: 0; height: 64px; border: 1px solid var(--borda-campo); border-radius: 10px; padding: 0 16px; font: inherit; font-size: 16px; color: var(--texto); background: var(--branco); }
+.mf-geral input:focus { border-color: var(--verde-esc); }
+.mf-bloco .bt { height: 64px; padding: 0 24px; font-size: 16px; }
+.mf-bloco .status-placa { margin: 8px 0 0; font-size: 13px; }
+/* placa Mercosul (da opção 3): faixa "BR" no --verde-txt (o branco nele dá 6,5:1) */
+.v-placa .v-rot { color: var(--escuro); }
+.v-placa-campo { flex: 1; min-width: 0; display: flex; height: 64px; border: 3px solid var(--escuro); border-radius: 10px; overflow: hidden; background: var(--branco); }
+.v-placa-campo:focus-within { border-color: var(--verde-esc); }
+.v-placa-faixa { width: 34px; flex: none; background: var(--verde-txt); color: var(--branco); font-size: 11px; font-weight: 700; display: grid; place-items: end center; padding-bottom: 8px; letter-spacing: .04em; }
+.v-placa-campo input { flex: 1; min-width: 0; border: 0; padding: 0 12px; font: inherit; font-size: 28px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--escuro); text-align: center; background: none; }
+.v-placa-campo input:focus-visible { outline-offset: -3px; } /* o contorno do foco fica dentro da moldura */
+.v-placa-campo input::placeholder { color: var(--texto-2); font-weight: 500; }
+/* fatos do catálogo */
+.difs { max-width: 1200px; margin: 0 auto; padding: 22px 16px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.dif { background: var(--branco); border: 1px solid var(--linha); border-left: 4px solid var(--verde); border-radius: var(--raio); padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; }
+.dif b { font-size: 20px; color: var(--escuro); line-height: 1.2; }
+.dif span { font-size: 14px; color: var(--texto-2); }
+/* Destaques / Pesquisas recentes: 4 peças */
+.destaques-bloco { padding-top: 28px; padding-bottom: 48px; }
+.dest-topo { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.dest-topo .sub { margin: 0; }
+.dest-topo .bt-mini { height: 44px; }
+.destaques { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.destaque { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; text-decoration: none; color: var(--texto); display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.destaque:hover { border-color: var(--verde); box-shadow: var(--sombra); transform: translateY(-2px); }
+.d-foto { height: 170px; background: var(--branco); border-bottom: 1px solid var(--linha); }
+.d-foto img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+.d-foto .sem-foto { height: 100%; }
+.d-txt { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; min-height: 64px; }
+.d-cod { font-size: 16px; color: var(--escuro); }
+.d-desc { font-size: 13px; color: var(--texto-2); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.destaques.espera .d-foto { background: var(--fundo); }
+@media (max-width: 900px) {
+  .marca-faixa-in { grid-template-columns: minmax(0, 1fr); grid-template-areas: "txt" "busca"; padding: 28px 16px 32px; }
+  .mf-foto { display: none; }
+  .mf-busca { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .destaques { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .difs { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+}
+@media (max-width: 640px) {
+  .mf-selo { font-size: 11px; margin-bottom: 10px; }
+  .so-pc { display: none; }
+  .inicio-marca .marca img { height: 40px; }
+  .marca-faixa h1 { font-size: 26px; }
+  .marca-faixa p { font-size: 14px; }
+  .mf-bloco { padding: 12px 12px 14px; }
+  .mf-geral input { height: 52px; font-size: 15px; padding: 0 12px; }
+  .mf-geral .bt { height: 52px; padding: 0 16px; }
+  .v-placa-campo { height: 56px; }
+  .v-placa-campo input { font-size: 22px; letter-spacing: .1em; padding: 0 6px; }
+  .v-placa .bt { height: 56px; padding: 0 16px; }
+  .dif { padding: 12px 14px; }
+  .dif b { font-size: 17px; }
+  .d-foto { height: 120px; }
+  .d-txt { padding: 8px 10px 12px; }
+  .d-cod { font-size: 14px; }
+  .destaques { gap: 10px; }
+}
