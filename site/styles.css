@@ -34,6 +34,11 @@
   /* fundo da faixa do início e do topo da Sobre (T-0018): só tokens; o verde translúcido é o --verde no color-mix */
   --fundo-faixa: radial-gradient(900px 420px at 88% 30%, color-mix(in srgb, var(--verde) 35%, transparent) 0%, transparent 65%),
                  linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%);
+  /* cabeçalho e faixa da busca do catálogo (T-0018, opção b, R-20261120-161500): degradê do --escuro ao --verde-esc.
+     A ponta é o --verde-esc com 15% de --escuro, para o menu branco de 14 px passar do AA (5,1:1; no --verde-esc puro, 4,1:1) */
+  --g-catalogo: linear-gradient(90deg, var(--escuro) 0%, var(--texto) 55%, color-mix(in srgb, var(--verde-esc) 85%, var(--escuro)) 100%);
+  /* véu --escuro no alto da faixa do início e do topo da Sobre, por trás do cabeçalho transparente: o branco fica legível */
+  --veu-topo: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px);
 }
 .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .so-impressao { display: none; }
@@ -55,18 +60,22 @@ main:focus, main:focus-visible { outline: none; }
 .carregando { padding: 120px 16px; text-align: center; color: var(--texto-2); }
 
 /* topo */
-.topo { background: var(--branco); border-bottom: 1px solid var(--linha); position: sticky; top: 0; z-index: 20; }
+.topo { background: var(--g-catalogo); position: sticky; top: 0; z-index: 20; } /* escuro em todas as telas (T-0018 b); no início e na Sobre, transparente sobre a faixa */
 .topo-in { max-width: var(--largura); margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.marca { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--escuro); }
+.marca { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--branco); }
 .marca img { height: 46px; width: auto; }
-.marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-2); border-left: 1px solid var(--linha); padding-left: 10px; }
+.marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; border-left: 1px solid color-mix(in srgb, var(--branco) 35%, transparent); padding-left: 10px; }
 .menu { display: flex; gap: 12px; }
-.menu a { display: flex; align-items: center; min-height: 44px; padding-inline: 5px; text-decoration: none; color: var(--texto); font-weight: 500; font-size: 14px; } /* toque com 44 px */
-.menu a:hover { color: var(--verde-txt); }
+.menu a { display: flex; align-items: center; min-height: 44px; padding-inline: 5px; text-decoration: none; color: var(--branco); font-weight: 500; font-size: 14px; } /* toque com 44 px */
+.menu a:hover { text-decoration: underline; text-decoration-color: var(--verde); text-decoration-thickness: 2px; text-underline-offset: 6px; } /* o --verde no texto some na ponta verde do degradê (designer-ux) */
+.topo :focus-visible { outline-color: var(--branco); } /* no escuro e na ponta verde, 4:1 ou mais */
 
 /* cartão de busca */
 .cartao-busca { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); position: relative; z-index: 2; overflow: hidden; }
-.pagina-busca .cartao-busca { margin-top: 16px; }
+/* opção b (T-0018): a faixa escura do cabeçalho desce até o quadro branco da busca, como no início */
+.busca-faixa { background: var(--g-catalogo); }
+#busca-topo { max-width: var(--largura); margin: 0 auto; padding: 14px 16px 22px; }
+.busca-faixa .cartao-busca { box-shadow: var(--sombra-janela); }
 /* sem abas, um botão só (R-20261120-112950 e R-20261120-115432): busca geral, placa (menor) e o "Buscar";
    a placa consultada e o veículo ficam embaixo do campo da placa */
 .form-busca { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px) auto; gap: 8px 14px; padding: 12px 16px; align-items: start; }
@@ -208,13 +217,10 @@ main:focus, main:focus-visible { outline: none; }
 .foto-zoom:hover img { transform: scale(1.04); }
 .foto-zoom img { transition: transform .15s; }
 .foto-zoom:focus-visible { outline-offset: -3px; } /* dentro da moldura (a .prod-foto corta o que sai) */
-.prod-foto-box:has(.sem-foto) .foto-dica { display: none; }
-.foto-dica { margin: 6px 0 0; font-size: var(--min); line-height: 1.3; color: var(--texto-2); text-align: center; }
 .prod-cab h1, .prod-cab h2 { margin: 0; font-size: max(var(--min), calc(30px * var(--t))); letter-spacing: .02em; line-height: 1.2; }
 .prod-info .desc { font-size: max(var(--min), calc(17px * var(--t))); font-weight: 500; margin: 2px 0 10px; }
 .selos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
 .selo { background: var(--fundo); border: 1px solid var(--linha); border-radius: 999px; padding: 2px 10px; font-size: max(var(--min), calc(12px * var(--t))); font-weight: 500; color: var(--texto-2); }
-.selo.v { background: var(--verde-claro); border-color: transparent; color: var(--verde-txt); }
 .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
 .acoes .bt { height: 44px; font-size: 14px; }
 /* computador (opB2, R-20261120-141100): os 2 botões na linha do código, logo à direita dele, na página e na janela;
@@ -315,6 +321,8 @@ table.tab-veiculos td:nth-child(3), table.tab-veiculos td:nth-child(5) { white-s
 .rodape p { margin: 0; }
 .rodape .rodape-copy { grid-column: 1; grid-row: 1; font-size: 14px; font-weight: 500; line-height: 1.5; text-wrap: balance; }
 .rodape .mini { grid-column: 1; grid-row: 2; font-size: 12px; color: var(--borda-campo); } /* ~12:1 no --escuro */
+/* RD-0170: onde há a seção Aplicação (página, janela ou PDF do produto), o "Confira sempre a aplicação" fica só nela */
+body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
 .rodape-topo { grid-column: 2; grid-row: 1 / span 2; width: 48px; height: 48px; border-radius: 50%; border: 0; cursor: pointer;
   display: grid; place-items: center; background: var(--verde); color: var(--escuro); box-shadow: 0 6px 16px var(--veu); transition: box-shadow .15s, transform .15s; }
 .rodape-topo:hover { box-shadow: 0 6px 16px var(--veu), var(--sombra); } /* o mesmo verde, sombra mais forte (design-de-marca) */
@@ -335,7 +343,6 @@ table.tab-veiculos td:nth-child(3), table.tab-veiculos td:nth-child(5) { white-s
   .marca { gap: 8px; }
   .marca span { font-size: 10px; line-height: 1.2; letter-spacing: .1em; padding-left: 8px; } /* "Catálogo online" em 2 linhas (T-0018) */
   .so-cel { display: inline; }
-  .pagina-busca .cartao-busca { margin: 16px 0 0; }
   .rodape { margin-top: 40px; }
   .rodape-in { padding: 18px 16px 20px; column-gap: 14px; row-gap: 10px; }
   .rodape .rodape-copy { font-size: 12px; line-height: 1.55; }
@@ -468,19 +475,15 @@ dialog.painel-c::backdrop { background: var(--veu); }
 
 /* ===== Início (T-0018, opção 4c): faixa da marca, busca geral e placa Mercosul lado a lado, lista tabelada ===== */
 /* só tokens do :root; o verde translúcido é o --verde misturado (color-mix) */
-/* op4d: no início o cabeçalho fica por cima da faixa, transparente, com o logo e o menu em branco; ao rolar, --escuro */
-.inicio-marca .topo { position: fixed; left: 0; right: 0; background: transparent; border-bottom-color: transparent; transition: background-color .2s, box-shadow .2s; }
-.inicio-marca.topo-rolou .topo { background: var(--escuro); box-shadow: var(--sombra); }
+/* op4d: no início o cabeçalho fica por cima da faixa, transparente (o logo e o menu brancos são os de todas as telas); ao rolar, --escuro */
+/* s2 (R-20261120-162000-alexandre): na Sobre, o mesmo cabeçalho transparente sobre o topo escuro (.sobre-marca) */
+.inicio-marca .topo, .sobre-marca .topo { position: fixed; left: 0; right: 0; background: transparent; transition: background-color .2s, box-shadow .2s; }
+.inicio-marca.topo-rolou .topo, .sobre-marca.topo-rolou .topo { background: var(--escuro); box-shadow: var(--sombra); }
 .inicio-marca .marca img { height: 52px; }
-.inicio-marca .marca span { color: var(--branco); border-left-color: color-mix(in srgb, var(--branco) 35%, transparent); }
-.inicio-marca .menu a { color: var(--branco); }
-.inicio-marca .menu a:hover { color: var(--verde); }
-@media (prefers-reduced-motion: reduce) { .inicio-marca .topo { transition: none; } }
-.inicio-marca .topo :focus-visible { outline-color: var(--verde); } /* no escuro, 3:1 ou mais */
+@media (prefers-reduced-motion: reduce) { .inicio-marca .topo, .sobre-marca .topo { transition: none; } }
 .marca-faixa, .sb-topo { color: var(--branco); position: relative; overflow: hidden; background-color: var(--escuro); background-image: var(--fundo-faixa); }
-/* a faixa começa atrás do cabeçalho (52 px do logo + 20 px); o véu --escuro no alto garante o contraste do branco */
-.inicio-marca .marca-faixa { padding-top: 72px;
-  background-image: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px), var(--fundo-faixa); }
+/* a faixa do início e o topo da Sobre começam atrás do cabeçalho (72 px; 60 px no celular); o véu --escuro no alto garante o contraste do branco */
+.inicio-marca .marca-faixa, .sobre-marca .sb-topo { padding-top: 72px; background-image: var(--veu-topo), var(--fundo-faixa); }
 .marca-faixa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--verde); }
 .marca-faixa-in { max-width: 1200px; margin: 0 auto; padding: 26px 16px 34px; display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "txt foto" "busca busca"; gap: 18px 32px; align-items: center; }
@@ -511,7 +514,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .v-placa-campo input:focus-visible { outline-offset: -3px; } /* o contorno do foco fica dentro da moldura */
 /* o exemplo não parece placa digitada (designer-ux): corpo menor, peso 400, sem o espaçamento, como na tela de busca */
 .v-placa-campo input::placeholder { color: var(--texto-2); font-size: 16px; font-weight: 400; letter-spacing: 0; text-transform: none; }
-/* Destaques / Pesquisas recentes: lista tabelada (miniatura, código, descrição de 1 linha, sistema e seta) */
+/* Destaques / Mais vistas: lista tabelada (miniatura, código, descrição de 1 linha, sistema e seta) */
 .recentes-bloco, .sistemas-bloco { padding-bottom: 44px; }
 .recentes-bloco { padding-top: 26px; }
 .rec-topo { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
@@ -546,7 +549,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 @media (max-width: 640px) {
   .so-pc { display: none; }
   .inicio-marca .marca img { height: 40px; }
-  .inicio-marca .marca-faixa { padding-top: 60px; }
+  .inicio-marca .marca-faixa, .sobre-marca .sb-topo { padding-top: 60px; }
   .marca-faixa .mf-num { gap: 10px; margin: 2px 0 10px; }
   .mf-num b { font-size: 36px; }
   .mf-num span { font-size: 11px; padding-left: 10px; }
@@ -575,7 +578,6 @@ dialog.painel-c::backdrop { background: var(--veu); }
 /* ===== Sobre a BAP (T-0018, sobre1): texto do PDF "Empresa", fotos de produtos BAP; o fundo do topo é o da faixa do início ===== */
 .sobre { --sb-larg: 1160px; }
 .sb-topo-in { max-width: var(--sb-larg); margin: 0 auto; padding: 56px 16px 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: 32px; align-items: center; }
-.sb-selo { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; background: var(--verde); color: var(--escuro); letter-spacing: .12em; }
 .sb-txt h1 { font-size: clamp(28px, 3.6vw, 44px); line-height: 1.12; margin: 0 0 18px; font-weight: 700; }
 .sb-txt p { margin: 0; color: var(--branco); font-size: 17px; max-width: 520px; }
 .sb-fotos { position: relative; height: 320px; }
@@ -595,8 +597,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .sb-frase b { color: var(--verde-txt); }
 .sb-cta { display: grid; grid-template-columns: 200px minmax(0, 1fr) auto; align-items: center; gap: 24px; background: var(--escuro); color: var(--branco); border-radius: var(--raio); padding: 22px 32px; }
 .sb-cta img { width: 100%; height: auto; filter: drop-shadow(0 10px 16px var(--veu)); }
-.sb-cta h2 { margin: 0 0 4px; font-size: 22px; }
-.sb-cta p { margin: 0; color: var(--borda-campo); }
+.sb-cta h2 { margin: 0; font-size: 22px; }
 .sb-cta .bt { height: 48px; }
 .sb-dados { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 24px 0 0; background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); }
 .sb-dados div { padding: 18px 22px; border-left: 1px solid var(--linha); min-width: 0; }

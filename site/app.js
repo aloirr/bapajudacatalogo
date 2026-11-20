@@ -436,19 +436,21 @@
   // ---------- pedaços de tela ----------
   const nProd = (n) => fmt(n) + " produto" + (n === 1 ? "" : "s"); // "3 produtos": o total e o "Ver 3 produtos"
   const SEM_FOTO = '<img src="assets/logo_escuro.png" alt="">Foto em breve'; // o miolo do "Foto em breve"
-  function fotoHtml(p, grande) {
-    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + p.d)}" loading="${grande ? "eager" : "lazy"}" onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:${esc(JSON.stringify(SEM_FOTO)).replace(/"/g, "&quot;")}}))">`;
+  // a foto grande (produto) carrega logo e na frente (fetchpriority); no cartão, lazy, menos os da 1ª linha (logo)
+  function fotoHtml(p, grande, logo) {
+    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + p.d)}" loading="${grande || logo ? "eager" : "lazy"}"${grande ? ' fetchpriority="high"' : ""} onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:${esc(JSON.stringify(SEM_FOTO)).replace(/"/g, "&quot;")}}))">`;
     return `<div class="sem-foto">${SEM_FOTO}</div>`;
   }
   // a foto com o botão de ampliar (no cartão e no produto); sem foto, só o "Foto em breve"
-  const fotoZoomHtml = (p, grande) => p.i ? `<button class="foto-zoom" type="button" aria-haspopup="dialog" aria-label="Ampliar a foto do ${esc(p.c)}">${fotoHtml(p, grande)}</button>` : fotoHtml(p, grande);
+  const fotoZoomHtml = (p, grande, logo) => p.i ? `<button class="foto-zoom" type="button" aria-haspopup="dialog" aria-label="Ampliar a foto do ${esc(p.c)}">${fotoHtml(p, grande, logo)}</button>` : fotoHtml(p, grande);
   // Cartão do resultado (T-0014, R-20261120-112520). O código vai sobre a foto, no canto inferior direito
   // (R-20261120-122300; não é botão; o código continua no alt da foto e no link do cartão, para leitor de tela). a foto só amplia (botão; sem foto, nada); o código e o nome
   // são o link que abre a janela do produto; "+ Detalhes" também abre a janela. Sem botão dentro de link.
-  function itemHtml(p) {
+  const CARTOES_LOGO = 4; // a 1ª linha no computador (4 cartões) e as 2 primeiras no celular: foto sem lazy
+  function itemHtml(p, n) {
     const href = "#/produto/" + encodeURIComponent(p.c);
     return `<article class="item" data-cod="${esc(p.c)}">
-      <div class="foto">${fotoZoomHtml(p)}
+      <div class="foto">${fotoZoomHtml(p, false, n < CARTOES_LOGO)}
         <span class="foto-cod" aria-hidden="true">${esc(p.c)}</span></div>
       <div class="corpo">
         <a class="item-link" href="${href}"><span class="cod vh">${esc(p.c)}</span><span class="vh"> · </span>
@@ -750,6 +752,7 @@
   const N_LISTA = 8; // linhas da lista do início (op4c; o serviço devolve até 8)
   // a imagem da faixa do início (e do convite ao catálogo na Sobre): um lugar só para trocar
   const IMG_FAIXA = { src: "assets/hero_faixa.webp", w: 979, h: 661, alt: "Amortecedor, kit batente, óleos, bateria e peças de freio BAP" }; // a B (R-20261120-145600)
+  const FOTO_SOBRE = "assets/card3.webp"; // a 1ª foto do topo da Sobre (a maior, no meio)
   let MAIS_VISTOS = null; // a resposta, uma vez por carga da página (só em memória)
   const CONTADOS = new Set(); // [SUPOSIÇÃO] cada código conta uma vez por carga da página
   // fire-and-forget: sem credenciais, sem esperar a resposta e sem travar a tela; a falha não aparece
@@ -805,22 +808,18 @@
   function blocoPecas(sec, recentes) {
     const lst = recentes || destaques();
     sec.removeAttribute("aria-busy");
-    sec.innerHTML = `<div class="rec-topo"><div><h2>${recentes ? "Pesquisas recentes" : "Destaques"}</h2>
-        <p class="sub">${recentes ? "As mais abertas nos últimos 7 dias" : "Peças com foto e ficha completa"}</p></div>
+    sec.innerHTML = `<div class="rec-topo"><div><h2>${recentes ? "Mais vistas" : "Destaques"}</h2>
+        <p class="sub">${recentes ? "Peças mais abertas nos últimos 7 dias" : "Peças com foto e ficha completa"}</p></div>
         <a class="rec-todos" href="#/busca">Ver todos<span class="so-pc"> os produtos</span> <span aria-hidden="true">›</span></a></div>
       <ul class="rec-lista">${lst.map(pecaHtml).join("")}</ul>`;
   }
-  // o topo escuro e o logo branco só no início (a troca de rota volta ao topo claro antes do render)
-  // op4d: no início o cabeçalho fica transparente sobre a faixa; ao rolar, ganha o fundo --escuro
+  // op4d e s2: no início e na Sobre o cabeçalho fica transparente sobre a faixa; ao rolar, ganha o fundo --escuro. Nas outras telas
+  // ele é escuro (T-0018, opção b), com o mesmo logo branco (a troca de rota tira as classes antes do render)
   const marcarRolagem = () => document.body.classList.toggle("topo-rolou", window.scrollY > 8);
   window.addEventListener("scroll", marcarRolagem, { passive: true });
-  const topoInicio = (sim) => {
-    document.body.classList.toggle("inicio-marca", sim);
-    marcarRolagem();
-    const logo = document.querySelector(".topo .marca img");
-    if (logo) logo.src = sim ? "assets/logo_branco.png" : "assets/logo_escuro.png";
-  };
-  window.addEventListener("hashchange", () => topoInicio(false));
+  const topoInicio = (sim) => { document.body.classList.toggle("inicio-marca", sim); marcarRolagem(); };
+  const topoSobre = (sim) => document.body.classList.toggle("sobre-marca", sim); // s2: o cabeçalho transparente da Sobre
+  window.addEventListener("hashchange", () => { topoInicio(false); topoSobre(false); });
   function telaInicio() {
     const portfolio = Math.floor(BASE.total / 100) * 100; // op4d: o total arredondado para baixo à centena (4.419 → +4.400)
     const celular = EX_CURTO(); // o exemplo da busca geral e o título em 1 linha (R-20261120-155400) cabem no celular
@@ -832,7 +831,7 @@
             <h1>${celular ? "A peça certa pro seu" : "A peça certa <br>para o seu"} <em>veículo</em>.</h1>
             <p class="mf-num"><b class="mf-total">+${fmt(portfolio)}</b><span>produtos <br>no portfólio</span></p>
           </div>
-          <div class="mf-foto"><img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="${esc(IMG_FAIXA.alt)}"></div>
+          <div class="mf-foto"><img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="${esc(IMG_FAIXA.alt)}" fetchpriority="high"></div>
           <div class="mf-busca">
             <form class="mf-bloco mf-geral" id="form-geral" role="search" autocomplete="off" aria-label="Buscar produtos">
               <label class="campo-rot v-rot" for="campo-q">Código, descrição ou aplicação</label>
@@ -877,13 +876,11 @@
   function telaBusca(pr) {
     const todos = buscar(pr);
     let mostrando = 0;
-    const desc = [];
-    if (pr.get("q")) desc.push(`“${pr.get("q")}”`);
-    app.innerHTML = `<div class="pagina-busca"><div id="busca-topo"></div>
+    app.innerHTML = `<div class="busca-faixa"><div id="busca-topo"></div></div><div class="pagina-busca">
       <div class="barra-filtros" role="group" aria-label="Filtros"></div>
       <div class="etiquetas" role="group" aria-label="Filtros da pesquisa" hidden></div>
-      <div class="res-topo"><h1>${desc.length ? "Resultados para " + esc(desc.join(" · ")) : "Todos os produtos"}</h1>
-        <span class="total" aria-live="polite">${nProd(todos.length)}</span></div>
+      <div class="res-topo"><h1>${pr.get("q") ? "Resultados" : "Todos os produtos"}</h1>
+        <span class="total" aria-live="polite">${todos.length ? nProd(todos.length) : ""}</span></div>
       ${todos.length && todos.casaram < todos.palavras ? `<p class="aviso proximos" role="status" style="margin:0 0 14px;font-size:14px"><b>Nenhum produto tem todas as palavras.</b> Estes são os mais próximos: casam com ${fmt(todos.casaram)} de ${fmt(todos.palavras)} palavras${todos.faltam.length ? `. Não casou: ${todos.faltam.map((t) => `“${esc(t.toLowerCase())}”`).join(", ")}` : ""}.</p>` : ""}
       <div class="lista"></div><div class="mais"></div></div>`;
     montarBusca(document.getElementById("busca-topo"), pr);
@@ -894,7 +891,7 @@
     // insere os próximos cartões e ajusta as etiquetas só deles (a volta à lista insere todos de uma vez)
     function pagina(qtd = POR_PAGINA) {
       const ini = lista.children.length;
-      lista.insertAdjacentHTML("beforeend", todos.slice(mostrando, mostrando + qtd).map(itemHtml).join(""));
+      lista.insertAdjacentHTML("beforeend", todos.slice(mostrando, mostrando + qtd).map((p, i) => itemHtml(p, ini + i)).join(""));
       mostrando = Math.min(todos.length, mostrando + qtd);
       ajustarEtiquetas([...lista.children].slice(ini).map((c) => c.querySelector(".refs")).filter(Boolean));
       mais.innerHTML = mostrando < todos.length ? `<button class="bt bt-claro" type="button">Carregar mais (${fmt(todos.length - mostrando)} restantes)</button>` : "";
@@ -1189,7 +1186,7 @@
     const etqs = app.querySelector(".pagina-busca .etiquetas");
     const topo = app.querySelector(".res-topo");
     const nMarcados = Object.keys(ROT_FILTRO).reduce((t, k) => t + pr.getAll(k).filter(Boolean).length, 0);
-    document.getElementById("busca-topo").insertAdjacentHTML("afterend", meuVeiculoHtml(pr)); // um bloco só (um aria-label)
+    pagina.insertAdjacentHTML("afterbegin", meuVeiculoHtml(pr)); // um bloco só (um aria-label), logo abaixo da faixa escura da busca
     ligarMeuVeiculo(app.querySelector(".pagina-busca .meu-veiculo"), pr);
     if (CELULAR.matches) {
       const rotulo = "Filtrar" + (nMarcados ? ` (${nMarcados})` : "");
@@ -1394,15 +1391,12 @@
       : `<div class="prod-dados um"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`;
     return `<div class="so-impressao cab-pdf"><img src="assets/logo_escuro.png" alt="bap componentes de qualidade"><span>Ficha do produto · Catálogo BAP</span></div>
       <div class="prod">
-        <div class="prod-foto-box">${p.i
-          ? `<div class="prod-foto">${fotoZoomHtml(p, true)}</div>
-            <p class="foto-dica nao-imprime">Clique na foto para ampliar.</p>`
-          : `<div class="prod-foto">${fotoHtml(p, true)}</div>`}</div>
+        <div class="prod-foto-box"><div class="prod-foto">${fotoZoomHtml(p, true)}</div></div>
         <div class="prod-info">
           <div class="prod-cab">
             <${H} id="${naJanela ? "janela-tit" : "produto-tit"}">${esc(p.c)}</${H}>
             <div class="desc">${esc(p.d)}</div>
-            <div class="selos">${[p.ca, p.si, p.fa, p.li].filter(Boolean).map((s, i) => `<span class="selo ${i === 1 ? "v" : ""}">${esc(titulo(s))}</span>`).join("")}${p.p ? `<span class="selo">${esc(p.p)}</span>` : ""}</div>
+            <div class="selos">${[p.ca, p.li].filter(Boolean).map((s) => `<span class="selo">${esc(titulo(s))}</span>`).join("")}</div>
             <div class="acoes">
               <button class="bt bt-mini" type="button" data-copiar="${esc(p.c)}">Copiar código</button>
               <button class="bt bt-claro bt-mini bt-pdf" type="button">Salvar em PDF</button>
@@ -1412,7 +1406,7 @@
           ${dados}
         </div>
       </div>
-      <div class="so-impressao rod-pdf">As fotos são ilustrativas. Confira sempre a aplicação antes da compra.<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
+      <div class="so-impressao rod-pdf">As fotos são ilustrativas.<span class="rodape-confira"> Confira sempre a aplicação antes da compra.</span><br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
   }
   function ligarAcoes(raiz) {
     raiz.querySelector("[data-copiar]").addEventListener("click", (ev) => {
@@ -1540,19 +1534,19 @@
 
   // Sobre a BAP (T-0018, sobre1 do PO): o texto e os dados da empresa vêm do PDF da página "Empresa" do site
   // institucional (recados/anexos/T-0018/sobre/HISTORIA_BAP.pdf), palavra por palavra; os títulos dos 3 blocos são da
-  // simulação. As fotos são de produtos BAP (assets/card2 a card4 e a IMG_FAIXA do início), sem foto de banco.
+  // simulação. As fotos são de produtos BAP (assets/card2 a card4, em WebP, e a IMG_FAIXA do início), sem foto de banco.
   function telaSobre() {
+    topoSobre(true);
     app.innerHTML = `<div class="sobre">
       <section class="sb-topo"><div class="sb-topo-in">
         <div class="sb-txt">
-          <span class="sb-selo">A BAP</span>
           <h1>Tradição e inovação em <em>componentes de qualidade</em></h1>
           <p>A BAP chega ao mercado de autopeças com dois desejos: seguir as tradições que ditam o sucesso do setor e inovar com seus produtos e serviços.</p>
         </div>
         <div class="sb-fotos" aria-hidden="true">
-          <img class="sf1" src="assets/card3.png" alt="">
-          <img class="sf2" src="assets/card2.png" alt="">
-          <img class="sf3" src="assets/card4.png" alt="">
+          <img class="sf1" src="${FOTO_SOBRE}" alt="" fetchpriority="high">
+          <img class="sf2" src="assets/card2.webp" alt="">
+          <img class="sf3" src="assets/card4.webp" alt="">
         </div>
       </div></section>
       <section class="sb-corpo">
@@ -1566,8 +1560,8 @@
         </div>
         <blockquote class="sb-frase"><p>Temos um pé nas tradições e outro nas inovações.</p><span>Somos a BAP: <b>Componentes de qualidade.</b></span></blockquote>
         <div class="sb-cta">
-          <img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="" aria-hidden="true">
-          <div><h2>Quer conhecer nossas soluções?</h2><p>Acesse nosso catálogo completo.</p></div>
+          <img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="" aria-hidden="true" loading="lazy">
+          <h2>Quer conhecer nossas soluções?</h2>
           <a class="bt" href="#/busca">Ver o catálogo <span aria-hidden="true">›</span></a>
         </div>
         <dl class="sb-dados">
@@ -1635,6 +1629,10 @@
       app.focus({ preventScroll: true });
     }
   });
+  // a tela só é montada depois do produtos.json (~440 KB com gzip): a foto do topo do início e da Sobre começa a
+  // baixar já, junto com ele, e não depois dele
+  const fotoTopo = { "/": IMG_FAIXA.src, "/sobre": FOTO_SOBRE }[lerRota().caminho];
+  if (fotoTopo) Object.assign(new Image(), { fetchPriority: "high", src: fotoTopo }); // o <img> da tela reaproveita a mesma
   carregar().then(render).catch((e) => {
     app.innerHTML = `<div class="carregando">Não foi possível carregar o catálogo (${esc(e.message)}). Atualize a página.</div>`;
   });
