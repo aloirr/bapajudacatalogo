@@ -412,6 +412,7 @@
     lista.palavras = total;
     lista.casaram = total ? maxN : 0; // menor que palavras: são os mais próximos
     lista.faltam = [];
+    lista.vei = vei; // o veículo da lista: a tag "Compatível" dos cartões (itemHtml)
     if (total && maxN < total && out.length) {
       // palavras que nenhum produto da lista casou (para o aviso na tela)
       let alguma = 0;
@@ -452,10 +453,14 @@
   // (R-20261120-122300; não é botão; o código continua no alt da foto e no link do cartão, para leitor de tela). a foto só amplia (botão; sem foto, nada); o código e o nome
   // são o link que abre a janela do produto; "+ Detalhes" também abre a janela. Sem botão dentro de link.
   const CARTOES_LOGO = 4; // a 1ª linha no computador (4 cartões) e as 2 primeiras no celular: foto sem lazy
-  function itemHtml(p, n) {
+  // Tag "Compatível" (T-0018, R-20261120-191700-alexandre): só no cartão da busca, com veículo (placa ou listas); nunca
+  // na janela, na página nem no "Leve também". O visual e o porquê do SVG: styles.css (.tag-compat)
+  const TAG_COMPAT = '<span class="tag-compat"><svg aria-hidden="true" focusable="false" viewBox="0 0 12 12"><path d="M2.4 6.4 4.9 8.9 9.6 3.4"/></svg><span class="vh">Compatível</span></span>';
+  function itemHtml(p, n, vei) {
     const href = "#/produto/" + encodeURIComponent(p.c);
+    const compat = !!vei; // a lista (buscar) só tem o que serve no veículo
     return `<article class="item" data-cod="${esc(p.c)}">
-      <div class="foto">${fotoZoomHtml(p, false, n < CARTOES_LOGO)}
+      <div class="foto${compat ? " com-tag" : ""}">${fotoZoomHtml(p, false, n < CARTOES_LOGO)}${compat ? TAG_COMPAT : ""}
         <span class="foto-cod" aria-hidden="true">${esc(p.c)}</span></div>
       <div class="corpo">
         <a class="item-link" href="${href}"><span class="cod vh">${esc(p.c)}</span><span class="vh"> · </span>
@@ -896,7 +901,7 @@
     // insere os próximos cartões e ajusta as etiquetas só deles (a volta à lista insere todos de uma vez)
     function pagina(qtd = POR_PAGINA) {
       const ini = lista.children.length;
-      lista.insertAdjacentHTML("beforeend", todos.slice(mostrando, mostrando + qtd).map((p, i) => itemHtml(p, ini + i)).join(""));
+      lista.insertAdjacentHTML("beforeend", todos.slice(mostrando, mostrando + qtd).map((p, i) => itemHtml(p, ini + i, todos.vei)).join(""));
       mostrando = Math.min(todos.length, mostrando + qtd);
       ajustarEtiquetas([...lista.children].slice(ini).map((c) => c.querySelector(".refs")).filter(Boolean));
       mais.innerHTML = mostrando < todos.length ? `<button class="bt bt-claro" type="button">Carregar mais (${fmt(todos.length - mostrando)} restantes)</button>` : "";
@@ -1259,18 +1264,28 @@
   // à esquerda no computador e em cima no celular. "Itens parecidos" e "Diferencial BAP" saíram da tela e da ficha
   // impressa do site (R-20261120-155900-alexandre e R-20261120-160300-alexandre)
   // "Leve também" conforme o veículo da placa ou das listas (R-20261120-181930-alexandre e R-20261120-182200-alexandre):
-  // fica o item que serve no veículo pela regra do filtro "Meu veículo" (casaVeiculo), só com a marca, o modelo e o ano;
-  // o item sem "ve", pela aplicação (a marca e o modelo escritos nela, como no JSON antigo). Ficam sempre o item sem
-  // aplicação ou com "universal" nela e o fora do catálogo. Sem veículo, a lista inteira do oj; sem nenhum, a seção
-  // some. Só na tela. O veículo (VEI_LEVE) é o da lista por baixo da janela ou, na página, o da busca ou do produto de
-  // onde se clicou (cartão ou "Leve também"); o endereço digitado e o voltar ou avançar até a página ficam sem veículo (render).
+  // com veículo, fica o item que serve nele pela regra do filtro "Meu veículo" (casaVeiculo), só com a marca, o modelo e
+  // o ano; o item sem "ve", pela aplicação (a marca e o modelo escritos nela, como no JSON antigo). Com veículo, ficam
+  // sempre o item sem aplicação, o UNIVERSAL e o fora do catálogo. Sem veículo, a lista inteira do oj, menos o item UNIVERSAL
+  // (sem "ve" e com "universal" na aplicação) de outra família (fa) que a do produto aberto (R-20261120-191700-alexandre
+  // e R-20261120-192000-alexandre: "sem a placa"); sem nenhum, a seção some. Só na tela. O veículo (VEI_LEVE) é o da
+  // lista por baixo da janela ou, na página, o da busca ou do produto de onde se clicou (cartão ou "Leve também"); o
+  // endereço digitado e o voltar ou avançar até a página ficam sem veículo (render).
   let VEI_LEVE = null; // { vm, vmo, va, vmt, vv } ou null
   const veiculoDoHash = (h) => { const pr = new URLSearchParams(String(h || "").split("?")[1] || ""); return pr.get("vm") ? veiculoDaRota(pr) : null; };
-  const servemNoVeiculo = (cods, v) => !v || !v.vm ? cods : cods.filter((c) => {
-    const p = POR_COD.get(normCod(c)), e = p && entradaDe(p);
-    return !e || (!veDe(e) && (!e.apl || temPalavra(e.apl, "UNIVERSAL")))
-      || casaVeiculo(e, { vm: v.vm, vmo: v.vmo, va: v.va }, true); // marca, modelo e ano; sem motor e sem versão
-  });
+  // false: com veículo (placa ou listas), o UNIVERSAL fica sempre, como no #58; true: a regra da família vale também com veículo
+  const UNIVERSAL_SO_MESMA_FAMILIA_COM_VEICULO = false;
+  const servemNoVeiculo = (cods, v, aberto) => {
+    const comVei = !!(v && v.vm);
+    return cods.filter((c) => {
+      const p = POR_COD.get(normCod(c)), e = p && entradaDe(p);
+      if (!e) return true; // fora do catálogo
+      const semVe = !veDe(e), universal = semVe && !!e.apl && temPalavra(e.apl, "UNIVERSAL");
+      if (universal && (!comVei || UNIVERSAL_SO_MESMA_FAMILIA_COM_VEICULO)) return !!p.fa && p.fa === aberto.fa;
+      return !comVei || universal || (semVe && !e.apl)
+        || casaVeiculo(e, { vm: v.vm, vmo: v.vmo, va: v.va }, true); // marca, modelo e ano; sem motor e sem versão
+    });
+  };
   const secJunto = (H2, cods) => cods.length
     ? `<section class="secao rel rel-oj"><${H2} class="secao-tit">Leve também</${H2}>${itensRelHtml(cods)}</section>` : "";
 
@@ -1476,7 +1491,7 @@
     if (p.la) ficha.push(["Lado", titulo(p.la)]);
     if (p.de) ficha.push(["Detalhe", p.de]);
     (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
-    const junto = servemNoVeiculo(listaCodigos(p.oj), VEI_LEVE);
+    const junto = servemNoVeiculo(listaCodigos(p.oj), VEI_LEVE, p);
     const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e, embaixo, "Outros veículos e detalhes" (restoAplicacao);
     // no PDF, o texto inteiro vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
