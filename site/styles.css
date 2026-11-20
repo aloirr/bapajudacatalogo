@@ -120,7 +120,7 @@ main:focus, main:focus-visible { outline: none; }
 .filtro { border-bottom: 1px solid var(--linha); }
 .filtro:last-child { border-bottom: 0; }
 .filtro-bt { width: 100%; height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px; border: 0; background: none; color: var(--texto); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-.filtro-bt.ativo { background: var(--verde-claro); color: var(--escuro); } /* marcado: verde claro de fundo e texto escuro */
+.filtro-bt.ativo { background: var(--branco); color: var(--escuro); box-shadow: inset 0 0 0 1px var(--borda-campo); } /* marcado: linha neutra (opção A, R-20261120-131800) */
 .filtro-bt b { font-weight: 600; color: var(--texto-2); } /* "Linha (1)": o número ao lado do nome */
 .filtro-bt .seta { font-size: 12px; color: var(--texto-2); }
 .filtro-bt[aria-expanded="true"] .seta { transform: rotate(180deg); }
@@ -133,10 +133,10 @@ main:focus, main:focus-visible { outline: none; }
 /* etiquetas abaixo da busca: o termo e os filtros marcados, cada um com o X (a placa fica na faixa do veículo) */
 .etiquetas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 0; }
 .etiquetas[hidden] { display: none; }
-.etq { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; min-height: 36px; padding: 0 2px 0 12px; border-radius: 999px; background: var(--verde-claro); color: var(--verde-txt); font-size: 13px; font-weight: 600; }
+.etq { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; min-height: 36px; padding: 0 2px 0 12px; border-radius: 999px; background: var(--branco); color: var(--escuro); box-shadow: inset 0 0 0 1px var(--borda-campo); font-size: 13px; font-weight: 500; } /* neutra (opção A, R-20261120-131800) */
 .etq > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.etq button { width: 44px; height: 44px; margin: -4px -2px -4px 0; border: 0; border-radius: 50%; background: none; color: var(--verde-txt); font-size: 14px; cursor: pointer; flex: none; }
-.etq button:hover { background: color-mix(in srgb, var(--verde-esc) 15%, transparent); }
+.etq button { width: 44px; height: 44px; margin: -4px -2px -4px 0; border: 0; border-radius: 50%; background: none; color: var(--texto-2); font-size: 14px; cursor: pointer; flex: none; }
+.etq button:hover { background: var(--fundo); color: var(--escuro); }
 .limpar-tudo { height: 44px; border: 0; background: none; color: var(--verde-esc); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0 8px; }
 .lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(var(--cartao-min), calc((100% - 4 * 12px) / 5)), 1fr)); gap: 12px; } /* no máximo 5 por linha */
 .item { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; text-decoration: none; color: var(--texto); display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
