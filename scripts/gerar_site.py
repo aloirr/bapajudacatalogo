@@ -64,10 +64,18 @@ def so_codigo(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", sem_acento(s).upper())
 
 
+# Rótulo da referência só com a marca (RD-0200): sai o prefixo "CROSS REFERENCES - " / "CROSS REFERENCIAS - " /
+# "REF. CRUZADA - " e o " PN" do fim ("NAKATA PN" → "NAKATA"). A caixa fica como vem da base.
+PREFIXO_E_PN = re.compile(r"^(?:(?:CROSS\s+)?REFER[ÊE]NC[IE]AS?(?:\s+CRUZADAS?)?|REF\.?\s+CRUZADAS?)\s*-\s*|\s+PN$", re.I)
+
+
 def refs_de(texto: str, codigo: str = "") -> list[dict]:
     """'REFERENCIAS CRUZADAS - AMPRI: 24125, TRW: X' → [{'m': 'AMPRI', 'c': '24125'}, ...], sem as do próprio produto."""
     proprio = so_codigo(codigo)
     t = re.sub(r"^\s*REFER[ÊE]NCIAS?\s+CRUZADAS?\s*[-:]\s*", "", texto, flags=re.I)
+    # tira o "| ANTERIOR: ..." (histórico interno) de cada trecho, antes de separar as referências: o histórico vai até
+    # o próximo ";" (RD-0199; desde a v8 o que veio depois do histórico entrou com "; ") e tem vírgula dentro
+    t = "; ".join(x.split(" | ")[0] for x in re.split(r"\s*;\s*", t))
     saida = []
     for parte in re.split(r"\s*[;,]\s*(?=[A-ZÀ-Ú0-9 .&/\-]{2,30}:)|\s+/\s+(?=[A-ZÀ-Úa-z][\w .&-]{1,30}\s+\S)", t):
         parte = parte.strip(" ;,")
@@ -75,14 +83,16 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
             continue
         m = re.match(r"^([^:]{1,40}):\s*(.+)$", parte)
         if m:
-            cod = m.group(2).split(" | ")[0]                       # tira o "| ANTERIOR: ..." (histórico interno)
-            cod = re.sub(r"\s*BAP\s+BOX\b.*$", "", cod, flags=re.I).strip()   # e o preço de compra
+            cod = re.sub(r"\s*BAP\s+BOX\b.*$", "", m.group(2), flags=re.I).strip()   # tira o preço de compra
             if cod and cod not in ("-", "0", "--", "N/A"):
-                saida.append({"m": m.group(1).strip(), "c": cod})
+                bruta = m.group(1).strip()
+                marca = PREFIXO_E_PN.sub("", bruta).strip()
+                # a marca própria é vista antes e depois da limpeza ("BAPTA PN" e "CROSS REFERENCIAS - BAP" saem)
+                if not {re.sub(r"\s+", " ", x.upper()) for x in (bruta, marca)} & MARCAS_PROPRIAS:
+                    saida.append({"m": marca, "c": cod})
         else:
             saida.append({"m": "", "c": parte})
-    return [x for x in saida if re.sub(r"\s+", " ", x["m"].upper()) not in MARCAS_PROPRIAS
-            and not (proprio and so_codigo(x["c"]) == proprio)]
+    return [x for x in saida if not (proprio and so_codigo(x["c"]) == proprio)]
 
 
 # Ficha técnica do site: SÓ o que está nesta lista (os DADOS_ADICIONAIS também têm custo de importação, MOQ,
