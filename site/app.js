@@ -145,6 +145,7 @@
   //   "06/2008–06/2012", "01/1993 - 12/2012", "01/198309/1984" (grudado)                                 → faixa
   //   "01/89 - 12/97", "12/97 12/03" (mês/ano com 2 dígitos)                                             → faixa
   //   "05-10", "(83-92)" (ano-ano, até 30 anos), "84/97" (ano/ano, com o 1º maior que 12)                  → faixa
+  //   "(01-88/06-92)" (mês-ano/mês-ano)                                                                    → faixa
   //   "2018>", "2005 EM DIANTE", "2025 →", "2000 +", "2012/...", "1998 / ...", "2018 ATE" (sem fim)        → de ano em diante
   //   "../08", ".../1977" (sem começo)                                                                     → até o ano
   //   "2007", "08/2022"                                                                                    → só o ano
@@ -158,7 +159,7 @@
   function faixasDoTexto(texto) {
     const s = norm(texto).replace(/(\d{2}\/(?:19|20)\d{2})(?=\d{2}\/(?:19|20)\d{2})/g, "$1 ");
     const datas = []; // { i, f, de, ate }
-    const re = /(?<!\d|\d[.,])(?:(\d{1,2})\/)?((?:19|20)\d{2})(?!\d|[.,]\d)|(?<!\d|\d[.,\/])(\d{2})\/(\d{2})(?!\d|[.,\/]\d|\s*(?:"|''|POL))|(?<![\d.,\/-])(\d{2})-(\d{2})(?![\d.,\/-])|(?:\.{2,}|…)\s*\/\s*(\d{2})(?!\d)/g;
+    const re = /(?<!\d|\d[.,])(?:(\d{1,2})\/)?((?:19|20)\d{2})(?!\d|[.,]\d)|(?<!\d|\d[.,\/])(\d{2})\/(\d{2})(?!\d|[.,\/]\d|\s*(?:"|''|POL))|(?<![\d.,\/-])(\d{2})-(\d{2})(?![\d.,\/-])|(?:\.{2,}|…)\s*\/\s*(\d{2})(?!\d)|(?<![\d.,\/-])(\d{2})-(\d{2})\/(\d{2})-(\d{2})(?![\d.,\/-])/g;
     let m;
     while ((m = re.exec(s))) {
       const i = m.index, f = m.index + m[0].length;
@@ -170,6 +171,10 @@
         else { const a = ano2(m[3]), b = ano2(m[4]); if (a <= b) datas.push({ i, f, de: a, ate: b, faixa: true }); } // ano/ano
       } else if (m[5]) { const a = ano2(m[5]), b = ano2(m[6]); if (a <= b && b - a <= 30) datas.push({ i, f, de: a, ate: b, faixa: true }); } // "05-10", "(83-92)"
       else if (m[7]) datas.push({ i, f, de: SEM_INICIO, ate: ano2(m[7]), faixa: true });
+      else if (m[8]) { // mês-ano/mês-ano: "(01-88/06-92)" = 01/1988 a 06/1992 (revisão do testes no PR #54)
+        const a = ano2(m[9]), b = ano2(m[11]);
+        if (+m[8] >= 1 && +m[8] <= 12 && +m[10] >= 1 && +m[10] <= 12 && a <= b) datas.push({ i, f, de: a, ate: b, faixa: true });
+      }
     }
     const faixas = [];
     const SEP = /^[\s·]*(?:-|–|—|A|AO|ATE|\/|>|→)?[\s·]*$/;
@@ -1260,21 +1265,43 @@
   // aplicação onde o modelo aparece (o mesmo texto da lista Motor e do ano); o ano da base (an), se houver, vale
   // primeiro. Sem achar: "—".
   const fmtFaixa = ([de, ate]) => de <= SEM_INICIO ? "até " + ate : ate >= SEM_FIM ? de + "–" : de === ate ? String(de) : de + "–" + ate;
-  // o ano sem fim ("2006–"): o leitor de tela ouve "2006 em diante" (o " em diante" fica só para ele, na .vh)
-  const anoHtml = (an) => esc(an) + (/–$/.test(an) ? '<span class="vh"> em diante</span>' : "");
+  // o ano sem fim ("2006–"): o leitor de tela ouve "2006 em diante" (o " em diante" fica só para ele, na .vh). Com
+  // várias faixas na célula (R-20261120-165900-alexandre), cada uma num .faixa, com a vírgula no fim ("2011–2019,")
+  const SEP_FAIXAS = ", ";
+  const faixasDaCelula = (an) => String(an || "").split(SEP_FAIXAS).filter(Boolean);
+  const anoHtml = (an) => faixasDaCelula(an).map((f, i, l) => `<span class="faixa">${esc(f)}${/–$/.test(f) ? '<span class="vh"> em diante</span>' : ""}${i < l.length - 1 ? "," : ""}</span>`).join(" ");
+  // pedaços do trecho para a coluna Ano (doModelo): " · ", " ; ", " : ", " | ", " + ", "94/97 Coupe", "2001> 206", a
+  // vírgula antes de um número que não é ano ("Atego 1315 (2005–2010), 1418 (2004–2012)", "Axor 1933 (...), 2035") e a vírgula depois da
+  // cilindrada ("EcoSport 01/2003–12/2007 1.0, 01/2003–12/2013 1.6"); a lista de anos ("(1995–1996, 1999–2009)",
+  // "Monza 01/82 - 12/89, 01/90 - 12/96") fica junta
+  const RX_PEDACO_ANO = /\s*[·;:|]\s*|\s+\+\s+|(?<=\b\d{2}\/\d{2}\)?)\s+(?=[A-Z])|(?<=(?:19|20)\d{2}>)\s+(?=\d)|\s*,\s*(?=\d)(?!(?:\d{2}\/)*(?:19[5-9]\d|20[0-2]\d)(?!\d)|\d{2}\/\d{2}(?!\d))|(?<=\d[.,]\d)\s*,\s*(?=\d)/;
+  const RX_SO_MES_ANO = /^\(?\d{2}\/\d{2}(?:\s*[-–]\s*\d{2}\/\d{2})?\)?$/; // "01/90 - 12/96"
+  const soAnoPedaco = (x) => (SO_ANO.test(x) || RX_SO_MES_ANO.test(x)) && faixasDoTexto(x).length > 0; // o pedaço só de ano
+  let RX_MARCA_MEIO = null, RX_MARCA_ANTES = null;
+  let ALT_MARCAS = null; // as marcas e os apelidos (GM, VW, MB…) para os regex da coluna Ano
+  const altMarcas = () => ALT_MARCAS || (ALT_MARCAS = [...NOME_MARCA.keys(), ...Object.values(APELIDOS).join(" ").split(" ")].filter(Boolean).map(reEsc).join("|"));
+  const rxMarcaAntes = () => RX_MARCA_ANTES || (RX_MARCA_ANTES = new RegExp(String.raw`(?:^|[^A-Z0-9])(?:${altMarcas()})\s+$`));
+  // a marca no meio do pedaço ("Atego - 2005 em Diante Mercedes-Benz 1418 Atego") começa outro veículo
+  const rxMarcaNoMeio = () => RX_MARCA_MEIO || (RX_MARCA_MEIO = new RegExp(String.raw`\s+(?=(?:${altMarcas()})(?![A-Z0-9]))`));
   function linhasVeiculos(p) {
     if (!Array.isArray(p.ve) || !p.ve.length) return [];
     const apl = String(p.a || ""), up = semAcento(apl).toUpperCase();
     const modelos = [...new Set(p.ve.map((x) => norm(x[1])).filter(Boolean))];
     const achar = (m, de) => { const r = rxPalavra(m, "g"); r.lastIndex = de; const x = r.exec(up); return x ? x.index + x[1].length : -1; };
-    const trecho = new Map();
+    // onde o modelo começa (revisão do testes no PR #54): o nome dentro de um modelo mais longo do ve ("Siena" em "Grand
+    // Siena", "Vitara" em "Grand Vitara") é do longo, nunca do curto
+    const dentroDeOutro = (m, k) => modelos.some((o) => o !== m && o.includes(m) && up.startsWith(o, k - o.indexOf(m)));
+    const inicioDe = (m) => { let k = achar(m, 0); while (k >= 0 && dentroDeOutro(m, k)) k = achar(m, k + m.length); return k; };
+    const trecho = new Map(), inicio = new Map(), cortado = new Set();
     for (const m of modelos) {
-      const i = achar(m, 0);
+      const i = inicioDe(m);
+      inicio.set(m, i);
       if (i < 0) { trecho.set(m, ""); continue; }
       let fim = Math.min(apl.length, i + 120);
       // o fim é o próximo modelo; o nome curto dentro do longo ("Palio" em "Palio Weekend") não corta o trecho do longo
       const longo = (o, j) => modelos.some((x) => x !== o && x.includes(o) && up.startsWith(x, j));
       for (const o of modelos) if (o !== m && !o.includes(m)) { let j = achar(o, i + m.length); while (j > 0 && longo(o, j)) j = achar(o, j + o.length); if (j > i && j < fim) fim = j; }
+      if (fim === i + 120 && /[\p{L}\d]{2}/u.test(apl.slice(fim - 1, fim + 1))) cortado.add(m); // cortado no limite, no meio de uma palavra ou número
       trecho.set(m, apl.slice(i, fim));
     }
     const anoBase = p.an && (p.an[0] || p.an[1]) ? fmtFaixa([p.an[0] || SEM_INICIO, p.an[1] || SEM_FIM]) : "";
@@ -1290,18 +1317,70 @@
       for (const o of outras) { const x = rxPalavra(o, "g"); x.lastIndex = ini; const y = x.exec(tu); if (y && y.index < fim) fim = y.index; }
       return t.slice(ver ? ini - ver.length : 0, fim);
     };
+    // Coluna Ano com todas as faixas do modelo (R-20261120-165900-alexandre; a regra e os exemplos estão no
+    // docs/DADOS_DO_SITE.md): o trecho vai em pedaços e em entradas (o modelo e os pedaços só de ano depois dele); só
+    // entra a entrada pura, sem nada além do que a linha já tem.
+    const doModelo = (t, m, ver, cil) => {
+      // só o bloco do modelo: o " ; " (com espaço dos dois lados, como no linhasAplic) começa outro bloco de marca ("WR-V
+      // 1.5 L 16V · 2017 até 2020 ; VW - Spacecross"); o ";" colado separa veículos do mesmo bloco ("X1 2015 2022; X1 2023 →")
+      const ps = norm(t).split(/\s+;\s+/)[0].split(RX_PEDACO_ANO).flatMap((x) => x.split(RX_SEP_VEICULO)).flatMap((x) => x.split(rxMarcaNoMeio()))
+        .map((x) => x.trim()).filter(Boolean);
+      const lista = /([^·;:|,\/]*)[,\/]\s*$/.exec(up.slice(Math.max(0, inicio.get(m) - 40), inicio.get(m)));
+      const emLista = lista && !/\d/.test(lista[1]) && modelos.some((o) => o !== m && rxPalavra(o).test(lista[1])); // outro modelo do ve antes da "," ou "/"
+      const V = ver ? norm(ver) : "";
+      if (!ps.length || (V && !rxPalavra(V).test(ps[0])) || emLista) return "";
+      const doM = (x) => x.startsWith(m) && !/[A-Z0-9]/.test(x.charAt(m.length));
+      const puro = (x) => {
+        let r = doM(x) ? x.slice(m.length) : x;
+        if (V) { if (!rxPalavra(V).test(r)) return false; r = r.replace(rxPalavra(V, "g"), "$1 $2"); }
+        if (cilDe(r).some((c) => c !== cil)) return false; // outra cilindrada, ou a válvula que a linha não tem
+        // mais de uma faixa e a cilindrada no mesmo pedaço: não dá para saber de qual é ("Meriva 01/2003–12/2012, 01/2008–12/2013 1.4")
+        if (cilDe(r).length && new Set(faixasDoTexto(r).map(fmtFaixa)).size > 1) return false;
+        // o "em diante" escrito como ">", "→", "+" ou "»" logo depois do ano não é qualificador ("X1 2023 →", "08/2011+")
+        return !r.replace(RX_CIL, " ").replace(/(?<=\d)\s*(?:\+|»)/g, " ").replace(RX_ANO, " ").replace(/\b\d{2}[\/-]\d{2}\b/g, " ").replace(SOBRA_APL, " ").trim();
+      };
+      // a palavra colada antes do modelo também qualifica ("2035 Axor", "Cross UP", "Grand Santa FE"); a marca, não
+      const ini = inicio.get(m), antes = up.slice(Math.max(0, ini - 25), ini);
+      const colada = doM(ps[0]) && /[A-Z0-9]\s+$/.test(antes) && !rxMarcaAntes().test(antes);
+      const entradas = [];
+      let pendente = colada;
+      for (const [k, x] of ps.entries()) {
+        if (k && modelos.some((o) => o !== m && o.includes(m) && x.startsWith(o))) break; // o modelo mais longo ("Palio Weekend")
+        if (!k || doM(x)) { entradas.push({ partes: [x], puro: puro(x) && !pendente }); pendente = false; }
+        else if (soAnoPedaco(x)) entradas[entradas.length - 1].partes.push(x);
+        else if (faixasDoTexto(x).length || rxMarcaAntes().test(x + " ")) break; // outro veículo com ano ou a marca; "2036" de "2036 Axor" não é ano
+        // o nome seguido do pedaço só de ano é outro veículo ("Galloper 2.5 L · 1998–2004 · H1 Starex · 2000–2026")
+        else if (ps[k + 1] && soAnoPedaco(ps[k + 1])) break;
+        // detalhe sem ano: qualifica a entrada de antes ("Dualogic", "Diant", "com A/C") e a de depois ("2036 · Axor")
+        else { entradas[entradas.length - 1].puro = false; pendente = true; }
+      }
+      return entradas.filter((e) => e.puro).flatMap((e) => e.partes).join(" · ");
+    };
+    // só faixa de verdade; o "2014 até" sem o ano final (o texto ou o trecho cortado) não é faixa sem fim: a faixa
+    // aberta só vem do ">" ou do "em diante" (decisão do gerente no PR #54)
+    const faixasDe = (t) => faixasDoTexto(String(t).replace(/((?:19|20)\d{2})\s*at[ée](?![\s·]*\d)/gi, "$1")).filter(([de, ate]) => de !== ate);
     const linhas = p.ve.map(([fab, mod, ver]) => {
       const m = norm(mod), vs = versoesDe(m);
-      let t = trecho.get(m) || "";
+      let t = trecho.get(m) || "", repetido = false;
+      const cheio = t;
       if (vs.length > 1 || (vs.length === 1 && p.ve.some((x) => norm(x[1]) === m && !x[2]))) t = pedaco(t, ver ? norm(ver) : "", vs.filter((v) => v !== norm(ver || "")));
-      else if (!vs.length) { // o modelo repetido ("Pulse 1.0 L 12V · 2021 · Pulse 1.3 L 16V · 2022 até 2024"): só a 1ª entrada
+      else if (!vs.length) { // o modelo repetido ("Pulse 1.0 L 12V · 2021 · Pulse 1.3 L 16V · 2022 até 2024"): a cilindrada da 1ª entrada
         const r = rxPalavra(m, "g"), tu = semAcento(t).toUpperCase(); r.lastIndex = m.length; const x = r.exec(tu);
-        if (x) t = t.slice(0, x.index + x[1].length);
+        if (x) { t = t.slice(0, x.index + x[1].length); repetido = true; }
       }
       const cil = cilDe(t)[0] || "";
-      // só faixa de verdade; mais de uma faixa no trecho é dúvida: "—" (não se mostra ano errado)
-      const fx = [...new Set(faixasDoTexto(t).filter(([de, ate]) => de !== ate).map(fmtFaixa))];
-      const ano = anoBase || (fx.length === 1 ? fx[0] : "");
+      // só as faixas das entradas puras (doModelo); uma faixa no trecho e nenhuma pura: ela, como antes; várias e nenhuma pura: "—"
+      // no trecho cortado no meio de uma palavra ou número no limite dos 120, o ano não lê o último pedaço, que está
+      // partido ("Worker 17-25" de "17-250", "2015 até 20"); a cilindrada lê o trecho inteiro, como antes (testes, PR #54)
+      const semPartido = (x) => { if (!cortado.has(m) || !cheio.endsWith(x)) return x; const k = Math.max(...[...x.matchAll(/[·;,]/g)].map((y) => y.index)); return k > m.length ? x.slice(0, k) : x; };
+      const tAno = semPartido(t);
+      // o caminho (uma faixa ou várias) se escolhe como antes, com o "2014 até" contando como faixa; o valor sai sem ela
+      const f1 = faixasDe(tAno), n1 = new Set(faixasDoTexto(tAno).filter(([de, ate]) => de !== ate).map(fmtFaixa)).size;
+      const puras = repetido || n1 > 1 ? faixasDe(doModelo(repetido ? semPartido(cheio) : tAno, m, ver, cil)) : [];
+      const fx = n1 > 1 ? puras : repetido && puras.length ? puras : f1;
+      // a faixa inteira dentro de outra da célula não aparece ("2013–2021, 2014–2017" fica "2013–2021"); a sem fim fica por último
+      const fora = fx.filter(([de, ate], i) => !fx.some(([d2, a2], j) => j !== i && d2 <= de && ate <= a2 && (d2 < de || ate < a2)));
+      const ano = anoBase || [...new Set(fora.sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(fmtFaixa))].join(SEP_FAIXAS);
       return [bonito(NOME_MARCA.get(norm(fab)) || fab), mod, cil, ver || "", ano];
     });
     return linhas;
@@ -1340,28 +1419,37 @@
   // acento, sem maiúscula, com "Pick up" igual a "Pick-Up" e sem o "–" entre o modelo e o ano) só é coberto quando a
   // tabela tem o modelo (o mais longo que casa: "Duster Oroch" antes de "Duster") e a versão citada, TODAS as
   // cilindradas e válvulas dele e a faixa de anos dele, e não sobra mais nada (o "exc. Si", o "(Enc. Mod. Antigo)", o
-  // "Sportback", o "Axor 2035"). O pedaço só de ano ("04/2002–07/2012 / Meriva") é coberto pela faixa de uma linha da
-  // tabela. A linha só sai quando todos os veículos dela são cobertos.
+  // "Sportback", o "Axor 2035"). O pedaço só de ano ("04/2002–07/2012 / Meriva") é coberto pela linha do veículo de antes
+  // (sem veículo antes, por uma linha da tabela). A linha só sai quando todos os veículos dela são cobertos.
   const SOBRA_APL = /\b(?:L|ATE|A|EM DIANTE|DIANTE)\b|[\s·>→–\-\/().,]+/g;
   const chaveApl = (t) => norm(t).replace(/([A-Z])-(?=[A-Z0-9])|([0-9])-(?=[A-Z])/g, "$1$2 ");
-  function cobreVeiculo(v, tab) {
-    const fx = faixasDoTexto(v);
-    if (fx.length > 1) return false;
-    const ano = fx.length ? fmtFaixa(fx[0]) : "";
-    if (SO_ANO.test(v)) return !!ano && tab.some((r) => r[4] === ano);
+  // Devolve as linhas da tabela que cobrem o veículo (ou null). A faixa do texto tem de estar na célula Ano da PRÓPRIA
+  // linha do veículo, a mesma da cilindrada; com mais de uma ("Astra (1995–1996, 1999–2009)"), todas. O veículo sem
+  // ano usa o ano que vem depois dele na linha ("Clio / Kangoo / … / Symbol · 01/1996–12/2018"): o "herdado". O pedaço
+  // só de ano é do veículo de antes (antes) (R-20261120-165900-alexandre e a revisão do designer-ux no PR #54).
+  function cobreVeiculo(v, tab, herdado, antes) {
+    const fx = faixasDoTexto(v), so = SO_ANO.test(v), anos = [...new Set((fx.length || so ? fx : faixasDoTexto(herdado || "")).map(fmtFaixa))];
+    const temAno = (r) => anos.every((a) => faixasDaCelula(r[4]).includes(a));
+    // o pedaço só de ano usa só o ano dele: o "2035" do "2035 Axor" e o "1932" do "1932 Cargo" não são ano
+    if (so) { const dono = antes || tab; return anos.length && dono.some(temAno) ? dono.filter(temAno) : null; }
     const casa = tab.filter(([, mod, , ver]) => v.startsWith(chaveApl(mod)) && rxPalavra(chaveApl(mod)).test(v) && (!ver || rxPalavra(chaveApl(ver)).test(v)));
     const longo = Math.max(0, ...casa.map((r) => chaveApl(r[1]).length)), rs = casa.filter((r) => chaveApl(r[1]).length === longo);
-    if (!rs.length || (ano && !rs.some((r) => r[4] === ano))) return false;
-    const cils = cilDe(v);
-    if (!cils.every((c) => rs.some((r) => r[2] === c || (!c.includes(" ") && r[2].split(" ")[0] === c)))) return false;
+    const cils = cilDe(v), cilOk = (r, c) => r[2] === c || (!c.includes(" ") && r[2].split(" ")[0] === c);
+    const comAno = anos.length ? rs.filter(temAno) : rs;
+    if (!comAno.length || !cils.every((c) => comAno.some((r) => cilOk(r, c)))) return null;
     let u = v.replace(RX_CIL, " ");
     for (const [, mod, , ver] of rs) for (const w of [chaveApl(mod), chaveApl(ver)].filter(Boolean)) u = u.replace(rxPalavra(w, "g"), "$1 $2");
-    if (fx.length) u = u.replace(RX_ANO, (x, a) => (+a === fx[0][0] || +a === fx[0][1] ? " " : x)); // só os anos da faixa
-    return !/[A-Z0-9]/.test(u.replace(SOBRA_APL, " "));
+    if (fx.length) u = u.replace(RX_ANO, (x, a) => (fx.some(([de, ate]) => +a === de || +a === ate) ? " " : x)); // só os anos das faixas
+    return /[A-Z0-9]/.test(u.replace(SOBRA_APL, " ")) ? null : comAno;
   }
-  const restoAplicacao = (p, tab) => linhasAplic(p.a).filter((l) => !chaveApl(l).replace(/^[A-Z][A-Z /&.]{0,30}?\s-\s/, "") // sem a marca do começo do bloco
-    .split(/\s+\/\s*|\s*\/\s+|\s*,\s*(?=[A-Z])|\s+[–—-]\s+(?=[A-Z])|(?<=(?:19|20)\d{2}(?:>|\/?\.{3})?\)?)\s+(?=[A-Z])(?!(?:ATE|A|AO|EM DIANTE)\b)/).map((v) => v.replace(/\s+[–—-]\s+/g, " ").trim()).filter(Boolean)
-    .every((v) => cobreVeiculo(v, tab)));
+  // o que separa um veículo do outro na linha (texto sem acento e em maiúsculas); também na coluna Ano (doModelo)
+  const RX_SEP_VEICULO = /\s+\/\s*|\s*\/\s+|\s*,\s*(?=[A-Z])|\s+[–—-]\s+(?=[A-Z])|(?<=(?:19|20)\d{2}(?:>|\/?\.{3})?\)?)\s+(?=[A-Z])(?!(?:ATE|A|AO|EM DIANTE)\b)/;
+  const restoAplicacao = (p, tab) => linhasAplic(p.a).filter((l) => {
+    const vs = chaveApl(l).replace(/^[A-Z][A-Z /&.]{0,30}?\s-\s/, "") // sem a marca do começo do bloco
+      .split(RX_SEP_VEICULO).map((v) => v.replace(/\s+[–—-]\s+/g, " ").trim()).filter(Boolean);
+    let antes = null;
+    return !vs.every((v, k) => (antes = cobreVeiculo(v, tab, vs.slice(k + 1).find((x) => faixasDoTexto(x).length), SO_ANO.test(v) ? antes : null)));
+  });
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
