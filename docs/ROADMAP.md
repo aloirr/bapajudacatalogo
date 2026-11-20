@@ -16,8 +16,8 @@
    - A chave **nunca** vai para o navegador.
 2. **Cache** por placa (24 h), para economizar consultas. Limite de chamadas por IP.
 3. No site, o campo **Placa**, ao lado da busca, chama o serviço e preenche a busca por veículo (montadora, modelo e ano).
-4. **Ligada em 20/11, às 11:29** (T-0005), com a chave cadastrada pelo Alexandre no Render. O que ficou aberto está nas pendências da T-0005.
-5. Contador de aberturas (T-0018, v1.1.0) publicado em 20/11 às 14:52 (#42); ligado na home no PR da T-0018.
+4. Ligada (T-0005), com a chave cadastrada pelo Alexandre no Render. O que ficou aberto está nas pendências da T-0005.
+5. Contador de aberturas (T-0018, v1.1.0): merge às 14:51 (#42), no ar às 14:52; a ligar na home no PR da T-0018.
 
 ## Sincronização
 
