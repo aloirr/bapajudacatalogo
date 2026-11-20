@@ -872,13 +872,11 @@
   function telaBusca(pr) {
     const todos = buscar(pr);
     let mostrando = 0;
-    const desc = [];
-    if (pr.get("q")) desc.push(`“${pr.get("q")}”`);
     app.innerHTML = `<div class="busca-faixa"><div id="busca-topo"></div></div><div class="pagina-busca">
       <div class="barra-filtros" role="group" aria-label="Filtros"></div>
       <div class="etiquetas" role="group" aria-label="Filtros da pesquisa" hidden></div>
-      <div class="res-topo"><h1>${desc.length ? "Resultados para " + esc(desc.join(" · ")) : "Todos os produtos"}</h1>
-        <span class="total" aria-live="polite">${nProd(todos.length)}</span></div>
+      <div class="res-topo"><h1>${pr.get("q") ? "Resultados" : "Todos os produtos"}</h1>
+        <span class="total" aria-live="polite">${todos.length ? nProd(todos.length) : ""}</span></div>
       ${todos.length && todos.casaram < todos.palavras ? `<p class="aviso proximos" role="status" style="margin:0 0 14px;font-size:14px"><b>Nenhum produto tem todas as palavras.</b> Estes são os mais próximos: casam com ${fmt(todos.casaram)} de ${fmt(todos.palavras)} palavras${todos.faltam.length ? `. Não casou: ${todos.faltam.map((t) => `“${esc(t.toLowerCase())}”`).join(", ")}` : ""}.</p>` : ""}
       <div class="lista"></div><div class="mais"></div></div>`;
     montarBusca(document.getElementById("busca-topo"), pr);
@@ -1332,15 +1330,12 @@
       : `<div class="prod-dados um"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`;
     return `<div class="so-impressao cab-pdf"><img src="assets/logo_escuro.png" alt="bap componentes de qualidade"><span>Ficha do produto · Catálogo BAP</span></div>
       <div class="prod">
-        <div class="prod-foto-box">${p.i
-          ? `<div class="prod-foto">${fotoZoomHtml(p, true)}</div>
-            <p class="foto-dica nao-imprime">Clique na foto para ampliar.</p>`
-          : `<div class="prod-foto">${fotoHtml(p, true)}</div>`}</div>
+        <div class="prod-foto-box"><div class="prod-foto">${fotoZoomHtml(p, true)}</div></div>
         <div class="prod-info">
           <div class="prod-cab">
             <${H} id="${naJanela ? "janela-tit" : "produto-tit"}">${esc(p.c)}</${H}>
             <div class="desc">${esc(p.d)}</div>
-            <div class="selos">${[p.ca, p.si, p.fa, p.li].filter(Boolean).map((s, i) => `<span class="selo ${i === 1 ? "v" : ""}">${esc(titulo(s))}</span>`).join("")}${p.p ? `<span class="selo">${esc(p.p)}</span>` : ""}</div>
+            <div class="selos">${[p.ca, p.li].filter(Boolean).map((s) => `<span class="selo">${esc(titulo(s))}</span>`).join("")}</div>
             <div class="acoes">
               <button class="bt bt-mini" type="button" data-copiar="${esc(p.c)}">Copiar código</button>
               <button class="bt bt-claro bt-mini bt-pdf" type="button">Salvar em PDF</button>
@@ -1486,7 +1481,6 @@
     app.innerHTML = `<div class="sobre">
       <section class="sb-topo"><div class="sb-topo-in">
         <div class="sb-txt">
-          <span class="sb-selo">A BAP</span>
           <h1>Tradição e inovação em <em>componentes de qualidade</em></h1>
           <p>A BAP chega ao mercado de autopeças com dois desejos: seguir as tradições que ditam o sucesso do setor e inovar com seus produtos e serviços.</p>
         </div>
@@ -1508,7 +1502,7 @@
         <blockquote class="sb-frase"><p>Temos um pé nas tradições e outro nas inovações.</p><span>Somos a BAP: <b>Componentes de qualidade.</b></span></blockquote>
         <div class="sb-cta">
           <img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="" aria-hidden="true">
-          <div><h2>Quer conhecer nossas soluções?</h2><p>Acesse nosso catálogo completo.</p></div>
+          <h2>Quer conhecer nossas soluções?</h2>
           <a class="bt" href="#/busca">Ver o catálogo <span aria-hidden="true">›</span></a>
         </div>
         <dl class="sb-dados">
