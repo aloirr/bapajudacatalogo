@@ -453,14 +453,12 @@
   // (R-20261120-122300; não é botão; o código continua no alt da foto e no link do cartão, para leitor de tela). a foto só amplia (botão; sem foto, nada); o código e o nome
   // são o link que abre a janela do produto; "+ Detalhes" também abre a janela. Sem botão dentro de link.
   const CARTOES_LOGO = 4; // a 1ª linha no computador (4 cartões) e as 2 primeiras no celular: foto sem lazy
-  // Tag "Compatível" (T-0018, simulação v3 t2, R-20261120-191700-alexandre): só no cartão da busca, quando há veículo
-  // (placa ou listas) e o produto serve nele pelo casaVeiculo da lista; nunca na janela, na página nem no "Leve também".
-  // O ✓ é um SVG (a Poppins do Google Fonts não tem o U+2713, que cairia noutra fonte, diferente em cada aparelho); o
-  // leitor de tela ouve só "Compatível". No celular fica só o ✓ num círculo; o texto vai para a .vh (styles.css).
+  // Tag "Compatível" (T-0018, R-20261120-191700-alexandre): só no cartão da busca, com veículo (placa ou listas); nunca
+  // na janela, na página nem no "Leve também". O visual e o porquê do SVG: styles.css (.tag-compat)
   const TAG_COMPAT = '<span class="tag-compat"><svg aria-hidden="true" focusable="false" viewBox="0 0 12 12"><path d="M2.4 6.4 4.9 8.9 9.6 3.4"/></svg><span class="vh">Compatível</span></span>';
   function itemHtml(p, n, vei) {
     const href = "#/produto/" + encodeURIComponent(p.c);
-    const compat = !!vei && casaVeiculo(entradaDe(p), vei);
+    const compat = !!vei; // a lista (buscar) só tem o que serve no veículo
     return `<article class="item" data-cod="${esc(p.c)}">
       <div class="foto${compat ? " com-tag" : ""}">${fotoZoomHtml(p, false, n < CARTOES_LOGO)}${compat ? TAG_COMPAT : ""}
         <span class="foto-cod" aria-hidden="true">${esc(p.c)}</span></div>
@@ -1266,9 +1264,9 @@
   // à esquerda no computador e em cima no celular. "Itens parecidos" e "Diferencial BAP" saíram da tela e da ficha
   // impressa do site (R-20261120-155900-alexandre e R-20261120-160300-alexandre)
   // "Leve também" conforme o veículo da placa ou das listas (R-20261120-181930-alexandre e R-20261120-182200-alexandre):
-  // fica o item que serve no veículo pela regra do filtro "Meu veículo" (casaVeiculo), só com a marca, o modelo e o ano;
-  // o item sem "ve", pela aplicação (a marca e o modelo escritos nela, como no JSON antigo). Ficam sempre o item sem
-  // aplicação ou com "universal" nela e o fora do catálogo. Sem veículo, a lista inteira do oj, menos o item UNIVERSAL
+  // com veículo, fica o item que serve nele pela regra do filtro "Meu veículo" (casaVeiculo), só com a marca, o modelo e
+  // o ano; o item sem "ve", pela aplicação (a marca e o modelo escritos nela, como no JSON antigo). Com veículo, ficam
+  // sempre o item sem aplicação, o UNIVERSAL e o fora do catálogo. Sem veículo, a lista inteira do oj, menos o item UNIVERSAL
   // (sem "ve" e com "universal" na aplicação) de outra família (fa) que a do produto aberto (R-20261120-191700-alexandre
   // e R-20261120-192000-alexandre: "sem a placa"); sem nenhum, a seção some. Só na tela. O veículo (VEI_LEVE) é o da
   // lista por baixo da janela ou, na página, o da busca ou do produto de onde se clicou (cartão ou "Leve também"); o
@@ -1277,14 +1275,17 @@
   const veiculoDoHash = (h) => { const pr = new URLSearchParams(String(h || "").split("?")[1] || ""); return pr.get("vm") ? veiculoDaRota(pr) : null; };
   // false: com veículo (placa ou listas), o UNIVERSAL fica sempre, como no #58; true: a regra da família vale também com veículo
   const UNIVERSAL_SO_MESMA_FAMILIA_COM_VEICULO = false;
-  const servemNoVeiculo = (cods, v, aberto) => cods.filter((c) => {
-    const p = POR_COD.get(normCod(c)), e = p && entradaDe(p), comVei = !!(v && v.vm);
-    if (!e) return true; // fora do catálogo
-    const universal = !veDe(e) && !!e.apl && temPalavra(e.apl, "UNIVERSAL");
-    if (universal && (!comVei || UNIVERSAL_SO_MESMA_FAMILIA_COM_VEICULO)) return !!p.fa && p.fa === aberto.fa;
-    return !comVei || (!veDe(e) && (!e.apl || universal))
-      || casaVeiculo(e, { vm: v.vm, vmo: v.vmo, va: v.va }, true); // marca, modelo e ano; sem motor e sem versão
-  });
+  const servemNoVeiculo = (cods, v, aberto) => {
+    const comVei = !!(v && v.vm);
+    return cods.filter((c) => {
+      const p = POR_COD.get(normCod(c)), e = p && entradaDe(p);
+      if (!e) return true; // fora do catálogo
+      const semVe = !veDe(e), universal = semVe && !!e.apl && temPalavra(e.apl, "UNIVERSAL");
+      if (universal && (!comVei || UNIVERSAL_SO_MESMA_FAMILIA_COM_VEICULO)) return !!p.fa && p.fa === aberto.fa;
+      return !comVei || universal || (semVe && !e.apl)
+        || casaVeiculo(e, { vm: v.vm, vmo: v.vmo, va: v.va }, true); // marca, modelo e ano; sem motor e sem versão
+    });
+  };
   const secJunto = (H2, cods) => cods.length
     ? `<section class="secao rel rel-oj"><${H2} class="secao-tit">Leve também</${H2}>${itensRelHtml(cods)}</section>` : "";
 
