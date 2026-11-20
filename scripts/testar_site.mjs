@@ -18,7 +18,7 @@
    diretriz (lista estrita, outra ordem, minúsculas, os mais próximos, marca concorrente, código BAP e EAN exatos)
    e sem resultado; os links antigos (#/busca?cod=, mo=, modelo=, ano=) viram q; as 2 abas (código, descrição ou
    aplicação; placa com campo e botão, sem consultar o serviço) com setas, Home e End; página do produto (foto, aplicação, referências, ficha
-   técnica, ofereça junto, sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
+   técnica, leve também, sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
    básica; prints em 1366 × 768 e 390 × 844.
    Saída: 0 se passou (ou se só sobraram os conhecidos, com --conhecidos) e 1 se falhou.
 
@@ -1107,9 +1107,12 @@ async function testarSite(base, ctxJson, dirPrints) {
       // ---- página do produto ----
       const N_PROD = "página do produto", N_PRECO = "produto sem preço nem estoque";
       const paginas = [];
-      if (pCod) paginas.push([pCod, "produto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Ofereça junto"]]);
-      if (comFoto) paginas.push([comFoto, "produto-com-foto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Ofereça junto"]]);
+      if (pCod) paginas.push([pCod, "produto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Leve também"]]);
+      if (comFoto) paginas.push([comFoto, "produto-com-foto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Leve também"]]);
       for (const c of ["TER556556", "1"]) if (existe(c)) paginas.push([porCod.get(normCod(c)), "produto-" + c, []]);
+      // R-20261120-141100b-alexandre: o bloco "Ofereça junto" passou a "Leve também" (título exato da seção, como as outras)
+      // TRANSIÇÃO T-0014: o 'Ofereça junto' sai depois do PR do site (até lá, "Leve também" OU "Ofereça junto")
+      const NOMES_SECAO = { "Leve também": ["Leve também", "Ofereça junto"] };
       // T-0014: é a PÁGINA (link direto #/produto/CODIGO), não a janela. O 1º produto abre com o endereço colado
       // numa carga nova da página; os outros, trocando o endereço (sem clique no cartão). Janela aberta = falha.
       let primeira = true;
@@ -1137,13 +1140,13 @@ async function testarSite(base, ctxJson, dirPrints) {
         if (info.h1 !== p.c) falha("produto", N_PROD, `${p.c}:h1`, `${L} ${p.c}: título "${info.h1}"`);
         if (p.i) { if (!info.foto || !info.foto.ok) falha("produto", N_PROD, `${p.c}:foto`, `${L} ${p.c}: a foto ${p.i} não carregou`); }
         else if (!/Foto em breve/.test(info.semFoto)) falha("produto", N_PROD, `${p.c}:sem-foto`, `${L} ${p.c}: sem foto e sem "Foto em breve"`);
-        for (const s of secoesEsperadas) if (!info.secoes.includes(s)) falha("produto", N_PROD, `${p.c}:${s}`, `${L} ${p.c}: sem a seção "${s}"`);
+        for (const s of secoesEsperadas) if (!(NOMES_SECAO[s] || [s]).some((n) => info.secoes.includes(n))) falha("produto", N_PROD, `${p.c}:${s}`, `${L} ${p.c}: sem a seção "${s}"`);
         for (const a of palavrasInternas(info.texto)) falha("tela-preco", N_PRECO, `${a.nome}:${p.c}`, `#/produto/${p.c} mostra "${a.nome}": …${a.trecho}…`);
         if (nome === "produto" || nome === "produto-com-foto") await print(nome);
         conferirConsole(nome);
       }
       teste("tela-preco", N_PRECO);
-      detalhe("produto", N_PROD, paginas.slice(0, 2).map(([p]) => p.c + (p.i ? " (com foto)" : " (Foto em breve)")).join(" e ") + ": foto, aplicação, referências, ficha técnica, ofereça junto; página pelo link direto, sem janela");
+      detalhe("produto", N_PROD, paginas.slice(0, 2).map(([p]) => p.c + (p.i ? " (com foto)" : " (Foto em breve)")).join(" e ") + ": foto, aplicação, referências, ficha técnica, leve também; página pelo link direto, sem janela");
       detalhe("tela-preco", N_PRECO, paginas.map(([p]) => p.c).join(", "));
       await abrir("produto-inexistente", "#/produto/ZZQ999999");
       if (!/não encontrado/.test(await page.evaluate(() => document.body.innerText))) falha("produto", N_PROD, "inexistente", `${L} #/produto/ZZQ999999 sem a mensagem "não encontrado"`);
