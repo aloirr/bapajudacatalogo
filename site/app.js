@@ -811,7 +811,8 @@
   const marcarRolagem = () => document.body.classList.toggle("topo-rolou", window.scrollY > 8);
   window.addEventListener("scroll", marcarRolagem, { passive: true });
   const topoInicio = (sim) => { document.body.classList.toggle("inicio-marca", sim); marcarRolagem(); };
-  window.addEventListener("hashchange", () => topoInicio(false));
+  const topoSobre = (sim) => document.body.classList.toggle("sobre-marca", sim); // s2: o cabeçalho transparente da Sobre
+  window.addEventListener("hashchange", () => { topoInicio(false); topoSobre(false); });
   function telaInicio() {
     const portfolio = Math.floor(BASE.total / 100) * 100; // op4d: o total arredondado para baixo à centena (4.419 → +4.400)
     const celular = window.matchMedia("(max-width: 640px)").matches; // o exemplo da busca geral cabe no celular
@@ -1481,6 +1482,7 @@
   // institucional (recados/anexos/T-0018/sobre/HISTORIA_BAP.pdf), palavra por palavra; os títulos dos 3 blocos são da
   // simulação. As fotos são de produtos BAP (assets/card2 a card4 e a IMG_FAIXA do início), sem foto de banco.
   function telaSobre() {
+    topoSobre(true);
     app.innerHTML = `<div class="sobre">
       <section class="sb-topo"><div class="sb-topo-in">
         <div class="sb-txt">

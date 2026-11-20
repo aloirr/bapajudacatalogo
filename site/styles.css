@@ -36,6 +36,8 @@
                  linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%);
   /* cabeçalho e faixa da busca do catálogo (T-0018, opção b, R-20261120-161500): degradê do --escuro ao --verde-esc.
      A ponta é o --verde-esc com 15% de --escuro, para o menu branco de 14 px passar do AA (5,1:1; no --verde-esc puro, 4,1:1) */
+  /* véu --escuro no alto da faixa do início e do topo da Sobre, por trás do cabeçalho transparente: o branco fica legível */
+  --veu-topo: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px);
   --g-catalogo: linear-gradient(90deg, var(--escuro) 0%, var(--texto) 55%, color-mix(in srgb, var(--verde-esc) 85%, var(--escuro)) 100%);
 }
 .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -475,14 +477,17 @@ dialog.painel-c::backdrop { background: var(--veu); }
 /* ===== Início (T-0018, opção 4c): faixa da marca, busca geral e placa Mercosul lado a lado, lista tabelada ===== */
 /* só tokens do :root; o verde translúcido é o --verde misturado (color-mix) */
 /* op4d: no início o cabeçalho fica por cima da faixa, transparente (o logo e o menu brancos são os de todas as telas); ao rolar, --escuro */
-.inicio-marca .topo { position: fixed; left: 0; right: 0; background: transparent; transition: background-color .2s, box-shadow .2s; }
-.inicio-marca.topo-rolou .topo { background: var(--escuro); box-shadow: var(--sombra); }
+/* s2 (R-20261120-162000-alexandre): na Sobre, o mesmo cabeçalho transparente sobre o topo escuro (.sobre-marca) */
+.inicio-marca .topo, .sobre-marca .topo { position: fixed; left: 0; right: 0; background: transparent; transition: background-color .2s, box-shadow .2s; }
+.inicio-marca.topo-rolou .topo, .sobre-marca.topo-rolou .topo { background: var(--escuro); box-shadow: var(--sombra); }
 .inicio-marca .marca img { height: 52px; }
-@media (prefers-reduced-motion: reduce) { .inicio-marca .topo { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .inicio-marca .topo, .sobre-marca .topo { transition: none; } }
 .marca-faixa, .sb-topo { color: var(--branco); position: relative; overflow: hidden; background-color: var(--escuro); background-image: var(--fundo-faixa); }
 /* a faixa começa atrás do cabeçalho (52 px do logo + 20 px); o véu --escuro no alto garante o contraste do branco */
 .inicio-marca .marca-faixa { padding-top: 72px;
-  background-image: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px), var(--fundo-faixa); }
+  background-image: var(--veu-topo), var(--fundo-faixa); }
+/* o topo da Sobre começa atrás do cabeçalho (46 px do logo + 20 px; 60 px no celular) */
+.sobre-marca .sb-topo { padding-top: 72px; background-image: var(--veu-topo), var(--fundo-faixa); }
 .marca-faixa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--verde); }
 .marca-faixa-in { max-width: 1200px; margin: 0 auto; padding: 26px 16px 34px; display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "txt foto" "busca busca"; gap: 18px 32px; align-items: center; }
@@ -623,6 +628,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .sb-dados div:nth-child(n+3) { border-top: 1px solid var(--linha); }
 }
 @media (max-width: 640px) {
+  .sobre-marca .sb-topo { padding-top: 60px; }
   .sb-txt h1 { font-size: 27px; }
   .sb-txt p { font-size: 15px; }
   .sb-fotos { height: 190px; }
