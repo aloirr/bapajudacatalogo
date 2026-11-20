@@ -64,9 +64,7 @@ def so_codigo(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", sem_acento(s).upper())
 
 
-# Rótulo da referência só com a marca (RD-0200): sai o prefixo "CROSS REFERENCES - ", "CROSS REFERENCIAS - ",
-# "REFERENCIAS CRUZADAS - ", "REF. CRUZADA - " ou "REFERENCIAS CROSS " e o " PN" do fim ("NAKATA PN" → "NAKATA",
-# "REFERENCIAS CROSS FARJ" → "FARJ"). A caixa fica como vem da base.
+# Rótulo da referência só com a marca (RD-0200): os prefixos e o " PN" do fim; a lista está no docs/DADOS_DO_SITE.md (campo r).
 PREFIXO = (r"(?:(?:CROSS\s+)?REFER[ÊE]NC(?:IA|E)S?(?:\s+CRUZADAS?)?\s*-|REFER[ÊE]NC(?:IA|E)S?\s+CROSS\b"
            r"|REF\.?\s+CRUZADAS?\s*-)\s*")
 PREFIXO_E_PN = re.compile(r"^" + PREFIXO + r"|\s+PN$", re.I)
@@ -99,7 +97,12 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
                     saida.append({"m": marca, "c": cod})
         else:
             saida.append({"m": "", "c": parte})
-    return [x for x in saida if not (proprio and so_codigo(x["c"]) == proprio)]
+    vistos, unicas = set(), []
+    for x in saida:                       # a referência repetida na célula (mesma marca e mesmo código) aparece uma vez (RD-0201)
+        k = (re.sub(r"\W", "", sem_acento(x["m"]).upper()), so_codigo(x["c"]))
+        if k not in vistos and not (proprio and k[1] == proprio):
+            vistos.add(k); unicas.append(x)
+    return unicas
 
 
 # Ficha técnica do site: SÓ o que está nesta lista (os DADOS_ADICIONAIS também têm custo de importação, MOQ,
