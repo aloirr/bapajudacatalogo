@@ -1,4 +1,4 @@
-# Serviço de consulta por placa (T-0005) e contador de aberturas (T-0018) · v1.1.0
+# Serviço de consulta por placa (T-0005) e contador de aberturas (T-0018)
 
 Serviço pequeno, em Node 18+ e **sem dependências**, que recebe a placa do site e devolve só os dados do veículo. Desenho: `docs/placas/DESENHO.md` (PR #22).
 
@@ -16,7 +16,8 @@ Serviço pequeno, em Node 18+ e **sem dependências**, que recebe a placa do sit
 - `POST /contar`, corpo `{"codigo":"AMT7183"}` (até 1 KB): conta **uma abertura** da página do produto (T-0018, decisão do Alexandre em R-20261120-141600).
   - Só da origem `ORIGEM_PERMITIDA`: o header `Origin` é **obrigatório** (sem ele ou com outro, 403). `OPTIONS` responde à pré-checagem do CORS.
   - O código precisa existir no catálogo (espaço nas pontas e minúsculas são aceitos). Não aceita query no endereço.
-  - 204 contou (sem corpo) · 400 `{"erro":"codigo_invalido"}` · 403 `{"erro":"origem"}` · 413 corpo grande · 429 `{"erro":"limite"}` (30 por IP no minuto) ou `{"erro":"teto"}` (120 no serviço no minuto), com `Retry-After` **[SUPOSIÇÃO: números a confirmar]** · 503 `{"erro":"indisponivel"}` enquanto a lista de códigos não foi lida.
+  - 204 contou (sem corpo) · 400 `{"erro":"codigo_invalido"}` · 403 `{"erro":"origem"}` · 413 `{"erro":"grande"}` (corpo acima de 1 KB) · 429 `{"erro":"limite"}` (30 por IP no minuto) ou `{"erro":"teto"}` (120 no serviço no minuto), com `Retry-After` · 503 `{"erro":"indisponivel"}` enquanto a lista de códigos não foi lida.
+  - **[SUPOSIÇÃO: os números 30 e 120 são a confirmar com o Alexandre.]** O `Origin` **não é prova**: fora do navegador (curl, robô) qualquer um escreve o header que quiser. Ele só barra outro site de contar pelo navegador do visitante; contra quem quer inflar a contagem de fora, o que segura são os limites 30/120 por minuto e a lista de códigos do catálogo.
   - O site pode mandar sem `Content-Type` (vai como texto e não faz pré-checagem): `fetch(URL + '/contar', {method:'POST', body: JSON.stringify({codigo}), keepalive:true})`. Erro do contador nunca deve atrapalhar a página.
 - `GET /mais-vistos?dias=7` (sem `dias`, vale 7; aceita de 1 a 30): `{"total": N, "itens": [{"codigo":"AMT7183","n":12}, ...]}`.
   - `total` é a soma das aberturas na janela; `itens` são os **4** códigos mais abertos (empate: ordem do código). A janela é hoje (dia de Manaus) e os `dias − 1` dias antes.
@@ -65,4 +66,4 @@ O endereço da API (`https://wdapi2.com.br/v3/basico/`) é **fixo no código**, 
 
 ## Log
 
-Só contagens e status: `veiculo <status> <tempo>ms`, `contar <status> <tempo>ms`, `mais-vistos <status> <tempo>ms`, `contador ok <dias> dias`, `catalogo ok <quantos>`. Nunca a placa, o código aberto, o IP, os headers, a URL da API, a chave ou a mensagem de erro.
+Só status e contagens, sem dado do pedido: `<rota> <status> <tempo>ms` (veiculo, contar, mais-vistos) e as linhas de partida e falha (`placas ouvindo <porta>`, `guarda …`, `contador …`, `catalogo …`). Nunca a placa, o código aberto, o IP, os headers, a URL da API, a chave ou a mensagem de erro.

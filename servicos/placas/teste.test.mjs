@@ -7,6 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { diaManaus, nomeDoDia } from './contador.mjs';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const CHAVE = 'chave-falsa-de-teste';
@@ -340,9 +341,7 @@ test('CORS só para a origem permitida; /saude não chama a API; outra rota 404,
 });
 
 // ---------- contador de aberturas (T-0018) ----------
-const H24 = 24 * 60 * 60 * 1000;
-const hojeManaus = () => Math.floor((Date.now() - 4 * 60 * 60 * 1000) / H24);
-const nomeDia = (atras) => new Date((hojeManaus() - atras) * H24).toISOString().slice(0, 10) + '.json';
+const nomeDia = (atras) => nomeDoDia(diaManaus(Date.now()) - atras) + '.json';
 
 const contar = (s, codigo, { ip = '198.51.100.20', origem = ORIGEM, corpo } = {}) => fetch(s.url + '/contar', {
   method: 'POST',
@@ -353,8 +352,11 @@ const maisVistos = async (s, dias) => {
   const r = await fetch(s.url + '/mais-vistos' + (dias === undefined ? '' : `?dias=${dias}`), { headers: { Origin: ORIGEM } });
   return { status: r.status, corpo: await r.json(), cors: r.headers.get('access-control-allow-origin') };
 };
+async function esperarLog(s, re) {
+  for (let i = 0; i < 100 && !re.test(s.logs()); i++) await new Promise((r) => setTimeout(r, 20));
+}
 async function esperarCatalogo(s) {
-  for (let i = 0; i < 100 && !/catalogo (ok|indisponivel)/.test(s.logs()); i++) await new Promise((r) => setTimeout(r, 20));
+  await esperarLog(s, /catalogo (ok|indisponivel)/);
   assert.match(s.logs(), /catalogo ok 6\b/);
 }
 // Os limites usam a janela do minuto do relógio: não começa nos últimos 8 s do minuto.
@@ -378,7 +380,9 @@ test('contar: código do catálogo dá 204; inválido, fora do catálogo ou na q
     assert.deepEqual(await x.json(), { erro: 'codigo_invalido' });
   }
   assert.equal((await contar(s, null, { corpo: 'nao-e-json' })).status, 400);
-  assert.equal((await contar(s, null, { corpo: '{"codigo":"' + 'x'.repeat(2000) + '"}' })).status, 413);
+  const g = await contar(s, null, { corpo: '{"codigo":"' + 'x'.repeat(2000) + '"}' });
+  assert.equal(g.status, 413);
+  assert.deepEqual(await g.json(), { erro: 'grande' });
   const q = await fetch(s.url + '/contar?codigo=AMT7183', { method: 'POST', headers: { Origin: ORIGEM }, body: '{"codigo":"AMT7183"}' });
   assert.equal(q.status, 400);
   assert.equal((await fetch(s.url + '/contar', { headers: { Origin: ORIGEM } })).status, 405);
@@ -406,7 +410,7 @@ test('contar: origem errada ou sem Origin dá 403 e não conta', async () => {
 
 test('contar: sem o catálogo carregado dá 503 (não conta às cegas)', async () => {
   const s = await subir({ catalogo: 'http://127.0.0.1:9/data/produtos.json' });
-  for (let i = 0; i < 100 && !/catalogo indisponivel/.test(s.logs()); i++) await new Promise((r) => setTimeout(r, 20));
+  await esperarLog(s, /catalogo indisponivel/);
   const r = await contar(s, 'AMT7183');
   assert.equal(r.status, 503);
   assert.deepEqual(await r.json(), { erro: 'indisponivel' });
@@ -506,10 +510,7 @@ test('contador: nada de IP, origem, hora ou placa no disco nem no log', async ()
   const dia = fs.readFileSync(path.join(dir, nomeDia(0)), 'utf8');
   assert.deepEqual(JSON.parse(dia), { AMT7183: 1, 'ROL3204-2RS': 1 });
   const tudo = arquivos.map((f) => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n');
-  for (const proibido of ['192.0.2', '127.0.0.1', 'outro.invalid', ORIGEM, 'NAOEXISTE1', 'PRV1A23', CHAVE]) {
-    assert.ok(!dia.includes(proibido), 'contador vazou no disco: ' + proibido);
-  }
-  assert.ok(!tudo.includes('192.0.2'), 'IP no disco');
+  for (const p of ['192.0.2', '127.0.0.1', 'outro.invalid', ORIGEM, 'NAOEXISTE1', CHAVE]) assert.ok(!tudo.includes(p), 'vazou no disco: ' + p);
   const log = s.logs();
   for (const proibido of ['AMT7183', 'ROL3204', 'NAOEXISTE1', 'PRV1A23', '192.0.2', 'outro.invalid', catalogoUrl]) {
     assert.ok(!log.includes(proibido), 'log vazou: ' + proibido);

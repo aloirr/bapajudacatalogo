@@ -4,10 +4,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const H24 = 24 * 60 * 60 * 1000;
-const FUSO_MANAUS = -4 * 60 * 60 * 1000;
-export const GUARDA_DIAS = 30;          // arquivo com mais de 30 dias é apagado
+export const H24 = 24 * 60 * 60 * 1000;
+export const FUSO_MANAUS = -4 * 60 * 60 * 1000;
+const GUARDA_DIAS = 30;                 // arquivo com mais de 30 dias é apagado
 export const JANELA_MAX = 30;           // /mais-vistos aceita dias de 1 a 30
+export const JANELA_PADRAO = 7;         // /mais-vistos sem dias
+export const MAIS_VISTOS = 4;           // quantos códigos o /mais-vistos devolve
+const RENOVAR_MS = 6 * 60 * 60 * 1000;  // lê a lista de códigos de novo a cada 6 h
+const TENTAR_DE_NOVO_MS = 60 * 1000;    // se a leitura falhou, tenta em 1 min
 const ESPERA_GRAVAR_MS = 5000;          // junta as aberturas antes de gravar
 const CODIGO_MAX = 40;
 const CATALOGO_MAX = 32 * 1024 * 1024;  // o produtos.json tem uns 3 MB
@@ -101,9 +105,9 @@ export function criarContador({ pasta = null, log = () => {} } = {}) {
     }
   }
 
-  function contar(codigo, agora = Date.now()) {
-    const hoje = diaManaus(agora);
-    if (hoje !== ultimoDia) limpar(hoje);
+  function contar(codigo) {
+    faxina(Date.now());
+    const hoje = ultimoDia;
     let m = dias.get(hoje);
     if (!m) { m = new Map(); dias.set(hoje, m); }
     m.set(codigo, (m.get(codigo) || 0) + 1);
@@ -113,8 +117,8 @@ export function criarContador({ pasta = null, log = () => {} } = {}) {
 
   // Janela de N dias: hoje (dia de Manaus) e os N-1 dias antes.
   // Se o catálogo já foi lido, código que saiu do catálogo não entra.
-  function maisVistos(n, { valido = null, quantos = 4, agora = Date.now() } = {}) {
-    const hoje = diaManaus(agora);
+  function maisVistos(n, { valido = null } = {}) {
+    const hoje = diaManaus(Date.now());
     const soma = new Map();
     let total = 0;
     for (let d = hoje - n + 1; d <= hoje; d++) {
@@ -128,7 +132,7 @@ export function criarContador({ pasta = null, log = () => {} } = {}) {
     }
     const itens = [...soma]
       .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
-      .slice(0, quantos)
+      .slice(0, MAIS_VISTOS)
       .map(([codigo, v]) => ({ codigo, n: v }));
     return { total, itens };
   }
@@ -142,11 +146,22 @@ export function criarContador({ pasta = null, log = () => {} } = {}) {
 }
 
 // ---------- lista de códigos do catálogo ----------
-// Lida do produtos.json PUBLICADO pelo site (ORIGEM_PERMITIDA + /data/produtos.json).
-// Motivo: o Render só entrega ao serviço a pasta servicos/placas (rootDir);
-// site/data/produtos.json não existe para ele. Assim a lista é sempre a do ar.
-export function criarCatalogo({ url, log = () => {}, renovarMs = 6 * 60 * 60 * 1000, tentarDeNovoMs = 60 * 1000 }) {
+// Lida do produtos.json PUBLICADO (ORIGEM_PERMITIDA + /data/produtos.json). Motivo: README, "Lista de códigos do catálogo".
+export function criarCatalogo({ url, log = () => {} }) {
   let codigos = null;
+  // Corpo lido em pedaços, contando bytes; passou de CATALOGO_MAX, desiste.
+  async function lerAte(res, max) {
+    if (Number(res.headers.get('content-length')) > max) { await res.body?.cancel(); return null; }
+    if (!res.body) return '';
+    const partes = [];
+    let tam = 0;
+    for await (const b of res.body) {
+      tam += b.length;
+      if (tam > max) return null; // sair do for await cancela o resto do corpo
+      partes.push(b);
+    }
+    return Buffer.concat(partes).toString('utf8');
+  }
   async function baixar() {
     if (!url) return false;
     try {
@@ -155,9 +170,9 @@ export function criarCatalogo({ url, log = () => {}, renovarMs = 6 * 60 * 60 * 1
         redirect: 'error',
         signal: AbortSignal.timeout(20000),
       });
-      if (!res.ok) return false;
-      const t = await res.text();
-      if (t.length > CATALOGO_MAX) return false;
+      if (!res.ok) { await res.body?.cancel(); return false; }
+      const t = await lerAte(res, CATALOGO_MAX);
+      if (t === null) return false;
       const j = JSON.parse(t);
       if (!j || !Array.isArray(j.produtos)) return false;
       const s = new Set();
@@ -176,7 +191,7 @@ export function criarCatalogo({ url, log = () => {}, renovarMs = 6 * 60 * 60 * 1
   async function ciclo() {
     const ok = await baixar();
     log(ok ? `catalogo ok ${codigos.size}` : 'catalogo indisponivel');
-    setTimeout(ciclo, ok ? renovarMs : tentarDeNovoMs).unref();
+    setTimeout(ciclo, ok ? RENOVAR_MS : TENTAR_DE_NOVO_MS).unref();
   }
 
   return {

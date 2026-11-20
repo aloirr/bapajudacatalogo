@@ -7,7 +7,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { criarContador, criarCatalogo, normalizarCodigo, JANELA_MAX } from './contador.mjs';
+import {
+  criarContador, criarCatalogo, normalizarCodigo, diaManaus, H24, FUSO_MANAUS, JANELA_MAX, JANELA_PADRAO,
+} from './contador.mjs';
 
 // Endereço FIXO. Só os testes (NODE_ENV=test) podem trocar.
 const API_FIXA = 'https://wdapi2.com.br/v3/basico/';
@@ -21,12 +23,10 @@ const TETO_DIA = 300;
 const TIMEOUT_MS = 8000;
 const CORPO_MAX = 1024;
 const RESPOSTA_MAX = 256 * 1024;
-const H24 = 24 * 60 * 60 * 1000;
-const FUSO_MANAUS = -4 * 60 * 60 * 1000;
+const PASTA_GUARDA = process.env.PASTA_GUARDA || null;
 // Contador (T-0018) [SUPOSIÇÃO: números a confirmar com o Alexandre].
 const CONTAR_IP_MINUTO = 30;    // aberturas contadas por IP por minuto
 const CONTAR_TETO_MINUTO = 120; // aberturas contadas no serviço inteiro por minuto
-const MAIS_VISTOS = 4;
 
 const semente = crypto.randomBytes(32);
 const chave = (placa) => crypto.createHmac('sha256', semente).update(placa).digest('hex');
@@ -41,7 +41,7 @@ let contarTeto = { min: -1, cont: 0 };
 
 const log = (msg) => console.log(msg);
 
-const contador = criarContador({ pasta: process.env.PASTA_GUARDA || null, log });
+const contador = criarContador({ pasta: PASTA_GUARDA, log });
 function urlDoCatalogo() {
   if (process.env.NODE_ENV === 'test' && process.env.CATALOGO_URL_TESTE) return process.env.CATALOGO_URL_TESTE;
   try { return new URL('/data/produtos.json', process.env.ORIGEM_PERMITIDA).href; } catch { return null; }
@@ -51,11 +51,10 @@ const catalogo = criarCatalogo({ url: urlDoCatalogo(), log });
 // ---------- guarda em disco (opcional) ----------
 let arquivoGuarda = null;
 function abrirGuarda() {
-  const pasta = process.env.PASTA_GUARDA;
-  if (!pasta) return;
+  if (!PASTA_GUARDA) return;
   try {
-    fs.accessSync(pasta, fs.constants.W_OK);
-    const arq = path.join(pasta, 'veiculos.jsonl');
+    fs.accessSync(PASTA_GUARDA, fs.constants.W_OK);
+    const arq = path.join(PASTA_GUARDA, 'veiculos.jsonl');
     if (fs.existsSync(arq)) {
       const texto = fs.readFileSync(arq, 'utf8');
       for (const linha of texto.split('\n')) {
@@ -121,7 +120,7 @@ function soCampos(d) {
 }
 
 // ---------- limites ----------
-const diaManaus = (t) => Math.floor((t + FUSO_MANAUS) / H24);
+const segAteFimDoMinuto = (t) => Math.max(1, Math.ceil((60000 - (t % 60000)) / 1000));
 const segAteFimDoDia = (t) => Math.max(1, Math.ceil(((diaManaus(t) + 1) * H24 - (t + FUSO_MANAUS)) / 1000));
 
 function ipDoPedido(req) {
@@ -142,7 +141,7 @@ function limiteIp(ipChave, agora) {
   if (r.min !== min) { r.min = min; r.contMin = 0; }
   if (r.dia !== dia) { r.dia = dia; r.contDia = 0; }
   if (r.contDia >= LIMITE_IP_DIA) return segAteFimDoDia(agora);
-  if (r.contMin >= LIMITE_IP_MINUTO) return Math.max(1, Math.ceil(((min + 1) * 60000 - agora) / 1000));
+  if (r.contMin >= LIMITE_IP_MINUTO) return segAteFimDoMinuto(agora);
   r.contMin++; r.contDia++;
   return 0;
 }
@@ -232,7 +231,7 @@ async function consultar(placa, ipChave, agora) {
 // Todo pedido de origem certa conta, até o inválido.
 function limiteContar(ipChave, agora) {
   const min = Math.floor(agora / 60000);
-  const espera = Math.max(1, Math.ceil(((min + 1) * 60000 - agora) / 1000));
+  const espera = segAteFimDoMinuto(agora);
   if (contarTeto.min !== min) contarTeto = { min, cont: 0 };
   let r = contarPorIp.get(ipChave);
   if (!r || r.min !== min) { r = { min, cont: 0 }; contarPorIp.set(ipChave, r); }
@@ -269,45 +268,66 @@ function lerCorpo(req) {
   });
 }
 
+// Pré-checagem do CORS (OPTIONS) das rotas POST.
+const SO_POST = { Allow: 'POST, OPTIONS' };
+function preChecagem(res, p) {
+  if (!p.origemCerta) return responder(res, 403, { erro: 'origem' }, p.cors);
+  res.writeHead(204, {
+    ...p.cors,
+    'Access-Control-Allow-Methods': 'POST',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '600',
+  });
+  return res.end();
+}
+// Fecha o pedido com o log só de rota, status e tempo.
+function fimDe(nome, res, p) {
+  return (status, obj, extra = {}) => {
+    log(`${nome} ${status} ${Date.now() - p.inicio}ms`);
+    if (status !== 204) return responder(res, status, obj, { ...p.cors, ...extra });
+    res.writeHead(204, { ...p.cors, 'Cache-Control': 'no-store', ...extra });
+    return res.end();
+  };
+}
+
+// Nome da rota para o log (nunca o endereço cru).
+const ROTAS = { '/saude': 'saude', '/veiculo': 'veiculo', '/contar': 'contar', '/mais-vistos': 'mais-vistos' };
+const nomeDaRota = (url) => ROTAS[(url || '').split('?')[0]] || 'rota';
+
 async function tratar(req, res) {
-  const inicio = Date.now();
   const origemOk = process.env.ORIGEM_PERMITIDA || null;
   const origem = req.headers.origin;
-  const cors = origemOk && origem === origemOk
-    ? { 'Access-Control-Allow-Origin': origemOk, Vary: 'Origin' }
-    : { Vary: 'Origin' };
-  const rota = (req.url || '').split('?')[0];
-  const temQuery = (req.url || '').includes('?');
+  const origemCerta = Boolean(origemOk && origem === origemOk);
+  const [rota, query] = (req.url || '').split('?');
+  const p = {
+    inicio: Date.now(),
+    origem,
+    origemCerta,
+    cors: origemCerta ? { 'Access-Control-Allow-Origin': origemOk, Vary: 'Origin' } : { Vary: 'Origin' },
+    temQuery: query !== undefined,
+    query: query || '',
+  };
 
   if (rota === '/saude') {
     if (req.method !== 'GET' && req.method !== 'HEAD') return responder(res, 405, { erro: 'metodo' }, { Allow: 'GET' });
     return responder(res, 200, { ok: true });
   }
-  if (rota === '/contar') return tratarContar(req, res, cors, origem, inicio);
-  if (rota === '/mais-vistos') return tratarMaisVistos(req, res, cors, origem, inicio);
-  if (rota !== '/veiculo') return responder(res, 404, { erro: 'rota' });
+  if (rota === '/veiculo') return tratarVeiculo(req, res, p);
+  if (rota === '/contar') return tratarContar(req, res, p);
+  if (rota === '/mais-vistos') return tratarMaisVistos(req, res, p);
+  return responder(res, 404, { erro: 'rota' });
+}
 
-  if (req.method === 'OPTIONS') {
-    if (!cors['Access-Control-Allow-Origin']) return responder(res, 403, { erro: 'origem' }, cors);
-    res.writeHead(204, {
-      ...cors,
-      'Access-Control-Allow-Methods': 'POST',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '600',
-    });
-    return res.end();
-  }
-  if (req.method !== 'POST') return responder(res, 405, { erro: 'metodo' }, { ...cors, Allow: 'POST, OPTIONS' });
-  const fim = (status, obj, extra = {}) => {
-    log(`veiculo ${status} ${Date.now() - inicio}ms`);
-    return responder(res, status, obj, { ...cors, ...extra });
-  };
-  if (origem && !cors['Access-Control-Allow-Origin']) return fim(403, { erro: 'origem' });
+async function tratarVeiculo(req, res, p) {
+  if (req.method === 'OPTIONS') return preChecagem(res, p);
+  if (req.method !== 'POST') return responder(res, 405, { erro: 'metodo' }, { ...p.cors, ...SO_POST });
+  const fim = fimDe('veiculo', res, p);
+  if (p.origem && !p.origemCerta) return fim(403, { erro: 'origem' });
 
   const bruto = await lerCorpo(req);
   if (bruto === null) return fim(413, { erro: 'placa_invalida' });
   let placa = null;
-  if (!temQuery) {
+  if (!p.temQuery) {
     try { placa = validarPlaca(JSON.parse(bruto)?.placa); } catch { placa = null; }
   }
   if (!placa) return fim(400, { erro: 'placa_invalida' });
@@ -326,34 +346,17 @@ async function tratar(req, res) {
 
 // POST /contar {"codigo":"AMT7183"} -> 204. Só da origem do catálogo (o Origin
 // é obrigatório). Guarda só {codigo: n} do dia; nada de quem abriu.
-async function tratarContar(req, res, cors, origem, inicio) {
-  const okOrigem = Boolean(cors['Access-Control-Allow-Origin']);
-  if (req.method === 'OPTIONS') {
-    if (!okOrigem) return responder(res, 403, { erro: 'origem' }, cors);
-    res.writeHead(204, {
-      ...cors,
-      'Access-Control-Allow-Methods': 'POST',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '600',
-    });
-    return res.end();
-  }
-  if (req.method !== 'POST') return responder(res, 405, { erro: 'metodo' }, { ...cors, Allow: 'POST, OPTIONS' });
-  const fim = (status, obj, extra = {}) => {
-    log(`contar ${status} ${Date.now() - inicio}ms`);
-    if (status === 204) {
-      res.writeHead(204, { ...cors, 'Cache-Control': 'no-store', ...extra });
-      return res.end();
-    }
-    return responder(res, status, obj, { ...cors, ...extra });
-  };
-  if (!origem || !okOrigem) { req.resume(); return fim(403, { erro: 'origem' }); }
+async function tratarContar(req, res, p) {
+  if (req.method === 'OPTIONS') return preChecagem(res, p);
+  if (req.method !== 'POST') return responder(res, 405, { erro: 'metodo' }, { ...p.cors, ...SO_POST });
+  const fim = fimDe('contar', res, p);
+  if (!p.origemCerta) { req.resume(); return fim(403, { erro: 'origem' }); }
   const lim = limiteContar(chave(ipDoPedido(req)), Date.now());
   if (lim) { req.resume(); return fim(429, { erro: lim.erro }, { 'Retry-After': String(lim.espera) }); }
   const bruto = await lerCorpo(req);
-  if (bruto === null) return fim(413, { erro: 'codigo_invalido' });
+  if (bruto === null) return fim(413, { erro: 'grande' });
   let codigo = null;
-  if (!(req.url || '').includes('?')) {
+  if (!p.temQuery) {
     try { codigo = normalizarCodigo(JSON.parse(bruto)?.codigo); } catch { codigo = null; }
   }
   if (!catalogo.pronto()) return fim(503, { erro: 'indisponivel' });
@@ -362,23 +365,19 @@ async function tratarContar(req, res, cors, origem, inicio) {
   return fim(204);
 }
 
-// GET /mais-vistos?dias=7 -> {"total": N, "itens": [{"codigo","n"}]} (até 4).
-async function tratarMaisVistos(req, res, cors, origem, inicio) {
-  if (req.method !== 'GET' && req.method !== 'HEAD') return responder(res, 405, { erro: 'metodo' }, { ...cors, Allow: 'GET' });
-  const fim = (status, obj) => {
-    log(`mais-vistos ${status} ${Date.now() - inicio}ms`);
-    return responder(res, status, obj, cors);
-  };
-  if (origem && !cors['Access-Control-Allow-Origin']) return fim(403, { erro: 'origem' });
-  let dias = 7;
-  const q = new URLSearchParams((req.url || '').split('?')[1] || '');
+// GET /mais-vistos?dias=7 -> {"total": N, "itens": [{"codigo","n"}]} (até MAIS_VISTOS).
+async function tratarMaisVistos(req, res, p) {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return responder(res, 405, { erro: 'metodo' }, { ...p.cors, Allow: 'GET' });
+  const fim = fimDe('mais-vistos', res, p);
+  if (p.origem && !p.origemCerta) return fim(403, { erro: 'origem' });
+  let dias = JANELA_PADRAO;
+  const q = new URLSearchParams(p.query);
   if (q.has('dias')) {
     const d = q.get('dias');
     dias = /^[0-9]{1,2}$/.test(d) ? Number(d) : 0;
   }
   if (dias < 1 || dias > JANELA_MAX) return fim(400, { erro: 'dias_invalido' });
-  const valido = catalogo.pronto() ? catalogo.tem : null;
-  return fim(200, contador.maisVistos(dias, { valido, quantos: MAIS_VISTOS }));
+  return fim(200, contador.maisVistos(dias, { valido: catalogo.pronto() ? catalogo.tem : null }));
 }
 
 export function iniciar(porta = process.env.PORT !== undefined ? Number(process.env.PORT) : 10000) {
@@ -386,8 +385,9 @@ export function iniciar(porta = process.env.PORT !== undefined ? Number(process.
   contador.abrir();
   catalogo.iniciar();
   const srv = http.createServer((req, res) => {
+    const t0 = Date.now();
     tratar(req, res).catch(() => {
-      log('veiculo 503');
+      log(`${nomeDaRota(req.url)} 503 ${Date.now() - t0}ms`);
       if (!res.headersSent) responder(res, 503, { erro: 'indisponivel' });
       else res.destroy();
     });
