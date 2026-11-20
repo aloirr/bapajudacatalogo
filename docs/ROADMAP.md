@@ -16,7 +16,8 @@
    - A chave **nunca** vai para o navegador.
 2. **Cache** por placa (24 h), para economizar consultas. Limite de chamadas por IP.
 3. No site, o campo **Placa**, ao lado da busca, chama o serviço e preenche a busca por veículo (montadora, modelo e ano).
-4. **Antes de ligar:** confirmar com o Alexandre o contrato e o custo por consulta, o formato da resposta e a LGPD (não guardar placa ligada a pessoa).
+4. **Ligada em 20/11, às 11:29** (T-0005), com a chave cadastrada pelo Alexandre no Render. O que ficou aberto está nas pendências da T-0005.
+5. Contador de aberturas (T-0018, v1.1.0) a publicar.
 
 ## Sincronização
 

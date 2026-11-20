@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 20/11/2026 14:48 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 20/11/2026 14:53 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -20,19 +20,18 @@ Atualizado em 20/11/2026 14:48 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | EM ANDAMENTO (ajustes no ar; falta o aperto do testes) | #29, #35, #36, #39, #41 |
 | [T-0015](tarefas/T-0015.md) | Três agentes novos: corretor-redundancias, design-de-marca e designer-ux | gerente-projetos | po, revisor-codigo | CONCLUÍDA | #30 |
 | [T-0016](tarefas/T-0016.md) | Guardião com a regra de merge do PO, conferência dos merges pelo GitHub e limpeza do CI e do coord.mjs | alexandre | gerente-projetos, testes, revisor-codigo | EM ANDAMENTO (pacote d na sessão filha) | #34 |
-| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" (v17, v18; v19 com ano e cilindrada) | catalogo-dados | web-site, testes | EM ANDAMENTO (v18 no ar) | #32, #33, #37, #38 |
-| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | EM ANDAMENTO (home em simulação final) | #42, #43 |
+| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v18 no ar; v19 a simular) | #32, #33, #37, #38 |
+| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | EM ANDAMENTO (home aprovada, menos a imagem da faixa: op4f em simulação; contador #42 e deploy v1.1.0 a seguir) | #42, #43 |
 | [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | EM ANDAMENTO (PDFs no PC do Alexandre) | #40 |
 
 ## Fila
 
-1. T-0001 (base para as outras).
-2. T-0002 e T-0004, em paralelo, logo depois da T-0001 (decisão 3a, R-20261120-093235-alexandre).
-   - Também logo depois da T-0001: T-0007 (simulação primeiro) e T-0008 (simulação de tela primeiro).
-3. T-0003 (depois que a T-0002 estiver no `main`).
-4. T-0006 (proposta para aprovação; não há código).
-5. T-0014: simulação das opções de filtros e veículo e da "Ref. Cruzada:" (R-20261120-120700); PR final 1 h depois da escolha.
-6. T-0016: depois da T-0014, numa sessão filha (tarefa longa e independente, R-20261120-120117).
+1. T-0018: a home (PR próprio, depois do #43 do testes, com a imagem da faixa escolhida na op4f), o contador (#42) e o deploy da v1.1.0. Prazo do Alexandre: 15:00 (R-20261120-142100).
+2. T-0014: só o PR de aperto do testes.
+3. T-0016: o pacote d na sessão filha e o merge do #34.
+4. T-0017: a simulação da v19, para o "aprovado".
+5. T-0019: os PDFs novos, quando o Alexandre rodar o gerador no PC dele.
+6. T-0006: a proposta para aprovação (não há código).
 
 ## Regras novas de hoje
 - Merge: o PO autoriza todos os merges, inclusive os de governança, conferindo número, head, arquivos, CI verde e revisão LIBERADO; o gerente executa (R-20261120-111133 e R-20261120-111308-alexandre). As simulações de tela e de PDF continuam indo ao Alexandre.
