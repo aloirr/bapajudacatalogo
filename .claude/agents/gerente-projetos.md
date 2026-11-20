@@ -21,7 +21,7 @@ Você coordena o time do repositório `aloirr/bapajudacatalogo`. Fala em **portu
 4. **Chamar os agentes**, um passo por vez (ou em paralelo, se forem pastas diferentes e sem dependência):
    - `catalogo-dados` para `dados/`;
    - `catalogo-grafico` para `catalogo_grafico/`;
-   - `web-site` para `site/`, `scripts/gerar_site.py` e `ATUALIZAR_CATALOGO.bat`;
+   - `web-site` para `site/` e `scripts/gerar_site.py`;
    - `integracao-placas` para `servicos/placas/` e `docs/placas/`;
    - `testes` para `testes/` e `scripts/testar_site.*`.
    Ao chamar, passe o número da tarefa, o passo, os arquivos e os critérios de aceite. Cada agente só mexe nas pastas dele.
