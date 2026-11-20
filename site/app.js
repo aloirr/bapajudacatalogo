@@ -15,6 +15,17 @@
   // (serviço reiniciando depois de um deploy ou a API PLACAS lenta); o limite de espera continua folgado.
   const PLACAS_TIMEOUT_MS = 75000;
   const PLACAS_ACORDANDO_MS = 5000;
+  // SIMULAÇÃO T-0014 (R-20261120-120700; sai na entrega, fica a opção escolhida pelo Alexandre):
+  //   ?f=A|B|C posição dos filtros (A: barra compacta dentro do quadro da busca; B: coluna lateral fina e recolhível,
+  //   no celular painel de baixo para cima; C: botão "Filtrar (n)" ao lado do título, que abre um painel);
+  //   ?v=A|B|C informação do veículo (A: faixa de resumo acima da lista; B: cartão do veículo ao lado do quadro;
+  //   C: pílula dentro do campo da placa). Sem parâmetro: a tela de hoje.
+  const SIM = new URLSearchParams(location.search);
+  const SIM_F = /^[ABC]$/.test(SIM.get("f") || "") ? SIM.get("f") : "";
+  const SIM_V = /^[ABC]$/.test(SIM.get("v") || "") ? SIM.get("v") : "";
+  if (SIM_F) document.documentElement.classList.add("sim-f-" + SIM_F.toLowerCase());
+  if (SIM_V) document.documentElement.classList.add("sim-v-" + SIM_V.toLowerCase());
+  const FILTROS_FIXOS = SIM_F === "B" || SIM_F === "C"; // grupos sempre abertos, sem fechar no clique fora
   const POR_PAGINA = 50; // T-0014: 10 linhas de 5 cartões no computador (25 de 2 no celular)
   // { q, texto, partes, placa } do último veículo achado pela placa. Só em memória: nunca no endereço, no
   // localStorage/sessionStorage, no console ou no título. A placa vive só no fluxo da busca (lista, janela do produto e
@@ -443,14 +454,23 @@
       </div></article>`;
   }
 
-  // Etiquetas do cartão (T-0014): só o código, sem a marca. Primeiro o código original da montadora (marca "OEM"
-  // ou "CÓD. ORIGINAL"), depois as referências da concorrência, na ordem da base.
+  // Etiquetas do cartão (T-0014): "Ref. Cruzada:" e os códigos. Primeiro o código original da montadora (marca "OEM"
+  // ou "CÓD. ORIGINAL", que aparece como "Original"), depois as referências da concorrência, na ordem da base. Cada
+  // código é um botão: passar o mouse, focar ou tocar mostra o balão com a marca (R-20261120-120700), sem abrir o produto.
   // Fica fora o código da própria BAP (marca "BAP PN_2", "BAPTA PN" e o código igual ao do produto).
   const MAX_ETIQUETAS = 12; // no DOM; o que não couber em 2 linhas vira "+N" (ajustarEtiquetas)
   function codigosConcorrencia(p) {
     const vistos = new Set([normCod(p.c)]);
     const out = [];
-    const ehOem = (x) => /^\s*(OEM|C[ÓO]D(IGO)?\.?\s*ORIGINAL|ORIGINAL)\b/i.test(x.m || "");
+    const OEM = /^\s*(OEM|C[ÓO]D(IGO)?\.?\s*ORIGINAL|ORIGINAL)\b\s*[-:/]?\s*/i;
+    const ehOem = (x) => OEM.test(x.m || "");
+    // nome da marca para o balão: sem " PN", " PN_2" e "CROSS REFERENCIAS - "; o OEM vira "Original" (com a montadora, se vier)
+    const marca = (x) => {
+      const m = String(x.m || "").trim();
+      if (ehOem(x)) { const resto = m.replace(OEM, "").trim(); return "Original" + (resto ? " " + bonito(resto) : ""); }
+      const limpa = m.replace(/^CROSS\s+REFER[ÊE]NCIAS?\s*-\s*/i, "").replace(/\s+PN(_\d+)?$/i, "").trim();
+      return limpa ? bonito(limpa, true) : "";
+    };
     const refs = (p.r || []).filter((x) => x.c && !/^BAP/i.test(x.m || ""));
     for (const x of [...refs.filter(ehOem), ...refs.filter((x) => !ehOem(x))]) {
       // vários códigos no mesmo campo: " / ", ",", ";", "|", quebra de linha ou " OU " (a "/" grudada fica: CU20006/1)
@@ -463,7 +483,7 @@
         const k = normCod(c);
         if (k.length < 3 || vistos.has(k)) continue;
         vistos.add(k);
-        out.push(c);
+        out.push({ c, m: marca(x) });
       }
     }
     return out;
@@ -472,8 +492,40 @@
     const cods = codigosConcorrencia(p);
     if (!cods.length) return "";
     const extra = Math.max(0, cods.length - MAX_ETIQUETAS);
-    return `<span class="refs" data-extra="${extra}"><span class="vh">Referências: </span>${cods.slice(0, MAX_ETIQUETAS).map((c) => `<span class="ref">${esc(c)}</span>`).join("")}<span class="ref ref-mais"${extra ? "" : " hidden"}>+${extra}</span></span>`;
+    return `<div class="refs" data-extra="${extra}"><span class="refs-rot">Ref. Cruzada:</span>${cods.slice(0, MAX_ETIQUETAS).map(({ c, m }) =>
+      `<button type="button" class="ref" data-m="${esc(m || "Marca não informada")}" aria-label="Referência cruzada: ${esc((m ? m + " " : "") + c)}"><span>${esc(c)}</span></button>`).join("")}<span class="ref ref-mais"${extra ? "" : " hidden"}>+${extra}</span></div>`;
   }
+  // balão da marca da referência cruzada: um só na página, posto junto da etiqueta (mouse, foco ou toque)
+  let BALAO = null, BALAO_DE = null;
+  function mostrarBalao(bt) {
+    if (!BALAO) {
+      BALAO = document.createElement("div");
+      BALAO.id = "balao-ref"; BALAO.className = "balao"; BALAO.setAttribute("role", "tooltip"); BALAO.hidden = true;
+      document.body.appendChild(BALAO);
+    }
+    if (BALAO_DE && BALAO_DE !== bt) BALAO_DE.removeAttribute("aria-describedby");
+    BALAO_DE = bt;
+    BALAO.textContent = bt.dataset.m;
+    BALAO.hidden = false;
+    bt.setAttribute("aria-describedby", "balao-ref");
+    const r = bt.getBoundingClientRect(), b = BALAO.getBoundingClientRect();
+    const x = Math.max(8, Math.min(window.innerWidth - b.width - 8, r.left + r.width / 2 - b.width / 2));
+    const y = r.top - b.height - 8 < 8 ? r.bottom + 8 : r.top - b.height - 8;
+    BALAO.style.left = x + window.scrollX + "px"; BALAO.style.top = y + window.scrollY + "px";
+  }
+  function esconderBalao() {
+    if (!BALAO || BALAO.hidden) return;
+    BALAO.hidden = true;
+    if (BALAO_DE) BALAO_DE.removeAttribute("aria-describedby");
+    BALAO_DE = null;
+  }
+  document.addEventListener("mouseover", (ev) => { const b = ev.target.closest && ev.target.closest(".refs .ref:not(.ref-mais)"); if (b) mostrarBalao(b); });
+  document.addEventListener("mouseout", (ev) => { const b = ev.target.closest && ev.target.closest(".refs .ref:not(.ref-mais)"); if (b && b === BALAO_DE && document.activeElement !== b) esconderBalao(); });
+  document.addEventListener("focusin", (ev) => { if (ev.target.matches(".refs .ref")) mostrarBalao(ev.target); else esconderBalao(); });
+  document.addEventListener("click", (ev) => { const b = ev.target.closest(".refs .ref:not(.ref-mais)"); if (b) mostrarBalao(b); else esconderBalao(); });
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && BALAO && !BALAO.hidden) esconderBalao(); });
+  window.addEventListener("scroll", esconderBalao, { passive: true });
+
   // Mostra as etiquetas que cabem em 2 linhas e troca o resto por "+N". Desempenho (revisão da T-0014): recebe só as
   // caixas que precisam (os cartões novos do "Carregar mais"; no resize, todas) e trabalha em lotes, sem alternar
   // leitura e escrita de layout por cartão: 1) escreve (mostra tudo), 2) lê todas as posições, 3) escreve (esconde e
@@ -544,15 +596,38 @@
       const partes = mem && mem.partes;
       const nome = mem && mem.placa ? "Placa: " + mem.placa : "Veículo: " + bonito(ve); // sem a placa: "Veículo: Honda Civic 2008"
       const info = partes ? [partes.marcaModelo, partes.ano, partes.cil, partes.versao].filter(Boolean) : [];
-      caixaVeiculo.innerHTML = `<span class="etq etq-placa"><span>${esc(nome)}</span><button type="button" aria-label="${mem && mem.placa ? "Tirar a placa e o veículo" : "Tirar o veículo"}">✕</button></span>`
-        + (info.length ? `<ul class="veiculo" aria-label="Veículo da placa">${info.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : "");
-      caixaVeiculo.hidden = false;
-      statusPlaca.hidden = true;
-      caixaVeiculo.querySelector("button").addEventListener("click", () => {
+      const tirar = (paraPlaca) => {
         const n = new URLSearchParams(pr); n.delete("ve");
-        FILTRO_FOCO = { y: window.scrollY };
+        FILTRO_FOCO = paraPlaca ? { y: 0, sel: "#campo-placa" } : { y: window.scrollY };
         irPara("/busca", n);
-      });
+      };
+      const completo = info.length ? info.join(" ") : bonito(ve);
+      const placaTxt = mem && mem.placa ? mem.placa : "";
+      if (SIM_V === "A") { // faixa de resumo acima da lista
+        const etqs = app.querySelector(".pagina-busca .etiquetas");
+        if (etqs) {
+          etqs.insertAdjacentHTML("afterend", `<div class="faixa-veiculo"><span>Peças para <b>${esc(completo)}</b>${placaTxt ? ` · Placa <b class="placa-txt">${esc(placaTxt)}</b>` : ""}</span><button type="button" class="faixa-x">Trocar veículo <span aria-hidden="true">✕</span></button></div>`);
+          app.querySelector(".faixa-x").addEventListener("click", () => tirar(true));
+        }
+      } else if (SIM_V === "B") { // cartão do veículo ao lado do quadro da busca
+        cartao.classList.add("com-veiculo");
+        cartao.insertAdjacentHTML("beforeend", `<aside class="cartao-veiculo" aria-label="Veículo da placa"><span class="cv-rot">Veículo${placaTxt ? " da placa" : ""}</span>
+          <b class="cv-nome">${esc(partes ? partes.marcaModelo : bonito(ve))}</b>
+          ${partes ? `<span class="cv-linha">${esc([partes.ano, partes.cil, partes.versao].filter(Boolean).join(" · "))}</span>` : ""}
+          ${placaTxt ? `<span class="cv-placa">Placa <b>${esc(placaTxt)}</b></span>` : ""}
+          <button type="button" class="cv-x">Trocar veículo <span aria-hidden="true">✕</span></button></aside>`);
+        cartao.querySelector(".cv-x").addEventListener("click", () => tirar(true));
+      } else if (SIM_V === "C") { // pílula dentro do campo da placa
+        campoPlaca.hidden = true;
+        campoPlaca.insertAdjacentHTML("afterend", `<div class="pilula-placa"><span>${placaTxt ? `<b>${esc(placaTxt)}</b> · ` : ""}${esc(completo)}</span><button type="button" aria-label="${placaTxt ? "Tirar a placa e o veículo" : "Tirar o veículo"}">✕</button></div>`);
+        cartao.querySelector(".pilula-placa button").addEventListener("click", () => tirar(true));
+      } else {
+        caixaVeiculo.innerHTML = `<span class="etq etq-placa"><span>${esc(nome)}</span><button type="button" aria-label="${mem && mem.placa ? "Tirar a placa e o veículo" : "Tirar o veículo"}">✕</button></span>`
+          + (info.length ? `<ul class="veiculo" aria-label="Veículo da placa">${info.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : "");
+        caixaVeiculo.hidden = false;
+        caixaVeiculo.querySelector("button").addEventListener("click", () => tirar(false));
+      }
+      statusPlaca.hidden = SIM_V !== "A";
     }
     const aviso = (html) => { statusPlaca.hidden = false; statusPlaca.innerHTML = html; };
     campoPlaca.addEventListener("input", () => { campoPlaca.value = campoPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7); });
@@ -741,6 +816,7 @@
       <div class="lista"></div><div class="mais"></div></div>`;
     montarBusca(document.getElementById("busca-topo"), pr);
     montarFiltros(pr, todos);
+    if (SIM_F) arrumarFiltros(pr, todos);
     const lista = app.querySelector(".lista");
     const mais = app.querySelector(".mais");
     // insere os próximos cartões e ajusta as etiquetas só deles (a volta à lista insere todos de uma vez)
@@ -765,7 +841,9 @@
     const ff = FILTRO_FOCO; FILTRO_FOCO = null;
     if (ff && !volta) {
       let alvo = null;
-      if (ff.k) {
+      if (ff.painel) abrirPainel();
+      if (ff.sel) alvo = app.querySelector(ff.sel);
+      else if (ff.k) {
         const box = app.querySelector(`.filtro[data-k="${ff.k}"]`);
         if (box) { abrirFiltro(box); alvo = [...box.querySelectorAll("input")].find((x) => x.value === ff.v) || box.querySelector(".filtro-bt"); }
       } else alvo = app.querySelector(".etiquetas:not([hidden]) button") || app.querySelector(".barra-filtros .filtro-bt") || app.querySelector("#campo-q");
@@ -783,7 +861,7 @@
   const ROT_FILTRO = { si: "Sistema", fa: "Família", li: "Linha", ca: "Categoria" };
   let FILTRO_FOCO = null; // { k, v, y }: o que reabrir e focar depois de refazer a lista
   function abrirFiltro(box) {
-    fecharFiltros(box);
+    if (!FILTROS_FIXOS) fecharFiltros(box);
     box.querySelector(".filtro-lista").hidden = false;
     box.querySelector(".filtro-bt").setAttribute("aria-expanded", "true");
   }
@@ -794,7 +872,7 @@
       b.querySelector(".filtro-bt").setAttribute("aria-expanded", "false");
     }
   }
-  document.addEventListener("click", (ev) => { if (!ev.target.closest(".filtro")) fecharFiltros(); });
+  document.addEventListener("click", (ev) => { if (!FILTROS_FIXOS && !ev.target.closest(".filtro")) fecharFiltros(); });
   function montarFiltros(pr, todos) {
     const barra = app.querySelector(".barra-filtros");
     barra.innerHTML = Object.keys(ROT_FILTRO).map((k) => {
@@ -811,8 +889,13 @@
     }).join("");
     for (const box of barra.querySelectorAll(".filtro")) {
       const k = box.dataset.k, bt = box.querySelector(".filtro-bt");
-      bt.addEventListener("click", () => { if (bt.getAttribute("aria-expanded") === "true") fecharFiltros(); else { abrirFiltro(box); const c = box.querySelector("input"); if (c) c.focus(); } });
-      box.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && bt.getAttribute("aria-expanded") === "true") { ev.preventDefault(); fecharFiltros(); bt.focus(); } });
+      bt.addEventListener("click", () => {
+        const aberto = bt.getAttribute("aria-expanded") === "true";
+        if (FILTROS_FIXOS) { box.querySelector(".filtro-lista").hidden = aberto; bt.setAttribute("aria-expanded", String(!aberto)); return; } // recolhe só este grupo
+        if (aberto) fecharFiltros(); else { abrirFiltro(box); const c = box.querySelector("input"); if (c) c.focus(); }
+      });
+      box.addEventListener("keydown", (ev) => { if (!FILTROS_FIXOS && ev.key === "Escape" && bt.getAttribute("aria-expanded") === "true") { ev.preventDefault(); fecharFiltros(); bt.focus(); } });
+      if (FILTROS_FIXOS) { box.querySelector(".filtro-lista").hidden = false; bt.setAttribute("aria-expanded", "true"); }
       box.addEventListener("change", (ev) => {
         const n = new URLSearchParams(pr);
         const vals = [...box.querySelectorAll("input:checked")].map((x) => x.value);
@@ -823,7 +906,7 @@
           const manter = n.getAll("fa").filter((v) => fas.has(v));
           n.delete("fa"); manter.forEach((v) => n.append("fa", v));
         }
-        FILTRO_FOCO = { k, v: ev.target.value, y: window.scrollY };
+        FILTRO_FOCO = { k, v: ev.target.value, y: window.scrollY, painel: painelAberto() };
         irPara("/busca", n);
       });
     }
@@ -847,6 +930,77 @@
       FILTRO_FOCO = { y: window.scrollY };
       irPara("/busca", n);
     });
+  }
+
+  // ---------- SIMULAÇÃO dos filtros (?f=A|B|C) ----------
+  let LADO_RECOLHIDO = false;
+  const painelAberto = () => document.documentElement.classList.contains("filtros-abertos") || !!app.querySelector("dialog.painel-c[open]");
+  function abrirPainel() {
+    const dlg = app.querySelector("dialog.painel-c");
+    if (dlg) { if (!dlg.open) dlg.showModal(); return; }
+    if (SIM_F === "B") { document.documentElement.classList.add("filtros-abertos"); const b = app.querySelector(".bt-filtrar"); if (b) b.setAttribute("aria-expanded", "true"); }
+  }
+  function fecharPainel() {
+    const dlg = app.querySelector("dialog.painel-c");
+    if (dlg && dlg.open) dlg.close();
+    document.documentElement.classList.remove("filtros-abertos");
+    const b = app.querySelector(".bt-filtrar");
+    if (b) { b.setAttribute("aria-expanded", "false"); b.focus(); }
+  }
+  function arrumarFiltros(pr, todos) {
+    const barra = app.querySelector(".barra-filtros");
+    const nMarcados = Object.keys(ROT_FILTRO).reduce((t, k) => t + pr.getAll(k).filter(Boolean).length, 0);
+    const rotFiltrar = "Filtrar" + (nMarcados ? ` (${nMarcados})` : "");
+    if (SIM_F === "A") { // barra compacta dentro do quadro da busca, embaixo dos campos
+      const cartao = app.querySelector("#busca-topo .cartao-busca");
+      barra.classList.add("barra-no-quadro");
+      cartao.appendChild(barra);
+      return;
+    }
+    const topo = app.querySelector(".res-topo");
+    if (SIM_F === "B") { // coluna lateral fina e recolhível; no celular, painel de baixo para cima
+      const grade = document.createElement("div");
+      grade.className = "res-grade" + (LADO_RECOLHIDO ? " recolhido" : "");
+      grade.innerHTML = `<aside class="lado-filtros" id="painel-filtros" aria-label="Filtros">
+        <div class="painel-cab"><b>Filtros</b>
+          <button type="button" class="painel-recolher" aria-expanded="${!LADO_RECOLHIDO}" aria-controls="painel-corpo" aria-label="${LADO_RECOLHIDO ? "Mostrar" : "Recolher"} os filtros">${LADO_RECOLHIDO ? "›" : "‹"}</button>
+          <button type="button" class="painel-ok">Ver ${fmt(todos.length)} produto${todos.length === 1 ? "" : "s"}</button></div>
+        <div class="painel-corpo" id="painel-corpo"></div></aside><div class="res-conteudo"></div>`;
+      grade.querySelector(".painel-corpo").appendChild(barra);
+      const conteudo = grade.querySelector(".res-conteudo");
+      const etqs = app.querySelector(".pagina-busca .etiquetas");
+      const depois = [...app.querySelector(".pagina-busca").children].filter((el) => el.compareDocumentPosition(etqs) & Node.DOCUMENT_POSITION_PRECEDING); // inclui a faixa do veículo (?v=A), que fica no alto da coluna da lista
+      etqs.after(grade);
+      depois.forEach((el) => conteudo.appendChild(el));
+      topo.insertAdjacentHTML("beforeend", `<button type="button" class="bt bt-claro bt-mini bt-filtrar" aria-expanded="false" aria-controls="painel-filtros">${rotFiltrar}</button>`);
+      topo.querySelector(".bt-filtrar").addEventListener("click", abrirPainel);
+      grade.querySelector(".painel-ok").addEventListener("click", fecharPainel);
+      grade.querySelector(".painel-recolher").addEventListener("click", () => {
+        LADO_RECOLHIDO = !LADO_RECOLHIDO;
+        grade.classList.toggle("recolhido", LADO_RECOLHIDO);
+        const b = grade.querySelector(".painel-recolher");
+        b.textContent = LADO_RECOLHIDO ? "›" : "‹";
+        b.setAttribute("aria-expanded", String(!LADO_RECOLHIDO));
+        b.setAttribute("aria-label", (LADO_RECOLHIDO ? "Mostrar" : "Recolher") + " os filtros");
+        ajustarEtiquetas(app.querySelectorAll(".lista .refs"));
+      });
+      return;
+    }
+    // C: botão "Filtrar (n)" ao lado do título; painel por cima (computador: à direita; celular: tela cheia)
+    topo.querySelector("h1").insertAdjacentHTML("afterend", `<button type="button" class="bt bt-claro bt-mini bt-filtrar" aria-haspopup="dialog">${rotFiltrar}</button>`);
+    const dlg = document.createElement("dialog");
+    dlg.className = "painel-c";
+    dlg.setAttribute("aria-labelledby", "painel-c-tit");
+    dlg.innerHTML = `<div class="painel-cab"><b id="painel-c-tit">Filtros</b><button type="button" class="painel-x" aria-label="Fechar os filtros">✕</button></div>
+      <div class="painel-corpo"></div>
+      <div class="painel-pe"><button type="button" class="bt painel-ok">Ver ${fmt(todos.length)} produto${todos.length === 1 ? "" : "s"}</button></div>`;
+    dlg.querySelector(".painel-corpo").appendChild(barra);
+    app.querySelector(".pagina-busca").appendChild(dlg);
+    topo.querySelector(".bt-filtrar").addEventListener("click", abrirPainel);
+    dlg.querySelector(".painel-x").addEventListener("click", fecharPainel);
+    dlg.querySelector(".painel-ok").addEventListener("click", fecharPainel);
+    dlg.addEventListener("click", (ev) => { if (ev.target === dlg) fecharPainel(); });
+    dlg.addEventListener("cancel", (ev) => { ev.preventDefault(); fecharPainel(); });
   }
 
   function listaCodigos(txt) {
@@ -1044,6 +1198,7 @@
       fecharJanela(false);
       if (voltouNaLista) { ROTA_ATUAL = location.hash; return; }
     }
+    document.documentElement.classList.remove("filtros-abertos"); // painel de filtros da simulação (?f=B no celular)
     if (caminho !== "/busca") VEICULO_PLACA = null; // tela fora da busca (início, sobre, página do produto): a placa some
     if (ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && ehProduto) VOLTA_LISTA = { hash: ROTA_ATUAL, n: ESTADO_LISTA.n(), y: window.scrollY, cod };
     ESTADO_LISTA = null;
