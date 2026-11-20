@@ -1323,6 +1323,7 @@
     const { dlg, cod } = JANELA;
     JANELA = null;
     dlg.close();
+    dlg.innerHTML = ""; // a janela fechada fica vazia: não sobra produto para o PDF
     document.documentElement.classList.remove("com-janela");
     document.title = "Catálogo BAP · Componentes de qualidade";
     const quem = LINK_CARTAO && LINK_CARTAO.isConnected ? LINK_CARTAO : linkDoCartao(cod);

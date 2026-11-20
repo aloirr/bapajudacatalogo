@@ -256,7 +256,7 @@ dialog.zoom::backdrop { background: transparent; }
 
 /* aplicação em tabela (R-20261120-130900): rola dentro dela no celular, sem rolar a página de lado */
 .tab-rola { overflow-x: auto; max-width: 100%; }
-table.tab-veiculos { min-width: 420px; }
+table.tab-veiculos { min-width: 0; } /* sem rolagem na janela; no celular (até 480 px) vai a lista */
 table.tab-veiculos th { width: auto; color: var(--texto-2); font-weight: 600; white-space: nowrap; }
 table.tab-veiculos thead th { border-bottom: 1px solid var(--linha); }
 table.tab-veiculos td { white-space: nowrap; }
@@ -379,6 +379,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .topo, .rodape, .toast, .nao-imprime, .acoes, .selos { display: none !important; }
   html.com-janela main { display: none; }
   dialog.janela { position: static; display: block; width: auto; max-width: none; height: auto; max-height: none; margin: 0; padding: 0; border: 0; box-shadow: none; background: var(--branco); overflow: visible; }
+  dialog.janela:not([open]) { display: none !important; } /* só o produto aberto: a janela fechada não vai para o PDF */
   dialog.janela::backdrop { display: none; }
   .janela-corpo { overflow: visible; padding: 0; }
   .pagina-produto { max-width: none; padding: 0; }
