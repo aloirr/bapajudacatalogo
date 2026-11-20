@@ -12,7 +12,11 @@
   --sombra: 0 10px 30px rgba(21, 21, 21, .10);
   --borda-campo: #CFD5D1; /* borda dos campos e das listas */
   --veu: rgba(21, 21, 21, .55); /* fundo por trás da janela e do painel */
-  --verde-txt: #2E6B1F; /* texto verde sobre --verde-claro com contraste AA (5,8:1) */
+  --verde-txt: #2E6B1F; /* texto verde com contraste AA (6,5:1 no branco, 5,9:1 no --fundo, 5,8:1 no --verde-claro): links,
+     .bt-claro ("+ Detalhes", "Salvar em PDF"), "Ver aplicação completa", "Limpar tudo", .selo.v e o anel de foco */
+  --sombra-cod: 0 1px 3px rgba(21, 21, 21, .25); /* código BAP sobre a foto do cartão */
+  --sombra-janela: 0 20px 60px rgba(21, 21, 21, .35); /* janela do produto */
+  --contorno-neutro: inset 0 0 0 1px var(--borda-campo); /* linha neutra (opção A, R-20261120-131800): filtro marcado, etiqueta e item relacionado */
   --t: .7; /* texto da página e da janela do produto 30% menor (T-0014), com piso de 12 px (--min) */
   --min: 12px;
   --zoom-fundo: rgba(21, 21, 21, .92); /* fundo da foto ampliada */
@@ -34,9 +38,9 @@
 html { scroll-behavior: smooth; }
 body { margin: 0; font-family: Poppins, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--texto); background: var(--fundo); font-size: 15px; line-height: 1.5; }
 img { max-width: 100%; display: block; }
-a { color: var(--verde-esc); }
+a { color: var(--verde-txt); }
 button, input, select { font: inherit; }
-:focus-visible { outline: 3px solid var(--verde); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--verde-txt); outline-offset: 2px; }
 main { min-height: 60vh; outline: none; }
 main:focus, main:focus-visible { outline: none; }
 .carregando { padding: 120px 16px; text-align: center; color: var(--texto-2); }
@@ -49,7 +53,7 @@ main:focus, main:focus-visible { outline: none; }
 .marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-2); border-left: 1px solid var(--linha); padding-left: 10px; }
 .menu { display: flex; gap: 22px; }
 .menu a { text-decoration: none; color: var(--texto); font-weight: 500; font-size: 14px; }
-.menu a:hover { color: var(--verde-esc); }
+.menu a:hover { color: var(--verde-txt); }
 
 /* hero */
 .hero { position: relative; overflow: hidden; color: var(--branco);
@@ -75,17 +79,16 @@ main:focus, main:focus-visible { outline: none; }
 .bq-campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .campo-rot { font-size: 12px; font-weight: 600; color: var(--texto-2); text-transform: uppercase; letter-spacing: .04em; }
 .bq-campo input { width: 100%; height: 44px; border: 1px solid var(--borda-campo); border-radius: 8px; padding: 0 12px; font: inherit; font-size: 15px; color: var(--texto); background: var(--branco); }
-.bq-campo input:focus { border-color: var(--verde); outline: none; box-shadow: 0 0 0 3px rgba(98,187,71,.25); }
 .bq-placa input { text-transform: uppercase; letter-spacing: .06em; }
 .bq-placa input::placeholder { text-transform: none; letter-spacing: 0; }
 .bq-bt { padding-top: 22px; } /* alinha o botão com os campos (altura do rótulo) */
 .bq-bt .bt { height: 44px; padding: 0 26px; }
 .status-placa { margin: 2px 0 0; font-size: 12px; line-height: 1.35; color: var(--texto-2); }
 .status-placa[hidden] { display: none; }
-.bt { height: 48px; padding: 0 26px; border-radius: 8px; border: 2px solid var(--verde); background: var(--verde); color: var(--branco); font-weight: 600; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-.bt:hover { background: var(--verde-esc); border-color: var(--verde-esc); }
-.bt-claro { background: var(--branco); color: var(--verde-esc); }
-.bt-claro:hover { background: var(--verde-claro); color: var(--verde-esc); }
+.bt { height: 48px; padding: 0 26px; border-radius: 8px; border: 2px solid var(--verde); background: var(--verde); color: var(--escuro); font-weight: 600; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.bt:hover { background: var(--verde-txt); border-color: var(--verde-txt); color: var(--branco); } /* 6,5:1 (o --escuro no --verde-esc dava 4,49:1) */
+.bt-claro { background: var(--branco); color: var(--verde-txt); } /* a borda continua --verde */
+.bt-claro:hover { background: var(--verde-claro); color: var(--verde-txt); }
 .bt-mini { height: 38px; padding: 0 16px; font-size: 14px; }
 
 /* blocos */
@@ -105,7 +108,7 @@ main:focus, main:focus-visible { outline: none; }
 .novidade div.txt { padding: 16px 18px 20px; }
 .novidade h3 { margin: 0 0 4px; font-size: 17px; }
 .novidade p { margin: 0; color: var(--texto-2); font-size: 14px; }
-.novidade .ver { color: var(--verde-esc); font-weight: 600; font-size: 14px; margin-top: 10px; display: inline-block; }
+.novidade .ver { color: var(--verde-txt); font-weight: 600; font-size: 14px; margin-top: 10px; display: inline-block; }
 
 /* resultados */
 .pagina-busca { max-width: var(--largura); margin: 0 auto; padding: 0 16px 40px; }
@@ -120,7 +123,7 @@ main:focus, main:focus-visible { outline: none; }
 .filtro { border-bottom: 1px solid var(--linha); }
 .filtro:last-child { border-bottom: 0; }
 .filtro-bt { width: 100%; height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px; border: 0; background: none; color: var(--texto); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-.filtro-bt.ativo { background: var(--branco); color: var(--escuro); box-shadow: inset 0 0 0 1px var(--borda-campo); } /* marcado: linha neutra (opção A, R-20261120-131800) */
+.filtro-bt.ativo { background: var(--branco); color: var(--escuro); box-shadow: var(--contorno-neutro); } /* marcado: linha neutra */
 .filtro-bt b { font-weight: 600; color: var(--texto-2); } /* "Linha (1)": o número ao lado do nome */
 .filtro-bt .seta { font-size: 12px; color: var(--texto-2); }
 .filtro-bt[aria-expanded="true"] .seta { transform: rotate(180deg); }
@@ -133,11 +136,11 @@ main:focus, main:focus-visible { outline: none; }
 /* etiquetas abaixo da busca: o termo e os filtros marcados, cada um com o X (a placa fica na faixa do veículo) */
 .etiquetas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 0; }
 .etiquetas[hidden] { display: none; }
-.etq { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; min-height: 36px; padding: 0 2px 0 12px; border-radius: 999px; background: var(--branco); color: var(--escuro); box-shadow: inset 0 0 0 1px var(--borda-campo); font-size: 13px; font-weight: 500; } /* neutra (opção A, R-20261120-131800) */
+.etq { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; min-height: 36px; padding: 0 2px 0 12px; border-radius: 999px; background: var(--branco); color: var(--escuro); box-shadow: var(--contorno-neutro); font-size: 13px; font-weight: 500; } /* linha neutra */
 .etq > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .etq button { width: 44px; height: 44px; margin: -4px -2px -4px 0; border: 0; border-radius: 50%; background: none; color: var(--texto-2); font-size: 14px; cursor: pointer; flex: none; }
 .etq button:hover { background: var(--fundo); color: var(--escuro); }
-.limpar-tudo { height: 44px; border: 0; background: none; color: var(--verde-esc); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0 8px; }
+.limpar-tudo { height: 44px; border: 0; background: none; color: var(--verde-txt); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0 8px; }
 .lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(var(--cartao-min), calc((100% - 4 * 12px) / 5)), 1fr)); gap: 12px; } /* no máximo 5 por linha */
 .item { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; text-decoration: none; color: var(--texto); display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
 .item:hover { border-color: var(--verde); box-shadow: var(--sombra); }
@@ -148,15 +151,15 @@ main:focus, main:focus-visible { outline: none; }
 .item .foto .foto-zoom { border-radius: 0; }
 .item .foto .foto-zoom:focus-visible { outline-offset: -3px; }
 .item-link { display: flex; flex-direction: column; gap: 2px; color: inherit; text-decoration: none; border-radius: 6px; position: relative; }
-.item-link::before { content: ""; position: absolute; inset: -6px 0; } /* toque com 44 px sem abrir vão */
-.item-link:hover .desc { color: var(--verde-esc); text-decoration: underline; }
+.item-link::before { content: ""; position: absolute; inset: -7px 0; } /* toque com 44 px (31 + 14) sem abrir vão */
+.item-link:hover .desc { color: var(--verde-txt); text-decoration: underline; }
 /* altura padrão do cartão (R-20261120-124800): título e aplicação com 2 linhas sempre (corte com "…"), as referências
    com 1 linha (2 no celular) e o "+ Detalhes" no rodapé, na mesma posição em todos */
 .item-pe { margin-top: auto; padding-top: 2px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .bt-detalhes { width: 100%; height: 34px; padding: 0 10px; font-size: 13px; justify-content: center; position: relative; }
 .bt-detalhes::before { content: ""; position: absolute; inset: -6px -2px -5px; } /* toque com 44 px (34 + 10) */
 /* código BAP sobre a foto, no canto inferior direito (R-20261120-122300): não é botão; o clique passa para a foto */
-.item .foto-cod { position: absolute; right: 4px; bottom: 4px; padding: 1px 5px; border-radius: 5px; background: var(--escuro); color: var(--branco) !important; font-size: 12px !important; font-weight: 700 !important; line-height: 1.3; letter-spacing: 0; pointer-events: none; box-shadow: 0 1px 3px rgba(21, 21, 21, .25); }
+.item .foto-cod { position: absolute; right: 4px; bottom: 4px; padding: 1px 5px; border-radius: 5px; background: var(--escuro); color: var(--branco) !important; font-size: 12px !important; font-weight: 700 !important; line-height: 1.3; letter-spacing: 0; pointer-events: none; box-shadow: var(--sombra-cod); }
 .item .desc { height: 2.6em; font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--texto); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .item .apl { height: 2.6em; font-size: 12px; line-height: 1.3; color: var(--texto-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .item .refs { display: flex; flex-wrap: wrap; gap: 3px; position: relative; min-width: 0; height: 22px; overflow: hidden; } /* 1 linha (2 no celular) */
@@ -173,7 +176,7 @@ main:focus, main:focus-visible { outline: none; }
 .item .sem-foto { gap: 2px; font-size: 12px; line-height: 1.2; padding-bottom: 20px; align-content: start; padding-top: 8px; } /* o "Foto em breve" sobe; o código fica embaixo, à direita */
 .item .sem-foto img { width: 24px !important; }
 .item .ref-mais { background: none; border-color: transparent; color: var(--texto-2); padding-left: 2px; padding-right: 2px; } /* "+N" discreto (R-20261120-122300) */
-.sem-foto { width: 100%; height: 100%; display: grid; place-items: center; color: #A8B0AB; font-size: 12px; text-align: center; gap: 6px; align-content: center; }
+.sem-foto { width: 100%; height: 100%; display: grid; place-items: center; color: var(--texto-2); font-size: 12px; text-align: center; gap: 6px; align-content: center; }
 .sem-foto img { width: 44px !important; height: auto !important; opacity: .35; padding: 0 !important; }
 .mais { display: flex; justify-content: center; margin: 24px 0 0; }
 .vazio { background: var(--branco); border: 1px dashed var(--borda-campo); border-radius: var(--raio); padding: 40px 20px; text-align: center; color: var(--texto-2); }
@@ -186,7 +189,7 @@ main:focus, main:focus-visible { outline: none; }
 .bt-voltar { height: 44px; padding: 0 16px; font-size: 14px; }
 .trilha { font-size: max(var(--min), calc(13px * var(--t))); color: var(--texto-2); display: flex; gap: 6px; flex-wrap: wrap; }
 .trilha a { color: var(--texto-2); text-decoration: none; }
-.trilha a:hover { color: var(--verde-esc); }
+.trilha a:hover { color: var(--verde-txt); }
 /* foto pequena ao lado das informações (T-0014); clicar amplia (dialog.zoom) */
 .prod { display: grid; grid-template-columns: var(--foto-pc) minmax(0, 1fr); gap: 24px; align-items: start; }
 .prod-foto-box { position: sticky; top: 84px; }
@@ -202,7 +205,7 @@ main:focus, main:focus-visible { outline: none; }
 .prod-info .desc { font-size: max(var(--min), calc(17px * var(--t))); font-weight: 500; margin: 2px 0 10px; }
 .selos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
 .selo { background: var(--fundo); border: 1px solid var(--linha); border-radius: 999px; padding: 2px 10px; font-size: max(var(--min), calc(12px * var(--t))); font-weight: 500; color: var(--texto-2); }
-.selo.v { background: var(--verde-claro); border-color: transparent; color: var(--verde-esc); }
+.selo.v { background: var(--verde-claro); border-color: transparent; color: var(--verde-txt); }
 .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
 .acoes .bt { height: 44px; font-size: 14px; }
 /* aplicação e, ao lado, referências e ficha técnica (T-0014) */
@@ -222,7 +225,7 @@ table.t td.c { font-weight: 600; font-variant-numeric: tabular-nums; }
 /* "Ofereça junto" e "Itens parecidos": código em negrito e descrição, na linha neutra (opção A); 2 colunas no
    computador, 1 no celular */
 .itens-rel { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.item-rel { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-height: 44px; padding: 6px 10px; border-radius: 8px; background: var(--branco); color: var(--escuro); box-shadow: inset 0 0 0 1px var(--borda-campo); text-decoration: none; }
+.item-rel { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-height: 44px; padding: 6px 10px; border-radius: 8px; background: var(--branco); color: var(--escuro); box-shadow: var(--contorno-neutro); text-decoration: none; }
 a.item-rel:hover { background: var(--fundo); }
 .item-rel b { font-size: max(var(--min), calc(14px * var(--t))); font-weight: 700; font-variant-numeric: tabular-nums; }
 .item-rel span { font-size: max(var(--min), calc(13px * var(--t))); color: var(--texto); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -232,7 +235,7 @@ a.item-rel:hover { background: var(--fundo); }
 
 /* janela do produto (T-0014): no computador e no celular */
 html.com-janela { overflow: hidden; }
-dialog.janela { width: min(1120px, calc(100vw - 48px)); max-width: none; max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: var(--raio); box-shadow: 0 20px 60px rgba(21, 21, 21, .35); background: var(--fundo); color: var(--texto); }
+dialog.janela { width: min(1120px, calc(100vw - 48px)); max-width: none; max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: var(--raio); box-shadow: var(--sombra-janela); background: var(--fundo); color: var(--texto); }
 dialog.janela[open] { display: flex; flex-direction: column; }
 dialog.janela::backdrop { background: var(--veu); }
 .janela-barra { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px 4px 20px; background: var(--branco); border-bottom: 1px solid var(--linha); flex: none; }
@@ -270,7 +273,7 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
   .lista-veiculos li > span { display: block; color: var(--texto-2); }
 }
 .apl-completa { margin-top: 8px; }
-.apl-completa summary { cursor: pointer; color: var(--verde-esc); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+.apl-completa summary { cursor: pointer; color: var(--verde-txt); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
 
 /* sobre */
 .texto-pagina { max-width: 820px; margin: 0 auto; padding: 40px 16px; }
@@ -386,7 +389,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .produto-conteudo { font-size: 8.5pt; line-height: 1.3; }
   .so-impressao { display: block; }
   .cab-pdf { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--verde); padding-bottom: 2mm; margin-bottom: 4mm; }
-  .cab-pdf img { height: 10mm; width: auto; }
+  .cab-pdf img { height: 12mm; width: auto; }
   .cab-pdf span { font-size: 8pt; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-2); }
   .prod { display: grid; grid-template-columns: 46mm minmax(0, 1fr); grid-template-areas: "foto cab" "foto tab" "apl apl"; gap: 3mm 5mm; align-items: start; }
   .prod-info, .prod-dados { display: contents; }
@@ -412,12 +415,11 @@ dialog.painel-c::backdrop { background: var(--veu); }
   table.t { font-size: 7.5pt; line-height: 1.25; }
   table.t th, table.t td { padding: .4mm 1.2mm; }
   table.t th { width: 46%; }
-  .tab-rola { overflow: visible; }
+  .tab-rola { display: block !important; overflow: visible; } /* no PDF vai a tabela, mesmo no celular */
   table.tab-veiculos { min-width: 0; }
   table.tab-veiculos th { width: auto; }
   .apl-completa { display: none; } /* no PDF vai a tabela */
   .item-rel { min-height: 0; padding: 1mm 2mm; } /* no PDF: código e descrição, sem link */
   .lista-veiculos { display: none !important; }
-  .tab-rola { display: block !important; }
   .rod-pdf { margin-top: 5mm; padding-top: 2mm; border-top: 1px solid var(--linha); font-size: 7.5pt; color: var(--texto-2); }
 }
