@@ -48,7 +48,7 @@ before(async () => {
 after(() => api.close());
 
 // ---------- catálogo falso (simula o site/data/produtos.json publicado) ----------
-const CODIGOS = ['AMT7183', 'CXD13062', 'CXD13027', 'ROL3204-2RS', 'ROL2780/2720', 'TER5597000', 'SAIU0001'];
+const CODIGOS = ['AMT7183', 'CXD13062', 'CXD13027', 'ROL3204-2RS', 'ROL2780/2720', 'TER5597000', 'PST0001', 'PST0002', 'PST0003', 'PST0004', 'SAIU0001'];
 let catalogoUrl;
 let catalogoSrv;
 before(async () => {
@@ -358,7 +358,7 @@ async function esperarLog(s, re) {
 }
 async function esperarCatalogo(s) {
   await esperarLog(s, /catalogo (ok|indisponivel)/);
-  assert.match(s.logs(), /catalogo ok 6\b/);
+  assert.match(s.logs(), /catalogo ok 10\b/);
 }
 // Os limites (placa e contador) usam a janela do minuto do relógio: não começa nos últimos 8 s do minuto.
 async function longeDaVirada() {
@@ -437,9 +437,10 @@ test('contar: limite de 30 por IP e 120 no serviço, por minuto, com 429 e Retry
   await s.parar();
 });
 
-test('mais-vistos: janela de 7 dias, os 4 mais abertos, dias de 1 a 30', async () => {
+test('mais-vistos: janela de 7 dias, até 8 itens (10 códigos na janela), dias de 1 a 30', async () => {
   const dir = pastaTemp();
   fs.writeFileSync(path.join(dir, nomeDia(1)), JSON.stringify({ AMT7183: 5, CXD13062: 1 }));
+  fs.writeFileSync(path.join(dir, nomeDia(3)), JSON.stringify({ PST0001: 3, PST0002: 3, PST0003: 1, PST0004: 1, 'ROL2780/2720': 1 }));
   fs.writeFileSync(path.join(dir, nomeDia(6)), JSON.stringify({ CXD13027: 4, TER5597000: 2, 'ROL3204-2RS': 2 }));
   fs.writeFileSync(path.join(dir, nomeDia(7)), JSON.stringify({ CXD13062: 50 }));
   fs.writeFileSync(path.join(dir, nomeDia(20)), JSON.stringify({ SAIU0001: 99, TER5597000: 10 }));
@@ -449,16 +450,21 @@ test('mais-vistos: janela de 7 dias, os 4 mais abertos, dias de 1 a 30', async (
   const m = await maisVistos(s, 7);
   assert.equal(m.status, 200);
   assert.equal(m.cors, ORIGEM);
+  // 10 códigos distintos na janela: saem os 8 primeiros; o empate em 1 vai pela ordem do código.
   assert.deepEqual(m.corpo, {
-    total: 15,
-    itens: [{ codigo: 'AMT7183', n: 6 }, { codigo: 'CXD13027', n: 4 }, { codigo: 'ROL3204-2RS', n: 2 }, { codigo: 'TER5597000', n: 2 }],
+    total: 24,
+    itens: [
+      { codigo: 'AMT7183', n: 6 }, { codigo: 'CXD13027', n: 4 }, { codigo: 'PST0001', n: 3 }, { codigo: 'PST0002', n: 3 },
+      { codigo: 'ROL3204-2RS', n: 2 }, { codigo: 'TER5597000', n: 2 }, { codigo: 'CXD13062', n: 1 }, { codigo: 'PST0003', n: 1 },
+    ],
   });
+  assert.ok(!JSON.stringify(m.corpo).includes('PST0004') && !JSON.stringify(m.corpo).includes('ROL2780'), 'o 9º e o 10º ficam de fora');
   assert.deepEqual(await maisVistos(s), m, 'sem dias = 7');
   const m8 = await maisVistos(s, 8);
-  assert.equal(m8.corpo.total, 65);
+  assert.equal(m8.corpo.total, 74);
   assert.deepEqual(m8.corpo.itens[0], { codigo: 'CXD13062', n: 51 });
   const m30 = await maisVistos(s, 30);
-  assert.equal(m30.corpo.total, 75, 'código que saiu do catálogo não entra');
+  assert.equal(m30.corpo.total, 84, 'código que saiu do catálogo não entra');
   assert.ok(!JSON.stringify(m30.corpo).includes('SAIU0001'));
   assert.deepEqual((await maisVistos(s, 1)).corpo, { total: 1, itens: [{ codigo: 'AMT7183', n: 1 }] });
   for (const d of ['0', '31', '-1', 'abc', '7.5', '']) {

@@ -20,7 +20,7 @@ Serviço pequeno, em Node 18+ e **sem dependências**, que recebe a placa do sit
   - **[SUPOSIÇÃO: os números 30 e 120 são a confirmar com o Alexandre.]** O `Origin` **não é prova**: fora do navegador (curl, robô) qualquer um escreve o header que quiser. Ele só barra outro site de contar pelo navegador do visitante; contra quem quer inflar a contagem de fora, o que segura são os limites 30/120 por minuto e a lista de códigos do catálogo.
   - O site pode mandar sem `Content-Type` (vai como texto e não faz pré-checagem): `fetch(URL + '/contar', {method:'POST', body: JSON.stringify({codigo}), keepalive:true})`. Erro do contador nunca deve atrapalhar a página.
 - `GET /mais-vistos?dias=7` (sem `dias`, vale 7; aceita de 1 a 30): `{"total": N, "itens": [{"codigo":"AMT7183","n":12}, ...]}`.
-  - `total` é a soma das aberturas na janela; `itens` são os **4** códigos mais abertos (empate: ordem do código). A janela é hoje (dia de Manaus) e os `dias − 1` dias antes.
+  - `total` é a soma das aberturas na janela; `itens` traz **até 8** códigos, os mais abertos (empate: ordem do código; decisão do Alexandre em R-20261120-144530). A janela é hoje (dia de Manaus) e os `dias − 1` dias antes.
   - Código que saiu do catálogo não entra nem no total.
   - 400 `{"erro":"dias_invalido"}` · 403 com `Origin` de outro site. Sem `Origin` (curl) responde.
   - A regra "mostrar Destaques até haver 20 aberturas em 7 dias" fica no site: `total < 20` → Destaques.
