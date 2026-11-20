@@ -904,6 +904,10 @@
     "TODAS", "DIANT", "TRAS", "LINHA", "MOTOR", "GERACAO", "FASE", "SERIE", "VERSAO", "COM", "SEM", "ATE", "DIESEL", "FLEX",
     "GASOLINA", "TURBO", "AUT", "MEC", "WAGON", "VAN", "CARGO", "DUPLA", "SIMPLES", "CAB", "ESQ", "DIR", "SPORT", "CLASSIC",
     "AGRICOLA", "TRATOR", "ONIBUS", "CAMINHAO", "MICRO", "UTILITARIO", "MODELOS", "ANO", "ANOS", "APOS", "ANTES", "DESDE", "EM", "DIANTE"]);
+  // JSON antigo: a marca escrita na aplicação, com os apelidos ("VW - Gol" é Volkswagen, "GM - Corsa" é Chevrolet)
+  const RX_MARCA = new Map();
+  const nomesDaMarca = (vm) => [vm, ...String(APELIDOS[vm] || "").split(" ").filter(Boolean)];
+  const rxMarcaNaApl = (vm) => { if (!RX_MARCA.has(vm)) RX_MARCA.set(vm, new RegExp("(?:^|[^A-Z])(?:" + nomesDaMarca(vm).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\s*[-:]?\\s*([^·;(]+)", "g")); return RX_MARCA.get(vm); };
   const RX_PALAVRA = new Map();
   const temPalavra = (txt, w) => { if (!RX_PALAVRA.has(w)) RX_PALAVRA.set(w, new RegExp("(^|[^A-Z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "($|[^A-Z0-9])")); return RX_PALAVRA.get(w).test(txt); };
   // Campo "ve" da T-0017 ([fabricante, modelo, versão?]): quando o produto tem, a cascata usa ele; sem o campo (o JSON
@@ -920,7 +924,7 @@
     const ve = veDe(e);
     if (TEM_VE && !ve) return false;
     const hits = ve ? ve.filter((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo)) : null;
-    if (ve ? !hits.length : (!marcasDe(e).includes(v.vm) && !temPalavra(e.apl, v.vm)) || (v.vmo && !temPalavra(e.apl, v.vmo))) return false;
+    if (ve ? !hits.length : (!marcasDe(e).includes(v.vm) && !nomesDaMarca(v.vm).some((n) => temPalavra(e.apl, n))) || (v.vmo && !temPalavra(e.apl, v.vmo))) return false;
     if (v.va && !anoServe(e, v.va)) return false;
     if (v.vmt) { const m = motoresDe(e); if (m.length && !m.includes(v.vmt)) return false; }
     if (v.vv && hits) { const vs = hits.map((x) => x[2]).filter(Boolean); if (vs.length && !vs.includes(v.vv)) return false; }
@@ -950,11 +954,11 @@
       if (TEM_VE && !veDe(e)) continue;
       for (const m of marcasDe(e)) marcas.set(m, (marcas.get(m) || 0) + 1);
       const ve = veDe(e);
-      if (!v.vm || !(ve ? ve.some((x) => x[0] === v.vm) : marcasDe(e).includes(v.vm) || temPalavra(e.apl, v.vm))) continue;
+      if (!v.vm || !(ve ? ve.some((x) => x[0] === v.vm) : marcasDe(e).includes(v.vm) || nomesDaMarca(v.vm).some((n) => temPalavra(e.apl, n)))) continue;
       // modelo: do "ve" (T-0017) ou, sem ele, o que vem logo depois da marca na aplicação ("HONDA - Civic · ...",
       // "VW - Gol / Saveiro · ..."), 1ª palavra de cada pedaço (SIMULAÇÃO)
       const ws = new Set(ve ? ve.filter((x) => x[0] === v.vm).map((x) => x[1]) : []);
-      if (!ve) for (const mt of e.apl.matchAll(new RegExp("(?:^|[^A-Z])" + v.vm + "\\s*[-:]?\\s*([^·;(]+)", "g")))
+      if (!ve) for (const mt of e.apl.matchAll(rxMarcaNaApl(v.vm)))
         for (const pd of mt[1].split("/")) { const w = (pd.trim().match(/^[A-Z][A-Z0-9]+/) || [""])[0]; if (w.length >= 2 && !ehVersao(w) && !PARA_FORA.has(w) && w !== v.vm) ws.add(w); }
       for (const w of ws) modelos.set(w, (modelos.get(w) || 0) + 1);
       if (!v.vmo || !(ve ? ve.some((x) => x[0] === v.vm && x[1] === v.vmo) : temPalavra(e.apl, v.vmo))) continue;
@@ -999,9 +1003,9 @@
     const v = veiculoDaRota(pr);
     const op = opcoesVeiculo(v, pr);
     const mem = VEICULO_PLACA && VEICULO_PLACA.chave === chaveVeiculo(pr) ? VEICULO_PLACA : null;
-    const lista = (k, rot, todos, valor, ativo, fmtV) => `<label class="mv-campo"><span>${rot}</span>
+    const lista = (k, rot, todos, valor, ativo0, fmtV) => { const ativo = ativo0 && (op[k].length > 0 || !!valor); return `<label class="mv-campo"><span>${rot}</span>
       <select data-k="${k}"${ativo ? "" : " disabled"}><option value="">${ativo ? todos : "—"}</option>${ativo ? op[k].map(([x, n]) =>
-        `<option value="${esc(String(x))}"${String(x) === String(valor) ? " selected" : ""}>${esc(fmtV(x))} (${fmt(n)})</option>`).join("") : ""}</select></label>`;
+        `<option value="${esc(String(x))}"${String(x) === String(valor) ? " selected" : ""}>${esc(fmtV(x))} (${fmt(n)})</option>`).join("") : ""}</select></label>`; }; // lista sem opção: desabilitada com "—"
     const resumo = nomeVeiculo(pr);
     return `<section class="meu-veiculo faixa-modelo${MV_ABERTO ? " aberto" : ""}" aria-label="Veículo">
       <div class="mv-resumo">${resumo ? `<span class="mv-resumo-txt">${esc(resumo)}</span>` : ""}
