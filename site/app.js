@@ -1,7 +1,7 @@
 /* Catálogo BAP online · site estático (sem servidor).
    Os dados vêm de data/produtos.json, gerado por scripts/gerar_site.py a partir da base unificada.
    Rotas: #/  ·  #/busca?q=&vm=&vmo=&va=&vmt=&vv=&si=&fa=&li=&ca=  ·  #/produto/<CODIGO>  ·  #/sobre
-   (os links antigos com cod=, mo=, modelo=, ano= e ve= viram q=: ver rotaAntiga; vm, vmo, va, vmt e vv = marca, modelo,
+   (os links antigos com cod=, mo=, modelo= e ano= viram q=: ver rotaAntiga; vm, vmo, va, vmt e vv = marca, modelo,
    ano, motor e versão do veículo, nunca a placa; si, fa, li e ca podem vir repetidos, um por opção marcada)
    Busca por placa (T-0005): chama o serviço bapajudacatalogo-placas (integracao-placas), que guarda a chave da
    API PLACAS. O site só conhece a URL pública abaixo; nenhuma chave entra aqui. LGPD: a placa não vai para o
@@ -16,7 +16,7 @@
   const PLACAS_TIMEOUT_MS = 75000;
   const PLACAS_ACORDANDO_MS = 5000;
   const VEI_K = ["vm", "vmo", "va", "vmt", "vv"]; // marca, modelo, ano, motor e versão do veículo (no endereço vai o veículo, nunca a placa)
-  const chaveVeiculo = (pr) => VEI_K.map((k) => (pr && pr.get(k)) || "").join("|");
+  const chaveVeiculo = (pr) => VEI_K.map((k) => (pr ? (pr instanceof URLSearchParams ? pr.get(k) : pr[k]) : "") || "").join("|"); // rota ou objeto da placa
   const POR_PAGINA = 50; // T-0014: 10 linhas de 5 cartões no computador (25 de 2 no celular)
   // { q, texto, partes, placa } do último veículo achado pela placa. Só em memória: nunca no endereço, no
   // localStorage/sessionStorage, no console ou no título. A placa vive só no fluxo da busca (lista, janela do produto e
@@ -26,6 +26,7 @@
   let VEICULO_PLACA = null;
   const app = document.getElementById("app");
   let BASE = null;           // { gerado_em, total, produtos }
+  const NOME_MARCA = new Map(); // marca sem acento → como a base escreve
   let TEM_VE = false;        // o produtos.json tem o campo "ve" (T-0017) em algum produto
   let POR_COD = new Map();   // código → produto
   let INDICE = [];           // [{ p, desc, apl, marcas, outros, cods, mcods, eans, faixas }]
@@ -91,6 +92,9 @@
       return out;
     };
     TEM_VE = BASE.produtos.some((p) => Array.isArray(p.ve) && p.ve.length);
+    // nome da marca como a base escreve (com acento: "CITROËN"), para mostrar na lista; a comparação é sem acento
+    for (const p of BASE.produtos) for (const m of [...(p.ve || []).map((x) => x[0]), ...String(p.mo || "").split(/\s*[\/,]\s*/)])
+      if (m && (!NOME_MARCA.has(norm(m)) || /[À-ÿ]/.test(m))) NOME_MARCA.set(norm(m), String(m).toUpperCase());
     BASE.produtos.forEach((p, ix) => {
       POR_COD.set(normCod(p.c), p);
       const e = {
@@ -413,10 +417,10 @@
   // Links antigos (aba Veículo e aba Código, até a T-0011) viram a busca nova: #/busca?mo=VOLKSWAGEN&modelo=Gol&ano=2018
   // → #/busca?q=Volkswagen Gol 2018; #/busca?cod=AMT7115 → #/busca?q=AMT7115. Sistema e filtros continuam.
   function rotaAntiga(pr) {
-    if (!["cod", "mo", "modelo", "ano", "ve"].some((k) => pr.get(k))) return null;
+    if (!["cod", "mo", "modelo", "ano"].some((k) => pr.get(k))) return null;
     const n = new URLSearchParams(pr);
-    const q = [pr.get("ve"), pr.get("q"), pr.get("cod"), pr.get("mo") && titulo(pr.get("mo")), pr.get("modelo"), pr.get("ano")].filter(Boolean).join(" ");
-    ["cod", "mo", "modelo", "ano", "ve"].forEach((k) => n.delete(k)); // ve= era o veículo da placa como texto (simulação anterior)
+    const q = [pr.get("q"), pr.get("cod"), pr.get("mo") && titulo(pr.get("mo")), pr.get("modelo"), pr.get("ano")].filter(Boolean).join(" ");
+    ["cod", "mo", "modelo", "ano"].forEach((k) => n.delete(k));
     n.delete("q");
     return Object.assign({ q }, Object.fromEntries(n));
   }
@@ -597,7 +601,7 @@
       ev.preventDefault();
       if (consultando) return;
       if (!campoPlaca.value.trim()) { // só texto (ou nada): busca o texto
-        if (VEICULO_PLACA) VEICULO_PLACA.placa = null; // outra busca: a placa some da memória (o veículo continua no filtro)
+        VEICULO_PLACA = null; // busca nova de texto: a placa some e as listas destravam; o veículo continua pela rota (vm, vmo...)
         irPara("/busca", Object.assign(veiAtual(), { q: form.elements.q.value.trim() }));
         return;
       }
@@ -613,10 +617,10 @@
         if (!achado.q) throw Object.assign(new Error("vazio"), { status: 404 });
         // a placa fica só aqui, em memória, para a faixa (com a chave do veículo que ela preencheu)
         campoPlaca.value = "";
-        // o veículo vai para ve= (a placa não); o termo que está no campo continua junto
-        // a placa preenche as listas do veículo (marca, modelo, ano, motor, versão); no endereço vai o veículo, nunca a placa
+        // o termo que está no campo continua junto
+        // a placa preenche e trava as listas do veículo (marca, modelo, ano, motor, versão); no endereço vai o veículo, nunca a placa
         const daPlaca = { vm: achado.bruto.mo, vmo: achado.bruto.modelo, va: achado.bruto.ano, vmt: achado.bruto.cil, vv: achado.bruto.versao };
-        VEICULO_PLACA = { placa, chave: VEI_K.map((k) => daPlaca[k] || "").join("|") };
+        VEICULO_PLACA = { placa, chave: chaveVeiculo(daPlaca) };
         const novo = new URLSearchParams(Object.entries(Object.assign(daPlaca, { q: form.elements.q.value.trim() })).filter(([, v]) => v));
         if (lerRota().caminho === "/busca" && lerRota().params.toString() === novo.toString()) render();
         else irPara("/busca", novo);
@@ -883,10 +887,10 @@
     });
   }
 
-  // ---------- faixa do veículo e filtros à esquerda (R-20261120-122100, 123630, 123800 e 124800) ----------
-  // As listas do veículo são montadas aqui, em JavaScript, a partir do produtos.json de hoje: a marca do campo
-  // mo, o modelo da palavra que vem depois da marca na aplicação (a), o ano das faixas da aplicação e o motor dos
-  // números "1.8" da aplicação. É SIMULAÇÃO: o filtro de verdade virá do campo de veículo da base (T-0017).
+  // ---------- faixa do veículo e filtros à esquerda (R-20261120-122100, 123630, 123800, 124800 e 130300) ----------
+  // As listas do veículo saem do campo "ve" do produtos.json (T-0017: marca, modelo e versão), o ano do an e das
+  // faixas da aplicação e o motor dos números "1.8" da aplicação. Num JSON sem nenhum "ve" (antigo), marca e modelo
+  // saem do campo mo e da aplicação.
   const painelAberto = () => !!app.querySelector("dialog.painel-c[open]");
   function abrirPainel() {
     const dlg = app.querySelector("dialog.painel-c");
@@ -900,17 +904,19 @@
   }
   const ANO_HOJE = 2026;
   const PARA_FORA = new Set(["EXC", "FURGAO", "PICK", "UP", "SEDAN", "HATCH", "CHASSI", "MOD", "NOVO", "NOVA", "CABINE", "TODOS",
-    "TODAS", "DIANT", "TRAS", "LINHA", "MOTOR", "GERACAO", "FASE", "SERIE", "VERSAO", "COM", "SEM", "ATE", "DIESEL", "FLEX",
-    "GASOLINA", "TURBO", "AUT", "MEC", "WAGON", "VAN", "CARGO", "DUPLA", "SIMPLES", "CAB", "ESQ", "DIR", "SPORT", "CLASSIC",
+    "TODAS", "DIANT", "TRAS", "LINHA", "MOTOR", "GERACAO", "FASE", "SERIE", "VERSAO", "COM", "SEM", "ATE", 
+    "TURBO", "AUT", "MEC", "WAGON", "VAN", "CARGO", "DUPLA", "SIMPLES", "CAB", "ESQ", "DIR", "SPORT", "CLASSIC",
     "AGRICOLA", "TRATOR", "ONIBUS", "CAMINHAO", "MICRO", "UTILITARIO", "MODELOS", "ANO", "ANOS", "APOS", "ANTES", "DESDE", "EM", "DIANTE"]);
   // JSON antigo: a marca escrita na aplicação, com os apelidos ("VW - Gol" é Volkswagen, "GM - Corsa" é Chevrolet)
   const RX_MARCA = new Map();
   const nomesDaMarca = (vm) => [vm, ...String(APELIDOS[vm] || "").split(" ").filter(Boolean)];
-  const rxMarcaNaApl = (vm) => { if (!RX_MARCA.has(vm)) RX_MARCA.set(vm, new RegExp("(?:^|[^A-Z])(?:" + nomesDaMarca(vm).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\s*[-:]?\\s*([^·;(]+)", "g")); return RX_MARCA.get(vm); };
+  const rxMarcaNaApl = (vm) => { if (!RX_MARCA.has(vm)) RX_MARCA.set(vm, new RegExp("(?:^|[^A-Z])(?:" + nomesDaMarca(vm).map(reEsc).join("|") + ")\\s*[-:]?\\s*([^·;(]+)", "g")); return RX_MARCA.get(vm); };
+  // o produto é da marca (JSON antigo): pelo campo mo ou pela marca (e os apelidos) escrita na aplicação
+  const daMarca = (e, vm) => marcasDe(e).includes(vm) || nomesDaMarca(vm).some((n) => temPalavra(e.apl, n));
   const RX_PALAVRA = new Map();
-  const temPalavra = (txt, w) => { if (!RX_PALAVRA.has(w)) RX_PALAVRA.set(w, new RegExp("(^|[^A-Z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "($|[^A-Z0-9])")); return RX_PALAVRA.get(w).test(txt); };
-  // Campo "ve" da T-0017 ([fabricante, modelo, versão?]): quando o produto tem, a cascata usa ele; sem o campo (o JSON
-  // de hoje), cai na montagem pela aplicação (SIMULAÇÃO). O ano continua vindo da aplicação.
+  const temPalavra = (txt, w) => { if (!RX_PALAVRA.has(w)) RX_PALAVRA.set(w, new RegExp("(^|[^A-Z0-9])" + reEsc(w) + "($|[^A-Z0-9])")); return RX_PALAVRA.get(w).test(txt); };
+  // Campo "ve" da T-0017 ([fabricante, modelo, versão?]): a cascata usa ele; sem nenhum "ve" no JSON (antigo), cai na
+  // montagem pela aplicação. O ano continua vindo do an e da aplicação.
   // Com o campo "ve" no JSON (detectado uma vez em carregar(): TEM_VE), produto SEM "ve" fica fora do filtro e das
   // contagens (os duvidosos e os sem veículo; R-20261120-123130). A montagem pela aplicação só vale no JSON antigo.
   const veDe = (e) => (Array.isArray(e.p.ve) && e.p.ve.length ? e.p.ve.map((x) => [norm(x[0]), norm(x[1]), norm(x[2] || "")]) : null);
@@ -923,7 +929,7 @@
     const ve = veDe(e);
     if (TEM_VE && !ve) return false;
     const hits = ve ? ve.filter((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo)) : null;
-    if (ve ? !hits.length : (!marcasDe(e).includes(v.vm) && !nomesDaMarca(v.vm).some((n) => temPalavra(e.apl, n))) || (v.vmo && !temPalavra(e.apl, v.vmo))) return false;
+    if (ve ? !hits.length : !daMarca(e, v.vm) || (v.vmo && !temPalavra(e.apl, v.vmo))) return false;
     if (v.va && !anoServe(e, v.va)) return false;
     if (v.vmt) { const m = motoresDe(e); if (m.length && !m.includes(v.vmt)) return false; }
     if (v.vv && hits) { const vs = hits.map((x) => x[2]).filter(Boolean); if (vs.length && !vs.includes(v.vv)) return false; }
@@ -931,7 +937,7 @@
   }
   // norm: "CITROËN" e "CITROEN" são a mesma marca (a placa manda com acento; a base compara sem)
   const veiculoDaRota = (pr) => ({ vm: norm(pr.get("vm")), vmo: norm(pr.get("vmo")), va: +pr.get("va") || 0, vmt: norm(pr.get("vmt")), vv: norm(pr.get("vv")) });
-  const nomeVeiculo = (pr) => [pr.get("vm") && bonito(pr.get("vm")), pr.get("vmo") && bonito(pr.get("vmo")), pr.get("va"), pr.get("vmt"), pr.get("vv") && bonito(pr.get("vv"), true)].filter(Boolean).join(" ");
+  const nomeVeiculo = (pr) => [pr.get("vm") && bonito(NOME_MARCA.get(norm(pr.get("vm"))) || pr.get("vm")), pr.get("vmo") && bonito(pr.get("vmo")), pr.get("va"), pr.get("vmt"), pr.get("vv") && bonito(pr.get("vv"), true)].filter(Boolean).join(" ");
   // tira o veículo da busca (o ✕ da placa e o "Tirar o veículo" do estado vazio); o foco vai para o campo da placa
   function tirarVeiculo(pr) {
     const n = new URLSearchParams(pr);
@@ -953,9 +959,9 @@
       if (TEM_VE && !veDe(e)) continue;
       for (const m of marcasDe(e)) marcas.set(m, (marcas.get(m) || 0) + 1);
       const ve = veDe(e);
-      if (!v.vm || !(ve ? ve.some((x) => x[0] === v.vm) : marcasDe(e).includes(v.vm) || nomesDaMarca(v.vm).some((n) => temPalavra(e.apl, n)))) continue;
+      if (!v.vm || !(ve ? ve.some((x) => x[0] === v.vm) : daMarca(e, v.vm))) continue;
       // modelo: do "ve" (T-0017) ou, sem ele, o que vem logo depois da marca na aplicação ("HONDA - Civic · ...",
-      // "VW - Gol / Saveiro · ..."), 1ª palavra de cada pedaço (SIMULAÇÃO)
+      // "VW - Gol / Saveiro · ..."), 1ª palavra de cada pedaço (só no JSON antigo)
       const ws = new Set(ve ? ve.filter((x) => x[0] === v.vm).map((x) => x[1]) : []);
       if (!ve) for (const mt of e.apl.matchAll(rxMarcaNaApl(v.vm)))
         for (const pd of mt[1].split("/")) { const w = (pd.trim().match(/^[A-Z][A-Z0-9]+/) || [""])[0]; if (w.length >= 2 && !ehVersao(w) && !PARA_FORA.has(w) && w !== v.vm) ws.add(w); }
@@ -987,7 +993,7 @@
     const top = (m, n) => [...m.entries()].filter(([x, q]) => q > 0 || x === v.vm || x === v.vmo).sort((a, b) => b[1] - a[1]).slice(0, n);
     return {
       vm: top(marcas, 60).sort((a, b) => a[0].localeCompare(b[0])),
-      vmo: top(modelos, 80).filter(([x, q]) => q >= 2 || x === v.vmo).sort((a, b) => a[0].localeCompare(b[0])), // SIMULAÇÃO: tira o que aparece 1 vez só
+      vmo: top(modelos, 80).filter(([x, q]) => q >= 2 || x === v.vmo).sort((a, b) => a[0].localeCompare(b[0])), // JSON antigo: tira o que aparece 1 vez só
       va: [...anos.entries()].filter(([x, q]) => q > 0 || x === v.va).sort((a, b) => b[0] - a[0]),
       vmt: [...motores.entries()].filter(([x, q]) => q > 0 || x === v.vmt).sort((a, b) => a[0].localeCompare(b[0])),
       vv: [...versoes.entries()].filter(([x, q]) => q > 0 || x === v.vv).sort((a, b) => a[0].localeCompare(b[0])),
@@ -1001,7 +1007,7 @@
   function meuVeiculoHtml(pr) {
     const v = veiculoDaRota(pr);
     const op = opcoesVeiculo(v, pr);
-    const mem = VEICULO_PLACA && VEICULO_PLACA.chave === chaveVeiculo(pr) ? VEICULO_PLACA : null;
+    const mem = VEICULO_PLACA && VEICULO_PLACA.placa && VEICULO_PLACA.chave === chaveVeiculo(pr) ? VEICULO_PLACA : null;
     // com a placa consultada (R-20261120-130300): as 5 listas travadas, em cinza, com os valores da placa; o ✕ destrava
     const lista = (k, rot, todos, valor, ativo0, fmtV) => {
       if (mem) return `<label class="mv-campo"><span>${rot}</span><select data-k="${k}" class="travada" disabled><option>${valor ? esc(fmtV(valor)) : "—"}</option></select></label>`;
@@ -1016,7 +1022,7 @@
         <div class="mv-campo mv-campo-placa"><span id="mv-placa-rot">Placa</span>${mem
           ? `<span class="mv-placa-grande" aria-labelledby="mv-placa-rot"><b>${esc(mem.placa)}</b><button type="button" class="mv-tirar" aria-label="Tirar a placa e o veículo">✕</button></span>`
           : `<span class="mv-placa-grande vazia" aria-labelledby="mv-placa-rot"><b aria-hidden="true">—</b><span class="vh">nenhuma placa consultada</span></span>`}</div>
-        ${lista("vm", "Marca", "Todas as marcas", v.vm, true, (x) => bonito(x))}
+        ${lista("vm", "Marca", "Todas as marcas", v.vm, true, (x) => bonito(NOME_MARCA.get(x) || x))}
         ${lista("vmo", "Modelo", "Todos os modelos", v.vmo, !!v.vm, (x) => bonito(x))}
         ${lista("va", "Ano", "Todos os anos", v.va || "", !!v.vmo, (x) => String(x))}
         ${lista("vmt", "Motor", "Todos os motores", v.vmt, !!v.va, (x) => String(x))}

@@ -10,6 +10,8 @@
   --branco: #FFFFFF;
   --raio: 12px;
   --sombra: 0 10px 30px rgba(21, 21, 21, .10);
+  --borda-campo: #CFD5D1; /* borda dos campos e das listas */
+  --veu: rgba(21, 21, 21, .55); /* fundo por trás da janela e do painel */
   --verde-txt: #2E6B1F; /* texto verde sobre --verde-claro com contraste AA (5,8:1) */
   --t: .7; /* texto da página e da janela do produto 30% menor (T-0014), com piso de 12 px (--min) */
   --min: 12px;
@@ -72,7 +74,7 @@ main:focus, main:focus-visible { outline: none; }
 .form-busca { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px) auto; gap: 8px 14px; padding: 12px 16px; align-items: start; }
 .bq-campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .campo-rot { font-size: 12px; font-weight: 600; color: var(--texto-2); text-transform: uppercase; letter-spacing: .04em; }
-.bq-campo input { width: 100%; height: 44px; border: 1px solid #CFD5D1; border-radius: 8px; padding: 0 12px; font: inherit; font-size: 15px; color: var(--texto); background: var(--branco); }
+.bq-campo input { width: 100%; height: 44px; border: 1px solid var(--borda-campo); border-radius: 8px; padding: 0 12px; font: inherit; font-size: 15px; color: var(--texto); background: var(--branco); }
 .bq-campo input:focus { border-color: var(--verde); outline: none; box-shadow: 0 0 0 3px rgba(98,187,71,.25); }
 .bq-placa input { text-transform: uppercase; letter-spacing: .06em; }
 .bq-placa input::placeholder { text-transform: none; letter-spacing: 0; }
@@ -128,14 +130,13 @@ main:focus, main:focus-visible { outline: none; }
 .filtro-lista label span { flex: 1; }
 .filtro-lista label em { font-style: normal; color: var(--texto-2); font-size: 12px; }
 .filtro-lista input { accent-color: var(--verde-esc); width: 18px; height: 18px; flex: none; }
-/* etiquetas: a da placa fica no quadro da busca; abaixo da barra, o termo e os filtros marcados, cada um com o X */
+/* etiquetas abaixo da busca: o termo e os filtros marcados, cada um com o X (a placa fica na faixa do veículo) */
 .etiquetas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 0; }
 .etiquetas[hidden] { display: none; }
 .etq { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; min-height: 36px; padding: 0 2px 0 12px; border-radius: 999px; background: var(--verde-claro); color: var(--verde-txt); font-size: 13px; font-weight: 600; }
 .etq > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .etq button { width: 44px; height: 44px; margin: -4px -2px -4px 0; border: 0; border-radius: 50%; background: none; color: var(--verde-txt); font-size: 14px; cursor: pointer; flex: none; }
 .etq button:hover { background: color-mix(in srgb, var(--verde-esc) 15%, transparent); }
-/* placa consultada (R-20261120-113625), no quadro da busca: a etiqueta da placa e, embaixo, o veículo separado */
 .limpar-tudo { height: 44px; border: 0; background: none; color: var(--verde-esc); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0 8px; }
 .lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(var(--cartao-min), calc((100% - 4 * 12px) / 5)), 1fr)); gap: 12px; } /* no máximo 5 por linha */
 .item { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; text-decoration: none; color: var(--texto); display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
@@ -152,14 +153,13 @@ main:focus, main:focus-visible { outline: none; }
 /* altura padrão do cartão (R-20261120-124800): título e aplicação com 2 linhas sempre (corte com "…"), as referências
    com 1 linha (2 no celular) e o "+ Detalhes" no rodapé, na mesma posição em todos */
 .item-pe { margin-top: auto; padding-top: 2px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.item .refs { height: 22px; overflow: hidden; }
 .bt-detalhes { width: 100%; height: 34px; padding: 0 10px; font-size: 13px; justify-content: center; position: relative; }
 .bt-detalhes::before { content: ""; position: absolute; inset: -6px -2px -5px; } /* toque com 44 px (34 + 10) */
 /* código BAP sobre a foto, no canto inferior direito (R-20261120-122300): não é botão; o clique passa para a foto */
 .item .foto-cod { position: absolute; right: 4px; bottom: 4px; padding: 1px 5px; border-radius: 5px; background: var(--escuro); color: var(--branco) !important; font-size: 12px !important; font-weight: 700 !important; line-height: 1.3; letter-spacing: 0; pointer-events: none; box-shadow: 0 1px 3px rgba(21, 21, 21, .25); }
 .item .desc { height: 2.6em; font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--texto); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .item .apl { height: 2.6em; font-size: 12px; line-height: 1.3; color: var(--texto-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.item .refs { display: flex; flex-wrap: wrap; gap: 3px; position: relative; min-width: 0; }
+.item .refs { display: flex; flex-wrap: wrap; gap: 3px; position: relative; min-width: 0; height: 22px; overflow: hidden; } /* 1 linha (2 no celular) */
 .item .ref { font-size: 12px; font-weight: 600; line-height: 1.2; padding: 3px 4px; border: 1px solid var(--linha); border-radius: 6px; background: var(--fundo); color: var(--texto); font-variant-numeric: tabular-nums; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item .ref[hidden] { display: none; }
 /* "Ref. Cruzada:" e o balão da marca (R-20261120-120700): cada código é um botão; a área de toque passa de 44 px */
@@ -176,7 +176,7 @@ main:focus, main:focus-visible { outline: none; }
 .sem-foto { width: 100%; height: 100%; display: grid; place-items: center; color: #A8B0AB; font-size: 12px; text-align: center; gap: 6px; align-content: center; }
 .sem-foto img { width: 44px !important; height: auto !important; opacity: .35; padding: 0 !important; }
 .mais { display: flex; justify-content: center; margin: 24px 0 0; }
-.vazio { background: var(--branco); border: 1px dashed #CFD5D1; border-radius: var(--raio); padding: 40px 20px; text-align: center; color: var(--texto-2); }
+.vazio { background: var(--branco); border: 1px dashed var(--borda-campo); border-radius: var(--raio); padding: 40px 20px; text-align: center; color: var(--texto-2); }
 .vazio b { color: var(--texto); display: block; font-size: 17px; margin-bottom: 6px; }
 
 /* produto */
@@ -227,7 +227,7 @@ table.t td.c { font-weight: 600; font-variant-numeric: tabular-nums; }
 html.com-janela { overflow: hidden; }
 dialog.janela { width: min(1120px, calc(100vw - 48px)); max-width: none; max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: var(--raio); box-shadow: 0 20px 60px rgba(21, 21, 21, .35); background: var(--fundo); color: var(--texto); }
 dialog.janela[open] { display: flex; flex-direction: column; }
-dialog.janela::backdrop { background: rgba(21, 21, 21, .55); }
+dialog.janela::backdrop { background: var(--veu); }
 .janela-barra { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px 4px 20px; background: var(--branco); border-bottom: 1px solid var(--linha); flex: none; }
 .janela-barra span { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-2); }
 .janela-x { width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; color: var(--texto); font-size: 20px; cursor: pointer; }
@@ -303,12 +303,12 @@ dialog.zoom::backdrop { background: transparent; }
 .mv-resumo { display: none; }
 .mv-placa-grande { display: flex; align-items: center; justify-content: space-between; gap: 2px; padding: 0 0 0 12px; height: 44px; border: 2px solid var(--escuro); border-radius: 8px; background: var(--branco); color: var(--escuro); }
 .mv-placa-grande b { font-size: 19px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
-.mv-placa-grande.vazia { border-color: #CFD5D1; border-width: 1px; color: var(--texto-2); }
-.mv-tirar { width: 44px; height: 42px; border: 0; border-radius: 6px; background: none; color: var(--escuro); font-size: 15px; cursor: pointer; }
+.mv-placa-grande.vazia { border-color: transparent; background: none; color: var(--texto-2); padding-left: 2px; } /* sem placa: só o "—", não parece campo de digitar */
+.mv-tirar { width: 44px; height: 44px; margin: -2px -2px -2px 0; flex: none; border: 0; border-radius: 6px; background: none; color: var(--escuro); font-size: 15px; cursor: pointer; }
 .mv-tirar:hover { background: var(--fundo); }
 .mv-listas { display: grid; grid-template-columns: 170px repeat(5, minmax(0, 1fr)); gap: 8px; min-width: 0; }
 .mv-campo { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: 600; color: var(--texto-2); min-width: 0; }
-.mv-campo select { height: 44px; border: 1px solid #CFD5D1; border-radius: 8px; padding: 0 8px; font: inherit; font-size: 14px; font-weight: 500; color: var(--texto); background: var(--branco); min-width: 0; width: 100%; }
+.mv-campo select { height: 44px; border: 1px solid var(--borda-campo); border-radius: 8px; padding: 0 8px; font: inherit; font-size: 14px; font-weight: 500; color: var(--texto); background: var(--branco); min-width: 0; width: 100%; }
 .mv-campo select:disabled { color: var(--texto-2); background: var(--fundo); }
 .mv-campo select.travada { opacity: 1; color: var(--texto-2); background: var(--fundo); border-color: var(--linha); font-weight: 600; cursor: not-allowed; } /* placa: travada, cinza e legível (5,8:1) */
 /* filtros numa coluna fina à esquerda dos cartões, de cima a baixo */
@@ -319,7 +319,7 @@ dialog.zoom::backdrop { background: transparent; }
 /* painel "Filtrar" por cima (celular): fundo escurecido e foco preso (dialog com showModal) */
 dialog.painel-c { margin: 0 0 0 auto; width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; padding: 0; border: 0; background: var(--fundo); color: var(--texto); }
 dialog.painel-c[open] { display: flex; flex-direction: column; }
-dialog.painel-c::backdrop { background: rgba(21, 21, 21, .55); }
+dialog.painel-c::backdrop { background: var(--veu); }
 .painel-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 14px; background: var(--branco); border-bottom: 1px solid var(--linha); }
 .painel-cab b { font-size: 15px; font-weight: 600; }
 .painel-x { width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; font-size: 20px; cursor: pointer; color: var(--texto); }
@@ -328,7 +328,7 @@ dialog.painel-c::backdrop { background: rgba(21, 21, 21, .55); }
 .painel-pe .bt { width: 100%; justify-content: center; }
 @media (max-width: 900px) {
   .res-grade { grid-template-columns: minmax(0, 1fr); }
-  /* celular (designer-ux): a faixa fica numa linha; "Alterar veículo" abre as 4 listas */
+  /* celular (designer-ux): a faixa fica numa linha; "Alterar veículo" abre as 6 caixas (a placa e as 5 listas) */
   .faixa-modelo { padding: 6px 8px; display: flex; flex-direction: column; gap: 6px; }
   .mv-placa-grande b { font-size: 17px; }
   .mv-resumo { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
