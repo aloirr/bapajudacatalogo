@@ -571,7 +571,8 @@
   // menor da placa, com UM botão "Buscar" para os dois (o Enter em qualquer campo faz o mesmo): só texto → busca o
   // texto; só placa → consulta a placa; os dois → consulta a placa e filtra pelo texto. A placa consultada e o veículo
   // vão para a faixa abaixo do quadro (montarLayout). O aviso embaixo da placa só aparece quando há algo a dizer.
-  // no celular (até 640 px) o exemplo do campo geral é curto, para não sair cortado (R-20261120-155000-alexandre)
+  // celular (até 640 px): o exemplo do campo geral (R-20261120-155000-alexandre) e o texto inicial das 5 listas do veículo
+  // (R-20261120-155600-alexandre) são curtos, para não saírem cortados com a fonte de 16 px
   const EX_CURTO = () => window.matchMedia("(max-width: 640px)").matches;
   function montarBusca(container, pr) {
     container.insertAdjacentHTML("beforeend", `<section class="cartao-busca" aria-label="Buscar produtos">
@@ -1132,6 +1133,7 @@
       const ativo = ativo0 && (op[k].length > 0 || !!valor); return `<label class="mv-campo"><span>${rot}</span>
       <select data-k="${k}"${ativo ? "" : " disabled"}><option value="">${todos}</option>${ativo ? op[k].map(([x, n]) =>
         `<option value="${esc(String(x))}"${String(x) === String(valor) ? " selected" : ""}>${esc(fmtV(x))} (${fmt(n)})</option>`).join("") : ""}</select></label>`; }; // lista sem opção: desabilitada com "—"
+    const curto = EX_CURTO(); // "Todas"/"Todos" no celular; no computador, "Todas as marcas" etc.
     const resumo = nomeVeiculo(pr);
     // celular: o resumo vai no DOM na ordem da tela (Tab sem tabindex): fechada, a placa e o ✕ à esquerda e o resumo
     // ao lado (depois das listas); aberta, o resumo em cima (antes das listas). ligarMeuVeiculo move ao alternar.
@@ -1143,11 +1145,11 @@
         <div class="mv-campo mv-campo-placa"><span id="mv-placa-rot">Placa</span>${mem
           ? `<span class="mv-placa-grande" aria-labelledby="mv-placa-rot"><b>${esc(mem.placa)}</b><button type="button" class="mv-tirar" aria-label="Tirar a placa e o veículo">✕</button></span>`
           : `<span class="mv-placa-grande vazia" aria-labelledby="mv-placa-rot"><b aria-hidden="true">—</b><span class="vh">nenhuma placa consultada</span></span>`}</div>
-        ${lista("vm", "Marca", "Todas as marcas", v.vm, true, (x) => bonito(NOME_MARCA.get(x) || x))}
-        ${lista("vmo", "Modelo", "Todos os modelos", v.vmo, !!v.vm, (x) => bonito(x))}
-        ${lista("va", "Ano", "Todos os anos", v.va || "", !!v.vmo, (x) => String(x))}
-        ${lista("vmt", "Motor", "Todos os motores", v.vmt, !!v.va, (x) => String(x))}
-        ${lista("vv", "Versão", "Todas as versões", v.vv, !!v.va && (op.temVersao || !!v.vv), (x) => bonito(String(x), true))}
+        ${lista("vm", "Marca", curto ? "Todas" : "Todas as marcas", v.vm, true, (x) => bonito(NOME_MARCA.get(x) || x))}
+        ${lista("vmo", "Modelo", curto ? "Todos" : "Todos os modelos", v.vmo, !!v.vm, (x) => bonito(x))}
+        ${lista("va", "Ano", curto ? "Todos" : "Todos os anos", v.va || "", !!v.vmo, (x) => String(x))}
+        ${lista("vmt", "Motor", curto ? "Todos" : "Todos os motores", v.vmt, !!v.va, (x) => String(x))}
+        ${lista("vv", "Versão", curto ? "Todas" : "Todas as versões", v.vv, !!v.va && (op.temVersao || !!v.vv), (x) => bonito(String(x), true))}
       </div>
       ${MV_ABERTO ? "" : resumoHtml}
     </section>`;
