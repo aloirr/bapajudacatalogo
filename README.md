@@ -39,6 +39,23 @@ Depois abra http://localhost:8000.
 3. confere que não há dado interno;
 4. envia ao GitHub. O Render publica sozinho.
 
+## Testar antes de entregar
+
+1. Gere os dados: `py -3 scripts/gerar_site.py` (na nuvem: `python3`). Tem de terminar sem `[ERRO]` e sem `[PARADO]`.
+2. Rode os testes automáticos: `node scripts/testar_site.mjs --conhecidos testes/conhecidos.json`.
+   - Eles conferem:
+     - a palavra interna no `produtos.json`;
+     - as buscas por código, por referência, por veículo e por texto livre, e a busca sem resultado;
+     - a página do produto, sem preço nem estoque;
+     - o celular: 390 px sem rolar de lado;
+     - o console e a acessibilidade básica.
+   - Saem com 0 se passou e com 1 se falhou, com o resumo em português. Os prints em 1366 e 390 px ficam em `testes/prints/ultima/`.
+   - `testes/conhecidos.json` lista os achados que já têm tarefa aberta. Eles aparecem como CONHECIDO e não derrubam o teste. Sem `--conhecidos`, tudo conta.
+   - Precisa do Node 22 e do Playwright. No PC, uma vez só: `npm install -g playwright` e `npx playwright install chromium`. [SUPOSIÇÃO: ainda não testado no Windows.]
+3. Para olhar com os próprios olhos: `py -3 -m http.server 8000 -d site` e abra http://localhost:8000.
+4. Em cada PR, o CI do GitHub roda os passos 1 e 2 e guarda os prints como artefato, quando o workflow da T-0002 estiver no `main`.
+5. Ao mudar a tela, entregue os prints.
+
 ## Regras
 
 - O site **não mostra preço nem estoque**.
