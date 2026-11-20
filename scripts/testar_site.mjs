@@ -127,6 +127,8 @@ function palavrasInternas(texto) {
   return achou;
 }
 // campos que o gerar_site.py grava em cada produto (docs/DADOS_DO_SITE.md); campo novo = conferir antes
+// É a lista do que é PERMITIDO, não do que é obrigatório: produto sem um destes campos não falha. TRANSIÇÃO T-0017:
+// o PR #50 (web-site/T-0017-aplicacao-tela) tira "df" e "ip" do JSON; eles ficam aqui até esse PR entrar no main.
 // "ve" (T-0017, v17): veículos da aba VEICULOS, lista de [FABRICANTE, MODELO] ou [FABRICANTE, MODELO, VERSAO], textos não vazios
 const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "df", "oj", "ip", "an", "i", "ve"]);
 const palavraInteira = (texto, palavra) => new RegExp(`(?<![A-Z0-9])${palavra}(?![A-Z0-9])`).test(norm(texto));
@@ -653,7 +655,10 @@ async function testarSite(base, ctxJson, dirPrints) {
       for (const [k, v] of [["q", "xyzqwk nadaexiste"], ["q", "ZZQ999999"], ["cod", "ZZQ999999"]]) {
         await abrir("busca-vazia", `#/busca?${k}=${encodeURIComponent(v)}`);
         const r = await listaTodos();
-        if (r.itens.length || !/Nenhum produto encontrado/.test(r.vazio) || !/^0 produtos?( encontrados?)?$/.test(r.total.trim()))
+        // TRANSIÇÃO T-0018 (R-20261120-161500-alexandre, RD-0169): com 0 resultados o total "0 produtos" sai e fica só
+        // "Nenhum produto encontrado". Até o PR do web-site (T-0018, catálogo escuro) entrar no main, vale o total
+        // "0 produtos" (site no ar hoje) OU o total vazio. Depois desse PR, apertar para só o vazio.
+        if (r.itens.length || !/Nenhum produto encontrado/.test(r.vazio) || !/^(0 produtos?( encontrados?)?)?$/.test(r.total.trim()))
           falha("vazia", N_VAZ, `${k}:${v}`, `"${v}": ${r.itens.length} item(ns), total "${r.total}", mensagem "${cortar(r.vazio, 40)}"`);
         if (r.proximos) falha("vazia", N_VAZ, `${k}:${v}:proximos`, `"${v}": aviso dos "mais próximos" sem nenhum produto parecido`);
         if (v === "xyzqwk nadaexiste") await print("busca-vazia");
