@@ -1,0 +1,53 @@
+Testes T-0002 · 20/11/2026 09:57 (Manaus)
+total do JSON ................ PASSOU (4.679 produtos, gerado em 20/11/2026 13:56; no commit: 4.679)
+código único no site ......... CONHECIDO (T-0010) · 103 achado(s)
+campos do JSON ............... PASSOU (só os 19 campos conhecidos)
+palavra interna .............. CONHECIDO (T-0009: 1; T-0007: 152) · 153 achado(s)
+casos do JSON ................ PASSOU (código CXD13062; referência TRW 16900255S e NAKATA NCDH50002; veículo VOLKSWAGEN/Gol/2018; geral "amortecedor dianteiro Onix" e "15W40"; produto com foto AMT7115; amostra TER555165, AMT7109, KG26, KHC12459, JUH70063, TAX10062, PIV5101, BAN14509E)
+busca código ................. PASSOU (CXD13062, "CXD 13062", "CXD-13062", minúsculo, formulário e 8 de 8 da amostra)
+busca referência ............. CONHECIDO (T-0008) · 1 achado(s)
+busca veículo ................ CONHECIDO (T-0008) · 13 achado(s)
+busca geral .................. PASSOU ("amortecedor dianteiro Onix" = 10; "15W40" = 2)
+busca sem resultado .......... PASSOU ("xyzqwk nadaexiste" e código "ZZQ999999" → "Nenhum produto encontrado")
+produto sem preço nem estoque  CONHECIDO (T-0009: 1; T-0007: 1) · 2 achado(s)
+página do produto ............ PASSOU (CXD13062 (Foto em breve) e AMT7115 (com foto): foto, aplicação, referências, ficha técnica, ofereça junto)
+acessibilidade básica ........ PASSOU (campos com rótulo, imagens com alt, Tab chega às abas (1 passos), foco visível, Enter abre a aba)
+390 px sem rolar de lado ..... PASSOU (scrollWidth <= 390 em todas as telas abertas)
+console sem erro ............. PASSOU (0 erro do site nas telas abertas, nas 2 larguras)
+prints ....................... testes/prints/ultima/
+
+Resultado: PASSOU (0 falha(s) nova(s), 272 CONHECIDO(S) ignorado(s) por testes/conhecidos.json)
+
+Detalhe:
+[código único no site]
+  CONHECIDO (T-0010) 103 pastilhas com dois códigos, PAFnnnn × PAF.nnnn, que dividem a mesma página no site (relatório T-0002; decisão 4a do recado R-20261120-095221-alexandre): 103 achado(s)
+      ex.: PAF0013 e PAF.0013 viram "PAF0013": #/produto/PAF0013 abre o PAF.0013
+      ex.: PAF0019 e PAF.0019 viram "PAF0019": #/produto/PAF0019 abre o PAF.0019
+      ex.: PAF0023 e PAF.0023 viram "PAF0023": #/produto/PAF0023 abre o PAF.0023
+
+[palavra interna]
+  CONHECIDO (T-0009) 'R$ 103.88+ Detalhes' na aplicação do TER556556 (relatório T-0001, problema 1): 1 achado(s)
+      ex.: TER556556 "R$": …| TERMINAL PESADO | A | R$ 103.88+ DETALHES | R | M…
+  CONHECIDO (T-0007) 152 Terminal Axial com 'FORNECEDOR AMPRI' nas referências (relatório T-0001, problema 2): 152 achado(s)
+      ex.: 1 "fornecedor": …O MASTER TERMINAL AXIAL (FORNECEDOR AMPRI) ATUALIZADO 100434…
+      ex.: 2 "fornecedor": …O MASTER TERMINAL AXIAL (FORNECEDOR AMPRI) ATUALIZADO 100434…
+      ex.: 3 "fornecedor": …O MASTER TERMINAL AXIAL (FORNECEDOR AMPRI) ATUALIZADO 100434…
+
+[busca referência] aba Código "16900255S"; aba Código "TRW 16900255S"; busca geral "TRW 16900255S"; aba Código "NCDH50002" → CXD13062
+  CONHECIDO (T-0008) 'TRW 16900255S' na aba Código dá 0 (relatório T-0001, problema 5): 1 achado(s)
+      ex.: aba Código "TRW 16900255S": 0 resultado(s), sem o CXD13062
+
+[busca veículo] VOLKSWAGEN + Gol + 2018 = 61, 13 sem "Gol" como palavra
+  CONHECIDO (T-0008) 'Gol' casa com 'Golf', 'Bora', 'Jetta' em VOLKSWAGEN/Gol/2018 (relatório T-0001, problema 4): 13 achado(s)
+      ex.: SFR30015 sem "Gol" como palavra: VW - Cordoba 1.6/1.8/2.0 1995> · Ibiza 1.6/1.8/2.0 1995> · …
+      ex.: CUB60192 sem "Gol" como palavra: AUDI / VOLKSWAGEN - A3 / Golf / Jetta - 01/2009 - 12/2018 -…
+      ex.: CUB60235 sem "Gol" como palavra: AUDI / VOLKSWAGEN - A3 / Beetle / Bora / Golf - 01/99 - 12/…
+
+[produto sem preço nem estoque] CXD13062, AMT7115, TER556556, 1
+  CONHECIDO (T-0009) a página #/produto/TER556556 mostra 'R$ 103.88+' (relatório T-0001, problema 1): 1 achado(s)
+      ex.: #/produto/TER556556 mostra "R$": …AR NO WHATSAPP APLICACAO R$ 103.88+ DETALHES CONFIRA…
+  CONHECIDO (T-0007) a página #/produto/1 mostra 'FORNECEDOR AMPRI' (relatório T-0001, problema 2): 1 achado(s)
+      ex.: #/produto/1 mostra "fornecedor": …O MASTER TERMINAL AXIAL (FORNECEDOR AMPRI) ATUALIZADO 100434…
+
+[acessibilidade básica]
+  AVISO      as setas não trocam de aba (padrão ARIA; T-0001, problema 10, ainda sem tarefa)
