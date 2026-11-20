@@ -123,7 +123,7 @@
       INDICE.push(e);
     });
     const info = document.getElementById("info-base");
-    if (info && BASE.gerado_em) info.textContent = fmt(BASE.total) + " produtos · base atualizada em " + BASE.gerado_em;
+    if (info && BASE.gerado_em) info.textContent = " Base atualizada em " + BASE.gerado_em + "."; // T-0018 op4e: sem o total (o início mostra o "+4.400")
   }
 
   // ---------- busca palavra por palavra (T-0011) ----------
@@ -726,17 +726,20 @@
   }
 
   // ---------- telas ----------
-  // Início (T-0018, opção 4c, R-20261120-140100 e o pedido de tirar as repetições): faixa da marca com a busca geral e,
-  // ao lado, a placa Mercosul; embaixo, a lista tabelada de 8 peças (2 colunas no computador). Sem preço e sem estoque.
+  // Início (T-0018, opção 4c aprovada e op4d, R-20261120-143900): cabeçalho integrado à faixa da marca, "+4.400 produtos
+  // no portfólio", a busca geral e, ao lado, a placa Mercosul; embaixo, a lista tabelada de 8 peças (2 colunas no
+  // computador). Sem preço e sem estoque.
   // Contador (R-20261120-141600, "2) a"): o serviço bapajudacatalogo-placas conta a abertura do produto pelo código
   // (POST /contar) e devolve os mais vistos (GET /mais-vistos?dias=7). Fica DESLIGADO até o deploy do serviço
   // (R-20261120-142100): com false, nenhuma chamada sai e o bloco é sempre "Destaques".
   // Contrato confirmado pelo integracao-placas: POST /contar {"codigo"} → 204; GET /mais-vistos?dias=7 → 200
-  // {"total":N,"itens":[{"codigo","n"}]}, até 4 itens, do mais aberto para o menos aberto.
+  // {"total":N,"itens":[{"codigo","n"}]}, até 8 itens (decisão "1) B"), do mais aberto para o menos aberto.
   const CONTADOR_LIGADO = false;
   const SERVICO = PLACAS_URL.replace(/\/veiculo$/, ""); // a mesma URL base da placa
   const RECENTES_MIN = 20, RECENTES_MS = 3000; // menos de 20 aberturas em 7 dias, erro ou mais de 3 s: "Destaques"
-  const N_LISTA = 8; // linhas da lista do início (op4c)
+  const N_LISTA = 8; // linhas da lista do início (op4c; o serviço devolve até 8)
+  // a imagem da faixa do início (e do convite ao catálogo na Sobre): um lugar só para trocar (op4f em simulação)
+  const IMG_FAIXA = { src: "assets/hero_kit.webp", w: 566, h: 420, alt: "Kit amortecedor e kit batente BAP" };
   let MAIS_VISTOS = null; // a resposta, uma vez por carga da página (só em memória)
   const CONTADOS = new Set(); // [SUPOSIÇÃO] cada código conta uma vez por carga da página
   // fire-and-forget: sem credenciais, sem esperar a resposta e sem travar a tela; a falha não aparece
@@ -798,14 +801,18 @@
       <ul class="rec-lista">${lst.map(pecaHtml).join("")}</ul>`;
   }
   // o topo escuro e o logo branco só no início (a troca de rota volta ao topo claro antes do render)
+  // op4d: no início o cabeçalho fica transparente sobre a faixa; ao rolar, ganha o fundo --escuro
+  const marcarRolagem = () => document.body.classList.toggle("topo-rolou", window.scrollY > 8);
+  window.addEventListener("scroll", marcarRolagem, { passive: true });
   const topoInicio = (sim) => {
     document.body.classList.toggle("inicio-marca", sim);
+    marcarRolagem();
     const logo = document.querySelector(".topo .marca img");
     if (logo) logo.src = sim ? "assets/logo_branco.png" : "assets/logo_escuro.png";
   };
   window.addEventListener("hashchange", () => topoInicio(false));
   function telaInicio() {
-    const sistemas = contar(BASE.produtos, "si");
+    const portfolio = Math.floor(BASE.total / 100) * 100; // op4d: o total arredondado para baixo à centena (4.419 → +4.400)
     const celular = window.matchMedia("(max-width: 640px)").matches; // o exemplo da busca geral cabe no celular
     topoInicio(true);
     app.innerHTML = `
@@ -814,9 +821,10 @@
           <div class="mf-texto">
             <span class="mf-selo">BAP AUTO PARTS</span>
             <h1>A peça certa <br class="so-pc">para a sua <em>oficina</em></h1>
-            <p><b class="mf-total">${fmt(BASE.total)}</b> produtos em ${fmt(sistemas.length)} sistemas. Busque por código, referência, veículo ou placa.</p>
+            <p class="mf-num"><b class="mf-total">+${fmt(portfolio)}</b><span>produtos <br>no portfólio</span></p>
+            <p>Busque por código, referência, veículo ou placa.</p>
           </div>
-          <div class="mf-foto"><img src="assets/hero_kit.webp" width="566" height="420" alt="Kit amortecedor e kit batente BAP"></div>
+          <div class="mf-foto"><img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="${esc(IMG_FAIXA.alt)}"></div>
           <div class="mf-busca">
             <form class="mf-bloco mf-geral" id="form-geral" role="search" autocomplete="off" aria-label="Buscar produtos">
               <label class="campo-rot v-rot" for="campo-q">Código, descrição ou aplicação</label>
@@ -1465,11 +1473,46 @@
   }
   const linkDoCartao = (cod) => [...app.querySelectorAll(".lista .item")].find((e) => e.dataset.cod === cod)?.querySelector(".item-link") || null;
 
+  // Sobre a BAP (T-0018, sobre1 do PO): o texto e os dados da empresa vêm do PDF da página "Empresa" do site
+  // institucional (recados/anexos/T-0018/sobre/HISTORIA_BAP.pdf), palavra por palavra; os títulos dos 3 blocos são da
+  // simulação. As fotos são de produtos BAP (assets/card2 a card4 e a IMG_FAIXA do início), sem foto de banco.
   function telaSobre() {
-    app.innerHTML = `<div class="texto-pagina"><h1>BAP · componentes de qualidade</h1>
-      <p>A BAP Autoparts oferece peças de reposição para a linha leve, pesada e moto: suspensão, direção, transmissão, freio, rodagem, filtração, elétrica, motor, arrefecimento, lubrificantes, químicos e acessórios.</p>
-      <p>Este catálogo mostra os produtos ativos da base unificada BAP, com aplicação, referências cruzadas e ficha técnica. Para preço e disponibilidade, fale com o seu representante.</p>
-      <p><a class="bt" href="#/busca">Ver todos os produtos</a></p></div>`;
+    app.innerHTML = `<div class="sobre">
+      <section class="sb-topo"><div class="sb-topo-in">
+        <div class="sb-txt">
+          <span class="sb-selo">A BAP</span>
+          <h1>Tradição e inovação em <em>componentes de qualidade</em></h1>
+          <p>A BAP chega ao mercado de autopeças com dois desejos: seguir as tradições que ditam o sucesso do setor e inovar com seus produtos e serviços.</p>
+        </div>
+        <div class="sb-fotos" aria-hidden="true">
+          <img class="sf1" src="assets/card3.png" alt="">
+          <img class="sf2" src="assets/card2.png" alt="">
+          <img class="sf3" src="assets/card4.png" alt="">
+        </div>
+      </div></section>
+      <section class="sb-corpo">
+        <div class="sb-hist">
+          <div class="sb-bloco"><h2>Tradição e inovação</h2>
+            <p>Acreditamos que as tradições existem, pois dão bons resultados. Elas definiram o caminho que trouxe o setor até aqui. Porém, tão importante quanto vislumbrar o passado é sonhar com o futuro.</p></div>
+          <div class="sb-bloco"><h2>Qualidade com valor acessível</h2>
+            <p>Somos uma marca jovem e pretendemos agir assim: trazendo novidades e acompanhando as tendências do mercado. O setor automotivo apresenta constantes evoluções e visamos atendê-las com peças de qualidade e valor acessível.</p></div>
+          <div class="sb-bloco"><h2>Brasileira em sua essência</h2>
+            <p>Brasileira em sua essência, a BAP traz toda a qualidade esperada de marcas internacionais sem penalizar o bolso de nossos consumidores. Além disso, toda essa proximidade com o mercado brasileiro nos permite acompanhá-lo de perto. O contato e treinamentos constantes são parte de nossas práticas.</p></div>
+        </div>
+        <blockquote class="sb-frase"><p>Temos um pé nas tradições e outro nas inovações.</p><span>Somos a BAP: <b>Componentes de qualidade.</b></span></blockquote>
+        <div class="sb-cta">
+          <img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="" aria-hidden="true">
+          <div><h2>Quer conhecer nossas soluções?</h2><p>Acesse nosso catálogo completo.</p></div>
+          <a class="bt" href="#/busca">Ver o catálogo <span aria-hidden="true">›</span></a>
+        </div>
+        <dl class="sb-dados">
+          <div><dt>Razão social</dt><dd>BRASIL AUTOPARTS S.A</dd></div>
+          <div><dt>CNPJ</dt><dd>61.558.903/0001-87</dd></div>
+          <div><dt>Atendimento</dt><dd>Seg - Sex das 8h às 18hs</dd></div>
+          <div><dt>E-mail</dt><dd><a href="mailto:sac@bapautoparts.com.br">sac@bapautoparts.com.br</a></dd></div>
+        </dl>
+      </section>
+    </div>`;
   }
 
   let ROTA_ATUAL = null, ROTA_ANTERIOR = null; // hash da tela na frente e da anterior (para o Voltar)
@@ -1521,8 +1564,11 @@
     const lk = ev.target.closest('.lista .item a[href^="#/produto/"]');
     CLICOU_CARTAO = !!lk && !(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) && ev.button === 0;
     if (CLICOU_CARTAO) LINK_CARTAO = lk;
-    const a = ev.target.closest('a[href="#contato"]');
-    if (a) { ev.preventDefault(); document.getElementById("contato").scrollIntoView({ behavior: "smooth" }); }
+    // o botão verde do rodapé (op4e) volta ao topo; o foco vai para o conteúdo
+    if (ev.target.closest(".rodape-topo")) {
+      window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      app.focus({ preventScroll: true });
+    }
   });
   carregar().then(render).catch((e) => {
     app.innerHTML = `<div class="carregando">Não foi possível carregar o catálogo (${esc(e.message)}). Atualize a página.</div>`;
