@@ -32,8 +32,12 @@
   --foto-cartao-cel: 55px;
   --alto-topo: 84px; /* altura do cabeçalho e uma folga: scroll-padding-top e a foto do produto (76 px no celular) */
   /* fundo da faixa do início e do topo da Sobre (T-0018): só tokens; o verde translúcido é o --verde no color-mix */
-  --fundo-faixa: radial-gradient(900px 420px at 88% 30%, color-mix(in srgb, var(--verde) 35%, transparent) 0%, transparent 65%),
-                 linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%);
+  --verde-mancha: color-mix(in srgb, var(--verde) 35%, transparent);
+  --degrade-faixa: linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%);
+  --fundo-faixa: radial-gradient(900px 420px at 88% 30%, var(--verde-mancha) 0%, transparent 65%), var(--degrade-faixa);
+  /* topo da Sobre em uma coluna, até 900 px (R-20261120-174100, item 2; MC-0001): a mancha sai de trás da frase verde
+     do título e desce para trás das fotos; o computador e a faixa do início continuam no --fundo-faixa */
+  --fundo-sobre-cel: radial-gradient(460px 280px at 50% 74%, var(--verde-mancha) 0%, transparent 65%), var(--degrade-faixa);
   /* cabeçalho e faixa da busca do catálogo (T-0018, opção b, R-20261120-161500): degradê do --escuro ao --verde-esc.
      A ponta é o --verde-esc com 15% de --escuro, para o menu branco de 14 px passar do AA (5,1:1; no --verde-esc puro, 4,1:1) */
   --g-catalogo: linear-gradient(90deg, var(--escuro) 0%, var(--texto) 55%, color-mix(in srgb, var(--verde-esc) 85%, var(--escuro)) 100%);
@@ -338,9 +342,9 @@ body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
 @media (max-width: 640px) {
   :root { --alto-topo: 76px; }
   .menu { gap: 2px; }
-  .menu a { font-size: 13px; white-space: nowrap; } /* 3 itens (op4e): o "Sobre a BAP" aparece também no celular */
+  .menu a { font-size: 13px; white-space: nowrap; padding-inline: 6px; } /* 3 itens (op4e): o "Sobre a BAP" aparece também no celular; o "Início" com 44 px de largura (43 px com 5 px) */
   .marca img { height: 38px; }
-  .marca { gap: 8px; }
+  .marca { gap: 8px; min-height: 44px; } /* toque com 44 px (o logo tem 38 a 40 px) */
   .marca span { font-size: 10px; line-height: 1.2; letter-spacing: .1em; padding-left: 8px; } /* "Catálogo online" em 2 linhas (T-0018) */
   .so-cel { display: inline; }
   .rodape { margin-top: 40px; }
@@ -418,6 +422,17 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .faixa-modelo:not(.aberto) .mv-resumo-txt { font-size: 12px; }
   .faixa-modelo:not(.aberto) .mv-placa-grande { width: 150px; }
 }
+/* celular com a placa consultada (p1, R-20261120-181200): a placa com o ✕ e, ao lado, o nome do veículo com 18 px,
+   em até 2 linhas (o leitor de tela lê o nome inteiro); sem o "Alterar veículo". O rótulo "Placa" sai só da vista
+   (a técnica da .vh): o aria-labelledby da placa depende dele. Sem placa e no computador, nada muda */
+@media (max-width: 640px) {
+  .faixa-modelo:not(.aberto):has(.mv-tirar) { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 10px 12px; }
+  .faixa-modelo:not(.aberto):has(.mv-tirar) #mv-placa-rot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .faixa-modelo:not(.aberto):has(.mv-tirar) .mv-alterar { display: none; }
+  .faixa-modelo:not(.aberto):has(.mv-tirar) .mv-resumo { justify-content: center; }
+  .faixa-modelo:not(.aberto):has(.mv-tirar) .mv-resumo-txt { font-size: 18px; font-weight: 700; line-height: 1.25; color: var(--texto);
+    white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}
 
 /* "Salvar em PDF" (T-0014): a folha A4 sai da impressão do navegador. Só o que a página mostra. */
 @page { size: A4; margin: 10mm 11mm; }
@@ -434,9 +449,11 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .produto-conteudo { font-size: 8.5pt; line-height: 1.3; }
   .so-impressao { display: block; }
   .secao .so-impressao { margin-top: 2mm; } /* "Aplicação completa" afastada da tabela */
-  .cab-pdf { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--verde); padding-bottom: 2mm; margin-bottom: 4mm; }
-  .cab-pdf img { height: 12mm; width: auto; }
-  .cab-pdf span { font-size: 8pt; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-2); }
+  /* f1 (R-20261120-181200): faixa escura com o degradê do site, arredondada e dentro da margem, com o logo branco
+     e a linha --verde; padding e logo menores para o MF24 caber em 1 folha (designer-ux) */
+  .cab-pdf { display: flex; align-items: center; justify-content: space-between; background: var(--g-catalogo); border-bottom: 2px solid var(--verde); border-radius: 2mm; padding: 2mm 4mm; margin-bottom: 4mm; }
+  .cab-pdf img { height: 10mm; width: auto; }
+  .cab-pdf span { font-size: 8pt; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--branco); }
   .prod { display: grid; grid-template-columns: 46mm minmax(0, 1fr); grid-template-areas: "foto cab" "foto tab" "apl apl"; gap: 3mm 5mm; align-items: start; }
   .prod-info, .prod-dados { display: contents; }
   dialog.zoom { display: none !important; }
@@ -607,6 +624,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .sb-dados a { color: var(--verde-txt); text-decoration: none; display: inline-block; padding: 12px 0; margin: -12px 0; } /* toque com 44 px */
 .sb-dados a:hover { text-decoration: underline; }
 @media (max-width: 900px) {
+  .sobre-marca .sb-topo { background-image: var(--veu-topo), var(--fundo-sobre-cel); }
   .sb-topo-in { grid-template-columns: minmax(0, 1fr); padding: 36px 16px 56px; gap: 20px; }
   .sb-fotos { height: 220px; max-width: 420px; width: 100%; margin: 0 auto; }
   .sb-hist { grid-template-columns: minmax(0, 1fr); }
