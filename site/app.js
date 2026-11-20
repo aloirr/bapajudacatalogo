@@ -921,26 +921,34 @@
   }
 
   // ---------- filtros e etiquetas (R-20261120-113148 e R-20261120-123800, Alexandre) ----------
-  // Um grupo por filtro (Sistema, Família, Linha, Categoria), aberto, com caixas de marcar (uma ou mais) e a contagem;
+  // Um grupo por filtro (Linha, Categoria, Sistema, Família), aberto, com caixas de marcar (uma ou mais) e a contagem;
   // o botão do grupo só recolhe. Ficam na coluna à esquerda dos cartões (no celular, no painel "Filtrar"). A lógica:
   // si=, fa=, li= e ca= no endereço (repetidos quando há mais de um) e a contagem sobre o resultado sem o próprio
   // filtro. Abaixo, as etiquetas do termo (q) e de cada filtro marcado, com o X, e o "Limpar tudo". A placa e o
   // veículo ficam no quadro da busca (montarBusca).
-  const ROT_FILTRO = { si: "Sistema", fa: "Família", li: "Linha", ca: "Categoria" };
+  // ordem dos grupos, no computador e no celular: Linha, Categoria, Sistema, Família (R-20261120-145600-alexandre)
+  const ROT_FILTRO = { li: "Linha", ca: "Categoria", si: "Sistema", fa: "Família" };
   let FILTRO_FOCO = null; // { k, v, y }: o que reabrir e focar depois de refazer a lista
   function montarFiltros(pr, todos) {
     const barra = app.querySelector(".barra-filtros");
+    // as opções não somem ao marcar outra: a lista e a ordem de cada grupo vêm da busca sem nenhum filtro marcado;
+    // a contagem, da busca com os outros filtros. Com 0, a opção fica cinza e desabilitada (a marcada, nunca).
+    const semFiltros = new URLSearchParams(pr); Object.keys(ROT_FILTRO).forEach((k) => semFiltros.delete(k));
+    const universo = semFiltros.toString() === pr.toString() ? todos : buscar(semFiltros);
     barra.innerHTML = Object.keys(ROT_FILTRO).map((k) => {
       const marcados = pr.getAll(k).filter(Boolean);
       const semEste = new URLSearchParams(pr); semEste.delete(k);
       const base = marcados.length ? buscar(semEste) : todos;
-      const op = contar(base, k).slice(0, 40);
-      for (const v of marcados) if (!op.some(([x]) => x === v)) op.push([v, 0]);
+      const qtd = new Map(contar(base, k));
+      const op = contar(universo, k).slice(0, 40).map(([v]) => [v, qtd.get(v) || 0]);
+      for (const v of marcados) if (!op.some(([x]) => x === v)) op.push([v, qtd.get(v) || 0]);
       if (!op.length) return ""; // a coluna aparece sempre, mesmo com uma opção só (R-20261120-130300)
       return `<div class="filtro" data-k="${k}">
         <button class="filtro-bt" type="button" aria-expanded="true" aria-controls="filtro-${k}"><span>${ROT_FILTRO[k]}${marcados.length ? ` <b>(${marcados.length})</b>` : ""}</span><span class="seta" aria-hidden="true">▾</span></button>
-        <div class="filtro-lista" id="filtro-${k}" role="group" aria-label="${ROT_FILTRO[k]}">${op.map(([v, n]) =>
-          `<label><input type="checkbox" value="${esc(v)}"${marcados.includes(v) ? " checked" : ""}><span>${esc(titulo(v))}</span><em>${fmt(n)}</em></label>`).join("")}</div></div>`;
+        <div class="filtro-lista" id="filtro-${k}" role="group" aria-label="${ROT_FILTRO[k]}">${op.map(([v, n]) => {
+          const marc = marcados.includes(v), off = !n && !marc;
+          return `<label${off ? ' class="off"' : ""}><input type="checkbox" value="${esc(v)}"${marc ? " checked" : ""}${off ? ' disabled aria-disabled="true"' : ""}><span>${esc(titulo(v))}</span><em>${fmt(n)}</em></label>`;
+        }).join("")}</div></div>`;
     }).join("");
     for (const box of barra.querySelectorAll(".filtro")) {
       const k = box.dataset.k, bt = box.querySelector(".filtro-bt");
