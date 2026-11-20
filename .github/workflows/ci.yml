@@ -27,7 +27,8 @@ jobs:
       - name: Governança (avisa; o merge exige a autorização do Alexandre)
         env:
           BASE_REF: ${{ github.base_ref }}
-        run: node scripts/coord.mjs governanca --base "origin/$BASE_REF" || echo "::warning::PR com caminho de governança: precisa do recado do Alexandre 'autorizo o merge do PR #N no commit <sha>'"
+        run: |
+          node scripts/coord.mjs governanca --base "origin/$BASE_REF" || echo "::warning::PR com caminho de governança: precisa do recado do Alexandre 'autorizo o merge do PR #N no commit <sha>'"
       - name: Python compila
         run: python -m compileall -q -x '(docs|catalogo_grafico/entregas)/' .
       - name: Site (gera o JSON e confere a TRAVA; sem fotos)
