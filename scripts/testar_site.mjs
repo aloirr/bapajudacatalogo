@@ -891,6 +891,34 @@ async function testarSite(base, ctxJson, dirPrints) {
         FILTRO_SI.coluna = COLUNA.join("; ");
       }
       if (tipoFiltro === "painel") FILTRO_SI.painel = `${L}: botão "${await botaoFiltrar()}"`;
+      // R-20261120-130300: a coluna de filtros aparece SEMPRE, mesmo com 1 opção só em cada grupo (1366 e 1536), e o
+      // "Filtrar" sempre à vista no celular. Caso: "CXD13062" (1 produto: cada grupo com 1 opção)
+      if (tela === "campos" && pCod) {
+        const gruposProd = ["si", "fa", "li", "ca"].filter((k) => pCod[k]).length;
+        await abrir("filtros-um", "#/busca?q=" + encodeURIComponent(COD));
+        const UM = [];
+        for (const [w, h] of larg === 1366 ? [[1366, 768], [1536, 864]] : [[larg, alt]]) {
+          if (w !== larg) { await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(400); }
+          const c = await page.evaluate(() => {
+            const T = window.__bapT, g = T.grupos(), it = document.querySelector(".lista .item");
+            const col = g[0] && (g[0].closest("aside") || g[0].parentElement.parentElement);
+            const fil = [...document.querySelectorAll("#app button")].find((x) => T.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim()));
+            return { g: g.length, esq: !!(col && it && col.getBoundingClientRect().right <= it.getBoundingClientRect().left + 1), filtrar: fil ? fil.textContent.replace(/\s+/g, " ").trim() : "", itens: document.querySelectorAll(".lista .item").length };
+          });
+          if (w >= 1000) {
+            if (c.g < gruposProd) falha("filtros", N_FIL, `sempre:${w}`, `${w} px: "${COD}" (${c.itens} produto) mostra ${c.g} de ${gruposProd} grupo(s) de filtro (pedido: a coluna sempre, mesmo com 1 opção)`);
+            else if (!c.esq) falha("filtros", N_FIL, `sempre:esquerda:${w}`, `${w} px: "${COD}": a coluna de filtros não fica à esquerda do cartão`);
+            UM.push(`${w} px: ${c.g} grupos`);
+          } else {
+            if (!c.filtrar) falha("filtros", N_FIL, `sempre:${w}`, `${w} px: "${COD}" (${c.itens} produto) sem o botão "Filtrar" à vista (pedido: sempre)`);
+            UM.push(`${w} px: botão "${c.filtrar}"`);
+          }
+          if (w !== larg) { await page.setViewportSize({ width: larg, height: alt }); await page.waitForTimeout(300); }
+        }
+        FILTRO_SI.sempre = (FILTRO_SI.sempre ? FILTRO_SI.sempre + "; " : "") + `"${COD}" (1 opção por grupo): ` + UM.join(", ");
+        conferirConsole("filtros-um");
+        await abrir("filtros", "#/busca?q=" + encodeURIComponent(QF)); // volta ao caso dos filtros
+      }
       const total0 = await totalTela();
       const siCaso = FILTRO_SI_CASO;
       if (siCaso) {
@@ -1303,8 +1331,10 @@ async function testarSite(base, ctxJson, dirPrints) {
           }
           const antesMarca = !!etq && !!listas[0] && !!(etq.compareDocumentPosition(listas[0]) & Node.DOCUMENT_POSITION_FOLLOWING);
           const sel = listas.map((l) => (l && l.value ? (l.selectedOptions[0] || {}).textContent || l.value : ""));
+          const off = listas.map((l) => !!(l && l.disabled));
+          const estilo = (l) => { if (!l) return ""; const cs = getComputedStyle(l); return [cs.color, cs.backgroundColor, cs.opacity, cs.filter, cs.borderColor].join(";"); };
           return { hash: location.hash, etq: etq ? txt(etq) : "", xLabel: xPlaca ? xPlaca.getAttribute("aria-label") : "", fora: total - naEtq - noCampo,
-            naFaixa: !!etq && !!faixa && faixa.contains(etq), noQuadro: !!etq && T.quadro().contains(etq), fonteP, rotP, antesMarca, sel, temFaixa: !!faixa, itens: document.querySelectorAll(".lista .item").length };
+            naFaixa: !!etq && !!faixa && faixa.contains(etq), noQuadro: !!etq && T.quadro().contains(etq), fonteP, rotP, antesMarca, sel, off, estilo0: estilo(listas[0]), temFaixa: !!faixa, itens: document.querySelectorAll(".lista .item").length };
         }, PL_RX.source);
         if (!v.hash.startsWith("#/busca")) falha("placa", N_PL, "veiculo:tela", `${L}: com o veículo falso, a placa não levou à lista (endereço "${v.hash}")`);
         if (!v.itens) falha("placa", N_PL, "veiculo:lista", `${L}: o veículo falso (VW GOL 2018) trouxe a lista vazia`);
@@ -1319,6 +1349,8 @@ async function testarSite(base, ctxJson, dirPrints) {
         const esperadoSel = [/volkswagen|\bvw\b/i, /\bgol\b/i, /\b2018\b/, /\b1[.,]6\b/], nomesSel = ["Marca", "Modelo", "Ano", "Motor"];
         esperadoSel.forEach((rx, i) => { if (v.temFaixa && !rx.test(v.sel[i] || "")) falha("placa", N_PL, "veiculo:lista:" + nomesSel[i], `${L}: depois da placa (VW GOL 2018 1.6), a lista ${nomesSel[i]} ficou com "${v.sel[i] || "(nada)"}"`); });
         const mm = v.sel.slice(0, 4).filter(Boolean).join(" › ");
+        // R-20261120-130300: com a placa, as 5 listas travadas (disabled), em cinza, com os valores da placa
+        if (v.temFaixa && !v.off.every(Boolean)) falha("placa", N_PL, "veiculo:travadas", `${L}: com a placa, as listas ${["Marca", "Modelo", "Ano", "Motor", "Versão"].filter((_, i) => !v.off[i]).join(", ")} não estão travadas (pedido: as 5 travadas com os valores da placa)`);
         await placaFora("(veículo falso)");
         await page.evaluate(() => window.scrollTo(0, 0));
         await print("busca-placa");
@@ -1331,8 +1363,15 @@ async function testarSite(base, ctxJson, dirPrints) {
           if (!clicou) falha("placa", N_PL, "x:clique", `${L}: não consegui clicar no "x" da etiqueta da placa ("${v.xLabel}")`);
           const resta = await page.evaluate((fonte) => { const rx = new RegExp(fonte, "gi"); const c = window.__bapT.campos(); return (document.documentElement.outerHTML.match(rx) || []).length - (c.placa ? (c.placa.outerHTML.match(rx) || []).length : 0); }, PL_RX.source);
           if (resta > 0) falha("placa", N_PL, "x:some", `${L}: depois do "x", a placa continua no DOM (${resta} vez(es))`);
-          const depoisX = await page.evaluate(() => window.__bapT.veiculo().listas.map((l) => (l ? l.value : "")));
-          if (depoisX.some(Boolean)) falha("placa", N_PL, "x:listas", `${L}: depois do "x" da placa, as listas do veículo ficaram com "${depoisX.join(" › ")}" (esperado: vazias)`);
+          const dx = await page.evaluate(() => { const l = window.__bapT.veiculo().listas; const cs = l[0] ? getComputedStyle(l[0]) : null;
+            return { val: l.map((x) => (x ? x.value : "")), txt: l.map((x) => (x && x.selectedOptions[0] ? x.selectedOptions[0].textContent.trim() : "")), off: l.map((x) => !!(x && x.disabled)),
+              estilo0: cs ? [cs.color, cs.backgroundColor, cs.opacity, cs.filter, cs.borderColor].join(";") : "" }; });
+          // R-20261120-130300: o X volta as 5 para "Todos" e editáveis (a Marca ativa; as outras como numa busca nova, em cascata)
+          if (dx.val.some(Boolean) || dx.txt.some((t) => t && !/^Tod[oa]s\b/i.test(t))) falha("placa", N_PL, "x:listas", `${L}: depois do "x" da placa, as listas do veículo ficaram com "${dx.txt.join(" › ")}" (esperado: "Todos" nas 5)`);
+          if (dx.off[0]) falha("placa", N_PL, "x:travada", `${L}: depois do "x" da placa, a lista Marca continua travada`);
+          // em cinza: a Marca travada (com a placa) tem outra cor que a Marca editável (depois do X)
+          if (v.temFaixa && v.off[0] && !dx.off[0] && v.estilo0 === dx.estilo0) falha("placa", N_PL, "veiculo:cinza", `${L}: a lista Marca travada (com a placa) tem a mesma cor da editável (pedido: em cinza)`);
+          if (v.temFaixa) CAMPOS_TELA.trava = `com a placa, as 5 listas travadas (${v.off.filter(Boolean).length} de 5) e em cinza; o X volta a "Todos" com a Marca editável`;
           await placaFora("(depois do x)");
         }
         // os 2 campos preenchidos (R-20261120-115432, 1 botão só): placa + "amortecedor" = a lista do veículo filtrada pelo
@@ -1388,9 +1427,9 @@ async function testarSite(base, ctxJson, dirPrints) {
   detalhe("filtros", "filtros da busca", [siTxt, FILTRO_SI.marcou ? "barra: Esc fecha; " + FILTRO_SI.marcou + "; etiqueta \"Tirar\" criada e tirada" : ""].filter(Boolean).join("; "));
   if (TELAS.has("campos")) {
     detalhe("campos-busca", "campos da busca", `${CAMPOS_TELA.rotulos || "?"}; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro; q com Enter e botão (busca código e veículo)`);
-    detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} em destaque na faixa, com o rótulo "Placa" em cima e antes da Marca, e as listas "${CAMPOS_TELA.veiculo || "?"}"; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas`);
+    detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} em destaque na faixa, com o rótulo "Placa" em cima e antes da Marca, e as listas "${CAMPOS_TELA.veiculo || "?"}"; ${CAMPOS_TELA.trava || ""}; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas`);
     detalhe("meuveiculo", "meu veículo", MV.join("; ") + '; faixa logo abaixo do quadro da busca, 5 listas em cascata (Marca, Modelo, Ano, Motor, Versão); sem "Meu veículo", sem "Trocar veículo", sem chave liga/desliga, sem "Departamentos"');
-    detalhe("filtros", "filtros da busca", [FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "", FILTRO_SI.coluna || "", FILTRO_SI.painel || "", FILTRO_SI.marcou || ""].filter(Boolean).join("; "));
+    detalhe("filtros", "filtros da busca", [FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "", FILTRO_SI.coluna || "", FILTRO_SI.painel || "", FILTRO_SI.sempre || "", FILTRO_SI.marcou || ""].filter(Boolean).join("; "));
     detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 4 ou 5 na 1ª linha em 1366, 5 em 1536 e 1920, 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes"`);
   }
   if (JANELAS.size) detalhe("janela", "janela do produto", `"+ Detalhes" e código/nome abrem o dialog com o código; Esc fecha e devolve o foco ao cartão; a foto do cartão só amplia (${[...JANELAS].join(" e ")})`);
