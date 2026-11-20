@@ -247,8 +247,6 @@ def ler_base(caminho: Path) -> list[dict]:
             "po": g(r, "POSICAO"),
             "la": g(r, "LADO"),
             "de": g(r, "DETALHE_CATALOGO"),
-            "df": g(r, "DIFERENCIAL"),
-            "ip": g(r, "ITEM_PARECIDO"),
             "oj": g(r, "OFERECA_JUNTO"),
         })
     ve = veiculos_de(wb)

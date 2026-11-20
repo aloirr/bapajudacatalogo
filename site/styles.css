@@ -291,8 +291,11 @@ dialog.zoom::backdrop { background: transparent; }
 table.tab-veiculos { min-width: 0; } /* sem rolagem na janela */
 table.tab-veiculos th { width: auto; color: var(--texto-2); font-weight: 600; white-space: nowrap; }
 table.tab-veiculos thead th { border-bottom: 1px solid var(--linha); }
-table.tab-veiculos td { white-space: nowrap; }
-table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o ano quebra a linha em vez de cortar */
+/* a tabela nunca rola para o lado (revisão do designer-ux no PR #50): Marca, Modelo e Versão quebram a linha;
+   Cilindrada e Ano não quebram */
+table.tab-veiculos td { white-space: normal; overflow-wrap: normal; } /* quebra entre palavras ("Volkswagen" inteiro) */
+table.tab-veiculos td:nth-child(3), table.tab-veiculos td:nth-child(5) { white-space: nowrap; }
+@media (max-width: 1279px) { table.tab-veiculos td { overflow-wrap: anywhere; } } /* tela estreita: a palavra longa quebra para não rolar */
 .lista-veiculos { display: none; list-style: none; margin: 0; padding: 0; }
 @media (max-width: 480px) {
   .tab-rola { display: none; }
@@ -301,7 +304,7 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
   .lista-veiculos li b { display: block; font-weight: 600; color: var(--escuro); }
   .lista-veiculos li > span { display: block; color: var(--texto-2); }
 }
-.apl-resto { margin-top: 12px; } /* "Mais detalhes da aplicação": o texto que a tabela não mostra, aberto */
+.apl-resto { margin-top: 12px; } /* "Outros veículos e detalhes": o que a tabela não cobre, aberto */
 
 /* rodapé (T-0018 op4e): --escuro, a linha --verde e o padrão de ícones automotivos (SVG inline, traço branco a 7%) */
 .rodape { position: relative; margin-top: 56px; color: var(--branco); border-top: 3px solid var(--verde); background-color: var(--escuro);
@@ -482,10 +485,8 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .marca-faixa-in { max-width: 1200px; margin: 0 auto; padding: 26px 16px 34px; display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "txt foto" "busca busca"; gap: 18px 32px; align-items: center; }
 .mf-texto { grid-area: txt; }
-.sb-selo { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
 .marca-faixa h1 { font-size: clamp(28px, 3.3vw, 42px); line-height: 1.12; font-weight: 700; margin: 0 0 12px; }
 .marca-faixa h1 em, .sb-txt h1 em { font-style: normal; color: var(--verde); }
-.marca-faixa p { margin: 0; color: var(--branco); font-size: 16px; max-width: 520px; } /* a frase de apoio (op4d): --branco, o mais forte também onde passa sobre o verde */
 /* "+4.400 produtos no portfólio" (op4d): o número grande e o rótulo com o fio --verde */
 .marca-faixa .mf-num { display: flex; align-items: center; gap: 12px; margin: 4px 0 12px; }
 .mf-num b { font-size: clamp(36px, 4vw, 52px); font-weight: 700; line-height: 1; color: var(--branco); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
@@ -550,7 +551,6 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .mf-num b { font-size: 36px; }
   .mf-num span { font-size: 11px; padding-left: 10px; }
   .marca-faixa h1 { font-size: 22px; letter-spacing: -.01em; } /* o título em 1 linha de 375 a 440 px (R-20261120-155400) */
-  .marca-faixa p { font-size: 14px; }
   .mf-bloco { padding: 12px 12px 14px; }
   /* campos de digitação com 16 px no celular: o Safari do iPhone amplia a página ao focar um campo com fonte menor
      (R-20261120-153600); o .mf-geral input já tem 16 px na regra base. Sem maximum-scale nem user-scalable no viewport */
@@ -575,7 +575,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 /* ===== Sobre a BAP (T-0018, sobre1): texto do PDF "Empresa", fotos de produtos BAP; o fundo do topo é o da faixa do início ===== */
 .sobre { --sb-larg: 1160px; }
 .sb-topo-in { max-width: var(--sb-larg); margin: 0 auto; padding: 56px 16px 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: 32px; align-items: center; }
-.sb-selo { margin-bottom: 16px; background: var(--verde); color: var(--escuro); letter-spacing: .12em; }
+.sb-selo { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; background: var(--verde); color: var(--escuro); letter-spacing: .12em; }
 .sb-txt h1 { font-size: clamp(28px, 3.6vw, 44px); line-height: 1.12; margin: 0 0 18px; font-weight: 700; }
 .sb-txt p { margin: 0; color: var(--branco); font-size: 17px; max-width: 520px; }
 .sb-fotos { position: relative; height: 320px; }
