@@ -10,6 +10,8 @@ Uso (na raiz do repositório bapajudacatalogo):
 - O site NÃO mostra preço nem estoque (regra do BAP Ajuda, 21/10/2026).
 - Fotos: <CODIGO>.jpg/png da pasta de fotos, reduzidas para no máximo 700 px (JPEG 80). Foto já gerada e mais
   nova que a original não é refeita. Sem foto, o site mostra o logo e "Foto em breve".
+- Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (v17, T-0017). Só as
+  linhas SITUACAO = separado; as duvidosas ficam fora até a revisão. Sem a aba, o JSON sai como antes.
 - Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
   ou de importação, fornecedor), o script PARA e não grava (ver TRAVA abaixo).
 """
@@ -141,6 +143,47 @@ def montadora_de(extras: list[list[str]], aplicacao: str) -> str:
     return MONTADORAS.get(nome, nome)
 
 
+# Aba VEICULOS (v17, T-0017): uma linha por produto x veículo. Vai para o site SÓ fabricante, modelo e versão das
+# linhas SITUACAO = separado. ORIGEM, SITUACAO, MOTIVO e os anos (ANO_INICIO/ANO_FIM) não vão.
+VE_SITUACAO = "separado"
+
+
+def veiculos_de(wb) -> dict[str, list[list[str]]]:
+    """{CODIGO: [[fabricante, modelo, versao?], ...]}, sem repetir e na ordem da aba. Sem a aba VEICULOS: {}."""
+    if "VEICULOS" not in wb.sheetnames:
+        return {}
+    linhas = wb["VEICULOS"].iter_rows(values_only=True)
+    cab = [limpar(c).upper() for c in next(linhas, ())]
+    pos = {c: i for i, c in enumerate(cab)}
+    falta = {"CODIGO_BAP", "FABRICANTE", "MODELO", "SITUACAO"} - pos.keys()
+    if falta:
+        sys.exit(f"[ERRO] aba VEICULOS sem a coluna {', '.join(sorted(falta))}")
+
+    def g(r, c):
+        i = pos.get(c)
+        return limpar(r[i]) if i is not None and i < len(r) else ""
+
+    saida: dict[str, list[list[str]]] = {}
+    vistos: set[tuple[str, str, str, str]] = set()
+    sem_modelo = 0
+    for r in linhas:
+        cod = g(r, "CODIGO_BAP").upper()
+        if not cod or g(r, "SITUACAO").lower() != VE_SITUACAO:
+            continue
+        fab, mod, ver = g(r, "FABRICANTE"), g(r, "MODELO"), g(r, "VERSAO")
+        if not fab or not mod:
+            sem_modelo += 1                      # separado sem fabricante ou modelo não serve ao filtro
+            continue
+        chave = (cod, fab, mod, ver)
+        if chave in vistos:
+            continue
+        vistos.add(chave)
+        saida.setdefault(cod, []).append([fab, mod, ver] if ver else [fab, mod])
+    if sem_modelo:
+        print(f"  [AVISO] VEICULOS: {sem_modelo} linhas 'separado' sem fabricante ou modelo ficaram fora do 've'")
+    return saida
+
+
 def ler_base(caminho: Path) -> list[dict]:
     try:
         import openpyxl
@@ -188,6 +231,10 @@ def ler_base(caminho: Path) -> list[dict]:
             "ip": g(r, "ITEM_PARECIDO"),
             "oj": g(r, "OFERECA_JUNTO"),
         })
+    ve = veiculos_de(wb)
+    for p in produtos:
+        if p["c"] in ve:
+            p["ve"] = ve[p["c"]]
     return produtos
 
 
@@ -264,6 +311,7 @@ TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s
 
 
 def conferir(produtos: list[dict]) -> list[str]:
+    """Varre cada produto inteiro (todos os campos, o "ve" também)."""
     achados = []
     for p in produtos:
         m = TRAVA.search(json.dumps(p, ensure_ascii=False))
@@ -305,10 +353,18 @@ def main():
         for a_ in achados[:20]:
             print("   ", a_)
         sys.exit(2)
+    com_ve = sum(1 for p in produtos if "ve" in p)
+    if com_ve:
+        print(f"  veículos: {com_ve} produtos com 've' ({sum(len(p['ve']) for p in produtos if 've' in p)} veículos)")
     dados = {"gerado_em": datetime.now().strftime("%d/%m/%Y %H:%M"), "fonte": Path(a.base).name,
              "total": len(produtos), "produtos": produtos}
+    texto = json.dumps(dados, ensure_ascii=False, separators=(",", ":"))
+    m = TRAVA.search(texto)                  # segunda volta: o arquivo inteiro, como vai ser gravado
+    if m:
+        print(f"[PARADO] o JSON sairia com dado interno (nada foi gravado): '{m.group(0)}'")
+        sys.exit(2)
     SAIDA.parent.mkdir(parents=True, exist_ok=True)
-    SAIDA.write_text(json.dumps(dados, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    SAIDA.write_text(texto, encoding="utf-8")
     print(f"  {SAIDA.relative_to(RAIZ)}: {SAIDA.stat().st_size / 1e6:.1f} MB")
 
 

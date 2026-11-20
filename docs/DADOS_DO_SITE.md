@@ -15,6 +15,15 @@
 | `po`, `la`, `de`, `df` | POSICAO, LADO, DETALHE_CATALOGO, DIFERENCIAL |
 | `ip`, `oj` | ITEM_PARECIDO, OFERECA_JUNTO |
 | `i` | foto em `site/img/` |
+| `ve` | veículos do filtro "Meu veículo", da aba `VEICULOS` (v17, T-0017): lista de `[FABRICANTE, MODELO, VERSAO]`, a VERSAO só quando existe. Ex.: `[["VOLKSWAGEN","Gol","G5"],["VOLKSWAGEN","Saveiro"]]`. |
+
+**Campo `ve` (T-0017):**
+
+- Vêm só as linhas com `SITUACAO` = "separado", sem repetir e na ordem da aba.
+- As linhas "duvidoso" ficam fora do `ve` até a revisão (decisão do Alexandre, R-20261120-123130). A busca geral continua achando esses produtos pela APLICACAO.
+- Fabricante, modelo e versão vão como estão na aba, sem caixa alta forçada: o site formata.
+- O produto sem linha "separado" não ganha o campo. Se a base não tem a aba `VEICULOS`, nenhum produto ganha o campo e o JSON sai como antes.
+- Da aba `VEICULOS` **não vão** para o site: `ORIGEM`, `SITUACAO`, `MOTIVO`, `ANO_INICIO` e `ANO_FIM`. A aba `MODELOS_VEICULO` (dicionário) também não vai.
 
 **Nunca vai para o site:**
 
@@ -28,3 +37,5 @@
 - observações internas.
 
 A `TRAVA` do `gerar_site.py` para a geração (código 2, nada é gravado) se o JSON sair com uma destas palavras: estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra ou de importação, fornecedor. "Fornecedor" e "R$" entraram na v15 (T-0007 e T-0009, com o "autorizo" do Alexandre no recado R-20261120-100005-alexandre).
+
+A `TRAVA` varre cada produto inteiro, com o `ve`. Desde a T-0017 ela também varre o arquivo inteiro, como vai ser gravado, antes de gravar.
