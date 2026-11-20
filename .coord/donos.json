@@ -52,6 +52,10 @@
       "dono": "alexandre"
     },
     {
+      "padrao": "fotos-novas/**",
+      "dono": "alexandre"
+    },
+    {
       "padrao": "docs/legado/**",
       "dono": "congelado"
     },

@@ -353,7 +353,7 @@
       const base = pr.get(k) ? buscar(semEste) : todos;
       const op = contar(base, k).slice(0, 40);
       if (!op.length) return "";
-      return `<details ${k === "si" || k === "fa" || pr.get(k) ? "open" : ""}><summary>${ROT[k]}</summary>${op.map(([v, n]) =>
+      return `<details open><summary>${ROT[k]}</summary>${op.map(([v, n]) =>
         `<label><input type="radio" name="f-${k}" value="${esc(v)}" ${pr.get(k) === v ? "checked" : ""}><span>${esc(titulo(v))}</span><em>${fmt(n)}</em></label>`).join("")}</details>`;
     }).join("") + `<button class="limpar-f" type="button">Limpar filtros</button>`;
     aside.addEventListener("change", (ev) => {

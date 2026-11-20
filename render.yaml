@@ -17,3 +17,25 @@ services:
       - path: /*
         name: X-Content-Type-Options
         value: nosniff
+  # Busca por placa (T-0005): serviço pequeno que consulta a API PLACAS com a chave só em variável de ambiente.
+  # A chave (API_PLACAS_TOKEN) é criada pelo Alexandre no painel do Render; nunca vai para o Git.
+  # Plano pago (não dorme) e disco persistente para guardar placa -> veículo (decisão do Alexandre, R-20261120-110140).
+  - type: web
+    name: bapajudacatalogo-placas
+    runtime: node
+    plan: starter
+    rootDir: servicos/placas
+    buildCommand: 'echo "sem dependencias"'
+    startCommand: node server.mjs
+    healthCheckPath: /saude
+    disk:
+      name: placas-guardadas
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: API_PLACAS_TOKEN
+        sync: false
+      - key: ORIGEM_PERMITIDA
+        value: https://bapajudacatalogo.onrender.com
+      - key: PASTA_GUARDA
+        value: /var/data
