@@ -571,12 +571,14 @@
   // menor da placa, com UM botão "Buscar" para os dois (o Enter em qualquer campo faz o mesmo): só texto → busca o
   // texto; só placa → consulta a placa; os dois → consulta a placa e filtra pelo texto. A placa consultada e o veículo
   // vão para a faixa abaixo do quadro (montarLayout). O aviso embaixo da placa só aparece quando há algo a dizer.
+  // no celular (até 640 px) o exemplo do campo geral é curto, para não sair cortado (R-20261120-155000-alexandre)
+  const EX_CURTO = () => window.matchMedia("(max-width: 640px)").matches;
   function montarBusca(container, pr) {
     container.insertAdjacentHTML("beforeend", `<section class="cartao-busca" aria-label="Buscar produtos">
       <form class="form-busca" autocomplete="off" role="search" aria-label="Buscar produtos">
         <div class="bq-campo bq-q">
           <label class="campo-rot" for="campo-q">Código, descrição ou aplicação</label>
-          <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S, 15W40">
+          <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="${EX_CURTO() ? "Ex.: gol 2007" : "Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S, 15W40"}">
         </div>
         <div class="bq-campo bq-placa">
           <label class="campo-rot" for="campo-placa">Placa do veículo</label>
