@@ -75,7 +75,7 @@ def _compat(a, b):
 
 
 def _idx(rows):
-    return [(r, X.feats(r), X.brands(r), _pos(r['code'])) for r in rows if r.get('segs') and not r.get('sem_estoque')]   # par só com item em estoque (27/10)
+    return [(r, X.feats(r), X.brands(r), _pos(r['code'])) for r in rows if r.get('segs') and not r.get('sem_estoque')]   # par só com item ATIVO no cadastro (sem_estoque = não ATIVO, T-0019)
 
 
 def _pares(r, cand, lado=True, maxn=2):

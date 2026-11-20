@@ -534,6 +534,7 @@ def build(out):
             table_page(dc, f, rows, p0 + j, j > 0, (PC, top, k) if j == 0 else None)
     contracapa(dc)
     dc.c.showOutline(); dc.c.save()
+    PC.log_destaques()
     return pg + 1, entries
 
 

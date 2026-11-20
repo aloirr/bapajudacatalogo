@@ -1,7 +1,7 @@
 """Texto da coluna DETALHE/POSIÇÃO: completo (nunca com "…") e enxuto.
 
 1. Se o texto veio cortado ("…" herdado do PDF antigo), usa a descrição completa
-   da base unificada / ESTOQUE_BAP.
+   da base unificada.
 2. Tira do começo as palavras que repetem o nome da linha
    (ex.: "Bandeja suspensão" na página Bandejas de Suspensão).
 3. Abrevia termos comuns (esq., dir., compl., c/, hidr., diant., tras.).
@@ -10,6 +10,8 @@ import re, os, unicodedata
 import pandas as pd
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
+# base unificada: a fonte única, no Git (T-0019); o montar.py usa este mesmo caminho
+BASE_UNIFICADA = os.path.join(AQUI, '..', '..', 'dados', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx')
 
 
 def _n(s):
@@ -23,18 +25,17 @@ def _desc():
     global _DESC
     if _DESC is None:
         _DESC = {}
-        try:
-            e = pd.read_excel(os.path.join(AQUI, 'entradas', 'ESTOQUE_BAP.xlsx'), dtype=str, usecols=['COD_PRODUTO', 'DESCRICAO_PRODUTO'])
-            _DESC.update(dict(zip(e.COD_PRODUTO, e.DESCRICAO_PRODUTO)))
+        try:   # descrição da base unificada (dados/, no Git); o arquivo de estoque saiu (T-0019, 20/11)
+            b = pd.read_excel(BASE_UNIFICADA, 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'DESCRICAO'])
+            _DESC.update({c: d for c, d in zip(b.CODIGO_BAP, b.DESCRICAO) if isinstance(d, str) and d.strip()})
         except Exception:
             pass
-        for fn in ('BASE_BAP_UNIFICADA_PRODUTOS_BAP_v8.xlsx', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx'):
-            try:
-                b = pd.read_excel(os.path.join(AQUI, 'entradas', fn), 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'DESCRICAO'])
-                for c, d in zip(b.CODIGO_BAP, b.DESCRICAO):
-                    _DESC.setdefault(c, d)
-            except Exception:
-                pass
+        try:   # v8: só para códigos antigos que não estão na base unificada
+            b = pd.read_excel(os.path.join(AQUI, 'entradas', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP_v8.xlsx'), 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'DESCRICAO'])
+            for c, d in zip(b.CODIGO_BAP, b.DESCRICAO):
+                _DESC.setdefault(c, d)
+        except Exception:
+            pass
     return _DESC
 
 
@@ -206,7 +207,8 @@ def preencher_aplicacao(fams):
     for fn in ('BASE_BAP_UNIFICADA_PRODUTOS_BAP_v8.xlsx',):
         try:
             b = pd.read_excel(os.path.join(AQUI, 'entradas', fn), 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'APLICACAO'])
-            base.update({str(c).strip().upper(): str(a).strip() for c, a in zip(b.CODIGO_BAP, b.APLICACAO) if isinstance(a, str) and a.strip()})
+            base.update({str(c).strip().upper(): str(a).strip() for c, a in zip(b.CODIGO_BAP, b.APLICACAO)
+                         if isinstance(a, str) and a.strip() and not re.search(r'R\s*\$', a, re.I)})   # preço nunca entra (TER556556 tinha preço na aplicação da v8)
         except Exception:
             pass
     for f in fams:
@@ -226,7 +228,8 @@ def _base10():
     global _BASE10
     if _BASE10 is None:
         _BASE10 = {}
-        for fn in ('saidas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx', 'entradas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx'):
+        for fn in ('saidas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx', 'entradas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx',
+                   '../../dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx'):   # a v10 está no Git em dados/versoes
             p = os.path.join(AQUI, fn)
             if os.path.exists(p):
                 b = pd.read_excel(p, 'PRODUTOS', dtype=str).fillna('')
