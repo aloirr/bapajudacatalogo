@@ -28,7 +28,7 @@ const chave = (placa) => crypto.createHmac('sha256', semente).update(placa).dige
 const cache = new Map();     // chave -> { status, dados, expira }
 const guardados = new Map(); // chave -> dados (vindos do disco)
 const emVoo = new Map();     // chave -> Promise
-const porIp = new Map();     // ip -> { min, contMin, dia, contDia }
+const porIp = new Map();     // HMAC(ip) -> { min, contMin, dia, contDia } (IP nunca cru)
 let teto = { dia: -1, cont: 0 };
 
 const log = (msg) => console.log(msg);
@@ -118,11 +118,12 @@ function ipDoPedido(req) {
   }
   return req.socket.remoteAddress || '?';
 }
-function limiteIp(ip, agora) {
+// Só conta o pedido que vai chamar a API (ver consultar). O IP entra já embaralhado.
+function limiteIp(ipChave, agora) {
   const min = Math.floor(agora / 60000);
   const dia = diaManaus(agora);
-  let r = porIp.get(ip);
-  if (!r) { r = { min, contMin: 0, dia, contDia: 0 }; porIp.set(ip, r); }
+  let r = porIp.get(ipChave);
+  if (!r) { r = { min, contMin: 0, dia, contDia: 0 }; porIp.set(ipChave, r); }
   if (r.min !== min) { r.min = min; r.contMin = 0; }
   if (r.dia !== dia) { r.dia = dia; r.contDia = 0; }
   if (r.contDia >= LIMITE_IP_DIA) return segAteFimDoDia(agora);
@@ -184,14 +185,19 @@ async function chamarApi(placa) {
   return { status: 503 };
 }
 
-async function consultar(placa, agora) {
+// Cache, guarda e pedido em voo nunca contam nem são barrados por limite.
+// Só o pedido que vai chamar a API reserva a vaga no limite por IP e no teto,
+// ANTES de chamar.
+async function consultar(placa, ipChave, agora) {
   const k = chave(placa);
   const c = cache.get(k);
   if (c && c.expira > agora) return c;
   const g = guardados.get(k);
   if (g) return { status: 200, dados: g };
   if (emVoo.has(k)) return emVoo.get(k);
-  if (!reservarTeto(agora)) return { status: 429, teto: true };
+  const espera = limiteIp(ipChave, agora);
+  if (espera) return { status: 429, erro: 'limite', espera };
+  if (!reservarTeto(agora)) return { status: 429, erro: 'teto', espera: segAteFimDoDia(agora) };
   const p = chamarApi(placa).then((r) => {
     if (r.status === 200) {
       cache.set(k, { ...r, expira: Date.now() + H24 });
@@ -265,9 +271,6 @@ async function tratar(req, res) {
   };
   if (origem && !cors['Access-Control-Allow-Origin']) return fim(403, { erro: 'origem' });
 
-  const espera = limiteIp(ipDoPedido(req), inicio);
-  if (espera) return fim(429, { erro: 'limite' }, { 'Retry-After': String(espera) });
-
   const bruto = await lerCorpo(req);
   if (bruto === null) return fim(413, { erro: 'placa_invalida' });
   let placa = null;
@@ -281,10 +284,10 @@ async function tratar(req, res) {
   const temNaMemoria = (cache.get(k)?.expira ?? 0) > agora || guardados.has(k);
   if (!temNaMemoria && !process.env.API_PLACAS_TOKEN) return fim(503, { erro: 'indisponivel' });
 
-  const r = await consultar(placa, agora);
+  const r = await consultar(placa, chave(ipDoPedido(req)), agora);
   if (r.status === 200) return fim(200, r.dados);
   if (r.status === 404) return fim(404, { erro: 'nao_encontrada' });
-  if (r.status === 429) return fim(429, { erro: 'teto' }, { 'Retry-After': String(segAteFimDoDia(agora)) });
+  if (r.status === 429) return fim(429, { erro: r.erro }, { 'Retry-After': String(r.espera) });
   return fim(503, { erro: 'indisponivel' });
 }
 
