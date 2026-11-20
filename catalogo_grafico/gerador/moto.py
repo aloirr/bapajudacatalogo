@@ -59,7 +59,7 @@ _rol = [_copia(r, 'Rolamento', moto_only(r['segs'])) for r in F['Rolamentos']['r
 FILTROS_MOTO = ('FLU6186', 'FLU6240')
 _filt = [_copia(r) for r in F['Filtros']['rows'] if _eh_moto(r) or r['code'] in FILTROS_MOTO]
 
-MOTO_DEF = [  # (nome, sistema · família, descrição, imagem, linhas, spec, faixa "ofereça junto")
+MOTO_DEF = [  # (nome, sistema · família, descrição, imagem, linhas, spec, faixa "leve também")
     ('Velas de Ignição Moto', 'ELÉTRICA · IGNIÇÃO', 'Velas de ignição para motores de motocicleta.', F['Velas de Ignição']['img'], _velas, False,
      'Óleo 4T na revisão da moto.'),
     ('Lâmpadas Moto', 'ELÉTRICA · ILUMINAÇÃO', 'Lâmpadas de sinalização para motocicletas.', F['Lâmpadas']['img'], _lamp, bool(F['Lâmpadas'].get('spec')), None),
@@ -68,16 +68,16 @@ MOTO_DEF = [  # (nome, sistema · família, descrição, imagem, linhas, spec, f
     ('Óleo 4T', 'LUBRIFICANTES · ÓLEOS DE MOTOR', 'Óleo para motores de motocicleta 4 tempos.', F['Óleo Lubrificante']['img'], _oleo, False,
      'Vela de ignição na revisão da moto.'),
     ('Pneus Moto', 'RODAGEM · PNEUS E CÂMARAS', 'Pneus para motocicletas, com e sem câmara, dianteiros e traseiros.', F['Pneus e Câmaras de Ar Moto']['img'], _pneus, False,
-     'Câmara de ar indicada para cada pneu (coluna Ofereça junto).'),
+     'Câmara de ar indicada para cada pneu (coluna Leve também).'),
     ('Câmaras de Ar Moto', 'RODAGEM · PNEUS E CÂMARAS', 'Câmaras de ar para motocicletas, por aro e medida.', F['Pneus e Câmaras de Ar Moto']['img'], _cam, False,
-     'Pneus BAP compatíveis (coluna Ofereça junto).'),
+     'Pneus BAP compatíveis (coluna Leve também).'),
     ('Rolamentos Moto', 'RODAGEM · CUBOS E ROLAMENTOS', 'Rolamentos de roda e de direção para motocicletas.', F['Rolamentos']['img'], _rol, False, None),
 ]
 MOTO_FAMS = []
 for nome, eb, desc, img, rows_, spec_, venda in MOTO_DEF:
     if not rows_: continue
     d = dict(name=nome, group='LINHA MOTO', eyebrow='LINHA MOTO · ' + eb, desc=desc, count=len(rows_), lanc=False, img=img,
-             spec=spec_, rows=rows_, extra_col='OFEREÇA JUNTO', moto=True)
+             spec=spec_, rows=rows_, extra_col='LEVE TAMBÉM', moto=True)
     if venda: d['venda'] = venda
     MOTO_FAMS.append(d)
 MOTO_ROWS = [r for f in MOTO_FAMS for r in f['rows']]

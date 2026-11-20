@@ -840,7 +840,7 @@
       for (const v of marcados) if (!op.some(([x]) => x === v)) op.push([v, 0]);
       if (!op.length) return ""; // a coluna aparece sempre, mesmo com uma opção só (R-20261120-130300)
       return `<div class="filtro" data-k="${k}">
-        <button class="filtro-bt${marcados.length ? " ativo" : ""}" type="button" aria-expanded="true" aria-controls="filtro-${k}"><span>${ROT_FILTRO[k]}${marcados.length ? ` <b>(${marcados.length})</b>` : ""}</span><span class="seta" aria-hidden="true">▾</span></button>
+        <button class="filtro-bt" type="button" aria-expanded="true" aria-controls="filtro-${k}"><span>${ROT_FILTRO[k]}${marcados.length ? ` <b>(${marcados.length})</b>` : ""}</span><span class="seta" aria-hidden="true">▾</span></button>
         <div class="filtro-lista" id="filtro-${k}" role="group" aria-label="${ROT_FILTRO[k]}">${op.map(([v, n]) =>
           `<label><input type="checkbox" value="${esc(v)}"${marcados.includes(v) ? " checked" : ""}><span>${esc(titulo(v))}</span><em>${fmt(n)}</em></label>`).join("")}</div></div>`;
     }).join("");
@@ -869,12 +869,13 @@
     const etq = app.querySelector(".etiquetas");
     const itens = [];
     const q = pr.get("q");
-    if (q) itens.push({ nome: "Busca: “" + q + "”", tirar: (n) => n.delete("q") });
+    // a etiqueta da busca mostra só o termo entre aspas (R-20261120-141300); o ✕ continua dizendo "Busca" ao leitor de tela
+    if (q) itens.push({ nome: "“" + q + "”", leitor: "Busca: “" + q + "”", tirar: (n) => n.delete("q") });
     for (const k of Object.keys(ROT_FILTRO)) for (const v of pr.getAll(k).filter(Boolean))
       itens.push({ nome: ROT_FILTRO[k] + ": " + titulo(v), tirar: (n) => { const r = n.getAll(k).filter((x) => x !== v); n.delete(k); r.forEach((x) => n.append(k, x)); } });
     if (!itens.length) return;
     etq.hidden = false;
-    etq.innerHTML = itens.map((it, i) => `<span class="etq"><span>${esc(it.nome)}</span><button type="button" data-i="${i}" aria-label="${esc("Tirar " + it.nome)}">✕</button></span>`).join("")
+    etq.innerHTML = itens.map((it, i) => `<span class="etq"><span>${esc(it.nome)}</span><button type="button" data-i="${i}" aria-label="${esc("Tirar " + (it.leitor || it.nome))}">✕</button></span>`).join("")
       + (itens.length >= 2 ? `<button class="limpar-tudo" type="button">Limpar tudo</button>` : "");
     etq.addEventListener("click", (ev) => {
       const b = ev.target.closest("button");
@@ -1110,7 +1111,7 @@
     depois.forEach((el) => conteudo.appendChild(el));
   }
 
-  // códigos de "Ofereça junto" e "Itens parecidos": os do catálogo e os que têm cara de código (letra e número),
+  // códigos de "Leve também" (campo oj) e "Itens parecidos": os do catálogo e os que têm cara de código (letra e número),
   // sem repetir; as observações soltas ("s/ ar", "c/ ar") ficam fora
   function listaCodigos(txt) {
     const vistos = new Set();
@@ -1121,16 +1122,25 @@
       return true;
     });
   }
-  // cada item: o código em negrito e a descrição (d) do catálogo, numa linha que abre o produto (R-20261120-132000 e
-  // 132200); fora do catálogo: o código e a nota "fora do catálogo", sem link. No PDF vai o texto, sem link.
+  // cada item (opção B, R-20261120-140600): a miniatura da foto (até 48 px), o código em negrito e a descrição (d) do
+  // catálogo, num cartão que abre o produto (R-20261120-132000 e 132200); fora do catálogo: o código e a nota
+  // "fora do catálogo", sem link. A miniatura é enfeite (alt vazio): o código e a descrição já dizem o item.
+  // No PDF vai o texto, sem link e sem miniatura.
+  const miniHtml = (p) => `<span class="rel-foto" aria-hidden="true">${p && p.i
+    ? `<img src="img/${encodeURIComponent(p.i)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='assets/logo_escuro.png';this.className='sem'">`
+    : '<img class="sem" src="assets/logo_escuro.png" alt="">'}</span>`;
   function itensRelHtml(cods) {
     return `<ul class="itens-rel">${cods.map((c) => {
       const p = POR_COD.get(normCod(c));
       return p
-        ? `<li><a class="item-rel" href="#/produto/${encodeURIComponent(p.c)}"><b>${esc(p.c)}</b><span title="${esc(p.d)}">${esc(p.d)}</span></a></li>`
-        : `<li><span class="item-rel fora"><b>${esc(c)}</b><span>fora do catálogo</span></span></li>`;
+        ? `<li><a class="item-rel" href="#/produto/${encodeURIComponent(p.c)}">${miniHtml(p)}<span class="rel-txt"><b>${esc(p.c)}</b><span title="${esc(p.d)}">${esc(p.d)}</span></span></a></li>`
+        : `<li><span class="item-rel fora">${miniHtml(null)}<span class="rel-txt"><b>${esc(c)}</b><span>fora do catálogo</span></span></span></li>`;
     }).join("")}</ul>`;
   }
+  // "Leve também" (faixa verde-clara) e "Itens parecidos" (branco), logo abaixo dos botões e antes da aplicação
+  // (opção B, R-20261120-140600): o título à esquerda no computador e em cima no celular
+  const secRelHtml = (H2, tit, classe, cods) => cods.length
+    ? `<section class="secao rel ${classe}"><${H2} class="secao-tit">${tit}</${H2}>${itensRelHtml(cods)}</section>` : "";
 
   // Tabela da aplicação: uma linha por veículo do "ve" (Marca, Modelo, Cilindrada, Versão, Ano). Marca, Modelo e
   // Versão são do "ve". SIMULAÇÃO: a base ainda não tem cilindrada nem ano por veículo; aqui eles saem do trecho da
@@ -1228,10 +1238,10 @@
               <button class="bt bt-claro bt-mini bt-pdf" type="button">Salvar em PDF</button>
             </div>
           </div>
+          ${secRelHtml(H2, "Leve também", "rel-oj", junto)}
+          ${secRelHtml(H2, "Itens parecidos", "rel-ip", parecido)}
           ${dados}
           ${p.df ? `<section class="secao"><${H2} class="secao-tit">Diferencial BAP</${H2}><p>${esc(p.df)}</p></section>` : ""}
-          ${junto.length ? `<section class="secao"><${H2} class="secao-tit">Ofereça junto</${H2}>${itensRelHtml(junto)}</section>` : ""}
-          ${parecido.length ? `<section class="secao"><${H2} class="secao-tit">Itens parecidos</${H2}>${itensRelHtml(parecido)}</section>` : ""}
         </div>
       </div>
       <div class="so-impressao rod-pdf">As fotos são ilustrativas. Confira sempre a aplicação antes da compra.<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
