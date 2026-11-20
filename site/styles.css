@@ -423,15 +423,16 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .faixa-modelo:not(.aberto) .mv-placa-grande { width: 150px; }
 }
 /* celular com a placa consultada (p1, R-20261120-181200): a placa com o ✕ e, ao lado, o nome do veículo com 18 px,
-   em até 2 linhas (o leitor de tela lê o nome inteiro); sem o "Alterar veículo". O rótulo "Placa" sai só da vista
-   (a técnica da .vh): o aria-labelledby da placa depende dele. Sem placa e no computador, nada muda */
+   em até 3 linhas, para o ano e o motor não serem cortados (designer-ux); o leitor de tela lê o nome inteiro.
+   Sem o "Alterar veículo". O rótulo "Placa" sai só da vista (a técnica da .vh): o aria-labelledby da placa depende
+   dele. Sem placa e no computador, nada muda */
 @media (max-width: 640px) {
   .faixa-modelo:not(.aberto):has(.mv-tirar) { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 10px 12px; }
   .faixa-modelo:not(.aberto):has(.mv-tirar) #mv-placa-rot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .faixa-modelo:not(.aberto):has(.mv-tirar) .mv-alterar { display: none; }
   .faixa-modelo:not(.aberto):has(.mv-tirar) .mv-resumo { justify-content: center; }
   .faixa-modelo:not(.aberto):has(.mv-tirar) .mv-resumo-txt { font-size: 18px; font-weight: 700; line-height: 1.25; color: var(--texto);
-    white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 }
 
 /* "Salvar em PDF" (T-0014): a folha A4 sai da impressão do navegador. Só o que a página mostra. */
