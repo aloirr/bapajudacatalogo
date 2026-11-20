@@ -1099,6 +1099,52 @@
 
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
+  // Tabela da aplicação: uma linha por veículo do "ve" (Marca, Modelo, Cilindrada, Versão, Ano). Marca, Modelo e
+  // Versão são do "ve". SIMULAÇÃO: a base ainda não tem cilindrada nem ano por veículo; aqui eles saem do trecho da
+  // aplicação onde o modelo aparece (o mesmo texto da lista Motor e do ano); o ano da base (an), se houver, vale
+  // primeiro. Sem achar: "—".
+  const fmtFaixa = ([de, ate]) => de <= SEM_INICIO ? "até " + ate : ate >= SEM_FIM ? de + " em diante" : de === ate ? String(de) : de + "–" + ate;
+  function tabelaVeiculos(p) {
+    if (!Array.isArray(p.ve) || !p.ve.length) return "";
+    const apl = String(p.a || ""), up = semAcento(apl).toUpperCase();
+    const modelos = [...new Set(p.ve.map((x) => norm(x[1])).filter(Boolean))];
+    const achar = (m, de) => { const r = new RegExp("(^|[^A-Z0-9])" + reEsc(m) + "($|[^A-Z0-9])", "g"); r.lastIndex = de; const x = r.exec(up); return x ? x.index + x[1].length : -1; };
+    const trecho = new Map();
+    for (const m of modelos) {
+      const i = achar(m, 0);
+      if (i < 0) { trecho.set(m, ""); continue; }
+      let fim = Math.min(apl.length, i + 120);
+      for (const o of modelos) if (o !== m && !o.includes(m)) { const j = achar(o, i + m.length); if (j > i && j < fim) fim = j; }
+      trecho.set(m, apl.slice(i, fim));
+    }
+    const anoBase = p.an && (p.an[0] || p.an[1]) ? fmtFaixa([p.an[0] || SEM_INICIO, p.an[1] || SEM_FIM]) : "";
+    // versões do mesmo modelo (Gol G5, G6, G7): o ano e a cilindrada só valem no pedaço da versão (da versão até a
+    // próxima); fora dele, "—". Ano solto ("08/2022") não é faixa: "—" (decisão da v19).
+    const versoesDe = (m) => [...new Set(p.ve.filter((x) => norm(x[1]) === m && x[2]).map((x) => norm(x[2])))];
+    const pedaco = (t, ver, outras) => {
+      const tu = semAcento(t).toUpperCase(), r = new RegExp("(^|[^A-Z0-9])" + reEsc(ver) + "($|[^A-Z0-9])").exec(tu);
+      if (!r) return "";
+      const ini = r.index + r[1].length;
+      let fim = t.length;
+      for (const o of outras) { const x = new RegExp("(^|[^A-Z0-9])" + reEsc(o) + "($|[^A-Z0-9])", "g"); x.lastIndex = ini + ver.length; const y = x.exec(tu); if (y && y.index < fim) fim = y.index; }
+      return t.slice(ini, fim);
+    };
+    const linhas = p.ve.map(([fab, mod, ver]) => {
+      const m = norm(mod), vs = versoesDe(m);
+      let t = trecho.get(m) || "";
+      if (vs.length > 1 || (vs.length === 1 && p.ve.some((x) => norm(x[1]) === m && !x[2]))) t = ver ? pedaco(t, norm(ver), vs.filter((v) => v !== norm(ver))) : "";
+      const cil = (t.match(/\b\d[.,]\d\b/) || [""])[0].replace(",", ".");
+      const fx = faixasDoTexto(t).filter(([de, ate]) => de !== ate); // só faixa de verdade
+      const ano = anoBase || (fx.length ? [...new Set(fx.map(fmtFaixa))].join(", ") : "");
+      return [bonito(NOME_MARCA.get(norm(fab)) || fab), mod, cil, ver || "", ano];
+    });
+    const traco = '<span aria-label="não informado">—</span>';
+    // computador e PDF: a tabela; celular (até 480 px): uma lista por veículo, sem rolar de lado
+    return `<div class="tab-rola"><table class="t tab-veiculos"><thead><tr><th scope="col">Marca</th><th scope="col">Modelo</th><th scope="col">Cilindrada</th><th scope="col">Versão</th><th scope="col">Ano</th></tr></thead>
+      <tbody>${linhas.map((l) => `<tr>${l.map((c) => `<td>${c ? esc(c) : traco}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      <ul class="lista-veiculos">${linhas.map(([ma, mo, ci, ve, an]) => `<li><b>${esc([ma, mo, ve].filter(Boolean).join(" "))}</b>${ci || an
+        ? `<span>Cilindrada ${ci ? esc(ci) : traco} · Ano ${an ? esc(an) : traco}</span>` : ""}</li>`).join("")}</ul>`;
+  }
   function produtoHtml(p, naJanela) {
     const H = naJanela ? "h2" : "h1", H2 = naJanela ? "h3" : "h2";
     const aplicacoes = String(p.a || "").split(/\s+·\s+(?=[A-ZÀ-Úa-zà-ú0-9])/).length > 1 && (p.a || "").length > 160
@@ -1111,7 +1157,11 @@
     (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
     const junto = listaCodigos(p.oj), parecido = listaCodigos(p.ip);
     const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
-    const secApl = p.a ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${aplicacoes}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
+    // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e o texto original fica em "Ver aplicação completa"
+    const tab = tabelaVeiculos(p);
+    const secApl = tab
+      ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${tab}${p.a ? `<details class="apl-completa"><summary>Ver aplicação completa</summary>${aplicacoes}</details>` : ""}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>`
+      : p.a ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${aplicacoes}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
     const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
     const secFicha = ficha.length ? `<section class="secao"><${H2} class="secao-tit">Ficha técnica</${H2}><table class="t"><tbody>${ficha.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</tbody></table></section>` : "";
     const dados = secApl && (secRefs || secFicha)
