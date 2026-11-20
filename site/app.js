@@ -1,25 +1,27 @@
 /* Catálogo BAP online · site estático (sem servidor).
    Os dados vêm de data/produtos.json, gerado por scripts/gerar_site.py a partir da base unificada.
-   Rotas: #/  ·  #/busca?q=&si=&fa=&li=&ca=  ·  #/produto/<CODIGO>  ·  #/sobre
-   (os links antigos com cod=, mo=, modelo= e ano= viram q=: ver rotaAntiga)
+   Rotas: #/  ·  #/busca?q=&ve=&si=&fa=&li=&ca=  ·  #/produto/<CODIGO>  ·  #/sobre
+   (os links antigos com cod=, mo=, modelo= e ano= viram q=: ver rotaAntiga; ve = o veículo achado pela placa, nunca
+   a placa; si, fa, li e ca podem vir repetidos, um por opção marcada na barra de filtros)
    Busca por placa (T-0005): chama o serviço bapajudacatalogo-placas (integracao-placas), que guarda a chave da
    API PLACAS. O site só conhece a URL pública abaixo; nenhuma chave entra aqui. LGPD: a placa não vai para o
    endereço (#/...), nem para o localStorage/sessionStorage, nem para o console. */
 (function () {
   "use strict";
 
-  // [SUPOSIÇÃO] endereço que o Render dá ao serviço bapajudacatalogo-placas (contrato: POST {"placa":"ABC1D23"})
+  // endereço confirmado do serviço bapajudacatalogo-placas no Render (contrato: POST {"placa":"ABC1D23"})
   const PLACAS_URL = "https://bapajudacatalogo-placas.onrender.com/veiculo";
-  const PLACAS_TIMEOUT_MS = 75000; // o serviço grátis do Render dorme; acordar pode levar quase 1 minuto
+  // O plano starter do Render não dorme. O aviso "Acordando o serviço" fica só para a consulta que passa de 5 s
+  // (serviço reiniciando depois de um deploy ou a API PLACAS lenta); o limite de espera continua folgado.
+  const PLACAS_TIMEOUT_MS = 75000;
   const PLACAS_ACORDANDO_MS = 5000;
-  const POR_PAGINA = 24;
-  // SIMULAÇÃO T-0014 (sai na entrega final, fica só a versão escolhida pelo Alexandre para o celular):
-  //   no computador (mais de 640 px), o produto aberto da lista vem sempre numa janela por cima da lista;
-  //   no celular (até 640 px), ?v=B (padrão) abre a janela e ?v=A abre a página do produto com "Voltar".
-  const SIM_V = new URLSearchParams(location.search).get("v");
-  const CELULAR = window.matchMedia("(max-width: 640px)");
-  const usaJanela = () => !CELULAR.matches || SIM_V !== "A";
-  let VEICULO_PLACA = null;  // { q, texto } do último veículo achado pela placa (só em memória e sem a placa)
+  const POR_PAGINA = 50; // T-0014: 10 linhas de 5 cartões no computador (25 de 2 no celular)
+  // { q, texto, partes, placa } do último veículo achado pela placa. Só em memória: nunca no endereço, no
+  // localStorage/sessionStorage, no console ou no título. A placa vive só no fluxo da busca (lista, janela do produto e
+  // volta à lista) e some no X dela (no quadro da busca), numa busca nova de texto, ao ir para qualquer tela fora da
+  // busca (início, sobre, página do produto) e ao recarregar a página. O "Limpar tudo" não mexe nela: tira só o termo
+  // e os filtros, abaixo da barra.
+  let VEICULO_PLACA = null;
   const app = document.getElementById("app");
   let BASE = null;           // { gerado_em, total, produtos }
   let POR_COD = new Map();   // código → produto
@@ -52,7 +54,8 @@
     return { caminho, params: new URLSearchParams(qs || "") };
   }
   function irPara(caminho, params) {
-    const qs = params ? new URLSearchParams(Object.entries(params).filter(([, v]) => v !== "" && v != null)).toString() : "";
+    const pares = params instanceof URLSearchParams ? [...params.entries()] : Object.entries(params || {});
+    const qs = new URLSearchParams(pares.filter(([, v]) => v !== "" && v != null)).toString();
     location.hash = "#" + caminho + (qs ? "?" + qs : "");
   }
 
@@ -368,16 +371,19 @@
   // Se algum produto casa com todas as palavras, só eles; se nenhum, os que casam com mais palavras (os mais
   // próximos). O produto com o código exato (BAP, EAN ou referência) entra sempre e vem em 1º.
   function buscar(pr) {
-    const cs = pr.get("q") ? casador(pr.get("q")) : null;
+    // ve = o veículo que veio da placa (no endereço vai só o veículo, nunca a placa), somado ao termo digitado (q)
+    const texto = [pr.get("ve"), pr.get("q")].filter(Boolean).join(" ");
+    const cs = texto ? casador(texto) : null;
     const total = cs ? cs.total : 0;
-    const filtros = { si: pr.get("si"), fa: pr.get("fa"), li: pr.get("li"), ca: pr.get("ca") };
+    const sel = (k) => { const v = pr.getAll(k).filter(Boolean); return v.length ? new Set(v) : null; };
+    const filtros = { si: sel("si"), fa: sel("fa"), li: sel("li"), ca: sel("ca") };
     let out = [], maxN = 0;
     for (const e of INDICE) {
       const p = e.p;
-      if (filtros.si && p.si !== filtros.si) continue;
-      if (filtros.fa && p.fa !== filtros.fa) continue;
-      if (filtros.li && p.li !== filtros.li) continue;
-      if (filtros.ca && p.ca !== filtros.ca) continue;
+      if (filtros.si && !filtros.si.has(p.si)) continue;
+      if (filtros.fa && !filtros.fa.has(p.fa)) continue;
+      if (filtros.li && !filtros.li.has(p.li)) continue;
+      if (filtros.ca && !filtros.ca.has(p.ca)) continue;
       const r = cs ? cs.testar(e) : { n: 0, nota: 0, bits: 0, exato: false };
       if (total && !r.n) continue;
       if (r.n > maxN) maxN = r.n;
@@ -419,18 +425,22 @@
 
   // ---------- pedaços de tela ----------
   function fotoHtml(p, grande) {
-    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + p.d)}" loading="${grande ? "eager" : "lazy"}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:'<img src=&quot;assets/logo_escuro.png&quot; alt=&quot;&quot;>Foto em breve'}))">`;
+    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + p.d)}" loading="${grande ? "eager" : "lazy"}" onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:'<img src=&quot;assets/logo_escuro.png&quot; alt=&quot;&quot;>Foto em breve'}))">`;
     return `<div class="sem-foto"><img src="assets/logo_escuro.png" alt="">Foto em breve</div>`;
   }
+  // Cartão do resultado (T-0014, R-20261120-112520): a foto só amplia (botão; sem foto, nada); o código e o nome
+  // são o link que abre a janela do produto; "+ Detalhes" também abre a janela. Sem botão dentro de link.
   function itemHtml(p) {
-    return `<a class="item" href="#/produto/${encodeURIComponent(p.c)}">
-      <div class="foto">${fotoHtml(p)}</div>
+    const href = "#/produto/" + encodeURIComponent(p.c);
+    return `<article class="item" data-cod="${esc(p.c)}">
+      <div class="foto">${p.i ? `<button class="foto-zoom" type="button" aria-haspopup="dialog" aria-label="Ampliar a foto do ${esc(p.c)}">${fotoHtml(p)}</button>` : fotoHtml(p)}</div>
       <div class="corpo">
-        <span class="cod">${esc(p.c)}</span>
-        <span class="desc">${esc(p.d)}</span>
+        <a class="item-link" href="${href}"><span class="cod">${esc(p.c)}</span>
+        <span class="desc">${esc(p.d)}</span></a>
         ${p.a ? `<span class="apl">${esc(p.a)}</span>` : ""}
-        ${refsHtml(p)}
-      </div></a>`;
+        <div class="item-pe">${refsHtml(p)}
+          <a class="bt bt-claro bt-detalhes" href="${href}">+ Detalhes<span class="vh"> do ${esc(p.c)}</span></a></div>
+      </div></article>`;
   }
 
   // Etiquetas do cartão (T-0014): só o código, sem a marca. Primeiro o código original da montadora (marca "OEM"
@@ -464,108 +474,120 @@
     const extra = Math.max(0, cods.length - MAX_ETIQUETAS);
     return `<span class="refs" data-extra="${extra}"><span class="vh">Referências: </span>${cods.slice(0, MAX_ETIQUETAS).map((c) => `<span class="ref">${esc(c)}</span>`).join("")}<span class="ref ref-mais"${extra ? "" : " hidden"}>+${extra}</span></span>`;
   }
-  // mostra as etiquetas que cabem em 2 linhas e troca o resto por "+N"
-  function ajustarEtiquetas(raiz) {
-    for (const box of raiz.querySelectorAll(".refs")) {
-      const tags = [...box.querySelectorAll(".ref:not(.ref-mais)")];
-      const mais = box.querySelector(".ref-mais");
-      const extra = +box.dataset.extra || 0;
-      tags.forEach((t) => (t.hidden = false));
-      mais.hidden = true;
-      const limite = tags[0].offsetTop + tags[0].offsetHeight * 1.5 + 4; // fim da 2ª linha (o topo dela)
-      let escondidas = 0;
-      for (const t of tags) if (t.offsetTop > limite) { t.hidden = true; escondidas++; }
-      if (!escondidas && !extra) continue;
-      mais.hidden = false;
-      const vis = tags.filter((t) => !t.hidden);
-      mais.textContent = "+" + (escondidas + extra);
-      while (mais.offsetTop > limite && vis.length > 1) { vis.pop().hidden = true; escondidas++; mais.textContent = "+" + (escondidas + extra); }
-      mais.setAttribute("aria-label", "e mais " + (escondidas + extra));
+  // Mostra as etiquetas que cabem em 2 linhas e troca o resto por "+N". Desempenho (revisão da T-0014): recebe só as
+  // caixas que precisam (os cartões novos do "Carregar mais"; no resize, todas) e trabalha em lotes, sem alternar
+  // leitura e escrita de layout por cartão: 1) escreve (mostra tudo), 2) lê todas as posições, 3) escreve (esconde e
+  // põe o "+N"), 4) confere o "+N" de todas de uma vez e tira mais uma etiqueta só onde ele passou da 2ª linha.
+  function ajustarEtiquetas(caixas) {
+    const itens = [...caixas].map((box) => ({ box, tags: [...box.querySelectorAll(".ref:not(.ref-mais)")], mais: box.querySelector(".ref-mais"), extra: +box.dataset.extra || 0 }))
+      .filter((x) => x.tags.length && x.mais);
+    for (const x of itens) { for (const t of x.tags) t.hidden = false; x.mais.hidden = true; } // 1) escrita
+    for (const x of itens) { // 2) leitura
+      x.limite = x.tags[0].offsetTop + x.tags[0].offsetHeight * 1.5 + 4; // fim da 2ª linha (o topo dela)
+      x.vis = x.tags.filter((t) => t.offsetTop <= x.limite);
+      x.escondidas = x.tags.length - x.vis.length;
     }
+    let abertos = [];
+    for (const x of itens) { // 3) escrita
+      for (const t of x.tags.slice(x.vis.length)) t.hidden = true;
+      if (!x.escondidas && !x.extra) continue;
+      x.mais.hidden = false;
+      x.mais.textContent = "+" + (x.escondidas + x.extra);
+      abertos.push(x);
+    }
+    for (let volta = 0; abertos.length && volta < MAX_ETIQUETAS; volta++) { // 4) leitura de todas, depois escrita
+      const passou = abertos.filter((x) => x.mais.offsetTop > x.limite && x.vis.length > 1);
+      for (const x of passou) { x.vis.pop().hidden = true; x.escondidas++; x.mais.textContent = "+" + (x.escondidas + x.extra); }
+      abertos = passou;
+    }
+    for (const x of itens) if (!x.mais.hidden) x.mais.setAttribute("aria-label", "e mais " + (x.escondidas + x.extra));
   }
   let tAjuste = 0;
-  window.addEventListener("resize", () => { clearTimeout(tAjuste); tAjuste = setTimeout(() => ajustarEtiquetas(app), 150); });
+  window.addEventListener("resize", () => {
+    clearTimeout(tAjuste);
+    tAjuste = setTimeout(() => requestAnimationFrame(() => ajustarEtiquetas(app.querySelectorAll(".lista .refs"))), 150);
+  });
 
-  // Cartão de busca com 2 abas (decisão do Alexandre, 20/11/2026): 1) código, descrição ou aplicação, num campo só,
-  // palavra por palavra; 2) placa (T-0005): o serviço devolve o veículo e ele vira o q da aba 1 (mesmo casador()).
+  // Quadro da busca sem abas (R-20261120-112950 e R-20261120-115432, Alexandre): o campo geral (q) e, ao lado, o campo
+  // menor da placa, com UM botão "Buscar" para os dois (o Enter em qualquer campo faz o mesmo): só texto → busca o
+  // texto; só placa → consulta a placa; os dois → consulta a placa e filtra pelo texto. A placa consultada e o veículo
+  // em partes ficam dentro do quadro, embaixo do campo da placa, com o X que tira o veículo da busca.
+  const AVISO_PLACA = "Digite a placa e veja as peças do veículo.";
   function montarBusca(container, pr) {
     container.insertAdjacentHTML("beforeend", `<section class="cartao-busca" aria-label="Buscar produtos">
-      <div class="abas" role="tablist" aria-label="Tipo de busca">
-        <button role="tab" type="button" id="aba-texto" data-aba="texto" aria-controls="painel-texto" aria-selected="true">Busca por código, descrição ou aplicação</button>
-        <button role="tab" type="button" id="aba-placa" data-aba="placa" aria-controls="painel-placa" aria-selected="false" tabindex="-1">Busca por placa</button>
-      </div>
-      <form class="form-busca" autocomplete="off" role="search">
-        <div class="campos" data-campos="texto" id="painel-texto" role="tabpanel" aria-labelledby="aba-texto">
-          <label class="campo largo"><span>Código, descrição ou aplicação</span>
-            <input name="q" type="search" enterkeyhint="search" placeholder="Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S, 15W40"></label>
+      <form class="form-busca" autocomplete="off" role="search" aria-label="Buscar produtos">
+        <div class="bq-campo bq-q">
+          <label class="campo-rot" for="campo-q">Código, descrição ou aplicação</label>
+          <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S, 15W40">
         </div>
-        <div class="campos" data-campos="placa" id="painel-placa" role="tabpanel" aria-labelledby="aba-placa" hidden>
-          <label class="campo largo"><span>Placa do veículo</span>
-            <input id="campo-placa" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="8" enterkeyhint="search" placeholder="Ex.: ABC1D23 ou ABC1234" aria-describedby="status-placa"></label>
-          <p class="aviso" id="status-placa" role="status" aria-live="polite" style="font-size:15px;margin:4px 0 8px">Digite a placa do veículo e veja os produtos do catálogo que servem nele.</p>
+        <div class="bq-campo bq-placa">
+          <label class="campo-rot" for="campo-placa">Placa do veículo</label>
+          <input id="campo-placa" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="8" enterkeyhint="search" placeholder="Ex.: ABC1D23" aria-describedby="status-placa">
+          <div class="placa-veiculo" hidden></div>
+          <p class="status-placa" id="status-placa" role="status" aria-live="polite">${AVISO_PLACA}</p>
         </div>
-        <div class="botoes">
-          <button type="reset" class="bt bt-claro">Limpar</button>
-          <button type="submit" class="bt">Buscar</button>
-        </div>
+        <div class="bq-bt"><button type="submit" class="bt">Buscar</button></div>
       </form>
     </section>`);
     const cartao = container.querySelector(".cartao-busca");
     const form = cartao.querySelector("form");
-    const abas = [...cartao.querySelectorAll(".abas button")];
     const campoPlaca = cartao.querySelector("#campo-placa");
     const statusPlaca = cartao.querySelector("#status-placa");
-    const btBuscar = cartao.querySelector('.botoes button[type="submit"]');
-    let aba = "texto";
-    const mostrar = (a, foco) => {
-      aba = a;
-      abas.forEach((b) => { const sel = b.dataset.aba === a; b.setAttribute("aria-selected", String(sel)); b.tabIndex = sel ? 0 : -1; if (sel && foco) b.focus(); });
-      cartao.querySelectorAll(".campos").forEach((c) => (c.hidden = c.dataset.campos !== a));
-    };
-    abas.forEach((b, i) => {
-      b.addEventListener("click", () => { mostrar(b.dataset.aba); (b.dataset.aba === "texto" ? form.elements.q : campoPlaca).focus(); });
-      // teclado: setas, Home e End trocam de aba
-      b.addEventListener("keydown", (ev) => {
-        const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: abas.length - 1 }[ev.key];
-        if (j == null) return;
-        ev.preventDefault();
-        mostrar(abas[(j + abas.length) % abas.length].dataset.aba, true);
-      });
-    });
+    const caixaVeiculo = cartao.querySelector(".placa-veiculo");
+    const btBuscar = form.querySelector('button[type="submit"]');
     if (pr && pr.get("q")) form.elements.q.value = pr.get("q");
-    // resultado de uma placa: volta na aba placa, com o veículo achado (a placa não fica guardada)
-    const daPlaca = !!(pr && VEICULO_PLACA && pr.get("q") === VEICULO_PLACA.q);
-    if (daPlaca) statusPlaca.innerHTML = `Veículo encontrado: <b>${esc(VEICULO_PLACA.texto)}</b>`;
-    mostrar(daPlaca ? "placa" : "texto");
+    // o veículo da busca na tela (ve=): a etiqueta da placa (só da memória desta busca) ou "Veículo", com o X, e as partes
+    const ve = (pr && pr.get("ve")) || "";
+    if (VEICULO_PLACA && ve !== VEICULO_PLACA.q) VEICULO_PLACA = null; // a busca na tela já não tem esse veículo (o X dele no quadro): placa e veículo somem da memória
+    if (ve) {
+      const mem = VEICULO_PLACA;
+      const partes = mem && mem.partes;
+      const nome = mem && mem.placa ? "Placa: " + mem.placa : "Veículo: " + bonito(ve); // sem a placa: "Veículo: Honda Civic 2008"
+      const info = partes ? [partes.marcaModelo, partes.ano, partes.cil, partes.versao].filter(Boolean) : [];
+      caixaVeiculo.innerHTML = `<span class="etq etq-placa"><span>${esc(nome)}</span><button type="button" aria-label="${mem && mem.placa ? "Tirar a placa e o veículo" : "Tirar o veículo"}">✕</button></span>`
+        + (info.length ? `<ul class="veiculo" aria-label="Veículo da placa">${info.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : "");
+      caixaVeiculo.hidden = false;
+      statusPlaca.hidden = true;
+      caixaVeiculo.querySelector("button").addEventListener("click", () => {
+        const n = new URLSearchParams(pr); n.delete("ve");
+        FILTRO_FOCO = { y: window.scrollY };
+        irPara("/busca", n);
+      });
+    }
+    const aviso = (html) => { statusPlaca.hidden = false; statusPlaca.innerHTML = html; };
     campoPlaca.addEventListener("input", () => { campoPlaca.value = campoPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7); });
-    form.addEventListener("reset", () => setTimeout(() => {
-      statusPlaca.textContent = "Digite a placa do veículo e veja os produtos do catálogo que servem nele.";
-      if (lerRota().caminho === "/busca") irPara("/busca");
-    }, 0));
+    // o termo novo fica com o veículo da placa que já está na tela (a etiqueta "Placa" sai pelo X dela)
+    const veAtual = () => (lerRota().caminho === "/busca" ? lerRota().params.get("ve") : "") || "";
     let consultando = false;
     form.addEventListener("submit", (ev) => {
       ev.preventDefault();
-      if (aba === "texto") { irPara("/busca", { q: form.elements.q.value.trim() }); return; }
       if (consultando) return;
+      if (!campoPlaca.value.trim()) { // só texto (ou nada): busca o texto
+        if (VEICULO_PLACA) VEICULO_PLACA.placa = null; // outra busca: a placa some da memória (o veículo continua no filtro)
+        irPara("/busca", { ve: veAtual(), q: form.elements.q.value.trim() });
+        return;
+      }
       const placa = campoPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-      if (!PLACA_OK.test(placa)) { statusPlaca.innerHTML = "<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23."; campoPlaca.focus(); return; }
+      if (!PLACA_OK.test(placa)) { aviso("<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23."); campoPlaca.focus(); return; }
       consultando = true;
       btBuscar.disabled = true;
       cartao.setAttribute("aria-busy", "true");
-      statusPlaca.textContent = "Consultando…";
-      const acordando = setTimeout(() => { statusPlaca.textContent = "Acordando o serviço, aguarde…"; }, PLACAS_ACORDANDO_MS);
+      aviso("Consultando…");
+      const acordando = setTimeout(() => { aviso("Acordando o serviço, aguarde…"); }, PLACAS_ACORDANDO_MS);
       consultarPlaca(placa).then((v) => {
         const achado = veiculoDaPlaca(v);
         if (!achado.q) throw Object.assign(new Error("vazio"), { status: 404 });
-        VEICULO_PLACA = achado;
+        VEICULO_PLACA = Object.assign(achado, { placa }); // a placa fica só aqui, em memória, para a etiqueta
         campoPlaca.value = "";
-        if (lerRota().caminho === "/busca" && lerRota().params.toString() === new URLSearchParams({ q: achado.q }).toString()) render();
-        else irPara("/busca", { q: achado.q });
+        // o veículo vai para ve= (a placa não); o termo que está no campo continua junto
+        const novo = new URLSearchParams(Object.entries({ ve: achado.q, q: form.elements.q.value.trim() }).filter(([, v]) => v));
+        if (lerRota().caminho === "/busca" && lerRota().params.toString() === novo.toString()) render();
+        else irPara("/busca", novo);
       }).catch((e) => {
         const msg = { 400: "<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23.", 404: "<b>Placa não encontrada.</b>",
           429: "<b>Muitas consultas, tente em alguns minutos.</b>" }[e && e.status]
           || "<b>Busca por placa indisponível agora;</b> use a busca por código, descrição ou aplicação.";
-        statusPlaca.innerHTML = msg;
+        aviso(msg);
       }).finally(() => {
         clearTimeout(acordando);
         consultando = false;
@@ -636,11 +658,32 @@
     const modelo = nomes.find((m) => { const l = buscar(new URLSearchParams({ q: qDe(m) })); return l.length && l.casaram === l.palavras; }) || nomes[0] || "";
     let cil = String(v.motor || v.cilindradas || "").trim();
     if (/^\d{3,4}$/.test(cil)) cil = (Number(cil) / 1000).toFixed(1); // 1598 (cm³) → 1.6 (o serviço já manda motor "1.6")
-    const anos = ano && anoModelo && ano !== anoModelo ? ano + "/" + anoModelo : anoModelo;
+    // versão (R-20261120-113625): as palavras do modelo que sobram depois do nome base e sem a cilindrada
+    // ("CIVIC LXS 1.8" com modelo_lista ["CIVIC"] → "LXS"); combustível também fica fora
+    let resto = norm(v.modelo);
+    if (resto.includes("/")) resto = resto.slice(resto.indexOf("/") + 1).trim();
+    for (const m of [bruta, montadora]) if (m && resto.startsWith(m + " ")) resto = resto.slice(m.length + 1);
+    const base = new Set([modelo, ...lista.map((x) => norm(x))].join(" ").split(/\s+/).filter(Boolean));
+    const versao = resto.split(/\s+/).filter((w) => w && !base.has(w) && w !== norm(cil) && !/^\d+[.,]\d+$/.test(w)
+      && !/^(FLEX|TOTALFLEX|GASOLINA|ALCOOL|ÁLCOOL|DIESEL|GNV)$/.test(w)).join(" ");
+    const partes = { marcaModelo: bonito([montadora, modelo].filter(Boolean).join(" ")), ano: anoModelo, cil, versao: bonito(versao, true) };
     return {
       q: qDe(modelo),
-      texto: [montadora, modelo, anos, cil].filter(Boolean).join(" "),
+      texto: [partes.marcaModelo, partes.ano, partes.cil, partes.versao].filter(Boolean).join(" "),
+      partes,
     };
+  }
+  // Exibição sem caixa alta ("Honda Civic", "Volkswagen Gol", "Mercedes-Benz Atego"); siglas ficam: VW, GM, BMW...,
+  // palavra com número (HB20, 16V, 208), pedaço curto com hífen (CR-V) e, na versão, as de 2 a 4 letras (LXS, HX, GLI).
+  // Só para mostrar: a busca continua com o texto da base.
+  const SIGLAS = new Set(["VW", "GM", "BMW", "BYD", "JAC", "GWM", "MG", "DS", "RAM", "CAOA", "JCB", "DAF", "MAN", "AGCO"]);
+  function bonito(txt, versao) {
+    return String(txt || "").toUpperCase().replace(/\s+/g, " ").trim().replace(/[A-ZÀ-Ý0-9.]+/g, (w, i, todo) => {
+      if (SIGLAS.has(w) || /\d/.test(w)) return w;
+      if (versao && w.length <= 4) return w;
+      if (w.length <= 2 && (todo[i - 1] === "-" || todo[i + w.length] === "-")) return w;
+      return w.charAt(0) + w.slice(1).toLowerCase();
+    });
   }
 
   // ---------- telas ----------
@@ -687,58 +730,123 @@
     const todos = buscar(pr);
     let mostrando = 0;
     const desc = [];
+    if (pr.get("ve")) desc.push(VEICULO_PLACA && VEICULO_PLACA.q === pr.get("ve") ? VEICULO_PLACA.texto : pr.get("ve"));
     if (pr.get("q")) desc.push(`“${pr.get("q")}”`);
     app.innerHTML = `<div class="pagina-busca"><div id="busca-topo"></div>
+      <div class="barra-filtros" role="group" aria-label="Filtros"></div>
+      <div class="etiquetas" role="group" aria-label="Filtros da pesquisa" hidden></div>
       <div class="res-topo"><h1>${desc.length ? "Resultados para " + esc(desc.join(" · ")) : "Todos os produtos"}</h1>
-        <span class="total">${fmt(todos.length)} produto${todos.length === 1 ? "" : "s"}</span>
-        <button class="bt bt-claro bt-mini bt-filtros" type="button" aria-expanded="false">Filtrar</button></div>
+        <span class="total" aria-live="polite">${fmt(todos.length)} produto${todos.length === 1 ? "" : "s"}</span></div>
       ${todos.length && todos.casaram < todos.palavras ? `<p class="aviso proximos" role="status" style="margin:0 0 14px;font-size:14px"><b>Nenhum produto tem todas as palavras.</b> Estes são os mais próximos: casam com ${fmt(todos.casaram)} de ${fmt(todos.palavras)} palavras${todos.faltam.length ? `. Não casou: ${todos.faltam.map((t) => `“${esc(t.toLowerCase())}”`).join(", ")}` : ""}.</p>` : ""}
-      <div class="res-grade"><aside class="filtros" aria-label="Filtros"></aside><div><div class="chips"></div><div class="lista"></div><div class="mais"></div></div></div></div>`;
+      <div class="lista"></div><div class="mais"></div></div>`;
     montarBusca(document.getElementById("busca-topo"), pr);
-    const ROT = { si: "Sistema", fa: "Família", li: "Linha", ca: "Categoria" };
-    // filtros: contagem sobre o resultado sem o próprio filtro
-    const aside = app.querySelector(".filtros");
-    aside.innerHTML = Object.keys(ROT).map((k) => {
-      const semEste = new URLSearchParams(pr); semEste.delete(k);
-      const base = pr.get(k) ? buscar(semEste) : todos;
-      const op = contar(base, k).slice(0, 40);
-      if (!op.length) return "";
-      return `<details open><summary>${ROT[k]}</summary>${op.map(([v, n]) =>
-        `<label><input type="radio" name="f-${k}" value="${esc(v)}" ${pr.get(k) === v ? "checked" : ""}><span>${esc(titulo(v))}</span><em>${fmt(n)}</em></label>`).join("")}</details>`;
-    }).join("") + `<button class="limpar-f" type="button">Limpar filtros</button>`;
-    aside.addEventListener("change", (ev) => {
-      const k = ev.target.name.replace("f-", "");
-      const n = new URLSearchParams(pr); n.set(k, ev.target.value);
-      if (k === "si") n.delete("fa");
-      irPara("/busca", Object.fromEntries(n));
-    });
-    aside.querySelector(".limpar-f").addEventListener("click", () => {
-      const n = new URLSearchParams(pr); Object.keys(ROT).forEach((k) => n.delete(k)); irPara("/busca", Object.fromEntries(n));
-    });
-    const btF = app.querySelector(".bt-filtros");
-    btF.addEventListener("click", () => { const a = aside.classList.toggle("aberto"); btF.setAttribute("aria-expanded", String(a)); });
-    // chips dos filtros ativos
-    const chips = app.querySelector(".chips");
-    chips.innerHTML = Object.keys(ROT).filter((k) => pr.get(k)).map((k) => `<button class="chip" data-k="${k}" type="button">${ROT[k]}: ${esc(titulo(pr.get(k)))} ✕</button>`).join("");
-    chips.addEventListener("click", (ev) => { const b = ev.target.closest(".chip"); if (!b) return; const n = new URLSearchParams(pr); n.delete(b.dataset.k); irPara("/busca", Object.fromEntries(n)); });
+    montarFiltros(pr, todos);
     const lista = app.querySelector(".lista");
     const mais = app.querySelector(".mais");
-    function pagina() {
-      lista.insertAdjacentHTML("beforeend", todos.slice(mostrando, mostrando + POR_PAGINA).map(itemHtml).join(""));
-      mostrando = Math.min(todos.length, mostrando + POR_PAGINA);
-      ajustarEtiquetas(lista);
+    // insere os próximos cartões e ajusta as etiquetas só deles (a volta à lista insere todos de uma vez)
+    function pagina(qtd = POR_PAGINA) {
+      const ini = lista.children.length;
+      lista.insertAdjacentHTML("beforeend", todos.slice(mostrando, mostrando + qtd).map(itemHtml).join(""));
+      mostrando = Math.min(todos.length, mostrando + qtd);
+      ajustarEtiquetas([...lista.children].slice(ini).map((c) => c.querySelector(".refs")).filter(Boolean));
       mais.innerHTML = mostrando < todos.length ? `<button class="bt bt-claro" type="button">Carregar mais (${fmt(todos.length - mostrando)} restantes)</button>` : "";
     }
-    mais.addEventListener("click", pagina);
+    mais.addEventListener("click", () => pagina());
+    lista.addEventListener("click", (ev) => { const bz = ev.target.closest(".foto-zoom"); if (bz) abrirZoom(bz); });
     if (!todos.length) {
       lista.outerHTML = `<div class="vazio"><b>Nenhum produto encontrado</b>Confira o código ou tente menos palavras (sem o ano, por exemplo).</div>`;
     } else pagina();
     // volta do produto (T-0014): reabre a mesma lista com os mesmos cartões carregados e a mesma rolagem
     const volta = VOLTA_LISTA && VOLTA_LISTA.hash === location.hash ? VOLTA_LISTA : null;
     VOLTA_LISTA = null;
-    if (volta) while (mostrando < Math.min(volta.n, todos.length)) pagina();
+    if (volta && volta.n > mostrando) pagina(Math.min(volta.n, todos.length) - mostrando);
     ESTADO_LISTA = { hash: location.hash, n: () => mostrando };
+    // depois de marcar um filtro ou tirar uma etiqueta: a página fica onde estava e o foco volta à barra
+    const ff = FILTRO_FOCO; FILTRO_FOCO = null;
+    if (ff && !volta) {
+      let alvo = null;
+      if (ff.k) {
+        const box = app.querySelector(`.filtro[data-k="${ff.k}"]`);
+        if (box) { abrirFiltro(box); alvo = [...box.querySelectorAll("input")].find((x) => x.value === ff.v) || box.querySelector(".filtro-bt"); }
+      } else alvo = app.querySelector(".etiquetas:not([hidden]) button") || app.querySelector(".barra-filtros .filtro-bt") || app.querySelector("#campo-q");
+      return { y: ff.y, alvo };
+    }
     return volta;
+  }
+
+  // ---------- barra de filtros e etiquetas (R-20261120-113148, Alexandre) ----------
+  // No lugar do painel lateral: uma barra horizontal abaixo da busca, um botão por grupo (Sistema, Família, Linha,
+  // Categoria) que abre a lista de opções com a contagem e caixas de marcar (uma ou mais). Mesma lógica de antes:
+  // si=, fa=, li= e ca= no endereço (repetidos quando há mais de um) e a contagem sobre o resultado sem o próprio
+  // filtro. Abaixo, as etiquetas do termo (q) e de cada filtro marcado, com o X, e o "Limpar tudo". A placa e o
+  // veículo ficam no quadro da busca (montarBusca).
+  const ROT_FILTRO = { si: "Sistema", fa: "Família", li: "Linha", ca: "Categoria" };
+  let FILTRO_FOCO = null; // { k, v, y }: o que reabrir e focar depois de refazer a lista
+  function abrirFiltro(box) {
+    fecharFiltros(box);
+    box.querySelector(".filtro-lista").hidden = false;
+    box.querySelector(".filtro-bt").setAttribute("aria-expanded", "true");
+  }
+  function fecharFiltros(menos) {
+    for (const b of app.querySelectorAll(".filtro")) {
+      if (b === menos) continue;
+      b.querySelector(".filtro-lista").hidden = true;
+      b.querySelector(".filtro-bt").setAttribute("aria-expanded", "false");
+    }
+  }
+  document.addEventListener("click", (ev) => { if (!ev.target.closest(".filtro")) fecharFiltros(); });
+  function montarFiltros(pr, todos) {
+    const barra = app.querySelector(".barra-filtros");
+    barra.innerHTML = Object.keys(ROT_FILTRO).map((k) => {
+      const marcados = pr.getAll(k).filter(Boolean);
+      const semEste = new URLSearchParams(pr); semEste.delete(k);
+      const base = marcados.length ? buscar(semEste) : todos;
+      const op = contar(base, k).slice(0, 40);
+      for (const v of marcados) if (!op.some(([x]) => x === v)) op.push([v, 0]);
+      if (!op.length) return "";
+      return `<div class="filtro" data-k="${k}">
+        <button class="filtro-bt${marcados.length ? " ativo" : ""}" type="button" aria-expanded="false" aria-controls="filtro-${k}"><span>${ROT_FILTRO[k]}${marcados.length ? ` <b>(${marcados.length})</b>` : ""}</span><span class="seta" aria-hidden="true">▾</span></button>
+        <div class="filtro-lista" id="filtro-${k}" role="group" aria-label="${ROT_FILTRO[k]}" hidden>${op.map(([v, n]) =>
+          `<label><input type="checkbox" value="${esc(v)}"${marcados.includes(v) ? " checked" : ""}><span>${esc(titulo(v))}</span><em>${fmt(n)}</em></label>`).join("")}</div></div>`;
+    }).join("");
+    for (const box of barra.querySelectorAll(".filtro")) {
+      const k = box.dataset.k, bt = box.querySelector(".filtro-bt");
+      bt.addEventListener("click", () => { if (bt.getAttribute("aria-expanded") === "true") fecharFiltros(); else { abrirFiltro(box); const c = box.querySelector("input"); if (c) c.focus(); } });
+      box.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && bt.getAttribute("aria-expanded") === "true") { ev.preventDefault(); fecharFiltros(); bt.focus(); } });
+      box.addEventListener("change", (ev) => {
+        const n = new URLSearchParams(pr);
+        const vals = [...box.querySelectorAll("input:checked")].map((x) => x.value);
+        n.delete(k); vals.forEach((v) => n.append(k, v));
+        if (k === "si" && n.getAll("fa").length) { // a família que não existe nos sistemas marcados sai (como antes, ao trocar o sistema)
+          const semFa = new URLSearchParams(n); semFa.delete("fa");
+          const fas = new Set(buscar(semFa).map((p) => p.fa));
+          const manter = n.getAll("fa").filter((v) => fas.has(v));
+          n.delete("fa"); manter.forEach((v) => n.append("fa", v));
+        }
+        FILTRO_FOCO = { k, v: ev.target.value, y: window.scrollY };
+        irPara("/busca", n);
+      });
+    }
+    // etiquetas abaixo da barra: só o termo e os filtros marcados (a placa e o veículo ficam no quadro da busca)
+    const etq = app.querySelector(".etiquetas");
+    const itens = [];
+    const q = pr.get("q");
+    if (q) itens.push({ nome: "Busca: “" + q + "”", tirar: (n) => n.delete("q") });
+    for (const k of Object.keys(ROT_FILTRO)) for (const v of pr.getAll(k).filter(Boolean))
+      itens.push({ nome: ROT_FILTRO[k] + ": " + titulo(v), tirar: (n) => { const r = n.getAll(k).filter((x) => x !== v); n.delete(k); r.forEach((x) => n.append(k, x)); } });
+    if (!itens.length) return;
+    etq.hidden = false;
+    etq.innerHTML = itens.map((it, i) => `<span class="etq"><span>${esc(it.nome)}</span><button type="button" data-i="${i}" aria-label="${esc("Tirar " + it.nome)}">✕</button></span>`).join("")
+      + (itens.length >= 2 ? `<button class="limpar-tudo" type="button">Limpar tudo</button>` : "");
+    etq.addEventListener("click", (ev) => {
+      const b = ev.target.closest("button");
+      if (!b) return;
+      const n = new URLSearchParams(pr);
+      if (b.classList.contains("limpar-tudo")) { n.delete("q"); Object.keys(ROT_FILTRO).forEach((k) => n.delete(k)); } // o veículo sai pelo X dele, no quadro
+      else itens[+b.dataset.i].tirar(n);
+      FILTRO_FOCO = { y: window.scrollY };
+      irPara("/busca", n);
+    });
   }
 
   function listaCodigos(txt) {
@@ -802,7 +910,7 @@
   }
 
   // ---------- foto ampliada (T-0014) ----------
-  // Clicar na foto do produto abre a foto em tela cheia, por cima da página ou da janela. <dialog> com
+  // Clicar na foto do produto (na página, na janela ou no cartão da lista) abre a foto em tela cheia. <dialog> com
   // showModal(): o fundo fica inerte e o foco fica no X. Fecha com o X, o Esc, o clique fora da foto e o voltar
   // do celular (uma entrada no histórico com o mesmo endereço; o voltar não muda a rota). O foco volta à foto.
   let ZOOM = null; // { dlg, volta: botão da foto }
@@ -861,10 +969,10 @@
     ligarAcoes(app);
   }
 
-  // ---------- janela do produto (no computador; no celular, a versão B da simulação) ----------
-  // Abre por cima da lista sem sair dela. A rota continua #/produto/<CODIGO> (o endereço serve para mandar o
+  // ---------- janela do produto (computador e celular; "Letra A", R-20261120-112520) ----------
+  // Abre por cima da lista sem sair dela (pelo código e nome do cartão ou pelo "+ Detalhes"). A rota continua #/produto/<CODIGO> (o endereço serve para mandar o
   // link), então o voltar do celular fecha a janela. <dialog> com showModal(): o fundo fica inerte (o foco
-  // não sai da janela) e o Esc fecha. Ao fechar, o foco volta ao cartão.
+  // não sai da janela) e o Esc fecha. Ao fechar, o foco volta ao link do cartão que abriu.
   let JANELA = null; // { dlg, pilha: [hash dos produtos abertos na janela], cod }
   function abrirJanela(codigo) {
     const p = POR_COD.get(normCod(codigo));
@@ -905,9 +1013,11 @@
     dlg.close();
     document.documentElement.classList.remove("com-janela");
     document.title = "Catálogo BAP · Componentes de qualidade";
-    const cartao = app.querySelector(`.item[href="#/produto/${encodeURIComponent(cod)}"]`);
-    if (cartao) cartao.focus({ preventScroll: true });
+    const quem = LINK_CARTAO && LINK_CARTAO.isConnected ? LINK_CARTAO : linkDoCartao(cod);
+    LINK_CARTAO = null;
+    if (quem) quem.focus({ preventScroll: true });
   }
+  const linkDoCartao = (cod) => [...app.querySelectorAll(".lista .item")].find((e) => e.dataset.cod === cod)?.querySelector(".item-link") || null;
 
   function telaSobre() {
     app.innerHTML = `<div class="texto-pagina"><h1>BAP · componentes de qualidade</h1>
@@ -924,18 +1034,17 @@
     const { caminho, params } = lerRota();
     const ehProduto = caminho.startsWith("/produto/");
     const cod = ehProduto ? decodeURIComponent(caminho.slice(9)) : "";
-    // janela: da lista, o produto abre na janela e a lista fica por baixo, do jeito que estava
-    if (usaJanela()) {
-      // só o clique no cartão abre a janela; o endereço digitado ou colado abre a página
-      const listaNaTela = ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && CLICOU_CARTAO;
-      CLICOU_CARTAO = false;
-      if (ehProduto && (JANELA || listaNaTela) && abrirJanela(cod)) return;
-      if (JANELA) {
-        const voltouNaLista = ESTADO_LISTA && location.hash === ESTADO_LISTA.hash;
-        fecharJanela(false);
-        if (voltouNaLista) { ROTA_ATUAL = location.hash; return; }
-      }
+    // janela (computador e celular): da lista, o produto abre na janela e a lista fica por baixo, do jeito que estava.
+    // Só o clique no cartão abre a janela; o endereço digitado ou colado (#/produto/CODIGO) abre a página.
+    const listaNaTela = ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && CLICOU_CARTAO;
+    CLICOU_CARTAO = false;
+    if (ehProduto && (JANELA || listaNaTela) && abrirJanela(cod)) return;
+    if (JANELA) {
+      const voltouNaLista = ESTADO_LISTA && location.hash === ESTADO_LISTA.hash;
+      fecharJanela(false);
+      if (voltouNaLista) { ROTA_ATUAL = location.hash; return; }
     }
+    if (caminho !== "/busca") VEICULO_PLACA = null; // tela fora da busca (início, sobre, página do produto): a placa some
     if (ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && ehProduto) VOLTA_LISTA = { hash: ROTA_ATUAL, n: ESTADO_LISTA.n(), y: window.scrollY, cod };
     ESTADO_LISTA = null;
     ROTA_ANTERIOR = ROTA_ATUAL;
@@ -952,8 +1061,7 @@
     else telaInicio();
     if (volta) {
       window.scrollTo({ top: volta.y, behavior: "instant" });
-      const cartao = app.querySelector(`.item[href="#/produto/${encodeURIComponent(volta.cod)}"]`);
-      (cartao || app).focus({ preventScroll: true });
+      (volta.alvo || linkDoCartao(volta.cod) || app).focus({ preventScroll: true });
       return;
     }
     window.scrollTo(0, 0);
@@ -961,9 +1069,12 @@
   }
 
   window.addEventListener("hashchange", render);
-  let CLICOU_CARTAO = false; // o cartão da lista foi clicado (mouse, toque ou Enter) sem Ctrl, Shift ou Cmd
+  // o código e nome ou o "+ Detalhes" do cartão foi clicado (mouse, toque ou Enter) sem Ctrl, Shift ou Cmd
+  let CLICOU_CARTAO = false, LINK_CARTAO = null;
   document.addEventListener("click", (ev) => {
-    CLICOU_CARTAO = !!ev.target.closest(".lista .item") && !(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) && ev.button === 0;
+    const lk = ev.target.closest('.lista .item a[href^="#/produto/"]');
+    CLICOU_CARTAO = !!lk && !(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) && ev.button === 0;
+    if (CLICOU_CARTAO) LINK_CARTAO = lk;
     const a = ev.target.closest('a[href="#contato"]');
     if (a) { ev.preventDefault(); document.getElementById("contato").scrollIntoView({ behavior: "smooth" }); }
   });
