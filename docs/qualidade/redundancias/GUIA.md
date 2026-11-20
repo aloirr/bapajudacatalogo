@@ -10,7 +10,7 @@ O `corretor-redundancias` procura o que se repete ou sobra no site, nos PDFs, no
 
 - **Origem:** pedido do Alexandre, R-20261120-155430-alexandre (20/11/2026 ~15h54, Manaus): "na verdade tire ela, pois é redundante. passe essas regras para o corretor de redundancia".
 - **Vale desde:** 20/11/2026.
-- **Onde vale:** toda tela do site, todo PDF de catálogo e todo texto para cliente.
+- **Onde vale:** toda tela, PDF e texto.
 
 ### R1 · nome da marca repetido
 - **Regra:** um selo ou uma etiqueta com o nome da empresa ao lado do logo ou do cabeçalho, que já mostram a marca, é redundante e sai.

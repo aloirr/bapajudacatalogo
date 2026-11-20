@@ -49,7 +49,7 @@
   - antes: `<div><h2>Quer conhecer nossas soluções?</h2><p>Acesse nosso catálogo completo.</p></div>`
   - depois: `<div><h2>Quer conhecer nossas soluções?</h2></div>`
 - **Dono:** `web-site`.
-- **Observação:** se a frase for do texto aprovado do PDF Empresa (como no RD-0134), a decisão é do `po` com o Alexandre. Até lá, fica `manter?`.
+- **Observação:** se a frase for do texto aprovado do PDF Empresa (como no RD-0172), a decisão é do `po` com o Alexandre. Até lá, fica `manter?`.
 - **Prints:** `RD-0166-CTA-Acesse-1366.png` e `-390.png`.
 
 ### RD-0167 · média · R3 · produto, abaixo da foto (`site/app.js:1336`, `.foto-dica`)
@@ -104,7 +104,7 @@
 
 - **R1:** "CATÁLOGO ONLINE" ao lado do logo é o nome do produto, não o da empresa, e fica. O "© 2026 - BAP AUTO PARTS" do rodapé é texto legal e fica.
 - **R2:** na busca, os rótulos "Código, descrição ou aplicação" e "Placa do veículo" não têm frase de instrução acima.
-- **R3 e R4:** "Destaques" × "Peças com foto e ficha completa" fica: o subtítulo diz o critério da lista e não contradiz o título. A Sobre segue o RD-0134 (MANTIDO).
+- **R3 e R4:** "Destaques" × "Peças com foto e ficha completa" fica: o subtítulo diz o critério da lista e não contradiz o título. A Sobre segue o RD-0172 (MANTIDO).
 - **Redundância útil (fica):** o código no selo da foto do cartão e no texto do cartão para o leitor de tela; o "do AMT7000" escondido no "+ Detalhes"; o "nenhuma placa consultada" escondido.
 
 ## Resultado

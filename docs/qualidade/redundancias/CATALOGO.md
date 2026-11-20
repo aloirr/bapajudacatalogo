@@ -2,11 +2,11 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0172**.
+O próximo número livre é o **RD-0174**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
-[SUPOSIÇÃO] Do RD-0136 ao RD-0145, os números foram usados em rodadas que não deixaram relatório no Git nem no repositório de recados, e ficam reservados. O RD-0135 é o da T-0016 (a constante da ponte, PR #34), que também não deixou relatório.
+Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança), registrado no R-20261120-160330-po, sem relatório no Git. As linhas abaixo resumem cada um.
 
 | ID | Sev. | Tipo | Onde | Resumo | Tarefa | Dono | Situação |
 |---|---|---|---|---|---|---|---|
@@ -24,8 +24,18 @@ O próximo número livre é o **RD-0172**.
 | RD-0131 | baixa | texto | site/app.js:1420, 1456, 1472, 1544 | título da aba em 4 cópias sem constante | T-0018 | web-site | CORRIGIDO (b189091) |
 | RD-0132 | baixa | código (comentário) | site/app.js:924-935 | comentário com a ordem e a contagem 2 vezes (não segura) | T-0018 | web-site | CORRIGIDO (b189091) |
 | RD-0133 | baixa | código | site/app.js:45 | `MINUSC` sem uso, pré-existente, fora do diff (não segura) | — | web-site | ABERTO |
-| RD-0134 | baixa | texto | site/app.js:1488, 1499, 1503-1504 (Sobre) | h2 repetido no começo do parágrafo e no h1; texto aprovado do PDF Empresa | T-0018 | web-site | MANTIDO (decisão do po) |
-| RD-0135 | — | código | ponte (PR #34) | constante da ponte repetida | T-0016 | — | ver o PR #34 (sem relatório no Git) |
+| RD-0134 | — | doc | .coord/README.md:40 e os 3 agentes | o Caminho em 5 lugares | T-0016 | alexandre | CORRIGIDO (d20359f, #48; dae45f5, #34) |
+| RD-0135 | — | código | ponte (PR #34) | PONTE duplicada | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0136 | — | código | PR #34 | o domínio do autor em 3 formas | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0137 | — | código | PR #34 | o `motivoIdentidade` duplicado | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0138 | — | código | PR #34 | o `SHA_COMPLETO` | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0139 | — | código | PR #34 | o bloco `conferirMerge` e `conferirMergeMcp` | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0140 | — | código | PR #34 | a linha inalcançável | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0141 | — | código | PR #34 | "de: alexandre" e "de: po" à mão | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0142 | — | código (comentário) | PR #34 | os comentários do guarda-bash e do mcp | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0143 | — | código (comentário) | PR #34 | a ponte em 4 comentários | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0144 | — | código (comentário) | PR #34 | o comentário do guarda-bash-lib | T-0016 | alexandre | CORRIGIDO (dae45f5) |
+| RD-0145 | — | teste | PR #34 | o env repetido nos testes | T-0016 | alexandre | CORRIGIDO (dae45f5) |
 | RD-0146 | média | texto (R3) | site/app.js, início (1366 e 390 px), no ar desde o #46 | subtítulo "Toque em um sistema para ver todos os produtos dele." repete o título e o "N produtos" dos botões | T-0018 | web-site | EM CORREÇÃO: no ar desde o #46 (03723ac); sai no PR da aplicação (R-20261120-154500 e R-20261120-155430) |
 | RD-0147 | média | código | site/styles.css:633-634 | `.sistema` e `.sistema:hover` refazem o cartão `.item` (`:139-140`) | T-0018 | web-site | CORRIGIDO (b0550e1) |
 | RD-0148 | baixa | código | site/styles.css:633 | `min-height: 44px` do `.sistema` morto (o botão mede 94 e 85 px) | T-0018 | web-site | CORRIGIDO (b0550e1) |
@@ -52,10 +62,18 @@ O próximo número livre é o **RD-0172**.
 | RD-0169 | baixa | texto | busca vazia (site/app.js:880, 903) | "0 produtos" e "Nenhum produto encontrado" juntos | varredura 20/11 | web-site | ABERTO |
 | RD-0170 | baixa | texto | produto (site/app.js:1326; site/index.html:34) | "Confira sempre a aplicação…" na seção Aplicação e no rodapé | varredura 20/11 | web-site | `manter?` (decisão do po) |
 | RD-0171 | média | texto | produto (site/app.js:1342) | os selos repetem o sistema e a família da trilha | varredura 20/11 | web-site | ABERTO |
+| RD-0172 | baixa | texto | site/app.js:1488, 1499, 1503-1504 (Sobre) | h2 repetido no começo do parágrafo e no h1; texto aprovado do PDF Empresa. **Era o RD-0134 da T-0018**, renumerado em 20/11/2026 | T-0018 | web-site | MANTIDO (decisão do po) |
+| RD-0173 | baixa | código (comentário) | guarda-merge-lib.mjs (PR #34) | cabeçalho c/d sem a regra "Alexandre só pelo clone"; JSDoc do `lerRecadosDoGerente` separado da função. **Saiu como RD-0146 no reteste do #34**, renumerado em 20/11/2026 | T-0016 | alexandre | ABERTO (próximo PR de governança) |
 
 ## Notas
 
-### Renumeração do RD-0135 (20/11/2026)
+### Renumerações (20/11/2026)
+
+**RD-0134:** o do PR #34 (o Caminho do `.coord/README.md:40`, citado no título do #48 e no R-20261120-160330-po) fica com o número. O h2 repetido da Sobre (T-0018) passa a **RD-0172**. O `T-0018.md` e a `VARREDURA-2026-11-20.md` já usam o número novo.
+
+**RD-0146:** o da T-0018 (o "Toque em…", citado nos recados do Alexandre) fica com o número. O do reteste do #34 (os comentários do `guarda-merge-lib.mjs`) passa a **RD-0173**.
+
+**RD-0135:**
 - Havia dois RD-0135: o da T-0016 (a constante da ponte, PR #34) e o da T-0018 (o comentário do contraste repetido).
 - O da T-0016 fica com o número. O da T-0018 passa a **RD-0161**, o primeiro livre depois do RD-0160 da T-0019 (commit fbf5f82). O `T-0018.md` já usa o número novo.
 
