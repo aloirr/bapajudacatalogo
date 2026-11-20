@@ -328,9 +328,6 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
 }
 @media (max-width: 640px) {
   :root { --alto-topo: 76px; }
-  /* campos de digitação com 16 px no celular: o Safari do iPhone amplia a página ao focar um campo com fonte menor
-     (R-20261120-153600); o zoom de acessibilidade continua (sem maximum-scale nem user-scalable no viewport) */
-  .bq-campo input, .mf-geral input, .mv-campo select { font-size: 16px; }
   .menu { gap: 2px; }
   .menu a { font-size: 13px; white-space: nowrap; } /* 3 itens (op4e): o "Sobre a BAP" aparece também no celular */
   .marca img { height: 38px; }
@@ -560,7 +557,10 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .marca-faixa h1 { font-size: 26px; }
   .marca-faixa p { font-size: 14px; }
   .mf-bloco { padding: 12px 12px 14px; }
-  .mf-geral input { height: 52px; padding: 0 12px; } /* 16 px (no bloco do celular de cima): sem o zoom do iOS */
+  /* campos de digitação com 16 px no celular: o Safari do iPhone amplia a página ao focar um campo com fonte menor
+     (R-20261120-153600); o .mf-geral input já tem 16 px na regra base. Sem maximum-scale nem user-scalable no viewport */
+  .bq-campo input, .mv-campo select { font-size: 16px; }
+  .mf-geral input { height: 52px; padding: 0 12px; }
   .mf-bloco .bt { height: 52px; padding: 0 16px; }
   .v-placa-campo { height: 52px; }
   .v-placa-campo input { font-size: 22px; letter-spacing: .1em; padding: 0 6px; }
