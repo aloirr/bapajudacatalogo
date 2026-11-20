@@ -822,7 +822,7 @@
   window.addEventListener("hashchange", () => topoInicio(false));
   function telaInicio() {
     const portfolio = Math.floor(BASE.total / 100) * 100; // op4d: o total arredondado para baixo à centena (4.419 → +4.400)
-    const celular = window.matchMedia("(max-width: 640px)").matches; // o exemplo da busca geral e o título em 1 linha (R-20261120-155400) cabem no celular
+    const celular = EX_CURTO(); // o exemplo da busca geral e o título em 1 linha (R-20261120-155400) cabem no celular
     topoInicio(true);
     app.innerHTML = `
       <section class="marca-faixa">
@@ -836,7 +836,7 @@
             <form class="mf-bloco mf-geral" id="form-geral" role="search" autocomplete="off" aria-label="Buscar produtos">
               <label class="campo-rot v-rot" for="campo-q">Código, descrição ou aplicação</label>
               <div class="mf-linha">
-                <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="${celular ? "Ex.: gol 2007 amortecedor" : "Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S"}">
+                <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="${celular ? "Ex.: gol 2007" : "Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S"}">
                 <button type="submit" class="bt">Buscar</button>
               </div>
             </form>
