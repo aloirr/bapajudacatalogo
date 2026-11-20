@@ -12,7 +12,7 @@ Versão de 12/11/2026 (atualizada pelo PC EMPRESA; antes 27/10 pelo PC PESSOAL).
 ## Montar o ambiente na nuvem do Cowork (cada sessão)
 1. Puxar do OneDrive (as duas máquinas veem a mesma pasta) a pasta `catalogo_bap\gerador\` com o que **não** está no projeto:
    - `entradas\` (ESTOQUE_BAP.xlsx, bases v8/v10, CATALOGO_BAP_INTERRUPTORES.xlsx, CATALOGO_BAP_CUICA_DE_FREIO.xlsx, catálogo de pivô), `dimg\`, `pptimg\`, `fontes\`, `digital_data.json`.
-   - Base mais nova: `catalogo_bap\entregas\BASE_BAP_UNIFICADA_PRODUTOS_BAP_vNN.xlsx` (a de número mais alto) → copiar para `gerador\saidas\` (os scripts leem a v10/v11 de lá; o `montar.py` lê a mais alta).
+   - Base mais nova: `catalogo_bap\entregas\BASE_BAP_UNIFICADA_PRODUTOS_BAP_vNN.xlsx` (a de número mais alto) → copiar para `gerador\saidas\` (os scripts leem a v10/v11 de lá; o `montar.py` lê a base de `dados/`, ver acima).
    - Fotos do `apres_bemol.py` (o A4 e o digital usam `site/img`): puxar da pasta `Regionais - Leandro\bap\` só os códigos dos destaques (lista tirada do A4 entregue: card sem "imagem ilustrativa") e o `FLU15002.jpg`, em lotes de 50, para `gerador\entradas\bap\`. O `bap.7z` (346 MB) é pesado para a ponte.
 2. Copiar por cima **todos os scripts deste pacote** (`claude/pacotes/catalogo_gerador/`), inclusive `kitfiltros/` e `entradas/aplicacoes_site_bap.json`.
 3. `pip install pymupdf --break-system-packages`.
