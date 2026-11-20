@@ -1137,6 +1137,8 @@
   // aplicação onde o modelo aparece (o mesmo texto da lista Motor e do ano); o ano da base (an), se houver, vale
   // primeiro. Sem achar: "—".
   const fmtFaixa = ([de, ate]) => de <= SEM_INICIO ? "até " + ate : ate >= SEM_FIM ? de + "–" : de === ate ? String(de) : de + "–" + ate;
+  // o ano sem fim ("2006–"): o leitor de tela ouve "2006 em diante" (o " em diante" fica só para ele, na .vh)
+  const anoHtml = (an) => esc(an) + (/–$/.test(an) ? '<span class="vh"> em diante</span>' : "");
   function tabelaVeiculos(p) {
     if (!Array.isArray(p.ve) || !p.ve.length) return "";
     const apl = String(p.a || ""), up = semAcento(apl).toUpperCase();
@@ -1178,9 +1180,9 @@
     const traco = '<span aria-label="não informado">—</span>';
     // computador e PDF: a tabela; celular (até 480 px): uma lista por veículo, sem rolar de lado
     return `<div class="tab-rola"><table class="t tab-veiculos"><thead><tr><th scope="col">Marca</th><th scope="col">Modelo</th><th scope="col">Cilindrada</th><th scope="col">Versão</th><th scope="col">Ano</th></tr></thead>
-      <tbody>${linhas.map((l) => `<tr>${l.map((c) => `<td>${c ? esc(c) : traco}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      <tbody>${linhas.map((l) => `<tr>${l.map((c, i) => `<td>${c ? (i === 4 ? anoHtml(c) : esc(c)) : traco}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
       <ul class="lista-veiculos">${linhas.map(([ma, mo, ci, ve, an]) => `<li><b>${esc([ma, mo, ve].filter(Boolean).join(" "))}</b>${ci || an
-        ? `<span>Cilindrada ${ci ? esc(ci) : traco} · Ano ${an ? esc(an) : traco}</span>` : ""}</li>`).join("")}</ul>`;
+        ? `<span>Cilindrada ${ci ? esc(ci) : traco} · Ano ${an ? anoHtml(an) : traco}</span>` : ""}</li>`).join("")}</ul>`;
   }
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.

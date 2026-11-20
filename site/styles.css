@@ -12,8 +12,7 @@
   --sombra: 0 10px 30px rgba(21, 21, 21, .10);
   --borda-campo: #CFD5D1; /* borda dos campos e das listas */
   --veu: rgba(21, 21, 21, .55); /* fundo por trás da janela e do painel */
-  --verde-txt: #2E6B1F; /* texto verde com contraste AA (6,5:1 no branco, 5,9:1 no --fundo, 5,8:1 no --verde-claro): links,
-     .bt-claro ("+ Detalhes", "Salvar em PDF"), "Ver aplicação completa", "Limpar tudo", .selo.v e o anel de foco */
+  --verde-txt: #2E6B1F; /* texto verde com contraste AA (6,5:1 no branco, 5,9:1 no --fundo, 5,8:1 no --verde-claro) */
   --sombra-cod: 0 1px 3px rgba(21, 21, 21, .25); /* código BAP sobre a foto do cartão */
   --sombra-janela: 0 20px 60px rgba(21, 21, 21, .35); /* janela do produto */
   --contorno-neutro: inset 0 0 0 1px var(--borda-campo); /* linha neutra (opção A, R-20261120-131800): filtro marcado, etiqueta e item relacionado */
@@ -257,9 +256,9 @@ dialog.zoom::backdrop { background: transparent; }
 .zoom-x:hover { background: var(--verde-claro); }
 .zoom-x:focus-visible { outline-color: var(--verde); outline-offset: 3px; }
 
-/* aplicação em tabela (R-20261120-130900): rola dentro dela no celular, sem rolar a página de lado */
+/* aplicação em tabela (R-20261120-130900); no celular (até 480 px) vai a lista */
 .tab-rola { overflow-x: auto; max-width: 100%; }
-table.tab-veiculos { min-width: 0; } /* sem rolagem na janela; no celular (até 480 px) vai a lista */
+table.tab-veiculos { min-width: 0; } /* sem rolagem na janela */
 table.tab-veiculos th { width: auto; color: var(--texto-2); font-weight: 600; white-space: nowrap; }
 table.tab-veiculos thead th { border-bottom: 1px solid var(--linha); }
 table.tab-veiculos td { white-space: nowrap; }
@@ -417,7 +416,6 @@ dialog.painel-c::backdrop { background: var(--veu); }
   table.t th, table.t td { padding: .4mm 1.2mm; }
   table.t th { width: 46%; }
   .tab-rola { display: block !important; overflow: visible; } /* no PDF vai a tabela, mesmo no celular */
-  table.tab-veiculos { min-width: 0; }
   table.tab-veiculos th { width: auto; }
   .apl-completa { display: none; } /* no PDF vai a tabela */
   .item-rel { min-height: 0; padding: 1mm 2mm; } /* no PDF: código e descrição, sem link */

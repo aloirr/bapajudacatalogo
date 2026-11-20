@@ -30,7 +30,7 @@
 **No detalhe do produto** (o site monta a partir do JSON, sem campo novo):
 
 - **Tabela da aplicação:** uma linha por veículo do `ve`, com Marca · Modelo · Cilindrada · Versão · Ano. Marca, modelo e versão vêm do `ve`; a cilindrada e o ano ainda são lidos do texto da aplicação (o `an`, se houver, vale primeiro), até a v19. Sem achar: "—".
-- **Ofereça junto** (`oj`) e **Itens parecidos** (`ip`): cada item com o código e a descrição (`d`) do catálogo, abrindo o produto; o código fora do catálogo aparece sozinho, sem link.
+- **Ofereça junto** (`oj`) e **Itens parecidos** (`ip`): cada item com o código e a descrição (`d`) do catálogo, abrindo o produto; o código fora do catálogo aparece com a nota "fora do catálogo", sem link.
 
 **Nunca vai para o site:**
 
