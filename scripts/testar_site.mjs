@@ -127,7 +127,8 @@ function palavrasInternas(texto) {
   return achou;
 }
 // campos que o gerar_site.py grava em cada produto (docs/DADOS_DO_SITE.md); campo novo = conferir antes
-const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "df", "oj", "ip", "an", "i"]);
+// "ve" (T-0017, v17): veículos da aba VEICULOS, lista de [FABRICANTE, MODELO] ou [FABRICANTE, MODELO, VERSAO], textos não vazios
+const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "df", "oj", "ip", "an", "i", "ve"]);
 const palavraInteira = (texto, palavra) => new RegExp(`(?<![A-Z0-9])${palavra}(?![A-Z0-9])`).test(norm(texto));
 
 // ---------- serviço de placas no teste (T-0005, T-0014) ----------
@@ -272,7 +273,17 @@ function testarJson(arqJson) {
   const novos = new Map();
   for (const p of prods) for (const k of Object.keys(p)) if (!CAMPOS.has(k)) novos.set(k, (novos.get(k) || []).concat(p.c));
   for (const [k, cods] of novos) falha("campos", N_CAMPOS, "campo:" + k, `campo "${k}" fora da lista em ${cods.length} produto(s), ex.: ${cods.slice(0, 3).join(", ")}`);
-  detalhe("campos", N_CAMPOS, novos.size ? "" : `só os ${CAMPOS.size} campos conhecidos`);
+  // formato do "ve" (docs/DADOS_DO_SITE.md): lista não vazia de [FABRICANTE, MODELO, VERSAO?], 2 ou 3 textos não vazios
+  const veRuim = [];
+  let comVe = 0, nVe = 0;
+  for (const p of prods) {
+    if (!("ve" in p)) continue;
+    comVe++;
+    const ok = Array.isArray(p.ve) && p.ve.length && p.ve.every((x) => Array.isArray(x) && (x.length === 2 || x.length === 3) && x.every((t) => typeof t === "string" && t.trim()));
+    if (!ok) veRuim.push(`${p.c}: ${cortar(JSON.stringify(p.ve), 60)}`); else nVe += p.ve.length;
+  }
+  if (veRuim.length) falha("campos", N_CAMPOS, "ve:formato", `"ve" fora do formato [fabricante, modelo, versão?] em ${veRuim.length} produto(s), ex.: ${veRuim.slice(0, 3).join("; ")}`);
+  detalhe("campos", N_CAMPOS, novos.size ? "" : `só os ${CAMPOS.size} campos conhecidos` + (comVe ? `; "ve" em ${fmt(comVe)} produtos (${fmt(nVe)} veículos) no formato [fabricante, modelo, versão?]` : `; sem "ve"`));
   // palavra interna: cabeçalho e cada produto
   const cab = { ...dados }; delete cab.produtos;
   for (const a of palavrasInternas(textoDe(cab))) falha("palavra", N_PAL, `${a.nome}:(cabeçalho)`, `(cabeçalho do JSON) "${a.nome}": …${a.trecho}…`);
@@ -789,7 +800,9 @@ async function testarSite(base, ctxJson, dirPrints) {
             cadeia.push(val);
             if (m.val[i] !== val) falha("meuveiculo", N_MV, "valor:" + NOMES_MV[i], `${L}: escolhi "${val}" em ${NOMES_MV[i]}, a lista ficou com "${m.val[i]}"`);
             if (i < 4 && m.off[i + 1] && (i < 3 || m.nOp[4])) falha("meuveiculo", N_MV, "cascata:" + NOMES_MV[i + 1], `${L}: com ${cadeia.join(" › ")}, a lista ${NOMES_MV[i + 1]} continua desativada`);
-            if (i < 3 && !m.off[i + 2]) falha("meuveiculo", N_MV, "cascata:" + NOMES_MV[i + 2] + ":cedo", `${L}: com ${cadeia.join(" › ")}, a lista ${NOMES_MV[i + 2]} já está ativa (cascata: uma de cada vez)`);
+            // a cascata uma de cada vez vale de Marca a Motor; a Versão (lista nova, R-20261120-124800) pode abrir junto com o
+            // Motor, depois do Ano [SUPOSIÇÃO: o pedido diz a posição, "logo depois do motor", não que ela espere o Motor]
+            if (i < 2 && !m.off[i + 2]) falha("meuveiculo", N_MV, "cascata:" + NOMES_MV[i + 2] + ":cedo", `${L}: com ${cadeia.join(" › ")}, a lista ${NOMES_MV[i + 2]} já está ativa (cascata: uma de cada vez)`);
             if (!m.total) falha("meuveiculo", N_MV, "vazio:" + NOMES_MV[i], `${L}: com ${cadeia.join(" › ")}: lista vazia`);
             else if (m.total > antes) falha("meuveiculo", N_MV, "aumentou:" + NOMES_MV[i], `${L}: com ${cadeia.join(" › ")}: ${m.total} produtos, mais que antes (${antes})`);
             if (m.trocar) falha("meuveiculo", N_MV, "trocar", `${L}: a faixa ainda tem o "Trocar veículo" (R-20261120-124800: tirar; limpa pelo X da placa)`);
@@ -823,7 +836,9 @@ async function testarSite(base, ctxJson, dirPrints) {
             const m = await mv();
             if (i === 4 && !m.nOp[i]) { aviso("meuveiculo", N_MV, `${L}: "${QF}" com ${cad.join(" › ")}: a lista Versão não tem opção`); break; }
             if (!m.nOp[i]) { falha("meuveiculo", N_MV, "termo:vazia:" + NOMES_MV[i], `${L}: "${QF}" (${m.total} produtos)${cad.length ? " com " + cad.join(" › ") : ""}: a lista ${NOMES_MV[i]} não tem nenhuma opção (a cascata para aqui)`); break; }
-            const val = await escolher(i, /./);
+            // com o termo, Volkswagen › Gol (o caso da placa); Ano, Motor e Versão: a 1ª opção
+            const val = await escolher(i, [/^\s*Volkswagen\b/i, /^\s*Gol\b/i][i] || /./);
+            if (!val) { falha("meuveiculo", N_MV, "termo:opcao:" + NOMES_MV[i], `${L}: "${QF}"${cad.length ? " com " + cad.join(" › ") : ""}: a lista ${NOMES_MV[i]} não tem ${i === 0 ? "Volkswagen" : "Gol"} (opções: ${(await page.evaluate((j) => [...(window.__bapT.veiculo().listas[j] || { options: [] }).options].filter((o) => o.value).map((o) => o.textContent.trim()).slice(0, 8).join(", "), i)) || "nenhuma"})`); break; }
             cad.push(val);
           }
           if (cad.length >= 4) MV.push(`${L}: "${QF}" → ${cad.join(" › ")} = ${(await mv()).total}`);
