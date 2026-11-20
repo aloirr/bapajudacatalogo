@@ -778,16 +778,16 @@
     }
     return MAIS_VISTOS;
   }
-  // Destaques (critério fixo): foto, aplicação, referência cruzada, ficha técnica, diferencial BAP e ofereça junto;
-  // um por sistema, dos sistemas com mais produtos; no sistema, o menor código. Sem N_LISTA assim, afrouxa nessa ordem:
-  // sem o diferencial, sem o ofereça junto, e depois repete sistema.
+  // Destaques (critério fixo): foto, aplicação, referência cruzada, ficha técnica e ofereça junto; um por sistema, dos
+  // sistemas com mais produtos; no sistema, o menor código. Sem N_LISTA assim, afrouxa nessa ordem: sem o ofereça
+  // junto, e depois repete sistema. O diferencial BAP saiu da tela e do critério (R-20261120-155900-alexandre).
   let DESTAQUES = null;
   function destaques() {
     if (DESTAQUES) return DESTAQUES;
     const ordemSi = new Map(contar(BASE.produtos, "si").map(([s], i) => [s, i]));
     const base = BASE.produtos.filter((p) => p.i && p.a && (p.r || []).some((x) => x.c) && (p.x || []).length)
       .sort((a, b) => (ordemSi.get(a.si) - ordemSi.get(b.si)) || (a.c < b.c ? -1 : a.c > b.c ? 1 : 0));
-    const niveis = [(p) => p.df && p.oj, (p) => p.oj, () => true];
+    const niveis = [(p) => p.oj, () => true];
     const escolha = [];
     for (const ok of niveis) {
       for (const p of base) if (escolha.length < N_LISTA && ok(p) && !escolha.some((e) => e.si === p.si)) escolha.push(p);
@@ -1248,8 +1248,9 @@
         : `<li><span class="item-rel fora">${miniHtml(null)}<span class="rel-txt"><b>${esc(c)}</b><span>fora do catálogo</span></span></span></li>`;
     }).join("")}</ul>`;
   }
-  // "Leve também" (faixa verde-clara) e "Itens parecidos" (branco), logo abaixo dos botões e antes da aplicação
-  // (opção B, R-20261120-140600): o título à esquerda no computador e em cima no celular
+  // "Leve também" (faixa verde-clara), logo abaixo dos botões e antes da aplicação (opção B, R-20261120-140600): o título
+  // à esquerda no computador e em cima no celular. "Itens parecidos" e "Diferencial BAP" saíram da tela e ficam só no
+  // PDF (R-20261120-155900-alexandre; a decisão foi não mudar os PDFs)
   const secRelHtml = (H2, tit, classe, cods) => cods.length
     ? `<section class="secao rel ${classe}"><${H2} class="secao-tit">${tit}</${H2}>${itensRelHtml(cods)}</section>` : "";
 
@@ -1260,8 +1261,8 @@
   const fmtFaixa = ([de, ate]) => de <= SEM_INICIO ? "até " + ate : ate >= SEM_FIM ? de + "–" : de === ate ? String(de) : de + "–" + ate;
   // o ano sem fim ("2006–"): o leitor de tela ouve "2006 em diante" (o " em diante" fica só para ele, na .vh)
   const anoHtml = (an) => esc(an) + (/–$/.test(an) ? '<span class="vh"> em diante</span>' : "");
-  function tabelaVeiculos(p) {
-    if (!Array.isArray(p.ve) || !p.ve.length) return "";
+  function linhasVeiculos(p) {
+    if (!Array.isArray(p.ve) || !p.ve.length) return [];
     const apl = String(p.a || ""), up = semAcento(apl).toUpperCase();
     const modelos = [...new Set(p.ve.map((x) => norm(x[1])).filter(Boolean))];
     const achar = (m, de) => { const r = rxPalavra(m, "g"); r.lastIndex = de; const x = r.exec(up); return x ? x.index + x[1].length : -1; };
@@ -1298,12 +1299,33 @@
       const ano = anoBase || (fx.length === 1 ? fx[0] : "");
       return [bonito(NOME_MARCA.get(norm(fab)) || fab), mod, cil, ver || "", ano];
     });
+    return linhas;
+  }
+  function tabelaVeiculos(linhas) {
+    if (!linhas.length) return "";
     const traco = '<span aria-label="não informado">—</span>';
     // computador e PDF: a tabela; celular (até 480 px): uma lista por veículo, sem rolar de lado
     return `<div class="tab-rola"><table class="t tab-veiculos"><thead><tr><th scope="col">Marca</th><th scope="col">Modelo</th><th scope="col">Cilindrada</th><th scope="col">Versão</th><th scope="col">Ano</th></tr></thead>
       <tbody>${linhas.map((l) => `<tr>${l.map((c, i) => `<td>${c ? (i === 4 ? anoHtml(c) : esc(c)) : traco}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
       <ul class="lista-veiculos">${linhas.map(([ma, mo, ci, ve, an]) => `<li><b>${esc([ma, mo, ve].filter(Boolean).join(" "))}</b>${ci || an
         ? `<span>Cilindrada ${ci ? esc(ci) : traco} · Ano ${an ? anoHtml(an) : traco}</span>` : ""}</li>`).join("")}</ul>`;
+  }
+  // Aplicação sempre completa, sem o botão "Ver aplicação completa" (R-20261120-155900-alexandre): abaixo da tabela, as
+  // linhas do texto (linhasAplic) que a tabela não mostra inteiras. Uma linha só sai quando começa pelo modelo (e cita a
+  // versão) de uma linha da tabela com a mesma cilindrada e o mesmo ano, e não sobra nada além de marca, modelo,
+  // versão, cilindrada, válvulas e ano (o "exc. Si", o "Sportback" e o ano solto antes do modelo ficam à vista).
+  const SOBRA_APL = /\b(?:\d+V|L|ATE|A|EM DIANTE)\b|\b\d[.,]\d\b|\b(?:\d{2}\/)?(?:19|20)\d{2}\b|[\s·>→–\-\/().,]+/g;
+  function restoAplicacao(p, tab) {
+    return linhasAplic(p.a).filter((l) => {
+      let u = norm(l).replace(/^[A-Z][A-Z /&.]{0,30}?\s-\s/, ""); // a marca do começo do bloco ("BMW - ")
+      const cil = (l.match(/\b\d[.,]\d\b/) || [""])[0].replace(",", ".");
+      const fx = [...new Set(faixasDoTexto(l).map(fmtFaixa))];
+      const ok = tab.filter(([, mod, ci, ver, an]) => u.startsWith(norm(mod)) && rxPalavra(norm(mod)).test(u) && (!ver || rxPalavra(norm(ver)).test(u))
+        && ci === cil && (!fx.length || (fx.length === 1 && an === fx[0])));
+      if (!ok.length) return true;
+      for (const [, mod, , ver] of ok) for (const w of [norm(mod), norm(ver)].filter(Boolean)) u = u.replace(rxPalavra(w, "g"), "$1$2");
+      return /[A-Z0-9]/.test(u.replace(SOBRA_APL, " "));
+    });
   }
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
@@ -1333,10 +1355,10 @@
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e o texto original fica em "Ver aplicação completa";
     // no PDF, o texto vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
     // não sumirem do material do cliente
-    const tab = tabelaVeiculos(p);
+    const tv = linhasVeiculos(p), tab = tabelaVeiculos(tv), resto = tab && p.a ? restoAplicacao(p, tv) : [];
     const miolo = tab
-      ? tab + (p.a ? `<details class="apl-completa"><summary>Ver aplicação completa</summary>${aplicacoes}</details>
-        <div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
+      ? tab + (resto.length ? `<div class="apl-resto nao-imprime"><${H3} class="secao-tit">Mais detalhes da aplicação</${H3}><ul class="aplic">${resto.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : "")
+        + (p.a ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
       : p.a ? aplicacoes : "";
     const secApl = miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
     const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
@@ -1363,7 +1385,7 @@
           ${secRelHtml(H2, "Leve também", "rel-oj", junto)}
           ${secRelHtml(H2, "Itens parecidos", "rel-ip", parecido)}
           ${dados}
-          ${p.df ? `<section class="secao"><${H2} class="secao-tit">Diferencial BAP</${H2}><p>${esc(p.df)}</p></section>` : ""}
+          ${p.df ? `<section class="secao so-impressao"><${H2} class="secao-tit">Diferencial BAP</${H2}><p>${esc(p.df)}</p></section>` : ""}
         </div>
       </div>
       <div class="so-impressao rod-pdf">As fotos são ilustrativas. Confira sempre a aplicação antes da compra.<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;

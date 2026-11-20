@@ -244,10 +244,10 @@ table.t td.c { font-weight: 600; font-variant-numeric: tabular-nums; }
   .secao.rel .secao-tit { margin: 0; }
   .rel-oj { background: var(--verde-claro); border-color: transparent; }
   .rel-oj .secao-tit { color: var(--verde-txt); } /* 5,8:1 no --verde-claro */
+  .rel-ip { display: none; } /* "Itens parecidos" só no PDF (R-20261120-155900-alexandre) */
 }
 .itens-rel { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 270px)); gap: 8px; }
 .item-rel { display: flex; align-items: center; gap: 10px; min-height: 44px; height: 100%; padding: 6px 10px 6px 6px; border-radius: 8px; background: var(--branco); color: var(--escuro); text-decoration: none; }
-.rel-ip .item-rel { box-shadow: var(--contorno-neutro); }
 a.item-rel:hover { background: var(--fundo); }
 .rel-foto { flex: none; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 6px; background: var(--branco); box-shadow: var(--contorno-neutro); overflow: hidden; }
 .rel-foto img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
@@ -298,8 +298,7 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
   .lista-veiculos li b { display: block; font-weight: 600; color: var(--escuro); }
   .lista-veiculos li > span { display: block; color: var(--texto-2); }
 }
-.apl-completa { margin-top: 8px; }
-.apl-completa summary { cursor: pointer; color: var(--verde-txt); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+.apl-resto { margin-top: 12px; } /* "Mais detalhes da aplicação": o texto que a tabela não mostra, aberto */
 
 /* rodapé (T-0018 op4e): --escuro, a linha --verde e o padrão de ícones automotivos (SVG inline, traço branco a 7%) */
 .rodape { position: relative; margin-top: 56px; color: var(--branco); border-top: 3px solid var(--verde); background-color: var(--escuro);
@@ -451,7 +450,6 @@ dialog.painel-c::backdrop { background: var(--veu); }
   table.t th { width: 46%; }
   .tab-rola { display: block !important; overflow: visible; } /* no PDF vai a tabela, mesmo no celular */
   table.tab-veiculos th { width: auto; }
-  .apl-completa { display: none; } /* no PDF vai a tabela */
   /* no PDF: "Leve também" e "Itens parecidos" depois da aplicação e do diferencial, como antes; código e
      descrição, sem link e sem miniatura, no branco */
   .prod-info > .rel { order: 1; }
