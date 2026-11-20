@@ -107,7 +107,7 @@
         // marca concorrente: r[].m, e o texto da referência r[].c, onde às vezes vem a marca ("Cofap GP33190");
         // a marca do produto é BAP
         marcas: norm((p.r || []).map((x) => x.m + " " + x.c).join(" | ")),
-        outros: norm([p.ca, p.fa, p.si, p.li, p.de, p.df, p.mo, p.po, p.la].join(" | ")), // categoria ca, família fa e os outros
+        outros: norm([p.ca, p.fa, p.si, p.li, p.de, p.mo, p.po, p.la].join(" | ")), // categoria ca, família fa e os outros
         // código BAP c (o 1º) e referências cruzadas r[].c, sem espaço, ponto e hífen
         cods: [...new Set([normCod(p.c)].concat((p.r || []).flatMap(partes).filter((c) => c.length >= 3)))],
         // referência com a marca na frente ("TRW 16900255S" → "TRW16900255S")
@@ -573,12 +573,16 @@
   // menor da placa, com UM botão "Buscar" para os dois (o Enter em qualquer campo faz o mesmo): só texto → busca o
   // texto; só placa → consulta a placa; os dois → consulta a placa e filtra pelo texto. A placa consultada e o veículo
   // vão para a faixa abaixo do quadro (montarLayout). O aviso embaixo da placa só aparece quando há algo a dizer.
+  // celular (até 640 px): o exemplo do campo geral (R-20261120-155000-alexandre) e o texto inicial das 5 listas do veículo
+  // (R-20261120-155600-alexandre) são curtos, para não saírem cortados com a fonte de 16 px
+  const EX_CURTO = () => window.matchMedia("(max-width: 640px)").matches;
+  const EX_Q = "Ex.: gol 2007", EX_Q_LONGO = "Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S"; // celular e computador
   function montarBusca(container, pr) {
     container.insertAdjacentHTML("beforeend", `<section class="cartao-busca" aria-label="Buscar produtos">
       <form class="form-busca" autocomplete="off" role="search" aria-label="Buscar produtos">
         <div class="bq-campo bq-q">
           <label class="campo-rot" for="campo-q">Código, descrição ou aplicação</label>
-          <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S, 15W40">
+          <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="${EX_CURTO() ? EX_Q : EX_Q_LONGO + ", 15W40"}">
         </div>
         <div class="bq-campo bq-placa">
           <label class="campo-rot" for="campo-placa">Placa do veículo</label>
@@ -778,16 +782,16 @@
     }
     return MAIS_VISTOS;
   }
-  // Destaques (critério fixo): foto, aplicação, referência cruzada, ficha técnica, diferencial BAP e ofereça junto;
-  // um por sistema, dos sistemas com mais produtos; no sistema, o menor código. Sem N_LISTA assim, afrouxa nessa ordem:
-  // sem o diferencial, sem o ofereça junto, e depois repete sistema.
+  // Destaques (critério fixo): foto, aplicação, referência cruzada, ficha técnica e ofereça junto; um por sistema, dos
+  // sistemas com mais produtos; no sistema, o menor código. Sem N_LISTA assim, afrouxa nessa ordem: sem o ofereça
+  // junto, e depois repete sistema. O diferencial BAP saiu da tela, da ficha impressa do site e do critério (R-20261120-155900 e -160300).
   let DESTAQUES = null;
   function destaques() {
     if (DESTAQUES) return DESTAQUES;
     const ordemSi = new Map(contar(BASE.produtos, "si").map(([s], i) => [s, i]));
     const base = BASE.produtos.filter((p) => p.i && p.a && (p.r || []).some((x) => x.c) && (p.x || []).length)
       .sort((a, b) => (ordemSi.get(a.si) - ordemSi.get(b.si)) || (a.c < b.c ? -1 : a.c > b.c ? 1 : 0));
-    const niveis = [(p) => p.df && p.oj, (p) => p.oj, () => true];
+    const niveis = [(p) => p.oj, () => true];
     const escolha = [];
     for (const ok of niveis) {
       for (const p of base) if (escolha.length < N_LISTA && ok(p) && !escolha.some((e) => e.si === p.si)) escolha.push(p);
@@ -818,23 +822,21 @@
   window.addEventListener("hashchange", () => { topoInicio(false); topoSobre(false); });
   function telaInicio() {
     const portfolio = Math.floor(BASE.total / 100) * 100; // op4d: o total arredondado para baixo à centena (4.419 → +4.400)
-    const celular = window.matchMedia("(max-width: 640px)").matches; // o exemplo da busca geral cabe no celular
+    const celular = EX_CURTO(); // o exemplo da busca geral e o título em 1 linha (R-20261120-155400) cabem no celular
     topoInicio(true);
     app.innerHTML = `
       <section class="marca-faixa">
         <div class="marca-faixa-in">
           <div class="mf-texto">
-            <span class="mf-selo">BAP AUTO PARTS</span>
-            <h1>A peça certa <br class="so-pc">para a sua <em>oficina</em></h1>
+            <h1>${celular ? "A peça certa pro seu" : "A peça certa <br>para o seu"} <em>veículo</em>.</h1>
             <p class="mf-num"><b class="mf-total">+${fmt(portfolio)}</b><span>produtos <br>no portfólio</span></p>
-            <p>Busque por código, referência, veículo ou placa.</p>
           </div>
           <div class="mf-foto"><img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="${esc(IMG_FAIXA.alt)}" fetchpriority="high"></div>
           <div class="mf-busca">
             <form class="mf-bloco mf-geral" id="form-geral" role="search" autocomplete="off" aria-label="Buscar produtos">
               <label class="campo-rot v-rot" for="campo-q">Código, descrição ou aplicação</label>
               <div class="mf-linha">
-                <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="${celular ? "Ex.: gol 2007 amortecedor" : "Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S"}">
+                <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="${celular ? EX_Q : EX_Q_LONGO}">
                 <button type="submit" class="bt">Buscar</button>
               </div>
             </form>
@@ -855,7 +857,6 @@
       <section class="bloco recentes-bloco" aria-busy="true"><ul class="rec-lista espera" aria-hidden="true">${"<li><span class=\"rec-item\"><span class=\"rec-foto\"></span></span></li>".repeat(N_LISTA)}</ul></section>
       <section class="bloco sistemas-bloco" aria-labelledby="tit-sistemas">
         <h2 id="tit-sistemas">Navegue por sistema</h2>
-        <p class="sub">Toque em um sistema para ver todos os produtos dele.</p>
         <div class="sistemas">${contar(BASE.produtos, "si").map(([si, n]) => `<a class="sistema" href="#/busca?si=${encodeURIComponent(si)}"><i aria-hidden="true"></i><b>${esc(titulo(si))}</b><span>${nProd(n)}</span></a>`).join("")}</div>
       </section>`;
     const sec = app.querySelector(".recentes-bloco");
@@ -1132,6 +1133,7 @@
       const ativo = ativo0 && (op[k].length > 0 || !!valor); return `<label class="mv-campo"><span>${rot}</span>
       <select data-k="${k}"${ativo ? "" : " disabled"}><option value="">${todos}</option>${ativo ? op[k].map(([x, n]) =>
         `<option value="${esc(String(x))}"${String(x) === String(valor) ? " selected" : ""}>${esc(fmtV(x))} (${fmt(n)})</option>`).join("") : ""}</select></label>`; }; // lista sem opção: desabilitada com "—"
+    const curto = EX_CURTO(); // "Todas"/"Todos" no celular; no computador, "Todas as marcas" etc.
     const resumo = nomeVeiculo(pr);
     // celular: o resumo vai no DOM na ordem da tela (Tab sem tabindex): fechada, a placa e o ✕ à esquerda e o resumo
     // ao lado (depois das listas); aberta, o resumo em cima (antes das listas). ligarMeuVeiculo move ao alternar.
@@ -1143,11 +1145,11 @@
         <div class="mv-campo mv-campo-placa"><span id="mv-placa-rot">Placa</span>${mem
           ? `<span class="mv-placa-grande" aria-labelledby="mv-placa-rot"><b>${esc(mem.placa)}</b><button type="button" class="mv-tirar" aria-label="Tirar a placa e o veículo">✕</button></span>`
           : `<span class="mv-placa-grande vazia" aria-labelledby="mv-placa-rot"><b aria-hidden="true">—</b><span class="vh">nenhuma placa consultada</span></span>`}</div>
-        ${lista("vm", "Marca", "Todas as marcas", v.vm, true, (x) => bonito(NOME_MARCA.get(x) || x))}
-        ${lista("vmo", "Modelo", "Todos os modelos", v.vmo, !!v.vm, (x) => bonito(x))}
-        ${lista("va", "Ano", "Todos os anos", v.va || "", !!v.vmo, (x) => String(x))}
-        ${lista("vmt", "Motor", "Todos os motores", v.vmt, !!v.va, (x) => String(x))}
-        ${lista("vv", "Versão", "Todas as versões", v.vv, !!v.va && (op.temVersao || !!v.vv), (x) => bonito(String(x), true))}
+        ${lista("vm", "Marca", curto ? "Todas" : "Todas as marcas", v.vm, true, (x) => bonito(NOME_MARCA.get(x) || x))}
+        ${lista("vmo", "Modelo", curto ? "Todos" : "Todos os modelos", v.vmo, !!v.vm, (x) => bonito(x))}
+        ${lista("va", "Ano", curto ? "Todos" : "Todos os anos", v.va || "", !!v.vmo, (x) => String(x))}
+        ${lista("vmt", "Motor", curto ? "Todos" : "Todos os motores", v.vmt, !!v.va, (x) => String(x))}
+        ${lista("vv", "Versão", curto ? "Todas" : "Todas as versões", v.vv, !!v.va && (op.temVersao || !!v.vv), (x) => bonito(String(x), true))}
       </div>
       ${MV_ABERTO ? "" : resumoHtml}
     </section>`;
@@ -1220,7 +1222,7 @@
     depois.forEach((el) => conteudo.appendChild(el));
   }
 
-  // códigos de "Leve também" (campo oj) e "Itens parecidos": os do catálogo e os que têm cara de código (letra e número),
+  // códigos de "Leve também" (campo oj): os do catálogo e os que têm cara de código (letra e número),
   // sem repetir; as observações soltas ("s/ ar", "c/ ar") ficam fora
   function listaCodigos(txt) {
     const vistos = new Set();
@@ -1246,10 +1248,11 @@
         : `<li><span class="item-rel fora">${miniHtml(null)}<span class="rel-txt"><b>${esc(c)}</b><span>fora do catálogo</span></span></span></li>`;
     }).join("")}</ul>`;
   }
-  // "Leve também" (faixa verde-clara) e "Itens parecidos" (branco), logo abaixo dos botões e antes da aplicação
-  // (opção B, R-20261120-140600): o título à esquerda no computador e em cima no celular
-  const secRelHtml = (H2, tit, classe, cods) => cods.length
-    ? `<section class="secao rel ${classe}"><${H2} class="secao-tit">${tit}</${H2}>${itensRelHtml(cods)}</section>` : "";
+  // "Leve também" (faixa verde-clara), logo abaixo dos botões e antes da aplicação (opção B, R-20261120-140600): o título
+  // à esquerda no computador e em cima no celular. "Itens parecidos" e "Diferencial BAP" saíram da tela e da ficha
+  // impressa do site (R-20261120-155900-alexandre e R-20261120-160300-alexandre)
+  const secJunto = (H2, cods) => cods.length
+    ? `<section class="secao rel rel-oj"><${H2} class="secao-tit">Leve também</${H2}>${itensRelHtml(cods)}</section>` : "";
 
   // Tabela da aplicação: uma linha por veículo do "ve" (Marca, Modelo, Cilindrada, Versão, Ano). Marca, Modelo e
   // Versão são do "ve". SIMULAÇÃO: a base ainda não tem cilindrada nem ano por veículo; aqui eles saem do trecho da
@@ -1258,8 +1261,8 @@
   const fmtFaixa = ([de, ate]) => de <= SEM_INICIO ? "até " + ate : ate >= SEM_FIM ? de + "–" : de === ate ? String(de) : de + "–" + ate;
   // o ano sem fim ("2006–"): o leitor de tela ouve "2006 em diante" (o " em diante" fica só para ele, na .vh)
   const anoHtml = (an) => esc(an) + (/–$/.test(an) ? '<span class="vh"> em diante</span>' : "");
-  function tabelaVeiculos(p) {
-    if (!Array.isArray(p.ve) || !p.ve.length) return "";
+  function linhasVeiculos(p) {
+    if (!Array.isArray(p.ve) || !p.ve.length) return [];
     const apl = String(p.a || ""), up = semAcento(apl).toUpperCase();
     const modelos = [...new Set(p.ve.map((x) => norm(x[1])).filter(Boolean))];
     const achar = (m, de) => { const r = rxPalavra(m, "g"); r.lastIndex = de; const x = r.exec(up); return x ? x.index + x[1].length : -1; };
@@ -1290,12 +1293,20 @@
       const m = norm(mod), vs = versoesDe(m);
       let t = trecho.get(m) || "";
       if (vs.length > 1 || (vs.length === 1 && p.ve.some((x) => norm(x[1]) === m && !x[2]))) t = pedaco(t, ver ? norm(ver) : "", vs.filter((v) => v !== norm(ver || "")));
-      const cil = (t.match(/\b\d[.,]\d\b/) || [""])[0].replace(",", ".");
+      else if (!vs.length) { // o modelo repetido ("Pulse 1.0 L 12V · 2021 · Pulse 1.3 L 16V · 2022 até 2024"): só a 1ª entrada
+        const r = rxPalavra(m, "g"), tu = semAcento(t).toUpperCase(); r.lastIndex = m.length; const x = r.exec(tu);
+        if (x) t = t.slice(0, x.index + x[1].length);
+      }
+      const cil = cilDe(t)[0] || "";
       // só faixa de verdade; mais de uma faixa no trecho é dúvida: "—" (não se mostra ano errado)
       const fx = [...new Set(faixasDoTexto(t).filter(([de, ate]) => de !== ate).map(fmtFaixa))];
       const ano = anoBase || (fx.length === 1 ? fx[0] : "");
       return [bonito(NOME_MARCA.get(norm(fab)) || fab), mod, cil, ver || "", ano];
     });
+    return linhas;
+  }
+  function tabelaVeiculos(linhas) {
+    if (!linhas.length) return "";
     const traco = '<span aria-label="não informado">—</span>';
     // computador e PDF: a tabela; celular (até 480 px): uma lista por veículo, sem rolar de lado
     return `<div class="tab-rola"><table class="t tab-veiculos"><thead><tr><th scope="col">Marca</th><th scope="col">Modelo</th><th scope="col">Cilindrada</th><th scope="col">Versão</th><th scope="col">Ano</th></tr></thead>
@@ -1303,27 +1314,74 @@
       <ul class="lista-veiculos">${linhas.map(([ma, mo, ci, ve, an]) => `<li><b>${esc([ma, mo, ve].filter(Boolean).join(" "))}</b>${ci || an
         ? `<span>Cilindrada ${ci ? esc(ci) : traco} · Ano ${an ? anoHtml(an) : traco}</span>` : ""}</li>`).join("")}</ul>`;
   }
+  // Cilindradas do texto, com a válvula quando vem junto ("2.0 L 16V" → "2.0 16V", "1.8 8v" → "1.8 8V"): a coluna
+  // Cilindrada da tabela mostra as duas (decisão do gerente sobre o RD-0174)
+  const RX_CIL = /\b(\d[.,]\d)\b(?:\s*L\b)?(?:\s*(\d{1,2})\s?V\b)?/gi;
+  const cilDe = (t) => [...String(t || "").matchAll(RX_CIL)].map((m) => m[1].replace(",", ".") + (m[2] ? " " + m[2] + "V" : ""));
+  // Ano da aplicação: "2011", "01/1979", "01/01/2012". O pedaço só de ano: "2011 até 2014", "2009>", "2007–2012",
+  // "2014 em Diante", "até 2009", "- 12/2020", "01/01/2012 A 31/12/2015", "2000–2003 / 2002>", "(2009>)" e a lista
+  // "2012, 2013, 2014". "1924–1979 até 2026" (modelo de caminhão na frente) não é só ano.
+  const ANO_APL = String.raw`(?:\d{2}\/){0,2}(?:19|20)\d{2}`;
+  const FAIXA_APL = String.raw`${ANO_APL}(?:\s*(?:at[ée]|a|–|-)\s*${ANO_APL})?(?:\s*(?:>|→|em diante|at[ée]))?`;
+  const SO_ANO = new RegExp(String.raw`^(?:\(?(?:[-–]\s*|at[ée]\s+)?${FAIXA_APL}(?:\s*\/\s*${FAIXA_APL})?\)?|${ANO_APL}(?:\s*,\s*${ANO_APL})+)$`, "i");
+  const RX_ANO = new RegExp(String.raw`(?<!\d)(?:\d{2}\/){0,2}((?:19|20)\d{2})(?!\d)`, "g");
+  // Linhas da lista da aplicação (T-0017, R-20261120-153900): cada " ; " (bloco de marca) começa linha nova e, dentro do
+  // bloco, cada " · " também; o pedaço só de ano fica na linha do veículo de antes ("BMW - X1 2.0 L 16V · 2011 até
+  // 2014"). Só a tela: a busca continua lendo o p.a inteiro.
+  const linhasAplic = (a) => String(a || "").split(/\s+;\s+/).flatMap((bloco) => bloco.split(/\s+·\s+/).reduce((ls, x) => {
+    if (ls.length && SO_ANO.test(x.trim())) ls[ls.length - 1] += " · " + x; else ls.push(x);
+    return ls;
+  }, [])).filter((x) => x.trim());
+  const ulAplic = (ls) => `<ul class="aplic">${ls.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
+  // "Outros veículos e detalhes" (R-20261120-155900-alexandre, RD-0174 e as revisões do PR #50): abaixo da tabela, só
+  // as linhas do texto que a tabela não cobre. A comparação é por veículo: a linha se divide em " / ", na vírgula e no
+  // " - " antes de um nome, e depois de um ano seguido de um nome ("Logan 2014> Sandero 2014>"). Cada veículo (sem
+  // acento, sem maiúscula, com "Pick up" igual a "Pick-Up" e sem o "–" entre o modelo e o ano) só é coberto quando a
+  // tabela tem o modelo (o mais longo que casa: "Duster Oroch" antes de "Duster") e a versão citada, TODAS as
+  // cilindradas e válvulas dele e a faixa de anos dele, e não sobra mais nada (o "exc. Si", o "(Enc. Mod. Antigo)", o
+  // "Sportback", o "Axor 2035"). O pedaço só de ano ("04/2002–07/2012 / Meriva") é coberto pela faixa de uma linha da
+  // tabela. A linha só sai quando todos os veículos dela são cobertos.
+  const SOBRA_APL = /\b(?:L|ATE|A|EM DIANTE|DIANTE)\b|[\s·>→–\-\/().,]+/g;
+  const chaveApl = (t) => norm(t).replace(/([A-Z])-(?=[A-Z0-9])|([0-9])-(?=[A-Z])/g, "$1$2 ");
+  function cobreVeiculo(v, tab) {
+    const fx = faixasDoTexto(v);
+    if (fx.length > 1) return false;
+    const ano = fx.length ? fmtFaixa(fx[0]) : "";
+    if (SO_ANO.test(v)) return !!ano && tab.some((r) => r[4] === ano);
+    const casa = tab.filter(([, mod, , ver]) => v.startsWith(chaveApl(mod)) && rxPalavra(chaveApl(mod)).test(v) && (!ver || rxPalavra(chaveApl(ver)).test(v)));
+    const longo = Math.max(0, ...casa.map((r) => chaveApl(r[1]).length)), rs = casa.filter((r) => chaveApl(r[1]).length === longo);
+    if (!rs.length || (ano && !rs.some((r) => r[4] === ano))) return false;
+    const cils = cilDe(v);
+    if (!cils.every((c) => rs.some((r) => r[2] === c || (!c.includes(" ") && r[2].split(" ")[0] === c)))) return false;
+    let u = v.replace(RX_CIL, " ");
+    for (const [, mod, , ver] of rs) for (const w of [chaveApl(mod), chaveApl(ver)].filter(Boolean)) u = u.replace(rxPalavra(w, "g"), "$1 $2");
+    if (fx.length) u = u.replace(RX_ANO, (x, a) => (+a === fx[0][0] || +a === fx[0][1] ? " " : x)); // só os anos da faixa
+    return !/[A-Z0-9]/.test(u.replace(SOBRA_APL, " "));
+  }
+  const restoAplicacao = (p, tab) => linhasAplic(p.a).filter((l) => !chaveApl(l).replace(/^[A-Z][A-Z /&.]{0,30}?\s-\s/, "") // sem a marca do começo do bloco
+    .split(/\s+\/\s*|\s*\/\s+|\s*,\s*(?=[A-Z])|\s+[–—-]\s+(?=[A-Z])|(?<=(?:19|20)\d{2}(?:>|\/?\.{3})?\)?)\s+(?=[A-Z])(?!(?:ATE|A|AO|EM DIANTE)\b)/).map((v) => v.replace(/\s+[–—-]\s+/g, " ").trim()).filter(Boolean)
+    .every((v) => cobreVeiculo(v, tab)));
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
     const H = naJanela ? "h2" : "h1", H2 = naJanela ? "h3" : "h2", H3 = naJanela ? "h4" : "h3";
-    const aplicacoes = String(p.a || "").split(/\s+·\s+(?=[A-ZÀ-Úa-zà-ú0-9])/).length > 1 && (p.a || "").length > 160
-      ? `<ul class="aplic">${p.a.split(/\s+·\s+/).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p.a)}</p>`;
+    const linhas = linhasAplic(p.a);
+    const aplicacoes = linhas.length > 1 && (p.a || "").length > 160 ? ulAplic(linhas) : `<p>${esc(p.a)}</p>`;
     const refs = (p.r || []).filter((x) => x.c);
     const ficha = [];
     if (p.po) ficha.push(["Posição", titulo(p.po)]);
     if (p.la) ficha.push(["Lado", titulo(p.la)]);
     if (p.de) ficha.push(["Detalhe", p.de]);
     (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
-    const junto = listaCodigos(p.oj), parecido = listaCodigos(p.ip);
+    const junto = listaCodigos(p.oj);
     const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
-    // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e o texto original fica em "Ver aplicação completa";
-    // no PDF, o texto vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
+    // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e, embaixo, "Outros veículos e detalhes" (restoAplicacao);
+    // no PDF, o texto inteiro vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
     // não sumirem do material do cliente
-    const tab = tabelaVeiculos(p);
+    const tv = linhasVeiculos(p), tab = tabelaVeiculos(tv), resto = tab && p.a ? restoAplicacao(p, tv) : [];
     const miolo = tab
-      ? tab + (p.a ? `<details class="apl-completa"><summary>Ver aplicação completa</summary>${aplicacoes}</details>
-        <div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
+      ? tab + (resto.length ? `<div class="apl-resto nao-imprime"><${H3} class="secao-tit">Outros veículos e detalhes</${H3}>${ulAplic(resto)}</div>` : "")
+        + (p.a ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
       : p.a ? aplicacoes : "";
     const secApl = miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
     const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
@@ -1344,10 +1402,8 @@
               <button class="bt bt-claro bt-mini bt-pdf" type="button">Salvar em PDF</button>
             </div>
           </div>
-          ${secRelHtml(H2, "Leve também", "rel-oj", junto)}
-          ${secRelHtml(H2, "Itens parecidos", "rel-ip", parecido)}
+          ${secJunto(H2, junto)}
           ${dados}
-          ${p.df ? `<section class="secao"><${H2} class="secao-tit">Diferencial BAP</${H2}><p>${esc(p.df)}</p></section>` : ""}
         </div>
       </div>
       <div class="so-impressao rod-pdf">As fotos são ilustrativas. Confira sempre a aplicação antes da compra.<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;

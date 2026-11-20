@@ -7,13 +7,13 @@
 | `c` | CODIGO_BAP |
 | `d` | DESCRICAO |
 | `a` | APLICACAO |
-| `r` | REFERENCIAS_CRUZADAS, separadas em marca e código. O que vem depois de "\| ANTERIOR" e o "BAP BOX USD" saem. |
+| `r` | REFERENCIAS_CRUZADAS, separadas em marca e código. O que vem depois de "\| ANTERIOR" e o "BAP BOX USD" saem. Também saem as referências do próprio produto (T-0017): as marcas "BAP", "BAP PN_2" e "BAPTA PN" e todo código igual ao CODIGO_BAP, sem espaço e sem pontuação (374 referências em 372 produtos na v18). |
 | `x` | ficha técnica: só a lista branca `FICHA` dos DADOS_ADICIONAIS |
 | `mo` | montadora (dos DADOS_ADICIONAIS ou do começo da aplicação, normalizada: GM → CHEVROLET, VW → VOLKSWAGEN...) |
 | `an` | ANO_INICIO e ANO_FIM, quando existem |
 | `p`, `ca`, `si`, `fa`, `li` | PRODUTO, CATEGORIA, SISTEMA, FAMILIA, LINHA |
-| `po`, `la`, `de`, `df` | POSICAO, LADO, DETALHE_CATALOGO, DIFERENCIAL |
-| `ip`, `oj` | ITEM_PARECIDO, OFERECA_JUNTO |
+| `po`, `la`, `de` | POSICAO, LADO, DETALHE_CATALOGO |
+| `oj` | OFERECA_JUNTO |
 | `i` | foto em `site/img/` |
 | `gerado_em` | data e hora da geração, em hora de Manaus (`America/Manaus`; sem os dados de fuso, UTC−4 fixo). O site mostra "base atualizada em". |
 | `ve` | veículos do filtro "Meu veículo", da aba `VEICULOS` (desde a v17, T-0017): lista de `[FABRICANTE, MODELO, VERSAO]`, a VERSAO só quando existe. Ex.: `[["VOLKSWAGEN","Gol","G5"],["VOLKSWAGEN","Saveiro"]]`. |
@@ -28,8 +28,10 @@
 
 **No detalhe do produto** (o site monta a partir do JSON, sem campo novo):
 
-- **Tabela da aplicação:** uma linha por veículo do `ve`, com Marca · Modelo · Cilindrada · Versão · Ano. Marca, modelo e versão vêm do `ve`; a cilindrada e o ano ainda são lidos do texto da aplicação (o `an`, se houver, vale primeiro), até a v19. Sem achar: "—".
-- **Leve também** (`oj`, da coluna OFERECA_JUNTO; o título era "Ofereça junto" até a R-20261120-141100b) e **Itens parecidos** (`ip`): cada item com o código e a descrição (`d`) do catálogo, abrindo o produto; o código fora do catálogo aparece com a nota "fora do catálogo", sem link.
+- **Tabela da aplicação:** uma linha por veículo do `ve`, com Marca · Modelo · Cilindrada · Versão · Ano. Marca, modelo e versão vêm do `ve`; a cilindrada (com a válvula, quando o texto diz: "2.0 16V") e o ano ainda são lidos do texto da aplicação (o `an`, se houver, vale primeiro), até a v19. Sem achar: "—".
+- **Outros veículos e detalhes:** abaixo da tabela, aberto, as linhas do texto da aplicação que a tabela não cobre (T-0017). O texto inteiro continua na ficha impressa.
+- **Leve também** (`oj`, da coluna OFERECA_JUNTO; o título era "Ofereça junto" até a R-20261120-141100b): cada item com o código e a descrição (`d`) do catálogo, abrindo o produto; o código fora do catálogo aparece com a nota "fora do catálogo", sem link.
+- DIFERENCIAL e ITEM_PARECIDO não vão mais para o site (R-20261120-155900-alexandre e R-20261120-161500-alexandre): saíram da tela, da ficha impressa e do JSON.
 
 **Nunca vai para o site:**
 
