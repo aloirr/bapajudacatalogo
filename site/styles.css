@@ -207,6 +207,15 @@ main:focus, main:focus-visible { outline: none; }
 .selo.v { background: var(--verde-claro); border-color: transparent; color: var(--verde-txt); }
 .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
 .acoes .bt { height: 44px; font-size: 14px; }
+/* computador (opB2, R-20261120-141100): os 2 botões na linha do código, logo à direita dele, na página e na janela;
+   o cabeçalho fica mais baixo. Celular e PDF sem mudança (botões embaixo das etiquetas; no PDF não há botões) */
+@media screen and (min-width: 901px) {
+  .prod-cab { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; column-gap: 28px; }
+  .prod-cab > h1, .prod-cab > h2 { grid-column: 1; grid-row: 1; }
+  .prod-cab > .acoes { grid-column: 2; grid-row: 1; margin-bottom: 0; }
+  .prod-cab > .desc { margin-top: 4px; }
+  .prod-cab > .desc, .prod-cab > .selos { grid-column: 1 / -1; }
+}
 /* aplicação e, ao lado, referências e ficha técnica (T-0014) */
 .prod-dados { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 12px; align-items: start; }
 .prod-dados.um { grid-template-columns: minmax(0, 1fr); }
