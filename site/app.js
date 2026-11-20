@@ -10,6 +10,8 @@
   let BASE = null;           // { gerado_em, total, produtos }
   let POR_COD = new Map();   // código → produto
   let INDICE = [];           // [{ p, txt, cods, apl }]
+  const PALAVRAS = new Set(); // palavras (letras e números) que aparecem nas aplicações, para achar os modelos derivados
+  const DERIVADOS = new Map(); // modelo → palavras derivadas (cache)
 
   // ---------- utilidades ----------
   const semAcento = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -44,12 +46,16 @@
     for (const p of BASE.produtos) {
       POR_COD.set(normCod(p.c), p);
       const refs = (p.r || []).map((x) => (x.m || "") + " " + (x.c || "")).join(" ");
+      const partes = (x) => String(x.c || "").split(/[\/;,|]| OU /i).map(normCod);
       INDICE.push({
         p,
         txt: norm([p.c, p.d, p.a, refs, p.p, p.si, p.fa, p.li, p.ca, p.de, p.df, p.mo, p.po, p.la].join(" | ")),
         apl: norm(p.a),
-        cods: [normCod(p.c)].concat((p.r || []).flatMap((x) => String(x.c || "").split(/[\/;,|]| OU /i).map(normCod)).filter((c) => c.length >= 3)),
+        cods: [normCod(p.c)].concat((p.r || []).flatMap(partes).filter((c) => c.length >= 3)),
+        // referência com a marca na frente ("TRW 16900255S" → "TRW16900255S"), só para a aba Código (casa exato)
+        mcods: (p.r || []).filter((x) => normCod(x.m)).flatMap((x) => partes(x).filter((c) => c.length >= 3).map((c) => normCod(x.m) + c)),
       });
+      for (const w of INDICE[INDICE.length - 1].apl.match(/[A-Z0-9]+/g) || []) PALAVRAS.add(w);
     }
     const info = document.getElementById("info-base");
     if (info && BASE.gerado_em) info.textContent = fmt(BASE.total) + " produtos · base atualizada em " + BASE.gerado_em;
@@ -74,6 +80,26 @@
     return f.some(([a, b]) => ano >= a && ano <= b);
   }
 
+  // Modelo derivado (regra do Alexandre, 20/11/2026: "é regra para todos"): a palavra da aplicação é o modelo
+  // grudado, na frente ou atrás, em outro nome que também aparece sozinho nas aplicações (TRAIL+BLAZER, CROSS+FOX,
+  // SPACE+FOX, SPACE+CROSS, POLO+CLASSIC). O modelo e o outro nome têm pelo menos 3 caracteres e o outro nome tem
+  // letra, então só coincidir nas letras não vale: GOL+F, C+ARGO, A+POLO, KA+NGOO, S+UP+ER, PICK+UP.
+  const NAO_E_NOME = new Set(["CAPA"]); // palavra comum, não nome: CAPA+CITY (CAPACITY) não é derivado do City
+  const ehNome = (x) => x.length >= 3 && /[A-Z]/.test(x) && PALAVRAS.has(x) && !NAO_E_NOME.has(x);
+  function derivados(t) {
+    t = t.replace(/-/g, "");
+    if (t.length < 3 || !/^[A-Z0-9]+$/.test(t)) return [];
+    if (!DERIVADOS.has(t)) {
+      const r = [];
+      for (const w of PALAVRAS) {
+        if (w.length <= t.length) continue;
+        if ((w.startsWith(t) && ehNome(w.slice(t.length))) || (w.endsWith(t) && ehNome(w.slice(0, -t.length)))) r.push(w);
+      }
+      DERIVADOS.set(t, r);
+    }
+    return DERIVADOS.get(t);
+  }
+
   function buscar(pr) {
     const q = norm(pr.get("q"));
     const cod = normCod(pr.get("cod"));
@@ -83,7 +109,34 @@
     const ano = parseInt(pr.get("ano"), 10) || 0;
     const filtros = { si: pr.get("si"), fa: pr.get("fa"), li: pr.get("li"), ca: pr.get("ca") };
     const termos = q ? q.split(" ").filter(Boolean) : [];
-    const termosMod = modelo ? modelo.split(" ").filter(Boolean) : [];
+    // modelo por palavra inteira: "GOL" não casa com "GOLF" (letra depois de letra), mas "1.6" casa com "1.6L"
+    // e "HB20" com "HB20X" (a palavra só não pode continuar com o mesmo tipo de caractere: letra ou número)
+    const reEsc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const classe = (c) => (/[A-Z]/.test(c) ? "A-Z" : /[0-9]/.test(c) ? "0-9" : "");
+    // com hífen, as partes ficam vizinhas: "T-CROSS" casa com "T-CROSS", "T CROSS" e "TCROSS"
+    const palavra = (t) => {
+      const a = classe(t[0]), b = classe(t[t.length - 1]);
+      const corpo = t.split("-").filter(Boolean).map(reEsc).join("[\\s-]?") || reEsc(t);
+      return new RegExp((a ? "(^|[^" + a + "])" : "") + corpo + (b ? "(?![" + b + "])" : ""));
+    };
+    const alternativas = (t) => [t].concat(derivados(t)).map(palavra);
+    // modelo de várias palavras também casa com as palavras juntas e vizinhas: "SPACE FOX" casa com "SPACEFOX".
+    // Cada modo é um jeito de juntar palavras vizinhas; o produto entra se algum modo casar inteiro.
+    // Palavra de 1 caractere não vale solta: "L-200" e "L 200" só casam com "L200", "L 200" ou "L-200", e não com um
+    // L qualquer da aplicação mais um 200 em outro lugar.
+    const palavrasMod = modelo ? modelo.split(/[\s-]+/).filter(Boolean) : []; // hífen digitado = espaço
+    const modosMod = [];
+    const nMod = palavrasMod.length;
+    for (let mask = 0; nMod && mask < (nMod > 6 ? 1 : 1 << (nMod - 1)); mask++) {
+      const pedacos = [palavrasMod[0]];
+      for (let i = 1; i < nMod; i++) {
+        if (mask & (1 << (i - 1))) pedacos[pedacos.length - 1] += "-" + palavrasMod[i];
+        else pedacos.push(palavrasMod[i]);
+      }
+      if (nMod > 1 && pedacos.some((x) => x.replace(/-/g, "").length < 2)) continue;
+      modosMod.push(pedacos.map(alternativas));
+    }
+    if (nMod && !modosMod.length) modosMod.push(palavrasMod.map(alternativas)); // nunca fica sem filtro de modelo
     const out = [];
     for (const e of INDICE) {
       const p = e.p;
@@ -91,6 +144,7 @@
       if (cod) {
         if (e.cods[0] === cod) nota = 1000;
         else if (e.cods.includes(cod)) nota = 800;
+        else if (e.mcods.includes(cod)) nota = 800;
         else if (e.cods[0].startsWith(cod)) nota = 600;
         else if (e.cods.some((c) => c.includes(cod))) nota = 400;
         else continue;
@@ -109,7 +163,7 @@
         const m = norm(p.mo);
         if (!(m === moN || m.split("/").includes(moN) || e.apl.includes(moN))) continue;
       }
-      if (termosMod.length && !termosMod.every((t) => e.apl.includes(t))) continue;
+      if (modosMod.length && !modosMod.some((modo) => modo.every((alt) => alt.some((rx) => rx.test(e.apl))))) continue;
       if (ano && !serveNoAno(p, ano)) continue;
       if (filtros.si && p.si !== filtros.si) continue;
       if (filtros.fa && p.fa !== filtros.fa) continue;
