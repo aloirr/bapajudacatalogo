@@ -593,53 +593,50 @@
     // a busca na tela já não tem o veículo da placa (o X dela, outra marca ou modelo): a placa some da memória
     if (VEICULO_PLACA && chaveVeiculo(pr) !== VEICULO_PLACA.chave) VEICULO_PLACA = null;
     const aviso = (html) => { statusPlaca.hidden = false; statusPlaca.innerHTML = html; };
-    campoPlaca.addEventListener("input", () => { campoPlaca.value = campoPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7); });
+    campoPlaca.addEventListener("input", () => { campoPlaca.value = soPlaca(campoPlaca.value).slice(0, 7); });
     // a busca nova de texto fica com o veículo da tela (marca, modelo, ano, motor e versão)
     const veiAtual = () => { const r = lerRota(); const o = {}; if (r.caminho === "/busca") for (const k of VEI_K) if (r.params.get(k)) o[k] = r.params.get(k); return o; };
-    let consultando = false;
+    const travar = (sim) => { btBuscar.disabled = sim; if (sim) cartao.setAttribute("aria-busy", "true"); else cartao.removeAttribute("aria-busy"); };
     form.addEventListener("submit", (ev) => {
       ev.preventDefault();
-      if (consultando) return;
+      if (btBuscar.disabled) return; // consultando
       if (!campoPlaca.value.trim()) { // só texto (ou nada): busca o texto
         VEICULO_PLACA = null; // busca nova de texto: a placa some e as listas destravam; o veículo continua pela rota (vm, vmo...)
         irPara("/busca", Object.assign(veiAtual(), { q: form.elements.q.value.trim() }));
         return;
       }
-      const placa = campoPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-      if (!PLACA_OK.test(placa)) { aviso("<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23."); campoPlaca.focus(); return; }
-      consultando = true;
-      btBuscar.disabled = true;
-      cartao.setAttribute("aria-busy", "true");
-      aviso("Consultando…");
-      const acordando = setTimeout(() => { aviso("Acordando o serviço, aguarde…"); }, PLACAS_ACORDANDO_MS);
-      consultarPlaca(placa).then((v) => {
-        const achado = veiculoDaPlaca(v);
-        if (!achado.q) throw Object.assign(new Error("vazio"), { status: 404 });
-        // a placa fica só aqui, em memória, para a faixa (com a chave do veículo que ela preencheu)
-        campoPlaca.value = "";
-        // o termo que está no campo continua junto
-        // a placa preenche e trava as listas do veículo (marca, modelo, ano, motor, versão); no endereço vai o veículo, nunca a placa
-        const daPlaca = { vm: achado.bruto.mo, vmo: achado.bruto.modelo, va: achado.bruto.ano, vmt: achado.bruto.cil, vv: achado.bruto.versao };
-        VEICULO_PLACA = { placa, chave: chaveVeiculo(daPlaca) };
-        const novo = new URLSearchParams(Object.entries(Object.assign(daPlaca, { q: form.elements.q.value.trim() })).filter(([, v]) => v));
-        if (lerRota().caminho === "/busca" && lerRota().params.toString() === novo.toString()) render();
-        else irPara("/busca", novo);
-      }).catch((e) => {
-        const msg = { 400: "<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23.", 404: "<b>Placa não encontrada.</b>",
-          429: "<b>Muitas consultas, tente em alguns minutos.</b>" }[e && e.status]
-          || "<b>Busca por placa indisponível agora;</b> use a busca por código, descrição ou aplicação.";
-        aviso(msg);
-      }).finally(() => {
-        clearTimeout(acordando);
-        consultando = false;
-        btBuscar.disabled = false;
-        cartao.removeAttribute("aria-busy");
-      });
+      buscarPelaPlaca(campoPlaca.value, form.elements.q.value.trim(), { aviso, travar, campo: campoPlaca });
     });
   }
 
   // ---------- busca por placa (T-0005) ----------
   const PLACA_OK = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/; // ABC1234 (antiga) e ABC1D23 (Mercosul)
+  const soPlaca = (s) => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const MSG_PLACA = { 400: "<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23.", 404: "<b>Placa não encontrada.</b>",
+    429: "<b>Muitas consultas, tente em alguns minutos.</b>", outro: "<b>Busca por placa indisponível agora;</b> use a busca por código, descrição ou aplicação." };
+  // pedido ao serviço sem cookie, sem cache e sem a página de origem (placa, /contar e /mais-vistos)
+  const SEM_RASTRO = { cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" };
+  // A busca pela placa das 2 telas (quadro da busca e início): valida, consulta e, achado o veículo, vai para a busca
+  // com ele e com o texto q. LGPD: a placa vai só no corpo do POST e fica só em memória (VEICULO_PLACA, com a chave
+  // do veículo que ela preencheu); no endereço vai o veículo, nunca a placa. travar(true/false): botões e aria-busy.
+  function buscarPelaPlaca(placaBruta, q, { aviso, travar, campo }) {
+    const placa = soPlaca(placaBruta);
+    if (!PLACA_OK.test(placa)) { aviso(MSG_PLACA[400]); if (campo) campo.focus(); return; }
+    travar(true);
+    aviso("Consultando…");
+    const acordando = setTimeout(() => { aviso("Acordando o serviço, aguarde…"); }, PLACAS_ACORDANDO_MS);
+    consultarPlaca(placa).then((v) => {
+      const achado = veiculoDaPlaca(v);
+      if (!achado.q) throw Object.assign(new Error("vazio"), { status: 404 });
+      if (campo) campo.value = "";
+      const daPlaca = { vm: achado.bruto.mo, vmo: achado.bruto.modelo, va: achado.bruto.ano, vmt: achado.bruto.cil, vv: achado.bruto.versao };
+      VEICULO_PLACA = { placa, chave: chaveVeiculo(daPlaca) };
+      const novo = new URLSearchParams(Object.entries(Object.assign(daPlaca, { q })).filter(([, x]) => x));
+      if (lerRota().caminho === "/busca" && lerRota().params.toString() === novo.toString()) render();
+      else irPara("/busca", novo);
+    }).catch((e) => { aviso(MSG_PLACA[e && e.status] || MSG_PLACA.outro); })
+      .finally(() => { clearTimeout(acordando); travar(false); });
+  }
   // POST ao serviço; erro HTTP vira { status }; rede, timeout ou resposta estranha vira status 503.
   async function consultarPlaca(placa) {
     const ctl = new AbortController();
@@ -648,7 +645,7 @@
       let r;
       try {
         r = await fetch(PLACAS_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ placa }),
-          signal: ctl.signal, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" });
+          signal: ctl.signal, ...SEM_RASTRO });
       } catch (e) { throw Object.assign(new Error("rede"), { status: 503 }); }
       if (!r.ok) throw Object.assign(new Error("HTTP"), { status: [400, 404, 429].includes(r.status) ? r.status : 503 });
       try { return await r.json(); } catch (e) { throw Object.assign(new Error("json"), { status: 503 }); }
@@ -729,8 +726,8 @@
   }
 
   // ---------- telas ----------
-  // Início (T-0018, opção 4b, R-20261120-140100): faixa da marca com a busca geral e, ao lado, a placa Mercosul; 3 fatos
-  // do catálogo e o bloco de 4 peças. Sem preço e sem estoque.
+  // Início (T-0018, opção 4c, R-20261120-140100 e o pedido de tirar as repetições): faixa da marca com a busca geral e,
+  // ao lado, a placa Mercosul; embaixo, a lista tabelada de 8 peças (2 colunas no computador). Sem preço e sem estoque.
   // Contador (R-20261120-141600, "2) a"): o serviço bapajudacatalogo-placas conta a abertura do produto pelo código
   // (POST /contar) e devolve os mais vistos (GET /mais-vistos?dias=7). Fica DESLIGADO até o deploy do serviço
   // (R-20261120-142100): com false, nenhuma chamada sai e o bloco é sempre "Destaques".
@@ -739,6 +736,7 @@
   const CONTADOR_LIGADO = false;
   const SERVICO = PLACAS_URL.replace(/\/veiculo$/, ""); // a mesma URL base da placa
   const RECENTES_MIN = 20, RECENTES_MS = 3000; // menos de 20 aberturas em 7 dias, erro ou mais de 3 s: "Destaques"
+  const N_LISTA = 8; // linhas da lista do início (op4c)
   let MAIS_VISTOS = null; // a resposta, uma vez por carga da página (só em memória)
   const CONTADOS = new Set(); // [SUPOSIÇÃO] cada código conta uma vez por carga da página
   // fire-and-forget: sem credenciais, sem esperar a resposta e sem travar a tela; a falha não aparece
@@ -747,22 +745,21 @@
     CONTADOS.add(p.c);
     try {
       // sem Content-Type (text/plain): sem a pré-checagem do CORS; keepalive: o pedido segue se a página sair
-      fetch(SERVICO + "/contar", { method: "POST", body: JSON.stringify({ codigo: p.c }), keepalive: true,
-        cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" }).catch(() => {});
+      fetch(SERVICO + "/contar", { method: "POST", body: JSON.stringify({ codigo: p.c }), keepalive: true, ...SEM_RASTRO }).catch(() => {});
     } catch (e) { /* sem contador */ }
   }
-  // os 4 mais vistos que estão no catálogo, ou null (desligado, erro, mais de 3 s, total < 20 ou menos de 4 no catálogo)
+  // os mais vistos que estão no catálogo (até N_LISTA), ou null (desligado, erro, mais de 3 s, total < 20 ou menos de 4 no catálogo)
   function maisVistos() {
     if (!CONTADOR_LIGADO) return Promise.resolve(null);
     if (!MAIS_VISTOS) {
       const ctl = new AbortController();
       const t = setTimeout(() => ctl.abort(), RECENTES_MS);
-      MAIS_VISTOS = fetch(SERVICO + "/mais-vistos?dias=7", { signal: ctl.signal, cache: "no-store", credentials: "omit", referrerPolicy: "no-referrer" })
+      MAIS_VISTOS = fetch(SERVICO + "/mais-vistos?dias=7", { signal: ctl.signal, ...SEM_RASTRO })
         .then((r) => (r.ok ? r.json() : null))
         .then((j) => {
           if (!j || !(Number(j.total) >= RECENTES_MIN) || !Array.isArray(j.itens)) return null;
-          const lst = [...new Set(j.itens.map((x) => POR_COD.get(normCod(x && x.codigo))).filter(Boolean))].slice(0, 4);
-          return lst.length === 4 ? lst : null;
+          const lst = [...new Set(j.itens.map((x) => POR_COD.get(normCod(x && x.codigo))).filter(Boolean))].slice(0, N_LISTA);
+          return lst.length >= 4 ? lst : null;
         })
         .catch(() => null)
         .finally(() => clearTimeout(t));
@@ -770,7 +767,7 @@
     return MAIS_VISTOS;
   }
   // Destaques (critério fixo): foto, aplicação, referência cruzada, ficha técnica, diferencial BAP e ofereça junto;
-  // um por sistema, dos sistemas com mais produtos; no sistema, o menor código. Sem 4 assim, afrouxa nessa ordem:
+  // um por sistema, dos sistemas com mais produtos; no sistema, o menor código. Sem N_LISTA assim, afrouxa nessa ordem:
   // sem o diferencial, sem o ofereça junto, e depois repete sistema.
   let DESTAQUES = null;
   function destaques() {
@@ -781,22 +778,24 @@
     const niveis = [(p) => p.df && p.oj, (p) => p.oj, () => true];
     const escolha = [];
     for (const ok of niveis) {
-      for (const p of base) if (escolha.length < 4 && ok(p) && !escolha.some((e) => e.si === p.si)) escolha.push(p);
-      if (escolha.length === 4) break;
+      for (const p of base) if (escolha.length < N_LISTA && ok(p) && !escolha.some((e) => e.si === p.si)) escolha.push(p);
+      if (escolha.length === N_LISTA) break;
     }
-    for (const p of base) if (escolha.length < 4 && !escolha.includes(p)) escolha.push(p);
+    for (const p of base) if (escolha.length < N_LISTA && !escolha.includes(p)) escolha.push(p);
     return (DESTAQUES = escolha);
   }
-  const pecaHtml = (p) => `<a class="destaque" href="#/produto/${encodeURIComponent(p.c)}">
-      <div class="d-foto">${fotoHtml(p)}</div>
-      <div class="d-txt"><b class="d-cod">${esc(p.c)}</b><span class="d-desc">${esc(titulo(p.d))}</span></div></a>`;
+  // a linha da lista: miniatura, código, descrição de 1 linha, sistema (só no computador) e a seta
+  const pecaHtml = (p) => `<li><a class="rec-item" href="#/produto/${encodeURIComponent(p.c)}">
+      <span class="rec-foto">${fotoHtml(p)}</span>
+      <span class="rec-txt"><b>${esc(p.c)}</b><span>${esc(titulo(p.d))}</span></span>
+      <span class="rec-si">${esc(titulo(p.si))}</span><span class="rec-seta" aria-hidden="true">›</span></a></li>`;
   function blocoPecas(sec, recentes) {
     const lst = recentes || destaques();
     sec.removeAttribute("aria-busy");
-    sec.innerHTML = `<div class="dest-topo"><div><h2>${recentes ? "Pesquisas recentes" : "Destaques"}</h2>
-        <p class="sub">${recentes ? "As 4 peças mais pesquisadas nos últimos 7 dias" : "Peças com foto e ficha completa no catálogo"}</p></div>
-        <a class="bt bt-claro bt-mini" href="#/busca">Ver todos os produtos</a></div>
-      <div class="destaques">${lst.map(pecaHtml).join("")}</div>`;
+    sec.innerHTML = `<div class="rec-topo"><div><h2>${recentes ? "Pesquisas recentes" : "Destaques"}</h2>
+        <p class="sub">${recentes ? "As mais pesquisadas nos últimos 7 dias" : "Peças com foto e ficha completa"}</p></div>
+        <a class="rec-todos" href="#/busca">Ver todos<span class="so-pc"> os produtos</span> <span aria-hidden="true">›</span></a></div>
+      <ul class="rec-lista">${lst.map(pecaHtml).join("")}</ul>`;
   }
   // o topo escuro e o logo branco só no início (a troca de rota volta ao topo claro antes do render)
   const topoInicio = (sim) => {
@@ -807,30 +806,31 @@
   window.addEventListener("hashchange", () => topoInicio(false));
   function telaInicio() {
     const sistemas = contar(BASE.produtos, "si");
+    const celular = window.matchMedia("(max-width: 640px)").matches; // o exemplo da busca geral cabe no celular
     topoInicio(true);
     app.innerHTML = `
       <section class="marca-faixa">
         <div class="marca-faixa-in">
           <div class="mf-texto">
-            <span class="mf-selo">bap · componentes de qualidade</span>
-            <h1>Componentes de qualidade <br class="so-pc">para a sua <em>oficina</em></h1>
-            <p>Ache a peça pelo código, pela referência, pelo veículo ou pela placa.</p>
+            <span class="mf-selo">BAP AUTO PARTS</span>
+            <h1>A peça certa <br class="so-pc">para a sua <em>oficina</em></h1>
+            <p><b class="mf-total">${fmt(BASE.total)}</b> produtos em ${fmt(sistemas.length)} sistemas. Busque por código, referência, veículo ou placa.</p>
           </div>
-          <div class="mf-foto" aria-hidden="true"><img src="assets/hero.png" alt=""></div>
+          <div class="mf-foto"><img src="assets/hero_kit.webp" width="566" height="420" alt="Kit amortecedor e kit batente BAP"></div>
           <div class="mf-busca">
             <form class="mf-bloco mf-geral" id="form-geral" role="search" autocomplete="off" aria-label="Buscar produtos">
-              <label class="v-rot" for="campo-q">Código, descrição ou aplicação</label>
+              <label class="campo-rot v-rot" for="campo-q">Código, descrição ou aplicação</label>
               <div class="mf-linha">
-                <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S">
+                <input id="campo-q" name="q" type="search" enterkeyhint="search" placeholder="${celular ? "Ex.: gol 2007 amortecedor" : "Ex.: gol 2007 amortecedor, AMT7115, TRW 16900255S"}">
                 <button type="submit" class="bt">Buscar</button>
               </div>
             </form>
             <form class="mf-bloco v-placa" id="form-placa" autocomplete="off" aria-label="Buscar pela placa">
-              <label class="v-rot" for="campo-placa">Placa do veículo</label>
-              <div class="v-placa-linha">
+              <label class="campo-rot v-rot" for="campo-placa">Placa do veículo</label>
+              <div class="mf-linha">
                 <div class="v-placa-campo">
                   <span class="v-placa-faixa" aria-hidden="true">BR</span>
-                  <input id="campo-placa" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="8" enterkeyhint="search" placeholder="ABC1D23" aria-describedby="status-placa">
+                  <input id="campo-placa" type="text" inputmode="text" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="8" enterkeyhint="search" placeholder="Ex.: ABC1D23" aria-describedby="status-placa">
                 </div>
                 <button type="submit" class="bt">Buscar</button>
               </div>
@@ -839,47 +839,25 @@
           </div>
         </div>
       </section>
-      <section class="difs" aria-label="O que o catálogo oferece">
-        <div class="dif"><b>${fmt(BASE.total)}</b><span>produtos no catálogo, em ${fmt(sistemas.length)} sistemas</span></div>
-        <div class="dif"><b>Busca por placa</b><span>Digite a placa e veja as peças do veículo</span></div>
-        <div class="dif"><b>Referência cruzada</b><span>Ache pelo código do original ou do concorrente</span></div>
-      </section>
-      <section class="bloco destaques-bloco" aria-busy="true"><div class="destaques espera" aria-hidden="true">${"<div class=\"destaque\"><div class=\"d-foto\"></div><div class=\"d-txt\"></div></div>".repeat(4)}</div></section>`;
-    const sec = app.querySelector(".destaques-bloco");
+      <section class="bloco recentes-bloco" aria-busy="true"><ul class="rec-lista espera" aria-hidden="true">${"<li><span class=\"rec-item\"><span class=\"rec-foto\"></span></span></li>".repeat(N_LISTA)}</ul></section>`;
+    const sec = app.querySelector(".recentes-bloco");
     if (!CONTADOR_LIGADO) blocoPecas(sec, null);
     else maisVistos().then((lst) => { if (sec.isConnected) blocoPecas(sec, lst); });
 
-    // os 2 botões fazem a mesma busca do quadro da busca (montarBusca, T-0014): placa vazia, busca o texto; com a placa,
-    // consulta o veículo e leva o texto junto. LGPD: a placa vai só no corpo do POST (consultarPlaca: credentials omit)
-    // e fica só em memória (VEICULO_PLACA); no endereço vai o veículo, nunca a placa.
+    // os 2 botões fazem a mesma busca do quadro da busca (montarBusca): placa vazia, busca o texto; com a placa,
+    // buscarPelaPlaca (o veículo e o texto q juntos)
     const fG = app.querySelector("#form-geral");
     const fP = app.querySelector("#form-placa"), cP = fP.querySelector("#campo-placa"), st = fP.querySelector("#status-placa");
     const bts = app.querySelectorAll(".mf-busca button");
     const aviso = (h) => { st.hidden = false; st.innerHTML = h; };
-    cP.addEventListener("input", () => { cP.value = cP.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7); });
-    let consultando = false;
+    const travar = (sim) => { bts.forEach((b) => { b.disabled = sim; }); if (sim) fP.setAttribute("aria-busy", "true"); else fP.removeAttribute("aria-busy"); };
+    cP.addEventListener("input", () => { cP.value = soPlaca(cP.value).slice(0, 7); });
     const buscarInicio = (ev) => {
       ev.preventDefault();
-      if (consultando) return;
+      if (bts[0].disabled) return; // consultando
       const q = fG.elements.q.value.trim();
       if (!cP.value.trim()) { VEICULO_PLACA = null; irPara("/busca", { q }); return; }
-      const placa = cP.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-      if (!PLACA_OK.test(placa)) { aviso("<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23."); cP.focus(); return; }
-      consultando = true; bts.forEach((b) => { b.disabled = true; }); fP.setAttribute("aria-busy", "true");
-      aviso("Consultando…");
-      const acordando = setTimeout(() => { aviso("Acordando o serviço, aguarde…"); }, PLACAS_ACORDANDO_MS);
-      consultarPlaca(placa).then((v) => {
-        const achado = veiculoDaPlaca(v);
-        if (!achado.q) throw Object.assign(new Error("vazio"), { status: 404 });
-        cP.value = "";
-        const daPlaca = { vm: achado.bruto.mo, vmo: achado.bruto.modelo, va: achado.bruto.ano, vmt: achado.bruto.cil, vv: achado.bruto.versao };
-        VEICULO_PLACA = { placa, chave: chaveVeiculo(daPlaca) };
-        irPara("/busca", new URLSearchParams(Object.entries(Object.assign(daPlaca, { q })).filter(([, x]) => x)));
-      }).catch((e) => {
-        aviso({ 400: "<b>Placa inválida.</b> Use o formato ABC1234 ou ABC1D23.", 404: "<b>Placa não encontrada.</b>",
-          429: "<b>Muitas consultas, tente em alguns minutos.</b>" }[e && e.status]
-          || "<b>Busca por placa indisponível agora;</b> use a busca por código, descrição ou aplicação.");
-      }).finally(() => { clearTimeout(acordando); consultando = false; bts.forEach((b) => { b.disabled = false; }); fP.removeAttribute("aria-busy"); });
+      buscarPelaPlaca(cP.value, q, { aviso, travar, campo: cP });
     };
     fG.addEventListener("submit", buscarInicio);
     fP.addEventListener("submit", buscarInicio);
