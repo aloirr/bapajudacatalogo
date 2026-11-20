@@ -813,8 +813,8 @@
         <a class="rec-todos" href="#/busca">Ver todos<span class="so-pc"> os produtos</span> <span aria-hidden="true">›</span></a></div>
       <ul class="rec-lista">${lst.map(pecaHtml).join("")}</ul>`;
   }
-  // op4d: no início o cabeçalho fica transparente sobre a faixa; ao rolar, ganha o fundo --escuro. Nas outras telas
-  // ele é escuro desde a T-0018 (opção b), com o mesmo logo branco (a troca de rota tira a classe antes do render)
+  // op4d e s2: no início e na Sobre o cabeçalho fica transparente sobre a faixa; ao rolar, ganha o fundo --escuro. Nas outras telas
+  // ele é escuro (T-0018, opção b), com o mesmo logo branco (a troca de rota tira as classes antes do render)
   const marcarRolagem = () => document.body.classList.toggle("topo-rolou", window.scrollY > 8);
   window.addEventListener("scroll", marcarRolagem, { passive: true });
   const topoInicio = (sim) => { document.body.classList.toggle("inicio-marca", sim); marcarRolagem(); };
@@ -1406,7 +1406,7 @@
           ${dados}
         </div>
       </div>
-      <div class="so-impressao rod-pdf">As fotos são ilustrativas.${secApl ? "" : " Confira sempre a aplicação antes da compra."}<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
+      <div class="so-impressao rod-pdf">As fotos são ilustrativas.<span class="rodape-confira"> Confira sempre a aplicação antes da compra.</span><br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
   }
   function ligarAcoes(raiz) {
     raiz.querySelector("[data-copiar]").addEventListener("click", (ev) => {

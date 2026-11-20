@@ -36,9 +36,9 @@
                  linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%);
   /* cabeçalho e faixa da busca do catálogo (T-0018, opção b, R-20261120-161500): degradê do --escuro ao --verde-esc.
      A ponta é o --verde-esc com 15% de --escuro, para o menu branco de 14 px passar do AA (5,1:1; no --verde-esc puro, 4,1:1) */
+  --g-catalogo: linear-gradient(90deg, var(--escuro) 0%, var(--texto) 55%, color-mix(in srgb, var(--verde-esc) 85%, var(--escuro)) 100%);
   /* véu --escuro no alto da faixa do início e do topo da Sobre, por trás do cabeçalho transparente: o branco fica legível */
   --veu-topo: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px);
-  --g-catalogo: linear-gradient(90deg, var(--escuro) 0%, var(--texto) 55%, color-mix(in srgb, var(--verde-esc) 85%, var(--escuro)) 100%);
 }
 .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .so-impressao { display: none; }
@@ -60,14 +60,14 @@ main:focus, main:focus-visible { outline: none; }
 .carregando { padding: 120px 16px; text-align: center; color: var(--texto-2); }
 
 /* topo */
-.topo { background: var(--g-catalogo); position: sticky; top: 0; z-index: 20; } /* escuro em todas as telas (T-0018 b); no início, transparente */
+.topo { background: var(--g-catalogo); position: sticky; top: 0; z-index: 20; } /* escuro em todas as telas (T-0018 b); no início e na Sobre, transparente sobre a faixa */
 .topo-in { max-width: var(--largura); margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--branco); }
 .marca img { height: 46px; width: auto; }
-.marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--branco); border-left: 1px solid color-mix(in srgb, var(--branco) 35%, transparent); padding-left: 10px; }
+.marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; border-left: 1px solid color-mix(in srgb, var(--branco) 35%, transparent); padding-left: 10px; }
 .menu { display: flex; gap: 12px; }
 .menu a { display: flex; align-items: center; min-height: 44px; padding-inline: 5px; text-decoration: none; color: var(--branco); font-weight: 500; font-size: 14px; } /* toque com 44 px */
-.menu a:hover { color: var(--branco); text-decoration: underline; text-decoration-color: var(--verde); text-decoration-thickness: 2px; text-underline-offset: 6px; } /* o --verde no texto some na ponta verde do degradê (designer-ux) */
+.menu a:hover { text-decoration: underline; text-decoration-color: var(--verde); text-decoration-thickness: 2px; text-underline-offset: 6px; } /* o --verde no texto some na ponta verde do degradê (designer-ux) */
 .topo :focus-visible { outline-color: var(--branco); } /* no escuro e na ponta verde, 4:1 ou mais */
 
 /* cartão de busca */
@@ -321,7 +321,7 @@ table.tab-veiculos td:nth-child(3), table.tab-veiculos td:nth-child(5) { white-s
 .rodape p { margin: 0; }
 .rodape .rodape-copy { grid-column: 1; grid-row: 1; font-size: 14px; font-weight: 500; line-height: 1.5; text-wrap: balance; }
 .rodape .mini { grid-column: 1; grid-row: 2; font-size: 12px; color: var(--borda-campo); } /* ~12:1 no --escuro */
-/* RD-0170: onde há a seção Aplicação (página ou janela do produto), o "Confira sempre a aplicação" fica só nela */
+/* RD-0170: onde há a seção Aplicação (página, janela ou PDF do produto), o "Confira sempre a aplicação" fica só nela */
 body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
 .rodape-topo { grid-column: 2; grid-row: 1 / span 2; width: 48px; height: 48px; border-radius: 50%; border: 0; cursor: pointer;
   display: grid; place-items: center; background: var(--verde); color: var(--escuro); box-shadow: 0 6px 16px var(--veu); transition: box-shadow .15s, transform .15s; }
@@ -482,11 +482,8 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .inicio-marca .marca img { height: 52px; }
 @media (prefers-reduced-motion: reduce) { .inicio-marca .topo, .sobre-marca .topo { transition: none; } }
 .marca-faixa, .sb-topo { color: var(--branco); position: relative; overflow: hidden; background-color: var(--escuro); background-image: var(--fundo-faixa); }
-/* a faixa começa atrás do cabeçalho (52 px do logo + 20 px); o véu --escuro no alto garante o contraste do branco */
-.inicio-marca .marca-faixa { padding-top: 72px;
-  background-image: var(--veu-topo), var(--fundo-faixa); }
-/* o topo da Sobre começa atrás do cabeçalho (46 px do logo + 20 px; 60 px no celular) */
-.sobre-marca .sb-topo { padding-top: 72px; background-image: var(--veu-topo), var(--fundo-faixa); }
+/* a faixa do início e o topo da Sobre começam atrás do cabeçalho (72 px; 60 px no celular); o véu --escuro no alto garante o contraste do branco */
+.inicio-marca .marca-faixa, .sobre-marca .sb-topo { padding-top: 72px; background-image: var(--veu-topo), var(--fundo-faixa); }
 .marca-faixa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--verde); }
 .marca-faixa-in { max-width: 1200px; margin: 0 auto; padding: 26px 16px 34px; display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "txt foto" "busca busca"; gap: 18px 32px; align-items: center; }
@@ -552,7 +549,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 @media (max-width: 640px) {
   .so-pc { display: none; }
   .inicio-marca .marca img { height: 40px; }
-  .inicio-marca .marca-faixa { padding-top: 60px; }
+  .inicio-marca .marca-faixa, .sobre-marca .sb-topo { padding-top: 60px; }
   .marca-faixa .mf-num { gap: 10px; margin: 2px 0 10px; }
   .mf-num b { font-size: 36px; }
   .mf-num span { font-size: 11px; padding-left: 10px; }
@@ -620,7 +617,6 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .sb-dados div:nth-child(n+3) { border-top: 1px solid var(--linha); }
 }
 @media (max-width: 640px) {
-  .sobre-marca .sb-topo { padding-top: 60px; }
   .sb-txt h1 { font-size: 27px; }
   .sb-txt p { font-size: 15px; }
   .sb-fotos { height: 190px; }
