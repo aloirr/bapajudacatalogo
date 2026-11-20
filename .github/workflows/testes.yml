@@ -1,0 +1,54 @@
+# Testes do site em todo PR (T-0002, 20/11/2026). Governança: mudança só com a autorização do Alexandre.
+# Não usa segredo, não faz commit do JSON regerado e não publica nada: os prints viram artefato do job.
+name: testes do site
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: testes-${{ github.head_ref }}
+  cancel-in-progress: true
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python e openpyxl
+        run: python -m pip install -q -r requirements.txt
+
+      - name: Gerar os dados do site (para no [PARADO] da TRAVA)
+        run: |
+          set -o pipefail
+          python scripts/gerar_site.py 2>&1 | tee gerar_site.log
+          if grep -E '\[(ERRO|PARADO)\]' gerar_site.log; then
+            echo "::error::gerar_site.py saiu com [ERRO] ou [PARADO]"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Playwright e Chromium (fora do repositório, sem package.json novo)
+        run: |
+          mkdir -p "$RUNNER_TEMP/pw"
+          npm install --prefix "$RUNNER_TEMP/pw" --no-save --no-package-lock --no-audit --no-fund playwright@1.63.0
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+          echo "NODE_PATH=$RUNNER_TEMP/pw/node_modules" >> "$GITHUB_ENV"
+
+      - name: Testes do site (buscas, página do produto, 390 px, console, palavra interna)
+        run: node scripts/testar_site.mjs --conhecidos testes/conhecidos.json
+
+      - name: Guardar os prints (1366 e 390 px)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prints-testes-site
+          path: testes/prints/ultima/
+          if-no-files-found: warn
+          retention-days: 14
