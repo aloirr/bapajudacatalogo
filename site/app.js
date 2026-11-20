@@ -15,16 +15,6 @@
   // (serviço reiniciando depois de um deploy ou a API PLACAS lenta); o limite de espera continua folgado.
   const PLACAS_TIMEOUT_MS = 75000;
   const PLACAS_ACORDANDO_MS = 5000;
-  // SIMULAÇÃO T-0014 (R-20261120-122100; sai na entrega, fica o modelo escolhido pelo Alexandre). Substitui ?f= e ?v=.
-  //   ?m=A vertical: coluna à esquerda com o título, o cartão "Meu veículo" (chave e listas Marca › Modelo › Ano ›
-  //        Motor/Versão) e os outros filtros; no celular, botão "Meu veículo e filtros" que abre o painel por cima.
-  //   ?m=B horizontal: o cartão "Meu veículo" deitado numa faixa abaixo do quadro da busca e os filtros na 2ª linha;
-  //        no celular, as 4 listas em 2×2 e os filtros no botão "Filtrar (n)".
-  //   Nos dois, o menu "Departamentos" (os sistemas) e o caminho ("Suspensão › Amortecedores e Kits").
-  //   Sem parâmetro: a tela de hoje.
-  const SIM_M = /^[AB]$/.test(new URLSearchParams(location.search).get("m") || "") ? new URLSearchParams(location.search).get("m") : "";
-  if (SIM_M) document.documentElement.classList.add("sim-m-" + SIM_M.toLowerCase());
-  const CELULAR_SIM = () => window.matchMedia("(max-width: 900px)").matches;
   const VEI_K = ["vm", "vmo", "va", "vmt"]; // marca, modelo, ano e motor/versão do "Meu veículo" (no endereço vai o veículo, nunca a placa)
   const chaveVeiculo = (pr) => VEI_K.map((k) => (pr && pr.get(k)) || "").join("|");
   const POR_PAGINA = 50; // T-0014: 10 linhas de 5 cartões no computador (25 de 2 no celular)
@@ -389,8 +379,8 @@
     const total = cs ? cs.total : 0;
     const sel = (k) => { const v = pr.getAll(k).filter(Boolean); return v.length ? new Set(v) : null; };
     const filtros = { si: sel("si"), fa: sel("fa"), li: sel("li"), ca: sel("ca") };
-    // "Meu veículo" (SIMULAÇÃO ?m=): com a chave ligada (vl diferente de 0), só o que serve na marca, modelo, ano e motor
-    const vei = SIM_M && pr.get("vm") && pr.get("vl") !== "0" ? { vm: pr.get("vm"), vmo: pr.get("vmo") || "", va: +pr.get("va") || 0, vmt: pr.get("vmt") || "" } : null;
+    // "Meu veículo" (listas em SIMULAÇÃO até a T-0017): só o que serve na marca, modelo, ano e motor escolhidos
+    const vei = pr.get("vm") ? { vm: pr.get("vm"), vmo: pr.get("vmo") || "", va: +pr.get("va") || 0, vmt: pr.get("vmt") || "" } : null;
     let out = [], maxN = 0;
     for (const e of INDICE) {
       const p = e.p;
@@ -443,17 +433,16 @@
     if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + p.d)}" loading="${grande ? "eager" : "lazy"}" onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:'<img src=&quot;assets/logo_escuro.png&quot; alt=&quot;&quot;>Foto em breve'}))">`;
     return `<div class="sem-foto"><img src="assets/logo_escuro.png" alt="">Foto em breve</div>`;
   }
-  // Cartão do resultado (T-0014, R-20261120-112520). Na SIMULAÇÃO ?m= (R-20261120-122300), o código vai sobre a foto,
-  // no canto inferior direito (não é botão; o código continua no alt da foto e no link do cartão, para leitor de tela).
-  // Sem parâmetro fica na linha de texto: a bateria 6dc1d73 procura o link pelo .cod (passo "janela do produto"). a foto só amplia (botão; sem foto, nada); o código e o nome
+  // Cartão do resultado (T-0014, R-20261120-112520). O código vai sobre a foto, no canto inferior direito
+  // (R-20261120-122300; não é botão; o código continua no alt da foto e no link do cartão, para leitor de tela). a foto só amplia (botão; sem foto, nada); o código e o nome
   // são o link que abre a janela do produto; "+ Detalhes" também abre a janela. Sem botão dentro de link.
   function itemHtml(p) {
     const href = "#/produto/" + encodeURIComponent(p.c);
     return `<article class="item" data-cod="${esc(p.c)}">
       <div class="foto">${p.i ? `<button class="foto-zoom" type="button" aria-haspopup="dialog" aria-label="Ampliar a foto do ${esc(p.c)}">${fotoHtml(p)}</button>` : fotoHtml(p)}
-        ${SIM_M ? `<span class="foto-cod" aria-hidden="true">${esc(p.c)}</span>` : ""}</div>
+        <span class="foto-cod" aria-hidden="true">${esc(p.c)}</span></div>
       <div class="corpo">
-        <a class="item-link" href="${href}">${SIM_M ? `<span class="cod vh">${esc(p.c)} · </span>` : `<span class="cod">${esc(p.c)}</span>`}
+        <a class="item-link" href="${href}"><span class="cod vh">${esc(p.c)}</span><span class="vh"> · </span>
         <span class="desc">${esc(p.d)}</span></a>
         ${p.a ? `<span class="apl">${esc(p.a)}</span>` : ""}
         <div class="item-pe">${refsHtml(p)}
@@ -537,12 +526,15 @@
   // caixas que precisam (os cartões novos do "Carregar mais"; no resize, todas) e trabalha em lotes, sem alternar
   // leitura e escrita de layout por cartão: 1) escreve (mostra tudo), 2) lê todas as posições, 3) escreve (esconde e
   // põe o "+N"), 4) confere o "+N" de todas de uma vez e tira mais uma etiqueta só onde ele passou da 2ª linha.
+  const UMA_LINHA = () => window.matchMedia("(min-width: 641px)").matches;
   function ajustarEtiquetas(caixas) {
     const itens = [...caixas].map((box) => ({ box, tags: [...box.querySelectorAll(".ref:not(.ref-mais)")], mais: box.querySelector(".ref-mais"), extra: +box.dataset.extra || 0 }))
       .filter((x) => x.tags.length && x.mais);
     for (const x of itens) { for (const t of x.tags) t.hidden = false; x.mais.hidden = true; } // 1) escrita
     for (const x of itens) { // 2) leitura
-      x.limite = x.tags[0].offsetTop + x.tags[0].offsetHeight * 1.5 + 4; // fim da 2ª linha (o topo dela)
+      // computador: 1 linha só (R-20261120-123630, cartão mais baixo); celular: até 2 linhas. A 1ª linha é a do "Ref. Cruzada:".
+      const rot = x.box.querySelector(".refs-rot") || x.tags[0];
+      x.limite = rot.offsetTop + (UMA_LINHA() ? 6 : x.tags[0].offsetHeight * 1.5 + 4);
       x.vis = x.tags.filter((t) => t.offsetTop <= x.limite);
       x.escondidas = x.tags.length - x.vis.length;
     }
@@ -555,7 +547,7 @@
       abertos.push(x);
     }
     for (let volta = 0; abertos.length && volta < MAX_ETIQUETAS; volta++) { // 4) leitura de todas, depois escrita
-      const passou = abertos.filter((x) => x.mais.offsetTop > x.limite && x.vis.length > 1);
+      const passou = abertos.filter((x) => x.mais.offsetTop > x.limite && x.vis.length > (UMA_LINHA() ? 0 : 1));
       for (const x of passou) { x.vis.pop().hidden = true; x.escondidas++; x.mais.textContent = "+" + (x.escondidas + x.extra); }
       abertos = passou;
     }
@@ -597,7 +589,7 @@
     if (pr && pr.get("q")) form.elements.q.value = pr.get("q");
     // o veículo da busca na tela (ve=): a etiqueta da placa (só da memória desta busca) ou "Veículo", com o X, e as partes
     const ve = (pr && pr.get("ve")) || "";
-    if (VEICULO_PLACA && (SIM_M ? chaveVeiculo(pr) !== VEICULO_PLACA.chave : ve !== VEICULO_PLACA.q)) VEICULO_PLACA = null; // a busca na tela já não tem esse veículo (o X dele no quadro): placa e veículo somem da memória
+    if (VEICULO_PLACA && (VEICULO_PLACA.chave ? chaveVeiculo(pr) !== VEICULO_PLACA.chave : ve !== VEICULO_PLACA.q)) VEICULO_PLACA = null; // a busca na tela já não tem esse veículo (o X dele no quadro): placa e veículo somem da memória
     if (ve) {
       const mem = VEICULO_PLACA;
       const partes = mem && mem.partes;
@@ -622,15 +614,15 @@
     campoPlaca.addEventListener("input", () => { campoPlaca.value = campoPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7); });
     // o termo novo fica com o veículo da placa que já está na tela (a etiqueta "Placa" sai pelo X dela)
     const veAtual = () => (lerRota().caminho === "/busca" ? lerRota().params.get("ve") : "") || "";
-    // SIMULAÇÃO ?m=: a busca nova de texto fica com o "Meu veículo" da tela (marca, modelo, ano, motor e a chave)
-    const veiAtual = () => { const r = lerRota(); const o = {}; if (r.caminho === "/busca") for (const k of [...VEI_K, "vl"]) if (r.params.get(k)) o[k] = r.params.get(k); return o; };
+    // a busca nova de texto fica com o "Meu veículo" da tela (marca, modelo, ano e motor)
+    const veiAtual = () => { const r = lerRota(); const o = {}; if (r.caminho === "/busca") for (const k of VEI_K) if (r.params.get(k)) o[k] = r.params.get(k); return o; };
     let consultando = false;
     form.addEventListener("submit", (ev) => {
       ev.preventDefault();
       if (consultando) return;
       if (!campoPlaca.value.trim()) { // só texto (ou nada): busca o texto
         if (VEICULO_PLACA) VEICULO_PLACA.placa = null; // outra busca: a placa some da memória (o veículo continua no filtro)
-        irPara("/busca", Object.assign({ ve: veAtual() }, SIM_M ? veiAtual() : {}, { q: form.elements.q.value.trim() }));
+        irPara("/busca", Object.assign({ ve: veAtual() }, veiAtual(), { q: form.elements.q.value.trim() }));
         return;
       }
       const placa = campoPlaca.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -646,9 +638,9 @@
         VEICULO_PLACA = Object.assign(achado, { placa }); // a placa fica só aqui, em memória, para a etiqueta
         campoPlaca.value = "";
         // o veículo vai para ve= (a placa não); o termo que está no campo continua junto
-        // SIMULAÇÃO ?m=: a placa preenche as listas do "Meu veículo" (marca, modelo, ano, motor) e liga a chave
-        const daPlaca = SIM_M ? { vm: achado.bruto.mo, vmo: achado.bruto.modelo, va: achado.bruto.ano, vmt: achado.bruto.cil } : { ve: achado.q };
-        if (SIM_M) VEICULO_PLACA.chave = VEI_K.map((k) => daPlaca[k] || "").join("|");
+        // a placa preenche as listas do "Meu veículo" (marca, modelo, ano, motor); no endereço vai o veículo, nunca a placa
+        const daPlaca = { vm: achado.bruto.mo, vmo: achado.bruto.modelo, va: achado.bruto.ano, vmt: achado.bruto.cil };
+        VEICULO_PLACA.chave = VEI_K.map((k) => daPlaca[k] || "").join("|");
         const novo = new URLSearchParams(Object.entries(Object.assign(daPlaca, { q: form.elements.q.value.trim() })).filter(([, v]) => v));
         if (lerRota().caminho === "/busca" && lerRota().params.toString() === novo.toString()) render();
         else irPara("/busca", novo);
@@ -740,7 +732,7 @@
       q: qDe(modelo),
       texto: [partes.marcaModelo, partes.ano, partes.cil, partes.versao].filter(Boolean).join(" "),
       partes,
-      bruto: { mo: montadora, modelo, ano: anoModelo, cil: /^\d+[.,]\d$/.test(cil) ? cil.replace(",", ".") : "" }, // para o "Meu veículo" (SIMULAÇÃO ?m=)
+      bruto: { mo: montadora, modelo, ano: anoModelo, cil: /^\d+[.,]\d$/.test(cil) ? cil.replace(",", ".") : "" }, // para o "Meu veículo"
     };
   }
   // Exibição sem caixa alta ("Honda Civic", "Volkswagen Gol", "Mercedes-Benz Atego"); siglas ficam: VW, GM, BMW...,
@@ -811,7 +803,7 @@
       <div class="lista"></div><div class="mais"></div></div>`;
     montarBusca(document.getElementById("busca-topo"), pr);
     montarFiltros(pr, todos);
-    if (SIM_M) arrumarModelo(pr, todos);
+    montarLayout(pr, todos);
     const lista = app.querySelector(".lista");
     const mais = app.querySelector(".mais");
     // insere os próximos cartões e ajusta as etiquetas só deles (a volta à lista insere todos de uma vez)
@@ -825,6 +817,11 @@
     mais.addEventListener("click", () => pagina());
     lista.addEventListener("click", (ev) => { const bz = ev.target.closest(".foto-zoom"); if (bz) abrirZoom(bz); });
     if (!todos.length) {
+      if (pr.get("vm")) {
+        const nomeV = [bonito(pr.get("vm")), pr.get("vmo") && bonito(pr.get("vmo")), pr.get("va"), pr.get("vmt")].filter(Boolean).join(" ");
+        lista.outerHTML = `<div class="vazio"><b>Nada para ${esc(nomeV)} com essa busca.</b>Tente outra busca ou veja tudo sem o veículo.<p><button type="button" class="bt bt-claro vazio-tirar">Tirar o veículo</button></p></div>`;
+        app.querySelector(".vazio-tirar").addEventListener("click", () => { const n = new URLSearchParams(pr); VEI_K.forEach((k) => n.delete(k)); FILTRO_FOCO = { y: 0, sel: "#campo-placa" }; irPara("/busca", n); });
+      } else
       lista.outerHTML = `<div class="vazio"><b>Nenhum produto encontrado</b>Confira o código ou tente menos palavras (sem o ano, por exemplo).</div>`;
     } else pagina();
     // volta do produto (T-0014): reabre a mesma lista com os mesmos cartões carregados e a mesma rolagem
@@ -927,10 +924,10 @@
     });
   }
 
-  // ---------- SIMULAÇÃO do modelo de filtros (?m=A|B, R-20261120-122100) ----------
+  // ---------- "Meu veículo" e filtros à esquerda (R-20261120-122100, 123630 e 123800; o modelo B virou o padrão) ----------
   // As listas do "Meu veículo" são montadas aqui, em JavaScript, a partir do produtos.json de hoje: a marca do campo
-  // mo, o modelo das palavras de veículo da aplicação (a), o ano das faixas da aplicação e o motor dos números "1.8"
-  // da aplicação. É SÓ PARA A SIMULAÇÃO: o filtro de verdade virá da coluna de veículo da base (T-0017).
+  // mo, o modelo da palavra que vem depois da marca na aplicação (a), o ano das faixas da aplicação e o motor dos
+  // números "1.8" da aplicação. É SIMULAÇÃO: o filtro de verdade virá do campo de veículo da base (T-0017).
   const painelAberto = () => !!app.querySelector("dialog.painel-c[open]");
   function abrirPainel() {
     const dlg = app.querySelector("dialog.painel-c");
@@ -949,10 +946,24 @@
     "AGRICOLA", "TRATOR", "ONIBUS", "CAMINHAO", "MICRO", "UTILITARIO", "MODELOS", "ANO", "ANOS", "APOS", "ANTES", "DESDE", "EM", "DIANTE"]);
   const RX_PALAVRA = new Map();
   const temPalavra = (txt, w) => { if (!RX_PALAVRA.has(w)) RX_PALAVRA.set(w, new RegExp("(^|[^A-Z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "($|[^A-Z0-9])")); return RX_PALAVRA.get(w).test(txt); };
-  const marcasDe = (e) => norm(e.p.mo).split(/\s*[\/,]\s*/).filter(Boolean);
+  // Campo "ve" da T-0017 ([fabricante, modelo, versão?]): quando o produto tem, a cascata usa ele; sem o campo (o JSON
+  // de hoje), cai na montagem pela aplicação (SIMULAÇÃO). O ano continua vindo da aplicação.
+  const veDe = (e) => (Array.isArray(e.p.ve) && e.p.ve.length ? e.p.ve.map((x) => [norm(x[0]), norm(x[1]), norm(x[2] || "")]) : null);
+  const marcasDe = (e) => { const ve = veDe(e); return ve ? [...new Set(ve.map((x) => x[0]))] : norm(e.p.mo).split(/\s*[\/,]\s*/).filter(Boolean); };
   const motoresDe = (e) => [...new Set((e.apl.match(/\b\d[.,]\d\b/g) || []).map((m) => m.replace(",", ".")))];
   const anoServe = (e, ano) => !e.faixas.length || e.faixas.some(([de, ate]) => (de || 0) <= ano && ano <= (ate || ANO_HOJE));
   function casaVeiculo(e, v) {
+    const ve = veDe(e);
+    if (ve) { // dado de verdade (T-0017): fabricante, modelo e versão do campo "ve"; o motor da placa vale pela aplicação
+      const hits = ve.filter((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo));
+      if (!hits.length) return false;
+      if (v.va && !anoServe(e, v.va)) return false;
+      if (v.vmt) { // serve se a versão ou o motor batem, ou se o produto não diz nenhum dos dois
+        const vers = hits.map((x) => x[2]).filter(Boolean), mot = motoresDe(e);
+        if (!vers.includes(v.vmt) && !mot.includes(v.vmt) && (vers.length || mot.length)) return false;
+      }
+      return true;
+    }
     if (!marcasDe(e).includes(v.vm) && !temPalavra(e.apl, v.vm)) return false;
     if (v.vmo && !temPalavra(e.apl, v.vmo)) return false;
     if (v.va && !anoServe(e, v.va)) return false;
@@ -960,183 +971,150 @@
     return true;
   }
   // opções de cada lista, só com o que existe para a escolha anterior, com a contagem de produtos
-  function opcoesVeiculo(v) {
-    const conta = (lista) => { const c = new Map(); for (const [k, n] of lista) c.set(k, (c.get(k) || 0) + n); return c; };
+  // (designer-ux: a contagem é só dentro do resultado da busca e dos filtros atuais, sem o próprio veículo)
+  let E_DE = null; // produto → entrada do INDICE
+  function opcoesVeiculo(v, pr) {
+    if (!E_DE) E_DE = new Map(INDICE.map((e) => [e.p, e]));
+    const semVei = new URLSearchParams(pr); VEI_K.forEach((k) => semVei.delete(k));
+    const base = buscar(semVei).map((p) => E_DE.get(p));
     const marcas = new Map(), modelos = new Map(), anos = new Map(), motores = new Map();
     let semMotor = 0;
-    for (const e of INDICE) {
+    for (const e of base) {
       for (const m of marcasDe(e)) marcas.set(m, (marcas.get(m) || 0) + 1);
-      if (!v.vm || !(marcasDe(e).includes(v.vm) || temPalavra(e.apl, v.vm))) continue;
-      // modelo: o que vem logo depois da marca na aplicação ("HONDA - Civic · ...", "VW - Gol / Saveiro · ..."), 1ª palavra de cada pedaço
-      const ws = new Set();
-      for (const mt of e.apl.matchAll(new RegExp("(?:^|[^A-Z])" + v.vm + "\\s*[-:]?\\s*([^·;(]+)", "g")))
+      const ve = veDe(e);
+      if (!v.vm || !(ve ? ve.some((x) => x[0] === v.vm) : marcasDe(e).includes(v.vm) || temPalavra(e.apl, v.vm))) continue;
+      // modelo: do "ve" (T-0017) ou, sem ele, o que vem logo depois da marca na aplicação ("HONDA - Civic · ...",
+      // "VW - Gol / Saveiro · ..."), 1ª palavra de cada pedaço (SIMULAÇÃO)
+      const ws = new Set(ve ? ve.filter((x) => x[0] === v.vm).map((x) => x[1]) : []);
+      if (!ve) for (const mt of e.apl.matchAll(new RegExp("(?:^|[^A-Z])" + v.vm + "\\s*[-:]?\\s*([^·;(]+)", "g")))
         for (const pd of mt[1].split("/")) { const w = (pd.trim().match(/^[A-Z][A-Z0-9]+/) || [""])[0]; if (w.length >= 2 && !VERSAO.test(w) && !PARA_FORA.has(w) && w !== v.vm) ws.add(w); }
       for (const w of ws) modelos.set(w, (modelos.get(w) || 0) + 1);
-      if (!v.vmo || !temPalavra(e.apl, v.vmo)) continue;
+      if (!v.vmo || !(ve ? ve.some((x) => x[0] === v.vm && x[1] === v.vmo) : temPalavra(e.apl, v.vmo))) continue;
       const fx = e.faixas.length ? e.faixas : [[1980, ANO_HOJE]];
       const vistos = new Set();
       for (const [de, ate] of fx) for (let a = Math.max(1980, de || 1980); a <= Math.min(ANO_HOJE, ate || ANO_HOJE); a++) vistos.add(a);
       for (const a of vistos) anos.set(a, (anos.get(a) || 0) + 1);
       if (!v.va || !anoServe(e, v.va)) continue;
-      const ms = motoresDe(e);
+      // Motor/Versão: a versão do "ve" (quando tem) e o motor "1.8" da aplicação
+      const ms = [...new Set([...(ve ? ve.filter((x) => x[0] === v.vm && x[1] === v.vmo && x[2]).map((x) => x[2]) : []), ...motoresDe(e)])];
       if (!ms.length) semMotor++;
       for (const m of ms) motores.set(m, (motores.get(m) || 0) + 1);
     }
     // motor que veio da placa e não está escrito na aplicação: entra com os produtos que não dizem o motor
     if (v.vmt && !motores.has(v.vmt)) motores.set(v.vmt, 0);
     if (semMotor) for (const k of motores.keys()) motores.set(k, motores.get(k) + semMotor);
-    const top = (m, n) => [...m.entries()].filter(([, q]) => q > 0).sort((a, b) => b[1] - a[1]).slice(0, n);
+    // a escolha que está na tela fica na lista mesmo com 0 (o estado vazio avisa e oferece "Tirar o veículo")
+    const ficar = (m, x) => { if (x && !m.has(x)) m.set(x, 0); };
+    ficar(marcas, v.vm); ficar(modelos, v.vmo); ficar(anos, v.va || 0); anos.delete(0);
+    const top = (m, n) => [...m.entries()].filter(([x, q]) => q > 0 || x === v.vm || x === v.vmo).sort((a, b) => b[1] - a[1]).slice(0, n);
     return {
       vm: top(marcas, 60).sort((a, b) => a[0].localeCompare(b[0])),
       vmo: top(modelos, 80).filter(([x, q]) => q >= 2 || x === v.vmo).sort((a, b) => a[0].localeCompare(b[0])), // SIMULAÇÃO: tira o que aparece 1 vez só
-      va: [...anos.entries()].sort((a, b) => b[0] - a[0]),
-      vmt: [...motores.entries()].filter(([, q]) => q > 0).sort((a, b) => a[0].localeCompare(b[0])),
+      va: [...anos.entries()].filter(([x, q]) => q > 0 || x === v.va).sort((a, b) => b[0] - a[0]),
+      vmt: [...motores.entries()].filter(([x, q]) => q > 0 || x === v.vmt).sort((a, b) => a[0].localeCompare(b[0])),
     };
   }
+  // "Meu veículo": a placa em destaque (só da memória desta busca) com o X que tira o veículo; sem placa, o rótulo
+  // pequeno "Meu veículo". Embaixo, as 4 listas e o "Trocar veículo".
+  let MV_ABERTO = false; // celular: as listas do "Meu veículo" abertas (continua aberto ao escolher a próxima lista)
   function meuVeiculoHtml(pr) {
     const v = { vm: pr.get("vm") || "", vmo: pr.get("vmo") || "", va: +pr.get("va") || 0, vmt: pr.get("vmt") || "" };
-    const ligado = !!v.vm && pr.get("vl") !== "0";
-    const op = opcoesVeiculo(v);
+    const op = opcoesVeiculo(v, pr);
     const mem = VEICULO_PLACA && VEICULO_PLACA.chave === chaveVeiculo(pr) ? VEICULO_PLACA : null;
     const lista = (k, rot, todos, valor, ativo, fmtV) => `<label class="mv-campo"><span>${rot}</span>
       <select data-k="${k}"${ativo ? "" : " disabled"}><option value="">${todos}</option>${op[k].map(([x, n]) =>
         `<option value="${esc(String(x))}"${String(x) === String(valor) ? " selected" : ""}>${esc(fmtV(x))} (${fmt(n)})</option>`).join("")}</select></label>`;
-    return `<section class="meu-veiculo${ligado ? " ligado" : ""}" aria-label="Meu veículo">
-      <div class="mv-cab"><span class="mv-tit">Meu veículo</span>
-        <label class="chave"><input type="checkbox" role="switch" class="mv-chave"${ligado ? " checked" : ""}${v.vm ? "" : " disabled"}><span class="chave-trilho" aria-hidden="true"></span><span class="vh">Filtrar pelo meu veículo</span></label></div>
-      ${mem && mem.placa ? `<p class="mv-placa">Pela placa <b>${esc(mem.placa)}</b>${mem.partes && mem.partes.versao ? ` · versão ${esc(mem.partes.versao)}` : ""}</p>` : ""}
-      <div class="mv-listas">
+    const resumo = [v.vm && bonito(v.vm), v.vmo && bonito(v.vmo), v.va || "", v.vmt].filter(Boolean).join(" ");
+    return `<section class="meu-veiculo${MV_ABERTO ? " aberto" : ""}" aria-label="Meu veículo">
+      <div class="mv-cab"><span class="mv-tit">Meu veículo</span>${mem && mem.placa
+        ? `<span class="mv-placa-grande"><span class="vh">Placa </span><b>${esc(mem.placa)}</b><button type="button" class="mv-tirar" aria-label="Tirar a placa e o veículo">✕</button></span>${mem.partes && mem.partes.versao ? `<span class="mv-versao">versão ${esc(mem.partes.versao)}</span>` : ""}`
+        : ""}</div>
+      <div class="mv-resumo">${resumo ? `<span class="mv-resumo-txt">${esc(resumo)}${mem && mem.placa ? "" : ""}</span>` : ""}
+        <button type="button" class="mv-alterar" aria-expanded="${MV_ABERTO}" aria-controls="mv-listas">${resumo ? "Alterar veículo" : "Escolher veículo"}</button></div>
+      <div class="mv-listas" id="mv-listas">
         ${lista("vm", "Marca", "Todas as marcas", v.vm, true, (x) => bonito(x))}
         ${lista("vmo", "Modelo", "Todos os modelos", v.vmo, !!v.vm, (x) => bonito(x))}
         ${lista("va", "Ano", "Todos os anos", v.va || "", !!v.vmo, (x) => String(x))}
-        ${lista("vmt", "Motor/Versão", "Todos os motores", v.vmt, !!v.va, (x) => String(x))}
+        ${lista("vmt", "Motor/Versão", "Todos os motores", v.vmt, !!v.va, (x) => bonito(String(x), true))}
       </div>
-      ${v.vm ? `<button type="button" class="mv-trocar">Trocar veículo <span aria-hidden="true">✕</span></button>` : ""}
+      ${v.vm ? `<button type="button" class="mv-trocar">Trocar veículo</button>` : ""}
     </section>`;
   }
   function ligarMeuVeiculo(raiz, pr) {
     const sec = raiz.querySelector(".meu-veiculo");
     if (!sec) return;
     sec.addEventListener("change", (ev) => {
-      const n = new URLSearchParams(pr);
-      if (ev.target.matches(".mv-chave")) {
-        if (ev.target.checked) n.delete("vl"); else n.set("vl", "0"); // desligada: mostra tudo sem perder as escolhas
-        FILTRO_FOCO = { y: window.scrollY, sel: ".mv-chave", painel: painelAberto() };
-        irPara("/busca", n);
-        return;
-      }
       const k = ev.target.dataset.k;
       if (!k) return;
+      const n = new URLSearchParams(pr);
       const i = VEI_K.indexOf(k);
       VEI_K.slice(i).forEach((x) => n.delete(x)); // a escolha nova limpa as listas de baixo
       if (ev.target.value) n.set(k, ev.target.value);
-      n.delete("vl");
-      FILTRO_FOCO = { y: window.scrollY, sel: `select[data-k="${VEI_K[Math.min(i + 1, 3)]}"]:not([disabled]), select[data-k="${k}"]`, painel: painelAberto() };
+      FILTRO_FOCO = { y: window.scrollY, sel: `select[data-k="${VEI_K[Math.min(i + 1, 3)]}"]:not([disabled]), select[data-k="${k}"]` };
       irPara("/busca", n);
     });
-    const tr = sec.querySelector(".mv-trocar");
-    if (tr) tr.addEventListener("click", () => { // "Trocar veículo": limpa as listas (e a placa some da memória)
+    const tirar = () => { // "Trocar veículo" e o X da placa: limpam as listas (e a placa some da memória)
       const n = new URLSearchParams(pr);
-      [...VEI_K, "vl"].forEach((x) => n.delete(x));
+      VEI_K.forEach((x) => n.delete(x));
       FILTRO_FOCO = { y: 0, sel: "#campo-placa" };
       irPara("/busca", n);
-    });
+    };
+    sec.querySelectorAll(".mv-trocar, .mv-tirar").forEach((b) => b.addEventListener("click", tirar));
+    // celular: a faixa fica numa linha; "Alterar veículo" (ou "Escolher veículo") abre as 4 listas
+    const alt = sec.querySelector(".mv-alterar");
+    alt.addEventListener("click", () => { MV_ABERTO = !sec.classList.contains("aberto"); sec.classList.toggle("aberto", MV_ABERTO); alt.setAttribute("aria-expanded", String(MV_ABERTO)); if (MV_ABERTO) sec.querySelector("select").focus(); });
   }
-  function departamentosHtml(pr) {
-    const base = new URLSearchParams(pr); ["si", "fa"].forEach((k) => base.delete(k));
-    const link = (extra) => { const n = new URLSearchParams(base); for (const [k, v] of Object.entries(extra)) n.set(k, v); const qs = n.toString(); return "#/busca" + (qs ? "?" + qs : ""); };
-    const sis = contar(INDICE.map((e) => e.p), "si");
-    const si = pr.getAll("si"), fa = pr.getAll("fa");
-    const caminho = [`<a href="${link({})}">Todos</a>`];
-    if (si.length === 1) caminho.push(`<a href="${link({ si: si[0] })}">${esc(titulo(si[0]))}</a>`);
-    if (si.length === 1 && fa.length === 1) caminho.push(`<span>${esc(titulo(fa[0]))}</span>`);
-    return `<div class="deptos-linha">
-      <div class="deptos"><button type="button" class="deptos-bt" aria-expanded="false" aria-controls="deptos-lista">Departamentos <span aria-hidden="true">▾</span></button>
-        <ul class="deptos-lista" id="deptos-lista" hidden>
-          <li><a href="${link({})}"${si.length ? "" : ' aria-current="true"'}>Todos <em>${fmt(INDICE.length)}</em></a></li>
-          ${sis.map(([v, n]) => `<li><a href="${link({ si: v })}"${si.length === 1 && si[0] === v ? ' aria-current="true"' : ""}>${esc(titulo(v))} <em>${fmt(n)}</em></a></li>`).join("")}
-        </ul></div>
-      <nav class="trilha deptos-trilha" aria-label="Você está em">${caminho.join('<span aria-hidden="true">›</span>')}</nav></div>`;
-  }
-  function arrumarModelo(pr, todos) {
+  // a faixa do "Meu veículo" abaixo do quadro da busca; os filtros numa coluna fina à esquerda dos cartões, de cima a baixo (R-20261120-123800)
+  // (no celular, no botão "Filtrar (n)", que abre o painel por cima)
+  function montarLayout(pr, todos) {
     const pagina = app.querySelector(".pagina-busca");
     const barra = app.querySelector(".barra-filtros");
     const etqs = app.querySelector(".pagina-busca .etiquetas");
     const topo = app.querySelector(".res-topo");
-    const cel = CELULAR_SIM();
     const nMarcados = Object.keys(ROT_FILTRO).reduce((t, k) => t + pr.getAll(k).filter(Boolean).length, 0);
-    // "N produtos encontrados"
     const total = topo.querySelector(".total");
     total.textContent = fmt(todos.length) + " produto" + (todos.length === 1 ? "" : "s") + " encontrado" + (todos.length === 1 ? "" : "s");
-    // Departamentos e o caminho, no alto
-    pagina.insertAdjacentHTML("afterbegin", departamentosHtml(pr));
-    const dbt = pagina.querySelector(".deptos-bt"), dl = pagina.querySelector(".deptos-lista");
-    const fecharDeptos = () => { dl.hidden = true; dbt.setAttribute("aria-expanded", "false"); };
-    dbt.addEventListener("click", (ev) => { ev.stopPropagation(); const a = dl.hidden; dl.hidden = !a; dbt.setAttribute("aria-expanded", String(a)); if (a) dl.querySelector("a").focus(); });
-    pagina.querySelector(".deptos").addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !dl.hidden) { fecharDeptos(); dbt.focus(); } });
-    document.addEventListener("click", (ev) => { if (dl.isConnected && !ev.target.closest(".deptos")) fecharDeptos(); });
-    // faixa curta do veículo (celular no A): acima da lista
-    const v = { vm: pr.get("vm"), vmo: pr.get("vmo"), va: pr.get("va"), vmt: pr.get("vmt") };
-    const faixaCurta = () => {
-      if (!v.vm) return;
-      const mem = VEICULO_PLACA && VEICULO_PLACA.chave === chaveVeiculo(pr) ? VEICULO_PLACA : null;
-      const txt = [bonito(v.vm), v.vmo && bonito(v.vmo), v.va, v.vmt].filter(Boolean).join(" ");
-      topo.insertAdjacentHTML("beforebegin", `<div class="faixa-veiculo"><span>${pr.get("vl") === "0" ? "Mostrando tudo (veículo desligado): " : "Peças para "}<b>${esc(txt)}</b>${mem && mem.placa ? ` · Placa <b class="placa-txt">${esc(mem.placa)}</b>` : ""}</span><button type="button" class="faixa-x">Trocar veículo <span aria-hidden="true">✕</span></button></div>`);
-      topo.previousElementSibling.querySelector(".faixa-x").addEventListener("click", () => { const n = new URLSearchParams(pr); [...VEI_K, "vl"].forEach((x) => n.delete(x)); FILTRO_FOCO = { y: 0, sel: "#campo-placa" }; irPara("/busca", n); });
-    };
-    // o painel por cima (celular): "Meu veículo e filtros" no A, "Filtrar (n)" no B
-    const painel = (rotulo, corpo) => {
+    const faixa = document.createElement("section");
+    faixa.className = "faixa-modelo";
+    faixa.setAttribute("aria-label", "Meu veículo");
+    faixa.innerHTML = meuVeiculoHtml(pr);
+    ligarMeuVeiculo(faixa, pr);
+    document.getElementById("busca-topo").after(faixa);
+    const abrirGrupos = (raiz) => raiz.querySelectorAll(".filtro").forEach((b) => { b.querySelector(".filtro-lista").hidden = false; b.querySelector(".filtro-bt").setAttribute("aria-expanded", "true"); });
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      const rotulo = "Filtrar" + (nMarcados ? ` (${nMarcados})` : "");
       topo.querySelector("h1").insertAdjacentHTML("afterend", `<button type="button" class="bt bt-claro bt-mini bt-filtrar" aria-haspopup="dialog">${rotulo}</button>`);
       const dlg = document.createElement("dialog");
       dlg.className = "painel-c";
       dlg.setAttribute("aria-labelledby", "painel-c-tit");
-      dlg.innerHTML = `<div class="painel-cab"><b id="painel-c-tit">${rotulo.replace(/\s*\(\d+\)$/, "")}</b><button type="button" class="painel-x" aria-label="Fechar">✕</button></div>
+      dlg.innerHTML = `<div class="painel-cab"><b id="painel-c-tit">Filtrar</b><button type="button" class="painel-x" aria-label="Fechar">✕</button></div>
         <div class="painel-corpo"></div>
         <div class="painel-pe"><button type="button" class="bt painel-ok">Ver ${fmt(todos.length)} produto${todos.length === 1 ? "" : "s"}</button></div>`;
-      corpo.forEach((el) => dlg.querySelector(".painel-corpo").appendChild(el));
+      dlg.querySelector(".painel-corpo").appendChild(barra);
       pagina.appendChild(dlg);
       topo.querySelector(".bt-filtrar").addEventListener("click", abrirPainel);
       dlg.querySelector(".painel-x").addEventListener("click", fecharPainel);
       dlg.querySelector(".painel-ok").addEventListener("click", fecharPainel);
       dlg.addEventListener("click", (ev) => { if (ev.target === dlg) fecharPainel(); });
       dlg.addEventListener("cancel", (ev) => { ev.preventDefault(); fecharPainel(); });
-      return dlg;
-    };
-    const abrirGrupos = (raiz) => raiz.querySelectorAll(".filtro").forEach((b) => { b.querySelector(".filtro-lista").hidden = false; b.querySelector(".filtro-bt").setAttribute("aria-expanded", "true"); });
-    const tituloLado = pr.getAll("si").length === 1 ? titulo(pr.get("si")) : "Todos os produtos";
-    if (SIM_M === "A") {
-      const lado = document.createElement("aside");
-      lado.className = "lado-filtros";
-      lado.setAttribute("aria-label", "Meu veículo e filtros");
-      lado.innerHTML = `<p class="lado-tit">${esc(tituloLado)}</p>${meuVeiculoHtml(pr)}<p class="lado-sub">Filtros</p>`;
-      lado.appendChild(barra);
-      ligarMeuVeiculo(lado, pr);
-      if (cel) {
-        faixaCurta();
-        painel("Meu veículo e filtros" + (nMarcados ? ` (${nMarcados})` : ""), [lado]);
-      } else {
-        const grade = document.createElement("div");
-        grade.className = "res-grade";
-        const conteudo = document.createElement("div");
-        conteudo.className = "res-conteudo";
-        const depois = [...pagina.children].filter((el) => el.compareDocumentPosition(etqs) & Node.DOCUMENT_POSITION_PRECEDING && !el.matches("dialog"));
-        etqs.after(grade);
-        grade.appendChild(lado);
-        grade.appendChild(conteudo);
-        depois.forEach((el) => conteudo.appendChild(el));
-      }
-      abrirGrupos(lado);
+      abrirGrupos(dlg);
       return;
     }
-    // B: o "Meu veículo" deitado numa faixa abaixo do quadro da busca; os filtros na 2ª linha (no celular, no botão)
-    const faixa = document.createElement("section");
-    faixa.className = "faixa-modelo";
-    faixa.setAttribute("aria-label", "Meu veículo e filtros");
-    faixa.innerHTML = meuVeiculoHtml(pr);
-    ligarMeuVeiculo(faixa, pr);
-    document.getElementById("busca-topo").after(faixa);
-    if (cel) { const dlg = painel("Filtrar" + (nMarcados ? ` (${nMarcados})` : ""), [barra]); abrirGrupos(dlg); }
-    else faixa.appendChild(barra);
+    const grade = document.createElement("div");
+    grade.className = "res-grade";
+    const conteudo = document.createElement("div");
+    conteudo.className = "res-conteudo";
+    const lado = document.createElement("aside");
+    lado.className = "lado-filtros";
+    lado.setAttribute("aria-label", "Filtros");
+    lado.innerHTML = `<p class="lado-sub">Filtros</p>`;
+    lado.appendChild(barra);
+    const depois = [...pagina.children].filter((el) => el.compareDocumentPosition(etqs) & Node.DOCUMENT_POSITION_PRECEDING);
+    etqs.after(grade);
+    grade.appendChild(lado);
+    grade.appendChild(conteudo);
+    depois.forEach((el) => conteudo.appendChild(el));
+    abrirGrupos(lado);
   }
 
   function listaCodigos(txt) {
