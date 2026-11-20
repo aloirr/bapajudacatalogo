@@ -3,6 +3,7 @@ import pandas as pd
 import digital2 as D2
 import datas, taxo
 from taxo import norm, META, LINES, ORDER_SIS
+from site_regras import G          # regra das referências do site (RD-0193): refs_de do scripts/gerar_site.py, sem cópia
 
 # ---------------------------------------------------------------- fontes
 old = D2.fams                                   # catálogo digital atual (já com os interruptores pneumáticos movidos)
@@ -83,29 +84,57 @@ def segs_from_base(app):
     return segs
 
 
-VAZIO = ('-', '0', '--', 'N/A')
+# [provisório, RD-0193] Dois cortes só do PDF que deveriam morar no refs_de do scripts/gerar_site.py (dono: web-site), para o
+# site e os PDFs terem uma regra só: o "#N/A" (JUH70105), que vai para a lista dos vazios do refs_de ("cod not in ..."), e
+# o ", APLICAÇÃO REVISADA ..." dos kits KHC (em ref_lista, abaixo; o site corta no app.js). A v19 da base tira a aplicação
+# de dentro das REFERENCIAS_CRUZADAS: depois dela o segundo corte fica sem efeito. Os dois saem quando o refs_de tirar.
+SEM_CODIGO = {'#N/A'}
 
 
-def ref_cod(c):
-    """código da referência sem histórico, sem preço de compra e sem código vazio; '' se não sobrar código"""
-    c = re.sub(r'(?i)\s*BAP\s+BOX\b.*$', '', c.split(' | ')[0]).strip()
-    return '' if c in VAZIO else c
+def ref_lista(s, codigo=''):
+    """referências da base [(marca, código)] pela regra do site (gerar_site.refs_de): separa por ";" e por ",", tira o
+    histórico "| ANTERIOR", o preço de compra, o código vazio, o prefixo "CROSS REFERENCES - " e o " PN" da marca.
+    Trecho sem marca só fica se for código (palavras com número, separadas por " / ": "REFERENCIAS CRUZADAS: SK132S"
+    -> ('', 'SK132S'), "W8BC / W7BC"); nota de cadastro e pedaço de marca ("SKF" de "SKF / PERFEC PN: ...") ficam fora.
+    [provisório, RD-0193; ver SEM_CODIGO] O código para antes do ", APLICAÇÃO REVISADA ..." dos kits KHC."""
+    if not isinstance(s, str) or not s.strip(): return []
+    out = []
+    for x in G.refs_de(s, str(codigo or '')):
+        c = re.split(r'(?i),?\s*APLICA[ÇC][ÃA]O\b', x['c'])[0].strip(' ,')
+        if c and c.upper() not in SEM_CODIGO and (x['m'] or re.fullmatch(r'[\w.\-]*\d[\w.\-]*(?:\s*/\s*[\w.\-]*\d[\w.\-]*)*', c)):
+            out.append((x['m'], c))
+    return out
 
 
-def refs_sem_vazio(s):
-    """referências do catálogo antigo ('Axios 0 · Nakata N370') sem as de código vazio"""
-    ps = [p for p in (s or '').split(' · ') if not (re.fullmatch(r'[^\d]+ (\S+)', p) and p.rsplit(' ', 1)[1] in VAZIO)]
+def ref_txt(m, c, marca=lambda m: m.title() if len(m) > 4 else m.upper()):
+    """('NAKATA', 'N370') -> 'Nakata N370' ; ('', 'SK132S') -> 'SK132S'"""
+    return (marca(m) + ' ' + c) if m else c
+
+
+def refs_pela_regra(s):
+    """referências já escritas ('Axios 0 · Autoimpact TR10 · Nakata N370': catálogo antigo, site de 12/11, Fraga de 13/11)
+    sem as que o refs_de tira pela marca ou pelo código: código vazio, marca própria e fornecedor (a AUTOIMPACT, T-0019,
+    R-20261120-184000-alexandre item 5). 'Marca Código' vira 'Marca: Código' para o refs_de; o resto fica como está."""
+    ps = [p for p in (s or '').split(' · ') if not ((m := re.fullmatch(r'([^\d]+) (\S+)', p)) and not ref_lista(f'{m[1]}: {m[2]}'))]
     return ' · '.join(ps)
 
 
-def refs_from_base(s):
-    if not isinstance(s, str) or not s.strip(): return ''
-    out = []
-    for p in re.split(r';\s*', s):
-        m = re.match(r'^\s*([^:]+?)\s*:\s*(.+)$', p)
-        if m and not re.search(r'(?i)bap|similar|aplica', m.group(1)) and (c := ref_cod(m.group(2))):
-            b = m.group(1).strip(); out.append(f"{b.title() if len(b) > 4 else b.upper()} {c}")
-    return ' · '.join(out[:6])
+def refs_from_base(s, codigo=''):
+    """até 10 referências, sem repetida: com a vírgula separada, cabem as que antes iam juntas nos 6 trechos entre ";"
+    (com 6, 58 referências que o main mostra sairiam de 35 itens) [SUPOSIÇÃO]"""
+    out = [ref_txt(m, c) for m, c in ref_lista(s, codigo) if not re.search(r'(?i)bap|similar|aplica|descri', m)]
+    return ' · '.join(refs_unicas(' · '.join(out)).split(' · ')[:10])
+
+
+def refs_unicas(s):
+    """'Axios 1443 · Kit & Cia 10285 · Axios 1443' -> 'Axios 1443 · Kit & Cia 10285': cada referência uma vez, na ordem
+    da 1ª (RD-0194). Igual = mesma marca e código sem espaço, pontuação e acento (gerar_site.so_codigo)."""
+    vistos, out = set(), []
+    for p in (s or '').split(' · '):
+        k = G.so_codigo(p)
+        if k and k in vistos: continue
+        vistos.add(k); out.append(p)
+    return ' · '.join(out)
 
 
 def pos_sub(desc):
@@ -124,7 +153,7 @@ def plain(segs):
 rows_by_line = collections.defaultdict(list); sem_linha = []
 # 1) todos os itens do catálogo digital atual permanecem
 for code, r in cat_row.items():
-    rows_by_line[taxo.line_of(code, DESC.get(code, ''), cat_line[code])].append(dict(r, refs=refs_sem_vazio(r.get('refs'))))
+    rows_by_line[taxo.line_of(code, DESC.get(code, ''), cat_line[code])].append(dict(r, refs=refs_pela_regra(r.get('refs'))))
 # 2) itens da base unificada que ainda não estão no catálogo (fora: INATIVO). Linha = coluna PRODUTO da base.
 #    Sem o arquivo de estoque (T-0019, 20/11): STATUS_CADASTRO da base diz se o item é ATIVO (tag NOVO, como antes)
 #    ou se entrou só pelo cadastro (sem_estoque: fica fora do "Leve também", como antes).
@@ -148,7 +177,7 @@ for b in BASE.itertuples():
     if line is None: sem_linha.append((b.CODIGO_BAP, b.DESCRICAO)); continue
     ativo = st == 'ATIVO'
     r = dict(code=str(b.CODIGO_BAP).strip(), nov=ativo, sub=pos_sub(b.DESCRICAO), segs=segs_from_base(_em_diante(b.APLICACAO)),
-             refs=refs_from_base(b.REFERENCIAS_CRUZADAS))
+             refs=refs_from_base(b.REFERENCIAS_CRUZADAS, b.CODIGO_BAP))
     if not ativo: r['sem_estoque'] = True
     if line in SPEC:
         r['segs'] = [[str(b.DESCRICAO).strip().capitalize(), False]]; r['sub'] = ''

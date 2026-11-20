@@ -41,3 +41,16 @@ _fix_base = fix_text
 def fix_text(t):
     t = re.sub(r'\b19(\d{2})[-–]19(\d{2})W', r'\1/\2W', t)
     return _fix_base(t)
+
+
+def em_diante(t):
+    """'2015>' -> '2015–', '03/2015>' -> '03/2015–' e '2008->' (sem ano depois) -> '2008–' ("em diante" = "2015–",
+    igual ao site; R-20261120-175000). Só no desenho do PDF (aplicação, DETALHE e subtítulo), depois do fix_text: a base
+    e o fix_text não mudam."""
+    t = re.sub(r'((?:\d{2}/)?' + Y + r')\s*->(?!\s*\d)', r'\1–', t)
+    return re.sub(r'((?:\d{2}/)?' + Y + r')\s*>', r'\1–', t)
+
+
+def para_pdf(t):
+    """texto do desenho dos PDFs: fix_text e depois em_diante (RD-0221)"""
+    return em_diante(fix_text(t))

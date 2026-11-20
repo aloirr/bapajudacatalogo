@@ -265,7 +265,7 @@ def cards(dc, f, top, y):
         import tags as TG
         tl, sb = TG.do_item(f['name'], r, f['spec'])
         hh = TG.desenhar(dc, lw, x + 9, yc + 7 + 16.5 + 2, tl, tw, max_linhas=2) if tl else 0
-        if sb and hh < 12: dc.text(x + 9, yc + 7 + 16.5 + 2 + hh + 1, tw, html.escape(D2.datas.fix_text(sb)), 7.4, 9.6, 'gtext', 'PM')
+        if sb and hh < 12: dc.text(x + 9, yc + 7 + 16.5 + 2 + hh + 1, tw, html.escape(D2.datas.para_pdf(sb)), 7.4, 9.6, 'gtext', 'PM')
         yb = yc + fixed_code
         dc.rect(x, yb, cw, 1, fill='line2')
         dc.text(x + 9, yb + 1 + 6, tw, m, CARD_FS, CARD_FS * 1.34, 'ink')
@@ -300,7 +300,7 @@ def row_cells(f, r, cols, widths):
             m, _ = mk_cut(f, r, APP_FS, w, 3)
             cells.append(('text', m, para_h(m, APP_FS, APP_LD, w), APP_FS, APP_LD, 'ink', 'PR'))
         elif k == 'sub':
-            s_ = html.escape(D2.datas.fix_text(r.get('sub') or '—'))
+            s_ = html.escape(D2.datas.para_pdf(r.get('sub') or '—'))
             from reportlab.lib.utils import simpleSplit
             raw = html.unescape(s_)
             fs, ld = 8.4, 11.2   # texto sempre inteiro: 2 linhas; se não couber, letra 7.8; senão 3 linhas
@@ -577,6 +577,7 @@ def build(out, moto_pages_n=2):
         anotacoes(dc, pgn); pgn += 1; total += 1
     contracapa(dc)
     dc.c.save()
+    D2.trava_pdf(out)
     log_destaques()
     return total, shown, np_
 

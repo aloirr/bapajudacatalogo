@@ -18,12 +18,8 @@ def segs_moto(app):
     return [s for s in segs if s[0]]
 
 
-def refs_moto(r):
-    if not isinstance(r, str) or not r.strip(): return '—'
-    out = []
-    for part in re.split(r',\s*(?=[A-Z][A-Z ]+:)', r):
-        m = re.match(r'\s*([^:]+):\s*(.+)', part)
-        if m and (c := M.ref_cod(m.group(2))): out.append(m.group(1).strip().title().replace('Camara', 'Câmara') + ' ' + c)
+def refs_moto(r, codigo=''):
+    out = [M.ref_txt(m, c, lambda m: m.strip().title().replace('Camara', 'Câmara')) for m, c in M.ref_lista(r, codigo)]   # regra do site (RD-0193)
     return ' · '.join(out) or '—'
 
 
@@ -38,7 +34,7 @@ nov_old = {r['code']: r.get('nov', False) for f in M.fams if f['name'] == 'Pneus
 for r in p.itertuples():
     code = str(r.CODIGO_BAP).strip()
     rows.append(dict(code=code, nov=nov_old.get(code, False), sub=sub_moto(r.DESCRICAO), segs=segs_moto(r.APLICACAO),
-                     refs=refs_moto(r.REFERENCIAS_CRUZADAS)))
+                     refs=refs_moto(r.REFERENCIAS_CRUZADAS, code)))
 rows.sort(key=lambda r: r['code'])
 # ---- coluna "Câmara indicada"
 cam_raiada = {}
