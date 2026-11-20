@@ -1110,7 +1110,7 @@
     depois.forEach((el) => conteudo.appendChild(el));
   }
 
-  // códigos de "Ofereça junto" e "Itens parecidos": os do catálogo e os que têm cara de código (letra e número),
+  // códigos de "Leve também" (campo oj) e "Itens parecidos": os do catálogo e os que têm cara de código (letra e número),
   // sem repetir; as observações soltas ("s/ ar", "c/ ar") ficam fora
   function listaCodigos(txt) {
     const vistos = new Set();
@@ -1136,7 +1136,7 @@
         : `<li><span class="item-rel fora">${miniHtml(null)}<span class="rel-txt"><b>${esc(c)}</b><span>fora do catálogo</span></span></span></li>`;
     }).join("")}</ul>`;
   }
-  // "Ofereça junto" (faixa verde-clara) e "Itens parecidos" (branco), logo abaixo dos botões e antes da aplicação
+  // "Leve também" (faixa verde-clara) e "Itens parecidos" (branco), logo abaixo dos botões e antes da aplicação
   // (opção B, R-20261120-140600): o título à esquerda no computador e em cima no celular
   const secRelHtml = (H2, tit, classe, cods) => cods.length
     ? `<section class="secao rel ${classe}"><${H2} class="secao-tit">${tit}</${H2}>${itensRelHtml(cods)}</section>` : "";
@@ -1237,7 +1237,7 @@
               <button class="bt bt-claro bt-mini bt-pdf" type="button">Salvar em PDF</button>
             </div>
           </div>
-          ${secRelHtml(H2, "Ofereça junto", "rel-oj", junto)}
+          ${secRelHtml(H2, "Leve também", "rel-oj", junto)}
           ${secRelHtml(H2, "Itens parecidos", "rel-ip", parecido)}
           ${dados}
           ${p.df ? `<section class="secao"><${H2} class="secao-tit">Diferencial BAP</${H2}><p>${esc(p.df)}</p></section>` : ""}

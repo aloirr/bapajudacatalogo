@@ -240,8 +240,8 @@ table.t th, table.t td { text-align: left; padding: 4px 6px; border-bottom: 1px 
 table.t th { color: var(--texto-2); font-weight: 500; width: 42%; }
 table.t td { white-space: pre-line; }
 table.t td.c { font-weight: 600; font-variant-numeric: tabular-nums; }
-/* "Ofereça junto" e "Itens parecidos" (opção B, R-20261120-140600): logo abaixo dos botões e antes da aplicação, na
-   largura do conteúdo. "Ofereça junto" numa faixa --verde-claro; "Itens parecidos" no branco, no mesmo padrão. Título
+/* "Leve também" (era "Ofereça junto", R-20261120-141100b) e "Itens parecidos" (opção B, R-20261120-140600): logo
+   abaixo dos botões e antes da aplicação, na largura do conteúdo. "Leve também" numa faixa --verde-claro; "Itens parecidos" no branco, no mesmo padrão. Título
    à esquerda no computador e em cima no celular; cartões brancos com a miniatura (até 48 px), o código e a descrição */
 .rel { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 8px 12px; }
 .secao.rel .secao-tit { margin: 0; }
@@ -447,7 +447,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .tab-rola { display: block !important; overflow: visible; } /* no PDF vai a tabela, mesmo no celular */
   table.tab-veiculos th { width: auto; }
   .apl-completa { display: none; } /* no PDF vai a tabela */
-  /* no PDF: "Ofereça junto" e "Itens parecidos" depois da aplicação e do diferencial, como antes; código e
+  /* no PDF: "Leve também" e "Itens parecidos" depois da aplicação e do diferencial, como antes; código e
      descrição, sem link e sem miniatura, no branco */
   .prod-info > .rel { order: 1; display: block; }
   .rel-oj { background: var(--branco); border-color: var(--linha); }
