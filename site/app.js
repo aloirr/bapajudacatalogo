@@ -1190,7 +1190,8 @@
     ligarMeuVeiculo(app.querySelector(".pagina-busca .meu-veiculo"), pr);
     if (CELULAR.matches) {
       const rotulo = "Filtrar" + (nMarcados ? ` (${nMarcados})` : "");
-      topo.querySelector("h1").insertAdjacentHTML("afterend", `<button type="button" class="bt bt-claro bt-mini bt-filtrar" aria-haspopup="dialog">${rotulo}</button>`);
+      // sem resultado (total 0), sem o "Filtrar" (R-20261120-174100, item 3): os filtros marcados saem pelas etiquetas
+      if (todos.length) topo.querySelector("h1").insertAdjacentHTML("afterend", `<button type="button" class="bt bt-claro bt-mini bt-filtrar" aria-haspopup="dialog">${rotulo}</button>`);
       const dlg = document.createElement("dialog");
       dlg.className = "painel-c";
       dlg.setAttribute("aria-labelledby", "painel-c-tit");
@@ -1199,7 +1200,7 @@
         <div class="painel-pe"><button type="button" class="bt painel-ok">Ver ${nProd(todos.length)}</button></div>`;
       dlg.querySelector(".painel-corpo").appendChild(barra);
       pagina.appendChild(dlg);
-      topo.querySelector(".bt-filtrar").addEventListener("click", abrirPainel);
+      topo.querySelector(".bt-filtrar")?.addEventListener("click", abrirPainel);
       dlg.querySelector(".painel-x").addEventListener("click", fecharPainel);
       dlg.querySelector(".painel-ok").addEventListener("click", fecharPainel);
       dlg.addEventListener("click", (ev) => { if (ev.target === dlg) fecharPainel(); });
@@ -1389,7 +1390,7 @@
     const dados = secApl && (secRefs || secFicha)
       ? `<div class="prod-dados"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`
       : `<div class="prod-dados um"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`;
-    return `<div class="so-impressao cab-pdf"><img src="assets/logo_escuro.png" alt="bap componentes de qualidade"><span>Ficha do produto · Catálogo BAP</span></div>
+    return `<div class="so-impressao cab-pdf"><img src="assets/logo_branco.png" alt="bap componentes de qualidade"><span>Ficha do produto · Catálogo BAP</span></div>
       <div class="prod">
         <div class="prod-foto-box"><div class="prod-foto">${fotoZoomHtml(p, true)}</div></div>
         <div class="prod-info">
