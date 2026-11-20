@@ -10,7 +10,7 @@ O repositório `aloirr/bapajudacatalogo` tem um time de 8 agentes do Claude Code
 | `gerente-projetos` | Divide a tarefa em passos, chama os agentes, cobra testes e revisão, abre o PR e devolve ao `po`. | `.coord/README.md` |
 | `catalogo-dados` | Base unificada: versões, `LOG_CORRECOES`, taxonomia, aplicações, referências, fotos que faltam. | `dados/` |
 | `catalogo-grafico` | PDFs: impresso A4, digital, Linha Moto, portfólio, Kit Filtros. Sempre simula antes. | `catalogo_grafico/` |
-| `web-site` | Catálogo online estático e o gerador do JSON. Guarda a `FICHA` e a `TRAVA`. | `site/`, `scripts/gerar_site.py`, `ATUALIZAR_CATALOGO.bat`, `requirements.txt`, `docs/DADOS_DO_SITE.md` |
+| `web-site` | Catálogo online estático e o gerador do JSON. Guarda a `FICHA` e a `TRAVA`. | `site/`, `scripts/gerar_site.py`, `requirements.txt`, `docs/DADOS_DO_SITE.md` |
 | `integracao-placas` | Consulta por placa (fase 3): serviço no Render, chave só em variável de ambiente, LGPD. | `servicos/placas/`, `docs/placas/` |
 | `testes` | `gerar_site.py`, testes de busca, prints 1366 px e 390 px, 0 palavra interna. | `testes/`, `scripts/testar_site.*` |
 | `revisor-codigo` | Revisão independente de cada PR. Só lê e aponta. | — |
