@@ -22,7 +22,7 @@ import json
 import re
 import sys
 import unicodedata
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -30,6 +30,14 @@ BASE = RAIZ / "dados" / "BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx"
 SAIDA = RAIZ / "site" / "data" / "produtos.json"
 IMG = RAIZ / "site" / "img"
 LADO_MAX = 700
+
+# hora de Manaus no "base atualizada em". Sem os dados de fuso (Windows sem o pacote tzdata): UTC-4 fixo,
+# que é a hora de Manaus (sem horário de verão).
+try:
+    from zoneinfo import ZoneInfo
+    FUSO = ZoneInfo("America/Manaus")
+except Exception:
+    FUSO = timezone(timedelta(hours=-4))
 
 # chaves dos DADOS_ADICIONAIS que são de controle interno (não vão para o site)
 INTERNAS = {"LINHA_ORIGEM", "FONTE", "QTD_APLICACOES", "ABA_ORIGEM", "ORIGEM", "OBS_INTERNA"}
@@ -146,6 +154,14 @@ def montadora_de(extras: list[list[str]], aplicacao: str) -> str:
 # Aba VEICULOS (v17, T-0017): uma linha por produto x veículo. Vai para o site SÓ fabricante, modelo e versão das
 # linhas SITUACAO = separado. ORIGEM, SITUACAO, MOTIVO e os anos (ANO_INICIO/ANO_FIM) não vão.
 VE_SITUACAO = "separado"
+# temporário até a v18 (T-0017): modelo numérico lido de data ou medida. Estes pares (fabricante, modelo) saem do
+# "ve" e, com ele, do filtro "Meu veículo" e da tabela da aplicação no detalhe do produto. O texto da aplicação (a)
+# e a busca não mudam. R-20261120-132530-alexandre.
+VE_FORA_TEMP = {("RENAULT", "12"), ("RENAULT", "19"), ("RENAULT", "21"), ("PEUGEOT", "2008")}
+
+
+def _sem_acento_maiusc(t: str) -> str:
+    return sem_acento(t).upper().strip()
 
 
 def veiculos_de(wb) -> dict[str, list[list[str]]]:
@@ -165,7 +181,7 @@ def veiculos_de(wb) -> dict[str, list[list[str]]]:
 
     saida: dict[str, list[list[str]]] = {}
     vistos: set[tuple[str, str, str, str]] = set()
-    sem_modelo = 0
+    sem_modelo = fora_temp = 0
     for r in linhas:
         cod = g(r, "CODIGO_BAP").upper()
         if not cod or g(r, "SITUACAO").lower() != VE_SITUACAO:
@@ -174,6 +190,9 @@ def veiculos_de(wb) -> dict[str, list[list[str]]]:
         if not fab or not mod:
             sem_modelo += 1                      # separado sem fabricante ou modelo não serve ao filtro
             continue
+        if (_sem_acento_maiusc(fab), _sem_acento_maiusc(mod)) in VE_FORA_TEMP:
+            fora_temp += 1                       # temporário até a v18 (ver VE_FORA_TEMP)
+            continue
         chave = (cod, fab, mod, ver)
         if chave in vistos:
             continue
@@ -181,6 +200,10 @@ def veiculos_de(wb) -> dict[str, list[list[str]]]:
         saida.setdefault(cod, []).append([fab, mod, ver] if ver else [fab, mod])
     if sem_modelo:
         print(f"  [AVISO] VEICULOS: {sem_modelo} linhas 'separado' sem fabricante ou modelo ficaram fora do 've'")
+    if fora_temp:
+        pares = " e ".join(f"{fab.title()} {'/'.join(sorted((m for f, m in VE_FORA_TEMP if f == fab), key=lambda m: m.zfill(9)))}"
+                           for fab in sorted({f for f, _ in VE_FORA_TEMP}))
+        print(f"  [AVISO] VEICULOS: {fora_temp} linhas de {pares} fora do 've' (temporário até a v18)")
     return saida
 
 
@@ -356,7 +379,7 @@ def main():
     com_ve = sum(1 for p in produtos if "ve" in p)
     if com_ve:
         print(f"  veículos: {com_ve} produtos com 've' ({sum(len(p['ve']) for p in produtos if 've' in p)} veículos)")
-    dados = {"gerado_em": datetime.now().strftime("%d/%m/%Y %H:%M"), "fonte": Path(a.base).name,
+    dados = {"gerado_em": datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"), "fonte": Path(a.base).name,
              "total": len(produtos), "produtos": produtos}
     texto = json.dumps(dados, ensure_ascii=False, separators=(",", ":"))
     m = TRAVA.search(texto)                  # segunda volta: o arquivo inteiro, como vai ser gravado
