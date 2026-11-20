@@ -736,6 +736,27 @@ export function agenteDaSessao({ argumento, entrada, env = process.env, raiz = R
 
 export const REPO_RECADOS = 'aloirr/bapajudacatalogo-recados';
 export const BRANCH_RECADOS = 'main';
+
+/**
+ * Clone do repositório de recados ANEXADO à sessão (20/11/2026, orientação do Alexandre): na nuvem o proxy bloqueia
+ * qualquer gravação pela API do GitHub ("Write access to this GitHub API path is not permitted through this proxy").
+ * Com o clone, o coord grava com git (pull --rebase, commit, push origin HEAD:main), pela integração de GitHub do
+ * próprio Claude: nenhum token entra. Gravar direto no main do repositório de RECADOS (só recados/ e lidos/) foi
+ * autorizado pelo Alexandre. Ordem: BAP_RECADOS_CLONE; ao lado do repositório de código; na home; /home/user.
+ * BAP_RECADOS=local|github desliga a busca.
+ */
+export function cloneDosRecados({ env = process.env, raiz = RAIZ } = {}) {
+  const forcado = String(env.BAP_RECADOS || '').trim().toLowerCase();
+  if (forcado === 'local' || forcado === 'github') return null;
+  const nome = REPO_RECADOS.split('/')[1];
+  const candidatos = [env.BAP_RECADOS_CLONE, join(dirname(raiz), nome), join(homedir(), nome), join('/home/user', nome)];
+  for (const c of candidatos.filter(Boolean)) {
+    try {
+      if (existsSync(join(c, '.git')) && existsSync(join(c, 'recados'))) return resolve(c);
+    } catch { /* caminho inválido: segue */ }
+  }
+  return null;
+}
 export const API_GITHUB = 'https://api.github.com';
 export const MOTIVO_RECADOS_NO_GITHUB = 'os recados e os lidos ficam direto no GitHub (aloirr/bapajudacatalogo-recados, ADR 0039): use node scripts/coord.mjs enviar ou lido; nada se grava em .coord/recados nem em .coord/lidos no disco';
 

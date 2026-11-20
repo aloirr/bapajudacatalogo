@@ -52,6 +52,10 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
   - **BapAjuda-PO** → `po`: é onde o Alexandre conversa;
   - **BapAjuda-GP** → `gerente-projetos`: sessão fixa do gerente, que chama os outros agentes como subagentes.
   - Sem a variável, a sessão é **restrita**: os guardiões não deixam alterar nada.
-- **Recados** ficam no **`aloirr/bapajudacatalogo-recados`**, lidos e gravados só pelo `node scripts/coord.mjs` (`caixa`, `pendencias`, `ler`, `fio`, `enviar`, `lido`), pela API REST do GitHub com o token da variável **`BAP_RECADOS_TOKEN`**. Nunca imprima o token. Não peça para "ligar o repositório" na sessão: a CLI não precisa.
+- **Recados** ficam no **`aloirr/bapajudacatalogo-recados`**. A sessão abre com **os dois repositórios anexados** (este e o de recados).
+  - Leia e grave **só com `node scripts/coord.mjs`** (`caixa`, `pendencias`, `ler`, `fio`, `enviar`, `lido`). Com o clone anexado, ele grava **com git**: `pull --rebase`, commit com o nome do agente (`<agente>@bapajuda.invalid`) e `push origin HEAD:main`, pela integração de GitHub do próprio Claude. Nenhum token entra.
+  - **Nunca grave pela API do GitHub:** o proxy da nuvem bloqueia ("Write access to this GitHub API path is not permitted through this proxy").
+  - **Autorizado pelo Alexandre (20/11/2026):** gravar direto no `main` do `bapajudacatalogo-recados`, só em `recados/` e `lidos/`. O código deste repositório continua indo por branch e PR.
 - **Donos:** `.coord/donos.json` (a primeira regra que casa manda). Governança (`.claude`, `donos.json`, `coord*.mjs`, `.github`, `render.yaml`, `CLAUDE.md`, `.gitignore`) só com o recado do Alexandre "autorizo o merge do PR #N no commit <sha>".
 - Recado do celular: issue com o formulário **Recado** no `aloirr/bapajudacatalogo-recados` (conta domontecristo).
+<!-- /SESSOES-E-RECADOS -->

@@ -4,7 +4,7 @@
 // guardiões a tratam como restrita (não altera nada no repositório). Subagentes não passam por aqui.
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { RAIZ, AGENTES } from '../../scripts/coord-lib.mjs';
+import { RAIZ, AGENTES, cloneDosRecados, REPO_RECADOS } from '../../scripts/coord-lib.mjs';
 
 const agente = String(process.env.BAP_AGENTE || '').trim().toLowerCase();
 const linhas = [];
@@ -31,4 +31,8 @@ if (!agente) {
     corpo,
   );
 }
+const clone = cloneDosRecados();
+linhas.push('', clone
+  ? `RECADOS: clone anexado em ${clone}. Leia e grave só com "node scripts/coord.mjs" (caixa, ler, enviar, lido): ele grava com git (pull --rebase, commit, push origin HEAD:main). Não use a API do GitHub para gravar: o proxy da nuvem bloqueia.`
+  : `RECADOS: o repositório ${REPO_RECADOS} NÃO está anexado a esta sessão. Sem ele não dá para gravar recado (o proxy bloqueia a API). Peça ao Alexandre para abrir a sessão com os dois repositórios marcados (este e o ${REPO_RECADOS}).`);
 process.stdout.write(linhas.filter((l) => l !== null).join('\n') + '\n');

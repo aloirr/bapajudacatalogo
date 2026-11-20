@@ -60,10 +60,40 @@ import {
   PESSOAS, classificarMudancas, agruparPorDono, agenteDoBranch, agenteDosTrailers, trailersAgente,
   WORKSPACE_PNPM, workspaceMudouSoEmBuilds, mudancasDeGovernanca, CAMINHOS_DE_GOVERNANCA, estadoDosRecados,
   modoDosRecados, regraDoRecadoNovo, ErroRecados, conexaoDeRecados, atualizarIndiceDeRecados, recadosDoIndice,
-  lidosDoIndice, enviarRecadoNoGitHub, marcarLidosNoGitHub, ehRemetenteDeSistema,
+  lidosDoIndice, enviarRecadoNoGitHub, marcarLidosNoGitHub, ehRemetenteDeSistema, cloneDosRecados,
 } from './coord-lib.mjs';
 
-const PASTA = join(RAIZ, '.coord', 'recados');
+// Recados no clone anexado à sessão (gravação com git; o proxy da nuvem bloqueia a API): ver cloneDosRecados.
+const CLONE = cloneDosRecados();
+const PASTA = CLONE ? join(CLONE, 'recados') : join(RAIZ, '.coord', 'recados');
+const PASTA_LIDOS = CLONE ? join(CLONE, 'lidos') : join(RAIZ, '.coord', 'lidos');
+const DOMINIO_EMAIL = 'bapajuda.invalid';
+function gitDoClone(args) {
+  return execFileSync('git', ['-C', CLONE, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+}
+const erroGit = (e) => String((e && (e.stderr || e.message)) || e).trim().split('\n').slice(-3).join(' ');
+function atualizarClone({ obrigatorio = false } = {}) {
+  try { gitDoClone(['pull', '-q', '--rebase', 'origin', 'main']); return true; } catch (e) {
+    if (obrigatorio) falhar(`NÃO gravado: não consegui atualizar o clone de recados (${erroGit(e)})`);
+    console.log(`Atenção: não consegui atualizar o clone de recados (${erroGit(e)}); mostrando a cópia local.\n`);
+    return false;
+  }
+}
+/** git add + commit (autor = quem grava) + push origin HEAD:main, com até 4 tentativas (pull --rebase no meio). */
+function publicarNoClone(arquivos, autor, mensagem) {
+  gitDoClone(['add', '--', ...arquivos]);
+  gitDoClone(['-c', `user.name=${autor}`, '-c', `user.email=${autor}@${DOMINIO_EMAIL}`, 'commit', '-q', '-m', mensagem]);
+  for (let i = 0; ; i++) {
+    try { gitDoClone(['push', '-q', 'origin', 'HEAD:main']); break; } catch (e) {
+      if (i >= 3) {
+        try { gitDoClone(['reset', '-q', '--hard', 'origin/main']); } catch { /* fica como está */ }
+        falhar(`NÃO gravado (o push foi recusado 4 vezes; o clone voltou ao origin/main): ${erroGit(e)}`);
+      }
+      try { gitDoClone(['pull', '-q', '--rebase', 'origin', 'main']); } catch { /* tenta o push de novo */ }
+    }
+  }
+  return gitDoClone(['rev-parse', '--short', 'HEAD']).trim();
+}
 const [, , cmd, ...resto] = process.argv;
 
 function opcoes(args) {
@@ -118,7 +148,8 @@ function* recadosDoDisco() {
 }
 
 // Fonte dos recados (T-0143, ADR 0039): o main do GitHub (padrão com a marca no .gitignore) ou o disco (local).
-const MODO = modoDosRecados();
+const MODO = CLONE ? 'clone' : modoDosRecados();
+if (CLONE && ['caixa', 'pendencias', 'ler', 'fio'].includes(cmd)) atualizarClone();
 let conexao = null;
 let indice = null;
 const github = () => (conexao ||= conexaoDeRecados());
@@ -153,7 +184,7 @@ function encerrados(recs) {
   return s;
 }
 function lidosDe(agente) {
-  const arq = join(RAIZ, '.coord', 'lidos', `${agente}.txt`);
+  const arq = join(PASTA_LIDOS, `${agente}.txt`);
   const texto = MODO === 'github' ? lidosDoIndice(indiceDoGitHub(), agente) : existsSync(arq) ? readFileSync(arq, 'utf8') : '';
   return new Set(texto.split(/\r?\n/).filter(Boolean));
 }
@@ -549,7 +580,8 @@ switch (cmd) {
     if (!TIPOS.includes(tipo)) falhar(`--tipo inválido. Use: ${TIPOS.join(', ')}`);
     if (!o.assunto || o.assunto === true) falhar('informe --assunto');
     const prioridade = ['alta', 'normal', 'baixa'].includes(o.prioridade) ? o.prioridade : 'normal';
-    if (o['responde-a'] && MODO === 'local') { // no GitHub, a conferência vai junto com o envio, contra o mesmo commit
+    if (MODO === 'clone') atualizarClone({ obrigatorio: true });
+    if (o['responde-a'] && (MODO === 'local' || MODO === 'clone')) { // no GitHub, a conferência vai junto com o envio, contra o mesmo commit
       const ids = new Set(todosRecados().map((r) => r.meta.id));
       if (!ids.has(o['responde-a'])) falhar(`--responde-a: recado ${o['responde-a']} não encontrado`);
     }
@@ -588,6 +620,25 @@ switch (cmd) {
     ].join('\n');
     const destinos = [...new Set([...para, ...cc])];
     const enviadoPara = [...para, ...cc.map((c) => c + ' (cc)')].join(', ');
+    if (MODO === 'clone') {
+      const id = gerarId(new Set(todosRecados().map((r) => r.meta.id)));
+      const conteudo = montar(id);
+      if (AGENTES.includes(de)) {
+        for (const d of destinos) {
+          const r = regraDoRecadoNovo({ agente: de, destino: d, arquivo: `${id}.md`, conteudo });
+          if (!r.ok) falhar(r.motivo);
+        }
+      }
+      const arquivos = [];
+      for (const d of destinos) {
+        mkdirSync(join(PASTA, d), { recursive: true });
+        writeFileSync(join(PASTA, d, `${id}.md`), conteudo, 'utf8');
+        arquivos.push(`recados/${d}/${id}.md`);
+      }
+      const sha = publicarNoClone(arquivos, de, `Recado ${id}: ${de} -> ${destinos.join(', ')}`);
+      console.log(`Recado ${id} enviado para ${enviadoPara} (git push no main do clone ${CLONE}, commit ${sha})`);
+      break;
+    }
     if (MODO === 'github') {
       if (AGENTES.includes(de)) {
         const id0 = gerarId(new Set());
@@ -642,6 +693,18 @@ switch (cmd) {
   case 'lido': {
     const [agente, ...ids] = resto;
     if (!DESTINOS.includes(agente) || !ids.length) falhar('uso: lido <agente> <id> [...]');
+    if (MODO === 'clone') {
+      atualizarClone({ obrigatorio: true });
+      const ja = lidosDe(agente);
+      const novos = ids.filter((i) => !ja.has(i));
+      if (!novos.length) { console.log(`${ids.length} recado(s) já estava(m) marcado(s) como lido(s) por ${agente}.`); break; }
+      mkdirSync(PASTA_LIDOS, { recursive: true });
+      appendFileSync(join(PASTA_LIDOS, `${agente}.txt`), novos.map((i) => i + '\n').join(''), 'utf8');
+      const autor = AGENTES.includes(agente) ? agente : String(process.env.BAP_AGENTE || agente);
+      const sha = publicarNoClone([`lidos/${agente}.txt`], autor, `Lidos de ${agente}: ${novos.join(', ')}`);
+      console.log(`${novos.length} recado(s) marcado(s) como lido(s) por ${agente} (git push no main do clone, commit ${sha}).`);
+      break;
+    }
     if (MODO === 'github') {
       let r;
       try {
