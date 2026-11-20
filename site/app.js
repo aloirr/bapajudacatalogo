@@ -1329,8 +1329,9 @@
     // entrada da célula e ela fica em "Outros". Sem a versão da linha no 1º pedaço ("R 164 ... 2000–2005" na linha do
     // R 580) ou com o modelo numa lista antes dos anos ("Brava, Doblô · 2000–2003 / 2002>"): nenhuma ("—").
     const doModelo = (t, m, ver, cil) => {
-      // só o bloco do modelo: o " ; " começa outro bloco de marca ("WR-V 1.5 L 16V · 2017 até 2020 ; VW - Spacecross")
-      const ps = norm(t).split(/\s*;\s*/)[0].split(RX_PEDACO_ANO).flatMap((x) => x.split(RX_SEP_VEICULO)).flatMap((x) => x.split(rxMarcaNoMeio()))
+      // só o bloco do modelo: o " ; " (com espaço dos dois lados, como no linhasAplic) começa outro bloco de marca ("WR-V
+      // 1.5 L 16V · 2017 até 2020 ; VW - Spacecross"); o ";" colado separa veículos do mesmo bloco ("X1 2015 2022; X1 2023 →")
+      const ps = norm(t).split(/\s+;\s+/)[0].split(RX_PEDACO_ANO).flatMap((x) => x.split(RX_SEP_VEICULO)).flatMap((x) => x.split(rxMarcaNoMeio()))
         .map((x) => x.trim()).filter(Boolean);
       const lista = /([^·;:|,\/]*)[,\/]\s*$/.exec(up.slice(Math.max(0, inicio.get(m) - 40), inicio.get(m)));
       const emLista = lista && !/\d/.test(lista[1]) && modelos.some((o) => o !== m && rxPalavra(o).test(lista[1])); // outro modelo do ve antes da "," ou "/"
@@ -1343,7 +1344,8 @@
         if (cilDe(r).some((c) => c !== cil)) return false; // outra cilindrada, ou a válvula que a linha não tem
         // mais de uma faixa e a cilindrada no mesmo pedaço: não dá para saber de qual é ("Meriva 01/2003–12/2012, 01/2008–12/2013 1.4")
         if (cilDe(r).length && new Set(faixasDoTexto(r).map(fmtFaixa)).size > 1) return false;
-        return !r.replace(RX_CIL, " ").replace(RX_ANO, " ").replace(/\b\d{2}[\/-]\d{2}\b/g, " ").replace(SOBRA_APL, " ").trim();
+        // o "em diante" escrito como ">", "→", "+" ou "»" logo depois do ano não é qualificador ("X1 2023 →", "08/2011+")
+        return !r.replace(RX_CIL, " ").replace(/(?<=\d)\s*(?:\+|»)/g, " ").replace(RX_ANO, " ").replace(/\b\d{2}[\/-]\d{2}\b/g, " ").replace(SOBRA_APL, " ").trim();
       };
       // a palavra colada antes do modelo também qualifica ("2035 Axor", "Cross UP", "Grand Santa FE"); a marca, não
       const ini = inicio.get(m), antes = up.slice(Math.max(0, ini - 25), ini);
