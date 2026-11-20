@@ -17,7 +17,7 @@ Atualizado em 20/11/2026 15:00 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0011](tarefas/T-0011.md) | Busca palavra por palavra no catálogo online (só produtos) e aba Placa | web-site | testes | CONCLUÍDA | #26, #27 |
 | [T-0012](tarefas/T-0012.md) | Fim do ATUALIZAR_CATALOGO.bat: o repositório é a base oficial | gerente-projetos | po, web-site | CONCLUÍDA | #16, #17 |
 | [T-0013](tarefas/T-0013.md) | Filtros do resultado abrem todos expandidos | web-site | testes | CONCLUÍDA | #20 |
-| [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | EM ANDAMENTO (ajustes no ar; falta o aperto do testes) | #29, #35, #36, #39, #41 |
+| [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | EM ANDAMENTO (filtros f1 no PR da home; falta o aperto do testes) | #29, #35, #36, #39, #41 |
 | [T-0015](tarefas/T-0015.md) | Três agentes novos: corretor-redundancias, design-de-marca e designer-ux | gerente-projetos | po, revisor-codigo | CONCLUÍDA | #30 |
 | [T-0016](tarefas/T-0016.md) | Guardião com a regra de merge do PO, conferência dos merges pelo GitHub e limpeza do CI e do coord.mjs | alexandre | gerente-projetos, testes, revisor-codigo | EM ANDAMENTO (pacote d na sessão filha) | #34 |
 | [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v18 no ar; v19 a simular) | #32, #33, #37, #38 |
@@ -27,7 +27,7 @@ Atualizado em 20/11/2026 15:00 (Manaus). Como usar: `.coord/README.md`. Uma linh
 ## Fila
 
 1. T-0018: o PR da home (com o contador ligado e a imagem B da op4f); depois, o aperto do testes. Prazo do Alexandre: 15:00 (R-20261120-142100).
-2. T-0014: só o PR de aperto do testes.
+2. T-0014: os filtros f1 (no PR da home) e o PR de aperto do testes.
 3. T-0016: o pacote d na sessão filha e o merge do #34.
 4. T-0017: a simulação da v19, para o "aprovado".
 5. T-0019: os PDFs novos, quando o Alexandre rodar o gerador no PC dele.
