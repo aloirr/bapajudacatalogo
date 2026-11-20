@@ -92,7 +92,7 @@ _DET.limpar_datas(FAMS)
 _DET.preencher_aplicacao(FAMS)
 _DET.essencial(FAMS)              # informação essencial da descrição no DETALHE (auditoria 23/10)
 import diferencial as _DIF
-_DIF.aplicar(FAMS)                # selo de diferencial ao lado do código (ex.: c/ ABS × s/ ABS)
+_DIF.aplicar(FAMS)                # selo e itens parecidos: só para a auditoria e a base_v11; os PDFs não mostram (T-0019, 20/11)
 _SITE_COD = set(_SITE.LOG.get('preenchidos', []))
 for f_ in FAMS:                   # aplicação do site (resumida por motor) não serve para achar "item parecido": sem selo
     for r_ in f_['rows']:

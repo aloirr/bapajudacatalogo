@@ -24,7 +24,7 @@ TOP, FOOT, HERO = 54, 56, 132
 S = 595.2756 / W
 C = dict(black='#141514', ink='#161816', sec='#4d514d', grey='#5b5f5b', green='#3dae49', green2='#5cb85f',
          gdark='#1f7a32', gtext='#1f6b2c', hero='#eef4ec', heroline='#dbe6d7', line='#dfe2dc', line2='#e3e6e0',
-         zebra='#f7f8f6', white='#ffffff', lgrey='#d5d8d5', fgrey='#c9ccc9', otag='#fdebd6', otext='#8a3f00', dtag='#fde4e1', dtext='#a8200d',
+         zebra='#f7f8f6', white='#ffffff', lgrey='#d5d8d5', fgrey='#c9ccc9', otag='#fdebd6', otext='#8a3f00',
          orange='#f28c28', divider='#3a3d3a', card='#242624')
 FS, LEAD, RF, RL, SF, SL, RPAD = 8.6, 11.1, 7.8, 10.3, 7.2, 9.3, 4.5
 CODE_W, REF_W, GAP, PAD = 122, 130, 10, 8
@@ -211,11 +211,10 @@ class Doc:
 
 # ---------------------------------------------------------------- linhas da tabela
 def sub_mk(f, r):
-    """texto que sobra depois das tags + nota do item parecido"""
+    """texto que sobra depois das tags"""
     import tags as TG
-    v, g, sobra, nota = TG.do_item(f['name'], r, f['spec'])
-    s = html.escape(sobra, quote=False) if sobra else ''
-    return s                                  # sem a nota "≠ item parecido" (Alexandre, 23/10: polui)
+    sobra = TG.do_item(f['name'], r, f['spec'])[1]
+    return html.escape(sobra, quote=False) if sobra else ''
 
 
 def tags_x0(r, cs=9.5):
@@ -229,8 +228,7 @@ def tags_na_linha(r, tl, cs=9.5):
 
 def tag_list(f, r):
     import tags as TG
-    v, g, sobra, nota = TG.do_item(f['name'], r, f['spec'])
-    return [(t, 'd') for t in v] + [(t, 'n') for t in g]
+    return TG.do_item(f['name'], r, f['spec'])[0]
 
 
 def prep_rows(f, linhas=None):
@@ -327,7 +325,7 @@ def table_page(dc, f, rows, pg, cont, primeira=None):
             dc.label(x, y + 16, '(continuação)', SF, 'grey', 'PM')
         elif r['nov']: dc.tag(x + lw(r['code'], cs, 'PB') + 6, y + 3.5, 'NOVO', 6.8, 'otag', 'otext', 4)
         ys = y + 16
-        if not it['cont']:                        # tags embaixo do código (vermelho = diferencial)
+        if not it['cont']:                        # tags embaixo do código
             import tags as TG
             tl = tag_list(f, r)
             if tl and tags_na_linha(r, tl, cs):
