@@ -24,7 +24,8 @@
   --foto-pc: 200px;
   --foto-cel: min(166px, calc((100vw - 32px) * .36));
   /* lista: a busca usa a largura toda (R-20261120-112950) e mostra no máximo 5 cartões por linha no computador
-     (R-20261120-115432; .lista); celular 2. Foto do cartão: 90 px no computador (era 150; os 75 px da redução de 50%
+     (R-20261120-115432; .lista); celular 2. Desde o fA2 (R-20261120-141600): 4 por linha e foto de 150 px
+     no computador, 5 a partir de 1680 px (bloco "fA2" abaixo do .item). Foto do cartão: 90 px no computador (era 150; os 75 px da redução de 50%
      ficaram pequenos no cartão mais largo de 5 por linha) e 55 px no celular (era 110) */
   --largura: 1880px;
   --cartao-min: 158px;
@@ -185,6 +186,21 @@ main:focus, main:focus-visible { outline: none; }
 .item .sem-foto { gap: 2px; font-size: 12px; line-height: 1.2; padding-bottom: 20px; align-content: start; padding-top: 8px; } /* o "Foto em breve" sobe; o código fica embaixo, à direita */
 .item .sem-foto img { width: 24px !important; }
 .item .ref-mais { background: none; border-color: transparent; color: var(--texto-2); padding-left: 2px; padding-right: 2px; } /* "+N" discreto (R-20261120-122300) */
+/* fA2 (R-20261120-141600): no computador, 4 cartões por linha (eram 5), cada um maior (265 x 318 px em 1366), com foto
+   de 150 px e letra um pouco maior; 5 por linha a partir de 1680 px, para o cartão não passar de ~320 px. Celular sem
+   mudança (2 por linha). Mesma altura em todos os cartões e o "+ Detalhes" no mesmo y (altura fixa de cada linha) */
+@media (min-width: 641px) {
+  :root { --foto-cartao: 150px; }
+  .lista { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .item .foto img { padding: 10px; }
+  .item .corpo { padding: 10px 12px 12px; gap: 4px; }
+  .item .foto-cod { right: 6px; bottom: 6px; padding: 2px 7px; font-size: 13px !important; }
+  .item .desc, .item .apl { font-size: 13px; line-height: 1.35; height: 2.7em; }
+  .item .refs { height: 24px; gap: 4px; }
+  .item .ref, .item .refs-rot { font-size: 12.5px; }
+  .bt-detalhes { height: 36px; font-size: 13.5px; }
+}
+@media (min-width: 1680px) { .lista { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 .sem-foto { width: 100%; height: 100%; display: grid; place-items: center; color: var(--texto-2); font-size: 12px; text-align: center; gap: 6px; align-content: center; }
 .sem-foto img { width: 44px !important; height: auto !important; opacity: .35; padding: 0 !important; }
 .mais { display: flex; justify-content: center; margin: 24px 0 0; }
