@@ -295,6 +295,9 @@ table.tab-veiculos thead th { border-bottom: 1px solid var(--linha); }
    Cilindrada não quebra; o Ano quebra só entre as faixas, na ", ", nunca dentro de uma (R-20261120-165900-alexandre) */
 table.tab-veiculos td { white-space: normal; overflow-wrap: normal; } /* quebra entre palavras ("Volkswagen" inteiro) */
 table.tab-veiculos td:nth-child(3), .tab-veiculos .faixa, .lista-veiculos .faixa { white-space: nowrap; }
+/* o Ano com a largura de uma faixa (revisão do designer-ux no PR #54): a Marca e o Modelo não perdem espaço; sem o
+   espaço à direita, a vírgula da faixa ("2003–2005,") cabe na janela de 1024 px sem rolar de lado */
+table.tab-veiculos th:nth-child(5), table.tab-veiculos td:nth-child(5) { width: 1%; padding-right: 0; }
 @media (max-width: 1279px) { table.tab-veiculos td { overflow-wrap: anywhere; } } /* tela estreita: a palavra longa quebra para não rolar */
 .lista-veiculos { display: none; list-style: none; margin: 0; padding: 0; }
 @media (max-width: 480px) {
