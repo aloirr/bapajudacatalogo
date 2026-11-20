@@ -4,7 +4,7 @@ services:
   - type: web
     name: bapajudacatalogo
     runtime: static
-    buildCommand: echo "site estatico: os dados vem prontos de scripts/gerar_site.py"
+    buildCommand: 'echo "site estatico: os dados vem prontos de scripts/gerar_site.py"'
     staticPublishPath: ./site
     pullRequestPreviewsEnabled: false
     headers:
