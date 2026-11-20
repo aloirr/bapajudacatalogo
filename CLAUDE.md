@@ -45,3 +45,13 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
 - Abra o site com `py -3 -m http.server 8000 -d site`.
 - Teste a busca geral, a busca por veículo e a busca por código ou referência, no computador e no celular (390 px).
 - Ao mudar a tela, entregue os prints.
+
+<!-- SESSOES-E-RECADOS (20/11/2026) -->
+## Sessões e recados (igual à BAP Central)
+- A variável **`BAP_AGENTE`** do ambiente do claude.ai/code define o papel da sessão (hook `SessionStart` `.claude/hooks/papel-da-sessao.mjs`):
+  - **BapAjuda-PO** → `po`: é onde o Alexandre conversa;
+  - **BapAjuda-GP** → `gerente-projetos`: sessão fixa do gerente, que chama os outros agentes como subagentes.
+  - Sem a variável, a sessão é **restrita**: os guardiões não deixam alterar nada.
+- **Recados** ficam no **`aloirr/bapajudacatalogo-recados`**, lidos e gravados só pelo `node scripts/coord.mjs` (`caixa`, `pendencias`, `ler`, `fio`, `enviar`, `lido`), pela API REST do GitHub com o token da variável **`BAP_RECADOS_TOKEN`**. Nunca imprima o token. Não peça para "ligar o repositório" na sessão: a CLI não precisa.
+- **Donos:** `.coord/donos.json` (a primeira regra que casa manda). Governança (`.claude`, `donos.json`, `coord*.mjs`, `.github`, `render.yaml`, `CLAUDE.md`, `.gitignore`) só com o recado do Alexandre "autorizo o merge do PR #N no commit <sha>".
+- Recado do celular: issue com o formulário **Recado** no `aloirr/bapajudacatalogo-recados` (conta domontecristo).

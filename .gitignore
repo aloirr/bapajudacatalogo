@@ -18,3 +18,6 @@ Thumbs.db
 .venv/
 venv/
 node_modules/
+# Recados e lidos ficam no aloirr/bapajudacatalogo-recados (modo GitHub do scripts/coord.mjs). Nao tire estas linhas.
+/.coord/recados
+/.coord/lidos

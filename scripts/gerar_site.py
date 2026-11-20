@@ -191,6 +191,33 @@ def ler_base(caminho: Path) -> list[dict]:
     return produtos
 
 
+# Arte "IMAGEM INDISPONÍVEL": o mesmo arquivo copiado com o código de muitos produtos (20/11/2026: 1.007 das 2.420
+# fotos, o mesmo arquivo do FLU15002). Arquivo idêntico em LIMITE_REPETIDA produtos ou mais = arte, não foto
+# [SUPOSIÇÃO: foto de verdade igual para tantos códigos não existe]. Esses produtos ficam com "Foto em breve".
+LIMITE_REPETIDA = 10
+
+
+def _hash(f: Path) -> str:
+    import hashlib
+    h = hashlib.md5()
+    with f.open("rb") as arq:
+        for bloco in iter(lambda: arq.read(1 << 20), b""):
+            h.update(bloco)
+    return h.hexdigest()
+
+
+def repetidas(por_codigo: dict[str, Path]) -> set[str]:
+    """Códigos cuja foto é um arquivo idêntico ao de LIMITE_REPETIDA produtos ou mais."""
+    from collections import defaultdict
+    grupos: dict[str, list[str]] = defaultdict(list)
+    for cod, f in por_codigo.items():
+        try:
+            grupos[_hash(f)].append(cod)
+        except OSError:
+            pass
+    return {c for cods in grupos.values() if len(cods) >= LIMITE_REPETIDA for c in cods}
+
+
 def fotos(produtos: list[dict], pasta: Path) -> int:
     try:
         from PIL import Image
@@ -201,13 +228,19 @@ def fotos(produtos: list[dict], pasta: Path) -> int:
     for f in pasta.iterdir():
         if f.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp") and f.is_file():
             origem.setdefault(f.stem.upper().replace(" ", ""), f)
+    por_codigo = {p["c"]: origem[p["c"].replace(" ", "")] for p in produtos if p["c"].replace(" ", "") in origem}
+    arte = repetidas(por_codigo)
+    if arte:
+        print(f"  fotos: {len(arte)} produtos com a arte 'imagem indisponível' (ficam com 'Foto em breve')")
     feitas = 0
     for i, p in enumerate(produtos, 1):
-        f = origem.get(p["c"].replace(" ", ""))
-        if not f:
-            continue
+        f = por_codigo.get(p["c"])
         nome = re.sub(r"[^A-Z0-9._-]", "_", p["c"]) + ".jpg"
         alvo = IMG / nome
+        if not f or p["c"] in arte:
+            if p["c"] in arte and alvo.exists():
+                alvo.unlink()                     # foto reduzida antiga da arte sai do site
+            continue
         if not alvo.exists() or alvo.stat().st_mtime < f.stat().st_mtime:
             with Image.open(f) as im:
                 im = im.convert("RGBA") if im.mode in ("P", "LA") else im
@@ -252,10 +285,17 @@ def main():
         print(f"  fotos: {com} produtos com foto ({n} reduzidas agora)")
     elif IMG.is_dir():
         tem = {f.name for f in IMG.glob("*.jpg")}
+        por_codigo = {}
         for p in produtos:
             nome = re.sub(r"[^A-Z0-9._-]", "_", p["c"]) + ".jpg"
             if nome in tem:
-                p["i"] = nome
+                por_codigo[p["c"]] = IMG / nome
+        arte = repetidas(por_codigo)
+        for p in produtos:
+            if p["c"] in por_codigo and p["c"] not in arte:
+                p["i"] = por_codigo[p["c"]].name
+        if arte:
+            print(f"  fotos: {len(arte)} com a arte 'imagem indisponível' fora do site (rode com --fotos para apagar)")
     for p in produtos:                       # tira os campos vazios (JSON menor)
         for k in [k for k, v in p.items() if v in ("", [], None)]:
             del p[k]
