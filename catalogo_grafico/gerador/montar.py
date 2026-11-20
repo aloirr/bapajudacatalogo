@@ -83,10 +83,19 @@ def segs_from_base(app):
     return segs
 
 
+VAZIO = ('-', '0', '--', 'N/A')
+
+
 def ref_cod(c):
-    """código da referência sem o histórico interno ('| ANTERIOR: ...') e sem o preço de compra ('BAP BOX USD ...'),
-    como no scripts/gerar_site.py (refs_de)"""
-    return re.sub(r'(?i)\s*BAP\s+BOX\b.*$', '', c.split(' | ')[0]).strip()
+    """código da referência sem histórico, sem preço de compra e sem código vazio; '' se não sobrar código"""
+    c = re.sub(r'(?i)\s*BAP\s+BOX\b.*$', '', c.split(' | ')[0]).strip()
+    return '' if c in VAZIO else c
+
+
+def refs_sem_vazio(s):
+    """referências do catálogo antigo ('Axios 0 · Nakata N370') sem as de código vazio"""
+    ps = [p for p in (s or '').split(' · ') if not (re.fullmatch(r'[^\d]+ (\S+)', p) and p.rsplit(' ', 1)[1] in VAZIO)]
+    return ' · '.join(ps)
 
 
 def refs_from_base(s):
@@ -94,8 +103,8 @@ def refs_from_base(s):
     out = []
     for p in re.split(r';\s*', s):
         m = re.match(r'^\s*([^:]+?)\s*:\s*(.+)$', p)
-        if m and not re.search(r'(?i)bap|similar|aplica', m.group(1)) and ref_cod(m.group(2)):
-            b = m.group(1).strip(); out.append(f"{b.title() if len(b) > 4 else b.upper()} {ref_cod(m.group(2))}")
+        if m and not re.search(r'(?i)bap|similar|aplica', m.group(1)) and (c := ref_cod(m.group(2))):
+            b = m.group(1).strip(); out.append(f"{b.title() if len(b) > 4 else b.upper()} {c}")
     return ' · '.join(out[:6])
 
 
@@ -115,7 +124,7 @@ def plain(segs):
 rows_by_line = collections.defaultdict(list); sem_linha = []
 # 1) todos os itens do catálogo digital atual permanecem
 for code, r in cat_row.items():
-    rows_by_line[taxo.line_of(code, DESC.get(code, ''), cat_line[code])].append(dict(r))
+    rows_by_line[taxo.line_of(code, DESC.get(code, ''), cat_line[code])].append(dict(r, refs=refs_sem_vazio(r.get('refs'))))
 # 2) itens da base unificada que ainda não estão no catálogo (fora: INATIVO). Linha = coluna PRODUTO da base.
 #    Sem o arquivo de estoque (T-0019, 20/11): STATUS_CADASTRO da base diz se o item é ATIVO (tag NOVO, como antes)
 #    ou se entrou só pelo cadastro (sem_estoque: fica fora do "Leve também", como antes).
