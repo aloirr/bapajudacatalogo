@@ -18,7 +18,6 @@
   let BASE = null;           // { gerado_em, total, produtos }
   let POR_COD = new Map();   // código → produto
   let INDICE = [];           // [{ p, desc, apl, marcas, outros, cods, mcods, eans, faixas }]
-  const CODIGOS = new Set(); // todos os códigos, referências e EAN (sem pontuação), para juntar "33 000" em "33000"
   const PALAVRAS = new Set(); // palavras (letras e números) que aparecem nas aplicações, para achar os modelos derivados
   const DERIVADOS = new Map(); // modelo → palavras derivadas (cache)
   // nome de veículo: palavra que está em pelo menos 5 vezes mais aplicações que descrições (POLO 154 x 7; ROLAMENTO
@@ -56,18 +55,37 @@
     const r = await fetch("data/produtos.json", { cache: "no-cache" });
     if (!r.ok) throw new Error("HTTP " + r.status);
     BASE = await r.json();
-    for (const p of BASE.produtos) {
+    // 1ª passada: palavras da aplicação e da descrição (ehVeiculo, derivados), antes de montar os códigos
+    const textos = BASE.produtos.map((p) => {
+      const desc = norm([p.d, p.p].join(" | ")), apl = norm(p.a);
+      for (const w of new Set(apl.match(/[A-Z0-9]+/g) || [])) { PALAVRAS.add(w); EM_APL.set(w, (EM_APL.get(w) || 0) + 1); }
+      for (const w of new Set(desc.match(/[A-Z0-9]+/g) || [])) EM_DESC.set(w, (EM_DESC.get(w) || 0) + 1);
+      return { desc, apl };
+    });
+    // Códigos de uma referência (T-0011, B2): só o que tem cara de código, nunca palavra de aplicação.
+    // - Nakata dos kits KHC traz a aplicação inteira depois de "APLICAÇÃO REVISADA": dali em diante não é código.
+    // - Pedaços separados por / ; , | = ( ) e "OU"; o rótulo antes de ":" sai ("Cofap: KJH04202" → KJH04202).
+    // - O pedaço inteiro vira um código só se tem número e cada palavra tem número ou é sigla de até 4 letras que
+    //   não é veículo ("NJH07 5123" → NJH075123, "BTC 39115", "6309 2RS C3"; "Corsa 1.0" não vira CORSA10).
+    // - Senão (pedaço com texto), só a palavra com número e pelo menos 5 caracteres ("Cofap GP33190" → GP33190;
+    //   16V e 4X4 não são código).
+    const partes = (x) => {
+      const out = [];
+      for (let pd of String(x.c || "").split(/APLICA[ÇC][ÃA]O/i)[0].split(/[\/;,|=()\n]| OU /i)) {
+        const ws = norm(pd.replace(/^.*:/, "")).split(" ").filter((w) => normCod(w));
+        if (!ws.length || !ws.some((w) => /\d/.test(w))) continue;
+        if (ws.every((w) => /\d/.test(w) || (normCod(w).length <= 4 && !ehVeiculo(normCod(w))))) out.push(normCod(ws.join("")));
+        else if (ws.length > 1) for (const w of ws) { const c = normCod(w); if (c.length >= 5 && /\d/.test(c) && !ehVeiculo(c)) out.push(c); }
+      }
+      return out;
+    };
+    BASE.produtos.forEach((p, ix) => {
       POR_COD.set(normCod(p.c), p);
-      // pedaços da referência: separados por / ; , | e "OU", e as palavras com número ("Cofap GP33190" → GP33190)
-      const partes = (x) => {
-        const s = String(x.c || "");
-        return s.split(/[\/;,|]| OU /i).map(normCod).concat(s.split(/[\s\/;,|:()]+/).filter((w) => /\d/.test(w)).map(normCod));
-      };
       const e = {
         p,
         // campos da busca (T-0011), com a chave do produtos.json de cada um:
-        desc: norm([p.d, p.p].join(" | ")),                                  // descrição: d (DESCRICAO) e p (PRODUTO)
-        apl: norm(p.a),                                                      // aplicação (veículo, motor e ano): a
+        desc: textos[ix].desc,                                               // descrição: d (DESCRICAO) e p (PRODUTO)
+        apl: textos[ix].apl,                                                 // aplicação (veículo, motor e ano): a
         // marca concorrente: r[].m, e o texto da referência r[].c, onde às vezes vem a marca ("Cofap GP33190");
         // a marca do produto é BAP
         marcas: norm((p.r || []).map((x) => x.m + " " + x.c).join(" | ")),
@@ -79,16 +97,15 @@
         eans: (p.x || []).filter(([k]) => k === "Código de barras").map(([, v]) => normCod(v)).filter(Boolean), // EAN: x["Código de barras"]
         faixas: faixasDoTexto(p.a || ""),                                    // anos da aplicação
       };
-      // montadora com o outro nome ("vw gol" acha o Gol com montadora VOLKSWAGEN, como a antiga aba Veículo)
-      const apelidos = norm(p.mo).split(/[\/,]\s*/).map((m) => APELIDOS[m]).filter(Boolean);
+      // montadora com o outro nome ("vw gol" acha o Gol da VOLKSWAGEN, como a antiga aba Veículo): vale a montadora
+      // do campo mo e também a escrita como palavra na aplicação ou na descrição ("VOLKSWAGEN GOL 1.6")
+      const apelidos = Object.keys(APELIDOS).filter((m) => norm(p.mo).split(/\s*[\/,]\s*/).includes(m)
+        || RX_MONTADORA[m].test(e.apl) || RX_MONTADORA[m].test(e.desc)).map((m) => APELIDOS[m]);
       if (apelidos.length) e.outros += " | " + apelidos.join(" ");
       e.tudo = [e.desc, e.apl, e.marcas, e.outros].join(" | ");
       e.codsTxt = e.cods.concat(e.mcods, e.eans).join(" ");
       INDICE.push(e);
-      for (const c of e.cods.concat(e.mcods, e.eans)) CODIGOS.add(c);
-      for (const w of new Set(e.apl.match(/[A-Z0-9]+/g) || [])) { PALAVRAS.add(w); EM_APL.set(w, (EM_APL.get(w) || 0) + 1); }
-      for (const w of new Set(e.desc.match(/[A-Z0-9]+/g) || [])) EM_DESC.set(w, (EM_DESC.get(w) || 0) + 1);
-    }
+    });
     const info = document.getElementById("info-base");
     if (info && BASE.gerado_em) info.textContent = fmt(BASE.total) + " produtos · base atualizada em " + BASE.gerado_em;
   }
@@ -99,9 +116,9 @@
   // 1. O termo vira palavras (espaço, vírgula e ponto e vírgula; hífen entre letras também, como no modelo da T-0008).
   // 2. Cada palavra casa com pelo menos um campo do produto (OU entre campos); o produto entra se todas casarem
   //    (E entre palavras). A ordem não importa; caixa e acento não importam (norm).
-  // 3. Palavras vizinhas também valem juntas: "SPACE FOX" casa com SPACEFOX, "CXD 13062" com CXD13062.
-  //    Se as palavras juntas formam um código ou referência que existe ("33 000", "33-000", "TRW 16900255S"),
-  //    elas valem como um código só.
+  // 3. Palavras vizinhas também valem juntas: "SPACE FOX" casa com SPACEFOX, "CXD 13062" com CXD13062,
+  //    "33 000" com 33000, "TRW 16900255S" com TRW + 16900255S. Juntas, só valem como código inteiro ou texto,
+  //    nunca como pedaço de código: assim a ordem das palavras não muda a lista ("gol 1.0" = "1.0 gol").
   // 4. Se nenhum produto casa com todas as palavras, a lista mostra os mais próximos (os que casam com mais
   //    palavras), em vez de lista vazia. Ver buscar().
 
@@ -115,9 +132,9 @@
   //   "2007", "08/2022"                                                                                    → só o ano
   //   "07/17" sozinho (sem outra data do lado): mês/ano ou ano/ano, as duas leituras (2007 a 2017)          → faixa
   //   não é ano: 13/16" (polegada), 2500 e 1938 (motor ou modelo)
-  // Ano com 2 dígitos: até 35 = 20xx; depois = 19xx. Ano de 4 dígitos só entre 1950 e 2035 (fora disso é número
-  // de motor ou de modelo, como 2500 ou 1938).
-  const ANO_MIN = 1950, ANO_MAX = 2035, SEM_FIM = 2100, SEM_INICIO = 1900;
+  // Ano com 2 dígitos: até 35 = 20xx; depois = 19xx. Ano de 4 dígitos só entre 1950 e o ano atual + 2 (fora disso
+  // é número de motor ou de modelo, como 2500, 1938 ou o Axor 2035).
+  const ANO_MIN = 1950, ANO_MAX = new Date().getFullYear() + 2, SEM_FIM = 2100, SEM_INICIO = 1900; // "Axor 2035" não é ano
   const ano2 = (s) => { const n = +s; return n <= 35 ? 2000 + n : 1900 + n; };
   const anoOk = (n) => n >= ANO_MIN && n <= ANO_MAX;
   function faixasDoTexto(texto) {
@@ -205,14 +222,17 @@
   const CONECTIVOS = new Set(["DE", "DA", "DO", "DAS", "DOS", "E", "A", "O", "AS", "OS", "EM", "NO", "NA", "NOS", "NAS", "PARA", "PRA", "P/"]);
   const MARCA_PRODUTO = "BAP"; // todo produto do catálogo é BAP
   const APELIDOS = { CHEVROLET: "GM CHEVY", VOLKSWAGEN: "VW VOLKS", "MERCEDES-BENZ": "MB MERCEDES BENZ", "MERCEDES BENZ": "MB MERCEDES" };
-  let CODIGOS_TXT = null;
-  const codigosTxt = () => CODIGOS_TXT || (CODIGOS_TXT = [...CODIGOS].join(" "));
+  const RX_MONTADORA = Object.fromEntries(Object.keys(APELIDOS).map((m) => [m, new RegExp("(^|[^A-Z])" + m.replace(/[-\s]/g, "[\\s-]?") + "(?![A-Z])")]));
 
-  function peca(t) {
+  // multi = peça de 2 ou mais palavras vizinhas: casa como código inteiro (BAP, referência, EAN) ou como texto; como
+  // pedaço de código, só se toda palavra é um grupo de código (tem número e não é veículo, motor nem ano: "33 000",
+  // "16900 255S"). Assim "GOL 1.0", "S10 1.4" e "HB20 2015" não viram pedaço de referência e a ordem não muda a lista.
+  const grupoDeCodigo = (w) => /\d/.test(w) && !/^\d+[.,]\d+$/.test(w) && !(/[A-Z]/.test(w) && ehVeiculo(normCod(w))) && !(/^\d{4}$/.test(w) && anoOk(+w));
+  function peca(t, multi) {
     const limpo = t.replace(/-/g, "");
     const n = /^\d{4}$/.test(limpo) ? +limpo : 0;
     return {
-      t, limpo, pc: normCod(t), ano: anoOk(n) ? n : 0,
+      t, limpo, pc: normCod(t), ano: anoOk(n) ? n : 0, pedaco: !multi || t.split("-").every(grupoDeCodigo),
       agulha: t.split("-").reduce((x, y) => (y.length > x.length ? y : x), ""), // teste rápido antes da regex
       rx: palavra(t),
       rxIni: limpo.length >= 4 && /[A-Z]/.test(limpo) && !ehVeiculo(limpo) ? palavra(t, true) : null,
@@ -225,7 +245,7 @@
     if (k.pc.length >= 2 && e.codsTxt.includes(k.pc)) { // codsTxt: teste rápido (todos os códigos juntos)
       if (e.cods[0] === k.pc) nota = 1000;
       else if (e.cods.includes(k.pc) || e.mcods.includes(k.pc) || e.eans.includes(k.pc)) nota = 800;
-      else if (!k.ano && k.pc.length >= 3) {
+      else if (!k.ano && k.pedaco && k.pc.length >= 3 && !ehVeiculo(k.limpo)) { // nome de veículo (HB20) não é pedaço de código
         if (e.cods[0].startsWith(k.pc)) nota = 600;
         else if (/\d/.test(k.pc) && (e.cods.some((x) => x.includes(k.pc)) || (k.pc.length >= 6 && e.eans.some((x) => x.includes(k.pc))))) nota = 400;
         parcial = nota > 0;
@@ -260,18 +280,9 @@
     // ("33-000" = "33000", "F-1000", "15W-40")
     let ps = norm(texto).replace(/([A-Z])-+(?=[A-Z])/g, "$1 ").split(/[\s,;]+/).filter((w) => w.replace(/-/g, ""));
     if (ps.some((w) => !CONECTIVOS.has(w))) ps = ps.filter((w) => !CONECTIVOS.has(w));
-    // palavras vizinhas que juntas são um código ou referência que existe (inteiro, ou pedaço com número) viram um
-    // código só, até 4 palavras: "33 000" = "33-000" = "33000"
-    const toks = []; // { t, w: quantas palavras digitadas }
-    for (let i = 0; i < ps.length;) {
-      let len = 1;
-      for (let l = Math.min(4, ps.length - i); l >= 2; l--) {
-        const j = normCod(ps.slice(i, i + l).join(""));
-        if (CODIGOS.has(j) || (j.length >= 4 && /\d/.test(j) && codigosTxt().includes(j))) { len = l; break; }
-      }
-      toks.push({ t: ps.slice(i, i + len).join("-"), w: len });
-      i += len;
-    }
+    // cada palavra digitada é uma palavra (B1: nada é juntado antes; as peças de palavras vizinhas, abaixo, já
+    // cobrem "33 000" e "TRW 16900255S", e a ordem das palavras não muda a lista)
+    const toks = ps.map((t) => ({ t, w: 1 }));
     const n = toks.length;
     const palavras = toks.map((x) => x.t);
     // Peça = palavras vizinhas juntas. Com mais de 6 palavras, só sozinhas (como na T-0008). Letra solta (1 caractere)
@@ -282,7 +293,7 @@
       pecas.push([]);
       for (let j = i + 1; j <= Math.min(n, i + vao); j++) {
         const t = toks.slice(i, j).map((x) => x.t).join("-");
-        pecas[i].push({ t, j, w: toks.slice(i, j).reduce((s, x) => s + x.w, 0), curta: t.replace(/-/g, "").length < 2 });
+        pecas[i].push({ t, j, multi: j - i > 1, w: toks.slice(i, j).reduce((s, x) => s + x.w, 0), curta: t.replace(/-/g, "").length < 2 });
       }
     }
     // se não há jeito de cobrir tudo sem letra solta, a letra solta vale (nunca fica sem filtro)
@@ -293,7 +304,7 @@
     // teste rápido por produto: cada "agulha" (o pedaço mais longo da peça) é procurada uma vez só no texto todo
     const agulhas = [];
     for (const lin of pecas) for (const q of lin) {
-      q.k = peca(q.t);
+      q.k = peca(q.t, q.multi);
       q.ag = agulhas.indexOf(q.k.agulha);
       if (q.ag < 0) q.ag = agulhas.push(q.k.agulha) - 1;
       q.livre = q.k.limpo === MARCA_PRODUTO || q.k.ano; // não depende do texto
@@ -537,20 +548,38 @@
     }
     return nome.join(" ");
   }
+  // Montadora como a API manda → nome do catálogo: a tabela MONTADORAS do scripts/gerar_site.py, mais M.BENZ e MBENZ
+  // (docs/placas/DESENHO.md, item 7). Nome que não está na tabela fica como veio.
+  const MONTADORAS = { "GM": "CHEVROLET", "GENERAL MOTORS": "CHEVROLET", "CHEVROLET/GM": "CHEVROLET", "GM/CHEVROLET": "CHEVROLET",
+    "CHEVROLET / GM": "CHEVROLET", "GM / CHEVROLET": "CHEVROLET", "VW": "VOLKSWAGEN", "VOLKS": "VOLKSWAGEN",
+    "MB": "MERCEDES-BENZ", "MERCEDES": "MERCEDES-BENZ", "MERCEDES BENZ": "MERCEDES-BENZ", "M.BENZ": "MERCEDES-BENZ",
+    "M. BENZ": "MERCEDES-BENZ", "MBENZ": "MERCEDES-BENZ", "CITROEN": "CITROËN", "HYUNDAI / KIA": "HYUNDAI/KIA",
+    "HYUNDAI/KIA MOTORS": "HYUNDAI/KIA", "KIA/HYUNDAI": "HYUNDAI/KIA" };
+  function montadoraDoCatalogo(txt) {
+    const s = norm(txt);
+    if (MONTADORAS[s]) return MONTADORAS[s];
+    const parte = s.split(/\s*\/\s*|\s+-\s+/)[0]; // "VW - VOLKSWAGEN" → VW
+    return MONTADORAS[parte] || parte;
+  }
   // Resposta 200 → texto para mostrar ("VOLKSWAGEN GOL 2018/2019 1.6") e q da busca (montadora + modelo + ano_modelo).
+  // Cada nome da modelo_lista é uma alternativa (OU): vale o 1º, na ordem, com que algum produto casa com todas as
+  // palavras; se nenhum, o 1º da lista. O modelo só entra se a lista vier vazia.
   function veiculoDaPlaca(v) {
     v = v || {};
-    const montadora = norm(String(v.montadora || "").split(/\s*[\/]\s*|\s+-\s+/)[0]);
+    const bruta = norm(v.montadora), montadora = montadoraDoCatalogo(v.montadora);
     const lista = Array.isArray(v.modelo_lista) ? v.modelo_lista : String(v.modelo_lista || "").split(/\s*[;,|]\s*/);
-    const primeiro = lista.map((x) => String(x || "").trim()).find(Boolean);
-    const modelo = nomeDoModelo(primeiro || v.modelo, montadora) || nomeDoModelo(v.modelo, montadora);
+    const nome = (x) => { let s = norm(x); for (const m of [bruta, montadora]) if (m && s.startsWith(m + " ")) s = s.slice(m.length + 1); return nomeDoModelo(s, montadora); };
+    let nomes = [...new Set(lista.map(nome).filter(Boolean))];
+    if (!nomes.length) nomes = [nome(v.modelo)].filter(Boolean);
     const ano = (String(v.ano || "").match(/\d{4}/) || [""])[0];
     const anoModelo = (String(v.ano_modelo || "").match(/\d{4}/) || [""])[0] || ano;
-    let cil = String(v.cilindradas || "").trim();
-    if (/^\d{3,4}$/.test(cil)) cil = (Number(cil) / 1000).toFixed(1); // [SUPOSIÇÃO] 1598 (cm³) → 1.6
+    const qDe = (modelo) => [montadora, modelo, anoModelo].filter(Boolean).join(" ");
+    const modelo = nomes.find((m) => { const l = buscar(new URLSearchParams({ q: qDe(m) })); return l.length && l.casaram === l.palavras; }) || nomes[0] || "";
+    let cil = String(v.motor || v.cilindradas || "").trim();
+    if (/^\d{3,4}$/.test(cil)) cil = (Number(cil) / 1000).toFixed(1); // 1598 (cm³) → 1.6 (o serviço já manda motor "1.6")
     const anos = ano && anoModelo && ano !== anoModelo ? ano + "/" + anoModelo : anoModelo;
     return {
-      q: [montadora, modelo, anoModelo].filter(Boolean).join(" "),
+      q: qDe(modelo),
       texto: [montadora, modelo, anos, cil].filter(Boolean).join(" "),
     };
   }
@@ -642,7 +671,7 @@
     }
     mais.addEventListener("click", pagina);
     if (!todos.length) {
-      lista.outerHTML = `<div class="vazio"><b>Nenhum produto encontrado</b>Confira o código ou tente menos palavras. Na busca por veículo, deixe o ano em branco para ver todas as versões.</div>`;
+      lista.outerHTML = `<div class="vazio"><b>Nenhum produto encontrado</b>Confira o código ou tente menos palavras (sem o ano, por exemplo).</div>`;
     } else pagina();
   }
 
