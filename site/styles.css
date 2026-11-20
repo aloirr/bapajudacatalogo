@@ -115,7 +115,6 @@ main:focus, main:focus-visible { outline: none; }
 .res-topo { display: flex; justify-content: flex-start; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 0 12px; }
 .res-topo h1 { font-size: 20px; margin: 0; }
 .res-topo .total { color: var(--texto-2); font-size: 14px; margin-left: auto; }
-/* barra de filtros (R-20261120-113148): horizontal, abaixo da busca; cada grupo abre a lista de caixas de marcar */
 /* filtros (R-20261120-123800): grupos abertos, um embaixo do outro, na coluna à esquerda e no painel "Filtrar";
    o botão do grupo só recolhe. Opção A (R-20261120-140900): compactos, numa coluna --verde-claro (diferente do fundo
    das fotos), sem cartão por grupo; texto em --texto/--escuro e contagem em --texto-2 (5,6:1 no --verde-claro).
@@ -131,10 +130,10 @@ main:focus, main:focus-visible { outline: none; }
 .filtro-bt[aria-expanded="true"] .seta { transform: rotate(180deg); }
 .filtro-lista { padding: 0; }
 .filtro-lista[hidden] { display: none; }
-.filtro-lista label { display: flex; gap: 8px; align-items: center; min-height: 44px; padding: 0 4px; border-radius: 6px; font-size: 14px; color: var(--texto); cursor: pointer; }
+.filtro-lista label { display: flex; gap: 8px; align-items: center; min-height: 44px; padding: 0 4px; border-radius: 6px; font-size: 14px; cursor: pointer; }
 .filtro-lista label span { flex: 1; }
 .filtro-lista label:has(input:checked) span { font-weight: 600; color: var(--escuro); } /* marcada: negrito, além da caixa */
-.filtro-lista label em { margin-left: auto; min-width: 3ch; text-align: right; font-style: normal; font-variant-numeric: tabular-nums; color: var(--texto-2); font-size: 13px; }
+.filtro-lista label em { min-width: 3ch; text-align: right; font-style: normal; font-variant-numeric: tabular-nums; color: var(--texto-2); font-size: 13px; }
 .filtro-lista input { accent-color: var(--verde-esc); width: 18px; height: 18px; flex: none; }
 @media (hover: hover) { .filtro-lista label:hover { background: var(--branco); } }
 /* computador: a coluna à esquerda, compacta */
@@ -259,10 +258,12 @@ table.t td.c { font-weight: 600; font-variant-numeric: tabular-nums; }
 /* "Leve também" (era "Ofereça junto", R-20261120-141100b) e "Itens parecidos" (opção B, R-20261120-140600): logo
    abaixo dos botões e antes da aplicação, na largura do conteúdo. "Leve também" numa faixa --verde-claro; "Itens parecidos" no branco, no mesmo padrão. Título
    à esquerda no computador e em cima no celular; cartões brancos com a miniatura (até 48 px), o código e a descrição */
-.rel { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 8px 12px; }
-.secao.rel .secao-tit { margin: 0; }
-.rel-oj { background: var(--verde-claro); border-color: transparent; }
-.rel-oj .secao-tit { color: var(--verde-txt); } /* 5,8:1 no --verde-claro */
+@media screen {
+  .rel { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 8px 12px; }
+  .secao.rel .secao-tit { margin: 0; }
+  .rel-oj { background: var(--verde-claro); border-color: transparent; }
+  .rel-oj .secao-tit { color: var(--verde-txt); } /* 5,8:1 no --verde-claro */
+}
 .itens-rel { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 270px)); gap: 8px; }
 .item-rel { display: flex; align-items: center; gap: 10px; min-height: 44px; height: 100%; padding: 6px 10px 6px 6px; border-radius: 8px; background: var(--branco); color: var(--escuro); text-decoration: none; }
 .rel-ip .item-rel { box-shadow: var(--contorno-neutro); }
@@ -385,7 +386,7 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
 .mv-campo select.travada { opacity: 1; color: var(--texto-2); background: var(--fundo); border-color: var(--linha); font-weight: 600; cursor: not-allowed; } /* placa: travada, cinza e legível (5,8:1) */
 /* filtros numa coluna fina à esquerda dos cartões, de cima a baixo */
 .res-grade { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 14px; align-items: start; margin-top: 12px; }
-.lado-filtros { display: flex; flex-direction: column; gap: 0; padding: 10px 6px 8px; border-radius: var(--raio); background: var(--verde-claro); color: var(--texto); position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow: auto; }
+.lado-filtros { display: flex; flex-direction: column; padding: 10px 6px 8px; border-radius: var(--raio); background: var(--verde-claro); color: var(--texto); position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow: auto; }
 .lado-sub { margin: 0; padding: 0 6px 6px; font-size: 13px; font-weight: 700; color: var(--escuro); }
 .bt-filtrar { display: inline-flex; height: 44px; }
 /* painel "Filtrar" por cima (celular): fundo escurecido e foco preso (dialog com showModal) */
@@ -465,10 +466,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .apl-completa { display: none; } /* no PDF vai a tabela */
   /* no PDF: "Leve também" e "Itens parecidos" depois da aplicação e do diferencial, como antes; código e
      descrição, sem link e sem miniatura, no branco */
-  .prod-info > .rel { order: 1; display: block; }
-  .rel-oj { background: var(--branco); border-color: var(--linha); }
-  .rel-oj .secao-tit { color: var(--texto-2); }
-  .secao.rel .secao-tit { margin-bottom: 1.5mm; }
+  .prod-info > .rel { order: 1; }
   .itens-rel { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5mm; }
   .item-rel { min-height: 0; padding: 1mm 2mm; box-shadow: var(--contorno-neutro); }
   .rel-foto { display: none; }
