@@ -82,7 +82,7 @@ for r in rows:
         r['segs'] = [[x.replace('Uso Sem Câmara', 'Uso sem câmara'), b] for x, b in r['segs']]
 for f in M.fams:
     if f['name'] == 'Pneus e Câmaras de Ar Moto':
-        f['rows'] = rows; f['spec'] = False; f['count'] = len(rows); f['extra_col'] = 'OFEREÇA JUNTO'
+        f['rows'] = rows; f['spec'] = False; f['count'] = len(rows); f['extra_col'] = 'LEVE TAMBÉM'
 D2.fams = M.fams
 if __name__ == '__main__':
     D2.build('digital_v4.pdf')

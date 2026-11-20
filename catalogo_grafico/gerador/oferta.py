@@ -119,14 +119,14 @@ def aplicar(fams):
         if f.get('moto'):
             _moto(f, fams); continue
         if nome == 'Pneus e Câmaras de Ar Moto':
-            f['extra_col'] = 'OFEREÇA JUNTO'                     # já vem do pneus_fix (pneu ↔ câmara)
+            f['extra_col'] = 'LEVE TAMBÉM'                     # já vem do pneus_fix (pneu ↔ câmara)
             for r in f['rows']:
                 if not r.get('extra') or r['extra'] == '—':
                     r['extra'] = 'Óleo 4T e vela'; LOG[(nome, 'sugestão fixa')] += 1
             continue
         if nome not in REGRAS: continue
         alvos, fixa = REGRAS[nome]
-        f['extra_col'] = 'OFEREÇA JUNTO'
+        f['extra_col'] = 'LEVE TAMBÉM'
         ja = nome in ('Kit de Distribuição', 'Bomba de Óleo', 'Sapata de Freio', 'Velas de Ignição')
         for r in f['rows']:
             if ja and r.get('extra') and r['extra'] != '—':

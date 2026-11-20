@@ -23,12 +23,10 @@
      celular 60% menor que a de hoje (40% de min(414 px, 90% da largura útil): 129 px em 390 px) */
   --foto-pc: 200px;
   --foto-cel: min(166px, calc((100vw - 32px) * .36));
-  /* lista: a busca usa a largura toda (R-20261120-112950) e mostra no máximo 5 cartões por linha no computador
-     (R-20261120-115432; .lista); celular 2. Foto do cartão: 90 px no computador (era 150; os 75 px da redução de 50%
-     ficaram pequenos no cartão mais largo de 5 por linha) e 55 px no celular (era 110) */
+  /* lista: a busca usa a largura toda (R-20261120-112950); 4 cartões por linha no computador (fA2, R-20261120-141600),
+     5 a partir de 1680 px, 2 no celular; foto do cartão 150 px no computador e 55 px no celular */
   --largura: 1880px;
-  --cartao-min: 158px;
-  --foto-cartao: 90px;
+  --foto-cartao: 150px;
   --foto-cartao-cel: 55px;
 }
 .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -85,24 +83,33 @@ main:focus, main:focus-visible { outline: none; }
 .res-topo { display: flex; justify-content: flex-start; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 0 12px; }
 .res-topo h1 { font-size: 20px; margin: 0; }
 .res-topo .total { color: var(--texto-2); font-size: 14px; margin-left: auto; }
-/* barra de filtros (R-20261120-113148): horizontal, abaixo da busca; cada grupo abre a lista de caixas de marcar */
 /* filtros (R-20261120-123800): grupos abertos, um embaixo do outro, na coluna à esquerda e no painel "Filtrar";
-   o botão do grupo só recolhe */
-.barra-filtros { display: flex; flex-direction: column; margin: 0; background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; }
+   o botão do grupo só recolhe. Opção A (R-20261120-140900): compactos, numa coluna --verde-claro (diferente do fundo
+   das fotos), sem cartão por grupo; texto em --texto/--escuro e contagem em --texto-2 (5,6:1 no --verde-claro).
+   Computador: 28 px por linha e 30 px no título do grupo; celular (painel): 44 px de toque. A opção marcada se
+   distingue pela caixa marcada e pelo negrito, não só pela cor */
+.barra-filtros { display: flex; flex-direction: column; margin: 0; }
 .barra-filtros:empty { display: none; }
-.filtro { border-bottom: 1px solid var(--linha); }
-.filtro:last-child { border-bottom: 0; }
-.filtro-bt { width: 100%; height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px; border: 0; background: none; color: var(--texto); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-.filtro-bt.ativo { background: var(--branco); color: var(--escuro); box-shadow: var(--contorno-neutro); } /* marcado: linha neutra */
+.filtro { border-bottom: 1px solid var(--borda-campo); padding: 2px 0 4px; }
+.filtro:last-child { border-bottom: 0; padding-bottom: 0; }
+.filtro-bt { width: 100%; height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 4px; border: 0; border-radius: 6px; background: none; color: var(--escuro); font: inherit; font-size: 13px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
 .filtro-bt b { font-weight: 600; color: var(--texto-2); } /* "Linha (1)": o número ao lado do nome */
 .filtro-bt .seta { font-size: 12px; color: var(--texto-2); }
 .filtro-bt[aria-expanded="true"] .seta { transform: rotate(180deg); }
-.filtro-lista { max-height: 220px; overflow: auto; padding: 0 4px 6px; }
+.filtro-lista { padding: 0; }
 .filtro-lista[hidden] { display: none; }
-.filtro-lista label { display: flex; gap: 8px; align-items: center; min-height: 44px; padding: 2px 6px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+.filtro-lista label { display: flex; gap: 8px; align-items: center; min-height: 44px; padding: 0 4px; border-radius: 6px; font-size: 14px; cursor: pointer; }
 .filtro-lista label span { flex: 1; }
-.filtro-lista label em { font-style: normal; color: var(--texto-2); font-size: 12px; }
+.filtro-lista label:has(input:checked) span { font-weight: 600; color: var(--escuro); } /* marcada: negrito, além da caixa */
+.filtro-lista label em { min-width: 3ch; text-align: right; font-style: normal; font-variant-numeric: tabular-nums; color: var(--texto-2); font-size: 13px; }
 .filtro-lista input { accent-color: var(--verde-esc); width: 18px; height: 18px; flex: none; }
+@media (hover: hover) { .filtro-lista label:hover { background: var(--branco); } }
+/* computador: a coluna à esquerda, compacta */
+.lado-filtros .filtro-bt { height: 30px; padding: 0 6px; font-size: 12px; }
+.lado-filtros .filtro-lista { max-height: 260px; overflow: auto; padding: 0 0 2px; }
+.lado-filtros .filtro-lista label { min-height: 28px; padding: 3px 4px; gap: 6px; line-height: 1.25; font-size: 12px; }
+.lado-filtros .filtro-lista label em { font-size: 12px; }
+.lado-filtros .filtro-lista input { width: 16px; height: 16px; }
 /* etiquetas abaixo da busca: o termo e os filtros marcados, cada um com o X (a placa fica na faixa do veículo) */
 .etiquetas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 0; }
 .etiquetas[hidden] { display: none; }
@@ -111,7 +118,7 @@ main:focus, main:focus-visible { outline: none; }
 .etq button { width: 44px; height: 44px; margin: -4px -2px -4px 0; border: 0; border-radius: 50%; background: none; color: var(--texto-2); font-size: 14px; cursor: pointer; flex: none; }
 .etq button:hover { background: var(--fundo); color: var(--escuro); }
 .limpar-tudo { height: 44px; border: 0; background: none; color: var(--verde-txt); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0 8px; }
-.lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(var(--cartao-min), calc((100% - 4 * 12px) / 5)), 1fr)); gap: 12px; } /* no máximo 5 por linha */
+.lista { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } /* 4 por linha (fA2); 5 a partir de 1680 px; 2 no celular */
 .item { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; text-decoration: none; color: var(--texto); display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
 .item:hover { border-color: var(--verde); box-shadow: var(--sombra); }
 .item .foto { position: relative; height: var(--foto-cartao); background: #FAFBFA; display: block; overflow: hidden; border-bottom: 1px solid var(--linha); }
@@ -146,6 +153,19 @@ main:focus, main:focus-visible { outline: none; }
 .item .sem-foto { gap: 2px; font-size: 12px; line-height: 1.2; padding-bottom: 20px; align-content: start; padding-top: 8px; } /* o "Foto em breve" sobe; o código fica embaixo, à direita */
 .item .sem-foto img { width: 24px !important; }
 .item .ref-mais { background: none; border-color: transparent; color: var(--texto-2); padding-left: 2px; padding-right: 2px; } /* "+N" discreto (R-20261120-122300) */
+/* fA2 (R-20261120-141600): no computador, cartão maior (265 x 318 px em 1366) e letra um pouco maior; 5 por linha a
+   partir de 1680 px, para o cartão não passar de ~320 px. Mesma altura em todos os cartões e o "+ Detalhes" no mesmo y
+   (altura fixa de cada linha) */
+@media (min-width: 641px) {
+  .item .foto img { padding: 10px; }
+  .item .corpo { padding: 10px 12px 12px; gap: 4px; }
+  .item .foto-cod { right: 6px; bottom: 6px; padding: 2px 7px; font-size: 13px !important; }
+  .item .desc, .item .apl { font-size: 13px; line-height: 1.35; height: 2.7em; }
+  .item .refs { height: 24px; gap: 4px; }
+  .item .ref, .item .refs-rot { font-size: 12.5px; }
+  .bt-detalhes { height: 36px; font-size: 13.5px; }
+}
+@media (min-width: 1680px) { .lista { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 .sem-foto { width: 100%; height: 100%; display: grid; place-items: center; color: var(--texto-2); font-size: 12px; text-align: center; gap: 6px; align-content: center; }
 .sem-foto img { width: 44px !important; height: auto !important; opacity: .35; padding: 0 !important; }
 .mais { display: flex; justify-content: center; margin: 24px 0 0; }
@@ -178,6 +198,15 @@ main:focus, main:focus-visible { outline: none; }
 .selo.v { background: var(--verde-claro); border-color: transparent; color: var(--verde-txt); }
 .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
 .acoes .bt { height: 44px; font-size: 14px; }
+/* computador (opB2, R-20261120-141100): os 2 botões na linha do código, logo à direita dele, na página e na janela;
+   o cabeçalho fica mais baixo. Celular e PDF sem mudança (botões embaixo das etiquetas; no PDF não há botões) */
+@media screen and (min-width: 901px) {
+  .prod-cab { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; column-gap: 28px; }
+  .prod-cab > h1, .prod-cab > h2 { grid-column: 1; grid-row: 1; }
+  .prod-cab > .acoes { grid-column: 2; grid-row: 1; margin-bottom: 0; }
+  .prod-cab > .desc { margin-top: 4px; }
+  .prod-cab > .desc, .prod-cab > .selos { grid-column: 1 / -1; }
+}
 /* aplicação e, ao lado, referências e ficha técnica (T-0014) */
 .prod-dados { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 12px; align-items: start; }
 .prod-dados.um { grid-template-columns: minmax(0, 1fr); }
@@ -192,15 +221,27 @@ table.t th, table.t td { text-align: left; padding: 4px 6px; border-bottom: 1px 
 table.t th { color: var(--texto-2); font-weight: 500; width: 42%; }
 table.t td { white-space: pre-line; }
 table.t td.c { font-weight: 600; font-variant-numeric: tabular-nums; }
-/* "Ofereça junto" e "Itens parecidos": código em negrito e descrição, na linha neutra (opção A); 2 colunas no
-   computador, 1 no celular */
-.itens-rel { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.item-rel { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-height: 44px; padding: 6px 10px; border-radius: 8px; background: var(--branco); color: var(--escuro); box-shadow: var(--contorno-neutro); text-decoration: none; }
+/* "Leve também" (era "Ofereça junto", R-20261120-141100b) e "Itens parecidos" (opção B, R-20261120-140600): logo
+   abaixo dos botões e antes da aplicação, na largura do conteúdo. "Leve também" numa faixa --verde-claro; "Itens parecidos" no branco, no mesmo padrão. Título
+   à esquerda no computador e em cima no celular; cartões brancos com a miniatura (até 48 px), o código e a descrição */
+@media screen {
+  .rel { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 8px 12px; }
+  .secao.rel .secao-tit { margin: 0; }
+  .rel-oj { background: var(--verde-claro); border-color: transparent; }
+  .rel-oj .secao-tit { color: var(--verde-txt); } /* 5,8:1 no --verde-claro */
+}
+.itens-rel { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 270px)); gap: 8px; }
+.item-rel { display: flex; align-items: center; gap: 10px; min-height: 44px; height: 100%; padding: 6px 10px 6px 6px; border-radius: 8px; background: var(--branco); color: var(--escuro); text-decoration: none; }
+.rel-ip .item-rel { box-shadow: var(--contorno-neutro); }
 a.item-rel:hover { background: var(--fundo); }
+.rel-foto { flex: none; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 6px; background: var(--branco); box-shadow: var(--contorno-neutro); overflow: hidden; }
+.rel-foto img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+.rel-foto img.sem { width: 30px; height: auto; opacity: .35; padding: 0; }
+.rel-txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .item-rel b { font-size: max(var(--min), calc(14px * var(--t))); font-weight: 700; font-variant-numeric: tabular-nums; }
-.item-rel span { font-size: max(var(--min), calc(13px * var(--t))); color: var(--texto); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.item-rel.fora span { color: var(--texto-2); }
-@media (max-width: 640px) { .itens-rel { grid-template-columns: minmax(0, 1fr); } }
+.rel-txt span { font-size: max(var(--min), calc(13px * var(--t))); color: var(--texto); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.item-rel.fora .rel-txt span { color: var(--texto-2); }
+@media (max-width: 640px) { .rel, .itens-rel { grid-template-columns: minmax(0, 1fr); } } /* celular: título em cima e um cartão por linha, sem rolar de lado */
 .aviso { font-size: max(var(--min), calc(12.5px * var(--t))); color: var(--texto-2); margin-top: 8px; }
 
 /* janela do produto (T-0014): no computador e no celular */
@@ -307,9 +348,9 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
 .mv-campo select:disabled { color: var(--texto-2); background: var(--fundo); }
 .mv-campo select.travada { opacity: 1; color: var(--texto-2); background: var(--fundo); border-color: var(--linha); font-weight: 600; cursor: not-allowed; } /* placa: travada, cinza e legível (5,8:1) */
 /* filtros numa coluna fina à esquerda dos cartões, de cima a baixo */
-.res-grade { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 14px; align-items: start; margin-top: 12px; }
-.lado-filtros { display: flex; flex-direction: column; gap: 6px; position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow: auto; }
-.lado-sub { margin: 0; font-size: 13px; font-weight: 600; color: var(--escuro); }
+.res-grade { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 14px; align-items: start; margin-top: 12px; }
+.lado-filtros { display: flex; flex-direction: column; padding: 10px 6px 8px; border-radius: var(--raio); background: var(--verde-claro); color: var(--texto); position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow: auto; }
+.lado-sub { margin: 0; padding: 0 6px 6px; font-size: 13px; font-weight: 700; color: var(--escuro); }
 .bt-filtrar { display: inline-flex; height: 44px; }
 /* painel "Filtrar" por cima (celular): fundo escurecido e foco preso (dialog com showModal) */
 dialog.painel-c { margin: 0 0 0 auto; width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; padding: 0; border: 0; background: var(--fundo); color: var(--texto); }
@@ -318,7 +359,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .painel-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 14px; background: var(--branco); border-bottom: 1px solid var(--linha); }
 .painel-cab b { font-size: 15px; font-weight: 600; }
 .painel-x { width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; font-size: 20px; cursor: pointer; color: var(--texto); }
-.painel-c .painel-corpo { flex: 1; overflow: auto; padding: 12px; }
+.painel-c .painel-corpo { flex: 1; overflow: auto; padding: 4px 12px 12px; background: var(--verde-claro); color: var(--texto); }
 .painel-pe { padding: 12px; background: var(--branco); border-top: 1px solid var(--linha); }
 .painel-pe .bt { width: 100%; justify-content: center; }
 @media (max-width: 900px) {
@@ -386,7 +427,12 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .tab-rola { display: block !important; overflow: visible; } /* no PDF vai a tabela, mesmo no celular */
   table.tab-veiculos th { width: auto; }
   .apl-completa { display: none; } /* no PDF vai a tabela */
-  .item-rel { min-height: 0; padding: 1mm 2mm; } /* no PDF: código e descrição, sem link */
+  /* no PDF: "Leve também" e "Itens parecidos" depois da aplicação e do diferencial, como antes; código e
+     descrição, sem link e sem miniatura, no branco */
+  .prod-info > .rel { order: 1; }
+  .itens-rel { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5mm; }
+  .item-rel { min-height: 0; padding: 1mm 2mm; box-shadow: var(--contorno-neutro); }
+  .rel-foto { display: none; }
   .lista-veiculos { display: none !important; }
   .rod-pdf { margin-top: 5mm; padding-top: 2mm; border-top: 1px solid var(--linha); font-size: 7.5pt; color: var(--texto-2); }
 }
