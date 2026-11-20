@@ -13,7 +13,7 @@ Uso (na raiz do repositório bapajudacatalogo):
 - Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (desde a v17, T-0017). Só as
   linhas SITUACAO = separado; as duvidosas ficam fora até a revisão. Sem a aba, o JSON sai como antes.
 - Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
-  ou de importação, fornecedor), o script PARA e não grava (ver TRAVA abaixo).
+  ou de importação, fornecedor, AUTOIMPACT), o script PARA e não grava (ver TRAVA abaixo).
 """
 from __future__ import annotations
 
@@ -59,6 +59,11 @@ def sem_acento(s: str) -> str:
 # "| ANTERIOR" nem do "BAP BOX". [SUPOSIÇÃO] "BAPTA PN" pode ser código de fornecedor; sai do mesmo jeito.
 MARCAS_PROPRIAS = {"BAP", "BAP PN_2", "BAPTA PN"}
 
+# Fornecedor da BAP é dado interno (regra 1 do CLAUDE.md): a AUTOIMPACT é fornecedor das palhetas (R-20261120-184000-alexandre,
+# item 5: "é fornecedor de palheta sim."). A referência dessas marcas sai do site, conferida como as MARCAS_PROPRIAS; na base
+# o dado fica. A TRAVA também tem o nome: se ele voltar por outro campo, o script para.
+FORNECEDORES = {"AUTOIMPACT"}
+
 
 def so_codigo(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", sem_acento(s).upper())
@@ -92,8 +97,9 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
             if cod and cod not in ("-", "0", "--", "N/A"):
                 bruta = m.group(1).strip()
                 marca = PREFIXO_E_PN.sub("", bruta).strip()
-                # a marca própria é vista antes e depois da limpeza ("BAPTA PN" e "CROSS REFERENCIAS - BAP" saem)
-                if not {re.sub(r"\s+", " ", x.upper()) for x in (bruta, marca)} & MARCAS_PROPRIAS:
+                # a marca própria e o fornecedor são vistos antes e depois da limpeza ("BAPTA PN", "CROSS REFERENCIAS - BAP"
+                # e "AUTOIMPACT PN" saem)
+                if not {re.sub(r"\s+", " ", x.upper()) for x in (bruta, marca)} & (MARCAS_PROPRIAS | FORNECEDORES):
                     saida.append({"m": marca, "c": cod})
         else:
             saida.append({"m": "", "c": parte})
@@ -345,7 +351,8 @@ def fotos(produtos: list[dict], pasta: Path) -> int:
 
 
 # TRAVA: dado interno nunca vai para o site público
-TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|R\$", re.I)
+# (AUTOIMPACT: ver FORNECEDORES; aqui junto ou com até 3 sinais entre AUTO e IMPACT: espaço, hífen, ponto...)
+TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|AUTO[\W_]{0,3}IMPACT|R\$", re.I)
 
 
 def conferir(produtos: list[dict]) -> list[str]:
