@@ -40,36 +40,6 @@
   <div class="rodape-fim">© BAP Autoparts · As fotos são ilustrativas. Confira sempre a aplicação antes da compra.</div>
 </footer>
 
-<template id="tpl-busca">
-  <section class="cartao-busca" aria-label="Buscar produtos">
-    <div class="abas" role="tablist">
-      <button role="tab" data-aba="geral" aria-selected="true">Busca geral</button>
-      <button role="tab" data-aba="veiculo" aria-selected="false">Veículo</button>
-      <button role="tab" data-aba="codigo" aria-selected="false">Código da peça</button>
-    </div>
-    <form class="form-busca" autocomplete="off">
-      <div class="campos" data-campos="geral">
-        <label class="campo largo"><span>O que você procura?</span>
-          <input name="q" type="search" placeholder="Ex.: amortecedor dianteiro Onix, pastilha Hilux, 15W40"></label>
-      </div>
-      <div class="campos" data-campos="veiculo" hidden>
-        <label class="campo"><span>Montadora</span><select name="mo"><option value="">Todas</option></select></label>
-        <label class="campo"><span>Modelo</span><input name="modelo" type="search" placeholder="Ex.: Gol, Strada, Hilux"></label>
-        <label class="campo curto"><span>Ano</span><input name="ano" type="number" inputmode="numeric" min="1960" max="2035" placeholder="Ex.: 2018"></label>
-        <label class="campo"><span>Sistema</span><select name="si"><option value="">Todos</option></select></label>
-      </div>
-      <div class="campos" data-campos="codigo" hidden>
-        <label class="campo largo"><span>Código BAP, código original ou do concorrente</span>
-          <input name="cod" type="search" placeholder="Ex.: AMT7115, HG33064, 16470"></label>
-      </div>
-      <div class="botoes">
-        <button type="reset" class="bt bt-claro">Limpar</button>
-        <button type="submit" class="bt">Buscar</button>
-      </div>
-    </form>
-  </section>
-</template>
-
 <script src="app.js"></script>
 </body>
 </html>

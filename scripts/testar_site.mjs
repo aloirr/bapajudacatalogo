@@ -13,10 +13,13 @@
      --sem-navegador         só os testes do JSON (palavra interna, campos, total), sem abrir o Chromium.
 
    O que testa: palavra interna no JSON; campos e total do JSON; servidor estático de site/ numa porta livre;
-   busca por código (exato, com e sem espaço ou hífen), por referência cruzada (aba Código e busca geral),
-   por veículo (montadora + modelo + ano), geral (texto livre) e sem resultado; página do produto (foto,
-   aplicação, referências, ficha técnica, ofereça junto, sem preço nem estoque); 390 px sem rolar de lado;
-   console sem erro; acessibilidade básica; prints em 1366 × 768 e 390 × 844.
+   a busca de um campo só (q) da T-0011, palavra por palavra: código (exato em 1º, com e sem espaço ou hífen),
+   referência cruzada, veículo (montadora + modelo + ano, sem Golf no Gol), geral (texto livre), os exemplos da
+   diretriz (lista estrita, outra ordem, minúsculas, os mais próximos, marca concorrente, código BAP e EAN exatos)
+   e sem resultado; os links antigos (#/busca?cod=, mo=, modelo=, ano=) viram q; as 2 abas (código, descrição ou
+   aplicação; placa com campo e botão, sem consultar o serviço) com setas, Home e End; página do produto (foto, aplicação, referências, ficha
+   técnica, ofereça junto, sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
+   básica; prints em 1366 × 768 e 390 × 844.
    Saída: 0 se passou (ou se só sobraram os conhecidos, com --conhecidos) e 1 se falhou. */
 
 import { createRequire } from "node:module";
@@ -200,8 +203,16 @@ async function testarSite(base, ctxJson, dirPrints) {
   const refNak = pCod && (pCod.r || []).find((r) => norm(r.m).startsWith("NAKATA"));
   const comFoto = porCod.get(normCod("AMT7115"))?.i ? porCod.get(normCod("AMT7115"))
     : prods.find((p) => p.i && p.a && p.r && p.x && p.oj);
+  // exemplos da diretriz da T-0011: AMT7005 (Gol 1980 a 2009, KYB 441126) e o EAN do TER551011
+  const pAmt = porCod.get(normCod("AMT7005"));
+  const temKyb = pAmt && (pAmt.r || []).some((r) => norm(r.m) === "KYB" && String(r.c).split(/[,;]\s*/).map(normCod).includes("441126"));
+  const pTer = porCod.get(normCod("TER551011"));
+  const ean = pTer && ((pTer.x || []).find(([k]) => norm(k) === "CODIGO DE BARRAS") || [])[1];
   const casosSumidos = [];
   if (!pCod) casosSumidos.push(COD);
+  if (!pAmt || !temKyb) casosSumidos.push("AMT7005 com a referência KYB 441126");
+  if (!ean) casosSumidos.push("TER551011 com o código de barras");
+  if (!existe("CL14")) casosSumidos.push("CL14");
   if (!refTrw) casosSumidos.push(`referência TRW do ${COD}`);
   if (!existe("TER556556")) casosSumidos.push("TER556556");
   for (const c of casosSumidos) falha("casos", "casos do JSON", c, `o caso ${c} não está mais no JSON: escolher outro no scripts/testar_site.mjs`);
@@ -211,7 +222,7 @@ async function testarSite(base, ctxJson, dirPrints) {
   const unicos = prods.filter((p) => vezes.get(normCod(p.c)) === 1);
   const passo = Math.max(1, Math.floor(unicos.length / 8));
   const amostra = unicos.filter((_, i) => i % passo === Math.floor(passo / 2)).slice(0, 8).map((p) => p.c);
-  detalhe("casos", "casos do JSON", `código ${COD}; referência ${refTrw ? "TRW " + refTrw.c : "?"}${refNak ? " e " + refNak.m + " " + refNak.c : ""}; veículo VOLKSWAGEN/Gol/2018; ` +
+  detalhe("casos", "casos do JSON", `código ${COD}; referência ${refTrw ? "TRW " + refTrw.c : "?"}${refNak ? " e " + refNak.m + " " + refNak.c : ""}; veículo VOLKSWAGEN/Gol/2018; diretriz AMT7005 (KYB 441126), CL14 e EAN ${ean || "?"} (TER551011); ` +
     `geral "amortecedor dianteiro Onix" e "15W40"; produto com foto ${comFoto ? comFoto.c : "?"}; amostra ${amostra.join(", ")}`);
 
   const browser = await chromium.launch();
@@ -219,6 +230,12 @@ async function testarSite(base, ctxJson, dirPrints) {
     for (const [larg, alt] of [[1366, 768], [390, 844]]) {
       const L = `${larg} px`;
       const ctx = await browser.newContext({ viewport: { width: larg, height: alt }, deviceScaleFactor: 1 });
+      // o serviço de placas (T-0005) nunca é chamado de verdade no teste: a rota responde 503 aqui mesmo
+      // [SUPOSIÇÃO] o site só chama o serviço quando o cliente busca uma placa; chamada sem a busca vira aviso.
+      await ctx.route(/bapajudacatalogo-placas\.onrender\.com|\/veiculo(\?|$)/, (rota) => {
+        aviso("abas", "abas da busca", `o site chamou o serviço de placas sem busca de placa: ${cortar(rota.request().url().replace(/[?#].*$/, ""), 70)} (respondido 503 no teste, sem rede)`);
+        return rota.fulfill({ status: 503, contentType: "application/json", body: '{"erro":"teste: serviço de placas desligado"}' });
+      });
       const page = await ctx.newPage();
       let erros = [];
       const local = (u) => String(u || "").startsWith(base);
@@ -246,6 +263,12 @@ async function testarSite(base, ctxJson, dirPrints) {
           window.addEventListener("hashchange", () => setTimeout(ok, 30), { once: true });
           location.hash = h;
         }), hash);
+        // link antigo (#/busca?cod=, mo=, modelo=, ano=, até a T-0011): o site troca para #/busca?q=... (location.replace)
+        if (/^#\/busca\?(.*&)?(cod|mo|modelo|ano)=/.test(hash)) {
+          const ok = await page.waitForFunction(() => !/[?&](cod|mo|modelo|ano)=/.test(location.hash) && /[?&]q=/.test(location.hash), null, { timeout: 5000 }).then(() => true, () => false);
+          if (!ok) falha("rota-antiga", "link antigo redireciona", nome + ":" + hash, `${L}: "${hash}" não virou #/busca?q=... (ficou "${await page.evaluate(() => location.hash)}")`);
+          await page.waitForTimeout(50);
+        }
         await esperarImagens();
         const info = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, carregando: !!document.getElementById("carregando") }));
         if (info.carregando) falha("abrir", "site abre", nome, `${L}: "${hash}" ficou em "Carregando o catálogo"`);
@@ -262,6 +285,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         return page.evaluate(() => ({
           total: (document.querySelector(".total") || {}).textContent || "",
           vazio: (document.querySelector(".vazio") || {}).textContent || "",
+          proximos: (document.querySelector(".proximos") || {}).textContent || "", // aviso "Estes são os mais próximos"
           itens: [...document.querySelectorAll(".lista .item")].map((e) => ({ c: (e.querySelector(".cod") || {}).textContent || "", t: e.innerText })),
         }));
       };
@@ -278,90 +302,173 @@ async function testarSite(base, ctxJson, dirPrints) {
       conferirConsole("inicio");
       await print("inicio");
 
-      // ---- busca por código ----
+      // ---- busca por código (T-0011: um campo só, q; o código exato vem sempre em 1º, decisão 4a) ----
       const N_COD = "busca código";
       if (pCod) {
         const variantes = [COD, COD.replace(/^([A-Z]+)(\d+)$/, "$1 $2"), COD.replace(/^([A-Z]+)(\d+)$/, "$1-$2"), COD.toLowerCase()];
         for (const v of variantes) {
-          await abrir("busca-codigo", "#/busca?cod=" + encodeURIComponent(v));
+          await abrir("busca-codigo", "#/busca?q=" + encodeURIComponent(v));
           const pr = await primeiros();
-          if (pr[0] !== COD) falha("codigo", N_COD, v, `aba Código "${v}": 1º = ${pr[0] || "nada"} (esperado ${COD})`);
+          if (pr[0] !== COD) falha("codigo", N_COD, v, `"${v}": 1º = ${pr[0] || "nada"} (esperado ${COD})`);
           if (v === COD) await print("busca-codigo");
           conferirConsole("busca-codigo");
         }
-        await abrir("busca-geral-codigo", "#/busca?q=" + encodeURIComponent("cxd 13062"));
-        if ((await primeiros())[0] !== COD) falha("codigo", N_COD, "geral:cxd 13062", `busca geral "cxd 13062": 1º = ${(await primeiros())[0] || "nada"}`);
-        conferirConsole("busca-geral-codigo");
-        // pelo formulário, como o cliente: aba Código, digita e Enter
+        // link antigo da aba Código: #/busca?cod= vira #/busca?q= e dá o mesmo 1º
+        for (const v of [COD, COD.replace(/^([A-Z]+)(\d+)$/, "$1-$2")]) {
+          await abrir("busca-codigo-antiga", "#/busca?cod=" + encodeURIComponent(v));
+          const pr = await primeiros();
+          if (pr[0] !== COD) falha("codigo", N_COD, "antiga:" + v, `link antigo #/busca?cod=${v}: 1º = ${pr[0] || "nada"} (esperado ${COD})`);
+          conferirConsole("busca-codigo-antiga");
+        }
+        // pelo formulário, como o cliente: digita no campo q e Enter
         await abrir("inicio", "#/");
-        await page.click('.abas button[data-aba="codigo"]');
-        await page.fill('input[name="cod"]', "cxd-13062");
+        await page.fill('input[name="q"]', "cxd-13062");
         await page.keyboard.press("Enter");
         await page.waitForFunction(() => location.hash.startsWith("#/busca"), null, { timeout: 5000 }).catch(() => {});
         await page.waitForTimeout(100);
         const pf = await primeiros();
-        if (pf[0] !== COD) falha("codigo", N_COD, "formulário:cxd-13062", `formulário (aba Código, "cxd-13062" + Enter): 1º = ${pf[0] || "nada"}`);
+        if (pf[0] !== COD) falha("codigo", N_COD, "formulário:cxd-13062", `formulário (campo q, "cxd-13062" + Enter): 1º = ${pf[0] || "nada"}`);
         conferirConsole("form-codigo");
       }
       const amostraRuim = [];
       for (const c of amostra) {
-        await abrir("busca-codigo-amostra", "#/busca?cod=" + encodeURIComponent(c));
+        await abrir("busca-codigo-amostra", "#/busca?q=" + encodeURIComponent(c));
         const pr = await primeiros();
-        if (pr[0] !== c) { amostraRuim.push(c); falha("codigo", N_COD, "amostra:" + c, `aba Código "${c}": 1º = ${pr[0] || "nada"}`); }
+        if (pr[0] !== c) { amostraRuim.push(c); falha("codigo", N_COD, "amostra:" + c, `"${c}": 1º = ${pr[0] || "nada"}`); }
         conferirConsole("busca-codigo-amostra");
       }
-      detalhe("codigo", N_COD, `${COD}, "${COD.replace(/^([A-Z]+)(\d+)$/, "$1 $2")}", "${COD.replace(/^([A-Z]+)(\d+)$/, "$1-$2")}", minúsculo, formulário e ${amostra.length - amostraRuim.length} de ${amostra.length} da amostra`);
+      detalhe("codigo", N_COD, `${COD}, "${COD.replace(/^([A-Z]+)(\d+)$/, "$1 $2")}", "${COD.replace(/^([A-Z]+)(\d+)$/, "$1-$2")}", minúsculo, link antigo cod=, formulário e ${amostra.length - amostraRuim.length} de ${amostra.length} da amostra em 1º`);
 
       // ---- busca por referência cruzada ----
       const N_REF = "busca referência";
       if (refTrw) {
         const casos = [
-          ["aba Código", "cod", refTrw.c],
-          ["aba Código", "cod", "TRW " + refTrw.c], // marca na frente: hoje dá 0 (T-0008)
-          ["busca geral", "q", "TRW " + refTrw.c],
+          ["q", refTrw.c],
+          ["q", "TRW " + refTrw.c],
+          ["q", refTrw.c + " TRW"],
+          ["cod", refTrw.c], // link antigo da aba Código
         ];
-        if (refNak) casos.push(["aba Código", "cod", refNak.c]);
-        for (const [onde, k, v] of casos) {
+        if (refNak) casos.push(["q", refNak.c]);
+        for (const [k, v] of casos) {
           await abrir("busca-referencia", `#/busca?${k}=${encodeURIComponent(v)}`);
           const todos = await listaTodos();
           const cods = todos.itens.map((i) => i.c);
-          if (!cods.includes(COD)) falha("referencia", N_REF, `${onde}:${v}`, `${onde} "${v}": ${cods.length} resultado(s), sem o ${COD}`);
-          if (k === "cod" && v.startsWith("TRW ")) await print("busca-referencia");
+          if (!cods.includes(COD)) falha("referencia", N_REF, `${k}:${v}`, `${k === "cod" ? "link antigo cod=" : "busca"} "${v}": ${cods.length} resultado(s), sem o ${COD}`);
+          if (v === "TRW " + refTrw.c) await print("busca-referencia");
           conferirConsole("busca-referencia");
         }
-        detalhe("referencia", N_REF, casos.map(([o, , v]) => `${o} "${v}"`).join("; ") + ` → ${COD}`);
+        detalhe("referencia", N_REF, casos.map(([k, v]) => `${k === "cod" ? "cod=" : ""}"${v}"`).join("; ") + ` → ${COD}`);
       }
 
-      // ---- busca por veículo ----
+      // ---- busca por veículo (T-0011: no campo q; o link antigo mo=&modelo=&ano= vira q) ----
       const N_VEI = "busca veículo";
+      // confere uma lista de "Gol 2018" com montadora VW: não vazia, todas as palavras casaram (sem o aviso dos mais
+      // próximos), Gol como palavra inteira na aplicação (Golf sozinho não serve, T-0008) e montadora VOLKSWAGEN
+      const conferirGol = async (rotulo) => {
+        const r = await listaTodos();
+        if (!r.itens.length) falha("veiculo", N_VEI, "vazio:" + rotulo, `${rotulo} não trouxe nada`);
+        if (r.proximos) falha("veiculo", N_VEI, "proximos:" + rotulo, `${rotulo}: mostrou os "mais próximos" (${cortar(r.proximos, 80)}), esperado todas as palavras`);
+        let semGol = 0;
+        for (const it of r.itens) {
+          const p = porCod.get(normCod(it.c));
+          if (!p) { falha("veiculo", N_VEI, "desconhecido:" + it.c, `${it.c} não está no JSON`); continue; }
+          if (!palavraInteira(p.a || "", "GOL")) { semGol++; falha("veiculo", N_VEI, "modelo:" + p.c, `${rotulo}: ${p.c} sem "Gol" como palavra: ${cortar(p.a, 60) || "(sem aplicação)"}`); }
+          const mo = norm(p.mo);
+          // a montadora: o campo mo, ou VOLKSWAGEN/VW como palavra na aplicação ou na descrição ("BOMBA DE AGUA ... - VW")
+          const vw = (t) => palavraInteira(t || "", "VOLKSWAGEN") || palavraInteira(t || "", "VW");
+          if (!(mo === "VOLKSWAGEN" || mo.split("/").includes("VOLKSWAGEN") || vw(p.a) || vw(p.d))) falha("veiculo", N_VEI, "montadora:" + p.c, `${rotulo}: ${p.c} não é VOLKSWAGEN (${p.mo || "sem montadora"})`);
+        }
+        return { n: r.itens.length, semGol, cods: r.itens.map((i) => i.c).join(",") };
+      };
       await abrir("busca-veiculo", "#/busca?mo=VOLKSWAGEN&modelo=Gol&ano=2018");
-      const vei = await listaTodos();
+      const vei = await conferirGol("link antigo VOLKSWAGEN/Gol/2018");
       await page.evaluate(() => window.scrollTo(0, 0));
       await print("busca-veiculo");
       conferirConsole("busca-veiculo");
-      if (!vei.itens.length) falha("veiculo", N_VEI, "vazio", "VOLKSWAGEN/Gol/2018 não trouxe nada");
-      let semGol = 0;
-      for (const it of vei.itens) {
-        const p = porCod.get(normCod(it.c));
-        if (!p) { falha("veiculo", N_VEI, "desconhecido:" + it.c, `${it.c} não está no JSON`); continue; }
-        // o modelo tem de estar na aplicação como palavra inteira: "Gol" não é "Golf" (T-0008)
-        if (!palavraInteira(p.a || "", "GOL")) { semGol++; falha("veiculo", N_VEI, "modelo:" + p.c, `${p.c} sem "Gol" como palavra: ${cortar(p.a, 60) || "(sem aplicação)"}`); }
-        const mo = norm(p.mo);
-        if (!(mo === "VOLKSWAGEN" || mo.split("/").includes("VOLKSWAGEN") || norm(p.a).includes("VOLKSWAGEN"))) falha("veiculo", N_VEI, "montadora:" + p.c, `${p.c} não é VOLKSWAGEN (${p.mo || "sem montadora"})`);
+      await abrir("busca-veiculo-q", "#/busca?q=" + encodeURIComponent("Volkswagen Gol 2018"));
+      const veiQ = await conferirGol('"Volkswagen Gol 2018"');
+      if (veiQ.cods !== vei.cods) falha("veiculo", N_VEI, "rota=q", `link antigo = ${vei.n}, "Volkswagen Gol 2018" = ${veiQ.n} (listas diferentes)`);
+      conferirConsole("busca-veiculo-q");
+      // pelo formulário: "gol 2018 volkswagen" (outra ordem) dá a mesma lista; "vw gol 2018" (a montadora com o outro
+      // nome) traz todos os do link antigo e pode trazer mais, porque "VW" também casa com a descrição (diretriz:
+      // cada palavra casa com qualquer campo), ex.: BDA50000 "BOMBA DE AGUA LINHA LEVE - VW", sem montadora
+      const forms = [];
+      for (const txt of ["gol 2018 volkswagen", "vw gol 2018"]) {
+        await abrir("inicio", "#/");
+        await page.fill('input[name="q"]', txt);
+        await page.click('.form-busca button[type="submit"]');
+        await page.waitForFunction(() => location.hash.startsWith("#/busca"), null, { timeout: 5000 }).catch(() => {});
+        await page.waitForTimeout(100);
+        const f = await conferirGol(`formulário "${txt}"`);
+        if (txt.startsWith("vw ")) {
+          const tem = new Set(f.cods.split(",")), faltam = vei.cods.split(",").filter((c) => c && !tem.has(c));
+          if (faltam.length) falha("veiculo", N_VEI, "formulário:" + txt, `formulário "${txt}" = ${f.n}, sem ${faltam.length} do link antigo (ex.: ${faltam.slice(0, 5).join(", ")})`);
+        } else if (f.cods !== vei.cods) falha("veiculo", N_VEI, "formulário:" + txt, `formulário "${txt}" = ${f.n}, link antigo = ${vei.n} (listas diferentes)`);
+        forms.push(`"${txt}" = ${f.n}`);
+        conferirConsole("form-veiculo");
       }
-      detalhe("veiculo", N_VEI, `VOLKSWAGEN + Gol + 2018 = ${vei.itens.length}` + (semGol ? `, ${semGol} sem "Gol" como palavra` : ""));
-      // pelo formulário
-      await abrir("inicio", "#/");
-      await page.click('.abas button[data-aba="veiculo"]');
-      await page.selectOption('select[name="mo"]', "VOLKSWAGEN");
-      await page.fill('input[name="modelo"]', "Gol");
-      await page.fill('input[name="ano"]', "2018");
-      await page.click('.form-busca button[type="submit"]');
-      await page.waitForFunction(() => location.hash.startsWith("#/busca"), null, { timeout: 5000 }).catch(() => {});
-      await page.waitForTimeout(100);
-      const tf = await totalTela();
-      if (tf !== vei.itens.length) falha("veiculo", N_VEI, "formulário", `formulário VOLKSWAGEN/Gol/2018 = ${tf}, pela rota = ${vei.itens.length}`);
-      conferirConsole("form-veiculo");
+      detalhe("veiculo", N_VEI, `link antigo VOLKSWAGEN/Gol/2018 = ${vei.n}; "Volkswagen Gol 2018" = ${veiQ.n}; ${forms.join("; ")}; sem Golf sozinho` + (vei.semGol ? `, ${vei.semGol} sem "Gol" como palavra` : ""));
+
+      // ---- exemplos da diretriz da busca palavra por palavra (R-20261120-103509 e R-20261120-104933) ----
+      // O "Mahle 33000" do texto não existe junto na base: o equivalente real é o AMT7005 (Gol 1980 a 2009, KYB 441126).
+      const N_PAL2 = "busca palavra por palavra";
+      if (pAmt && temKyb) {
+        const tudo = "AMORTECEDOR GOL 2007 KYB 441126";
+        await abrir("busca-diretriz", "#/busca?q=" + encodeURIComponent(tudo));
+        const e1 = await listaTodos();
+        const c1 = e1.itens.map((i) => i.c);
+        if (c1[0] !== "AMT7005") falha("palavra2", N_PAL2, "1:primeiro", `"${tudo}": 1º = ${c1[0] || "nada"} (esperado AMT7005)`);
+        if (e1.proximos) falha("palavra2", N_PAL2, "1:proximos", `"${tudo}": mostrou os "mais próximos", mas o AMT7005 casa com tudo`);
+        // lista estrita: quem casa só com GOL ou só com KYB não aparece (as palavras de texto têm de estar no produto)
+        for (const it of e1.itens) {
+          const p = porCod.get(normCod(it.c)), txt = norm(textoDe(p || {}));
+          const falta = ["AMORTECEDOR", "KYB"].filter((t) => !txt.includes(t)).concat(palavraInteira(p?.a || "", "GOL") ? [] : ["GOL"])
+            .concat((p?.r || []).some((r) => normCod(r.c).includes("441126")) ? [] : ["441126"]);
+          if (!p || falta.length) falha("palavra2", N_PAL2, "1:estrita:" + it.c, `"${tudo}" trouxe ${it.c}, que não tem ${falta.join(", ")}`);
+        }
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await print("busca-diretriz");
+        conferirConsole("busca-diretriz");
+        for (const q of ["gol 2007 amortecedor 441126 kyb", "amortecedor gol 2007 kyb 441126", "441126 Kyb 2007 Gol Amortecedor"]) {
+          await abrir("busca-diretriz-ordem", "#/busca?q=" + encodeURIComponent(q));
+          const r = await listaTodos(), c = r.itens.map((i) => i.c);
+          if (c.join() !== c1.join()) falha("palavra2", N_PAL2, "2:" + q, `"${q}" = ${c.join(",") || "nada"}; "${tudo}" = ${c1.join(",") || "nada"}`);
+          conferirConsole("busca-diretriz-ordem");
+        }
+        const fora = "AMORTECEDOR GOL 2015 KYB 441126"; // 2015 fora da faixa (1980 a 2009): ninguém casa com tudo
+        await abrir("busca-diretriz-proximos", "#/busca?q=" + encodeURIComponent(fora));
+        const e4 = await listaTodos();
+        if (!e4.itens.length) falha("palavra2", N_PAL2, "4:vazia", `"${fora}": lista vazia (esperado os mais próximos)`);
+        else if (e4.itens[0].c !== "AMT7005") falha("palavra2", N_PAL2, "4:primeiro", `"${fora}": 1º = ${e4.itens[0].c} (esperado AMT7005 como o mais próximo)`);
+        if (!e4.proximos) falha("palavra2", N_PAL2, "4:aviso", `"${fora}": sem o aviso dos "mais próximos"`);
+        if (e4.vazio) falha("palavra2", N_PAL2, "4:nada", `"${fora}": mostrou "${cortar(e4.vazio, 40)}"`);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await print("busca-diretriz-proximos");
+        conferirConsole("busca-diretriz-proximos");
+        await abrir("busca-diretriz-ref", "#/busca?q=" + encodeURIComponent("KYB 441126"));
+        const e5 = await primeiros();
+        if (e5[0] !== "AMT7005") falha("palavra2", N_PAL2, "5:KYB 441126", `"KYB 441126": 1º = ${e5[0] || "nada"} (esperado AMT7005, que tem a KYB só como concorrente)`);
+        conferirConsole("busca-diretriz-ref");
+      }
+      // o texto literal da diretriz (Mahle 33000): nunca lista vazia
+      for (const q of ["AMORTECEDOR GOL 2007 MAHLE 33000", "AMORTECEDOR GOL 2015 MAHLE 33000", "MAHLE 33000"]) {
+        await abrir("busca-diretriz-mahle", "#/busca?q=" + encodeURIComponent(q));
+        const r = await listaTodos();
+        if (!r.itens.length) falha("palavra2", N_PAL2, "literal:" + q, `"${q}": lista vazia (a diretriz manda mostrar os mais próximos)`);
+        conferirConsole("busca-diretriz-mahle");
+      }
+      // código exato em 1º (decisão 4a): código BAP e EAN
+      const exatos = [["CL14", "CL14"]];
+      if (ean) exatos.push([ean, "TER551011"]);
+      for (const [q, esperado] of exatos) {
+        if (!existe(esperado)) continue;
+        await abrir("busca-exato", "#/busca?q=" + encodeURIComponent(q));
+        const pr = await primeiros();
+        if (pr[0] !== esperado) falha("palavra2", N_PAL2, "exato:" + q, `"${q}": 1º = ${pr[0] || "nada"} (esperado ${esperado})`);
+        conferirConsole("busca-exato");
+      }
+      detalhe("palavra2", N_PAL2, `"AMORTECEDOR GOL 2007 KYB 441126" → AMT7005 em 1º, lista estrita; outra ordem e minúsculas iguais; ` +
+        `2015 → AMT7005 como o mais próximo; "KYB 441126" → AMT7005; Mahle 33000 literal não vazio; "CL14" → CL14; EAN ${ean || "?"} → TER551011`);
 
       // ---- busca geral ----
       const N_GER = "busca geral";
@@ -389,15 +496,16 @@ async function testarSite(base, ctxJson, dirPrints) {
 
       // ---- busca sem resultado ----
       const N_VAZ = "busca sem resultado";
-      for (const [k, v] of [["q", "xyzqwk nadaexiste"], ["cod", "ZZQ999999"]]) {
+      for (const [k, v] of [["q", "xyzqwk nadaexiste"], ["q", "ZZQ999999"], ["cod", "ZZQ999999"]]) {
         await abrir("busca-vazia", `#/busca?${k}=${encodeURIComponent(v)}`);
         const r = await listaTodos();
         if (r.itens.length || !/Nenhum produto encontrado/.test(r.vazio) || !/^0 produtos?$/.test(r.total.trim()))
           falha("vazia", N_VAZ, `${k}:${v}`, `"${v}": ${r.itens.length} item(ns), total "${r.total}", mensagem "${cortar(r.vazio, 40)}"`);
-        if (k === "q") await print("busca-vazia");
+        if (r.proximos) falha("vazia", N_VAZ, `${k}:${v}:proximos`, `"${v}": aviso dos "mais próximos" sem nenhum produto parecido`);
+        if (v === "xyzqwk nadaexiste") await print("busca-vazia");
         conferirConsole("busca-vazia");
       }
-      detalhe("vazia", N_VAZ, `"xyzqwk nadaexiste" e código "ZZQ999999" → "Nenhum produto encontrado"`);
+      detalhe("vazia", N_VAZ, `"xyzqwk nadaexiste", "ZZQ999999" e o link antigo cod=ZZQ999999 → "Nenhum produto encontrado"`);
 
       // ---- página do produto ----
       const N_PROD = "página do produto", N_PRECO = "produto sem preço nem estoque";
@@ -455,15 +563,46 @@ async function testarSite(base, ctxJson, dirPrints) {
         if ((foco.o === "none" || foco.w === 0) && (!foco.s || foco.s === "none")) falha("a11y", N_A11Y, "foco", `${L}: foco nas abas sem contorno visível`);
         if (larg === 1366) await page.screenshot({ path: path.join(dirPrints, `foco-teclado-${larg}.png`) });
       }
-      await page.focus('.abas button[data-aba="veiculo"]');
-      await page.keyboard.press("Enter");
-      if (!(await page.evaluate(() => !document.querySelector('[data-campos="veiculo"]').hidden))) falha("a11y", N_A11Y, "enter", `${L}: Enter na aba Veículo não abre os campos`);
-      await page.focus('.abas button[data-aba="geral"]');
-      await page.keyboard.press("ArrowRight");
-      if ((await page.evaluate(() => document.activeElement?.dataset?.aba)) === "geral")
-        aviso("a11y", N_A11Y, "as setas não trocam de aba (padrão ARIA; T-0001, problema 10, ainda sem tarefa)");
+      // as 2 abas da T-0011 (R-20261120-104703): "Busca por código, descrição ou aplicação" e "Busca por placa" (Em breve)
+      const abasTela = await page.evaluate(() => [...document.querySelectorAll(".abas button")].map((b) => ({ aba: b.dataset.aba, txt: b.textContent.replace(/\s+/g, " ").trim(), role: b.getAttribute("role") })));
+      const nomesAbas = abasTela.map((x) => x.txt);
+      if (abasTela.length !== 2 || !/c[oó]digo, descri[cç][aã]o ou aplica[cç][aã]o/i.test(nomesAbas[0] || "") || !/placa/i.test(nomesAbas[1] || ""))
+        falha("abas", "abas da busca", "nomes", `${L}: abas = ${nomesAbas.map((t) => `"${t}"`).join(", ") || "nenhuma"} (esperado 2: código, descrição ou aplicação; placa)`);
+      if (abasTela.some((x) => x.role !== "tab")) falha("abas", "abas da busca", "role", `${L}: aba sem role="tab"`);
+      const abaAtiva = () => page.evaluate(() => {
+        const sel = [...document.querySelectorAll(".abas button")].filter((b) => b.getAttribute("aria-selected") === "true").map((b) => b.dataset.aba);
+        const vis = [...document.querySelectorAll(".form-busca [data-campos]")].filter((c) => !c.hidden).map((c) => c.dataset.campos);
+        const painel = document.querySelector('.form-busca [data-campos="placa"]');
+        const visivel = (el) => !!el && !el.hidden && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+        const campo = painel && painel.querySelector("input");
+        const botao = [...document.querySelectorAll(".form-busca button, .cartao-busca button")].filter((b) => !b.closest(".abas")).find((b) => visivel(b) && /buscar/i.test(b.textContent));
+        return { foco: document.activeElement?.dataset?.aba || "", sel: sel.join(","), vis: vis.join(","), campo: visivel(campo), botao: !!botao };
+      });
+      const [aT, aP] = [abasTela[0]?.aba, abasTela[1]?.aba];
+      if (aT && aP) {
+        // Enter na aba Placa abre o painel, com o campo da placa e o botão "Buscar". Não digita placa nem busca:
+        // o serviço de placas não existe no CI nem na sessão (aviso do gerente, 20/11/2026), e placa real não entra em teste.
+        await page.focus(`.abas button[data-aba="${aP}"]`);
+        await page.keyboard.press("Enter");
+        const e = await abaAtiva();
+        if (e.sel !== aP || e.vis !== aP) falha("a11y", N_A11Y, "enter", `${L}: Enter na aba Placa: selecionada "${e.sel}", painel "${e.vis}"`);
+        else {
+          if (!e.campo) falha("abas", "abas da busca", "placa:campo", `${L}: a aba Placa não mostra o campo da placa`);
+          if (!e.botao) falha("abas", "abas da busca", "placa:botao", `${L}: a aba Placa não mostra o botão "Buscar"`);
+        }
+        // setas, Home e End trocam entre as 2 abas (padrão ARIA): a aba com foco é a selecionada e o painel dela aparece.
+        // Começa com o foco na aba Placa (o Enter na aba de texto leva o foco para o campo q, de propósito).
+        await page.focus(`.abas button[data-aba="${aP}"]`);
+        for (const [tecla, esperada] of [["ArrowRight", aT], ["ArrowLeft", aP], ["ArrowLeft", aT], ["ArrowRight", aP], ["Home", aT], ["End", aP], ["Home", aT]]) {
+          await page.keyboard.press(tecla);
+          const r = await abaAtiva();
+          if (r.foco !== esperada || r.sel !== esperada || r.vis !== esperada)
+            falha("a11y", N_A11Y, "tecla:" + tecla + ">" + esperada, `${L}: ${tecla} devia ir para a aba "${esperada}": foco "${r.foco}", selecionada "${r.sel}", painel "${r.vis}"`);
+        }
+      }
       conferirConsole("teclado");
-      detalhe("a11y", N_A11Y, `campos com rótulo, imagens com alt, Tab chega às abas${passos ? ` (${passos} passos)` : ""}, foco visível, Enter abre a aba`);
+      detalhe("abas", "abas da busca", nomesAbas.map((t) => `"${t}"`).join(" e ") + '; a de placa abre com o campo e o botão "Buscar" (sem consultar o serviço)');
+      detalhe("a11y", N_A11Y, `campos com rótulo, imagens com alt, Tab chega às abas${passos ? ` (${passos} passos)` : ""}, foco visível, Enter abre a aba, setas, Home e End trocam entre as 2 abas`);
 
       await ctx.close();
     }
@@ -474,6 +613,8 @@ async function testarSite(base, ctxJson, dirPrints) {
   detalhe("console", "console sem erro", "0 erro do site nas telas abertas, nas 2 larguras");
   teste("largura", "390 px sem rolar de lado");
   teste("console", "console sem erro");
+  teste("rota-antiga", "link antigo redireciona");
+  detalhe("rota-antiga", "link antigo redireciona", "#/busca?cod= e #/busca?mo=&modelo=&ano= viram #/busca?q=");
 }
 
 // ---------- conhecidos ----------
