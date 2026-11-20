@@ -64,9 +64,12 @@ def so_codigo(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", sem_acento(s).upper())
 
 
-# Rótulo da referência só com a marca (RD-0200): sai o prefixo "CROSS REFERENCES - " / "CROSS REFERENCIAS - " /
-# "REF. CRUZADA - " e o " PN" do fim ("NAKATA PN" → "NAKATA"). A caixa fica como vem da base.
-PREFIXO_E_PN = re.compile(r"^(?:(?:CROSS\s+)?REFER[ÊE]NC[IE]AS?(?:\s+CRUZADAS?)?|REF\.?\s+CRUZADAS?)\s*-\s*|\s+PN$", re.I)
+# Rótulo da referência só com a marca (RD-0200): sai o prefixo "CROSS REFERENCES - ", "CROSS REFERENCIAS - ",
+# "REFERENCIAS CRUZADAS - ", "REF. CRUZADA - " ou "REFERENCIAS CROSS " e o " PN" do fim ("NAKATA PN" → "NAKATA",
+# "REFERENCIAS CROSS FARJ" → "FARJ"). A caixa fica como vem da base.
+PREFIXO = (r"(?:(?:CROSS\s+)?REFER[ÊE]NC(?:IA|E)S?(?:\s+CRUZADAS?)?\s*-|REFER[ÊE]NC(?:IA|E)S?\s+CROSS\b"
+           r"|REF\.?\s+CRUZADAS?\s*-)\s*")
+PREFIXO_E_PN = re.compile(r"^" + PREFIXO + r"|\s+PN$", re.I)
 
 
 def refs_de(texto: str, codigo: str = "") -> list[dict]:
@@ -76,8 +79,12 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
     # tira o "| ANTERIOR: ..." (histórico interno) de cada trecho, antes de separar as referências: o histórico vai até
     # o próximo ";" (RD-0199; desde a v8 o que veio depois do histórico entrou com "; ") e tem vírgula dentro
     t = "; ".join(x.split(" | ")[0] for x in re.split(r"\s*;\s*", t))
+    # quebra de linha = vírgula: separa os códigos da mesma marca ("REFERENCIAS CROSS FARJ: 0002540047 (MERCEDES
+    # BENZ)\n970 051 431 0 (WABCO)"); o código com espaço ("970 051 431 0") fica inteiro
+    t = re.sub(r"\s*[\r\n]+\s*", ", ", t)
     saida = []
-    for parte in re.split(r"\s*[;,]\s*(?=[A-ZÀ-Ú0-9 .&/\-]{2,30}:)|\s+/\s+(?=[A-ZÀ-Úa-z][\w .&-]{1,30}\s+\S)", t):
+    # a referência nova começa no ";" ou na "," antes de "MARCA:", com ou sem o prefixo ("REFERENCIAS CRUZADAS - INDISA PN:")
+    for parte in re.split(r"\s*[;,]\s*(?=(?i:" + PREFIXO + r")?[A-ZÀ-Ú0-9 .&/\-]{2,30}:)|\s+/\s+(?=[A-ZÀ-Úa-z][\w .&-]{1,30}\s+\S)", t):
         parte = parte.strip(" ;,")
         if not parte:
             continue
