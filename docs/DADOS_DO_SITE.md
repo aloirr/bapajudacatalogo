@@ -27,4 +27,4 @@
 - origem da linha;
 - observações internas.
 
-A `TRAVA` do `gerar_site.py` para a geração se alguma dessas palavras aparecer.
+A `TRAVA` do `gerar_site.py` para a geração (código 2, nada é gravado) se o JSON sair com uma destas palavras: estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra ou de importação, fornecedor. "Fornecedor" e "R$" entraram na v15 (T-0007 e T-0009, com o "autorizo" do Alexandre no recado R-20261120-100005-alexandre).

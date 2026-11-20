@@ -10,8 +10,8 @@ Uso (na raiz do repositório bapajudacatalogo):
 - O site NÃO mostra preço nem estoque (regra do BAP Ajuda, 21/10/2026).
 - Fotos: <CODIGO>.jpg/png da pasta de fotos, reduzidas para no máximo 700 px (JPEG 80). Foto já gerada e mais
   nova que a original não é refeita. Sem foto, o site mostra o logo e "Foto em breve".
-- Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, custo de compra), o script
-  PARA e não grava (ver TRAVA abaixo).
+- Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
+  ou de importação, fornecedor), o script PARA e não grava (ver TRAVA abaixo).
 """
 from __future__ import annotations
 
@@ -260,7 +260,7 @@ def fotos(produtos: list[dict], pasta: Path) -> int:
 
 
 # TRAVA: dado interno nunca vai para o site público
-TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)", re.I)
+TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|R\$", re.I)
 
 
 def conferir(produtos: list[dict]) -> list[str]:
