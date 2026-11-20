@@ -1093,8 +1093,26 @@
     depois.forEach((el) => conteudo.appendChild(el));
   }
 
+  // códigos de "Ofereça junto" e "Itens parecidos": os do catálogo e os que têm cara de código (letra e número),
+  // sem repetir; as observações soltas ("s/ ar", "c/ ar") ficam fora
   function listaCodigos(txt) {
-    return String(txt || "").split(/\s*[·,;/|]\s*|\s+/).map((c) => c.trim()).filter((c) => c && POR_COD.has(normCod(c)));
+    const vistos = new Set();
+    return String(txt || "").split(/\s*[·,;/|]\s*|\s+/).map((c) => c.trim()).filter((c) => {
+      const k = normCod(c);
+      if (!k || vistos.has(k) || !(POR_COD.has(k) || (k.length >= 4 && /[A-Z]/.test(k) && /\d/.test(k)))) return false;
+      vistos.add(k);
+      return true;
+    });
+  }
+  // cada item: o código em negrito e a descrição (d) do catálogo, numa linha que abre o produto (R-20261120-132000 e
+  // 132200); fora do catálogo, só o código, sem link. No PDF vai o texto, sem link.
+  function itensRelHtml(cods) {
+    return `<ul class="itens-rel">${cods.map((c) => {
+      const p = POR_COD.get(normCod(c));
+      return p
+        ? `<li><a class="item-rel" href="#/produto/${encodeURIComponent(p.c)}"><b>${esc(p.c)}</b><span title="${esc(p.d)}">${esc(p.d)}</span></a></li>`
+        : `<li><span class="item-rel fora"><b>${esc(c)}</b><span>fora do catálogo</span></span></li>`;
+    }).join("")}</ul>`;
   }
 
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
@@ -1185,8 +1203,8 @@
           </div>
           ${dados}
           ${p.df ? `<section class="secao"><${H2} class="secao-tit">Diferencial BAP</${H2}><p>${esc(p.df)}</p></section>` : ""}
-          ${junto.length ? `<section class="secao nao-imprime"><${H2} class="secao-tit">Ofereça junto</${H2}><div class="links-cod">${junto.map((c) => `<a href="#/produto/${encodeURIComponent(c)}">${esc(c)}</a>`).join("")}</div></section>` : ""}
-          ${parecido.length ? `<section class="secao nao-imprime"><${H2} class="secao-tit">Itens parecidos</${H2}><div class="links-cod">${parecido.map((c) => `<a href="#/produto/${encodeURIComponent(c)}">${esc(c)}</a>`).join("")}</div></section>` : ""}
+          ${junto.length ? `<section class="secao"><${H2} class="secao-tit">Ofereça junto</${H2}>${itensRelHtml(junto)}</section>` : ""}
+          ${parecido.length ? `<section class="secao"><${H2} class="secao-tit">Itens parecidos</${H2}>${itensRelHtml(parecido)}</section>` : ""}
         </div>
       </div>
       <div class="so-impressao rod-pdf">As fotos são ilustrativas. Confira sempre a aplicação antes da compra.<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
