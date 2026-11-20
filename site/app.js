@@ -1044,9 +1044,10 @@
   const anoServe = (e, ano) => casaAno(e, ano) !== 0; // o ano da base (an) primeiro, depois a aplicação (T-0011); sem ano: serve
   // Motor = a cilindrada da aplicação ("1.8"); Versão = o 3º item do "ve" (T-0017). Produto que não diz o motor ou
   // a versão serve para qualquer um.
-  function casaVeiculo(e, v) {
+  // pelaAplicacao: o produto sem "ve" num JSON com "ve" é comparado pela aplicação, como no JSON antigo ("Leve também")
+  function casaVeiculo(e, v, pelaAplicacao) {
     const ve = veDe(e);
-    if (TEM_VE && !ve) return false;
+    if (TEM_VE && !ve && !pelaAplicacao) return false;
     const hits = ve ? ve.filter((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo)) : null;
     if (ve ? !hits.length : !daMarca(e, v.vm) || (v.vmo && !temPalavra(e.apl, v.vmo))) return false;
     if (v.va && !anoServe(e, v.va)) return false;
@@ -1251,19 +1252,18 @@
   // "Leve também" (faixa verde-clara), logo abaixo dos botões e antes da aplicação (opção B, R-20261120-140600): o título
   // à esquerda no computador e em cima no celular. "Itens parecidos" e "Diferencial BAP" saíram da tela e da ficha
   // impressa do site (R-20261120-155900-alexandre e R-20261120-160300-alexandre)
-  // "Leve também" conforme o veículo (R-20261120-181930-alexandre), da placa ou das listas Marca, Modelo, Ano... (o
-  // veículo das listas, sem placa, vale igual: R-20261120-182200-alexandre). A regra mora só aqui e no VEI_LEVE (render).
-  // Com o veículo, fica o item cujo "ve" tem a marca e o modelo dele (norm, como o filtro "Meu veículo") e, quando o
-  // item diz o ano (an ou as faixas da aplicação, o mesmo anoServe do filtro), o ano. O item sem "ve" (universal ou
-  // sem aplicação) e o fora do catálogo ficam. Sem veículo (busca pela descrição), a lista inteira do oj. Os que não
-  // servem saem sem aviso; sem nenhum, a seção some (secJunto). Só na tela: a base e o produtos.json não mudam.
-  let VEI_LEVE = null; // o veículo da busca de onde veio o produto ({ vm, vmo, va, vmt, vv }) ou null
-  const LEVE_COM_ANO = true; // false: compara só a marca e o modelo
+  // "Leve também" conforme o veículo da placa ou das listas (R-20261120-181930-alexandre e R-20261120-182200-alexandre):
+  // fica o item que serve no veículo pela regra do filtro "Meu veículo" (casaVeiculo), só com a marca, o modelo e o ano;
+  // o item sem "ve", pela aplicação (a marca e o modelo escritos nela, como no JSON antigo). Ficam sempre o item sem
+  // aplicação ou com "universal" nela e o fora do catálogo. Sem veículo, a lista inteira do oj; sem nenhum, a seção
+  // some. Só na tela. O veículo (VEI_LEVE) é o da lista por baixo da janela ou, na página, o da busca ou do produto de
+  // onde se clicou (cartão ou "Leve também"); o endereço digitado e o voltar ou avançar até a página ficam sem veículo (render).
+  let VEI_LEVE = null; // { vm, vmo, va, vmt, vv } ou null
+  const veiculoDoHash = (h) => { const pr = new URLSearchParams(String(h || "").split("?")[1] || ""); return pr.get("vm") ? veiculoDaRota(pr) : null; };
   const servemNoVeiculo = (cods, v) => !v || !v.vm ? cods : cods.filter((c) => {
-    const p = POR_COD.get(normCod(c)), e = p && entradaDe(p), ve = e && veDe(e);
-    if (!ve) return true;
-    if (!ve.some((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo))) return false;
-    return !LEVE_COM_ANO || !v.va || anoServe(e, v.va);
+    const p = POR_COD.get(normCod(c)), e = p && entradaDe(p);
+    return !e || (!veDe(e) && (!e.apl || temPalavra(e.apl, "UNIVERSAL")))
+      || casaVeiculo(e, { vm: v.vm, vmo: v.vmo, va: v.va }, true); // marca, modelo e ano; sem motor e sem versão
   });
   const secJunto = (H2, cods) => cods.length
     ? `<section class="secao rel rel-oj"><${H2} class="secao-tit">Leve também</${H2}>${itensRelHtml(cods)}</section>` : "";
@@ -1599,7 +1599,12 @@
     // janela (computador e celular): da lista, o produto abre na janela e a lista fica por baixo, do jeito que estava.
     // Só o clique no cartão abre a janela; o endereço digitado ou colado (#/produto/CODIGO) abre a página.
     const listaNaTela = ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && CLICOU_CARTAO;
-    CLICOU_CARTAO = false;
+    const porClique = CLICOU_CARTAO || CLICOU_LEVE;
+    CLICOU_CARTAO = CLICOU_LEVE = false;
+    // veículo do "Leve também" (servemNoVeiculo): na janela, o da lista por baixo; na página, só pelo clique (o da busca
+    // ou o do produto de onde veio); fora do produto, nenhum
+    VEI_LEVE = !ehProduto ? null : (JANELA || listaNaTela) && ESTADO_LISTA ? veiculoDoHash(ESTADO_LISTA.hash)
+      : !porClique ? null : String(ROTA_ATUAL).startsWith("#/busca") ? veiculoDoHash(ROTA_ATUAL) : VEI_LEVE;
     if (ehProduto && (JANELA || listaNaTela) && abrirJanela(cod)) return;
     if (JANELA) {
       const voltouNaLista = ESTADO_LISTA && location.hash === ESTADO_LISTA.hash;
@@ -1607,8 +1612,6 @@
       if (voltouNaLista) { ROTA_ATUAL = location.hash; return; }
     }
     if (caminho !== "/busca") VEICULO_PLACA = null; // tela fora da busca (início, sobre, página do produto): a placa some
-    // o veículo do "Leve também": o da busca; o produto (página ou janela) fica com o da busca de onde veio; início e sobre, nenhum
-    if (!ehProduto) VEI_LEVE = caminho === "/busca" && params.get("vm") ? veiculoDaRota(params) : null;
     if (ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && ehProduto) VOLTA_LISTA = { hash: ROTA_ATUAL, n: ESTADO_LISTA.n(), y: window.scrollY, cod };
     ESTADO_LISTA = null;
     ROTA_ANTERIOR = ROTA_ATUAL;
@@ -1634,11 +1637,13 @@
 
   window.addEventListener("hashchange", render);
   // o código e nome ou o "+ Detalhes" do cartão foi clicado (mouse, toque ou Enter) sem Ctrl, Shift ou Cmd
-  let CLICOU_CARTAO = false, LINK_CARTAO = null;
+  let CLICOU_CARTAO = false, LINK_CARTAO = null, CLICOU_LEVE = false; // CLICOU_LEVE: um item do "Leve também" (VEI_LEVE)
   document.addEventListener("click", (ev) => {
     const lk = ev.target.closest('.lista .item a[href^="#/produto/"]');
-    CLICOU_CARTAO = !!lk && !(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) && ev.button === 0;
+    const simples = !(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) && ev.button === 0;
+    CLICOU_CARTAO = !!lk && simples;
     if (CLICOU_CARTAO) LINK_CARTAO = lk;
+    CLICOU_LEVE = !!ev.target.closest('a.item-rel[href^="#/produto/"]') && simples;
     // o botão verde do rodapé (op4e) volta ao topo; o foco vai para o conteúdo
     if (ev.target.closest(".rodape-topo")) {
       window.scrollTo({ top: 0 }); // suave ou direto pelo scroll-behavior do CSS (reduce)
