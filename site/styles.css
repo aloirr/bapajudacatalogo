@@ -292,9 +292,9 @@ table.tab-veiculos { min-width: 0; } /* sem rolagem na janela */
 table.tab-veiculos th { width: auto; color: var(--texto-2); font-weight: 600; white-space: nowrap; }
 table.tab-veiculos thead th { border-bottom: 1px solid var(--linha); }
 /* a tabela nunca rola para o lado (revisão do designer-ux no PR #50): Marca, Modelo e Versão quebram a linha;
-   Cilindrada e Ano não quebram */
+   Cilindrada não quebra; o Ano quebra só entre as faixas, na ", ", nunca dentro de uma (R-20261120-165900-alexandre) */
 table.tab-veiculos td { white-space: normal; overflow-wrap: normal; } /* quebra entre palavras ("Volkswagen" inteiro) */
-table.tab-veiculos td:nth-child(3), table.tab-veiculos td:nth-child(5) { white-space: nowrap; }
+table.tab-veiculos td:nth-child(3), .tab-veiculos .faixa, .lista-veiculos .faixa { white-space: nowrap; }
 @media (max-width: 1279px) { table.tab-veiculos td { overflow-wrap: anywhere; } } /* tela estreita: a palavra longa quebra para não rolar */
 .lista-veiculos { display: none; list-style: none; margin: 0; padding: 0; }
 @media (max-width: 480px) {
