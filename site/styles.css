@@ -23,13 +23,10 @@
      celular 60% menor que a de hoje (40% de min(414 px, 90% da largura útil): 129 px em 390 px) */
   --foto-pc: 200px;
   --foto-cel: min(166px, calc((100vw - 32px) * .36));
-  /* lista: a busca usa a largura toda (R-20261120-112950) e mostra no máximo 5 cartões por linha no computador
-     (R-20261120-115432; .lista); celular 2. Desde o fA2 (R-20261120-141600): 4 por linha e foto de 150 px
-     no computador, 5 a partir de 1680 px (bloco "fA2" abaixo do .item). Foto do cartão: 90 px no computador (era 150; os 75 px da redução de 50%
-     ficaram pequenos no cartão mais largo de 5 por linha) e 55 px no celular (era 110) */
+  /* lista: a busca usa a largura toda (R-20261120-112950); 4 cartões por linha no computador (fA2, R-20261120-141600),
+     5 a partir de 1680 px, 2 no celular; foto do cartão 150 px no computador e 55 px no celular */
   --largura: 1880px;
-  --cartao-min: 158px;
-  --foto-cartao: 90px;
+  --foto-cartao: 150px;
   --foto-cartao-cel: 55px;
 }
 .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -150,7 +147,7 @@ main:focus, main:focus-visible { outline: none; }
 .etq button { width: 44px; height: 44px; margin: -4px -2px -4px 0; border: 0; border-radius: 50%; background: none; color: var(--texto-2); font-size: 14px; cursor: pointer; flex: none; }
 .etq button:hover { background: var(--fundo); color: var(--escuro); }
 .limpar-tudo { height: 44px; border: 0; background: none; color: var(--verde-txt); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0 8px; }
-.lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(var(--cartao-min), calc((100% - 4 * 12px) / 5)), 1fr)); gap: 12px; } /* no máximo 5 por linha */
+.lista { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } /* 4 por linha (fA2); 5 a partir de 1680 px; 2 no celular */
 .item { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; text-decoration: none; color: var(--texto); display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
 .item:hover { border-color: var(--verde); box-shadow: var(--sombra); }
 .item .foto { position: relative; height: var(--foto-cartao); background: #FAFBFA; display: block; overflow: hidden; border-bottom: 1px solid var(--linha); }
@@ -185,12 +182,10 @@ main:focus, main:focus-visible { outline: none; }
 .item .sem-foto { gap: 2px; font-size: 12px; line-height: 1.2; padding-bottom: 20px; align-content: start; padding-top: 8px; } /* o "Foto em breve" sobe; o código fica embaixo, à direita */
 .item .sem-foto img { width: 24px !important; }
 .item .ref-mais { background: none; border-color: transparent; color: var(--texto-2); padding-left: 2px; padding-right: 2px; } /* "+N" discreto (R-20261120-122300) */
-/* fA2 (R-20261120-141600): no computador, 4 cartões por linha (eram 5), cada um maior (265 x 318 px em 1366), com foto
-   de 150 px e letra um pouco maior; 5 por linha a partir de 1680 px, para o cartão não passar de ~320 px. Celular sem
-   mudança (2 por linha). Mesma altura em todos os cartões e o "+ Detalhes" no mesmo y (altura fixa de cada linha) */
+/* fA2 (R-20261120-141600): no computador, cartão maior (265 x 318 px em 1366) e letra um pouco maior; 5 por linha a
+   partir de 1680 px, para o cartão não passar de ~320 px. Mesma altura em todos os cartões e o "+ Detalhes" no mesmo y
+   (altura fixa de cada linha) */
 @media (min-width: 641px) {
-  :root { --foto-cartao: 150px; }
-  .lista { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
   .item .foto img { padding: 10px; }
   .item .corpo { padding: 10px 12px 12px; gap: 4px; }
   .item .foto-cod { right: 6px; bottom: 6px; padding: 2px 7px; font-size: 13px !important; }
