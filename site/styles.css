@@ -169,6 +169,11 @@ main:focus, main:focus-visible { outline: none; }
 .bt-detalhes::before { content: ""; position: absolute; inset: -6px -2px -5px; } /* toque com 44 px (34 + 10) */
 /* código BAP sobre a foto, no canto inferior direito (R-20261120-122300): não é botão; o clique passa para a foto */
 .item .foto-cod { position: absolute; right: 4px; bottom: 4px; padding: 1px 5px; border-radius: 5px; background: var(--escuro); color: var(--branco) !important; font-size: 12px !important; font-weight: 700 !important; line-height: 1.3; letter-spacing: 0; pointer-events: none; box-shadow: var(--sombra-cod); }
+/* tag "Compatível" (T-0018, simulação v3 t2, R-20261120-191700-alexandre): só com veículo escolhido, no canto superior
+   esquerdo da foto; branco no --verde-txt (6,5:1). Celular: só o ✓ num círculo de 16 px (o texto fica na .vh);
+   computador: "✓ Compatível" em 9 px e a foto desce para a tag não cobrir a peça. O ✓ é SVG (a Poppins não tem o U+2713) */
+.item .tag-compat { position: absolute; left: 3px; top: 3px; display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--verde-txt); color: var(--branco); box-shadow: var(--sombra-cod); pointer-events: none; }
+.item .tag-compat svg { flex: none; width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .item .desc { height: 2.6em; font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--texto); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .item .apl { height: 2.6em; font-size: 12px; line-height: 1.3; color: var(--texto-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .item .refs { display: flex; flex-wrap: wrap; gap: 3px; position: relative; min-width: 0; height: 22px; overflow: hidden; } /* 1 linha (2 no celular) */
@@ -192,6 +197,10 @@ main:focus, main:focus-visible { outline: none; }
   .item .foto img { padding: 10px; }
   .item .corpo { padding: 10px 12px 12px; gap: 4px; }
   .item .foto-cod { right: 6px; bottom: 6px; padding: 2px 7px; font-size: 13px !important; }
+  .item .tag-compat { width: auto; height: auto; max-width: calc(100% - 12px); gap: 2px; padding: 1px 5px 1px 3px; border-radius: 6px; font-size: 9px; font-weight: 700; line-height: 1.2; white-space: nowrap; }
+  .item .tag-compat svg { width: 1em; height: 1em; }
+  .item .tag-compat .vh { position: static !important; width: auto; height: auto; overflow: visible; clip: auto; } /* no computador o texto aparece */
+  .item .foto.com-tag img { padding-top: 16px; }
   .item .desc, .item .apl { font-size: 13px; line-height: 1.35; height: 2.7em; }
   .item .refs { height: 24px; gap: 4px; }
   .item .ref, .item .refs-rot { font-size: 12.5px; }
