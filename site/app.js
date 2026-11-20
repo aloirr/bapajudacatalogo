@@ -436,19 +436,21 @@
   // ---------- pedaços de tela ----------
   const nProd = (n) => fmt(n) + " produto" + (n === 1 ? "" : "s"); // "3 produtos": o total e o "Ver 3 produtos"
   const SEM_FOTO = '<img src="assets/logo_escuro.png" alt="">Foto em breve'; // o miolo do "Foto em breve"
-  function fotoHtml(p, grande) {
-    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + p.d)}" loading="${grande ? "eager" : "lazy"}" onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:${esc(JSON.stringify(SEM_FOTO)).replace(/"/g, "&quot;")}}))">`;
+  // a foto grande (produto) carrega logo e na frente (fetchpriority); no cartão, lazy, menos os da 1ª linha (logo)
+  function fotoHtml(p, grande, logo) {
+    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + p.d)}" loading="${grande || logo ? "eager" : "lazy"}"${grande ? ' fetchpriority="high"' : ""} onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:${esc(JSON.stringify(SEM_FOTO)).replace(/"/g, "&quot;")}}))">`;
     return `<div class="sem-foto">${SEM_FOTO}</div>`;
   }
   // a foto com o botão de ampliar (no cartão e no produto); sem foto, só o "Foto em breve"
-  const fotoZoomHtml = (p, grande) => p.i ? `<button class="foto-zoom" type="button" aria-haspopup="dialog" aria-label="Ampliar a foto do ${esc(p.c)}">${fotoHtml(p, grande)}</button>` : fotoHtml(p, grande);
+  const fotoZoomHtml = (p, grande, logo) => p.i ? `<button class="foto-zoom" type="button" aria-haspopup="dialog" aria-label="Ampliar a foto do ${esc(p.c)}">${fotoHtml(p, grande, logo)}</button>` : fotoHtml(p, grande);
   // Cartão do resultado (T-0014, R-20261120-112520). O código vai sobre a foto, no canto inferior direito
   // (R-20261120-122300; não é botão; o código continua no alt da foto e no link do cartão, para leitor de tela). a foto só amplia (botão; sem foto, nada); o código e o nome
   // são o link que abre a janela do produto; "+ Detalhes" também abre a janela. Sem botão dentro de link.
-  function itemHtml(p) {
+  const CARTOES_LOGO = 4; // a 1ª linha no computador (4 cartões) e as 2 primeiras no celular: foto sem lazy
+  function itemHtml(p, n) {
     const href = "#/produto/" + encodeURIComponent(p.c);
     return `<article class="item" data-cod="${esc(p.c)}">
-      <div class="foto">${fotoZoomHtml(p)}
+      <div class="foto">${fotoZoomHtml(p, false, n < CARTOES_LOGO)}
         <span class="foto-cod" aria-hidden="true">${esc(p.c)}</span></div>
       <div class="corpo">
         <a class="item-link" href="${href}"><span class="cod vh">${esc(p.c)}</span><span class="vh"> · </span>
@@ -746,6 +748,7 @@
   const N_LISTA = 8; // linhas da lista do início (op4c; o serviço devolve até 8)
   // a imagem da faixa do início (e do convite ao catálogo na Sobre): um lugar só para trocar
   const IMG_FAIXA = { src: "assets/hero_faixa.webp", w: 979, h: 661, alt: "Amortecedor, kit batente, óleos, bateria e peças de freio BAP" }; // a B (R-20261120-145600)
+  const FOTO_SOBRE = "assets/card3.webp"; // a 1ª foto do topo da Sobre (a maior, no meio)
   let MAIS_VISTOS = null; // a resposta, uma vez por carga da página (só em memória)
   const CONTADOS = new Set(); // [SUPOSIÇÃO] cada código conta uma vez por carga da página
   // fire-and-forget: sem credenciais, sem esperar a resposta e sem travar a tela; a falha não aparece
@@ -826,7 +829,7 @@
             <p class="mf-num"><b class="mf-total">+${fmt(portfolio)}</b><span>produtos <br>no portfólio</span></p>
             <p>Busque por código, referência, veículo ou placa.</p>
           </div>
-          <div class="mf-foto"><img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="${esc(IMG_FAIXA.alt)}"></div>
+          <div class="mf-foto"><img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="${esc(IMG_FAIXA.alt)}" fetchpriority="high"></div>
           <div class="mf-busca">
             <form class="mf-bloco mf-geral" id="form-geral" role="search" autocomplete="off" aria-label="Buscar produtos">
               <label class="campo-rot v-rot" for="campo-q">Código, descrição ou aplicação</label>
@@ -887,7 +890,7 @@
     // insere os próximos cartões e ajusta as etiquetas só deles (a volta à lista insere todos de uma vez)
     function pagina(qtd = POR_PAGINA) {
       const ini = lista.children.length;
-      lista.insertAdjacentHTML("beforeend", todos.slice(mostrando, mostrando + qtd).map(itemHtml).join(""));
+      lista.insertAdjacentHTML("beforeend", todos.slice(mostrando, mostrando + qtd).map((p, i) => itemHtml(p, ini + i)).join(""));
       mostrando = Math.min(todos.length, mostrando + qtd);
       ajustarEtiquetas([...lista.children].slice(ini).map((c) => c.querySelector(".refs")).filter(Boolean));
       mais.innerHTML = mostrando < todos.length ? `<button class="bt bt-claro" type="button">Carregar mais (${fmt(todos.length - mostrando)} restantes)</button>` : "";
@@ -1475,7 +1478,7 @@
 
   // Sobre a BAP (T-0018, sobre1 do PO): o texto e os dados da empresa vêm do PDF da página "Empresa" do site
   // institucional (recados/anexos/T-0018/sobre/HISTORIA_BAP.pdf), palavra por palavra; os títulos dos 3 blocos são da
-  // simulação. As fotos são de produtos BAP (assets/card2 a card4 e a IMG_FAIXA do início), sem foto de banco.
+  // simulação. As fotos são de produtos BAP (assets/card2 a card4, em WebP, e a IMG_FAIXA do início), sem foto de banco.
   function telaSobre() {
     topoSobre(true);
     app.innerHTML = `<div class="sobre">
@@ -1485,9 +1488,9 @@
           <p>A BAP chega ao mercado de autopeças com dois desejos: seguir as tradições que ditam o sucesso do setor e inovar com seus produtos e serviços.</p>
         </div>
         <div class="sb-fotos" aria-hidden="true">
-          <img class="sf1" src="assets/card3.png" alt="">
-          <img class="sf2" src="assets/card2.png" alt="">
-          <img class="sf3" src="assets/card4.png" alt="">
+          <img class="sf1" src="${FOTO_SOBRE}" alt="" fetchpriority="high">
+          <img class="sf2" src="assets/card2.webp" alt="">
+          <img class="sf3" src="assets/card4.webp" alt="">
         </div>
       </div></section>
       <section class="sb-corpo">
@@ -1501,7 +1504,7 @@
         </div>
         <blockquote class="sb-frase"><p>Temos um pé nas tradições e outro nas inovações.</p><span>Somos a BAP: <b>Componentes de qualidade.</b></span></blockquote>
         <div class="sb-cta">
-          <img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="" aria-hidden="true">
+          <img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="" aria-hidden="true" loading="lazy">
           <h2>Quer conhecer nossas soluções?</h2>
           <a class="bt" href="#/busca">Ver o catálogo <span aria-hidden="true">›</span></a>
         </div>
@@ -1570,6 +1573,10 @@
       app.focus({ preventScroll: true });
     }
   });
+  // a tela só é montada depois do produtos.json (~440 KB com gzip): a foto do topo do início e da Sobre começa a
+  // baixar já, junto com ele, e não depois dele
+  const fotoTopo = { "/": IMG_FAIXA.src, "/sobre": FOTO_SOBRE }[lerRota().caminho];
+  if (fotoTopo) Object.assign(new Image(), { fetchPriority: "high", src: fotoTopo }); // o <img> da tela reaproveita a mesma
   carregar().then(render).catch((e) => {
     app.innerHTML = `<div class="carregando">Não foi possível carregar o catálogo (${esc(e.message)}). Atualize a página.</div>`;
   });
