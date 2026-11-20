@@ -48,9 +48,20 @@ after(() => api.close());
 
 const chamadasDe = (placa) => chamadas.filter((c) => c.placa === placa).length;
 
+// Pastas temporárias: todas apagadas no fim.
+const temporarias = [];
+const pastaTemp = (prefixo = 'placas-') => {
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), prefixo));
+  temporarias.push(d);
+  return d;
+};
+
 // ---------- sobe o serviço num processo novo ----------
 const vivos = [];
-after(() => vivos.forEach((p) => p.kill()));
+after(() => {
+  vivos.forEach((p) => p.kill());
+  for (const d of temporarias) fs.rmSync(d, { recursive: true, force: true });
+});
 
 function subir({ token = CHAVE, guarda, cwd = AQUI } = {}) {
   const env = { PATH: process.env.PATH, NODE_ENV: 'test', PLACAS_API_TESTE: apiUrl, PORT: '0', ORIGEM_PERMITIDA: ORIGEM };
@@ -105,7 +116,7 @@ test('placa válida devolve só os 9 campos, motor das cilindradas', async () =>
 });
 
 test('placa não encontrada dá 404 (e fica só na memória)', async () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'placas-'));
+  const dir = pastaTemp();
   const s = await subir({ guarda: dir });
   assert.equal((await veiculo(s, 'NAO0A00')).status, 404);
   assert.equal((await veiculo(s, 'NAO0A00')).status, 404);
@@ -137,17 +148,83 @@ test('sem API_PLACAS_TOKEN dá 503 indisponivel', async () => {
   await s.parar();
 });
 
-test('limite por IP usa o ÚLTIMO X-Forwarded-For (1º valor forjado não escapa)', async () => {
+test('limite por IP: só conta o que chega à API, usa o ÚLTIMO X-Forwarded-For', async () => {
   const s = await subir();
+  // 400 não conta: 20 placas inválidas e depois uma nova ainda passa.
+  for (let i = 0; i < 20; i++) assert.equal((await veiculo(s, 'XX', { ip: '203.0.113.9' })).status, 400);
+  // 10 placas novas (cada uma chama a API) com o 1º valor forjado.
   for (let i = 0; i < 10; i++) {
-    const r = await veiculo(s, 'XX', { ip: `10.0.0.${i}, 203.0.113.9` });
-    assert.equal(r.status, 400);
+    const r = await veiculo(s, `LIM${i}A23`, { ip: `10.0.0.${i}, 203.0.113.9` });
+    assert.equal(r.status, 200, `LIM${i}A23`);
   }
-  const r = await veiculo(s, 'XX', { ip: '10.9.9.9, 203.0.113.9' });
+  // A 11ª placa nova do mesmo IP: 429 sem chamar a API.
+  const r = await veiculo(s, 'LIM0B23', { ip: '10.9.9.9, 203.0.113.9' });
   assert.equal(r.status, 429);
+  assert.deepEqual(await r.json(), { erro: 'limite' });
   assert.ok(Number(r.headers.get('retry-after')) >= 1);
-  assert.equal((await veiculo(s, 'XX', { ip: '203.0.113.10' })).status, 400);
+  assert.equal(chamadasDe('LIM0B23'), 0);
+  // Placa no cache não é barrada, mesmo com o IP no limite.
+  assert.equal((await veiculo(s, 'LIM0A23', { ip: '203.0.113.9' })).status, 200);
+  assert.equal(chamadasDe('LIM0A23'), 1);
+  // Outro IP segue livre.
+  assert.equal((await veiculo(s, 'LIM0B23', { ip: '203.0.113.10' })).status, 200);
   await s.parar();
+});
+
+test('placa guardada repetida 200 vezes do mesmo IP: sempre 200, 1 chamada só', async () => {
+  const dir = pastaTemp();
+  const s = await subir({ guarda: dir });
+  for (let i = 0; i < 200; i++) {
+    assert.equal((await veiculo(s, 'REP1A23', { ip: '198.51.100.50' })).status, 200, `pedido ${i + 1}`);
+  }
+  assert.equal(chamadasDe('REP1A23'), 1);
+  await s.parar();
+});
+
+test('teto de 300 por dia: o 301º pedido novo dá 429 sem chamar a API; guardada segue 200', async () => {
+  const s = await subir();
+  const placa = (i) => `TET${Math.floor(i / 100)}A${String(i % 100).padStart(2, '0')}`;
+  const ip = (i) => `198.18.${Math.floor(i / 10)}.${i % 10}`; // 10 por IP: não bate no limite por IP
+  for (let i = 0; i < 300; i++) assert.equal((await veiculo(s, placa(i), { ip: ip(i) })).status, 200, placa(i));
+  const antes = chamadas.length;
+  const r = await veiculo(s, 'TET9Z99', { ip: '198.18.99.1' });
+  assert.equal(r.status, 429);
+  assert.deepEqual(await r.json(), { erro: 'teto' });
+  assert.ok(Number(r.headers.get('retry-after')) >= 1);
+  assert.equal(chamadasDe('TET9Z99'), 0);
+  assert.equal(chamadas.length, antes);
+  assert.equal((await veiculo(s, placa(0), { ip: '198.18.99.1' })).status, 200);
+  assert.equal(chamadas.length, antes);
+  await s.parar();
+});
+
+test('arquivo de guarda corrompido: sobe e carrega só as linhas válidas', async () => {
+  const dir = pastaTemp();
+  const arq = path.join(dir, 'veiculos.jsonl');
+  const boa = { placa: 'BOA1A23', montadora: 'FIAT', modelo: 'UNO', modelo_lista: ['UNO'], ano: '2010', ano_modelo: '2011',
+    combustivel: 'Flex', cilindradas: '999', potencia: '75', motor: null };
+  fs.writeFileSync(arq, [
+    JSON.stringify(boa),
+    '{quebrada',
+    JSON.stringify({ ...boa, placa: 'ruim' }),
+    'null',
+    '',
+    '{"placa":"CRT1A23","montadora":"FI', // última linha cortada, sem \n
+  ].join('\n'));
+  const s = await subir({ guarda: dir });
+  assert.match(s.logs(), /guarda ok 1\b/);
+  const r = await veiculo(s, 'BOA1A23');
+  assert.equal(r.status, 200);
+  assert.equal((await r.json()).motor, '1.0');
+  assert.equal(chamadasDe('BOA1A23'), 0);
+  assert.equal((await veiculo(s, 'CRT1A23')).status, 200);
+  assert.equal(chamadasDe('CRT1A23'), 1);
+  await s.parar();
+  const ultima = fs.readFileSync(arq, 'utf8').trim().split('\n').pop();
+  assert.equal(JSON.parse(ultima).placa, 'CRT1A23', 'a linha nova não grudou na linha cortada');
+  const b = await subir({ guarda: dir });
+  assert.match(b.logs(), /guarda ok 2\b/);
+  await b.parar();
 });
 
 test('cache: antigo e Mercosul da mesma placa fazem 1 chamada; pedidos simultâneos esperam a mesma', async () => {
@@ -194,7 +271,7 @@ test('redirect da API é recusado: 503 e a chave não segue', async () => {
 });
 
 test('guarda em disco: sobrevive ao reinício e só tem a placa e os 9 campos', async () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'placas-'));
+  const dir = pastaTemp();
   const a = await subir({ guarda: dir });
   assert.equal((await veiculo(a, 'DSK1234')).status, 200);
   await a.parar();
@@ -216,7 +293,7 @@ test('guarda em disco: sobrevive ao reinício e só tem a placa e os 9 campos', 
 });
 
 test('sem PASTA_GUARDA nada é gravado em disco', async () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'placas-vazia-'));
+  const dir = pastaTemp('placas-vazia-');
   const s = await subir({ cwd: dir });
   assert.equal((await veiculo(s, 'MEM1A23')).status, 200);
   await s.parar();
