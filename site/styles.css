@@ -483,8 +483,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .marca-faixa-in { max-width: 1200px; margin: 0 auto; padding: 26px 16px 34px; display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "txt foto" "busca busca"; gap: 18px 32px; align-items: center; }
 .mf-texto { grid-area: txt; }
-.mf-selo, .sb-selo { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; } /* o selo: base comum */
-.mf-selo { margin: 0 0 14px; background: color-mix(in srgb, var(--verde) 16%, transparent); color: var(--verde); letter-spacing: .08em; }
+.sb-selo { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
 .marca-faixa h1 { font-size: clamp(28px, 3.3vw, 42px); line-height: 1.12; font-weight: 700; margin: 0 0 12px; }
 .marca-faixa h1 em, .sb-txt h1 em { font-style: normal; color: var(--verde); }
 .marca-faixa p { margin: 0; color: var(--branco); font-size: 16px; max-width: 520px; } /* a frase de apoio (op4d): --branco, o mais forte também onde passa sobre o verde */
@@ -545,14 +544,13 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .rec-lista li:nth-child(2) { border-top: 1px solid var(--linha); }
 }
 @media (max-width: 640px) {
-  .mf-selo { font-size: 11px; margin-bottom: 10px; }
   .so-pc { display: none; }
   .inicio-marca .marca img { height: 40px; }
   .inicio-marca .marca-faixa { padding-top: 60px; }
   .marca-faixa .mf-num { gap: 10px; margin: 2px 0 10px; }
   .mf-num b { font-size: 36px; }
   .mf-num span { font-size: 11px; padding-left: 10px; }
-  .marca-faixa h1 { font-size: 26px; }
+  .marca-faixa h1 { font-size: 22px; letter-spacing: -.01em; } /* o título em 1 linha de 375 a 440 px (R-20261120-155400) */
   .marca-faixa p { font-size: 14px; }
   .mf-bloco { padding: 12px 12px 14px; }
   /* campos de digitação com 16 px no celular: o Safari do iPhone amplia a página ao focar um campo com fonte menor

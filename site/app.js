@@ -822,16 +822,14 @@
   window.addEventListener("hashchange", () => topoInicio(false));
   function telaInicio() {
     const portfolio = Math.floor(BASE.total / 100) * 100; // op4d: o total arredondado para baixo à centena (4.419 → +4.400)
-    const celular = window.matchMedia("(max-width: 640px)").matches; // o exemplo da busca geral cabe no celular
+    const celular = window.matchMedia("(max-width: 640px)").matches; // o exemplo da busca geral e o título em 1 linha (R-20261120-155400) cabem no celular
     topoInicio(true);
     app.innerHTML = `
       <section class="marca-faixa">
         <div class="marca-faixa-in">
           <div class="mf-texto">
-            <span class="mf-selo">BAP AUTO PARTS</span>
-            <h1>A peça certa <br class="so-pc">para a sua <em>oficina</em></h1>
+            <h1>${celular ? "A peça certa pro seu" : "A peça certa <br>para o seu"} <em>veículo</em>.</h1>
             <p class="mf-num"><b class="mf-total">+${fmt(portfolio)}</b><span>produtos <br>no portfólio</span></p>
-            <p>Busque por código, referência, veículo ou placa.</p>
           </div>
           <div class="mf-foto"><img src="${IMG_FAIXA.src}" width="${IMG_FAIXA.w}" height="${IMG_FAIXA.h}" alt="${esc(IMG_FAIXA.alt)}"></div>
           <div class="mf-busca">
