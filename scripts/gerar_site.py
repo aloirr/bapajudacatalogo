@@ -62,13 +62,18 @@ MARCAS_PROPRIAS = {"BAP", "BAP PN_2", "BAPTA PN"}
 # Fornecedor da BAP é dado interno (regra 1 do CLAUDE.md): a AUTOIMPACT é fornecedor das palhetas (R-20261120-184000-alexandre,
 # item 5: "é fornecedor de palheta sim.") e a SUNRISE também (P10 da v19, R-20261120-194900-po). A referência sai do site
 # quando o nome está no rótulo da marca, inteiro ou dentro dele ("AUTOIMPACT PN", "Pruduct Pn Sunrise"); na base o dado fica.
-# A TRAVA é montada desta lista (como a TRAVA_PDF do catalogo_grafico/gerador/digital2.py): se o nome voltar por outro
-# campo, o script para. Só em maiúsculas, sem espaço e sem pontuação.
+# A TRAVA usa o FORNECEDOR_RE, montado desta lista com até 3 sinais (espaço, hífen, ponto...) entre cada letra ("AUTO.IMPACT",
+# "Sun-Rise"): se o nome voltar por outro campo, o script para. Só em maiúsculas, sem espaço e sem pontuação.
 FORNECEDORES = {"AUTOIMPACT", "SUNRISE"}
+FORNECEDOR_RE = "|".join(r"[\W_]{0,3}".join(map(re.escape, f)) for f in sorted(FORNECEDORES))
 
 
 def so_codigo(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", sem_acento(s).upper())
+
+
+# o refs_de procura o fornecedor no rótulo passado pelo so_codigo ("f in rot"): a lista tem de estar nesse formato
+assert all(f == so_codigo(f) for f in FORNECEDORES), "FORNECEDORES em maiúsculas, sem espaço e sem pontuação"
 
 
 # Rótulo da referência só com a marca (RD-0200): os prefixos e o " PN" do fim; a lista está no docs/DADOS_DO_SITE.md (campo r).
@@ -354,10 +359,9 @@ def fotos(produtos: list[dict], pasta: Path) -> int:
     return feitas
 
 
-# TRAVA: dado interno nunca vai para o site público. Os fornecedores entram da lista FORNECEDORES, com até 3 sinais (espaço,
-# hífen, ponto...) entre cada letra ("AUTO.IMPACT", "Sun-Rise"): a mesma regra da TRAVA_PDF do digital2.py.
+# TRAVA: dado interno nunca vai para o site público (os fornecedores entram pelo FORNECEDOR_RE)
 TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|R\$|"
-                   + "|".join(r"[\W_]{0,3}".join(map(re.escape, f)) for f in sorted(FORNECEDORES)), re.I)
+                   + FORNECEDOR_RE, re.I)
 
 
 def conferir(produtos: list[dict]) -> list[str]:
