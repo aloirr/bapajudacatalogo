@@ -48,6 +48,10 @@
       "dono": "alexandre"
     },
     {
+      "padrao": "ATUALIZAR_CATALOGO.bat",
+      "dono": "alexandre"
+    },
+    {
       "padrao": "fotos-novas/**",
       "dono": "alexandre"
     },
