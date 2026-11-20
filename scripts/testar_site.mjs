@@ -415,6 +415,13 @@ async function testarSite(base, ctxJson, dirPrints) {
       const primeiros = () => page.evaluate(() => [...document.querySelectorAll(".lista .item")].slice(0, 5).map((e) => window.__bapT.codDe(e)));
       // TRANSIÇÃO T-0018: a página inicial é o "#/" (ou sem hash)
       const naHome = () => page.evaluate(() => /^#?\/?$/.test(location.hash));
+      // TRANSIÇÃO T-0018: botões "Buscar" no quadro: na home 1 ou 2 (a placa com botão próprio), na tela de busca 1 só
+      const conferirBotoes = (n, onde) => {
+        const quer = onde === "home" ? [1, 2] : [1];
+        if (!quer.includes(n)) falha("campos-busca", "campos da busca", "botoes", `${L}: o quadro da busca ${onde === "home" ? "da página inicial " : ""}tem ${n} botão(ões) "Buscar" (pedido: ${onde === "home" ? "1 ou 2 na página inicial" : "1 só para os 2 campos"})`);
+      };
+      // o botão "Buscar" da placa: o do mesmo formulário do campo da placa (home nova, com 2) ou o 1º (1 só)
+      const botaoDaPlaca = async () => (await page.evaluateHandle(() => { const T = window.__bapT, placa = T.campos().placa, bs = T.botoesBuscar(); return bs.find((b) => placa && b.form && b.form === placa.form) || bs[0] || null; })).asElement();
       const totalTela = () => page.evaluate(() => parseInt(((document.querySelector(".total") || {}).textContent || "").replace(/\D/g, ""), 10) || 0);
 
       // ---- início ----
@@ -422,12 +429,13 @@ async function testarSite(base, ctxJson, dirPrints) {
       await page.goto(base + "#/", { waitUntil: "networkidle" });
       await page.waitForFunction(() => !document.getElementById("carregando"), null, { timeout: 15000 }).catch(() => {});
       await abrir("inicio", "#/");
-      // TRANSIÇÃO T-0018: a home nova (R-20261120-143900) mostra em ".mf-total" o total arredondado para baixo à centena,
-      // com "+" ("+4.400" para 4.419); o ".hero-num b" da home de hoje vale pelo valor exato e sai depois do PR do site
-      const ini = await page.evaluate(() => { const e = document.querySelector(".mf-total") || document.querySelector(".hero-num b"); return e ? { mf: e.matches(".mf-total"), t: e.textContent.replace(/\s+/g, "").trim() } : { mf: false, t: "" }; });
+      // TRANSIÇÃO T-0018: a home nova (R-20261120-143900) mostra em ".mf-total" o "+" e o total arredondado para baixo à
+      // centena ("+4.400" ou "+4400" para 4.419; os pontos não contam e o resto do texto do elemento é ignorado); o
+      // ".hero-num b" da home de hoje vale pelo valor exato e sai depois do PR do site
+      const ini = await page.evaluate(() => { const e = document.querySelector(".mf-total") || document.querySelector(".hero-num b"); return e ? { mf: e.matches(".mf-total"), t: e.textContent.replace(/\s+/g, "") } : { mf: false, t: "" }; });
       if (ini.mf) {
-        const quer = "+" + fmt(Math.floor(prods.length / 100) * 100);
-        if (ini.t !== quer) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${ini.t}" produtos (.mf-total), o esperado é "${quer}" (o total ${fmt(prods.length)} do JSON arredondado para baixo à centena)`);
+        const quer = "+" + Math.floor(prods.length / 100) * 100, achou = (ini.t.match(/\+[\d.]+/) || [""])[0].replace(/\./g, "");
+        if (achou !== quer) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${ini.t}" (.mf-total), o esperado é "+${fmt(Math.floor(prods.length / 100) * 100)}" (o total ${fmt(prods.length)} do JSON arredondado para baixo à centena, com "+")`);
       } else if (parseInt(ini.t.replace(/\D/g, ""), 10) !== prods.length) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${ini.t}" produtos, o JSON tem ${prods.length}`);
       conferirConsole("inicio");
       await print("inicio");
@@ -439,11 +447,9 @@ async function testarSite(base, ctxJson, dirPrints) {
       // o botão "Buscar" do campo q: o do formulário único (abas) ou o do próprio campo (campos)
       const clicarBuscarQ = async () => {
         if (tela === "abas") return page.click('.form-busca button[type="submit"]');
-        // tela nova (T-0014, R-20261120-115432): UM só botão "Buscar" no quadro, para os 2 campos
-        // TRANSIÇÃO T-0018: na HOME nova a placa Mercosul fica separada, com botão próprio (1 ou 2); na tela de busca, 1 só
-        const home = await naHome(), quer = home ? [1, 2] : [1];
+        // tela nova (T-0014, R-20261120-115432): UM só botão "Buscar" no quadro da busca (na home, 1 ou 2: TRANSIÇÃO T-0018)
         const n = await page.evaluate(() => window.__bapT.botoesBuscar().length);
-        if (!quer.includes(n)) falha("campos-busca", "campos da busca", "botoes", `${L}: o quadro da busca ${home ? "da página inicial " : ""}tem ${n} botão(ões) "Buscar" (pedido: ${home ? "1 ou 2 na página inicial" : "1 só para os 2 campos"})`);
+        conferirBotoes(n, (await naHome()) ? "home" : "busca");
         // com 2 (home nova), o do campo q: o do mesmo formulário do q, ou o 1º
         const h = n ? (await page.evaluateHandle(() => { const T = window.__bapT, q = T.campos().q, bs = T.botoesBuscar(); return bs.find((b) => q && b.form && b.form === q.form) || bs[0]; })).asElement() : null;
         if (!h) return page.press('input[name="q"]', "Enter");
@@ -1259,9 +1265,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         const pos = await posicao();
         if (!pos.nq) falha("a11y", N_A11Y, "rotulo:q", `${L}: o campo q sem rótulo acessível`);
         if (!/placa/i.test(pos.np)) falha("a11y", N_A11Y, "rotulo:placa", `${L}: o campo da placa sem rótulo acessível com "placa" ("${pos.np}")`);
-        // TRANSIÇÃO T-0018: na HOME nova, 1 ou 2 botões "Buscar" (a placa com botão próprio); na tela de busca, 1 só
-        const homePos = await naHome(), querPos = homePos ? [1, 2] : [1];
-        if (!querPos.includes(pos.nb)) falha("campos-busca", N_CB, "botoes", `${L}: o quadro da busca ${homePos ? "da página inicial " : ""}tem ${pos.nb} botão(ões) "Buscar" (pedido: ${homePos ? "1 ou 2 na página inicial" : "1 só para os 2 campos"})`);
+        conferirBotoes(pos.nb, (await naHome()) ? "home" : "busca");
         conferirPosicao(pos, larg);
         if (larg === 1366) {
           await page.setViewportSize({ width: 1536, height: 864 }); await page.waitForTimeout(300);
@@ -1298,7 +1302,7 @@ async function testarSite(base, ctxJson, dirPrints) {
           await hp.fill(PLACA_FALSA);
           if (como === "Enter") await hp.press("Enter");
           else {
-            const hb = (await page.evaluateHandle(() => window.__bapT.botoesBuscar()[0] || null)).asElement();
+            const hb = await botaoDaPlaca();
             if (hb) await hb.click(); else falha("campos-busca", N_CB, "botoes", `${L}: o quadro da busca não tem o botão "Buscar"`);
           }
           const chamou = await esperarChamada(antesN);
@@ -1402,7 +1406,8 @@ async function testarSite(base, ctxJson, dirPrints) {
           const n0 = PL.chamadas;
           await page.fill('input[name="q"]', TXT2);
           await (await pegarPlaca()).fill(PLACA_FALSA);
-          if (como === "botão") { const hb = (await page.evaluateHandle(() => window.__bapT.botoesBuscar()[0] || null)).asElement(); if (hb) await hb.click(); }
+          // na home nova (2 botões), o da PLACA: consulta o veículo e leva o texto junto (como o 4de7bb1)
+          if (como === "botão") { const hb = await botaoDaPlaca(); if (hb) await hb.click(); }
           else if (como === "Enter no campo geral") await page.press('input[name="q"]', "Enter");
           else await (await pegarPlaca()).press("Enter");
           const ch = await esperarChamada(n0);
