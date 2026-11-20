@@ -806,16 +806,11 @@
         <a class="rec-todos" href="#/busca">Ver todos<span class="so-pc"> os produtos</span> <span aria-hidden="true">›</span></a></div>
       <ul class="rec-lista">${lst.map(pecaHtml).join("")}</ul>`;
   }
-  // o topo escuro e o logo branco só no início (a troca de rota volta ao topo claro antes do render)
-  // op4d: no início o cabeçalho fica transparente sobre a faixa; ao rolar, ganha o fundo --escuro
+  // op4d: no início o cabeçalho fica transparente sobre a faixa; ao rolar, ganha o fundo --escuro. Nas outras telas
+  // ele é escuro desde a T-0018 (opção b), com o mesmo logo branco (a troca de rota tira a classe antes do render)
   const marcarRolagem = () => document.body.classList.toggle("topo-rolou", window.scrollY > 8);
   window.addEventListener("scroll", marcarRolagem, { passive: true });
-  const topoInicio = (sim) => {
-    document.body.classList.toggle("inicio-marca", sim);
-    marcarRolagem();
-    const logo = document.querySelector(".topo .marca img");
-    if (logo) logo.src = sim ? "assets/logo_branco.png" : "assets/logo_escuro.png";
-  };
+  const topoInicio = (sim) => { document.body.classList.toggle("inicio-marca", sim); marcarRolagem(); };
   window.addEventListener("hashchange", () => topoInicio(false));
   function telaInicio() {
     const portfolio = Math.floor(BASE.total / 100) * 100; // op4d: o total arredondado para baixo à centena (4.419 → +4.400)
@@ -878,7 +873,7 @@
     let mostrando = 0;
     const desc = [];
     if (pr.get("q")) desc.push(`“${pr.get("q")}”`);
-    app.innerHTML = `<div class="pagina-busca"><div id="busca-topo"></div>
+    app.innerHTML = `<div class="busca-faixa"><div id="busca-topo"></div></div><div class="pagina-busca">
       <div class="barra-filtros" role="group" aria-label="Filtros"></div>
       <div class="etiquetas" role="group" aria-label="Filtros da pesquisa" hidden></div>
       <div class="res-topo"><h1>${desc.length ? "Resultados para " + esc(desc.join(" · ")) : "Todos os produtos"}</h1>
@@ -1187,7 +1182,7 @@
     const etqs = app.querySelector(".pagina-busca .etiquetas");
     const topo = app.querySelector(".res-topo");
     const nMarcados = Object.keys(ROT_FILTRO).reduce((t, k) => t + pr.getAll(k).filter(Boolean).length, 0);
-    document.getElementById("busca-topo").insertAdjacentHTML("afterend", meuVeiculoHtml(pr)); // um bloco só (um aria-label)
+    pagina.insertAdjacentHTML("afterbegin", meuVeiculoHtml(pr)); // um bloco só (um aria-label), logo abaixo da faixa escura da busca
     ligarMeuVeiculo(app.querySelector(".pagina-busca .meu-veiculo"), pr);
     if (CELULAR.matches) {
       const rotulo = "Filtrar" + (nMarcados ? ` (${nMarcados})` : "");

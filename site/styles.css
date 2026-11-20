@@ -34,6 +34,9 @@
   /* fundo da faixa do início e do topo da Sobre (T-0018): só tokens; o verde translúcido é o --verde no color-mix */
   --fundo-faixa: radial-gradient(900px 420px at 88% 30%, color-mix(in srgb, var(--verde) 35%, transparent) 0%, transparent 65%),
                  linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%);
+  /* cabeçalho e faixa da busca do catálogo (T-0018, opção b, R-20261120-161500): degradê do --escuro ao --verde-esc.
+     A ponta é o --verde-esc com 15% de --escuro, para o menu branco de 14 px passar do AA (5,1:1; no --verde-esc puro, 4,1:1) */
+  --g-catalogo: linear-gradient(90deg, var(--escuro) 0%, var(--texto) 55%, color-mix(in srgb, var(--verde-esc) 85%, var(--escuro)) 100%);
 }
 .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .so-impressao { display: none; }
@@ -55,18 +58,22 @@ main:focus, main:focus-visible { outline: none; }
 .carregando { padding: 120px 16px; text-align: center; color: var(--texto-2); }
 
 /* topo */
-.topo { background: var(--branco); border-bottom: 1px solid var(--linha); position: sticky; top: 0; z-index: 20; }
+.topo { background: var(--g-catalogo); position: sticky; top: 0; z-index: 20; } /* escuro em todas as telas (T-0018 b); no início, transparente */
 .topo-in { max-width: var(--largura); margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.marca { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--escuro); }
+.marca { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--branco); }
 .marca img { height: 46px; width: auto; }
-.marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-2); border-left: 1px solid var(--linha); padding-left: 10px; }
+.marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--branco); border-left: 1px solid color-mix(in srgb, var(--branco) 35%, transparent); padding-left: 10px; }
 .menu { display: flex; gap: 12px; }
-.menu a { display: flex; align-items: center; min-height: 44px; padding-inline: 5px; text-decoration: none; color: var(--texto); font-weight: 500; font-size: 14px; } /* toque com 44 px */
-.menu a:hover { color: var(--verde-txt); }
+.menu a { display: flex; align-items: center; min-height: 44px; padding-inline: 5px; text-decoration: none; color: var(--branco); font-weight: 500; font-size: 14px; } /* toque com 44 px */
+.menu a:hover { color: var(--verde); }
+.topo :focus-visible { outline-color: var(--branco); } /* no escuro e na ponta verde, 4:1 ou mais */
 
 /* cartão de busca */
 .cartao-busca { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); position: relative; z-index: 2; overflow: hidden; }
-.pagina-busca .cartao-busca { margin-top: 16px; }
+/* opção b (T-0018): a faixa escura do cabeçalho desce até o quadro branco da busca, como no início */
+.busca-faixa { background: var(--g-catalogo); }
+#busca-topo { max-width: var(--largura); margin: 0 auto; padding: 14px 16px 22px; }
+.busca-faixa .cartao-busca { box-shadow: var(--sombra-janela); }
 /* sem abas, um botão só (R-20261120-112950 e R-20261120-115432): busca geral, placa (menor) e o "Buscar";
    a placa consultada e o veículo ficam embaixo do campo da placa */
 .form-busca { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px) auto; gap: 8px 14px; padding: 12px 16px; align-items: start; }
@@ -334,7 +341,6 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
   .marca { gap: 8px; }
   .marca span { font-size: 10px; line-height: 1.2; letter-spacing: .1em; padding-left: 8px; } /* "Catálogo online" em 2 linhas (T-0018) */
   .so-cel { display: inline; }
-  .pagina-busca .cartao-busca { margin: 16px 0 0; }
   .rodape { margin-top: 40px; }
   .rodape-in { padding: 18px 16px 20px; column-gap: 14px; row-gap: 10px; }
   .rodape .rodape-copy { font-size: 12px; line-height: 1.55; }
@@ -468,15 +474,11 @@ dialog.painel-c::backdrop { background: var(--veu); }
 
 /* ===== Início (T-0018, opção 4c): faixa da marca, busca geral e placa Mercosul lado a lado, lista tabelada ===== */
 /* só tokens do :root; o verde translúcido é o --verde misturado (color-mix) */
-/* op4d: no início o cabeçalho fica por cima da faixa, transparente, com o logo e o menu em branco; ao rolar, --escuro */
-.inicio-marca .topo { position: fixed; left: 0; right: 0; background: transparent; border-bottom-color: transparent; transition: background-color .2s, box-shadow .2s; }
+/* op4d: no início o cabeçalho fica por cima da faixa, transparente (o logo e o menu brancos são os de todas as telas); ao rolar, --escuro */
+.inicio-marca .topo { position: fixed; left: 0; right: 0; background: transparent; transition: background-color .2s, box-shadow .2s; }
 .inicio-marca.topo-rolou .topo { background: var(--escuro); box-shadow: var(--sombra); }
 .inicio-marca .marca img { height: 52px; }
-.inicio-marca .marca span { color: var(--branco); border-left-color: color-mix(in srgb, var(--branco) 35%, transparent); }
-.inicio-marca .menu a { color: var(--branco); }
-.inicio-marca .menu a:hover { color: var(--verde); }
 @media (prefers-reduced-motion: reduce) { .inicio-marca .topo { transition: none; } }
-.inicio-marca .topo :focus-visible { outline-color: var(--verde); } /* no escuro, 3:1 ou mais */
 .marca-faixa, .sb-topo { color: var(--branco); position: relative; overflow: hidden; background-color: var(--escuro); background-image: var(--fundo-faixa); }
 /* a faixa começa atrás do cabeçalho (52 px do logo + 20 px); o véu --escuro no alto garante o contraste do branco */
 .inicio-marca .marca-faixa { padding-top: 72px;
