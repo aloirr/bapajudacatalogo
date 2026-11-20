@@ -2,7 +2,7 @@
 
 ## Na nuvem, sem o PC do Alexandre (T-0019, 20/11/2026)
 - O A4 e o digital rodam só com o que está no Git: base `dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx` (e a v10 de `dados/versoes/` para a FAMÍLIA dos filtros e o DETALHE), fotos dos destaques em `site/img/*.jpg` (pelo código com `taxo.norm`).
-- Sem `ESTOQUE_BAP.xlsx` e sem `entradas/bap/`. Destaques: 1) com foto própria; 2) com aplicação ou especificação; 3) pelo código. A lista: com aplicação primeiro, depois pelo código.
+- Sem `ESTOQUE_BAP.xlsx` e sem `entradas/bap/`. Destaques: lista fixa em `destaques_fixos.json` (os 5 de 13/11, A4 e digital, só códigos; R-20261120-153200). Item que saiu da base ou ficou INATIVO, e família sem lista: completa pela regra 1) com foto própria; 2) com aplicação ou especificação; 3) pelo código. O gerador lista no log (`[destaques] ...`). A lista: com aplicação primeiro, depois pelo código.
 - Tag NOVO e "Leve também" seguem o `STATUS_CADASTRO` da base (ATIVO = NOVO quando o item não estava no catálogo; os demais ficam fora do par do "Leve também").
 - As seções abaixo sobre o OneDrive e o estoque valem só para os scripts que ainda leem o estoque (`encartelados.py`, `kitfiltros/parse.py`, `apres_bemol.py`, `auditoria_catalogo.py`).
 

@@ -157,17 +157,58 @@ APP_FS, APP_LD = 9.4, 12.6
 CARD_FS = 8.2
 
 
+import json as _json
+# destaques fixos (T-0019, R-20261120-153200): os 5 do catálogo de 13/11, só códigos
+_DF = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'destaques_fixos.json')
+DESTAQUES_FIXOS = _json.load(open(_DF, encoding='utf-8'))['familias'] if os.path.exists(_DF) else {}
+LOG_DESTAQUES = {}      # (família, código ou '—') -> motivo do completamento
+
+
+def _regra(r):
+    """1º com foto própria; 2º com aplicação ou especificação; 3º pelo código"""
+    return (0 if r['_img'] else 1, 0 if r['segs'] else 1, r['code'])
+
+
+def _inativo(code):
+    b = M.BASE_D.get(taxo.norm(code))
+    return b is not None and 'INATIVO' in str(b.STATUS_CADASTRO).upper()
+
+
 def pick(f):
     rows = list(f['rows'])
     for r in rows:
         r['_img'] = IMG.get(taxo.norm(r['code']))
     pool = [r for r in rows if r['segs']] if not f['spec'] else rows
     if len(pool) < min(5, len(rows)): pool = rows
-    # destaques (T-0019, 20/11): 1) com foto própria; 2) com aplicação ou especificação; 3) pelo código
-    top = sorted(pool, key=lambda r: (0 if r['_img'] else 1, 0 if r['segs'] else 1, r['code']))[:5]
+    pool = [r for r in pool if not _inativo(r['code'])] or pool
+    fixos = DESTAQUES_FIXOS.get(f['name'])
+    top = []
+    if fixos is None:
+        LOG_DESTAQUES[(f['name'], '—')] = 'família sem lista fixa: regra do código'
+    else:
+        por = {taxo.norm(r['code']): r for r in rows}
+        for c in fixos:
+            r = por.get(taxo.norm(c))
+            if r is None: LOG_DESTAQUES[(f['name'], c)] = 'saiu da base/da linha'
+            elif _inativo(c): LOG_DESTAQUES[(f['name'], c)] = 'INATIVO'
+            else: top.append(r)
+    tk = {id(r) for r in top}
+    # lista fixa: completa só o que saiu (fora da base/INATIVO), até o tamanho da lista de 13/11; sem lista: até 5
+    falta = (len(fixos) if fixos is not None else min(5, len(rows))) - len(top)
+    if falta > 0:
+        extra = sorted([r for r in pool if id(r) not in tk], key=_regra)[:falta]
+        if fixos is not None and extra:
+            for r in extra: LOG_DESTAQUES[(f['name'], '+' + r['code'])] = 'entrou para completar'
+        top += extra
+    top = top[:5]
     tk = {id(r) for r in top}
     rest = sorted([r for r in rows if id(r) not in tk], key=lambda r: (0 if (r['segs'] or f['spec']) else 1, r['code']))
     return top, rest
+
+
+def log_destaques():
+    for (fam, c), m in sorted(LOG_DESTAQUES.items()):
+        print(f'[destaques] {fam}: {c} — {m}')
 
 
 def plain(segs): return re.sub(r'\s+', ' ', ''.join(t for t, b in segs)).strip()
@@ -542,6 +583,7 @@ def build(out, moto_pages_n=2):
         anotacoes(dc, pgn); pgn += 1; total += 1
     contracapa(dc)
     dc.c.save()
+    log_destaques()
     return total, shown, np_
 
 
