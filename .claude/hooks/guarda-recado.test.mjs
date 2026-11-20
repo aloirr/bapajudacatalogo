@@ -4,7 +4,7 @@
 // Parte 1: funções puras (motivosRecadoFalso, classificarComando, escritasDoComando).
 // Parte 2: o hook de verdade (guarda-bash.mjs, stdin → exit code) num repositório git temporário.
 // Parte 3: git add/commit/stash de recado do Alexandre já existente (liberado se intacto).
-// Os casos de recado falso do v5 continuam em guarda-merge.test.mjs (sem mudança).
+// Os casos de recado falso em nome do po (T-0016) ficam em guarda-merge-mcp.test.mjs.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, rmSync, readdirSync } from 'node:fs';
@@ -57,8 +57,8 @@ const LEITURAS = [
 test('v6: comandos só de leitura que citam alexandre e .coord/recados passam (inclusive o caso real do gerente)', () => {
   for (const c of LEITURAS) {
     assert.deepEqual(m(c), [], c);
-    const doCore = c.replace('--de gerente-projetos', '--de modulo-robo');
-    assert.deepEqual(m(doCore, 'modulo-robo'), [], `modulo-robo: ${doCore}`);
+    const doCore = c.replace('--de gerente-projetos', '--de catalogo-grafico');
+    assert.deepEqual(m(doCore, 'catalogo-grafico'), [], `catalogo-grafico: ${doCore}`);
   }
 });
 
@@ -160,8 +160,8 @@ const DONOS = {
     { padrao: '.claude/**', dono: 'alexandre' },
     { padrao: 'scripts/coord*.mjs', dono: 'alexandre' },
     { padrao: '.coord/**', dono: 'gerente-projetos' },
-    { padrao: 'modules/core/**', dono: 'modulo-robo' },
-    { padrao: '*', dono: 'engenheiro-software' },
+    { padrao: 'modules/core/**', dono: 'catalogo-grafico' },
+    { padrao: '*', dono: 'web-site' },
   ],
   somente_leitura: [],
 };
@@ -203,8 +203,8 @@ test('hook v6: o caso real do gerente passa no guarda-bash (antes: BLOQUEADO (re
   for (const c of LEITURAS.slice(0, 12)) {
     const g = bash(dir, c);
     assert.equal(g.codigo, 0, `${c}\n${g.erro}`);
-    const mc = bash(dir, c, { entrada: { agent_type: 'modulo-robo' } });
-    assert.equal(mc.codigo, 0, `modulo-robo: ${c}\n${mc.erro}`);
+    const mc = bash(dir, c, { entrada: { agent_type: 'catalogo-grafico' } });
+    assert.equal(mc.codigo, 0, `catalogo-grafico: ${c}\n${mc.erro}`);
   }
 });
 
@@ -218,7 +218,7 @@ test('hook v6: escrita em recado com alexandre continua bloqueada no guarda-bash
     'sed -i s/31/32/ .coord/recados/gerente-projetos/R-20261101-195624-alexandre.md',
     'rm .coord/recados/gerente-projetos/R-20261101-195624-alexandre.md',
   ]) {
-    for (const entrada of [{ agent_type: 'gerente-projetos' }, { agent_type: 'modulo-robo' }]) {
+    for (const entrada of [{ agent_type: 'gerente-projetos' }, { agent_type: 'catalogo-grafico' }]) {
       const r = bash(dir, c, { entrada });
       assert.equal(r.codigo, 2, `${entrada.agent_type}: ${c}`);
       assert.match(r.erro, /BLOQUEADO \((recado|Bash)\)/, c);

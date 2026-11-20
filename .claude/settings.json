@@ -73,7 +73,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/guarda-bash.mjs"
+            "command": "node .claude/hooks/guarda-bash.mjs",
+            "timeout": 120
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*([Mm]erge|MERGE).*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guarda-merge-mcp.mjs",
+            "timeout": 120
           }
         ]
       }

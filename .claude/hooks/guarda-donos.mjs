@@ -20,32 +20,26 @@
 //  - Junções de recados (ADR 0035, T-0139): o caminho por .coord/recados/... fica dentro da raiz (nada aqui usa
 //    realpath). O caminho de verdade no clone (C:/bapajudacatalogo-recados/recados/...) volta a ser .coord/recados/...
 //    (mesmas regras) e o resto do clone (.git, .github, README) é bloqueado.
+//  - T-0016 (B1): sem junção, o clone ANEXADO à sessão (cloneDosRecados, na nuvem ao lado do repositório) é bloqueado
+//    inteiro para os agentes: recado só pelo node scripts/coord.mjs. E, em qualquer pasta, o texto gravado por outro
+//    agente não leva "de: po"/"de: alexandre" nem o autor po@/alexandre@bapajuda.invalid (motivoConteudoForjado).
 //  - sessão manual local (sem agente) → liberado. Desligar tudo: variável BAP_GUARDA=off.
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import {
-  PESSOAS, RAIZ, caminhoRelativo, podeAlterar, agenteDaSessao, juncoesDeRecados, relativoPorJuncao, MOTIVO_CLONE_DE_RECADOS,
+  PESSOAS, RAIZ, caminhoRelativo, podeAlterar, agenteDaSessao, relativoPorJuncao, MOTIVO_CLONE_DE_RECADOS,
 } from '../../scripts/coord-lib.mjs';
-
-function lerEntrada() {
-  return new Promise((ok) => {
-    let txt = '';
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (d) => (txt += d));
-    process.stdin.on('end', () => {
-      try { ok(JSON.parse(txt || '{}')); } catch { ok({}); }
-    });
-  });
-}
+import { lerEntradaDoHook, guardaDesligada, juncoesComClone, podeGravarAnexo } from './guarda-bash-lib.mjs';
+import { motivoConteudoForjado } from './guarda-merge-lib.mjs';
 
 const bloquear = (msg) => {
   process.stderr.write(`[guardião BAP] BLOQUEADO: ${msg}\n`);
   process.exit(2);
 };
 
-if ((process.env.BAP_GUARDA || '').toLowerCase() === 'off') process.exit(0);
+if (guardaDesligada()) process.exit(0);
 
-const entrada = await lerEntrada();
+const entrada = (await lerEntradaDoHook()) ?? {};
 const { agente } = agenteDaSessao({ argumento: process.argv[2], entrada });
 const ferramenta = entrada.tool_name || '';
 const ti = entrada.tool_input || {};
@@ -54,10 +48,18 @@ const alvo = ti.file_path || ti.notebook_path || ti.path;
 if (!agente) process.exit(0); // sessão manual, sem agente
 if (!alvo) process.exit(0);
 
+// T-0016 (B1): texto que forja recado ou commit do po/Alexandre, em qualquer pasta (dentro ou fora do repositório).
+const textos = [ti.content, ti.new_string, ti.new_source, ...(Array.isArray(ti.edits) ? ti.edits.map((e) => e?.new_string) : [])];
+const forjado = motivoConteudoForjado({ agente, textos });
+if (forjado) bloquear(forjado);
+
 let rel = caminhoRelativo(alvo, RAIZ);
 if (rel === null) {
   // ADR 0035: escrita direta no clone de recados (por fora da junção) segue as regras de .coord/recados.
-  const j = relativoPorJuncao(resolve(RAIZ, alvo), juncoesDeRecados(RAIZ));
+  const juncoes = juncoesComClone(RAIZ);
+  const j = relativoPorJuncao(resolve(RAIZ, alvo), juncoes);
+  // T-0016c: anexo (recados/anexos/**) do clone, pelo po ou pelo gerente-projetos (podeGravarAnexo, com o realpath).
+  if (j?.clone && podeGravarAnexo({ agente, abs: resolve(RAIZ, alvo), clone: juncoes.clone })) process.exit(0);
   if (j?.clone) bloquear(`"${alvo}": ${MOTIVO_CLONE_DE_RECADOS}.`);
   if (j?.rel) rel = j.rel;
 }

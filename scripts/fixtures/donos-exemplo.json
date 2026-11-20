@@ -28,15 +28,15 @@
     },
     {
       "padrao": ".coord/contratos/**",
-      "dono": "engenheiro-software"
+      "dono": "web-site"
     },
     {
       "padrao": ".coord/diario/revisor-codigo.md",
       "dono": "revisor-codigo"
     },
     {
-      "padrao": ".coord/diario/modulo-posvenda.md",
-      "dono": "modulo-posvenda"
+      "padrao": ".coord/diario/design-de-marca.md",
+      "dono": "design-de-marca"
     },
     {
       "padrao": ".coord/**",
@@ -60,15 +60,15 @@
     },
     {
       "padrao": "docs/decisoes/**",
-      "dono": "engenheiro-software"
+      "dono": "web-site"
     },
     {
       "padrao": "docs/desenho/**",
-      "dono": "engenheiro-software"
+      "dono": "web-site"
     },
     {
       "padrao": "docs/banco/**",
-      "dono": "engenheiro-dados"
+      "dono": "catalogo-dados"
     },
     {
       "padrao": "docs/testes/**",
@@ -76,15 +76,15 @@
     },
     {
       "padrao": "docs/modulos/core/**",
-      "dono": "modulo-robo"
+      "dono": "catalogo-grafico"
     },
     {
       "padrao": "docs/modulos/catalogo/**",
-      "dono": "modulo-metas"
+      "dono": "corretor-redundancias"
     },
     {
       "padrao": "docs/modulos/vendedor/**",
-      "dono": "modulo-farois"
+      "dono": "integracao-placas"
     },
     {
       "padrao": "docs/modulos/promotor/**",
@@ -96,7 +96,7 @@
     },
     {
       "padrao": "docs/modulos/pesquisa/**",
-      "dono": "modulo-rota"
+      "dono": "corretor-redundancias"
     },
     {
       "padrao": "docs/modulos/treinamento/**",
@@ -116,7 +116,7 @@
     },
     {
       "padrao": "docs/marca/**",
-      "dono": "modulo-posvenda"
+      "dono": "design-de-marca"
     },
     {
       "padrao": "docs/**",
@@ -124,27 +124,27 @@
     },
     {
       "padrao": "modules/*/db/**",
-      "dono": "engenheiro-dados"
+      "dono": "catalogo-dados"
     },
     {
       "padrao": "db/**",
-      "dono": "engenheiro-dados"
+      "dono": "catalogo-dados"
     },
     {
       "padrao": "drizzle.config.*",
-      "dono": "engenheiro-dados"
+      "dono": "catalogo-dados"
     },
     {
       "padrao": "modules/core/**",
-      "dono": "modulo-robo"
+      "dono": "catalogo-grafico"
     },
     {
       "padrao": "modules/catalogo/**",
-      "dono": "modulo-metas"
+      "dono": "corretor-redundancias"
     },
     {
       "padrao": "modules/vendedor/**",
-      "dono": "modulo-farois"
+      "dono": "integracao-placas"
     },
     {
       "padrao": "modules/promotor/**",
@@ -156,7 +156,7 @@
     },
     {
       "padrao": "modules/pesquisa/**",
-      "dono": "modulo-rota"
+      "dono": "corretor-redundancias"
     },
     {
       "padrao": "modules/treinamento/**",
@@ -172,15 +172,15 @@
     },
     {
       "padrao": "apps/mobile/**",
-      "dono": "modulo-web"
+      "dono": "designer-ux"
     },
     {
       "padrao": "apps/web/**",
-      "dono": "modulo-web"
+      "dono": "designer-ux"
     },
     {
       "padrao": "apps/**",
-      "dono": "engenheiro-software"
+      "dono": "web-site"
     },
     {
       "padrao": "packages/ui/**",
@@ -188,7 +188,7 @@
     },
     {
       "padrao": "packages/**",
-      "dono": "engenheiro-software"
+      "dono": "web-site"
     },
     {
       "padrao": "tests/**",
@@ -204,15 +204,15 @@
     },
     {
       "padrao": ".github/**",
-      "dono": "engenheiro-software"
+      "dono": "web-site"
     },
     {
       "padrao": "scripts/**",
-      "dono": "engenheiro-software"
+      "dono": "web-site"
     },
     {
       "padrao": "*",
-      "dono": "engenheiro-software"
+      "dono": "web-site"
     }
   ],
   "somente_leitura": [
