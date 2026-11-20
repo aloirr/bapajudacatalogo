@@ -39,7 +39,7 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
   - `.claude/**`, `.coord/donos.json`, `render.yaml`, `.github/**`, `CLAUDE.md` e `.gitignore` são do **Alexandre**.
 - **Caminho:** pedido → `po` → tarefa → `gerente-projetos` → donos → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` → PR → `po` → Alexandre.
   - **Merge (R-20261120-111308-alexandre):** o `po` autoriza todos os merges, inclusive os de governança, depois de conferir o número, o SHA do head, os arquivos, o CI verde e as revisões LIBERADO; cada autorização fica em recado, com o número e o SHA. O `gerente-projetos` executa o merge.
-  - Até a T-0016 ajustar o guardião, o hook de merge ainda exige o recado do Alexandre 'autorizo o merge do PR #N no commit <sha>' para merge pelo terminal; o gerente executa o merge pela integração do GitHub com a autorização do PO.
+  - O guardião confere todo merge (pelo terminal e pela integração do GitHub): o SHA do head, o CI do PR verde e o recado do `po` (ou do Alexandre) 'autorizo o merge do PR #N no commit <sha>' (T-0016).
   - As simulações de tela e de PDF continuam indo ao Alexandre.
   - **"autorizo"** libera, só naquela tarefa, o que a regra trava (ex.: a `TRAVA` ou a `FICHA`).
 

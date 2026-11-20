@@ -5,11 +5,11 @@
 //        [--corpo "..." | --arquivo caminho.md] [--tarefa T-0001] [--prioridade alta|normal|baixa]
 //        [--responde-a <id>] [--encerra] [--contrato modulo.entidade.fato@1]
 //        --de alexandre só na sessão do Alexandre: BAP_AGENTE=alexandre ou terminal fora do Claude
-//        Code (sem CLAUDECODE); com BAP_AGENTE=<agente>, o --de tem de ser esse agente (v5, T-0044).
-//        Recados no GitHub (T-0143, ADR 0039): com a marca da ADR 0035 no .gitignore, enviar e lido gravam direto
-//        no aloirr/bapajudacatalogo-recados (um commit por envio; "enviado" só depois de o GitHub confirmar) e caixa,
-//        pendencias, ler e fio leem o main do GitHub na hora (cache local por commit). Token: BAP_RECADOS_TOKEN,
-//        GH_TOKEN, GITHUB_TOKEN ou gh auth token. BAP_RECADOS=local volta às pastas .coord/recados e .coord/lidos.
+//        Code (sem CLAUDECODE); com BAP_AGENTE=<agente>, o --de tem de ser esse agente.
+//        Recados no aloirr/bapajudacatalogo-recados: com o clone dele anexado à sessão (ao lado deste repositório,
+//        na home ou em BAP_RECADOS_CLONE), enviar e lido gravam com git (pull --rebase, commit com o nome do agente,
+//        push origin HEAD:main), pela integração de GitHub da sessão; nenhuma chave entra. caixa, pendencias, ler e
+//        fio leem o clone. BAP_RECADOS=local volta às pastas .coord/recados e .coord/lidos.
 //   node scripts/coord.mjs caixa <agente>           recados abertos/não lidos do agente
 //   node scripts/coord.mjs lido <agente> <id> [...]  marca avisos/entregas/respostas como lidos
 //   node scripts/coord.mjs ler <id>                 mostra um recado

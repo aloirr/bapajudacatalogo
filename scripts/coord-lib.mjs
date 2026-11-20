@@ -12,8 +12,8 @@ import { gunzipSync } from 'node:zlib';
 
 export const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-// Time do Bap Ajuda catálogo (20/11/2026). BAP_AGENTES_TESTE (só nos testes herdados do BAP Central, que usam os
-// nomes antigos) troca a lista; fora dos testes ela nunca é definida.
+// Time do Bap Ajuda catálogo (20/11/2026). BAP_AGENTES_TESTE (só nos testes; o CI passa os mesmos 11 nomes, T-0016)
+// troca a lista; fora dos testes ela nunca é definida.
 const AGENTES_DO_TIME = [
   'gerente-projetos',
   'po',

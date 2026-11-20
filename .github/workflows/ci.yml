@@ -24,11 +24,11 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
         run: node scripts/coord.mjs verificar --base "origin/$BASE_REF"
-      - name: Governança (avisa; o merge exige a autorização do Alexandre)
+      - name: Governança (avisa; o merge exige a autorização do po)
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
-          node scripts/coord.mjs governanca --base "origin/$BASE_REF" || echo "::warning::PR com caminho de governança: precisa do recado do Alexandre 'autorizo o merge do PR #N no commit <sha>'"
+          node scripts/coord.mjs governanca --base "origin/$BASE_REF" || echo "::warning::PR com caminho de governança: precisa do recado do po 'autorizo o merge do PR #N no commit <sha>' (R-20261120-111308-alexandre)"
       - name: Python compila
         run: python -m compileall -q -x '(docs|catalogo_grafico/entregas)/' .
       - name: Site (gera o JSON e confere a TRAVA; sem fotos)
@@ -38,5 +38,5 @@ jobs:
           git diff --stat -- site/data || true
       - name: Testes da CLI e dos guardiões
         env:
-          BAP_AGENTES_TESTE: gerente-projetos,po,engenheiro-software,engenheiro-dados,modulo-robo,modulo-farois,modulo-posvenda,modulo-rota,modulo-metas,modulo-web,testes,revisor-codigo
-        run: node --test scripts/coord-recados.test.mjs scripts/coord-verificar.test.mjs .claude/hooks/guarda-agente.test.mjs .claude/hooks/guarda-recado.test.mjs
+          BAP_AGENTES_TESTE: gerente-projetos,po,catalogo-dados,catalogo-grafico,web-site,integracao-placas,testes,revisor-codigo,designer-ux,design-de-marca,corretor-redundancias
+        run: node --test scripts/coord-recados.test.mjs scripts/coord-verificar.test.mjs .claude/hooks/guarda-agente.test.mjs .claude/hooks/guarda-recado.test.mjs .claude/hooks/guarda-merge-mcp.test.mjs

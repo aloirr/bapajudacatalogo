@@ -31,18 +31,19 @@
 //        gerente-projetos na sessão principal (subagente nunca; identidade por BAP_AGENTE ou
 //        agent_type local), só `gh pr merge N -R aloirr/bapajudacatalogo --squash --match-head-commit <sha>`
 //        (+ --body/--subject), sem --admin/--auto/--merge/--rebase, sem prefixo nem $VAR; o hook
-//        consulta `gh pr view N --json files,headRefOid,changedFiles` e exige head = SHA e, em PR
-//        com caminho de governança, o recado do Alexandre "autorizo o merge do PR #N no commit <sha>"
-//        em .coord/recados/gerente-projetos. gh sem resposta = bloqueado (falha fechada). Merge
+//        consulta `gh pr view N --json files,headRefOid,changedFiles` e exige head = SHA e, em todo PR
+//        (T-0016), o recado do po ou do Alexandre "autorizo o merge do PR #N no commit <sha>" publicado
+//        em recados/gerente-projetos do aloirr/bapajudacatalogo-recados. gh sem resposta = bloqueado (falha fechada). Merge
 //        escondido (bash -c, eval, xargs, node -e, gh api, alias) também é bloqueado.
 //      · recado falso: agente não envia recado em nome de outro (coord.mjs enviar --de alheio,
-//        "de: alexandre" no comando, script que escreve recado de alexandre).
+//        "de: alexandre" no comando, script que escreve recado de alexandre; T-0016: "de: po" e o autor
+//        po@bapajuda.invalid em comando de outro agente).
 //    Mensagens e casos: .claude/hooks/guarda-merge-lib.mjs e guarda-merge.test.mjs.
 //  - Guardião v6 (T-0050): o bloqueio "recado em nome do Alexandre" vale SÓ para comando que cria, altera,
 //    move ou apaga arquivo de recado (> >> tee cp mv rm sed -i, node/python que grava, coord.mjs enviar
 //    --de alexandre...). Leitura (ls, cat, grep, find, head, git show/ls-tree/fetch, for que só lê) passa,
 //    mesmo citando alexandre e .coord/recados. Casos: guarda-recado.test.mjs. O merge pela ferramenta MCP
-//    do GitHub tem hook próprio: .claude/hooks/guarda-merge-mcp.mjs (casos: guarda-merge-mcp.test.mjs).
+//    do GitHub tem hook próprio (T-0016): .claude/hooks/guarda-merge-mcp.mjs (casos: guarda-merge-mcp.test.mjs).
 //    git add/commit/stash de recado do Alexandre JÁ EXISTENTE passa se ele estiver intacto: não criado nem
 //    alterado durante comando desta sessão (o PostToolUse registra o que muda em recado do Alexandre durante
 //    comando opaco ou de escrita incerta) e com o conteúdo do índice igual ao do disco. O gh é procurado no
@@ -53,7 +54,7 @@
 //  - Guardião v7 (T-0122), PreToolUse, também ANTES da liberação da sessão manual: `gh api` só de LEITURA (GET/HEAD;
 //    GraphQL só "query"). Leitura passa mesmo com $VAR ou "merge" no --jq; POST/PUT/PATCH/DELETE, método incerto,
 //    opção desconhecida e gh api escondido em bash -c/node -e são bloqueados (conferirGhApi em guarda-merge-lib.mjs;
-//    casos em guarda-gh-api.test.mjs). As ferramentas MCP têm hook próprio: .claude/hooks/guarda-mcp.mjs.
+//    casos em guarda-gh-api.test.mjs). Das ferramentas MCP, só as de merge têm hook: .claude/hooks/guarda-merge-mcp.mjs.
 // Detalhes e casos: .claude/hooks/guarda-bash-lib.mjs e .claude/hooks/guarda-bash.test.mjs.
 import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
