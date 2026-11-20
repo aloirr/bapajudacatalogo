@@ -3,12 +3,7 @@ import pandas as pd
 import digital2 as D2
 import datas, taxo
 from taxo import norm, META, LINES, ORDER_SIS
-import importlib.util as _ilu, os as _os
-
-# regra das referências do site (RD-0193): o gerador usa a mesma função do scripts/gerar_site.py (refs_de), sem cópia
-_GS = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', '..', 'scripts', 'gerar_site.py')
-_spec = _ilu.spec_from_file_location('gerar_site', _GS)
-G = _ilu.module_from_spec(_spec); _spec.loader.exec_module(G)
+from site_regras import G          # regra das referências do site (RD-0193): refs_de do scripts/gerar_site.py, sem cópia
 
 # ---------------------------------------------------------------- fontes
 old = D2.fams                                   # catálogo digital atual (já com os interruptores pneumáticos movidos)

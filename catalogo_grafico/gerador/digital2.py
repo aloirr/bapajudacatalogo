@@ -71,7 +71,7 @@ def markup(segs):
     global CORR
     s = ''.join(('\x01' + t + '\x02') if b else t for t, b in segs)
     s = re.sub(r'\s+', ' ', s).strip()
-    n = datas.em_diante(datas.fix_text(s))
+    n = datas.para_pdf(s)
     if n != s: CORR += 1
     out = []
     for part in re.split(r'(\x01.*?\x02)', n):
@@ -214,7 +214,7 @@ def tags_e_sobra(f, r):
     """(tags, texto que sobra já escapado) embaixo do código"""
     import tags as TG
     tl, sobra = TG.do_item(f['name'], r, f['spec'])
-    return tl, html.escape(datas.em_diante(sobra), quote=False) if sobra else ''
+    return tl, html.escape(datas.para_pdf(sobra), quote=False) if sobra else ''
 
 
 def prep_rows(f, linhas=None):
@@ -498,10 +498,12 @@ def pagina_sistema(dc, grupo, key, itens, pg):
     dc.end()
 
 
-# Trava dos PDFs (T-0019): a AUTOIMPACT é fornecedor das palhetas (R-20261120-184000-alexandre, item 5) e não sai em nenhum
-# dos 3 PDFs. A referência dela sai pela regra do site (refs_de do scripts/gerar_site.py; montar.refs_pela_regra). Se o nome
-# voltar por qualquer texto, o build para e o PDF fica com o fim ".BLOQUEADO" (não entregar).
-TRAVA_PDF = re.compile(r'AUTO[\W_]{0,3}IMPACT', re.I)   # igual à TRAVA do site: junto ou com até 3 sinais entre AUTO e IMPACT
+# Trava dos PDFs (T-0019): fornecedor não sai em nenhum dos 3 PDFs (a AUTOIMPACT, das palhetas: R-20261120-184000-alexandre,
+# item 5). A lista é a do site (G.FORNECEDORES do scripts/gerar_site.py, RD-0220); a referência sai pelo refs_de
+# (montar.refs_pela_regra). Aqui o nome é procurado com até 3 sinais entre cada letra ("AUTO IMPACT", "Auto-Impact",
+# "AUTO.IMPACT"). Se ele voltar por qualquer texto, o build para e o PDF fica com o fim ".BLOQUEADO" (não entregar).
+from site_regras import G as _G
+TRAVA_PDF = re.compile('|'.join(r'[\W_]{0,3}'.join(map(re.escape, f)) for f in _G.FORNECEDORES), re.I)
 
 
 def trava_pdf(out):

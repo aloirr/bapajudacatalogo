@@ -49,3 +49,8 @@ def em_diante(t):
     e o fix_text não mudam."""
     t = re.sub(r'((?:\d{2}/)?' + Y + r')\s*->(?!\s*\d)', r'\1–', t)
     return re.sub(r'((?:\d{2}/)?' + Y + r')\s*>', r'\1–', t)
+
+
+def para_pdf(t):
+    """texto do desenho dos PDFs: fix_text e depois em_diante (RD-0221)"""
+    return em_diante(fix_text(t))
