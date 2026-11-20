@@ -355,7 +355,7 @@ def venda_strip(dc, f, y_bottom):
     h = max(para_h(html.escape(f['venda']), 10, 14, tw) + 16, 32)
     y = y_bottom - h
     dc.rect(MX, y, CW, h, fill='white', stroke='green', sw=1.2, r=10)
-    dc.label(MX + 14, y + (h - 12) / 2, 'OFEREÇA JUNTO', 9, 'gdark', 'PB', 1.3)
+    dc.label(MX + 14, y + (h - 12) / 2, 'LEVE TAMBÉM', 9, 'gdark', 'PB', 1.3)
     dc.text(MX + 140, y + 8, tw, html.escape(f['venda']), 10, 14, 'ink')
     return y
 
@@ -463,7 +463,7 @@ def como(dc, pg):
     passos = [('Encontre a linha', 'O sumário organiza as linhas por sistema do veículo (suspensão, freio, arrefecimento...). Cada página traz uma linha de produtos BAP.'),
               ('Veja os destaques', 'Os cards no topo mostram os itens de maior estoque da linha, com foto, aplicação e equivalência.'),
               ('Consulte a lista', 'A tabela traz mais produtos da linha, com código, aplicação, posição e equivalência. Aplicações longas terminam em "(+ outras aplicações)".'),
-              ('Ofereça junto', 'A coluna e a faixa "Ofereça junto" indicam o agregado de cada produto, como bomba d\'água com o kit de distribuição ou câmara com o pneu.'),
+              ('Leve também', 'A coluna e a faixa "Leve também" indicam o agregado de cada produto, como bomba d\'água com o kit de distribuição ou câmara com o pneu.'),
               ('Fique atento às tags', 'NOVO: produto recém-chegado ao portfólio BAP. LANÇAMENTO 2026: linha lançada em 2026, indicada no topo da página.'),
               ('Catálogo digital', 'Todos os itens e todas as aplicações completas estão no Catálogo Digital Completo, com busca e sumário clicável.')]
     y0 = TOP + HERO + 30; cw = (CW - 16) / 2

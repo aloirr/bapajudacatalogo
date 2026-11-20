@@ -378,7 +378,7 @@ def cover_page(dc, f, key, first, last, pg):
         bh = 20 + 14 + th + 18
         dc.rect(MX, 935, CW - 260, bh, fill='card', r=14)
         dc.rect(MX, 935, 5, bh, fill='green')
-        dc.label(MX + 20, 935 + 16, 'OFEREÇA JUNTO', 9, 'green2', 'PB', 1.4)
+        dc.label(MX + 20, 935 + 16, 'LEVE TAMBÉM', 9, 'green2', 'PB', 1.4)
         dc.text(MX + 20, 935 + 34, tw, html.escape(f['venda'], quote=False), 12.5, 18, 'white')
     dc.rect(0, H - 56, W, 56, fill='green')
     dc.label(MX, H - 56 + 13, SITE_IG, 10.5, 'white', 'PB')

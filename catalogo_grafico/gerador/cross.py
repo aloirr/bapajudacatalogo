@@ -126,7 +126,7 @@ CROSS_LOG = {}
 for a, b in PAIRS:
     res, st = match(a, b, need_engine='strict' if a in ('Velas de Ignição', 'Kit de Distribuição') else True)
     CROSS_LOG[a] = (b, st, res)
-    F[a]['extra_col'] = 'OFEREÇA JUNTO'
+    F[a]['extra_col'] = 'LEVE TAMBÉM'
     for r in F[a]['rows']:
         r['extra'] = ' · '.join(res.get(r['code'], [])) or '—'
 
@@ -149,24 +149,24 @@ VENDA = {
     'Embreagem Remanufaturada': 'Servo e cilindro de embreagem.',
     'Servo e Cilindro de Embreagem': 'Kit de embreagem.',
     'Pastilha de Freio': 'Fluido de freio DOT.',
-    'Sapata de Freio': 'Cilindro de roda (coluna "Ofereça junto") e fluido de freio DOT.',
+    'Sapata de Freio': 'Cilindro de roda (coluna "Leve também") e fluido de freio DOT.',
     'Cilindro de Roda': 'Sapatas de freio e fluido de freio DOT.',
     'Cuíca de Freio': 'Catraca de freio.',
     'Catraca de Freio': 'Cuíca de freio.',
     'Eletroventiladores': "Aditivo, água desmineralizada e bomba d'água.",
     "Bomba D'Água": 'Kit de distribuição (motores com correia dentada), aditivo e água desmineralizada.',
-    'Bomba de Óleo': 'Interruptor de pressão do óleo (coluna "Ofereça junto"), óleo e filtro de óleo.',
+    'Bomba de Óleo': 'Interruptor de pressão do óleo (coluna "Leve também"), óleo e filtro de óleo.',
     'Interruptores de Pressão do Óleo': 'Bomba de óleo, óleo e filtro de óleo.',
     'Bomba de Combustível': 'Filtro de combustível.',
-    'Kit de Distribuição': 'Bomba d\'água (coluna "Ofereça junto") e polias e tensionadores.',
+    'Kit de Distribuição': 'Bomba d\'água (coluna "Leve também") e polias e tensionadores.',
     'Polias e Tensionadores': 'Kit de distribuição.',
-    'Velas de Ignição': 'Cabos de vela (coluna "Ofereça junto").',
+    'Velas de Ignição': 'Cabos de vela (coluna "Leve também").',
     'Cabo de Vela': 'Velas de ignição.',
     'Filtros': 'Kit revisão: filtros de óleo, ar, combustível e cabine, com o óleo lubrificante.',
     'Óleo Lubrificante': 'Filtro de óleo e filtro de ar.',
     'Cubo de Roda': 'Rolamentos de roda.',
     'Rolamentos': 'Cubo de roda.',
-    'Pneus e Câmaras de Ar Moto': 'Para cada pneu, a câmara indicada; para cada câmara, os pneus BAP compatíveis (coluna "Ofereça junto").',
+    'Pneus e Câmaras de Ar Moto': 'Para cada pneu, a câmara indicada; para cada câmara, os pneus BAP compatíveis (coluna "Leve também").',
 }
 for f in PF.M.fams:
     if f['name'] in VENDA: f['venda'] = VENDA[f['name']]
