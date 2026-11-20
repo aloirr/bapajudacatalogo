@@ -413,6 +413,15 @@ async function testarSite(base, ctxJson, dirPrints) {
         }));
       };
       const primeiros = () => page.evaluate(() => [...document.querySelectorAll(".lista .item")].slice(0, 5).map((e) => window.__bapT.codDe(e)));
+      // TRANSIÇÃO T-0018: a página inicial é o "#/" (ou sem hash)
+      const naHome = () => page.evaluate(() => /^#?\/?$/.test(location.hash));
+      // TRANSIÇÃO T-0018: botões "Buscar" no quadro: na home 1 ou 2 (a placa com botão próprio), na tela de busca 1 só
+      const conferirBotoes = (n, onde) => {
+        const quer = onde === "home" ? [1, 2] : [1];
+        if (!quer.includes(n)) falha("campos-busca", "campos da busca", "botoes", `${L}: o quadro da busca ${onde === "home" ? "da página inicial " : ""}tem ${n} botão(ões) "Buscar" (pedido: ${onde === "home" ? "1 ou 2 na página inicial" : "1 só para os 2 campos"})`);
+      };
+      // o botão "Buscar" da placa: o do mesmo formulário do campo da placa (home nova, com 2) ou o 1º (1 só)
+      const botaoDaPlaca = async () => (await page.evaluateHandle(() => { const T = window.__bapT, placa = T.campos().placa, bs = T.botoesBuscar(); return bs.find((b) => placa && b.form && b.form === placa.form) || bs[0] || null; })).asElement();
       const totalTela = () => page.evaluate(() => parseInt(((document.querySelector(".total") || {}).textContent || "").replace(/\D/g, ""), 10) || 0);
 
       // ---- início ----
@@ -420,8 +429,14 @@ async function testarSite(base, ctxJson, dirPrints) {
       await page.goto(base + "#/", { waitUntil: "networkidle" });
       await page.waitForFunction(() => !document.getElementById("carregando"), null, { timeout: 15000 }).catch(() => {});
       await abrir("inicio", "#/");
-      const hero = await page.evaluate(() => (document.querySelector(".hero-num b") || {}).textContent || "");
-      if (parseInt(hero.replace(/\D/g, ""), 10) !== prods.length) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${hero}" produtos, o JSON tem ${prods.length}`);
+      // TRANSIÇÃO T-0018: a home nova (R-20261120-143900) mostra em ".mf-total" o "+" e o total arredondado para baixo à
+      // centena ("+4.400" ou "+4400" para 4.419; os pontos não contam e o resto do texto do elemento é ignorado); o
+      // ".hero-num b" da home de hoje vale pelo valor exato e sai depois do PR do site
+      const ini = await page.evaluate(() => { const e = document.querySelector(".mf-total") || document.querySelector(".hero-num b"); return e ? { mf: e.matches(".mf-total"), t: e.textContent.replace(/\s+/g, "") } : { mf: false, t: "" }; });
+      if (ini.mf) {
+        const quer = "+" + Math.floor(prods.length / 100) * 100, achou = (ini.t.match(/\+[\d.]+/) || [""])[0].replace(/\./g, "");
+        if (achou !== quer) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${ini.t}" (.mf-total), o esperado é "+${fmt(Math.floor(prods.length / 100) * 100)}" (o total ${fmt(prods.length)} do JSON arredondado para baixo à centena, com "+")`);
+      } else if (parseInt(ini.t.replace(/\D/g, ""), 10) !== prods.length) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${ini.t}" produtos, o JSON tem ${prods.length}`);
       conferirConsole("inicio");
       await print("inicio");
       // qual tela o site mostra (T-0014): "abas" (hoje) ou "campos" (nova, sem abas, q e placa lado a lado)
@@ -432,10 +447,11 @@ async function testarSite(base, ctxJson, dirPrints) {
       // o botão "Buscar" do campo q: o do formulário único (abas) ou o do próprio campo (campos)
       const clicarBuscarQ = async () => {
         if (tela === "abas") return page.click('.form-busca button[type="submit"]');
-        // tela nova (T-0014, R-20261120-115432): UM só botão "Buscar" no quadro, para os 2 campos
+        // tela nova (T-0014, R-20261120-115432): UM só botão "Buscar" no quadro da busca (na home, 1 ou 2: TRANSIÇÃO T-0018)
         const n = await page.evaluate(() => window.__bapT.botoesBuscar().length);
-        if (n !== 1) falha("campos-busca", "campos da busca", "botoes", `${L}: o quadro da busca tem ${n} botão(ões) "Buscar" (pedido: 1 só para os 2 campos)`);
-        const h = n ? (await page.evaluateHandle(() => window.__bapT.botoesBuscar()[0])).asElement() : null;
+        conferirBotoes(n, (await naHome()) ? "home" : "busca");
+        // com 2 (home nova), o do campo q: o do mesmo formulário do q, ou o 1º
+        const h = n ? (await page.evaluateHandle(() => { const T = window.__bapT, q = T.campos().q, bs = T.botoesBuscar(); return bs.find((b) => q && b.form && b.form === q.form) || bs[0]; })).asElement() : null;
         if (!h) return page.press('input[name="q"]', "Enter");
         return h.click();
       };
@@ -1249,7 +1265,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         const pos = await posicao();
         if (!pos.nq) falha("a11y", N_A11Y, "rotulo:q", `${L}: o campo q sem rótulo acessível`);
         if (!/placa/i.test(pos.np)) falha("a11y", N_A11Y, "rotulo:placa", `${L}: o campo da placa sem rótulo acessível com "placa" ("${pos.np}")`);
-        if (pos.nb !== 1) falha("campos-busca", N_CB, "botoes", `${L}: o quadro da busca tem ${pos.nb} botão(ões) "Buscar" (pedido: 1 só para os 2 campos)`);
+        conferirBotoes(pos.nb, (await naHome()) ? "home" : "busca");
         conferirPosicao(pos, larg);
         if (larg === 1366) {
           await page.setViewportSize({ width: 1536, height: 864 }); await page.waitForTimeout(300);
@@ -1286,7 +1302,7 @@ async function testarSite(base, ctxJson, dirPrints) {
           await hp.fill(PLACA_FALSA);
           if (como === "Enter") await hp.press("Enter");
           else {
-            const hb = (await page.evaluateHandle(() => window.__bapT.botoesBuscar()[0] || null)).asElement();
+            const hb = await botaoDaPlaca();
             if (hb) await hb.click(); else falha("campos-busca", N_CB, "botoes", `${L}: o quadro da busca não tem o botão "Buscar"`);
           }
           const chamou = await esperarChamada(antesN);
@@ -1390,7 +1406,8 @@ async function testarSite(base, ctxJson, dirPrints) {
           const n0 = PL.chamadas;
           await page.fill('input[name="q"]', TXT2);
           await (await pegarPlaca()).fill(PLACA_FALSA);
-          if (como === "botão") { const hb = (await page.evaluateHandle(() => window.__bapT.botoesBuscar()[0] || null)).asElement(); if (hb) await hb.click(); }
+          // na home nova (2 botões), o da PLACA: consulta o veículo e leva o texto junto (como o 4de7bb1)
+          if (como === "botão") { const hb = await botaoDaPlaca(); if (hb) await hb.click(); }
           else if (como === "Enter no campo geral") await page.press('input[name="q"]', "Enter");
           else await (await pegarPlaca()).press("Enter");
           const ch = await esperarChamada(n0);
@@ -1431,7 +1448,7 @@ async function testarSite(base, ctxJson, dirPrints) {
   const siTxt = FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "";
   detalhe("filtros", "filtros da busca", [siTxt, FILTRO_SI.marcou ? "barra: Esc fecha; " + FILTRO_SI.marcou + "; etiqueta \"Tirar\" criada e tirada" : ""].filter(Boolean).join("; "));
   if (TELAS.has("campos")) {
-    detalhe("campos-busca", "campos da busca", `${CAMPOS_TELA.rotulos || "?"}; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro; q com Enter e botão (busca código e veículo)`);
+    detalhe("campos-busca", "campos da busca", `${CAMPOS_TELA.rotulos || "?"}; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro da busca (1 ou 2 na página inicial, transição T-0018); q com Enter e botão (busca código e veículo)`);
     detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} em destaque na faixa, com o rótulo "Placa" em cima e antes da Marca, e as listas "${CAMPOS_TELA.veiculo || "?"}"; ${CAMPOS_TELA.trava || ""}; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas`);
     detalhe("meuveiculo", "meu veículo", MV.join("; ") + '; faixa logo abaixo do quadro da busca, 5 listas em cascata (Marca, Modelo, Ano, Motor, Versão); sem "Meu veículo", sem "Trocar veículo", sem chave liga/desliga, sem "Departamentos"');
     detalhe("filtros", "filtros da busca", [FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "", FILTRO_SI.coluna || "", FILTRO_SI.painel || "", FILTRO_SI.sempre || "", FILTRO_SI.marcou || ""].filter(Boolean).join("; "));
