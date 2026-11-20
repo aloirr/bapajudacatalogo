@@ -81,4 +81,17 @@ def aplicar(fams, filtro_moto=None):
                 r['_refs_antes_fraga'] = atual
                 r['refs'] = novas if atual in ('', '—', '-') else atual.rstrip(' ·,') + ' · ' + novas
                 LOG['ref'].append(r['code'])
+    # no fim, em todos os itens dos 3 PDFs: a regra do site nas que vieram escritas (o Fraga e o site de 12/11 trazem
+    # AUTOIMPACT, fornecedor; montar.refs_pela_regra) e cada referência uma vez, na ordem da 1ª (o Fraga repete as do
+    # catálogo; a base às vezes também; RD-0194)
+    import montar as _M
+    LOG['fora'], LOG['repetidas'], feitos = [], [], set()
+    n = lambda s: len(s.split(' · ')) if s else 0
+    for f in fams:
+        for r in f['rows']:
+            if id(r) in feitos: continue
+            feitos.add(id(r)); antes = r.get('refs') or ''
+            regra = _M.refs_pela_regra(antes); r['refs'] = _M.refs_unicas(regra)
+            if regra != antes: LOG['fora'].append((r['code'], n(antes) - n(regra)))
+            if r['refs'] != regra: LOG['repetidas'].append((r['code'], n(regra) - n(r['refs'])))
     return LOG

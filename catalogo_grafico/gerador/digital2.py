@@ -71,7 +71,7 @@ def markup(segs):
     global CORR
     s = ''.join(('\x01' + t + '\x02') if b else t for t, b in segs)
     s = re.sub(r'\s+', ' ', s).strip()
-    n = datas.fix_text(s)
+    n = datas.em_diante(datas.fix_text(s))
     if n != s: CORR += 1
     out = []
     for part in re.split(r'(\x01.*?\x02)', n):
@@ -87,7 +87,7 @@ def markup(segs):
     return ''.join(out)
 
 
-datas_re = re.compile(r'(?<![\w/])((?:\d{2}/)?(?:19|20)\d{2})((?:–(?:\d{2}/)?(?:19|20)\d{2})|>)?(?![\w/])')
+datas_re = re.compile(r'(?<![\w/])((?:\d{2}/)?(?:19|20)\d{2})((?:–(?:\d{2}/)?(?:19|20)\d{2})|–|>)?(?![\w/])')
 
 # ---------------------------------------------------------------- desenho
 _pc = {}
@@ -214,7 +214,7 @@ def tags_e_sobra(f, r):
     """(tags, texto que sobra já escapado) embaixo do código"""
     import tags as TG
     tl, sobra = TG.do_item(f['name'], r, f['spec'])
-    return tl, html.escape(sobra, quote=False) if sobra else ''
+    return tl, html.escape(datas.em_diante(sobra), quote=False) if sobra else ''
 
 
 def prep_rows(f, linhas=None):
@@ -268,6 +268,16 @@ def paginate(rows, y0, AW=APP_W, y_first=None):
             if P is not None:
                 pages.append(cur); cur, y = [], y0
     pages.append(cur)
+    # última página de continuação com 1 ou 2 linhas (pág. 292 do digital, 20/11): recebe as últimas 3 (ou 2) da página
+    # anterior; com 2 linhas, as últimas 2. Só linha inteira (a de aplicação dividida não se move) e a anterior fica com
+    # pelo menos 1 linha.
+    if len(pages) >= 2 and 1 <= len(pages[-1]) <= 2:
+        for k in ((3, 2) if len(pages[-1]) == 1 else (2,)):
+            mov = pages[-2][-k:]
+            if (len(pages[-2]) > k and not any(it['cont'] or it['para'] is not None for it in mov + pages[-1])
+                    and sum(it['h'] for it in mov + pages[-1]) <= YMAX - y0):
+                pages[-2], pages[-1] = pages[-2][:-k], mov + pages[-1]
+                break
     return pages
 
 
@@ -488,6 +498,23 @@ def pagina_sistema(dc, grupo, key, itens, pg):
     dc.end()
 
 
+# Trava dos PDFs (T-0019): a AUTOIMPACT é fornecedor das palhetas (R-20261120-184000-alexandre, item 5) e não sai em nenhum
+# dos 3 PDFs. A referência dela sai pela regra do site (refs_de do scripts/gerar_site.py; montar.refs_pela_regra). Se o nome
+# voltar por qualquer texto, o build para e o PDF fica com o fim ".BLOQUEADO" (não entregar).
+TRAVA_PDF = re.compile(r'AUTO[\W_]{0,3}IMPACT', re.I)   # igual à TRAVA do site: junto ou com até 3 sinais entre AUTO e IMPACT
+
+
+def trava_pdf(out):
+    import os, pymupdf
+    with pymupdf.open(out) as d:
+        achados = [(i + 1, p.get_text()) for i, p in enumerate(d) if TRAVA_PDF.search(p.get_text())]
+    if not achados: return
+    os.replace(out, out + '.BLOQUEADO')
+    ex = [f"pág. {pg}: ...{t[max(0, m.start() - 40):m.end() + 20]}..." for pg, t in achados[:5] for m in [TRAVA_PDF.search(t)]]
+    raise SystemExit(f"[PARADO] {os.path.basename(out)} sairia com nome de fornecedor em {len(achados)} página(s) "
+                     f"(ficou em {os.path.basename(out)}.BLOQUEADO):\n  " + '\n  '.join(x.replace('\n', ' ') for x in ex))
+
+
 def build(out):
     import print_cat as PC                       # cabeçalho e destaques iguais aos do A4
     import filtros_split as FS                   # FILTRAÇÃO por tipo de filtro (12/11)
@@ -515,6 +542,7 @@ def build(out):
             table_page(dc, f, rows, p0 + j, j > 0, (PC, top, k) if j == 0 else None)
     contracapa(dc)
     dc.c.showOutline(); dc.c.save()
+    trava_pdf(out)
     PC.log_destaques()
     return pg + 1, entries
 
