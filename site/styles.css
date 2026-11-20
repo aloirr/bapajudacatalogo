@@ -388,6 +388,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .pagina-produto { max-width: none; padding: 0; }
   .produto-conteudo { font-size: 8.5pt; line-height: 1.3; }
   .so-impressao { display: block; }
+  .secao .so-impressao { margin-top: 2mm; } /* "Aplicação completa" afastada da tabela */
   .cab-pdf { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--verde); padding-bottom: 2mm; margin-bottom: 4mm; }
   .cab-pdf img { height: 12mm; width: auto; }
   .cab-pdf span { font-size: 8pt; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-2); }
