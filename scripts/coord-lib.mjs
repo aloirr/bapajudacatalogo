@@ -12,9 +12,9 @@ import { gunzipSync } from 'node:zlib';
 
 export const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-// Time do Bap Ajuda catálogo (20/11/2026). BAP_AGENTES_TESTE (só nos testes; o CI passa os mesmos 11 nomes, T-0016)
-// troca a lista; fora dos testes ela nunca é definida.
-const AGENTES_DO_TIME = [
+// Time do Bap Ajuda catálogo (20/11/2026). BAP_AGENTES_TESTE (só nos testes; o CI passa os mesmos 11 nomes, T-0016;
+// guarda-merge-mcp.test.mjs confere) troca a lista; fora dos testes ela nunca é definida.
+export const AGENTES_DO_TIME = [
   'gerente-projetos',
   'po',
   'catalogo-dados',
@@ -733,7 +733,7 @@ export function agenteDaSessao({ argumento, entrada, env = process.env, raiz = R
 //   e nunca sobrescreve: o id é escolhido contra a árvore daquele mesmo commit.
 // - Leitura: índice local (cache fora do repositório) por commit. A cada leitura, compara o commit do cache com o main
 //   (REST compare) e baixa só os arquivos novos (blob a blob; muitos de uma vez, pelo tarball do commit). Os textos do
-//   cache são conferidos pelo hash do git; a lista que autoriza merge (guarda-merge) vem sempre direto do GitHub.
+//   cache são conferidos pelo hash do git; a lista que autoriza merge (lerRecadosDoGerente, guarda-merge-lib.mjs) vem sempre direto do GitHub.
 // - Token só do ambiente: BAP_RECADOS_TOKEN, GH_TOKEN, GITHUB_TOKEN ou `gh auth token`. Nunca vai para arquivo,
 //   argumento de processo ou log (vai ao processo filho pelo stdin).
 

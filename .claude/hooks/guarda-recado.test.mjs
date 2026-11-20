@@ -4,7 +4,7 @@
 // Parte 1: funções puras (motivosRecadoFalso, classificarComando, escritasDoComando).
 // Parte 2: o hook de verdade (guarda-bash.mjs, stdin → exit code) num repositório git temporário.
 // Parte 3: git add/commit/stash de recado do Alexandre já existente (liberado se intacto).
-// Os casos de recado falso do v5 continuam em guarda-merge.test.mjs (sem mudança).
+// Os casos de recado falso em nome do po (T-0016) ficam em guarda-merge-mcp.test.mjs.
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, rmSync, readdirSync } from 'node:fs';

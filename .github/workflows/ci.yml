@@ -1,4 +1,4 @@
-# CI do PR do Bap Ajuda catálogo (20/11/2026). Governança: mudança só com a autorização do Alexandre.
+# CI do PR do Bap Ajuda catálogo (20/11/2026). Merge: ver CLAUDE.md, Merge (R-20261120-111308-alexandre).
 name: ci
 on:
   pull_request:
@@ -24,11 +24,11 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
         run: node scripts/coord.mjs verificar --base "origin/$BASE_REF"
-      - name: Governança (avisa; o merge exige a autorização do po)
+      - name: Governança (lista os caminhos de governança; não bloqueia)
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
-          node scripts/coord.mjs governanca --base "origin/$BASE_REF" || echo "::warning::PR com caminho de governança: precisa do recado do po 'autorizo o merge do PR #N no commit <sha>' (R-20261120-111308-alexandre)"
+          node scripts/coord.mjs governanca --base "origin/$BASE_REF" || echo "::warning::PR com caminho de governança: o po confere esses arquivos antes de autorizar o merge"
       - name: Python compila
         run: python -m compileall -q -x '(docs|catalogo_grafico/entregas)/' .
       - name: Site (gera o JSON e confere a TRAVA; sem fotos)

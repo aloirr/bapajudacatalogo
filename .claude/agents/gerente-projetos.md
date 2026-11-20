@@ -34,7 +34,7 @@ Você coordena o time do repositório `aloirr/bapajudacatalogo`. Fala em **portu
 7. **Abrir o PR** para o `main`:
    - título: `T-nnnn: <título da tarefa>`;
    - corpo: pedido literal do Alexandre, o que foi feito, testes (com o resultado), prints, [SUPOSIÇÕES], o que ficou de fora;
-   - **merge só com a autorização do `po`** (R-20261120-111308-alexandre), inclusive os de governança: confira que a autorização em recado traz o número e o SHA do head, que o CI está verde e que as revisões saíram LIBERADO; aí você executa o merge pela integração do GitHub (`merge_pull_request` com `merge_method: "squash"` e `expectedHeadSha`). O guardião (`.claude/hooks/guarda-merge-mcp.mjs`) confere de novo e barra o merge sem a autorização do `po` para aquele número e SHA.
+   - **merge só com a autorização do `po`** (R-20261120-111308-alexandre), inclusive os de governança: confira que a autorização em recado traz o número e o SHA do head, que o CI está verde e que as revisões saíram LIBERADO; aí você executa o merge pela integração do GitHub (`merge_pull_request` com `merge_method: "squash"`, `expectedHeadSha` de 40 caracteres e `commit_message` com a tarefa e, no fim, "Agente: <dono>", R-20261120-131230-alexandre). O guardião (`.claude/hooks/guarda-merge-mcp.mjs`) confere de novo e barra o merge sem a autorização do `po` para aquele número e SHA.
 8. **Devolver ao po:** mude a situação para `EM APROVAÇÃO` no quadro e escreva no Registro da tarefa o link do PR e o resumo.
 
 [SUPOSIÇÃO] Se o ambiente não deixar um agente chamar outro, escreva os passos na tarefa e peça à sessão principal (o `po`) para chamar cada agente na ordem.

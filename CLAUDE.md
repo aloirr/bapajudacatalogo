@@ -37,9 +37,10 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
   - Cada tarefa tem o pedido **literal** do Alexandre, a especificação e os critérios de aceite.
 - **Donos:** `.coord/donos.json`. Só o dono mexe na pasta.
   - `.claude/**`, `.coord/donos.json`, `render.yaml`, `.github/**`, `CLAUDE.md` e `.gitignore` são do **Alexandre**.
-- **Caminho:** pedido → `po` → tarefa → `gerente-projetos` → donos → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` → PR → `po` → Alexandre.
+- **Caminho:** pedido → `po` → tarefa → `gerente-projetos` → donos → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` → PR → `po` (autoriza o merge; as simulações vão ao Alexandre).
   - **Merge (R-20261120-111308-alexandre):** o `po` autoriza todos os merges, inclusive os de governança, depois de conferir o número, o SHA do head, os arquivos, o CI verde e as revisões LIBERADO; cada autorização fica em recado, com o número e o SHA. O `gerente-projetos` executa o merge.
-  - O guardião confere todo merge (pelo terminal e pela integração do GitHub): o SHA do head, o CI do PR verde e o recado do `po` (ou do Alexandre) 'autorizo o merge do PR #N no commit <sha>' (T-0016).
+  - Todo merge é squash, com expectedHeadSha e, no corpo, 'Agente: <dono>' e a tarefa (R-20261120-131230-alexandre).
+  - O guardião confere todo merge (pelo terminal e pela integração do GitHub): o SHA do head (40 caracteres), o CI do PR verde e esse recado do `po` (ou do Alexandre), publicado no `bapajudacatalogo-recados` (T-0016).
   - As simulações de tela e de PDF continuam indo ao Alexandre.
   - **"autorizo"** libera, só naquela tarefa, o que a regra trava (ex.: a `TRAVA` ou a `FICHA`).
 
@@ -59,6 +60,6 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
   - Leia e grave **só com `node scripts/coord.mjs`** (`caixa`, `pendencias`, `ler`, `fio`, `enviar`, `lido`). Com o clone anexado, ele grava **com git**: `pull --rebase`, commit com o nome do agente (`<agente>@bapajuda.invalid`) e `push origin HEAD:main`, pela integração de GitHub do próprio Claude. Nenhum token entra.
   - **Nunca grave pela API do GitHub:** o proxy da nuvem bloqueia ("Write access to this GitHub API path is not permitted through this proxy").
   - **Autorizado pelo Alexandre (20/11/2026):** gravar direto no `main` do `bapajudacatalogo-recados`, só em `recados/` e `lidos/`. O código deste repositório continua indo por branch e PR.
-- **Donos:** `.coord/donos.json` (a primeira regra que casa manda). Governança (`.claude`, `donos.json`, `coord*.mjs`, `.github`, `render.yaml`, `CLAUDE.md`, `.gitignore`) só com o recado do `po` "autorizo o merge do PR #N no commit <sha>" (R-20261120-111308-alexandre); o `gerente-projetos` executa.
+- **Donos:** `.coord/donos.json` (a primeira regra que casa manda). Governança (`.claude`, `donos.json`, `coord*.mjs`, `.github`, `render.yaml`, `CLAUDE.md`, `.gitignore`): merge como em **Merge**, acima.
 - Recado do celular: issue com o formulário **Recado** no `aloirr/bapajudacatalogo-recados` (conta domontecristo).
 <!-- /SESSOES-E-RECADOS -->

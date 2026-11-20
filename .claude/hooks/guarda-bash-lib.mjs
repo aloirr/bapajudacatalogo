@@ -1,6 +1,6 @@
 // Guardião de donos para o Bash — biblioteca (funções puras + acesso ao git/disco injetável).
 // Usada por .claude/hooks/guarda-bash.mjs (PreToolUse/PostToolUse) e pelos testes
-// (.claude/hooks/guarda-bash.test.mjs). Sem dependências externas.
+// (.claude/hooks/guarda-agente.test.mjs, guarda-recado.test.mjs e guarda-merge-mcp.test.mjs). Sem dependências externas.
 //
 // Antes do comando (PreToolUse): lê o comando com um analisador de shell simples e bloqueia só a
 // escrita EVIDENTE em caminho de outro dono (> e >>, tee, sed -i, perl -i, cp/mv/install/ln com
@@ -21,8 +21,60 @@ import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import {
   PESSOAS, podeAlterar, classificarMudancas, remetenteDoRecado, remetenteDoConteudo, ehAnexoDeRecado,
-  relativoPorJuncao, MOTIVO_CLONE_DE_RECADOS,
+  relativoPorJuncao, MOTIVO_CLONE_DE_RECADOS, juncoesDeRecados, cloneDosRecados,
 } from '../../scripts/coord-lib.mjs';
+
+// ───────────────────────────── comum aos hooks (RD-0027) ─────────────────────────────
+
+/** JSON do hook pelo stdin. null = vazio ou ilegível (cada hook decide: o de merge bloqueia, os outros seguem com {}). */
+export function lerEntradaDoHook(stdin = process.stdin) {
+  return new Promise((ok) => {
+    let txt = '';
+    stdin.setEncoding('utf8');
+    stdin.on('data', (d) => (txt += d));
+    stdin.on('end', () => {
+      try { const j = JSON.parse(txt); ok(j && typeof j === 'object' && !Array.isArray(j) ? j : null); } catch { ok(null); }
+    });
+    stdin.on('error', () => ok(null));
+  });
+}
+
+/** BAP_GUARDA=off (variável do processo do Claude Code, que o agente não altera) desliga os guardiões. */
+export const guardaDesligada = (env = process.env) => String(env.BAP_GUARDA || '').toLowerCase() === 'off';
+
+/**
+ * Junções de recados (ADR 0035) e, sem junção, o clone do repositório de recados ANEXADO à sessão (T-0016, B1): na nuvem
+ * o clone fica ao lado do repositório de código, sem junção. Com `clone` preenchido, o Write/Edit e o Bash que gravam
+ * dentro dele e o git que grava nele são bloqueados para os agentes (só o node scripts/coord.mjs grava lá).
+ */
+export function juncoesComClone(raiz, { env = process.env, juncoes = juncoesDeRecados(raiz), clone = () => cloneDosRecados({ env, raiz }) } = {}) {
+  if (juncoes?.clone) return juncoes;
+  const c = clone();
+  return c ? { mapas: juncoes?.mapas || [], clone: barras(c) } : (juncoes || { mapas: [], clone: null });
+}
+
+/**
+ * Anexos no clone de recados (T-0016c, decisão do po de 20/11/2026): o po e o gerente-projetos copiam prints, planilhas e
+ * patches para recados/anexos/** e publicam com git (pull, add, commit, push). Recados e lidos continuam só pelo coord.mjs.
+ */
+export const ANEXADORES = ['po', 'gerente-projetos'];
+export const GIT_DE_ANEXO = new Set(['pull', 'add', 'commit', 'push']);
+export const PASTA_ANEXOS = 'recados/anexos';
+/** O caminho absoluto está DENTRO de <clone>/recados/anexos/ (não a própria pasta)? */
+export function ehAnexoNoClone(abs, clone) {
+  const base = `${barras(clone).replace(/\/+$/, '')}/${PASTA_ANEXOS}/`;
+  const a = barras(abs);
+  return a.toLowerCase().startsWith(base.toLowerCase()) && a.length > base.length && !a.slice(base.length).split('/').includes('..');
+}
+/** Argumentos do git depois do subcomando (sem as opções globais -C, -c, --git-dir...). */
+export function argsDoGit(palavras) {
+  const i = palavras.findIndex((w) => !w.incerto && /(^|\/)git(\.exe)?$/i.test(w.valor));
+  let k = i + 1;
+  while (k < palavras.length && palavras[k].valor.startsWith('-')) k += /^(-C|-c|--git-dir|--work-tree|--namespace)$/.test(palavras[k].valor) ? 2 : 1;
+  return palavras.slice(k + 1);
+}
+/** Nome do comando (sem VAR=... e sem caminho). */
+const nomeDoComando = (palavras) => barras(palavras.find((w) => !/^[A-Za-z_][A-Za-z0-9_]*=/.test(w.valor))?.valor || '').split('/').pop().toLowerCase();
 
 // ───────────────────────────── caminhos ─────────────────────────────
 
@@ -334,7 +386,10 @@ function alvosGit(args, ctx, res) {
   while (i < args.length && args[i].valor.startsWith('-')) {
     const v = args[i].valor;
     if (v === '-C') { res.cwdGit = args[i + 1] && !args[i + 1].incerto ? args[i + 1].valor : null; i += 2; continue; }
-    if (['-c', '--git-dir', '--work-tree', '--namespace'].includes(v)) { i += 2; continue; }
+    // T-0016 (B1): --git-dir/--work-tree também apontam o repositório (o clone de recados, por exemplo).
+    if (v === '--git-dir' || v === '--work-tree') { res.cwdGit = args[i + 1] && !args[i + 1].incerto ? args[i + 1].valor : null; i += 2; continue; }
+    if (/^--(git-dir|work-tree)=/.test(v)) { res.cwdGit = args[i].incerto ? null : v.replace(/^[^=]*=/, ''); i++; continue; }
+    if (['-c', '--namespace'].includes(v)) { i += 2; continue; }
     i++;
   }
   const sub = args[i]?.valor;
@@ -681,7 +736,7 @@ function soLeituraPorArgumentos(nome, args) {
  *   repositório, de qualquer dono. O PostToolUse só acusa e manda desfazer o que estiver aqui.
  *   instala: pnpm/npm/yarn install/add/remove/update (pode reescrever o pnpm-lock.yaml).
  */
-export function analisarComando({ comando, agente, cwd, raiz, regras, somenteLeitura = [], permitidos = new Set(), amb, juncoes = { mapas: [], clone: null } }) {
+export function analisarComando({ comando, agente, cwd, raiz, regras, somenteLeitura = [], permitidos = new Set(), amb, juncoes = { mapas: [], clone: null }, gitNoClone = null }) {
   const violacoes = [];
   const vistos = new Set();
   const alvos = new Map(); // rel → sub
@@ -730,7 +785,18 @@ export function analisarComando({ comando, agente, cwd, raiz, regras, somenteLei
       // ADR 0035: git que grava dentro do clone de recados (commit, pull, push, reset...) é só do sincronizar-recados.ps1.
       if (r.gitSub && !GIT_LEITURA_NO_CLONE.has(r.gitSub) && cwdCmd && dentroDoClone(cwdCmd)) {
         soLeitura = false;
-        acusar(`git ${r.gitSub} @ ${cwdCmd}`, `git ${r.gitSub} no clone de recados: ${MOTIVO_CLONE_DE_RECADOS}`);
+        // T-0016c: anexos (recados/anexos/**) do po e do gerente-projetos: pull, add, commit e push conferidos por gitNoClone.
+        const semGitDir = !cmd.palavras.some((w) => /^--(git-dir|work-tree)/.test(w.valor) || /^GIT_/.test(w.valor));
+        const anexo = gitNoClone && ANEXADORES.includes(agente) && GIT_DE_ANEXO.has(r.gitSub) && juncoes.clone && semGitDir
+          ? gitNoClone({ sub: r.gitSub, args: argsDoGit(cmd.palavras), cwd: cwdCmd, clone: juncoes.clone })
+          : MOTIVO_CLONE_DE_RECADOS;
+        if (anexo) acusar(`git ${r.gitSub} @ ${cwdCmd}`, `git ${r.gitSub} no clone de recados: ${anexo}`);
+      }
+      // T-0016 (B1): com o clone de recados presente, git que grava numa pasta incerta (cd $X, cd ~/..., git -C $X) pode
+      // ser o clone: bloqueado (escreva a pasta por extenso).
+      if (r.gitSub && !GIT_LEITURA_NO_CLONE.has(r.gitSub) && r.gitSub !== 'clone' && cwdCmd === null && juncoes.clone) {
+        soLeitura = false;
+        acusar(`git ${r.gitSub} @ ?`, `git ${r.gitSub} numa pasta incerta ($VAR, ~ ou $(...)), que pode ser o clone de recados (${MOTIVO_CLONE_DE_RECADOS}): escreva a pasta por extenso`);
       }
       // ADR 0035: git clean -x/-X apaga ignorados, e as junções de recados são ignoradas no repositório de código.
       if (r.limpaIgnorados && (juncoes.mapas || []).length) {
@@ -744,6 +810,8 @@ export function analisarComando({ comando, agente, cwd, raiz, regras, somenteLei
         if (rel === null) {
           // ADR 0035: alvo no clone de recados (por fora da junção) = .coord/recados/... ou .coord/lidos/...
           const j = relativoPorJuncao(a, juncoes);
+          // T-0016c: arquivo em recados/anexos/** do clone, pelo po ou pelo gerente-projetos (cp, mkdir...; ln não).
+          if (j?.clone && ehAnexoNoClone(a, juncoes.clone) && ANEXADORES.includes(agente) && nomeDoComando(cmd.palavras) !== 'ln') continue;
           if (j?.clone) { acusar(a, `"${t.alvo.valor}": ${MOTIVO_CLONE_DE_RECADOS}`); continue; }
           if (j?.rel) rel = j.rel;
         }

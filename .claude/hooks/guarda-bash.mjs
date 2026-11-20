@@ -38,7 +38,7 @@
 //      · recado falso: agente não envia recado em nome de outro (coord.mjs enviar --de alheio,
 //        "de: alexandre" no comando, script que escreve recado de alexandre; T-0016: "de: po" e o autor
 //        po@bapajuda.invalid em comando de outro agente).
-//    Mensagens e casos: .claude/hooks/guarda-merge-lib.mjs e guarda-merge.test.mjs.
+//    Mensagens e casos: .claude/hooks/guarda-merge-lib.mjs, guarda-merge-mcp.test.mjs e guarda-recado.test.mjs.
 //  - Guardião v6 (T-0050): o bloqueio "recado em nome do Alexandre" vale SÓ para comando que cria, altera,
 //    move ou apaga arquivo de recado (> >> tee cp mv rm sed -i, node/python que grava, coord.mjs enviar
 //    --de alexandre...). Leitura (ls, cat, grep, find, head, git show/ls-tree/fetch, for que só lê) passa,
@@ -50,43 +50,33 @@
 //    PATH e, no Windows, também em %ProgramFiles%\GitHub CLI e %LOCALAPPDATA%\Programs\GitHub CLI.
 //  - ADR 0035 (T-0139): com .coord/recados e .coord/lidos em junção para o clone do bapajudacatalogo-recados, o alvo pelo
 //    caminho de verdade do clone segue as regras de .coord/recados, o git que grava no clone é bloqueado e a foto do
-//    PostToolUse inclui o git status do clone (juncoesDeRecados; casos em guarda-juncao.test.mjs).
+//    PostToolUse inclui o git status do clone (juncoesDeRecados). T-0016 (B1): sem junção, o clone ANEXADO à sessão
+//    (cloneDosRecados) conta como clone de recados: Bash que grava nele e git que grava nele são bloqueados (juncoesComClone).
 //  - Guardião v7 (T-0122), PreToolUse, também ANTES da liberação da sessão manual: `gh api` só de LEITURA (GET/HEAD;
 //    GraphQL só "query"). Leitura passa mesmo com $VAR ou "merge" no --jq; POST/PUT/PATCH/DELETE, método incerto,
 //    opção desconhecida e gh api escondido em bash -c/node -e são bloqueados (conferirGhApi em guarda-merge-lib.mjs;
-//    casos em guarda-gh-api.test.mjs). Das ferramentas MCP, só as de merge têm hook: .claude/hooks/guarda-merge-mcp.mjs.
-// Detalhes e casos: .claude/hooks/guarda-bash-lib.mjs e .claude/hooks/guarda-bash.test.mjs.
+//    casos em guarda-agente.test.mjs). Das ferramentas MCP, só as de merge têm hook: .claude/hooks/guarda-merge-mcp.mjs.
+// Detalhes: .claude/hooks/guarda-bash-lib.mjs; casos: guarda-agente.test.mjs, guarda-recado.test.mjs e guarda-merge-mcp.test.mjs.
 import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { RAIZ, carregarDonos, agenteDaSessao, juncoesDeRecados } from '../../scripts/coord-lib.mjs';
+import { RAIZ, carregarDonos, agenteDaSessao } from '../../scripts/coord-lib.mjs';
 import {
   analisarComando, ambienteReal, mensagemPre, lerStatus, fotografar, compararFotos, statDe,
   violacoesDasMudancas, mensagemPos, mensagemAviso, separarAcusacoes, atualizarAcusados, descontarDesfeitos, permitidosDe,
   arquivoFoto, arquivoAcusados, arquivoRecadosDaSessao, ehRecadoDoAlexandre,
-  lerJson, gravarJson, apagarArquivo, limparAntigos,
+  lerJson, gravarJson, apagarArquivo, limparAntigos, lerEntradaDoHook, guardaDesligada, juncoesComClone,
 } from './guarda-bash-lib.mjs';
 import {
   conferirMerge, conferirGhApi, consultarPrGh, lerRecadosDoGerente, motivosRecadoFalso, mensagemRecadoFalso,
-  motivosIndiceDeRecados, mensagemIndiceDeRecados, vigiarRecados,
+  motivosIndiceDeRecados, mensagemIndiceDeRecados, vigiarRecados, conferirGitDeAnexo,
 } from './guarda-merge-lib.mjs';
 
 /** Conteúdo de um arquivo do repositório (rel) ou null. */
 const lerDoRepo = (rel) => { try { return readFileSync(join(RAIZ, rel), 'utf8'); } catch { return null; } };
 
-function lerEntrada() {
-  return new Promise((ok) => {
-    let txt = '';
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (d) => (txt += d));
-    process.stdin.on('end', () => {
-      try { ok(JSON.parse(txt || '{}')); } catch { ok({}); }
-    });
-  });
-}
+if (guardaDesligada()) process.exit(0);
 
-if ((process.env.BAP_GUARDA || '').toLowerCase() === 'off') process.exit(0);
-
-const entrada = await lerEntrada();
+const entrada = (await lerEntradaDoHook()) ?? {};
 if (entrada.tool_name && entrada.tool_name !== 'Bash') process.exit(0);
 const { agente, origem } = agenteDaSessao({ argumento: process.argv[2], entrada });
 const comando = String(entrada.tool_input?.command || '');
@@ -121,7 +111,7 @@ try {
   process.exit(0); // donos.json ilegível: o guarda-donos/verificar acusam; aqui não trava o Bash
 }
 
-const juncoes = juncoesDeRecados(RAIZ);
+const juncoes = juncoesComClone(RAIZ);
 
 if (evento === 'PreToolUse') {
   const amb = ambienteReal(RAIZ, juncoes);
@@ -129,6 +119,8 @@ if (evento === 'PreToolUse') {
   const { violacoes, soLeitura, alvos, instala } = analisarComando({
     comando, agente, cwd: entrada.cwd || process.cwd(), raiz: RAIZ, regras, somenteLeitura,
     permitidos: permitidosDe(acusados), amb, juncoes,
+    // T-0016c: anexos do po e do gerente-projetos no clone de recados (pull, add, commit e push conferidos).
+    gitNoClone: (p) => conferirGitDeAnexo({ agente, ...p }),
   });
   if (violacoes.length) {
     process.stderr.write(mensagemPre(agente, violacoes) + '\n');
