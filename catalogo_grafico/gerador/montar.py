@@ -15,13 +15,20 @@ old_img['Catraca de Freio'] = 'dimg/catraca.png'
 old_img['Interruptores de Pressão do Óleo'] = None
 old_img['Interruptores e Sensores Elétricos'] = None
 
-import os as _os
-# base unificada: a fonte única, dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx, que está no Git (T-0019, 20/11: sem estoque)
-BASE_UNIFICADA = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', '..', 'dados', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx')
+from detalhe import BASE_UNIFICADA   # base unificada: a fonte única, no Git (T-0019, 20/11: sem estoque)
 BASE = pd.read_excel(BASE_UNIFICADA, 'PRODUTOS')
 BASE['code'] = BASE.CODIGO_BAP.map(norm)
 BASE_D = {r.code: r for r in BASE.itertuples()}
 DESC = {c: (str(r.DESCRICAO) if isinstance(r.DESCRICAO, str) else '') for c, r in BASE_D.items()}
+
+
+def inativo(code):
+    """INATIVO no STATUS_CADASTRO ou na descrição da base (regra única: montar e destaques do print_cat)"""
+    c = norm(code); b = BASE_D.get(c)
+    return (b is not None and 'INATIVO' in str(b.STATUS_CADASTRO).upper()) or 'INATIVO' in DESC.get(c, '').upper()
+
+
+SPEC = {'Óleo Lubrificante', 'Baterias', 'Fluidos e Químicos', 'Rodas de Aço e Alumínio', 'Cintas e Catracas', 'Pneus e Câmaras de Ar Moto'}
 
 BR_SHORT = {'VOLKSWAGEN': 'VW', 'CHEVROLET': 'GM', 'GENERAL MOTORS': 'GM', 'MERCEDES-BENZ': 'MB', 'MERCEDES BENZ': 'MB',
             'CITROEN': 'CITROËN', 'KIA MOTORS': 'KIA'}
@@ -121,19 +128,18 @@ _linhas = {l[0] for l in LINES}
 for b in BASE.itertuples():
     code = b.code
     st = str(b.STATUS_CADASTRO).upper()
-    if code in _ja or 'INATIVO' in st or 'INATIVO' in DESC.get(code, '').upper(): continue
+    if code in _ja or inativo(code): continue
     line = b.PRODUTO if b.PRODUTO in _linhas else taxo.line_of(code, DESC.get(code, ''), None)
     if line is None: sem_linha.append((b.CODIGO_BAP, b.DESCRICAO)); continue
     ativo = st == 'ATIVO'
     r = dict(code=str(b.CODIGO_BAP).strip(), nov=ativo, sub=pos_sub(b.DESCRICAO), segs=segs_from_base(_em_diante(b.APLICACAO)),
              refs=refs_from_base(b.REFERENCIAS_CRUZADAS))
     if not ativo: r['sem_estoque'] = True
-    if line in ('Óleo Lubrificante', 'Baterias', 'Fluidos e Químicos', 'Rodas de Aço e Alumínio', 'Cintas e Catracas', 'Pneus e Câmaras de Ar Moto'):
+    if line in SPEC:
         r['segs'] = [[str(b.DESCRICAO).strip().capitalize(), False]]; r['sub'] = ''
     rows_by_line[line].append(r); _ja.add(code)
     (novos if ativo else SEM_ESTOQUE).append((r['code'], line))
 
-SPEC = {'Óleo Lubrificante', 'Baterias', 'Fluidos e Químicos', 'Rodas de Aço e Alumínio', 'Cintas e Catracas', 'Pneus e Câmaras de Ar Moto'}
 fams = []
 for name, *_ in sorted(LINES, key=lambda l: ORDER_SIS.index(l[2])):
     rows = sorted(rows_by_line.get(name, []), key=lambda r: r['code'])

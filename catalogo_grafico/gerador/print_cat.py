@@ -169,18 +169,13 @@ def _regra(r):
     return (0 if r['_img'] else 1, 0 if r['segs'] else 1, r['code'])
 
 
-def _inativo(code):
-    b = M.BASE_D.get(taxo.norm(code))
-    return b is not None and 'INATIVO' in str(b.STATUS_CADASTRO).upper()
-
-
 def pick(f):
     rows = list(f['rows'])
     for r in rows:
         r['_img'] = IMG.get(taxo.norm(r['code']))
     pool = [r for r in rows if r['segs']] if not f['spec'] else rows
     if len(pool) < min(5, len(rows)): pool = rows
-    pool = [r for r in pool if not _inativo(r['code'])] or pool
+    pool = [r for r in pool if not M.inativo(r['code'])] or pool
     fixos = DESTAQUES_FIXOS.get(f['name'])
     top = []
     if fixos is None:
@@ -190,7 +185,7 @@ def pick(f):
         for c in fixos:
             r = por.get(taxo.norm(c))
             if r is None: LOG_DESTAQUES[(f['name'], c)] = 'saiu da base/da linha'
-            elif _inativo(c): LOG_DESTAQUES[(f['name'], c)] = 'INATIVO'
+            elif M.inativo(c): LOG_DESTAQUES[(f['name'], c)] = 'INATIVO'
             else: top.append(r)
     tk = {id(r) for r in top}
     # lista fixa: completa só o que saiu (fora da base/INATIVO), até o tamanho da lista de 13/11; sem lista: até 5

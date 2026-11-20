@@ -10,6 +10,8 @@ import re, os, unicodedata
 import pandas as pd
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
+# base unificada: a fonte única, no Git (T-0019); o montar.py usa este mesmo caminho
+BASE_UNIFICADA = os.path.join(AQUI, '..', '..', 'dados', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx')
 
 
 def _n(s):
@@ -24,17 +26,16 @@ def _desc():
     if _DESC is None:
         _DESC = {}
         try:   # descrição da base unificada (dados/, no Git); o arquivo de estoque saiu (T-0019, 20/11)
-            b = pd.read_excel(os.path.join(AQUI, '..', '..', 'dados', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx'), 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'DESCRICAO'])
+            b = pd.read_excel(BASE_UNIFICADA, 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'DESCRICAO'])
             _DESC.update({c: d for c, d in zip(b.CODIGO_BAP, b.DESCRICAO) if isinstance(d, str) and d.strip()})
         except Exception:
             pass
-        for fn in ('BASE_BAP_UNIFICADA_PRODUTOS_BAP_v8.xlsx', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx'):
-            try:
-                b = pd.read_excel(os.path.join(AQUI, 'entradas', fn), 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'DESCRICAO'])
-                for c, d in zip(b.CODIGO_BAP, b.DESCRICAO):
-                    _DESC.setdefault(c, d)
-            except Exception:
-                pass
+        try:   # v8: só para códigos antigos que não estão na base unificada
+            b = pd.read_excel(os.path.join(AQUI, 'entradas', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP_v8.xlsx'), 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'DESCRICAO'])
+            for c, d in zip(b.CODIGO_BAP, b.DESCRICAO):
+                _DESC.setdefault(c, d)
+        except Exception:
+            pass
     return _DESC
 
 
@@ -207,7 +208,7 @@ def preencher_aplicacao(fams):
         try:
             b = pd.read_excel(os.path.join(AQUI, 'entradas', fn), 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'APLICACAO'])
             base.update({str(c).strip().upper(): str(a).strip() for c, a in zip(b.CODIGO_BAP, b.APLICACAO)
-                         if isinstance(a, str) and a.strip() and 'R$' not in a})   # preço nunca entra (v8 do TER556556: 'R$ 103.88+ Detalhes')
+                         if isinstance(a, str) and a.strip() and not re.search(r'R\s*\$', a, re.I)})   # preço nunca entra (TER556556 tinha preço na aplicação da v8)
         except Exception:
             pass
     for f in fams:

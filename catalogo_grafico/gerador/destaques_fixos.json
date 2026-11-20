@@ -1,5 +1,5 @@
 {
- "_sobre": "Destaques fixos da linha (T-0019, decisão do Alexandre R-20261120-153200): os 5 destaques do catálogo 2027 entregue em 13/11, A4 e digital. Só códigos. Item fora da base ou INATIVO e família sem lista: completa pela regra (1º com foto própria, 2º com aplicação ou especificação, 3º pelo código).",
+ "_sobre": "Destaques fixos por família (T-0019, só códigos). Regra: LEIA_GERADOR.md, seção \"Na nuvem\".",
  "familias": {
   "Amortecedores": [
    "AMT7002",

@@ -97,7 +97,7 @@ def feats(r):
 
 def match(a_name, b_name, maxn=2, need_engine=True):
     A, B = F[a_name]['rows'], F[b_name]['rows']
-    FB = [(r, feats(r), brands(r)) for r in B if not r.get('sem_estoque')]   # par só com item em estoque (27/10)
+    FB = [(r, feats(r), brands(r)) for r in B if not r.get('sem_estoque')]   # par só com item ATIVO no cadastro (sem_estoque = não ATIVO, T-0019)
     res, stats = {}, collections.Counter()
     for r in A:
         m, e, v, y = feats(r); ba = brands(r)
