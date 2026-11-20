@@ -869,12 +869,13 @@
     const etq = app.querySelector(".etiquetas");
     const itens = [];
     const q = pr.get("q");
-    if (q) itens.push({ nome: "Busca: “" + q + "”", tirar: (n) => n.delete("q") });
+    // a etiqueta da busca mostra só o termo entre aspas (R-20261120-141300); o ✕ continua dizendo "Busca" ao leitor de tela
+    if (q) itens.push({ nome: "“" + q + "”", leitor: "Busca: “" + q + "”", tirar: (n) => n.delete("q") });
     for (const k of Object.keys(ROT_FILTRO)) for (const v of pr.getAll(k).filter(Boolean))
       itens.push({ nome: ROT_FILTRO[k] + ": " + titulo(v), tirar: (n) => { const r = n.getAll(k).filter((x) => x !== v); n.delete(k); r.forEach((x) => n.append(k, x)); } });
     if (!itens.length) return;
     etq.hidden = false;
-    etq.innerHTML = itens.map((it, i) => `<span class="etq"><span>${esc(it.nome)}</span><button type="button" data-i="${i}" aria-label="${esc("Tirar " + it.nome)}">✕</button></span>`).join("")
+    etq.innerHTML = itens.map((it, i) => `<span class="etq"><span>${esc(it.nome)}</span><button type="button" data-i="${i}" aria-label="${esc("Tirar " + (it.leitor || it.nome))}">✕</button></span>`).join("")
       + (itens.length >= 2 ? `<button class="limpar-tudo" type="button">Limpar tudo</button>` : "");
     etq.addEventListener("click", (ev) => {
       const b = ev.target.closest("button");
