@@ -28,7 +28,8 @@
        campos lado a lado (q e placa; no celular um embaixo do outro) com UM só botão "Buscar" e Enter nos 2 (os 2
        preenchidos: o veículo da placa filtrado pelo texto); faixa do veículo logo abaixo do quadro da busca na ordem Placa · Marca · Modelo · Ano · Motor · Versão (5 listas
        em cascata; R-20261120-124800: sai o "Meu veículo", que vira o rótulo "Placa" em cima da placa, e sai o "Trocar
-       veículo"), sem chave liga/desliga e sem o menu
+       veículo"; TRANSIÇÃO p1, R-20261120-175400 e R-20261120-181200: até 640 px, com a placa, o rótulo pode sair só da
+       vista, com as declarações da .vh, no DOM e apontado pelo aria-labelledby da placa), sem chave liga/desliga e sem o menu
        "Departamentos"; a placa consultada em destaque (etiqueta com X) na faixa, que preenche as listas; o "Limpar tudo"
        não tira o veículo; filtros numa coluna fina à ESQUERDA dos cartões, de cima a baixo (1366 e 1536 px), e no celular
        no botão "Filtrar (n)" com o painel; cartões (fA2, R-20261120-140900): 4 na 1ª linha em 1366 e 1536 px, 5 em 1920
@@ -1353,7 +1354,16 @@ async function testarSite(base, ctxJson, dirPrints) {
           if (etq && faixa) {
             const re = etq.getBoundingClientRect();
             const r = [...faixa.querySelectorAll("*")].find((e) => !e.children.length && T.visivel(e) && /^Placa:?$/i.test(e.textContent.trim()) && (() => { const x = e.getBoundingClientRect(); return x.width > 2 && x.bottom <= topoP + 2 && x.right > re.left && x.left < re.right; })());
-            rotP = r ? "ok" : [...faixa.querySelectorAll("*")].filter((e) => !e.children.length && T.visivel(e) && /placa/i.test(e.textContent)).map((e) => e.textContent.trim()).join(" | ") || "nenhum";
+            // transição p1 (R-20261120-175400 e R-20261120-181200-alexandre): até 640 px, o rótulo pode sair só da vista,
+            // com as declarações da .vh (absolute, 1×1 px, overflow hidden, clip 0, nowrap), no DOM e apontado pelo
+            // aria-labelledby da placa. Acima de 640 px, só vale o rótulo à vista.
+            const vh = (e) => { const cs = getComputedStyle(e), x = e.getBoundingClientRect();
+              return cs.position === "absolute" && x.width <= 1 && x.height <= 1 && cs.overflow === "hidden" && /^rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)$/.test(cs.clip)
+                && cs.whiteSpace === "nowrap" && cs.display !== "none" && cs.visibility !== "hidden" && !e.closest('[hidden],[aria-hidden="true"]'); };
+            const ids = (etq.getAttribute("aria-labelledby") || "").split(/\s+/).filter(Boolean);
+            const rVh = !r && window.innerWidth <= 640 && [...faixa.querySelectorAll("[id]")].find((e) => !e.children.length && /^Placa:?$/i.test(e.textContent.trim())
+              && ids.includes(e.id) && document.getElementById(e.id) === e && vh(e));
+            rotP = r ? "ok" : rVh ? "ok-vh" : [...faixa.querySelectorAll("*")].filter((e) => !e.children.length && T.visivel(e) && /placa/i.test(e.textContent)).map((e) => e.textContent.trim()).join(" | ") || "nenhum";
           }
           const antesMarca = !!etq && !!listas[0] && !!(etq.compareDocumentPosition(listas[0]) & Node.DOCUMENT_POSITION_FOLLOWING);
           const sel = listas.map((l) => (l && l.value ? (l.selectedOptions[0] || {}).textContent || l.value : ""));
@@ -1370,7 +1380,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         else if (v.etq && !v.naFaixa) falha("placa", N_PL, "etiqueta:faixa", `${L}: a etiqueta da placa ("${cortar(v.etq, 40)}") fica fora da faixa do veículo${v.noQuadro ? " (no quadro da busca)" : ""} (pedido: em destaque na faixa, no lugar da chave)`);
         // [SUPOSIÇÃO] "em destaque": o texto da placa com fonte de 16 px ou mais
         if (v.etq && v.fonteP < 16) falha("placa", N_PL, "etiqueta:destaque", `${L}: a placa na faixa com fonte de ${v.fonteP} px (destaque: 16 px ou mais)`);
-        if (v.etq && v.naFaixa && v.rotP !== "ok") falha("placa", N_PL, "etiqueta:rotulo", `${L}: sem o rótulo "Placa" à vista em cima da placa na faixa (textos com "placa" ali: ${cortar(v.rotP, 80)})`);
+        if (v.etq && v.naFaixa && v.rotP !== "ok" && v.rotP !== "ok-vh") falha("placa", N_PL, "etiqueta:rotulo", `${L}: sem o rótulo "Placa" à vista em cima da placa na faixa (textos com "placa" ali: ${cortar(v.rotP, 80)})`);
         if (v.etq && v.naFaixa && !v.antesMarca) falha("placa", N_PL, "etiqueta:ordem", `${L}: a placa não vem antes da Marca na faixa (ordem pedida: Placa · Marca · Modelo · Ano · Motor · Versão)`);
         const esperadoSel = [/volkswagen|\bvw\b/i, /\bgol\b/i, /\b2018\b/, /\b1[.,]6\b/], nomesSel = ["Marca", "Modelo", "Ano", "Motor"];
         esperadoSel.forEach((rx, i) => { if (v.temFaixa && !rx.test(v.sel[i] || "")) falha("placa", N_PL, "veiculo:lista:" + nomesSel[i], `${L}: depois da placa (VW GOL 2018 1.6), a lista ${nomesSel[i]} ficou com "${v.sel[i] || "(nada)"}"`); });
@@ -1439,6 +1449,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         conferirConsole("placa-veiculo");
         CAMPOS_TELA.placa = v.etq ? `etiqueta "${cortar(v.etq, 40)}"` : "";
         CAMPOS_TELA.veiculo = mm || "";
+        if (v.rotP === "ok" || v.rotP === "ok-vh") (CAMPOS_TELA.rotulo ||= []).push(`${L}: ${v.rotP === "ok" ? "à vista" : "só para o leitor de tela (.vh, aria-labelledby)"}`);
         detalhe("a11y", N_A11Y, `campos com rótulo, imagens com alt, Tab chega ao campo q e ao da placa (${pq} e ${pp} passos), foco visível nos 2`);
       }
 
@@ -1454,7 +1465,7 @@ async function testarSite(base, ctxJson, dirPrints) {
   detalhe("filtros", "filtros da busca", [siTxt, FILTRO_SI.marcou ? "barra: Esc fecha; " + FILTRO_SI.marcou + "; etiqueta \"Tirar\" criada e tirada" : ""].filter(Boolean).join("; "));
   if (TELAS.has("campos")) {
     detalhe("campos-busca", "campos da busca", `${CAMPOS_TELA.rotulos || "?"}; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro da busca (1 ou 2 na página inicial, transição T-0018); q com Enter e botão (busca código e veículo)`);
-    detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} em destaque na faixa, com o rótulo "Placa" em cima e antes da Marca, e as listas "${CAMPOS_TELA.veiculo || "?"}"; ${CAMPOS_TELA.trava || ""}; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas`);
+    detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} em destaque na faixa, com o rótulo "Placa" em cima (${(CAMPOS_TELA.rotulo || []).join("; ") || "?"}) e antes da Marca, e as listas "${CAMPOS_TELA.veiculo || "?"}"; ${CAMPOS_TELA.trava || ""}; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas`);
     detalhe("meuveiculo", "meu veículo", MV.join("; ") + '; faixa logo abaixo do quadro da busca, 5 listas em cascata (Marca, Modelo, Ano, Motor, Versão); sem "Meu veículo", sem "Trocar veículo", sem chave liga/desliga, sem "Departamentos"');
     detalhe("filtros", "filtros da busca", [FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "", FILTRO_SI.coluna || "", FILTRO_SI.painel || "", FILTRO_SI.sempre || "", FILTRO_SI.marcou || ""].filter(Boolean).join("; "));
     detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 4 ou 5 na 1ª linha em 1366 e 1536 (transição; o fA2 pede 4), 5 em 1920 (a partir de 1680), 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes"`);
