@@ -1406,7 +1406,7 @@
           ${dados}
         </div>
       </div>
-      <div class="so-impressao rod-pdf">As fotos são ilustrativas. Confira sempre a aplicação antes da compra.<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
+      <div class="so-impressao rod-pdf">As fotos são ilustrativas.${secApl ? "" : " Confira sempre a aplicação antes da compra."}<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
   }
   function ligarAcoes(raiz) {
     raiz.querySelector("[data-copiar]").addEventListener("click", (ev) => {

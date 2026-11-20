@@ -67,7 +67,7 @@ main:focus, main:focus-visible { outline: none; }
 .marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--branco); border-left: 1px solid color-mix(in srgb, var(--branco) 35%, transparent); padding-left: 10px; }
 .menu { display: flex; gap: 12px; }
 .menu a { display: flex; align-items: center; min-height: 44px; padding-inline: 5px; text-decoration: none; color: var(--branco); font-weight: 500; font-size: 14px; } /* toque com 44 px */
-.menu a:hover { color: var(--verde); }
+.menu a:hover { color: var(--branco); text-decoration: underline; text-decoration-color: var(--verde); text-decoration-thickness: 2px; text-underline-offset: 6px; } /* o --verde no texto some na ponta verde do degradê (designer-ux) */
 .topo :focus-visible { outline-color: var(--branco); } /* no escuro e na ponta verde, 4:1 ou mais */
 
 /* cartão de busca */
