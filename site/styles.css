@@ -42,6 +42,8 @@
 /* o cabeçalho fica por cima (fixo no início, sticky nas outras telas): o foco e as âncoras param abaixo dele
    (WCAG 2.4.11; designer-ux, T-0018) */
 html { scroll-padding-top: var(--alto-topo); }
+/* o próprio cabeçalho não precisa da folga: focar o menu não faz a página pular (designer-ux) */
+.topo a, .topo button, .topo input { scroll-margin-top: calc(-1 * var(--alto-topo)); }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } } /* com reduce, a rolagem vai direto */
 body { margin: 0; font-family: Poppins, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--texto); background: var(--fundo); font-size: 15px; line-height: 1.5; }
 img { max-width: 100%; display: block; }
@@ -58,8 +60,8 @@ main:focus, main:focus-visible { outline: none; }
 .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--escuro); }
 .marca img { height: 46px; width: auto; }
 .marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-2); border-left: 1px solid var(--linha); padding-left: 10px; }
-.menu { display: flex; gap: 22px; }
-.menu a { display: flex; align-items: center; min-height: 44px; text-decoration: none; color: var(--texto); font-weight: 500; font-size: 14px; } /* toque com 44 px */
+.menu { display: flex; gap: 12px; }
+.menu a { display: flex; align-items: center; min-height: 44px; padding-inline: 5px; text-decoration: none; color: var(--texto); font-weight: 500; font-size: 14px; } /* toque com 44 px */
 .menu a:hover { color: var(--verde-txt); }
 
 /* cartão de busca */
@@ -324,7 +326,7 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
 }
 @media (max-width: 640px) {
   :root { --alto-topo: 76px; }
-  .menu { gap: 12px; }
+  .menu { gap: 2px; }
   .menu a { font-size: 13px; white-space: nowrap; } /* 3 itens (op4e): o "Sobre a BAP" aparece também no celular */
   .marca img { height: 38px; }
   .marca { gap: 8px; }
@@ -623,4 +625,19 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .sb-dados { grid-template-columns: minmax(0, 1fr); }
   .sb-dados div { border-left: 0; padding: 14px 18px; }
   .sb-dados div + div { border-top: 1px solid var(--linha); }
+}
+
+/* botões de sistema do início (R-20261120-152800): os do main, no visual da home nova; 2 colunas no celular */
+.sistemas-bloco { padding-top: 0; padding-bottom: 44px; }
+.sistemas { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+.sistema { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); padding: 16px; min-height: 44px; text-decoration: none; color: var(--texto); display: flex; flex-direction: column; gap: 2px; transition: border-color .15s, box-shadow .15s; }
+.sistema:hover { border-color: var(--verde); box-shadow: var(--sombra); }
+.sistema b { font-size: 15px; color: var(--escuro); }
+.sistema span { font-size: 13px; color: var(--texto-2); }
+.sistema i { width: 28px; height: 4px; border-radius: 2px; background: var(--verde); margin-bottom: 10px; }
+@media (max-width: 640px) {
+  .sistemas-bloco { padding-bottom: 28px; }
+  .sistemas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .sistema { padding: 12px; }
+  .sistema b { font-size: 14px; }
 }
