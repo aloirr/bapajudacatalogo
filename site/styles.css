@@ -564,7 +564,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .recentes-bloco { padding-top: 18px; }
   .rec-topo { margin-bottom: 8px; }
   .rec-topo h2, .sistemas-bloco h2 { font-size: 18px; } /* os títulos das seções do início com o mesmo tamanho (MC-0001) */
-  .rec-topo .sub, .sistemas-bloco .sub { font-size: 13px; }
+  .rec-topo .sub { font-size: 13px; }
   .rec-todos { font-size: 13px; }
   .rec-lista { padding: 0 12px; }
   .rec-item { gap: 12px; min-height: 56px; padding: 6px 0; }
@@ -632,6 +632,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 
 /* botões de sistema do início (R-20261120-152800): os do main, no visual da home nova; 2 colunas no celular */
 .sistemas-bloco { padding-top: 0; }
+.sistemas-bloco h2 { margin: 0 0 12px; } /* sem o subtítulo (RD-0146, R-20261120-154500-alexandre) */
 .sistemas { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
 .sistema { padding: 16px; gap: 2px; } /* o resto do cartão vem do .item */
 .sistema b { font-size: 15px; color: var(--escuro); }

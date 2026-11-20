@@ -857,7 +857,6 @@
       <section class="bloco recentes-bloco" aria-busy="true"><ul class="rec-lista espera" aria-hidden="true">${"<li><span class=\"rec-item\"><span class=\"rec-foto\"></span></span></li>".repeat(N_LISTA)}</ul></section>
       <section class="bloco sistemas-bloco" aria-labelledby="tit-sistemas">
         <h2 id="tit-sistemas">Navegue por sistema</h2>
-        <p class="sub">Toque em um sistema para ver todos os produtos dele.</p>
         <div class="sistemas">${contar(BASE.produtos, "si").map(([si, n]) => `<a class="sistema" href="#/busca?si=${encodeURIComponent(si)}"><i aria-hidden="true"></i><b>${esc(titulo(si))}</b><span>${nProd(n)}</span></a>`).join("")}</div>
       </section>`;
     const sec = app.querySelector(".recentes-bloco");
