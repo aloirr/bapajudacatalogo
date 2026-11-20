@@ -1,0 +1,41 @@
+{
+  "atualizado_em": "20/11/2026",
+  "regra": "Cada caminho tem um dono. Vale o PRIMEIRO padrão da lista que casar com o arquivo. Só o dono mexe no arquivo; outro agente pede pelo gerente-projetos. Dono 'alexandre' = o agente pode propor no PR, mas o arquivo só entra no main com o 'aprovado' dele. Dono 'congelado' = ninguém mexe.",
+  "agentes": ["po", "gerente-projetos", "catalogo-dados", "catalogo-grafico", "web-site", "integracao-placas", "testes", "revisor-codigo"],
+  "donos": [
+    { "caminho": ".claude/**", "dono": "alexandre" },
+    { "caminho": ".coord/donos.json", "dono": "alexandre" },
+    { "caminho": "render.yaml", "dono": "alexandre" },
+    { "caminho": ".github/**", "dono": "alexandre" },
+    { "caminho": "CLAUDE.md", "dono": "alexandre", "obs": "[SUPOSIÇÃO] regras do repositório" },
+    { "caminho": ".gitignore", "dono": "alexandre", "obs": "[SUPOSIÇÃO] é a barreira contra segredo e dado interno no Git" },
+
+    { "caminho": "docs/legado/**", "dono": "congelado" },
+
+    { "caminho": ".coord/README.md", "dono": "gerente-projetos" },
+    { "caminho": ".coord/quadro.md", "dono": "po", "obs": "o gerente-projetos atualiza a situação e o PR" },
+    { "caminho": ".coord/tarefas/**", "dono": "po", "obs": "o gerente-projetos escreve Passos e Registro; testes e revisor-codigo escrevem no Registro" },
+    { "caminho": "docs/propostas/**", "dono": "po" },
+    { "caminho": "docs/ROADMAP.md", "dono": "po" },
+    { "caminho": "README.md", "dono": "po" },
+
+    { "caminho": "dados/**", "dono": "catalogo-dados" },
+
+    { "caminho": "catalogo_grafico/**", "dono": "catalogo-grafico" },
+
+    { "caminho": "site/**", "dono": "web-site", "obs": "site/data/produtos.json e site/img/ saem do scripts/gerar_site.py; não editar à mão" },
+    { "caminho": "scripts/gerar_site.py", "dono": "web-site" },
+    { "caminho": "ATUALIZAR_CATALOGO.bat", "dono": "web-site" },
+    { "caminho": "requirements.txt", "dono": "web-site" },
+    { "caminho": "docs/DADOS_DO_SITE.md", "dono": "web-site" },
+
+    { "caminho": "servicos/placas/**", "dono": "integracao-placas", "obs": "[SUPOSIÇÃO] pasta nova da fase 3" },
+    { "caminho": "docs/placas/**", "dono": "integracao-placas", "obs": "[SUPOSIÇÃO] pasta nova da fase 3" },
+
+    { "caminho": "scripts/testar_site.*", "dono": "testes" },
+    { "caminho": "testes/**", "dono": "testes" },
+
+    { "caminho": "scripts/**", "dono": "gerente-projetos", "obs": "[SUPOSIÇÃO] script novo sem dono: o gerente define o dono antes de criar" },
+    { "caminho": "**", "dono": "gerente-projetos", "obs": "[SUPOSIÇÃO] arquivo sem dono: o gerente define o dono e pede ao Alexandre para incluir aqui" }
+  ]
+}
