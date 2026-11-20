@@ -37,7 +37,7 @@ Alexandre ◀──entrega + prints + PR── po ◀─┘
     └── "aprovado" da simulação ──▶ po autoriza o merge (número + SHA) ──▶ gerente-projetos faz o merge
 ```
 
-Caminho: dono → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` → PR → `po` → Alexandre. O `po` autoriza todos os merges, inclusive os de governança, e o `gerente-projetos` executa (R-20261120-111308-alexandre); as simulações de tela e de PDF continuam indo ao Alexandre.
+Caminho: dono → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` → PR → `po`. O `po` autoriza todos os merges, inclusive os de governança, e o `gerente-projetos` executa (R-20261120-111308-alexandre); as simulações de tela e de PDF continuam indo ao Alexandre.
 
 1. **Pedido.** O Alexandre fala com o `po`. O `po` cria `.coord/tarefas/T-nnnn.md` (modelo abaixo) e a linha no `quadro.md`.
 2. **Plano.** O `gerente-projetos` escreve os passos na tarefa e abre o branch.
