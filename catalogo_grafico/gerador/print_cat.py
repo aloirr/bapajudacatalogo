@@ -12,7 +12,6 @@ from digital2 import W, H, MX, CW, TOP, FOOT, HERO, S, lw, para_h
 import taxo
 
 M = MO.X.PF.M
-STK = M.STK
 FAMS = MO.FAMS
 BPX = 3 * mm / S
 CMYK = dict(black=(0, 0, 0, 1), ink=(0, 0, 0, .95), sec=(0, 0, 0, .75), grey=(0, 0, 0, .68), green=(.75, 0, 1, 0),
@@ -27,18 +26,10 @@ LEGAL_R = ' — material exclusivo do time BAP. Proibida a distribuição a clie
 
 
 import os
-import hashlib
-_D = 'entradas/bap'
-os.makedirs(_D, exist_ok=True)
-_h = lambda f: hashlib.md5(open(os.path.join(_D, f), 'rb').read()).hexdigest()
-PLACEHOLDER = _h('FLU15002.jpg') if os.path.exists(os.path.join(_D, 'FLU15002.jpg')) else None          # arte "IMAGEM INDISPONÍVEL" (1.031 arquivos iguais)
+# fotos dos destaques: as do catálogo online (site/img, 700x700, código no nome), que estão no Git (T-0019, 20/11)
+_D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'site', 'img')
 IMG = {taxo.norm(os.path.splitext(f)[0]): os.path.join(_D, f)
-       for f in os.listdir(_D) if f.lower().endswith(('.jpg', '.jpeg', '.png')) and _h(f) != PLACEHOLDER}
-
-
-def est_of(code):
-    c = taxo.norm(code)
-    return int(STK.loc[c, 'est']) if c in STK.index else 0
+       for f in (os.listdir(_D) if os.path.isdir(_D) else []) if f.lower().endswith(('.jpg', '.jpeg', '.png'))}
 
 
 class PDoc(D2.Doc):
@@ -169,15 +160,13 @@ CARD_FS = 8.2
 def pick(f):
     rows = list(f['rows'])
     for r in rows:
-        r['_est'] = est_of(r['code']); r['_img'] = IMG.get(taxo.norm(r['code']))
+        r['_img'] = IMG.get(taxo.norm(r['code']))
     pool = [r for r in rows if r['segs']] if not f['spec'] else rows
     if len(pool) < min(5, len(rows)): pool = rows
-    com_est = [r for r in pool if r['_est'] > 0]           # destaque só com estoque (itens sem estoque entraram em 27/10)
-    if com_est: pool = com_est
-    # destaques: maior estoque, dando preferência a quem tem foto própria
-    top = sorted(pool, key=lambda r: (0 if r['_img'] else 1, -r['_est']))[:5]
+    # destaques (T-0019, 20/11): 1) com foto própria; 2) com aplicação ou especificação; 3) pelo código
+    top = sorted(pool, key=lambda r: (0 if r['_img'] else 1, 0 if r['segs'] else 1, r['code']))[:5]
     tk = {id(r) for r in top}
-    rest = sorted([r for r in rows if id(r) not in tk], key=lambda r: (0 if (r['segs'] or f['spec']) else 1, -r['_est'], r['code']))
+    rest = sorted([r for r in rows if id(r) not in tk], key=lambda r: (0 if (r['segs'] or f['spec']) else 1, r['code']))
     return top, rest
 
 
@@ -461,7 +450,7 @@ def como(dc, pg):
     topbar(dc, f'Catálogo {ANO}')
     hero(dc, 'GUIA RÁPIDO', 'Como consultar', 'Encontre a peça certa e aumente o ticket em poucos passos.')
     passos = [('Encontre a linha', 'O sumário organiza as linhas por sistema do veículo (suspensão, freio, arrefecimento...). Cada página traz uma linha de produtos BAP.'),
-              ('Veja os destaques', 'Os cards no topo mostram os itens de maior estoque da linha, com foto, aplicação e equivalência.'),
+              ('Veja os destaques', 'Os cards no topo mostram os itens em destaque da linha, com foto, aplicação e equivalência.'),
               ('Consulte a lista', 'A tabela traz mais produtos da linha, com código, aplicação, posição e equivalência. Aplicações longas terminam em "(+ outras aplicações)".'),
               ('Leve também', 'A coluna e a faixa "Leve também" indicam o agregado de cada produto, como bomba d\'água com o kit de distribuição ou câmara com o pneu.'),
               ('Fique atento às tags', 'NOVO: produto recém-chegado ao portfólio BAP. LANÇAMENTO 2026: linha lançada em 2026, indicada no topo da página.'),

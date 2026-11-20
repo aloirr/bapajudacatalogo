@@ -23,7 +23,7 @@ def _tipo(code):
 def _foto(rows, padrao):
     try:
         import print_cat as PC, taxo
-        for r in sorted(rows, key=lambda r: -PC.est_of(r['code'])):
+        for r in sorted(rows, key=lambda r: r['code']):   # 1ª foto própria pela ordem do código (sem estoque, T-0019)
             p = PC.IMG.get(taxo.norm(r['code']))
             if p: return p
     except Exception:

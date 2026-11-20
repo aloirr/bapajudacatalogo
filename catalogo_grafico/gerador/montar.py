@@ -15,12 +15,13 @@ old_img['Catraca de Freio'] = 'dimg/catraca.png'
 old_img['Interruptores de Pressão do Óleo'] = None
 old_img['Interruptores e Sensores Elétricos'] = None
 
-e = pd.read_excel('entradas/ESTOQUE_BAP.xlsx'); e['code'] = e.COD_PRODUTO.map(norm)
-STK = e.groupby('code').agg(est=('ESTOQUE', 'sum'), desc=('DESCRICAO_PRODUTO', 'first'), cod=('COD_PRODUTO', 'first'),
-                            forn=('FORNECEDOR', 'first'), cod_forn=('COD_FORNECEDOR', 'first'), cat_atual=('CATEGORIA', 'first'))
-BASE = pd.read_excel('entradas/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx', 'PRODUTOS')
+import os as _os
+# base unificada: a fonte única, dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx, que está no Git (T-0019, 20/11: sem estoque)
+BASE_UNIFICADA = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..', '..', 'dados', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx')
+BASE = pd.read_excel(BASE_UNIFICADA, 'PRODUTOS')
 BASE['code'] = BASE.CODIGO_BAP.map(norm)
 BASE_D = {r.code: r for r in BASE.itertuples()}
+DESC = {c: (str(r.DESCRICAO) if isinstance(r.DESCRICAO, str) else '') for c, r in BASE_D.items()}
 
 BR_SHORT = {'VOLKSWAGEN': 'VW', 'CHEVROLET': 'GM', 'GENERAL MOTORS': 'GM', 'MERCEDES-BENZ': 'MB', 'MERCEDES BENZ': 'MB',
             'CITROEN': 'CITROËN', 'KIA MOTORS': 'KIA'}
@@ -97,31 +98,15 @@ def plain(segs):
     return re.sub(r'\s+', ' ', ''.join(t for t, b in segs)).strip()
 
 
-# ---------------------------------------------------------------- itens do catálogo (estoque atual)
-rows_by_line = collections.defaultdict(list); novos, sem_linha, sairam = [], [], []
-# 1) todos os itens do catálogo digital atual permanecem (inclusive as cuícas sem estoque, pedidas por completo)
+# ---------------------------------------------------------------- itens do catálogo
+rows_by_line = collections.defaultdict(list); sem_linha = []
+# 1) todos os itens do catálogo digital atual permanecem
 for code, r in cat_row.items():
-    desc = STK.loc[code, 'desc'] if code in STK.index else ''
-    rows_by_line[taxo.line_of(code, desc, cat_line[code])].append(dict(r))
-# 2) itens novos com estoque que ainda não estavam no catálogo
-for code, s in STK.iterrows():
-    if code in cat_row: continue
-    if s.est <= 0 or 'INATIVO' in str(s.desc).upper(): continue
-    line = taxo.line_of(code, s.desc, cat_line.get(code))
-    if line is None: sem_linha.append((s.cod, s.desc)); continue
-    if True:
-        b = BASE_D.get(code)
-        r = dict(code=str(s.cod), nov=True, sub=pos_sub(s.desc), segs=segs_from_base(b.APLICACAO) if b is not None else [],
-                 refs=refs_from_base(b.REFERENCIAS_CRUZADAS) if b is not None else '')
-        if line in ('Óleo Lubrificante', 'Baterias', 'Fluidos e Químicos', 'Rodas de Aço e Alumínio', 'Cintas e Catracas', 'Pneus e Câmaras de Ar Moto'):
-            r['segs'] = [[str(s.desc).strip().capitalize(), False]]; r['sub'] = ''
-        novos.append((s.cod, line))
-    rows_by_line[line].append(r)
-# 3) itens da base unificada (versão mais alta em saidas/) que não têm estoque mas estão no cadastro:
-#    entram no catálogo também (Alexandre, 27/10: "todos os produtos que não tiverem estoque mas tiverem no
-#    catálogo devem aparecer"). Fora: INATIVO. Linha = coluna PRODUTO da base.
-import glob as _glob
-SEM_ESTOQUE = []
+    rows_by_line[taxo.line_of(code, DESC.get(code, ''), cat_line[code])].append(dict(r))
+# 2) itens da base unificada que ainda não estão no catálogo (fora: INATIVO). Linha = coluna PRODUTO da base.
+#    Sem o arquivo de estoque (T-0019, 20/11): STATUS_CADASTRO da base diz se o item é ATIVO (tag NOVO, como antes)
+#    ou se entrou só pelo cadastro (sem_estoque: fica fora do "Leve também", como antes).
+SEM_ESTOQUE, novos = [], []
 
 
 def _em_diante(app):
@@ -129,23 +114,24 @@ def _em_diante(app):
     if not isinstance(app, str): return app
     app = re.sub(r'\b((?:19|20)\d{2})\s*/\s*\.{2,}', r'\1>', app)
     return re.sub(r'(?<![\d/])(\d{2})\s*/\s*\.{2,}', lambda m: ('20' if int(m.group(1)) <= 30 else '19') + m.group(1) + '>', app)
-_bases = sorted(_glob.glob('saidas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v*.xlsx'), key=lambda p: int(re.search(r'_v(\d+)\.xlsx$', p).group(1)))
-if _bases:
-    _BU = pd.read_excel(_bases[-1], 'PRODUTOS')
-    _ja = {norm(r['code']) for rs in rows_by_line.values() for r in rs}
-    _linhas = {l[0] for l in LINES}
-    for b in _BU.itertuples():
-        code = norm(b.CODIGO_BAP)
-        if code in _ja or 'INATIVO' in str(b.STATUS_CADASTRO).upper(): continue
-        if code in STK.index and STK.loc[code, 'est'] > 0: continue      # com estoque já entrou no passo 2
-        line = b.PRODUTO if b.PRODUTO in _linhas else taxo.line_of(code, str(b.DESCRICAO), None)
-        if line is None: sem_linha.append((b.CODIGO_BAP, b.DESCRICAO)); continue
-        r = dict(code=str(b.CODIGO_BAP).strip(), nov=False, sub=pos_sub(b.DESCRICAO), segs=segs_from_base(_em_diante(b.APLICACAO)),
-                 refs=refs_from_base(b.REFERENCIAS_CRUZADAS), sem_estoque=True)
-        if line in ('Óleo Lubrificante', 'Baterias', 'Fluidos e Químicos', 'Rodas de Aço e Alumínio', 'Cintas e Catracas', 'Pneus e Câmaras de Ar Moto'):
-            r['segs'] = [[str(b.DESCRICAO).strip().capitalize(), False]]; r['sub'] = ''
-        rows_by_line[line].append(r); _ja.add(code); SEM_ESTOQUE.append((r['code'], line))
-sairam = [c for c in cat_row if c not in STK.index or STK.loc[c, 'est'] <= 0]
+
+
+_ja = {norm(r['code']) for rs in rows_by_line.values() for r in rs}
+_linhas = {l[0] for l in LINES}
+for b in BASE.itertuples():
+    code = b.code
+    st = str(b.STATUS_CADASTRO).upper()
+    if code in _ja or 'INATIVO' in st or 'INATIVO' in DESC.get(code, '').upper(): continue
+    line = b.PRODUTO if b.PRODUTO in _linhas else taxo.line_of(code, DESC.get(code, ''), None)
+    if line is None: sem_linha.append((b.CODIGO_BAP, b.DESCRICAO)); continue
+    ativo = st == 'ATIVO'
+    r = dict(code=str(b.CODIGO_BAP).strip(), nov=ativo, sub=pos_sub(b.DESCRICAO), segs=segs_from_base(_em_diante(b.APLICACAO)),
+             refs=refs_from_base(b.REFERENCIAS_CRUZADAS))
+    if not ativo: r['sem_estoque'] = True
+    if line in ('Óleo Lubrificante', 'Baterias', 'Fluidos e Químicos', 'Rodas de Aço e Alumínio', 'Cintas e Catracas', 'Pneus e Câmaras de Ar Moto'):
+        r['segs'] = [[str(b.DESCRICAO).strip().capitalize(), False]]; r['sub'] = ''
+    rows_by_line[line].append(r); _ja.add(code)
+    (novos if ativo else SEM_ESTOQUE).append((r['code'], line))
 
 SPEC = {'Óleo Lubrificante', 'Baterias', 'Fluidos e Químicos', 'Rodas de Aço e Alumínio', 'Cintas e Catracas', 'Pneus e Câmaras de Ar Moto'}
 fams = []
@@ -153,17 +139,10 @@ for name, *_ in sorted(LINES, key=lambda l: ORDER_SIS.index(l[2])):
     rows = sorted(rows_by_line.get(name, []), key=lambda r: r['code'])
     if not rows: continue
     m = META[name]
-    fam_set = {taxo.familia_of(name, STK.loc[norm(r['code']), 'desc'] if norm(r['code']) in STK.index else '') for r in rows}
+    fam_set = {taxo.familia_of(name, DESC.get(norm(r['code']), '')) for r in rows}
     eyebrow = m['sistema'] + (' · ' + next(iter(fam_set)) if len(fam_set) == 1 else '')
     fams.append(dict(name=name, group=m['sistema'], eyebrow=eyebrow, desc=m['desc'], count=len(rows), lanc=m['lanc'],
                      img=old_img.get(name), spec=name in SPEC, rows=rows))
-
-# ---------------------------------------------------------------- base unificada v8 (todos os códigos)
-APP_CAT = {}
-for f in fams:
-    for r in f['rows']:
-        APP_CAT[norm(r['code'])] = (f['name'], r)
-
 
 def app_base_fmt(segs):
     """segmentos do catálogo (datas já padronizadas) -> 'MONTADORA - modelos ; MONTADORA - modelos'"""
@@ -178,49 +157,8 @@ def app_base_fmt(segs):
     return ' ; '.join(out).replace('\x01', '').replace('\x02', '')
 
 
-base_codes = set(BASE.code)
-fontes = [(r.code, r) for r in BASE.itertuples()] + [(c, None) for c in STK.index if c not in base_codes]
-recs = []
-for c, b in fontes:
-    s = STK.loc[c] if c in STK.index else None
-    desc = (str(b.DESCRICAO) if b is not None and isinstance(b.DESCRICAO, str) else str(s.desc) if s is not None else '')
-    sdesc = str(s.desc) if s is not None else desc
-    inativo = 'INATIVO' in sdesc.upper()
-    if c in APP_CAT:
-        line, r = APP_CAT[c]
-        app = app_base_fmt(r['segs']) if (r['segs'] and line not in SPEC) else (b.APLICACAO if b is not None else '')
-        refs_src = 'CATÁLOGO DIGITAL'
-    else:
-        line = taxo.line_of(c, sdesc if s is not None else desc, None)
-        app = b.APLICACAO if b is not None else ''
-        refs_src = 'BASE v7'
-    if isinstance(app, float): app = ''
-    if line is None:
-        categoria, sistema, familia, linha, produto = 'OUTROS', 'OUTROS', 'OUTROS', '', 'Outros'
-    else:
-        m = META[line]; produto = line
-        categoria, sistema = m['categoria'], m['sistema']
-        familia = taxo.familia_of(line, sdesc)
-        linha = taxo.linha_of(line, sdesc, app, s.cat_atual if s is not None else '')
-    recs.append(dict(
-        CODIGO_BAP=(b.CODIGO_BAP if b is not None else s.cod),
-        DESCRICAO=desc,
-        PRODUTO=produto, CATEGORIA=categoria, SISTEMA=sistema, FAMILIA=familia, LINHA=linha if not inativo else (linha or ''),
-        APLICACAO=app,
-        REFERENCIAS_CRUZADAS=(b.REFERENCIAS_CRUZADAS if b is not None else ''),
-        DADOS_ADICIONAIS=(b.DADOS_ADICIONAIS if b is not None else ''),
-        CATEGORIA_ANTIGA_ESTOQUE=(s.cat_atual if s is not None else ''),
-        ESTOQUE_TOTAL=(int(s.est) if s is not None else None),
-        NO_CATALOGO_DIGITAL='SIM' if c in APP_CAT else 'NÃO',
-        STATUS='INATIVO' if inativo else ('ATIVO' if s is not None else 'FORA DO ESTOQUE'),
-    ))
-BASE8 = pd.DataFrame(recs)
-BASE8 = BASE8[BASE8.CODIGO_BAP.astype(str).str.strip() != 'BAP PN']
-
 if __name__ == '__main__':
-    print('linhas do catálogo', len(fams), '| itens', sum(f['count'] for f in fams), '| novos no catálogo', len(novos),
-          '| saíram do estoque', len(sairam), '| sem linha (estoque)', len(sem_linha))
+    print('linhas do catálogo', len(fams), '| itens', sum(f['count'] for f in fams), '| novos (ATIVO) no catálogo', len(novos),
+          '| só do cadastro', len(SEM_ESTOQUE), '| sem linha', len(sem_linha))
     print(collections.Counter(l for _, l in novos))
     print(sem_linha[:20])
-    print(BASE8.groupby(['SISTEMA']).size().to_string())
-    print(BASE8[BASE8.STATUS == 'ATIVO'].groupby(['SISTEMA', 'LINHA']).size().to_string())

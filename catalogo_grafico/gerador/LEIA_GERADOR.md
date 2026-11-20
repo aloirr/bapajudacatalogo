@@ -1,5 +1,11 @@
 # Gerador do Catálogo BAP — scripts em sintonia (PC EMPRESA e PC PESSOAL)
 
+## Na nuvem, sem o PC do Alexandre (T-0019, 20/11/2026)
+- O A4 e o digital rodam só com o que está no Git: base `dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx` (e a v10 de `dados/versoes/` para a FAMÍLIA dos filtros e o DETALHE), fotos dos destaques em `site/img/*.jpg` (pelo código com `taxo.norm`).
+- Sem `ESTOQUE_BAP.xlsx` e sem `entradas/bap/`. Destaques: 1) com foto própria; 2) com aplicação ou especificação; 3) pelo código. A lista: com aplicação primeiro, depois pelo código.
+- Tag NOVO e "Leve também" seguem o `STATUS_CADASTRO` da base (ATIVO = NOVO quando o item não estava no catálogo; os demais ficam fora do par do "Leve também").
+- As seções abaixo sobre o OneDrive e o estoque valem só para os scripts que ainda leem o estoque (`encartelados.py`, `kitfiltros/parse.py`, `apres_bemol.py`, `auditoria_catalogo.py`).
+
 Versão de 12/11/2026 (atualizada pelo PC EMPRESA; antes 27/10 pelo PC PESSOAL). **Os scripts deste pacote do projeto são a versão oficial.** Se o script do OneDrive (`Treinamentos e materiais de trade\catalogo_bap\gerador\`) ou o da nuvem da conversa for diferente, vale o do projeto.
 
 ## Montar o ambiente na nuvem do Cowork (cada sessão)

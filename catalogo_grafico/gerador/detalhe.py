@@ -1,7 +1,7 @@
 """Texto da coluna DETALHE/POSIÇÃO: completo (nunca com "…") e enxuto.
 
 1. Se o texto veio cortado ("…" herdado do PDF antigo), usa a descrição completa
-   da base unificada / ESTOQUE_BAP.
+   da base unificada.
 2. Tira do começo as palavras que repetem o nome da linha
    (ex.: "Bandeja suspensão" na página Bandejas de Suspensão).
 3. Abrevia termos comuns (esq., dir., compl., c/, hidr., diant., tras.).
@@ -23,9 +23,9 @@ def _desc():
     global _DESC
     if _DESC is None:
         _DESC = {}
-        try:
-            e = pd.read_excel(os.path.join(AQUI, 'entradas', 'ESTOQUE_BAP.xlsx'), dtype=str, usecols=['COD_PRODUTO', 'DESCRICAO_PRODUTO'])
-            _DESC.update(dict(zip(e.COD_PRODUTO, e.DESCRICAO_PRODUTO)))
+        try:   # descrição da base unificada (dados/, no Git); o arquivo de estoque saiu (T-0019, 20/11)
+            b = pd.read_excel(os.path.join(AQUI, '..', '..', 'dados', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx'), 'PRODUTOS', dtype=str, usecols=['CODIGO_BAP', 'DESCRICAO'])
+            _DESC.update({c: d for c, d in zip(b.CODIGO_BAP, b.DESCRICAO) if isinstance(d, str) and d.strip()})
         except Exception:
             pass
         for fn in ('BASE_BAP_UNIFICADA_PRODUTOS_BAP_v8.xlsx', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx'):
@@ -226,7 +226,8 @@ def _base10():
     global _BASE10
     if _BASE10 is None:
         _BASE10 = {}
-        for fn in ('saidas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx', 'entradas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx'):
+        for fn in ('saidas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx', 'entradas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx',
+                   '../../dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx'):   # a v10 está no Git em dados/versoes
             p = os.path.join(AQUI, fn)
             if os.path.exists(p):
                 b = pd.read_excel(p, 'PRODUTOS', dtype=str).fillna('')
