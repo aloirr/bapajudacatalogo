@@ -351,8 +351,8 @@ def fotos(produtos: list[dict], pasta: Path) -> int:
 
 
 # TRAVA: dado interno nunca vai para o site público
-# (AUTOIMPACT: fornecedor das palhetas, R-20261120-184000-alexandre; também escrito "AUTO IMPACT" ou "AUTO-IMPACT")
-TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|AUTO[\s_-]?IMPACT|R\$", re.I)
+# (AUTOIMPACT: ver FORNECEDORES; aqui junto ou com até 3 sinais entre AUTO e IMPACT: espaço, hífen, ponto...)
+TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|AUTO[\W_]{0,3}IMPACT|R\$", re.I)
 
 
 def conferir(produtos: list[dict]) -> list[str]:
