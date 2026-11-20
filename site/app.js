@@ -1068,10 +1068,10 @@
   // opções de cada lista, só com o que existe para a escolha anterior, com a contagem de produtos
   // (designer-ux: a contagem é só dentro do resultado da busca e dos filtros atuais, sem o próprio veículo)
   let E_DE = null; // produto → entrada do INDICE
+  const entradaDe = (p) => (E_DE || (E_DE = new Map(INDICE.map((e) => [e.p, e])))).get(p);
   function opcoesVeiculo(v, pr) {
-    if (!E_DE) E_DE = new Map(INDICE.map((e) => [e.p, e]));
     const semVei = new URLSearchParams(pr); VEI_K.forEach((k) => semVei.delete(k));
-    const base = buscar(semVei).map((p) => E_DE.get(p));
+    const base = buscar(semVei).map(entradaDe);
     const marcas = new Map(), modelos = new Map(), anos = new Map(), motores = new Map(), versoes = new Map();
     let semMotor = 0, semVersao = 0;
     for (const e of base) {
@@ -1251,6 +1251,20 @@
   // "Leve também" (faixa verde-clara), logo abaixo dos botões e antes da aplicação (opção B, R-20261120-140600): o título
   // à esquerda no computador e em cima no celular. "Itens parecidos" e "Diferencial BAP" saíram da tela e da ficha
   // impressa do site (R-20261120-155900-alexandre e R-20261120-160300-alexandre)
+  // "Leve também" conforme o veículo (R-20261120-181930-alexandre), da placa ou das listas Marca, Modelo, Ano... (o
+  // veículo das listas, sem placa, vale igual: R-20261120-182200-alexandre). A regra mora só aqui e no VEI_LEVE (render).
+  // Com o veículo, fica o item cujo "ve" tem a marca e o modelo dele (norm, como o filtro "Meu veículo") e, quando o
+  // item diz o ano (an ou as faixas da aplicação, o mesmo anoServe do filtro), o ano. O item sem "ve" (universal ou
+  // sem aplicação) e o fora do catálogo ficam. Sem veículo (busca pela descrição), a lista inteira do oj. Os que não
+  // servem saem sem aviso; sem nenhum, a seção some (secJunto). Só na tela: a base e o produtos.json não mudam.
+  let VEI_LEVE = null; // o veículo da busca de onde veio o produto ({ vm, vmo, va, vmt, vv }) ou null
+  const LEVE_COM_ANO = true; // false: compara só a marca e o modelo
+  const servemNoVeiculo = (cods, v) => !v || !v.vm ? cods : cods.filter((c) => {
+    const p = POR_COD.get(normCod(c)), e = p && entradaDe(p), ve = e && veDe(e);
+    if (!ve) return true;
+    if (!ve.some((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo))) return false;
+    return !LEVE_COM_ANO || !v.va || anoServe(e, v.va);
+  });
   const secJunto = (H2, cods) => cods.length
     ? `<section class="secao rel rel-oj"><${H2} class="secao-tit">Leve também</${H2}>${itensRelHtml(cods)}</section>` : "";
 
@@ -1373,7 +1387,7 @@
     if (p.la) ficha.push(["Lado", titulo(p.la)]);
     if (p.de) ficha.push(["Detalhe", p.de]);
     (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
-    const junto = listaCodigos(p.oj);
+    const junto = servemNoVeiculo(listaCodigos(p.oj), VEI_LEVE);
     const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e, embaixo, "Outros veículos e detalhes" (restoAplicacao);
     // no PDF, o texto inteiro vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
@@ -1593,6 +1607,8 @@
       if (voltouNaLista) { ROTA_ATUAL = location.hash; return; }
     }
     if (caminho !== "/busca") VEICULO_PLACA = null; // tela fora da busca (início, sobre, página do produto): a placa some
+    // o veículo do "Leve também": o da busca; o produto (página ou janela) fica com o da busca de onde veio; início e sobre, nenhum
+    if (!ehProduto) VEI_LEVE = caminho === "/busca" && params.get("vm") ? veiculoDaRota(params) : null;
     if (ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && ehProduto) VOLTA_LISTA = { hash: ROTA_ATUAL, n: ESTADO_LISTA.n(), y: window.scrollY, cod };
     ESTADO_LISTA = null;
     ROTA_ANTERIOR = ROTA_ATUAL;
