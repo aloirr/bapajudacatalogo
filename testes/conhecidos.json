@@ -171,7 +171,7 @@
     {
       "tarefa": "T-0009",
       "teste": "palavra",
-      "motivo": "'R$ 103.88+ Detalhes' na aplicação do TER556556 (relatório T-0001, problema 1)",
+      "motivo": "'R$ (valor)+ Detalhes' na aplicação do TER556556 (relatório T-0001, problema 1)",
       "chaves": [
         "R$:TER556556"
       ]
@@ -179,7 +179,7 @@
     {
       "tarefa": "T-0009",
       "teste": "tela-preco",
-      "motivo": "a página #/produto/TER556556 mostra 'R$ 103.88+' (relatório T-0001, problema 1)",
+      "motivo": "a página #/produto/TER556556 mostra 'R$ (valor)+' (relatório T-0001, problema 1)",
       "chaves": [
         "R$:TER556556"
       ]
