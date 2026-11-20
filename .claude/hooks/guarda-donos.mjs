@@ -24,12 +24,12 @@
 //    inteiro para os agentes: recado só pelo node scripts/coord.mjs. E, em qualquer pasta, o texto gravado por outro
 //    agente não leva "de: po"/"de: alexandre" nem o autor po@/alexandre@bapajuda.invalid (motivoConteudoForjado).
 //  - sessão manual local (sem agente) → liberado. Desligar tudo: variável BAP_GUARDA=off.
-import { readFileSync, realpathSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import {
   PESSOAS, RAIZ, caminhoRelativo, podeAlterar, agenteDaSessao, relativoPorJuncao, MOTIVO_CLONE_DE_RECADOS,
 } from '../../scripts/coord-lib.mjs';
-import { lerEntradaDoHook, guardaDesligada, juncoesComClone, ehAnexoNoClone, ANEXADORES } from './guarda-bash-lib.mjs';
+import { lerEntradaDoHook, guardaDesligada, juncoesComClone, podeGravarAnexo } from './guarda-bash-lib.mjs';
 import { motivoConteudoForjado } from './guarda-merge-lib.mjs';
 
 const bloquear = (msg) => {
@@ -58,19 +58,8 @@ if (rel === null) {
   // ADR 0035: escrita direta no clone de recados (por fora da junção) segue as regras de .coord/recados.
   const juncoes = juncoesComClone(RAIZ);
   const j = relativoPorJuncao(resolve(RAIZ, alvo), juncoes);
-  // T-0016c: anexo (recados/anexos/**) do clone, pelo po ou pelo gerente-projetos. O caminho de verdade (realpath da
-  // pasta mais próxima que existe) também tem de cair nos anexos: link simbólico para recados/<destino> não vale.
-  if (j?.clone && ANEXADORES.includes(agente) && ehAnexoNoClone(resolve(RAIZ, alvo), juncoes.clone)) {
-    const completo = resolve(RAIZ, alvo);
-    let pasta = dirname(completo);
-    let real = null;
-    for (let i = 0; i < 30 && !real && pasta !== dirname(pasta); i++) { try { real = realpathSync(pasta); } catch { pasta = dirname(pasta); } }
-    let cloneReal = juncoes.clone;
-    try { cloneReal = realpathSync(juncoes.clone); } catch { /* sem realpath: o léxico */ }
-    let alvoReal = null; // o próprio arquivo, se já existe, pode ser um link simbólico
-    try { alvoReal = realpathSync(completo); } catch { /* arquivo novo */ }
-    if (real && ehAnexoNoClone(`${real}${completo.slice(pasta.length)}`, cloneReal) && (!alvoReal || ehAnexoNoClone(alvoReal, cloneReal))) process.exit(0);
-  }
+  // T-0016c: anexo (recados/anexos/**) do clone, pelo po ou pelo gerente-projetos (podeGravarAnexo, com o realpath).
+  if (j?.clone && podeGravarAnexo({ agente, abs: resolve(RAIZ, alvo), clone: juncoes.clone })) process.exit(0);
   if (j?.clone) bloquear(`"${alvo}": ${MOTIVO_CLONE_DE_RECADOS}.`);
   if (j?.rel) rel = j.rel;
 }

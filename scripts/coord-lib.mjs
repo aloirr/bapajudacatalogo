@@ -136,7 +136,7 @@ export function relativoPorJuncao(abs, juncoes) {
   return null;
 }
 
-export const MOTIVO_CLONE_DE_RECADOS = 'o clone do repositório de recados só muda pelo node scripts/coord.mjs (enviar, lido) e pelo scripts/sincronizar-recados.ps1 (ADR 0035)';
+export const MOTIVO_CLONE_DE_RECADOS = 'o clone de recados só muda pelo node scripts/coord.mjs (enviar, lido); anexos (recados/anexos/**), pelo po e pelo gerente-projetos, com git pull/add/commit/push conferido';
 
 /**
  * Estado dos recados no repositório de código pela marca do .gitignore (ADR 0035), para o verificar:

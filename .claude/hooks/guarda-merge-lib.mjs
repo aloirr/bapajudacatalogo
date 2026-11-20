@@ -29,11 +29,11 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, win32, posix } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import {
-  tokenizar, comandosSimples, alvosDoComando, SO_LEITURA, COORD_SO_LEITURA, PACOTES_SO_LEITURA, DESCARTE,
+  tokenizar, comandosSimples, alvosDoComando, SO_LEITURA, COORD_SO_LEITURA, PACOTES_SO_LEITURA, DESCARTE, ehCaminhoDeAnexo,
 } from './guarda-bash-lib.mjs';
 import {
   AGENTES, PESSOAS, CAMINHOS_DE_GOVERNANCA, mudancasDeGovernanca, remetenteDoRecado, modoDosRecados, conexaoDeRecados,
-  recadosDaPastaNoGitHub, cloneDosRecados,
+  recadosDaPastaNoGitHub, cloneDosRecados, MOTIVO_CLONE_DE_RECADOS,
 } from '../../scripts/coord-lib.mjs';
 
 export const REPO_OFICIAL = 'aloirr/bapajudacatalogo';
@@ -43,6 +43,12 @@ export const ORIGENS_CONFIAVEIS = ['variável BAP_AGENTE', 'sessão local (agent
 export const PASTA_AUTORIZACOES = 'recados/gerente-projetos';
 /** Quem autoriza merge por recado (R-20261120-111308-alexandre): o po e o Alexandre. */
 export const AUTORIZADORES = ['po', 'alexandre'];
+/**
+ * Ponte (T-0016d, R-20261120-150200-alexandre): só o po grava recado do Alexandre, por
+ * `node scripts/coord.mjs enviar --de alexandre --ponte` (cabeçalho "via: po", autor po@bapajuda.invalid). Recado com
+ * "via:" nunca vale como autorização de merge.
+ */
+export const PONTE_DO_ALEXANDRE = 'po';
 /** SHA do head: sempre os 40 caracteres (T-0016, B2: um SHA curto pode casar com outro commit). */
 export const SHA_VALIDO = /^[0-9a-f]{40}$/i;
 /** "autorizo o merge do PR #N no commit <sha de 40>" (maiúsculas/minúsculas e espaços livres; sha entre crases aceito). */
@@ -501,6 +507,7 @@ export function autorizacoesDeMerge(recados, { remetentes = AUTORIZADORES } = {}
     if (!r || String(r.meta.de || '').trim().toLowerCase() !== de) continue;
     const id = nome.replace(/\.md$/i, '');
     if (r.meta.id !== id) continue;
+    if (String(r.meta.via || '').trim()) continue; // T-0016d: recado da ponte ("via: po") nunca autoriza merge
     for (const m of `${r.corpo}`.matchAll(RE_AUTORIZACAO)) res.push({ pr: Number(m[1]), sha: m[2].toLowerCase(), id, de });
   }
   return res;
@@ -579,6 +586,14 @@ export function localizarGh({ env = process.env, plataforma = process.platform, 
 }
 export const ONDE_PROCURA_GH = 'PATH; no Windows também %ProgramFiles%\\GitHub CLI\\gh.exe e %LOCALAPPDATA%\\Programs\\GitHub CLI\\gh.exe';
 
+/** Resumo do CI (avaliarRollup e avaliarChecks): vermelho, ainda rodando ou verde. Função pura. */
+export function resumoDoCi(falhos, pendentes, total) {
+  const lista = (l) => `${l.slice(0, 5).join('; ')}${l.length > 5 ? '; ...' : ''}`;
+  if (falhos.length) return { verde: false, detalhe: `vermelho (${lista(falhos)})` };
+  if (pendentes.length) return { verde: false, detalhe: `ainda rodando (${lista(pendentes)})` };
+  return { verde: true, detalhe: `${total} check(s) verdes` };
+}
+
 /**
  * Situação do CI pelo statusCheckRollup do `gh pr view` (T-0016, B3; mesma regra de avaliarChecks: tudo concluído com
  * só success, T-0016c). CheckRun: status/conclusion; StatusContext: state. Lista vazia = o CI não rodou. Função pura.
@@ -592,16 +607,14 @@ export function avaliarRollup(rollup) {
   for (const c of rollup) {
     if (c?.__typename === 'StatusContext' || (c?.state !== undefined && c?.status === undefined)) {
       const st = String(c?.state || '').toLowerCase();
-      if (st !== 'success') (st === 'pending' || st === 'expected' ? pendentes : falhos).push(`${nome(c)}: ${st || '?'}`);
+      if (!CONCLUSOES_VERDES.includes(st)) (st === 'pending' || st === 'expected' ? pendentes : falhos).push(`${nome(c)}: ${st || '?'}`);
       continue;
     }
     if (String(c?.status || '').toLowerCase() !== 'completed') { pendentes.push(nome(c)); continue; }
     const conc = String(c?.conclusion || '').toLowerCase();
     if (!CONCLUSOES_VERDES.includes(conc)) falhos.push(`${nome(c)}: ${conc || '?'}`);
   }
-  if (falhos.length) return { verde: false, detalhe: `vermelho (${falhos.slice(0, 5).join('; ')}${falhos.length > 5 ? '; ...' : ''})` };
-  if (pendentes.length) return { verde: false, detalhe: `ainda rodando (${pendentes.slice(0, 5).join('; ')}${pendentes.length > 5 ? '; ...' : ''})` };
-  return { verde: true, detalhe: `${rollup.length} check(s) verdes` };
+  return resumoDoCi(falhos, pendentes, rollup.length);
 }
 
 /**
@@ -675,8 +688,6 @@ function urlsDoOrigin(g, env) {
   };
 }
 
-const ehCaminhoDeAnexo = (rel) => /^recados\/anexos\/[^/]/.test(rel) && !rel.split('/').includes('..');
-
 /**
  * git do po e do gerente-projetos para publicar anexos (T-0016c): só pull, add, commit e push, e só com recados/anexos/**.
  *  - add: só caminhos (sem -A, -u, ., glob nem $VAR) dentro de recados/anexos/;
@@ -702,7 +713,7 @@ export function conferirGitDeAnexo({ agente, sub, args = [], cwd, clone, git = g
       const caminhos = v.filter((x) => x !== '--');
       if (!caminhos.length || caminhos.some((x) => x.startsWith('-') || /[*?[]/.test(x))) return 'git add de anexo só com os caminhos, sem opções nem glob';
       const ruins = fora(caminhos.map((x) => posix.normalize(posix.join(cwdRel, x)).replace(/\/+$/, '')));
-      return ruins.length ? `git add só de recados/anexos/** (veio ${ruins.slice(0, 3).join(', ')}); recados e lidos só pelo node scripts/coord.mjs` : null;
+      return ruins.length ? `git add só de recados/anexos/** (veio ${ruins.slice(0, 3).join(', ')}): ${MOTIVO_CLONE_DE_RECADOS}` : null;
     }
     if (sub === 'commit') {
       for (let i = 0; i < v.length; i++) {
@@ -726,7 +737,7 @@ export function conferirGitDeAnexo({ agente, sub, args = [], cwd, clone, git = g
       if (m) return m;
       const arquivos = g(['diff', '--name-only', '--no-renames', `${REF_PUBLICADA}..HEAD`]).split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
       const ruins = fora(arquivos);
-      if (ruins.length) return `os commits a publicar mexem fora de recados/anexos/ (${ruins.slice(0, 3).join(', ')}): recados e lidos só pelo node scripts/coord.mjs`;
+      if (ruins.length) return `os commits a publicar mexem fora de recados/anexos/ (${ruins.slice(0, 3).join(', ')}): ${MOTIVO_CLONE_DE_RECADOS}`;
       const autores = [...new Set(g(['log', '--format=%ae', `${REF_PUBLICADA}..HEAD`]).split(/\r?\n/).map((x) => x.trim().toLowerCase()).filter(Boolean))];
       const alheios = autores.filter((a) => a !== `${agente}@${DOMINIO_AUTOR}`);
       return alheios.length ? `os commits a publicar têm autor de outro (${alheios.join(', ')}): o anexo sai com o autor ${agente}@${DOMINIO_AUTOR}` : null;
@@ -734,9 +745,8 @@ export function conferirGitDeAnexo({ agente, sub, args = [], cwd, clone, git = g
   } catch (e) {
     return `não deu para conferir o clone de recados (${String(e?.message || e).split(/\r?\n/)[0].slice(0, 120)}): sem a conferência, bloqueado`;
   }
-  return MOTIVO_SO_COORD;
+  return MOTIVO_CLONE_DE_RECADOS;
 }
-const MOTIVO_SO_COORD = 'o clone de recados só muda pelo node scripts/coord.mjs (enviar, lido) e, nos anexos, pelo git add/commit/push conferido';
 
 /**
  * Autor (e-mail) do commit que trouxe cada arquivo da pasta ao REF (o mais recente com status A). Saída de
@@ -1161,11 +1171,15 @@ export function motivosRecadoFalso({ comando, agente, cwd = '' }) {
     if (!nome || nome.incerto || !['node', 'nodejs'].includes(nomeBase(nome.valor))) return;
     const i = args.findIndex((a) => !a.valor.startsWith('-'));
     if (i < 0 || args[i].incerto || nomeBase(args[i].valor) !== 'coord.mjs' || args[i + 1]?.valor !== 'enviar') return;
+    // T-0016d, ponte do po (R-20261120-150200-alexandre): só o po, e só com --ponte, envia --de alexandre.
+    const comPonte = args.slice(i + 2).some((a) => a.valor === '--ponte');
+    if (comPonte && agente !== PONTE_DO_ALEXANDRE) motivos.push(`--ponte é só do po (ponte do Alexandre, R-20261120-150200-alexandre); ${agente} envia com --de ${agente}`);
     for (let k = i + 2; k < args.length; k++) {
       if (args[k].valor !== '--de' && !args[k].valor.startsWith('--de=')) continue;
       const de = args[k].valor.startsWith('--de=') ? { valor: args[k].valor.slice(5), incerto: args[k].incerto } : (args[k + 1] || { valor: '', incerto: true });
       const v = String(de.valor).trim().toLowerCase();
       if (de.incerto) motivos.push(`o remetente do recado tem de estar por extenso: --de ${agente} (veio --de ${de.valor})`);
+      else if (v === 'alexandre' && comPonte && agente === PONTE_DO_ALEXANDRE) continue; // a ponte (via: po)
       else if (v === 'alexandre') motivos.push(`recado como alexandre (--de alexandre) só sai da sessão do Alexandre (BAP_AGENTE=alexandre ou o terminal dele); ${agente} envia com --de ${agente}`);
       else if (v !== agente) motivos.push(`o recado sai com o seu nome: --de ${agente} (veio --de ${de.valor})`);
     }
@@ -1472,9 +1486,7 @@ export function avaliarChecks(resposta) {
   if (!runs.length) return { verde: false, detalhe: 'nenhum check no commit (o CI não rodou)' };
   const pendentes = runs.filter((r) => r?.status !== 'completed').map((r) => r?.name || '?');
   const falhos = runs.filter((r) => r?.status === 'completed' && !CONCLUSOES_VERDES.includes(String(r.conclusion))).map((r) => `${r?.name || '?'}: ${r?.conclusion}`);
-  if (falhos.length) return { verde: false, detalhe: `vermelho (${falhos.slice(0, 5).join('; ')}${falhos.length > 5 ? '; ...' : ''})` };
-  if (pendentes.length) return { verde: false, detalhe: `ainda rodando (${pendentes.slice(0, 5).join('; ')}${pendentes.length > 5 ? '; ...' : ''})` };
-  return { verde: true, detalhe: `${runs.length} check(s) verdes` };
+  return resumoDoCi(falhos, pendentes, runs.length);
 }
 
 /**

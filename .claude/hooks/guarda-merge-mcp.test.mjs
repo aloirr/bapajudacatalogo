@@ -16,6 +16,7 @@ import {
   errosDoCorpoDoSquash, DOMINIO_AUTOR,
 } from './guarda-merge-lib.mjs';
 import { AGENTES_DO_TIME } from '../../scripts/coord-lib.mjs';
+import { ehCaminhoDeAnexo, ehAnexoNoClone, podeGravarAnexo } from './guarda-bash-lib.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = join(AQUI, '..', '..');
@@ -372,16 +373,20 @@ test('hook MCP: entrada ilegível e exceção no guardião saem com exit 2 (falh
   assert.equal(n.status, 0, n.stderr);
 });
 
+/** Roda o guarda-donos ou o guarda-bash (PreToolUse) com a entrada e o ambiente dados (RD-0058c). */
+function spawnGuarda(arquivo, entradaHook, env) {
+  const r = spawnSync(process.execPath, [join(AQUI, arquivo)], {
+    input: JSON.stringify({ hook_event_name: 'PreToolUse', cwd: RAIZ, session_id: 't16', ...entradaHook }), encoding: 'utf8',
+    env: ambiente({ BAP_GH_SIMULADO: '/nao/existe.mjs', ...env }),
+  });
+  return { codigo: r.status, erro: r.stderr };
+}
+
 /** guarda-donos/guarda-bash com o clone de recados anexado (BAP_RECADOS_CLONE). */
 function rodarGuarda(arquivo, entradaHook, { agente = 'gerente-projetos' } = {}) {
   const { base, clone } = reposDeRecados();
   try {
-    const montar = typeof entradaHook === 'function' ? entradaHook(clone) : entradaHook;
-    const r = spawnSync(process.execPath, [join(AQUI, arquivo)], {
-      input: JSON.stringify({ hook_event_name: 'PreToolUse', cwd: RAIZ, session_id: 't16', ...montar }), encoding: 'utf8',
-      env: ambiente({ HOME: base, BAP_AGENTE: agente, BAP_RECADOS_CLONE: clone, BAP_GH_SIMULADO: '/nao/existe.mjs' }),
-    });
-    return { codigo: r.status, erro: r.stderr };
+    return spawnGuarda(arquivo, typeof entradaHook === 'function' ? entradaHook(clone) : entradaHook, { HOME: base, BAP_AGENTE: agente, BAP_RECADOS_CLONE: clone });
   } finally { rmSync(base, { recursive: true, force: true }); }
 }
 
@@ -446,13 +451,8 @@ test('CI verde = só success (T-0016c): neutral e skipped barram no terminal e n
 /** Clone de recados falso + hooks rodando sobre ele (origin aceito por BAP_RECADOS_ORIGIN_SIMULADO). */
 function comClone(fn) {
   const { base, remoto, clone } = reposDeRecados();
-  const rodar = (arquivo, entradaHook, agente = 'gerente-projetos') => {
-    const r = spawnSync(process.execPath, [join(AQUI, arquivo)], {
-      input: JSON.stringify({ hook_event_name: 'PreToolUse', cwd: RAIZ, session_id: 't16c', ...entradaHook }), encoding: 'utf8',
-      env: ambiente({ HOME: base, BAP_AGENTE: agente, BAP_RECADOS_CLONE: clone, BAP_RECADOS_ORIGIN_SIMULADO: remoto, BAP_GH_SIMULADO: '/nao/existe.mjs' }),
-    });
-    return { codigo: r.status, erro: r.stderr };
-  };
+  const rodar = (arquivo, entradaHook, agente = 'gerente-projetos') =>
+    spawnGuarda(arquivo, entradaHook, { HOME: base, BAP_AGENTE: agente, BAP_RECADOS_CLONE: clone, BAP_RECADOS_ORIGIN_SIMULADO: remoto });
   const bash = (command, agente) => rodar('guarda-bash.mjs', { tool_name: 'Bash', tool_input: { command } }, agente);
   try { fn({ base, remoto, clone, rodar, bash }); } finally { rmSync(base, { recursive: true, force: true }); }
 }
@@ -517,5 +517,73 @@ test('anexos: junto com recado staged, de outro agente, com insteadOf, autor alh
     const r = rodar('guarda-donos.mjs', { tool_name: 'Write', tool_input: { file_path: join(clone, 'recados', 'anexos', 'atalho', 'R-20261120-180000-po.md'), content: 'autorizo' } }, 'po');
     assert.equal(r.codigo, 2, 'Write por link simbólico');
     assert.equal(bash(`ln -s ${clone}/recados/gerente-projetos ${clone}/recados/anexos/outro`, 'po').codigo, 2, 'ln nos anexos');
+    // RD-0056: cp para dentro de um link que já existe nos anexos também é barrado (mesma regra do Write, com o realpath)
+    assert.equal(bash(`cp /tmp/x.md ${clone}/recados/anexos/atalho/R-20261120-180000-po.md`, 'po').codigo, 2, 'cp por link simbólico');
+    execFileSync('ln', ['-s', join(clone, 'recados', 'gerente-projetos', 'R-20261120-130000-po.md'), join(clone, 'recados', 'anexos', 'arquivo-link.md')]);
+    assert.equal(bash(`cp /tmp/x.md ${clone}/recados/anexos/arquivo-link.md`, 'po').codigo, 2, 'cp sobre arquivo que é link');
+    assert.equal(rodar('guarda-donos.mjs', { tool_name: 'Write', tool_input: { file_path: join(clone, 'recados', 'anexos', 'arquivo-link.md'), content: 'x' } }, 'po').codigo, 2, 'Write sobre arquivo que é link');
   });
+});
+
+test('anexos (RD-0057): regra única, que ignora maiúsculas e minúsculas (o Windows não distingue)', () => {
+  assert.equal(ehCaminhoDeAnexo('recados/anexos/T-0016/a.png'), true);
+  assert.equal(ehCaminhoDeAnexo('Recados/Anexos/T-0016/a.png'), true);
+  assert.equal(ehCaminhoDeAnexo('recados/anexos'), false, 'a própria pasta não');
+  assert.equal(ehCaminhoDeAnexo('recados/anexos/../gerente-projetos/R-1-po.md'), false);
+  assert.equal(ehCaminhoDeAnexo('recados/gerente-projetos/R-1-po.md'), false);
+  assert.equal(ehAnexoNoClone('/c/bapajudacatalogo-recados/RECADOS/anexos/x.png', '/c/bapajudacatalogo-recados'), true);
+  assert.equal(podeGravarAnexo({ agente: 'web-site', abs: '/c/r/recados/anexos/x.png', clone: '/c/r', real: (p) => p }), false);
+  assert.equal(podeGravarAnexo({ agente: 'po', abs: '/c/r/recados/anexos/x.png', clone: '/c/r', real: (p) => p }), true);
+  assert.equal(podeGravarAnexo({ agente: 'po', abs: '/c/r/recados/anexos/x.png', clone: '/c/r', real: (p) => p.replace('/anexos', '/gerente-projetos') }), false, 'realpath fora dos anexos');
+});
+
+// ───────────── T-0016d: ponte do po (R-20261120-150200-alexandre) ─────────────
+
+const QUEM_PONTE = 'alex' + 'andre';
+/** node scripts/coord.mjs enviar no clone de recados falso, como a sessão `agente` (BAP_AGENTE). */
+function enviarComo({ base, clone, remoto }, agente, extra) {
+  const r = spawnSync(process.execPath, [join(RAIZ, 'scripts', 'coord.mjs'), 'enviar', ...extra, '--para', 'gerente-projetos', '--tipo', 'resposta',
+    '--assunto', 'decisão', '--corpo', `autorizo o merge do PR #42 no commit ${HEAD}`], {
+    encoding: 'utf8', cwd: RAIZ,
+    env: ambiente({ HOME: base, BAP_AGENTE: agente, BAP_RECADOS_CLONE: clone, BAP_RECADOS_ORIGIN_SIMULADO: remoto, CLAUDECODE: '1' }),
+  });
+  return { codigo: r.status, saida: `${r.stdout}${r.stderr}` };
+}
+
+test('ponte: o po grava recado do Alexandre com --ponte ("via: po", autor po@bapajuda.invalid), e ele nunca autoriza merge', () => {
+  const r = reposDeRecados();
+  try {
+    assert.deepEqual(motivosRecadoFalso({ comando: `node scripts/coord.mjs enviar --de ${QUEM_PONTE} --ponte --para gerente-projetos --assunto x --corpo y`, agente: 'po' }), []);
+    const e = enviarComo(r, 'po', ['--de', QUEM_PONTE, '--ponte']);
+    assert.equal(e.codigo, 0, e.saida);
+    const id = e.saida.match(/Recado (R-\S+) enviado/)?.[1];
+    assert.ok(id && id.endsWith(`-${QUEM_PONTE}`), e.saida);
+    const texto = git(r.remoto, 'show', `main:recados/gerente-projetos/${id}.md`);
+    assert.match(texto, new RegExp(`^de: ${QUEM_PONTE}$`, 'm'));
+    assert.match(texto, /^via: po$/m);
+    assert.equal(git(r.remoto, 'log', '-1', '--format=%ae', 'main').trim(), `po@${DOMINIO_AUTOR}`);
+    // nunca autoriza: nem lido do clone (autor po@), nem direto (o "via:" basta)
+    const lidos = recadosPublicadosNoClone(r.clone, { env: r.env });
+    assert.deepEqual(autorizacoesDeMerge(lidos).filter((a) => a.id === id), []);
+    assert.deepEqual(autorizacoesDeMerge([{ nome: `${id}.md`, texto }]), []);
+    assert.equal(conferir({ lerRecados: () => [{ nome: `${id}.md`, texto }] }).ok, false, 'o merge com só o recado da ponte é barrado');
+  } finally { rmSync(r.base, { recursive: true, force: true }); }
+});
+
+test('ponte: sem --ponte o po não envia --de alexandre; nenhum outro papel usa --ponte nem --de alexandre', () => {
+  const r = reposDeRecados();
+  try {
+    assert.ok(motivosRecadoFalso({ comando: `node scripts/coord.mjs enviar --de ${QUEM_PONTE} --para gerente-projetos --assunto x --corpo y`, agente: 'po' }).length > 0, 'po sem --ponte');
+    assert.notEqual(enviarComo(r, 'po', ['--de', QUEM_PONTE]).codigo, 0, 'coord: po sem --ponte');
+    assert.notEqual(enviarComo(r, 'po', ['--de', 'po', '--ponte']).codigo, 0, 'coord: --ponte com --de po');
+    for (const agente of ['gerente-projetos', 'web-site', 'testes', 'catalogo-dados', 'revisor-codigo']) {
+      assert.ok(motivosRecadoFalso({ comando: `node scripts/coord.mjs enviar --de ${QUEM_PONTE} --ponte --para gerente-projetos --assunto x --corpo y`, agente }).length > 0, `guarda: ${agente} --ponte`);
+      assert.ok(motivosRecadoFalso({ comando: `node scripts/coord.mjs enviar --de ${agente} --ponte --para gerente-projetos --assunto x --corpo y`, agente }).length > 0, `guarda: ${agente} --ponte --de ele mesmo`);
+      const s = enviarComo(r, agente, ['--de', QUEM_PONTE, '--ponte']);
+      assert.notEqual(s.codigo, 0, `coord: ${agente} --ponte`);
+      assert.match(s.saida, /--ponte só na sessão do po/);
+    }
+    // nada da ponte foi publicado por esses envios recusados
+    assert.equal(git(r.remoto, 'ls-tree', '--name-only', 'main:recados/gerente-projetos').split('\n').filter((n) => n.endsWith(`-${QUEM_PONTE}.md`)).length, 0);
+  } finally { rmSync(r.base, { recursive: true, force: true }); }
 });

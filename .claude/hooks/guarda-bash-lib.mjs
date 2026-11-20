@@ -12,11 +12,11 @@
 // antes × depois. Só bloqueia e manda desfazer ALVO EVIDENTE do comando que estava limpo antes;
 // o resto (outro agente em paralelo na mesma árvore) vira aviso não bloqueante. Não desfaz nada.
 // Junções de recados (ADR 0035, T-0139): alvo no clone de recados (C:/bapajudacatalogo-recados/recados/...) é tratado como
-// .coord/recados/... (mesmas regras); o resto do clone e o git que escreve nele são bloqueados (só o coord.mjs e o
-// sincronizar-recados.ps1 mexem lá); o git status do clone entra na foto do PostToolUse com os caminhos de .coord/.
-import { readFileSync, writeFileSync, mkdirSync, statSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
+// .coord/recados/... (mesmas regras); o resto do clone e o git que escreve nele são bloqueados (só o coord.mjs mexe lá,
+// salvo o git de anexo do po e do gerente-projetos); o git status do clone entra na foto do PostToolUse com os caminhos de .coord/.
+import { readFileSync, writeFileSync, mkdirSync, statSync, existsSync, readdirSync, unlinkSync, realpathSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { posix, join } from 'node:path';
+import { posix, join, dirname as dirnameNativo } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import {
@@ -60,11 +60,41 @@ export function juncoesComClone(raiz, { env = process.env, juncoes = juncoesDeRe
 export const ANEXADORES = ['po', 'gerente-projetos'];
 export const GIT_DE_ANEXO = new Set(['pull', 'add', 'commit', 'push']);
 export const PASTA_ANEXOS = 'recados/anexos';
-/** O caminho absoluto está DENTRO de <clone>/recados/anexos/ (não a própria pasta)? */
+/**
+ * Caminho relativo ao clone dentro de recados/anexos/ (não a própria pasta)? Ignora maiúsculas e minúsculas (o Windows não
+ * distingue). Regra única dos anexos (RD-0057): o git de anexo (guarda-merge-lib) e as escritas usam esta.
+ */
+export const ehCaminhoDeAnexo = (rel) => {
+  const r = barras(rel);
+  return r.toLowerCase().startsWith(`${PASTA_ANEXOS}/`) && r.length > PASTA_ANEXOS.length + 1 && !r.split('/').includes('..');
+};
+/** O caminho absoluto está DENTRO de <clone>/recados/anexos/? */
 export function ehAnexoNoClone(abs, clone) {
-  const base = `${barras(clone).replace(/\/+$/, '')}/${PASTA_ANEXOS}/`;
+  const base = `${barras(clone).replace(/\/+$/, '')}/`;
   const a = barras(abs);
-  return a.toLowerCase().startsWith(base.toLowerCase()) && a.length > base.length && !a.slice(base.length).split('/').includes('..');
+  return a.toLowerCase().startsWith(base.toLowerCase()) && ehCaminhoDeAnexo(a.slice(base.length));
+}
+/** realpath do caminho, mesmo que ele (ou as últimas pastas) ainda não exista: o da pasta mais próxima que existe + o resto. */
+function caminhoReal(abs, real = realpathSync) {
+  let pasta = abs;
+  for (let i = 0; i < 40; i++) {
+    try { return barras(real(pasta)) + barras(abs).slice(barras(pasta).length); } catch { /* ainda não existe */ }
+    const mae = dirnameNativo(pasta);
+    if (mae === pasta) return null;
+    pasta = mae;
+  }
+  return null;
+}
+/**
+ * O agente pode gravar este arquivo como anexo (T-0016c; RD-0056, regra única do guarda-donos e do guarda-bash)?
+ * Só o po e o gerente-projetos, só dentro de <clone>/recados/anexos/, e o caminho de verdade (realpath da pasta e do
+ * próprio arquivo, se já existe) também cai nos anexos: link simbólico para recados/<destino> não vale.
+ */
+export function podeGravarAnexo({ agente, abs, clone, real = realpathSync }) {
+  if (!ANEXADORES.includes(agente) || !clone || !ehAnexoNoClone(abs, clone)) return false;
+  const cloneReal = caminhoReal(clone, real) || barras(clone);
+  const r = caminhoReal(abs, real);
+  return Boolean(r) && ehAnexoNoClone(r, cloneReal);
 }
 /** Argumentos do git depois do subcomando (sem as opções globais -C, -c, --git-dir...). */
 export function argsDoGit(palavras) {
@@ -299,7 +329,7 @@ export const SO_LEITURA = new Set([
 export const GIT_SO_LEITURA = new Set(['status', 'diff', 'log', 'show', 'rev-parse', 'ls-files', 'blame', 'grep', 'shortlog', 'describe', 'merge-base', 'cat-file', 'ls-tree', 'remote', 'fetch', 'config', 'reflog', 'version', 'help', 'branch', 'tag', 'rev-list', 'for-each-ref', 'show-ref', 'var', 'whatchanged', 'count-objects', 'check-ignore', 'name-rev', 'ls-remote', 'diff-tree', 'diff-files', 'diff-index']);
 /**
  * Git no clone de recados (ADR 0035): só estes subcomandos passam para os agentes. Mais estrito que GIT_SO_LEITURA
- * (sem config, remote, branch e tag, que gravam): commit, pull, push, reset, rebase... são do sincronizar-recados.ps1.
+ * (sem config, remote, branch e tag, que gravam): commit, pull, push, reset, rebase... só no git de anexo (T-0016c), conferido.
  */
 export const GIT_LEITURA_NO_CLONE = new Set(['status', 'diff', 'log', 'show', 'rev-parse', 'ls-files', 'blame', 'grep', 'shortlog', 'describe', 'merge-base', 'cat-file', 'ls-tree', 'fetch', 'reflog', 'version', 'help', 'rev-list', 'for-each-ref', 'show-ref', 'whatchanged', 'count-objects', 'check-ignore', 'name-rev', 'ls-remote', 'diff-tree', 'diff-files', 'diff-index']);
 /** Subcomandos de scripts/coord.mjs que só leem (caixa, ler, fio, dono, pendencias, verificar). */
@@ -782,7 +812,7 @@ export function analisarComando({ comando, agente, cwd, raiz, regras, somenteLei
       if ('cd' in r) { cwdAtual = r.cd == null ? null : abs(r.cd); continue; }
       if (r.subcomando && profundidade < 3) analisar(r.subcomando, cwdAtual, profundidade + 1);
       const cwdCmd = r.cwdGit === undefined ? cwdAtual : r.cwdGit === null ? null : abs(r.cwdGit);
-      // ADR 0035: git que grava dentro do clone de recados (commit, pull, push, reset...) é só do sincronizar-recados.ps1.
+      // ADR 0035: git que grava no clone de recados é barrado, salvo o git de anexo do po e do gerente-projetos (abaixo).
       if (r.gitSub && !GIT_LEITURA_NO_CLONE.has(r.gitSub) && cwdCmd && dentroDoClone(cwdCmd)) {
         soLeitura = false;
         // T-0016c: anexos (recados/anexos/**) do po e do gerente-projetos: pull, add, commit e push conferidos por gitNoClone.
@@ -811,7 +841,7 @@ export function analisarComando({ comando, agente, cwd, raiz, regras, somenteLei
           // ADR 0035: alvo no clone de recados (por fora da junção) = .coord/recados/... ou .coord/lidos/...
           const j = relativoPorJuncao(a, juncoes);
           // T-0016c: arquivo em recados/anexos/** do clone, pelo po ou pelo gerente-projetos (cp, mkdir...; ln não).
-          if (j?.clone && ehAnexoNoClone(a, juncoes.clone) && ANEXADORES.includes(agente) && nomeDoComando(cmd.palavras) !== 'ln') continue;
+          if (j?.clone && podeGravarAnexo({ agente, abs: a, clone: juncoes.clone }) && nomeDoComando(cmd.palavras) !== 'ln') continue;
           if (j?.clone) { acusar(a, `"${t.alvo.valor}": ${MOTIVO_CLONE_DE_RECADOS}`); continue; }
           if (j?.rel) rel = j.rel;
         }

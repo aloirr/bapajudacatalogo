@@ -6,6 +6,8 @@
 //        [--responde-a <id>] [--encerra] [--contrato modulo.entidade.fato@1]
 //        --de alexandre só na sessão do Alexandre: BAP_AGENTE=alexandre ou terminal fora do Claude
 //        Code (sem CLAUDECODE); com BAP_AGENTE=<agente>, o --de tem de ser esse agente.
+//        Ponte (T-0016d): só BAP_AGENTE=po roda --de alexandre --ponte (cabeçalho "via: po", autor po@bapajuda.invalid;
+//        nunca vale como autorização de merge).
 //        Recados no aloirr/bapajudacatalogo-recados: com o clone dele anexado à sessão (ao lado deste repositório,
 //        na home ou em BAP_RECADOS_CLONE), enviar e lido gravam com git (pull --rebase, commit com o nome do agente,
 //        push origin HEAD:main), pela integração de GitHub da sessão; nenhuma chave entra. caixa, pendencias, ler e
@@ -68,6 +70,8 @@ const CLONE = cloneDosRecados();
 const PASTA = CLONE ? join(CLONE, 'recados') : join(RAIZ, '.coord', 'recados');
 const PASTA_LIDOS = CLONE ? join(CLONE, 'lidos') : join(RAIZ, '.coord', 'lidos');
 const DOMINIO_EMAIL = 'bapajuda.invalid';
+/** Único papel que grava recado do Alexandre como ponte (enviar --de alexandre --ponte; T-0016d). */
+const PONTE = 'po';
 function gitDoClone(args) {
   return execFileSync('git', ['-C', CLONE, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
 }
@@ -571,9 +575,15 @@ switch (cmd) {
     // terminal dele, fora do Claude Code (sem CLAUDECODE). O guarda-bash também barra o --de alheio,
     // inclusive de subagente (que herda BAP_AGENTE).
     const naSessao = String(process.env.BAP_AGENTE || '').trim().toLowerCase();
-    if (de === 'alexandre' && (naSessao ? naSessao !== 'alexandre' : Boolean(process.env.CLAUDECODE)))
+    // T-0016d, ponte do po (R-20261120-150200-alexandre, liberada pelo Alexandre na sessão do PO): exceção estreita.
+    // Só o papel po roda `enviar --de alexandre --ponte`; o cabeçalho leva "via: po", o commit sai com o autor
+    // po@bapajuda.invalid e o recado nunca vale como autorização de merge (autorizacoesDeMerge descarta "via:").
+    const ponte = Boolean(o.ponte);
+    if (ponte && (naSessao !== PONTE || de !== 'alexandre')) falhar(`--ponte só na sessão do po (BAP_AGENTE=po) e com --de alexandre`);
+    if (ponte && MODO !== 'clone') falhar('--ponte só com o clone de recados anexado (o commit sai com o autor po@bapajuda.invalid)');
+    if (de === 'alexandre' && !ponte && (naSessao ? naSessao !== 'alexandre' : Boolean(process.env.CLAUDECODE)))
       falhar('--de alexandre só na sessão do Alexandre (BAP_AGENTE=alexandre ou o terminal dele, fora do Claude Code). Envie com o seu nome: --de <agente>');
-    if (naSessao && naSessao !== 'alexandre' && PESSOAS.includes(naSessao) && de !== naSessao)
+    if (!ponte && naSessao && naSessao !== 'alexandre' && PESSOAS.includes(naSessao) && de !== naSessao)
       falhar(`esta sessão é de ${naSessao} (BAP_AGENTE): envie com --de ${naSessao}`);
     if (!para.length) falhar('informe --para');
     for (const p of [...para, ...cc]) if (!DESTINOS.includes(p)) falhar(`destinatário inválido: ${p}`);
@@ -604,6 +614,7 @@ switch (cmd) {
       '---',
       `id: ${id}`,
       `de: ${de}`,
+      ...(ponte ? [`via: ${PONTE}`] : []),
       `para: [${para.join(', ')}]`,
       `cc: [${cc.join(', ')}]`,
       `tipo: ${tipo}`,
@@ -635,7 +646,7 @@ switch (cmd) {
         writeFileSync(join(PASTA, d, `${id}.md`), conteudo, 'utf8');
         arquivos.push(`recados/${d}/${id}.md`);
       }
-      const sha = publicarNoClone(arquivos, de, `Recado ${id}: ${de} -> ${destinos.join(', ')}`);
+      const sha = publicarNoClone(arquivos, ponte ? PONTE : de, `Recado ${id}: ${de}${ponte ? ` (via ${PONTE})` : ''} -> ${destinos.join(', ')}`);
       console.log(`Recado ${id} enviado para ${enviadoPara} (git push no main do clone ${CLONE}, commit ${sha})`);
       break;
     }
