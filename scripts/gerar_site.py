@@ -10,7 +10,7 @@ Uso (na raiz do repositório bapajudacatalogo):
 - O site NÃO mostra preço nem estoque (regra do BAP Ajuda, 21/10/2026).
 - Fotos: <CODIGO>.jpg/png da pasta de fotos, reduzidas para no máximo 700 px (JPEG 80). Foto já gerada e mais
   nova que a original não é refeita. Sem foto, o site mostra o logo e "Foto em breve".
-- Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (v17, T-0017). Só as
+- Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (desde a v17, T-0017). Só as
   linhas SITUACAO = separado; as duvidosas ficam fora até a revisão. Sem a aba, o JSON sai como antes.
 - Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
   ou de importação, fornecedor), o script PARA e não grava (ver TRAVA abaixo).
@@ -151,7 +151,7 @@ def montadora_de(extras: list[list[str]], aplicacao: str) -> str:
     return MONTADORAS.get(nome, nome)
 
 
-# Aba VEICULOS (v18, T-0017): uma linha por produto x veículo. Vai para o site SÓ fabricante, modelo e versão das
+# Aba VEICULOS (desde a v17, T-0017): uma linha por produto x veículo. Vai para o site SÓ fabricante, modelo e versão das
 # linhas SITUACAO = separado. ORIGEM, SITUACAO, MOTIVO e os anos (ANO_INICIO/ANO_FIM) não vão.
 VE_SITUACAO = "separado"
 

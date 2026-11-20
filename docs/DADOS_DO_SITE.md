@@ -16,12 +16,12 @@
 | `ip`, `oj` | ITEM_PARECIDO, OFERECA_JUNTO |
 | `i` | foto em `site/img/` |
 | `gerado_em` | data e hora da geração, em hora de Manaus (`America/Manaus`; sem os dados de fuso, UTC−4 fixo). O site mostra "base atualizada em". |
-| `ve` | veículos do filtro "Meu veículo", da aba `VEICULOS` (v18, T-0017): lista de `[FABRICANTE, MODELO, VERSAO]`, a VERSAO só quando existe. Ex.: `[["VOLKSWAGEN","Gol","G5"],["VOLKSWAGEN","Saveiro"]]`. |
+| `ve` | veículos do filtro "Meu veículo", da aba `VEICULOS` (desde a v17, T-0017): lista de `[FABRICANTE, MODELO, VERSAO]`, a VERSAO só quando existe. Ex.: `[["VOLKSWAGEN","Gol","G5"],["VOLKSWAGEN","Saveiro"]]`. |
 
-**Campo `ve` (T-0017):** vem da aba `VEICULOS` da v18, que corrigiu na base os modelos numéricos (Renault 12, 19 e 21 e Peugeot 2008); o script não tira mais nenhum par.
+**Campo `ve` (T-0017):**
 
 - Vêm só as linhas com `SITUACAO` = "separado", sem repetir e na ordem da aba.
-- As linhas "duvidoso" ficam fora do `ve` até a revisão (decisão do Alexandre, R-20261120-123130). A busca geral continua achando esses produtos pela APLICACAO.
+- As linhas "duvidoso" ficam fora do `ve` até a revisão (decisão do Alexandre, R-20261120-123130), entre elas, desde a v18, os modelos numéricos lidos de data ou medida. A busca geral continua achando esses produtos pela APLICACAO.
 - Fabricante, modelo e versão vão como estão na aba, sem caixa alta forçada: o site formata.
 - O produto sem linha "separado" não ganha o campo. Se a base não tem a aba `VEICULOS`, nenhum produto ganha o campo e o JSON sai como antes.
 - Da aba `VEICULOS` **não vão** para o site: `ORIGEM`, `SITUACAO`, `MOTIVO`, `ANO_INICIO` e `ANO_FIM`. A aba `MODELOS_VEICULO` (dicionário) também não vai.
