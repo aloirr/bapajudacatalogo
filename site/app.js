@@ -730,11 +730,11 @@
   // no portfólio", a busca geral e, ao lado, a placa Mercosul; embaixo, a lista tabelada de 8 peças (2 colunas no
   // computador). Sem preço e sem estoque.
   // Contador (R-20261120-141600, "2) a"): o serviço bapajudacatalogo-placas conta a abertura do produto pelo código
-  // (POST /contar) e devolve os mais vistos (GET /mais-vistos?dias=7). Fica DESLIGADO até o deploy do serviço
-  // (R-20261120-142100): com false, nenhuma chamada sai e o bloco é sempre "Destaques".
+  // (POST /contar) e devolve os mais vistos (GET /mais-vistos?dias=7). Ligado com o serviço v1.1.0 no ar
+  // (R-20261120-144530); com false, nenhuma chamada sai e o bloco é sempre "Destaques".
   // Contrato confirmado pelo integracao-placas: POST /contar {"codigo"} → 204; GET /mais-vistos?dias=7 → 200
   // {"total":N,"itens":[{"codigo","n"}]}, até 8 itens (decisão "1) B"), do mais aberto para o menos aberto.
-  const CONTADOR_LIGADO = false;
+  const CONTADOR_LIGADO = true;
   const SERVICO = PLACAS_URL.replace(/\/veiculo$/, ""); // a mesma URL base da placa
   const RECENTES_MIN = 20, RECENTES_MS = 3000; // menos de 20 aberturas em 7 dias, erro ou mais de 3 s: "Destaques"
   const N_LISTA = 8; // linhas da lista do início (op4c; o serviço devolve até 8)
@@ -1415,7 +1415,7 @@
       return;
     }
     document.title = p.c + " · " + p.d + " · Catálogo BAP";
-    contarAbertura(p); // T-0018 (desligado até o deploy do contador)
+    contarAbertura(p); // T-0018: conta a abertura do produto
     const daLista = ROTA_ANTERIOR && ROTA_ANTERIOR.startsWith("#/busca");
     app.innerHTML = `<div class="pagina-produto produto-conteudo">
       <div class="prod-topo nao-imprime">
