@@ -2,6 +2,8 @@
   --verde: #62BB47;
   --verde-esc: #3E8F2B;
   --verde-claro: #EAF6E5;
+  --fundo-filtros: #EBEEEC; /* coluna e painel dos filtros, cinza claro (R-20261120-151700): --texto 13,5:1, --texto-2 5,36:1,
+                               --verde-txt 5,55:1; quase igual ao --fundo (1,07:1) e ao branco (1,17:1), por isso a borda --linha */
   --escuro: #151515;
   --texto: #1F2422;
   --texto-2: #5B625E;
@@ -92,8 +94,8 @@ main:focus, main:focus-visible { outline: none; }
 .res-topo h1 { font-size: 20px; margin: 0; }
 .res-topo .total { color: var(--texto-2); font-size: 14px; margin-left: auto; }
 /* filtros (R-20261120-123800): grupos abertos, um embaixo do outro, na coluna à esquerda e no painel "Filtrar";
-   o botão do grupo só recolhe. Opção A (R-20261120-140900): compactos, numa coluna --verde-claro (diferente do fundo
-   das fotos), sem cartão por grupo; texto em --texto/--escuro e contagem em --texto-2 (5,6:1 no --verde-claro).
+   o botão do grupo só recolhe. Opção A (R-20261120-140900): compactos, numa coluna --fundo-filtros (cinza claro,
+   R-20261120-151700), sem cartão por grupo; texto em --texto/--escuro e contagem em --texto-2 (5,36:1 no --fundo-filtros).
    Computador: 28 px por linha e 30 px no título do grupo; celular (painel): 44 px de toque. A opção marcada se
    distingue pela caixa marcada e pelo negrito, não só pela cor */
 .barra-filtros { display: flex; flex-direction: column; margin: 0; }
@@ -112,7 +114,7 @@ main:focus, main:focus-visible { outline: none; }
 .filtro-lista label em { min-width: 3ch; text-align: right; font-style: normal; font-variant-numeric: tabular-nums; color: var(--texto-2); font-size: 13px; }
 .filtro-lista input { accent-color: var(--verde-esc); width: 18px; height: 18px; flex: none; }
 @media (hover: hover) { .filtro-lista label:hover { background: var(--branco); } }
-/* opção com 0 produtos: fica na lista, na mesma ordem, em --texto-2 (~5:1 no --verde-claro) e desabilitada */
+/* opção com 0 produtos: fica na lista, na mesma ordem, em --texto-2 (5,36:1 no --fundo-filtros) e desabilitada */
 .filtro-lista label.off, .filtro-lista label.off input { cursor: not-allowed; }
 .filtro-lista label.off span { color: var(--texto-2); } /* o nome; a contagem (em) já é --texto-2 */
 @media (hover: hover) { .filtro-lista label.off:hover { background: none; } }
@@ -372,7 +374,7 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
 .mv-campo select.travada { opacity: 1; color: var(--texto-2); background: var(--fundo); border-color: var(--linha); font-weight: 600; cursor: not-allowed; } /* placa: travada, cinza e legível (5,8:1) */
 /* filtros numa coluna fina à esquerda dos cartões, de cima a baixo */
 .res-grade { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 14px; align-items: start; margin-top: 12px; }
-.lado-filtros { display: flex; flex-direction: column; padding: 10px 6px 8px; border-radius: var(--raio); background: var(--verde-claro); color: var(--texto); } /* rola com a página: sem sticky e sem rolagem própria (decisão "2") */
+.lado-filtros { display: flex; flex-direction: column; padding: 10px 6px 8px; border-radius: var(--raio); background: var(--fundo-filtros); border: 1px solid var(--linha); color: var(--texto); } /* rola com a página: sem sticky e sem rolagem própria (decisão "2") */
 .lado-sub { margin: 0; padding: 0 6px 6px; font-size: 13px; font-weight: 700; color: var(--escuro); }
 .bt-filtrar { display: inline-flex; height: 44px; }
 /* painel "Filtrar" por cima (celular): fundo escurecido e foco preso (dialog com showModal) */
@@ -382,7 +384,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .painel-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 14px; background: var(--branco); border-bottom: 1px solid var(--linha); }
 .painel-cab b { font-size: 15px; font-weight: 600; }
 .painel-x { width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; font-size: 20px; cursor: pointer; color: var(--texto); }
-.painel-c .painel-corpo { flex: 1; overflow: auto; padding: 4px 12px 12px; background: var(--verde-claro); color: var(--texto); }
+.painel-c .painel-corpo { flex: 1; overflow: auto; padding: 4px 12px 12px; background: var(--fundo-filtros); color: var(--texto); }
 .painel-pe { padding: 12px; background: var(--branco); border-top: 1px solid var(--linha); }
 .painel-pe .bt { width: 100%; justify-content: center; }
 @media (max-width: 900px) {
