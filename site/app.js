@@ -743,7 +743,7 @@
   const RECENTES_MIN = 20, RECENTES_MS = 3000; // menos de 20 aberturas em 7 dias, erro ou mais de 3 s: "Destaques"
   const N_LISTA = 8; // linhas da lista do início (op4c; o serviço devolve até 8)
   // a imagem da faixa do início (e do convite ao catálogo na Sobre): um lugar só para trocar (op4f em simulação)
-  const IMG_FAIXA = { src: "assets/hero_kit.webp", w: 566, h: 420, alt: "Kit amortecedor e kit batente BAP" };
+  const IMG_FAIXA = { src: "assets/hero_faixa.webp", w: 979, h: 661, alt: "Amortecedor, kit batente, óleos, bateria e peças de freio BAP" }; // a B (R-20261120-145600)
   let MAIS_VISTOS = null; // a resposta, uma vez por carga da página (só em memória)
   const CONTADOS = new Set(); // [SUPOSIÇÃO] cada código conta uma vez por carga da página
   // fire-and-forget: sem credenciais, sem esperar a resposta e sem travar a tela; a falha não aparece
