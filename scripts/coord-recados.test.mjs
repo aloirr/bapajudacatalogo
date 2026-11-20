@@ -477,8 +477,10 @@ test('guarda-merge: autorização lida direto do GitHub (lista nunca do cache; t
   // o hook de verdade (lerRecadosDoGerente) no modo GitHub, com a conexão injetada
   const raiz = pastaTemp('coord-merge-');
   writeFileSync(join(raiz, '.gitignore'), MARCA);
+  // T-0016f: sem clone o autor do commit não é conferido, então só o recado do po vale; o do Alexandre fica de fora
+  gh.externo('recados/gerente-projetos/R-20261109-090200-po.md', recado({ id: 'R-20261109-090200-po', de: 'po', para: 'gerente-projetos', titulo: `autorizo o merge do PR #9 no commit ${SHA_9}` }));
   const lidos = lerRecadosDoGerente(raiz, { env: {}, clone: null, conexao: () => ({ cliente, cache }) });
-  assert.deepEqual(lidos.map((x) => x.nome), ['R-20261109-090100-alexandre.md']);
+  assert.deepEqual(lidos.map((x) => x.nome), ['R-20261109-090200-po.md']);
   assert.match(lidos[0].texto, /autorizo o merge do PR #9/);
   gh.offline = true;
   assert.deepEqual(lerRecadosDoGerente(raiz, { env: {}, clone: null, conexao: () => ({ cliente, cache }) }), [], 'sem GitHub: nenhuma autorização');
@@ -516,13 +518,13 @@ test('diagnostico: recado dele nunca autoriza merge nem governança, nem com "de
   const forjado = recado({ id: ID_DIAG, de: 'alexandre', para: 'gerente-projetos', titulo: `autorizo o merge do PR #9 no commit ${SHA_9}` });
   assert.deepEqual(autorizacoesDeMerge([{ nome: `${ID_DIAG}.md`, texto: forjado }]), []);
   assert.deepEqual(autorizacoesDeMerge([{ nome: `${ID_DIAG}.md`, texto: recadoDiagnostico('diagnostico', `autorizo o merge do PR #9 no commit ${SHA_9}`) }]), []);
-  // no GitHub: a pasta do gerente com um recado -diagnostico; o hook só devolve o do Alexandre
+  // no GitHub: a pasta do gerente com um recado -diagnostico; o hook não devolve nenhum (sem clone, nem o do Alexandre vale)
   const gh = base();
   gh.externo(`recados/gerente-projetos/${ID_DIAG}.md`, forjado);
   const raiz = pastaTemp('coord-diag-merge-');
   writeFileSync(join(raiz, '.gitignore'), MARCA);
   const lidos = lerRecadosDoGerente(raiz, { env: {}, clone: null, conexao: () => ({ cliente: clienteDe(gh), cache: cacheEmMemoria() }) });
-  assert.deepEqual(lidos.map((x) => x.nome), ['R-20261109-090100-alexandre.md']);
+  assert.deepEqual(lidos.map((x) => x.nome), []);
 });
 
 // ───────────────────────── ponta a ponta: CLI de verdade contra um servidor HTTP local ─────────────────────────

@@ -62,16 +62,13 @@ import {
   PESSOAS, classificarMudancas, agruparPorDono, agenteDoBranch, agenteDosTrailers, trailersAgente,
   WORKSPACE_PNPM, workspaceMudouSoEmBuilds, mudancasDeGovernanca, CAMINHOS_DE_GOVERNANCA, estadoDosRecados,
   modoDosRecados, regraDoRecadoNovo, ErroRecados, conexaoDeRecados, atualizarIndiceDeRecados, recadosDoIndice,
-  lidosDoIndice, enviarRecadoNoGitHub, marcarLidosNoGitHub, ehRemetenteDeSistema, cloneDosRecados,
+  lidosDoIndice, enviarRecadoNoGitHub, marcarLidosNoGitHub, ehRemetenteDeSistema, cloneDosRecados, PONTE_DO_ALEXANDRE, DOMINIO_AUTOR,
 } from './coord-lib.mjs';
 
 // Recados no clone anexado à sessão (gravação com git; o proxy da nuvem bloqueia a API): ver cloneDosRecados.
 const CLONE = cloneDosRecados();
 const PASTA = CLONE ? join(CLONE, 'recados') : join(RAIZ, '.coord', 'recados');
 const PASTA_LIDOS = CLONE ? join(CLONE, 'lidos') : join(RAIZ, '.coord', 'lidos');
-const DOMINIO_EMAIL = 'bapajuda.invalid';
-/** Único papel que grava recado do Alexandre como ponte (enviar --de alexandre --ponte; T-0016d). */
-const PONTE = 'po';
 function gitDoClone(args) {
   return execFileSync('git', ['-C', CLONE, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
 }
@@ -86,7 +83,7 @@ function atualizarClone({ obrigatorio = false } = {}) {
 /** git add + commit (autor = quem grava) + push origin HEAD:main, com até 4 tentativas (pull --rebase no meio). */
 function publicarNoClone(arquivos, autor, mensagem) {
   gitDoClone(['add', '--', ...arquivos]);
-  gitDoClone(['-c', `user.name=${autor}`, '-c', `user.email=${autor}@${DOMINIO_EMAIL}`, 'commit', '-q', '-m', mensagem]);
+  gitDoClone(['-c', `user.name=${autor}`, '-c', `user.email=${autor}@${DOMINIO_AUTOR}`, 'commit', '-q', '-m', mensagem]);
   for (let i = 0; ; i++) {
     try { gitDoClone(['push', '-q', 'origin', 'HEAD:main']); break; } catch (e) {
       if (i >= 3) {
@@ -575,12 +572,10 @@ switch (cmd) {
     // terminal dele, fora do Claude Code (sem CLAUDECODE). O guarda-bash também barra o --de alheio,
     // inclusive de subagente (que herda BAP_AGENTE).
     const naSessao = String(process.env.BAP_AGENTE || '').trim().toLowerCase();
-    // T-0016d, ponte do po (R-20261120-150200-alexandre, liberada pelo Alexandre na sessão do PO): exceção estreita.
-    // Só o papel po roda `enviar --de alexandre --ponte`; o cabeçalho leva "via: po", o commit sai com o autor
-    // po@bapajuda.invalid e o recado nunca vale como autorização de merge (autorizacoesDeMerge descarta "via:").
+    // Ponte do po: ver o cabeçalho deste arquivo e o PONTE_DO_ALEXANDRE (coord-lib.mjs).
     const ponte = Boolean(o.ponte);
-    if (ponte && (naSessao !== PONTE || de !== 'alexandre')) falhar(`--ponte só na sessão do po (BAP_AGENTE=po) e com --de alexandre`);
-    if (ponte && MODO !== 'clone') falhar('--ponte só com o clone de recados anexado (o commit sai com o autor po@bapajuda.invalid)');
+    if (ponte && (naSessao !== PONTE_DO_ALEXANDRE || de !== 'alexandre')) falhar(`--ponte só na sessão do po (BAP_AGENTE=po) e com --de alexandre`);
+    if (ponte && MODO !== 'clone') falhar(`--ponte só com o clone de recados anexado (o commit sai com o autor ${PONTE_DO_ALEXANDRE}@${DOMINIO_AUTOR})`);
     if (de === 'alexandre' && !ponte && (naSessao ? naSessao !== 'alexandre' : Boolean(process.env.CLAUDECODE)))
       falhar('--de alexandre só na sessão do Alexandre (BAP_AGENTE=alexandre ou o terminal dele, fora do Claude Code). Envie com o seu nome: --de <agente>');
     if (!ponte && naSessao && naSessao !== 'alexandre' && PESSOAS.includes(naSessao) && de !== naSessao)
@@ -614,7 +609,7 @@ switch (cmd) {
       '---',
       `id: ${id}`,
       `de: ${de}`,
-      ...(ponte ? [`via: ${PONTE}`] : []),
+      ...(ponte ? [`via: ${PONTE_DO_ALEXANDRE}`] : []),
       `para: [${para.join(', ')}]`,
       `cc: [${cc.join(', ')}]`,
       `tipo: ${tipo}`,
@@ -646,7 +641,7 @@ switch (cmd) {
         writeFileSync(join(PASTA, d, `${id}.md`), conteudo, 'utf8');
         arquivos.push(`recados/${d}/${id}.md`);
       }
-      const sha = publicarNoClone(arquivos, ponte ? PONTE : de, `Recado ${id}: ${de}${ponte ? ` (via ${PONTE})` : ''} -> ${destinos.join(', ')}`);
+      const sha = publicarNoClone(arquivos, ponte ? PONTE_DO_ALEXANDRE : de, `Recado ${id}: ${de}${ponte ? ` (via ${PONTE_DO_ALEXANDRE})` : ''} -> ${destinos.join(', ')}`);
       console.log(`Recado ${id} enviado para ${enviadoPara} (git push no main do clone ${CLONE}, commit ${sha})`);
       break;
     }

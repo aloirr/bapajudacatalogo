@@ -13,9 +13,9 @@ import { fileURLToPath } from 'node:url';
 import {
   conferirMergeMcp, conferirMerge, decidirMerge, autorizacoesDeMerge, recadosPublicadosNoClone, lerRecadosDoGerente,
   motivosRecadoFalso, motivoConteudoForjado, motivoOriginDoClone, validarEntradaMergeMcp, avaliarRollup, consultarPrGh,
-  errosDoCorpoDoSquash, DOMINIO_AUTOR,
+  errosDoCorpoDoSquash,
 } from './guarda-merge-lib.mjs';
-import { AGENTES_DO_TIME } from '../../scripts/coord-lib.mjs';
+import { AGENTES_DO_TIME, DOMINIO_AUTOR, PONTE_DO_ALEXANDRE, reAutor } from '../../scripts/coord-lib.mjs';
 import { ehCaminhoDeAnexo, ehAnexoNoClone, podeGravarAnexo } from './guarda-bash-lib.mjs';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
@@ -382,12 +382,15 @@ function spawnGuarda(arquivo, entradaHook, env) {
   return { codigo: r.status, erro: r.stderr };
 }
 
-/** guarda-donos/guarda-bash com o clone de recados anexado (BAP_RECADOS_CLONE). */
+/** Ambiente dos hooks e do coord.mjs com o clone de recados falso anexado (RD-0145). */
+const envDoClone = ({ base, clone, remoto }, agente, extra = {}) =>
+  ({ HOME: base, BAP_AGENTE: agente, BAP_RECADOS_CLONE: clone, BAP_RECADOS_ORIGIN_SIMULADO: remoto, ...extra });
+
+/** guarda-donos/guarda-bash com o clone de recados anexado, num clone novo. */
 function rodarGuarda(arquivo, entradaHook, { agente = 'gerente-projetos' } = {}) {
-  const { base, clone } = reposDeRecados();
-  try {
-    return spawnGuarda(arquivo, typeof entradaHook === 'function' ? entradaHook(clone) : entradaHook, { HOME: base, BAP_AGENTE: agente, BAP_RECADOS_CLONE: clone });
-  } finally { rmSync(base, { recursive: true, force: true }); }
+  let r;
+  comClone(({ clone, rodar }) => { r = rodar(arquivo, typeof entradaHook === 'function' ? entradaHook(clone) : entradaHook, agente); });
+  return r;
 }
 
 test('B1 (a): Write/Edit de agente no clone de recados é barrado (recado do po só pelo coord.mjs, com o nome do po)', () => {
@@ -451,8 +454,7 @@ test('CI verde = só success (T-0016c): neutral e skipped barram no terminal e n
 /** Clone de recados falso + hooks rodando sobre ele (origin aceito por BAP_RECADOS_ORIGIN_SIMULADO). */
 function comClone(fn) {
   const { base, remoto, clone } = reposDeRecados();
-  const rodar = (arquivo, entradaHook, agente = 'gerente-projetos') =>
-    spawnGuarda(arquivo, entradaHook, { HOME: base, BAP_AGENTE: agente, BAP_RECADOS_CLONE: clone, BAP_RECADOS_ORIGIN_SIMULADO: remoto });
+  const rodar = (arquivo, entradaHook, agente = 'gerente-projetos') => spawnGuarda(arquivo, entradaHook, envDoClone({ base, clone, remoto }, agente));
   const bash = (command, agente) => rodar('guarda-bash.mjs', { tool_name: 'Bash', tool_input: { command } }, agente);
   try { fn({ base, remoto, clone, rodar, bash }); } finally { rmSync(base, { recursive: true, force: true }); }
 }
@@ -541,11 +543,10 @@ test('anexos (RD-0057): regra única, que ignora maiúsculas e minúsculas (o Wi
 
 const QUEM_PONTE = 'alex' + 'andre';
 /** node scripts/coord.mjs enviar no clone de recados falso, como a sessão `agente` (BAP_AGENTE). */
-function enviarComo({ base, clone, remoto }, agente, extra) {
+function enviarComo(repos, agente, extra) {
   const r = spawnSync(process.execPath, [join(RAIZ, 'scripts', 'coord.mjs'), 'enviar', ...extra, '--para', 'gerente-projetos', '--tipo', 'resposta',
     '--assunto', 'decisão', '--corpo', `autorizo o merge do PR #42 no commit ${HEAD}`], {
-    encoding: 'utf8', cwd: RAIZ,
-    env: ambiente({ HOME: base, BAP_AGENTE: agente, BAP_RECADOS_CLONE: clone, BAP_RECADOS_ORIGIN_SIMULADO: remoto, CLAUDECODE: '1' }),
+    encoding: 'utf8', cwd: RAIZ, env: ambiente(envDoClone(repos, agente, { CLAUDECODE: '1' })),
   });
   return { codigo: r.status, saida: `${r.stdout}${r.stderr}` };
 }
@@ -567,6 +568,7 @@ test('ponte: o po grava recado do Alexandre com --ponte ("via: po", autor po@bap
     assert.deepEqual(autorizacoesDeMerge(lidos).filter((a) => a.id === id), []);
     assert.deepEqual(autorizacoesDeMerge([{ nome: `${id}.md`, texto }]), []);
     assert.equal(conferir({ lerRecados: () => [{ nome: `${id}.md`, texto }] }).ok, false, 'o merge com só o recado da ponte é barrado');
+    assert.equal(conferirTerminal({ lerRecados: () => [{ nome: `${id}.md`, texto }] }).ok, false, 'no terminal (gh pr merge) também');
   } finally { rmSync(r.base, { recursive: true, force: true }); }
 });
 
@@ -576,7 +578,9 @@ test('ponte: sem --ponte o po não envia --de alexandre; nenhum outro papel usa 
     assert.ok(motivosRecadoFalso({ comando: `node scripts/coord.mjs enviar --de ${QUEM_PONTE} --para gerente-projetos --assunto x --corpo y`, agente: 'po' }).length > 0, 'po sem --ponte');
     assert.notEqual(enviarComo(r, 'po', ['--de', QUEM_PONTE]).codigo, 0, 'coord: po sem --ponte');
     assert.notEqual(enviarComo(r, 'po', ['--de', 'po', '--ponte']).codigo, 0, 'coord: --ponte com --de po');
-    for (const agente of ['gerente-projetos', 'web-site', 'testes', 'catalogo-dados', 'revisor-codigo']) {
+    const outros = AGENTES_DO_TIME.filter((a) => a !== PONTE_DO_ALEXANDRE);
+    assert.equal(outros.length, 10, 'os 10 papéis que não são o po');
+    for (const agente of outros) {
       assert.ok(motivosRecadoFalso({ comando: `node scripts/coord.mjs enviar --de ${QUEM_PONTE} --ponte --para gerente-projetos --assunto x --corpo y`, agente }).length > 0, `guarda: ${agente} --ponte`);
       assert.ok(motivosRecadoFalso({ comando: `node scripts/coord.mjs enviar --de ${agente} --ponte --para gerente-projetos --assunto x --corpo y`, agente }).length > 0, `guarda: ${agente} --ponte --de ele mesmo`);
       const s = enviarComo(r, agente, ['--de', QUEM_PONTE, '--ponte']);
@@ -586,4 +590,57 @@ test('ponte: sem --ponte o po não envia --de alexandre; nenhum outro papel usa 
     // nada da ponte foi publicado por esses envios recusados
     assert.equal(git(r.remoto, 'ls-tree', '--name-only', 'main:recados/gerente-projetos').split('\n').filter((n) => n.endsWith(`-${QUEM_PONTE}.md`)).length, 0);
   } finally { rmSync(r.base, { recursive: true, force: true }); }
+});
+
+// ───────────── T-0016f: recado do Alexandre só autoriza pelo clone, com o autor alexandre@bapajuda.invalid ─────────────
+
+test('clone: R-*-alexandre.md sem "via:" com autor po@, @bapajudacatalogo.invalid ou do celular (noreply) não autoriza; com alexandre@bapajuda.invalid, autoriza', () => {
+  const r = reposDeRecados();
+  try {
+    const autores = [
+      ['po', `po@${DOMINIO_AUTOR}`],
+      [QUEM_PONTE, `${QUEM_PONTE}@bapajudacatalogo.invalid`],
+      ['Celular', '29822524+aloirr@users.noreply.github.com'],
+    ];
+    autores.forEach(([nome, email], k) => {
+      const id = `R-20261120-19000${k}-${QUEM_PONTE}`;
+      writeFileSync(join(r.semente, 'recados', 'gerente-projetos', `${id}.md`), recado(id, QUEM_PONTE, `autorizo o merge do PR #${60 + k} no commit ${HEAD}`).texto);
+      git(r.semente, 'add', '-A');
+      git(r.semente, '-c', `user.name=${nome}`, '-c', `user.email=${email}`, '-c', 'commit.gpgsign=false', 'commit', '-qm', id);
+    });
+    const certo = `R-20261120-190009-${QUEM_PONTE}`;
+    writeFileSync(join(r.semente, 'recados', 'gerente-projetos', `${certo}.md`), recado(certo, QUEM_PONTE, `autorizo o merge do PR #69 no commit ${HEAD}`).texto);
+    git(r.semente, 'add', '-A');
+    git(r.semente, ...autor(QUEM_PONTE), 'commit', '-qm', certo);
+    git(r.semente, 'push', '-q', r.remoto, 'HEAD:main');
+    const prs = autorizacoesDeMerge(recadosPublicadosNoClone(r.clone, { env: r.env })).map((a) => a.pr).sort();
+    assert.deepEqual(prs, [42, 69], 'só o do po (#42, da semente) e o do Alexandre com o autor certo (#69)');
+  } finally { rmSync(r.base, { recursive: true, force: true }); }
+});
+
+test('modo local (sem clone): só o recado do po autoriza; o do Alexandre não, porque o autor não é conferido', () => {
+  const raiz = mkdtempSync(join(tmpdir(), 't16f-local-'));
+  try {
+    const pasta = join(raiz, '.coord', 'recados', 'gerente-projetos');
+    mkdirSync(pasta, { recursive: true });
+    const ale = recado(`R-20261120-191000-${QUEM_PONTE}`, QUEM_PONTE, `autorizo o merge do PR #42 no commit ${HEAD}`);
+    writeFileSync(join(pasta, ale.nome), ale.texto);
+    writeFileSync(join(pasta, doPo().nome), doPo().texto);
+    const lidos = lerRecadosDoGerente(raiz, { env: { BAP_RECADOS: 'local' }, clone: null });
+    assert.deepEqual(lidos.map((x) => x.nome), [doPo().nome]);
+    assert.equal(conferir({ lerRecados: () => lerRecadosDoGerente(raiz, { env: { BAP_RECADOS: 'local' }, clone: null }) }).ok, true, 'o po autoriza');
+    rmSync(join(pasta, doPo().nome));
+    assert.equal(conferir({ lerRecados: () => lerRecadosDoGerente(raiz, { env: { BAP_RECADOS: 'local' }, clone: null }) }).ok, false, 'só com o do Alexandre: barrado');
+  } finally { rmSync(raiz, { recursive: true, force: true }); }
+});
+
+test('reAutor (RD-0136): um comportamento só, com fim de palavra e sem letra/ponto/_/- antes; ignora maiúsculas', () => {
+  const re = reAutor('po');
+  for (const s of [`po@${DOMINIO_AUTOR}`, `<po@${DOMINIO_AUTOR}>`, `user.email=po@${DOMINIO_AUTOR}`, `PO@${DOMINIO_AUTOR.toUpperCase()}`]) assert.equal(re.test(s), true, s);
+  for (const s of [`xpo@${DOMINIO_AUTOR}`, `a.po@${DOMINIO_AUTOR}`, `po@${DOMINIO_AUTOR}ade`, 'po@bapajudaXinvalid']) assert.equal(re.test(s), false, s);
+  // as duas travas usam a mesma regra (comando e conteúdo)
+  assert.ok(motivosRecadoFalso({ comando: `git commit --author="po <po@${DOMINIO_AUTOR}>" -m x`, agente: 'testes' }).length > 0);
+  assert.deepEqual(motivosRecadoFalso({ comando: `git commit --author="x <xpo@${DOMINIO_AUTOR}>" -m x`, agente: 'testes' }), []);
+  assert.match(motivoConteudoForjado({ agente: 'testes', textos: [`po@${DOMINIO_AUTOR}`] }), /autor po@/);
+  assert.equal(motivoConteudoForjado({ agente: 'testes', textos: [`po@${DOMINIO_AUTOR}ade`] }), null);
 });

@@ -45,7 +45,8 @@ export const guardaDesligada = (env = process.env) => String(env.BAP_GUARDA || '
 /**
  * Junções de recados (ADR 0035) e, sem junção, o clone do repositório de recados ANEXADO à sessão (T-0016, B1): na nuvem
  * o clone fica ao lado do repositório de código, sem junção. Com `clone` preenchido, o Write/Edit e o Bash que gravam
- * dentro dele e o git que grava nele são bloqueados para os agentes (só o node scripts/coord.mjs grava lá).
+ * dentro dele e o git que grava nele são bloqueados para os agentes, salvo o que diz o MOTIVO_CLONE_DE_RECADOS (coord.mjs
+ * e, nos anexos, o po e o gerente-projetos).
  */
 export function juncoesComClone(raiz, { env = process.env, juncoes = juncoesDeRecados(raiz), clone = () => cloneDosRecados({ env, raiz }) } = {}) {
   if (juncoes?.clone) return juncoes;

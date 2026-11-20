@@ -27,6 +27,19 @@ export const AGENTES_DO_TIME = [
   'design-de-marca',
   'corretor-redundancias',
 ];
+/**
+ * Ponte (T-0016d, R-20261120-150200-alexandre): só este papel grava recado do Alexandre, por
+ * `node scripts/coord.mjs enviar --de alexandre --ponte` (cabeçalho "via: po", autor po@bapajuda.invalid). Recado com
+ * "via:" nunca vale como autorização de merge.
+ */
+export const PONTE_DO_ALEXANDRE = 'po';
+/** Domínio do autor dos commits do coord.mjs nos recados (<agente>@bapajuda.invalid). */
+export const DOMINIO_AUTOR = 'bapajuda.invalid';
+/**
+ * O e-mail de autor <quem>@bapajuda.invalid no texto (RD-0136, um comportamento só): sem letra, dígito, ponto, _ ou -
+ * antes (xpo@... não casa) e com fim de palavra depois (po@bapajuda.invalidade não casa); ignora maiúsculas.
+ */
+export const reAutor = (quem) => new RegExp(`(^|[^a-z0-9._-])${quem}@${DOMINIO_AUTOR.replace(/\./g, '\\.')}\\b`, 'i');
 export const AGENTES = String(process.env.BAP_AGENTES_TESTE || '').trim()
   ? String(process.env.BAP_AGENTES_TESTE).split(',').map((a) => a.trim()).filter(Boolean)
   : AGENTES_DO_TIME;

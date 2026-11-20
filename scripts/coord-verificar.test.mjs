@@ -68,12 +68,17 @@ function criarRepo() {
   return dir;
 }
 
-/** Roda o script do repositório `dir` (cwd = dir), sem herdar GITHUB_HEAD_REF do ambiente. */
+/**
+ * Roda o script do repositório `dir` (cwd = dir), sem herdar GITHUB_HEAD_REF do ambiente. BAP_RECADOS=local (salvo se o
+ * teste pedir outro modo): sem isso, numa sessão com o clone de recados real em /home/user, o cloneDosRecados o acharia
+ * e o teste leria (e o enviar gravaria) a caixa de verdade (T-0016f).
+ */
 function rodar(dir, args, env = {}) {
   const base = { ...process.env };
   delete base.GITHUB_HEAD_REF;
+  delete base.BAP_RECADOS_CLONE;
   const r = spawnSync(process.execPath, [join(dir, 'scripts', 'coord.mjs'), ...args], {
-    cwd: dir, encoding: 'utf8', env: { ...base, ...env },
+    cwd: dir, encoding: 'utf8', env: { ...base, BAP_RECADOS: 'local', ...env },
   });
   return { codigo: r.status, saida: r.stdout, erro: r.stderr, tudo: r.stdout + r.stderr };
 }
