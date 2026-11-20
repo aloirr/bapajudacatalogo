@@ -20,5 +20,5 @@
 
 ## Sincronização
 
-- Hoje: `ATUALIZAR_CATALOGO.bat` no PC (base e fotos do OneDrive → GitHub → Render).
+- Hoje: a base oficial está no repositório. As mudanças entram por PR com "aprovado", e o Render publica a cada merge. As fotos novas chegam pelo "Upload files" em `fotos-novas/` (T-0012). O `ATUALIZAR_CATALOGO.bat` foi aposentado.
 - Depois: rodar todo dia, junto com a sincronização da BAP Central feita pelas assistentes.
