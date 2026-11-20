@@ -12,7 +12,6 @@ from digital2 import W, H, MX, CW, TOP, FOOT, HERO, S, lw, para_h
 import taxo
 
 M = MO.X.PF.M
-STK = M.STK
 FAMS = MO.FAMS
 BPX = 3 * mm / S
 CMYK = dict(black=(0, 0, 0, 1), ink=(0, 0, 0, .95), sec=(0, 0, 0, .75), grey=(0, 0, 0, .68), green=(.75, 0, 1, 0),
@@ -27,18 +26,10 @@ LEGAL_R = ' — material exclusivo do time BAP. Proibida a distribuição a clie
 
 
 import os
-import hashlib
-_D = 'entradas/bap'
-os.makedirs(_D, exist_ok=True)
-_h = lambda f: hashlib.md5(open(os.path.join(_D, f), 'rb').read()).hexdigest()
-PLACEHOLDER = _h('FLU15002.jpg') if os.path.exists(os.path.join(_D, 'FLU15002.jpg')) else None          # arte "IMAGEM INDISPONÍVEL" (1.031 arquivos iguais)
+# fotos dos destaques: as do catálogo online (site/img, 700x700, código no nome), que estão no Git (T-0019, 20/11)
+_D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'site', 'img')
 IMG = {taxo.norm(os.path.splitext(f)[0]): os.path.join(_D, f)
-       for f in os.listdir(_D) if f.lower().endswith(('.jpg', '.jpeg', '.png')) and _h(f) != PLACEHOLDER}
-
-
-def est_of(code):
-    c = taxo.norm(code)
-    return int(STK.loc[c, 'est']) if c in STK.index else 0
+       for f in (os.listdir(_D) if os.path.isdir(_D) else []) if f.lower().endswith(('.jpg', '.jpeg', '.png'))}
 
 
 class PDoc(D2.Doc):
@@ -166,19 +157,53 @@ APP_FS, APP_LD = 9.4, 12.6
 CARD_FS = 8.2
 
 
+import json as _json
+# destaques fixos (T-0019, R-20261120-153200): os 5 do catálogo de 13/11, só códigos
+_DF = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'destaques_fixos.json')
+DESTAQUES_FIXOS = _json.load(open(_DF, encoding='utf-8'))['familias'] if os.path.exists(_DF) else {}
+LOG_DESTAQUES = {}      # (família, código ou '—') -> motivo do completamento
+
+
+def _regra(r):
+    """1º com foto própria; 2º com aplicação ou especificação; 3º pelo código"""
+    return (0 if r['_img'] else 1, 0 if r['segs'] else 1, r['code'])
+
+
 def pick(f):
     rows = list(f['rows'])
     for r in rows:
-        r['_est'] = est_of(r['code']); r['_img'] = IMG.get(taxo.norm(r['code']))
+        r['_img'] = IMG.get(taxo.norm(r['code']))
     pool = [r for r in rows if r['segs']] if not f['spec'] else rows
     if len(pool) < min(5, len(rows)): pool = rows
-    com_est = [r for r in pool if r['_est'] > 0]           # destaque só com estoque (itens sem estoque entraram em 27/10)
-    if com_est: pool = com_est
-    # destaques: maior estoque, dando preferência a quem tem foto própria
-    top = sorted(pool, key=lambda r: (0 if r['_img'] else 1, -r['_est']))[:5]
+    pool = [r for r in pool if not M.inativo(r['code'])] or pool
+    fixos = DESTAQUES_FIXOS.get(f['name'])
+    top = []
+    if fixos is None:
+        LOG_DESTAQUES[(f['name'], '—')] = 'família sem lista fixa: regra do código'
+    else:
+        por = {taxo.norm(r['code']): r for r in rows}
+        for c in fixos:
+            r = por.get(taxo.norm(c))
+            if r is None: LOG_DESTAQUES[(f['name'], c)] = 'saiu da base/da linha'
+            elif M.inativo(c): LOG_DESTAQUES[(f['name'], c)] = 'INATIVO'
+            else: top.append(r)
     tk = {id(r) for r in top}
-    rest = sorted([r for r in rows if id(r) not in tk], key=lambda r: (0 if (r['segs'] or f['spec']) else 1, -r['_est'], r['code']))
+    # lista fixa: completa só o que saiu (fora da base/INATIVO), até o tamanho da lista de 13/11; sem lista: até 5
+    falta = (len(fixos) if fixos is not None else min(5, len(rows))) - len(top)
+    if falta > 0:
+        extra = sorted([r for r in pool if id(r) not in tk], key=_regra)[:falta]
+        if fixos is not None and extra:
+            for r in extra: LOG_DESTAQUES[(f['name'], '+' + r['code'])] = 'entrou para completar'
+        top += extra
+    top = top[:5]
+    tk = {id(r) for r in top}
+    rest = sorted([r for r in rows if id(r) not in tk], key=lambda r: (0 if (r['segs'] or f['spec']) else 1, r['code']))
     return top, rest
+
+
+def log_destaques():
+    for (fam, c), m in sorted(LOG_DESTAQUES.items()):
+        print(f'[destaques] {fam}: {c} — {m}')
 
 
 def plain(segs): return re.sub(r'\s+', ' ', ''.join(t for t, b in segs)).strip()
@@ -461,7 +486,7 @@ def como(dc, pg):
     topbar(dc, f'Catálogo {ANO}')
     hero(dc, 'GUIA RÁPIDO', 'Como consultar', 'Encontre a peça certa e aumente o ticket em poucos passos.')
     passos = [('Encontre a linha', 'O sumário organiza as linhas por sistema do veículo (suspensão, freio, arrefecimento...). Cada página traz uma linha de produtos BAP.'),
-              ('Veja os destaques', 'Os cards no topo mostram os itens de maior estoque da linha, com foto, aplicação e equivalência.'),
+              ('Veja os destaques', 'Os cards no topo mostram os itens em destaque da linha, com foto, aplicação e equivalência.'),
               ('Consulte a lista', 'A tabela traz mais produtos da linha, com código, aplicação, posição e equivalência. Aplicações longas terminam em "(+ outras aplicações)".'),
               ('Leve também', 'A coluna e a faixa "Leve também" indicam o agregado de cada produto, como bomba d\'água com o kit de distribuição ou câmara com o pneu.'),
               ('Fique atento às tags', 'NOVO: produto recém-chegado ao portfólio BAP. LANÇAMENTO 2026: linha lançada em 2026, indicada no topo da página.'),
@@ -553,6 +578,7 @@ def build(out, moto_pages_n=2):
         anotacoes(dc, pgn); pgn += 1; total += 1
     contracapa(dc)
     dc.c.save()
+    log_destaques()
     return total, shown, np_
 
 

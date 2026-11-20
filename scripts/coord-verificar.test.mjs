@@ -23,15 +23,15 @@ const DONOS = {
     { padrao: 'scripts/coord*.mjs', dono: 'alexandre' },
     { padrao: 'legado/**', dono: 'congelado' },
     { padrao: '.coord/**', dono: 'gerente-projetos' },
-    { padrao: 'modules/core/**', dono: 'modulo-robo' },
-    { padrao: 'apps/**', dono: 'engenheiro-software' },
+    { padrao: 'modules/core/**', dono: 'catalogo-grafico' },
+    { padrao: 'apps/**', dono: 'web-site' },
     { padrao: 'docs/**', dono: 'gerente-projetos' },
-    { padrao: 'pnpm-lock.yaml', dono: 'engenheiro-software' },
-    { padrao: 'pnpm-workspace.yaml', dono: 'engenheiro-software' },
-    { padrao: 'package.json', dono: 'engenheiro-software' },
+    { padrao: 'pnpm-lock.yaml', dono: 'web-site' },
+    { padrao: 'pnpm-workspace.yaml', dono: 'web-site' },
+    { padrao: 'package.json', dono: 'web-site' },
   ], // sem regra "*": qualquer outro caminho é sem-dono
 };
-const RECADO = '---\nid: R-20261031-000000-modulo-robo\nde: modulo-robo\npara: [testes]\ntipo: aviso\n---\n# Olá\n';
+const RECADO = '---\nid: R-20261031-000000-catalogo-grafico\nde: catalogo-grafico\npara: [testes]\ntipo: aviso\n---\n# Olá\n';
 
 const temporarios = [];
 process.on('exit', () => { for (const d of temporarios) rmSync(d, { recursive: true, force: true }); });
@@ -60,7 +60,7 @@ function criarRepo() {
   copyFileSync(join(AQUI, 'coord.mjs'), join(dir, 'scripts', 'coord.mjs'));
   copyFileSync(join(AQUI, 'coord-lib.mjs'), join(dir, 'scripts', 'coord-lib.mjs'));
   escrever(dir, '.coord/donos.json', JSON.stringify(DONOS, null, 2));
-  escrever(dir, '.coord/recados/testes/R-20261031-000000-modulo-robo.md', RECADO);
+  escrever(dir, '.coord/recados/testes/R-20261031-000000-catalogo-grafico.md', RECADO);
   escrever(dir, 'modules/core/a.ts');
   escrever(dir, 'apps/api/x.ts');
   escrever(dir, 'legado/velho.txt');
@@ -68,12 +68,17 @@ function criarRepo() {
   return dir;
 }
 
-/** Roda o script do repositório `dir` (cwd = dir), sem herdar GITHUB_HEAD_REF do ambiente. */
+/**
+ * Roda o script do repositório `dir` (cwd = dir), sem herdar GITHUB_HEAD_REF do ambiente. BAP_RECADOS=local (salvo se o
+ * teste pedir outro modo): sem isso, numa sessão com o clone de recados real em /home/user, o cloneDosRecados o acharia
+ * e o teste leria (e o enviar gravaria) a caixa de verdade (T-0016f).
+ */
 function rodar(dir, args, env = {}) {
   const base = { ...process.env };
   delete base.GITHUB_HEAD_REF;
+  delete base.BAP_RECADOS_CLONE;
   const r = spawnSync(process.execPath, [join(dir, 'scripts', 'coord.mjs'), ...args], {
-    cwd: dir, encoding: 'utf8', env: { ...base, ...env },
+    cwd: dir, encoding: 'utf8', env: { ...base, BAP_RECADOS: 'local', ...env },
   });
   return { codigo: r.status, saida: r.stdout, erro: r.stderr, tudo: r.stdout + r.stderr };
 }
@@ -89,31 +94,31 @@ test('arquivo do próprio agente: OK e código 0', () => {
   const dir = criarRepo();
   escrever(dir, 'modules/core/a.ts', 'mudou\n');
   escrever(dir, 'modules/core/novo.ts');
-  const r = rodar(dir, ['verificar', 'modulo-robo']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'OK'), ['M modules/core/a.ts', 'A modules/core/novo.ts']);
-  assert.match(r.saida, /Resultado: OK — 2 arquivo\(s\) alterado\(s\), nenhuma violação para modulo-robo/);
+  assert.match(r.saida, /Resultado: OK — 2 arquivo\(s\) alterado\(s\), nenhuma violação para catalogo-grafico/);
 });
 
 test('sem alteração nenhuma: OK', () => {
   const dir = criarRepo();
-  const r = rodar(dir, ['verificar', 'modulo-robo']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.match(r.saida, /Resultado: OK — nenhum arquivo alterado/);
 });
 
 test('--base: arquivo de outro dono no branch é VIOLAÇÃO (código 1)', () => {
   const dir = criarRepo();
-  git(dir, 'checkout', '-q', '-b', 'agente/T-0001-modulo-robo');
+  git(dir, 'checkout', '-q', '-b', 'agente/T-0001-catalogo-grafico');
   escrever(dir, 'modules/core/a.ts', 'mudou\n');
   escrever(dir, 'apps/api/x.ts', 'invadiu\n');
   commitar(dir, 'mudanças');
-  const r = rodar(dir, ['verificar', 'modulo-robo', '--base', 'main']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico', '--base', 'main']);
   assert.equal(r.codigo, 1, r.tudo);
   assert.deepEqual(secao(r.saida, 'OK'), ['M modules/core/a.ts']);
   const v = secao(r.saida, 'VIOLAÇÃO');
   assert.equal(v.length, 1);
-  assert.match(v[0], /^M apps\/api\/x\.ts → dono: engenheiro-software/);
+  assert.match(v[0], /^M apps\/api\/x\.ts → dono: web-site/);
   assert.match(r.saida, /Resultado: VIOLAÇÃO — 1 de 2 arquivo\(s\) alterado\(s\)/);
 });
 
@@ -122,10 +127,10 @@ test('sem --base: outros donos aparecem como informativo e não mudam o código 
   escrever(dir, 'modules/core/a.ts', 'mudou\n');
   escrever(dir, 'apps/api/x.ts', 'outro agente na mesma árvore\n');
   escrever(dir, 'docs/nota.md');
-  const r = rodar(dir, ['verificar', 'modulo-robo']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'Outros donos (informativo'), [
-    'M apps/api/x.ts → engenheiro-software',
+    'M apps/api/x.ts → web-site',
     'A docs/nota.md → gerente-projetos',
   ]);
   assert.deepEqual(secao(r.saida, 'VIOLAÇÃO'), []);
@@ -135,7 +140,7 @@ test('sem-dono e congelado são sempre VIOLAÇÃO, mesmo sem --base', () => {
   const dir = criarRepo();
   escrever(dir, 'solto.txt');
   escrever(dir, 'legado/velho.txt', 'mexeu\n');
-  const r = rodar(dir, ['verificar', 'modulo-robo']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico']);
   assert.equal(r.codigo, 1, r.tudo);
   const v = secao(r.saida, 'VIOLAÇÃO');
   assert.equal(v.length, 2);
@@ -148,30 +153,30 @@ for (const comBase of [false, true]) {
 
   test(`exceções universais (${modo}): diário, lidos e recado novo`, () => {
     const dir = criarRepo();
-    git(dir, 'checkout', '-q', '-b', 'agente/T-0002-modulo-robo');
-    escrever(dir, '.coord/diario/modulo-robo.md', '2026-10-31 — T-0002 — feito\n');
-    escrever(dir, '.coord/lidos/modulo-robo.txt', 'R-1\n');
-    escrever(dir, '.coord/recados/engenheiro-software/R-20261031-010000-modulo-robo.md', RECADO);
-    escrever(dir, '.coord/recados/testes/R-20261031-010001-modulo-robo.md', RECADO);
+    git(dir, 'checkout', '-q', '-b', 'agente/T-0002-catalogo-grafico');
+    escrever(dir, '.coord/diario/catalogo-grafico.md', '2026-10-31 — T-0002 — feito\n');
+    escrever(dir, '.coord/lidos/catalogo-grafico.txt', 'R-1\n');
+    escrever(dir, '.coord/recados/web-site/R-20261031-010000-catalogo-grafico.md', RECADO);
+    escrever(dir, '.coord/recados/testes/R-20261031-010001-catalogo-grafico.md', RECADO);
     if (comBase) commitar(dir, 'recados');
-    const r = rodar(dir, comBase ? ['verificar', 'modulo-robo', '--base', 'main'] : ['verificar', 'modulo-robo']);
+    const r = rodar(dir, comBase ? ['verificar', 'catalogo-grafico', '--base', 'main'] : ['verificar', 'catalogo-grafico']);
     assert.equal(r.codigo, 0, r.tudo);
     const ex = secao(r.saida, 'Exceções do protocolo');
     assert.equal(ex.length, 4, r.saida);
-    assert.ok(ex.includes('A .coord/diario/modulo-robo.md — diário do próprio agente'));
-    assert.ok(ex.includes('A .coord/lidos/modulo-robo.txt — lidos do próprio agente'));
-    assert.ok(ex.includes('A .coord/recados/testes/R-20261031-010001-modulo-robo.md — recado novo para testes'));
+    assert.ok(ex.includes('A .coord/diario/catalogo-grafico.md — diário do próprio agente'));
+    assert.ok(ex.includes('A .coord/lidos/catalogo-grafico.txt — lidos do próprio agente'));
+    assert.ok(ex.includes('A .coord/recados/testes/R-20261031-010001-catalogo-grafico.md — recado novo para testes'));
   });
 
   test(`recado existente alterado ou apagado é VIOLAÇÃO (${modo})`, () => {
     for (const acao of ['alterar', 'apagar']) {
       const dir = criarRepo();
-      git(dir, 'checkout', '-q', '-b', 'agente/T-0003-modulo-robo');
-      const rel = '.coord/recados/testes/R-20261031-000000-modulo-robo.md';
+      git(dir, 'checkout', '-q', '-b', 'agente/T-0003-catalogo-grafico');
+      const rel = '.coord/recados/testes/R-20261031-000000-catalogo-grafico.md';
       if (acao === 'alterar') escrever(dir, rel, RECADO + 'editado\n');
       else unlinkSync(join(dir, rel));
       if (comBase) commitar(dir, acao);
-      const r = rodar(dir, comBase ? ['verificar', 'modulo-robo', '--base', 'main'] : ['verificar', 'modulo-robo']);
+      const r = rodar(dir, comBase ? ['verificar', 'catalogo-grafico', '--base', 'main'] : ['verificar', 'catalogo-grafico']);
       assert.equal(r.codigo, 1, r.tudo);
       const v = secao(r.saida, 'VIOLAÇÃO');
       assert.equal(v.length, 1, r.saida);
@@ -182,28 +187,28 @@ for (const comBase of [false, true]) {
 
 test('--base: diário de outro agente é VIOLAÇÃO; sem --base é informativo', () => {
   const dir = criarRepo();
-  git(dir, 'checkout', '-q', '-b', 'agente/T-0004-modulo-robo');
+  git(dir, 'checkout', '-q', '-b', 'agente/T-0004-catalogo-grafico');
   escrever(dir, '.coord/diario/testes.md');
-  assert.equal(rodar(dir, ['verificar', 'modulo-robo']).codigo, 0);
+  assert.equal(rodar(dir, ['verificar', 'catalogo-grafico']).codigo, 0);
   commitar(dir, 'diário alheio');
-  const r = rodar(dir, ['verificar', 'modulo-robo', '--base', 'main']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico', '--base', 'main']);
   assert.equal(r.codigo, 1, r.tudo);
   assert.match(secao(r.saida, 'VIOLAÇÃO')[0], /^A \.coord\/diario\/testes\.md → dono: testes/);
 });
 
 test('--base enxerga só o diff do branch (merge-base) somado ao não commitado', () => {
   const dir = criarRepo();
-  git(dir, 'checkout', '-q', '-b', 'agente/T-0005-modulo-robo');
+  git(dir, 'checkout', '-q', '-b', 'agente/T-0005-catalogo-grafico');
   escrever(dir, 'modules/core/b.ts');
   commitar(dir, 'branch');
   // o main anda depois do ponto de divergência, com arquivo de outro dono
   git(dir, 'checkout', '-q', 'main');
   escrever(dir, 'apps/web/depois.ts');
   commitar(dir, 'main andou');
-  git(dir, 'checkout', '-q', 'agente/T-0005-modulo-robo');
+  git(dir, 'checkout', '-q', 'agente/T-0005-catalogo-grafico');
   escrever(dir, 'modules/core/a.ts', 'não commitado\n');
   escrever(dir, 'modules/core/rascunho.ts'); // não rastreado
-  const r = rodar(dir, ['verificar', 'modulo-robo', '--base', 'main']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico', '--base', 'main']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'OK'), ['M modules/core/a.ts', 'A modules/core/b.ts', 'A modules/core/rascunho.ts']);
   assert.doesNotMatch(r.saida, /apps\/web\/depois\.ts/);
@@ -212,41 +217,41 @@ test('--base enxerga só o diff do branch (merge-base) somado ao não commitado'
 
 test('--base num checkout limpo (clone, como no CI) com origin/main', () => {
   const origem = criarRepo();
-  git(origem, 'checkout', '-q', '-b', 'agente/T-0006-modulo-robo');
+  git(origem, 'checkout', '-q', '-b', 'agente/T-0006-catalogo-grafico');
   escrever(origem, 'modules/core/c.ts');
   commitar(origem, 'branch do PR');
   git(origem, 'checkout', '-q', 'main');
   const clone = mkdtempSync(join(tmpdir(), 'coord-verificar-clone-'));
   temporarios.push(clone);
-  git(tmpdir(), 'clone', '-q', '--branch', 'agente/T-0006-modulo-robo', origem, clone);
+  git(tmpdir(), 'clone', '-q', '--branch', 'agente/T-0006-catalogo-grafico', origem, clone);
   // CI: HEAD destacado, nome do branch só em GITHUB_HEAD_REF
   git(clone, 'checkout', '-q', '--detach');
-  const r = rodar(clone, ['verificar', '--base', 'origin/main'], { GITHUB_HEAD_REF: 'agente/T-0006-modulo-robo' });
+  const r = rodar(clone, ['verificar', '--base', 'origin/main'], { GITHUB_HEAD_REF: 'agente/T-0006-catalogo-grafico' });
   assert.equal(r.codigo, 0, r.tudo);
-  assert.match(r.saida, /agente: modulo-robo \(branch agente\/T-0006-modulo-robo \(GITHUB_HEAD_REF\)\)/);
+  assert.match(r.saida, /agente: catalogo-grafico \(branch agente\/T-0006-catalogo-grafico \(GITHUB_HEAD_REF\)\)/);
   assert.deepEqual(secao(r.saida, 'OK'), ['A modules/core/c.ts']);
 });
 
 test('--base com ref ausente (clone raso sem main) dá erro claro e código 2', () => {
   const origem = criarRepo();
-  git(origem, 'checkout', '-q', '-b', 'agente/T-0006-modulo-robo');
+  git(origem, 'checkout', '-q', '-b', 'agente/T-0006-catalogo-grafico');
   escrever(origem, 'modules/core/c.ts');
   commitar(origem, 'branch do PR');
   const clone = mkdtempSync(join(tmpdir(), 'coord-verificar-raso-'));
   temporarios.push(clone);
-  git(tmpdir(), 'clone', '-q', '--depth', '1', '--single-branch', '--branch', 'agente/T-0006-modulo-robo', `file://${origem}`, clone);
-  const r = rodar(clone, ['verificar', 'modulo-robo', '--base', 'origin/main']);
+  git(tmpdir(), 'clone', '-q', '--depth', '1', '--single-branch', '--branch', 'agente/T-0006-catalogo-grafico', `file://${origem}`, clone);
+  const r = rodar(clone, ['verificar', 'catalogo-grafico', '--base', 'origin/main']);
   assert.equal(r.codigo, 2, r.tudo);
   assert.match(r.erro, /ref não encontrada: origin\/main\..*git fetch origin main/);
 });
 
 test('agente inferido do branch agente/T-nnnn-<agente> e alexandre/...', () => {
   const dir = criarRepo();
-  git(dir, 'checkout', '-q', '-b', 'agente/T-0007-modulo-robo');
+  git(dir, 'checkout', '-q', '-b', 'agente/T-0007-catalogo-grafico');
   escrever(dir, 'modules/core/a.ts', 'mudou\n');
   let r = rodar(dir, ['verificar']);
   assert.equal(r.codigo, 0, r.tudo);
-  assert.match(r.saida, /agente: modulo-robo \(branch agente\/T-0007-modulo-robo\)/);
+  assert.match(r.saida, /agente: catalogo-grafico \(branch agente\/T-0007-catalogo-grafico\)/);
 
   git(dir, 'checkout', '-q', '-b', 'alexandre/T-0005-verificar');
   escrever(dir, 'scripts/coord-extra.mjs', '// novo\n');
@@ -255,7 +260,7 @@ test('agente inferido do branch agente/T-nnnn-<agente> e alexandre/...', () => {
   assert.equal(r.codigo, 0, r.tudo); // alexandre: outros donos são informativos mesmo com --base
   assert.match(r.saida, /agente: alexandre \(branch alexandre\/T-0005-verificar\)/);
   assert.deepEqual(secao(r.saida, 'OK'), ['A scripts/coord-extra.mjs']);
-  assert.deepEqual(secao(r.saida, 'Outros donos (informativo'), ['M modules/core/a.ts → modulo-robo']);
+  assert.deepEqual(secao(r.saida, 'Outros donos (informativo'), ['M modules/core/a.ts → catalogo-grafico']);
 });
 
 test('agente inferido do trailer "Agente:" dos commits do PR', () => {
@@ -263,10 +268,10 @@ test('agente inferido do trailer "Agente:" dos commits do PR', () => {
   git(dir, 'checkout', '-q', '-b', 'trabalho-sem-padrao');
   escrever(dir, 'modules/core/a.ts', 'mudou\n');
   git(dir, 'add', '-A');
-  git(dir, 'commit', '-q', '-m', 'T-0008: ajuste\n\nCorpo do commit.\n\nAgente: modulo-robo');
+  git(dir, 'commit', '-q', '-m', 'T-0008: ajuste\n\nCorpo do commit.\n\nAgente: catalogo-grafico');
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 0, r.tudo);
-  assert.match(r.saida, /agente: modulo-robo \(trailer "Agente:" de 1 commit\(s\) do PR\)/);
+  assert.match(r.saida, /agente: catalogo-grafico \(trailer "Agente:" de 1 commit\(s\) do PR\)/);
 });
 
 test('sem como inferir o agente (--base, sem padrão de branch nem trailer): erro de uso com código 2', () => {
@@ -283,7 +288,7 @@ test('sem como inferir o agente (--base, sem padrão de branch nem trailer): err
 
 test('erros de uso: agente desconhecido, --base sem ref, opção desconhecida e branch com agente inválido', () => {
   const dir = criarRepo();
-  for (const args of [['verificar', 'fulano'], ['verificar', 'modulo-robo', '--base'], ['verificar', 'modulo-robo', '--bse', 'main']]) {
+  for (const args of [['verificar', 'fulano'], ['verificar', 'catalogo-grafico', '--base'], ['verificar', 'catalogo-grafico', '--bse', 'main']]) {
     const r = rodar(dir, args);
     assert.equal(r.codigo, 2, `${args.join(' ')}\n${r.tudo}`);
     assert.match(r.erro, /^Erro: /);
@@ -296,10 +301,10 @@ test('erros de uso: agente desconhecido, --base sem ref, opção desconhecida e 
 
 test('--base=<ref> (com sinal de igual) também funciona', () => {
   const dir = criarRepo();
-  git(dir, 'checkout', '-q', '-b', 'agente/T-0010-modulo-robo');
+  git(dir, 'checkout', '-q', '-b', 'agente/T-0010-catalogo-grafico');
   escrever(dir, 'modules/core/z.ts');
   commitar(dir, 'z');
-  const r = rodar(dir, ['verificar', 'modulo-robo', '--base=main']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico', '--base=main']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'OK'), ['A modules/core/z.ts']);
 });
@@ -308,7 +313,7 @@ test('caminho com barra invertida (Windows) é normalizado para /', { skip: proc
   // No Linux "modules\core\win.ts" é um nome de arquivo válido: simula a saída com "\" do Windows.
   const dir = criarRepo();
   writeFileSync(join(dir, 'modules\\core\\win.ts'), 'x\n');
-  const r = rodar(dir, ['verificar', 'modulo-robo']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'OK'), ['A modules/core/win.ts']);
 });
@@ -316,19 +321,19 @@ test('caminho com barra invertida (Windows) é normalizado para /', { skip: proc
 test('classificarMudancas normaliza barra invertida também na função pura', () => {
   const regras = DONOS.regras.map((r) => ({ ...r, re: globParaRegex(r.padrao) }));
   const r = classificarMudancas({
-    agente: 'modulo-robo',
+    agente: 'catalogo-grafico',
     estrito: true,
     regras,
     mudancas: [
       { status: 'M', caminho: 'modules\\core\\domain\\x.ts' },
-      { status: 'M', caminho: '.\\.coord\\diario\\modulo-robo.md' },
-      { status: 'A', caminho: '.coord\\recados\\testes\\R-1-modulo-robo.md' },
+      { status: 'M', caminho: '.\\.coord\\diario\\catalogo-grafico.md' },
+      { status: 'A', caminho: '.coord\\recados\\testes\\R-1-catalogo-grafico.md' },
       { status: 'M', caminho: 'apps\\api\\x.ts' },
     ],
   });
   assert.deepEqual(r.ok.map((i) => i.caminho), ['modules/core/domain/x.ts']);
-  assert.deepEqual(r.excecoes.map((i) => i.caminho), ['.coord/diario/modulo-robo.md', '.coord/recados/testes/R-1-modulo-robo.md']);
-  assert.deepEqual(r.violacoes.map((i) => [i.caminho, i.dono]), [['apps/api/x.ts', 'engenheiro-software']]);
+  assert.deepEqual(r.excecoes.map((i) => i.caminho), ['.coord/diario/catalogo-grafico.md', '.coord/recados/testes/R-1-catalogo-grafico.md']);
+  assert.deepEqual(r.violacoes.map((i) => [i.caminho, i.dono]), [['apps/api/x.ts', 'web-site']]);
   assert.equal(normalizarCaminho('C:\\bapcentral\\x'), 'C:/bapcentral/x');
 });
 
@@ -336,7 +341,7 @@ test('dono <caminho> aceita barra invertida', () => {
   const dir = criarRepo();
   const r = rodar(dir, ['dono', 'modules\\core\\domain\\x.ts']);
   assert.equal(r.codigo, 0, r.tudo);
-  assert.equal(r.saida.trim(), 'modules/core/domain/x.ts → modulo-robo');
+  assert.equal(r.saida.trim(), 'modules/core/domain/x.ts → catalogo-grafico');
 });
 
 test('--por-dono agrupa por dono e acusa sem-dono', () => {
@@ -345,21 +350,21 @@ test('--por-dono agrupa por dono e acusa sem-dono', () => {
   escrever(dir, 'apps/api/x.ts', 'mudou\n');
   let r = rodar(dir, ['verificar', '--por-dono']);
   assert.equal(r.codigo, 0, r.tudo);
-  assert.match(r.saida, /engenheiro-software \(1\):\n {2}M apps\/api\/x\.ts/);
-  assert.match(r.saida, /modulo-robo \(1\):\n {2}M modules\/core\/a\.ts/);
+  assert.match(r.saida, /web-site \(1\):\n {2}M apps\/api\/x\.ts/);
+  assert.match(r.saida, /catalogo-grafico \(1\):\n {2}M modules\/core\/a\.ts/);
   escrever(dir, 'solto.txt');
   r = rodar(dir, ['verificar', '--por-dono']);
   assert.equal(r.codigo, 1, r.tudo);
 });
 
 // ---------------------------------------------------------------------------------------------
-// Casos A1–A11 e B1–B12 do engenheiro-software (R-20261031-071802-engenheiro-software), com o
+// Casos A1–A11 e B1–B12 do web-site (R-20261031-071802-web-site), com o
 // .coord/donos.json de exemplo (scripts/fixtures/donos-exemplo.json, herdado do time Macuxi com os nomes do time BAP):
 // códigos 0/1/2; branch <agente>/T-nnnn[-assunto], agente/T-nnnn-<agente>, alexandre/*, nuvem/*
 // (trailer obrigatório em todos os commits); B9 = erro "agente ambíguo" (código 2).
 // ---------------------------------------------------------------------------------------------
 const DONOS_REAIS = readFileSync(join(AQUI, 'fixtures', 'donos-exemplo.json'), 'utf8');
-const RECADO_ENG = '.coord/recados/gerente-projetos/R-20261031-004609-engenheiro-software.md';
+const RECADO_ENG = '.coord/recados/gerente-projetos/R-20261031-004609-web-site.md';
 
 /** Repositório com o donos.json real e um arquivo de cada dono que os casos usam. */
 function criarRepoReal() {
@@ -373,11 +378,11 @@ function criarRepoReal() {
   copyFileSync(join(AQUI, 'coord.mjs'), join(dir, 'scripts', 'coord.mjs'));
   copyFileSync(join(AQUI, 'coord-lib.mjs'), join(dir, 'scripts', 'coord-lib.mjs'));
   escrever(dir, '.coord/donos.json', DONOS_REAIS);
-  escrever(dir, RECADO_ENG, RECADO.replaceAll('modulo-robo', 'engenheiro-software'));
+  escrever(dir, RECADO_ENG, RECADO.replaceAll('catalogo-grafico', 'web-site'));
   for (const f of [
     'CLAUDE.md', 'modules/core/app/lib/cargas.ts', 'packages/ui/src/web/ui.tsx', 'modules/vendedor/x.ts',
-    '.coord/diario/engenheiro-software.md', '.coord/diario/modulo-robo.md', '.coord/lidos/modulo-robo.txt',
-    '.coord/diario/modulo-farois.md',
+    '.coord/diario/web-site.md', '.coord/diario/catalogo-grafico.md', '.coord/lidos/catalogo-grafico.txt',
+    '.coord/diario/integracao-placas.md',
   ]) escrever(dir, f);
   commitar(dir, 'inicial');
   return dir;
@@ -399,47 +404,47 @@ test('A2: arquivo de outro agente na mesma árvore → "Outros donos", código 0
   const dir = criarRepoReal();
   escrever(dir, 'packages/platform-sdk/src/ambiente.ts');
   mudar(dir, 'modules/core/app/lib/cargas.ts');
-  const r = rodar(dir, ['verificar', 'engenheiro-software']);
+  const r = rodar(dir, ['verificar', 'web-site']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'OK'), ['A packages/platform-sdk/src/ambiente.ts']);
-  assert.deepEqual(secao(r.saida, 'Outros donos'), ['M modules/core/app/lib/cargas.ts → modulo-robo']);
+  assert.deepEqual(secao(r.saida, 'Outros donos'), ['M modules/core/app/lib/cargas.ts → catalogo-grafico']);
   assert.deepEqual(secao(r.saida, 'VIOLAÇÃO'), []);
 });
 
 test('A3: recado novo (não rastreado), diário e lidos do próprio agente → exceções, código 0', () => {
   const dir = criarRepoReal();
-  escrever(dir, '.coord/recados/modulo-robo/R-20261031-070000-engenheiro-software.md', RECADO);
-  mudar(dir, '.coord/diario/engenheiro-software.md');
-  escrever(dir, '.coord/lidos/engenheiro-software.txt', 'R-1\n');
-  git(dir, 'add', '.coord/lidos/engenheiro-software.txt'); // status A no índice
-  const r = rodar(dir, ['verificar', 'engenheiro-software']);
+  escrever(dir, '.coord/recados/catalogo-grafico/R-20261031-070000-web-site.md', RECADO);
+  mudar(dir, '.coord/diario/web-site.md');
+  escrever(dir, '.coord/lidos/web-site.txt', 'R-1\n');
+  git(dir, 'add', '.coord/lidos/web-site.txt'); // status A no índice
+  const r = rodar(dir, ['verificar', 'web-site']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'Exceções do protocolo').sort(), [
-    'A .coord/lidos/engenheiro-software.txt — lidos do próprio agente',
-    'A .coord/recados/modulo-robo/R-20261031-070000-engenheiro-software.md — recado novo para modulo-robo',
-    'M .coord/diario/engenheiro-software.md — diário do próprio agente',
+    'A .coord/lidos/web-site.txt — lidos do próprio agente',
+    'A .coord/recados/catalogo-grafico/R-20261031-070000-web-site.md — recado novo para catalogo-grafico',
+    'M .coord/diario/web-site.md — diário do próprio agente',
   ]);
 });
 
 test('A4: diário e lidos de outro agente → "Outros donos" com o próprio agente como dono', () => {
   const dir = criarRepoReal();
-  mudar(dir, '.coord/diario/modulo-robo.md');
-  mudar(dir, '.coord/lidos/modulo-robo.txt');
-  const r = rodar(dir, ['verificar', 'engenheiro-software']);
+  mudar(dir, '.coord/diario/catalogo-grafico.md');
+  mudar(dir, '.coord/lidos/catalogo-grafico.txt');
+  const r = rodar(dir, ['verificar', 'web-site']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'Outros donos'), [
-    'M .coord/diario/modulo-robo.md → modulo-robo',
-    'M .coord/lidos/modulo-robo.txt → modulo-robo',
+    'M .coord/diario/catalogo-grafico.md → catalogo-grafico',
+    'M .coord/lidos/catalogo-grafico.txt → catalogo-grafico',
   ]);
   assert.doesNotMatch(r.saida, /gerente-projetos/);
 });
 
 test('A5: recado novo com o nome de outro remetente → "Outros donos" (é do remetente)', () => {
   const dir = criarRepoReal();
-  escrever(dir, '.coord/recados/todos/R-20261031-070001-modulo-robo.md', RECADO);
-  const r = rodar(dir, ['verificar', 'engenheiro-software']);
+  escrever(dir, '.coord/recados/todos/R-20261031-070001-catalogo-grafico.md', RECADO);
+  const r = rodar(dir, ['verificar', 'web-site']);
   assert.equal(r.codigo, 0, r.tudo);
-  assert.deepEqual(secao(r.saida, 'Outros donos'), ['A .coord/recados/todos/R-20261031-070001-modulo-robo.md → modulo-robo']);
+  assert.deepEqual(secao(r.saida, 'Outros donos'), ['A .coord/recados/todos/R-20261031-070001-catalogo-grafico.md → catalogo-grafico']);
   assert.deepEqual(secao(r.saida, 'Exceções do protocolo'), []);
 });
 
@@ -448,7 +453,7 @@ test('A6: recado rastreado do próprio agente alterado ou apagado → VIOLAÇÃO
     const dir = criarRepoReal();
     if (acao === 'alterar') mudar(dir, RECADO_ENG);
     else unlinkSync(join(dir, RECADO_ENG));
-    const r = rodar(dir, ['verificar', 'engenheiro-software']);
+    const r = rodar(dir, ['verificar', 'web-site']);
     assert.equal(r.codigo, 1, r.tudo);
     const v = secao(r.saida, 'VIOLAÇÃO');
     assert.equal(v.length, 1, r.saida);
@@ -458,8 +463,8 @@ test('A6: recado rastreado do próprio agente alterado ou apagado → VIOLAÇÃO
 
 test('A7: recado novo em destino inválido → VIOLAÇÃO "destino de recado inválido"', () => {
   const dir = criarRepoReal();
-  escrever(dir, '.coord/recados/fulano/R-20261031-070002-engenheiro-software.md', RECADO);
-  const r = rodar(dir, ['verificar', 'engenheiro-software']);
+  escrever(dir, '.coord/recados/fulano/R-20261031-070002-web-site.md', RECADO);
+  const r = rodar(dir, ['verificar', 'web-site']);
   assert.equal(r.codigo, 1, r.tudo);
   assert.match(secao(r.saida, 'VIOLAÇÃO')[0], /^A \.coord\/recados\/fulano\/.* — destino de recado inválido: fulano$/);
 });
@@ -468,7 +473,7 @@ test('A8: arquivos do alexandre sem --base → "Outros donos" (com --base é VIO
   const dir = criarRepoReal();
   writeFileSync(join(dir, '.coord/donos.json'), JSON.stringify(JSON.parse(DONOS_REAIS))); // mesmo conteúdo, outro formato
   mudar(dir, 'scripts/coord.mjs');
-  const r = rodar(dir, ['verificar', 'engenheiro-software']);
+  const r = rodar(dir, ['verificar', 'web-site']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'Outros donos'), ['M .coord/donos.json → alexandre', 'M scripts/coord.mjs → alexandre']);
 });
@@ -477,16 +482,16 @@ test('A9: sem agente e sem --base (branch sem padrão) → lista por dono, recad
   const dir = criarRepoReal();
   escrever(dir, 'packages/ui/src/novo.ts');
   mudar(dir, 'modules/core/app/lib/cargas.ts');
-  escrever(dir, '.coord/recados/testes/R-20261031-070003-modulo-robo.md', RECADO);
-  mudar(dir, '.coord/diario/modulo-farois.md');
+  escrever(dir, '.coord/recados/testes/R-20261031-070003-catalogo-grafico.md', RECADO);
+  mudar(dir, '.coord/diario/integracao-placas.md');
   // o trailer do último commit não vale sem --base: a árvore é compartilhada
   git(dir, 'commit', '-q', '--allow-empty', '-m', 'x\n\nAgente: testes');
   const r = rodar(dir, ['verificar']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.match(r.saida, /^Alterações por dono — árvore de trabalho × HEAD/);
   assert.match(r.saida, /po \(1\):\n {2}A packages\/ui\/src\/novo\.ts/);
-  assert.match(r.saida, /modulo-robo \(2\):\n {2}M modules\/core\/app\/lib\/cargas\.ts\n {2}A \.coord\/recados\/testes\/R-20261031-070003-modulo-robo\.md/);
-  assert.match(r.saida, /modulo-farois \(1\):\n {2}M \.coord\/diario\/modulo-farois\.md/);
+  assert.match(r.saida, /catalogo-grafico \(2\):\n {2}M modules\/core\/app\/lib\/cargas\.ts\n {2}A \.coord\/recados\/testes\/R-20261031-070003-catalogo-grafico\.md/);
+  assert.match(r.saida, /integracao-placas \(1\):\n {2}M \.coord\/diario\/integracao-placas\.md/);
   assert.doesNotMatch(r.saida, /gerente-projetos|testes \(/);
   assert.match(r.saida, /Resultado: OK — 4 arquivo\(s\) alterado\(s\)/);
   // recado alterado continua violação na lista
@@ -501,12 +506,12 @@ test('A10: parênteses, espaços e acentos casam como texto literal (core.quoteP
   escrever(dir, rastreado);
   escrever(dir, 'docs/decisões/antigo ç.md');
   commitar(dir, 'acentos');
-  git(dir, 'checkout', '-q', '-b', 'modulo-web/T-0005-acentos');
+  git(dir, 'checkout', '-q', '-b', 'designer-ux/T-0005-acentos');
   mudar(dir, rastreado);
   mudar(dir, 'docs/decisões/antigo ç.md');
   escrever(dir, 'apps/web/src/app/(painel)/página inicial.tsx');
   escrever(dir, 'docs/decisões/x.md');
-  let r = rodar(dir, ['verificar', 'modulo-web']);
+  let r = rodar(dir, ['verificar', 'designer-ux']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'OK'), ['M apps/mobile/src/app/(tabs)/index.tsx', 'A apps/web/src/app/(painel)/página inicial.tsx']);
   // "docs/decisões" (com acento) não é "docs/decisoes/**": cai em docs/** → gerente-projetos
@@ -528,13 +533,13 @@ test('A11: agente inexistente → erro "agente desconhecido", código 2', () => 
 });
 
 // ------------------------------------------------------------------ B. com --base
-/** Branch modulo-robo/T-0003 com o diff do caso B1 já commitado. */
+/** Branch catalogo-grafico/T-0003 com o diff do caso B1 já commitado. */
 function repoB1() {
   const dir = criarRepoReal();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0003');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0003');
   escrever(dir, 'modules/core/domain/carteira.ts');
-  mudar(dir, '.coord/diario/modulo-robo.md');
-  escrever(dir, '.coord/recados/gerente-projetos/R-20261031-080000-modulo-robo.md', RECADO);
+  mudar(dir, '.coord/diario/catalogo-grafico.md');
+  escrever(dir, '.coord/recados/gerente-projetos/R-20261031-080000-catalogo-grafico.md', RECADO);
   commitar(dir, 'T-0003: carteira');
   return dir;
 }
@@ -543,19 +548,19 @@ test('B1: branch <agente>/T-nnnn sem sufixo → agente inferido; arquivo, diári
   const dir = repoB1();
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 0, r.tudo);
-  assert.match(r.saida, /agente: modulo-robo \(branch modulo-robo\/T-0003\)/);
+  assert.match(r.saida, /agente: catalogo-grafico \(branch catalogo-grafico\/T-0003\)/);
   assert.deepEqual(secao(r.saida, 'OK'), ['A modules/core/domain/carteira.ts']);
   assert.equal(secao(r.saida, 'Exceções do protocolo').length, 2);
 });
 
 test('B1b: branch <agente>/T-nnnn-<assunto> também infere o agente', () => {
   const dir = criarRepoReal();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0003-licencas');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0003-licencas');
   escrever(dir, 'modules/core/domain/licenca.ts');
   commitar(dir, 'licenças');
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 0, r.tudo);
-  assert.match(r.saida, /agente: modulo-robo \(branch modulo-robo\/T-0003-licencas\)/);
+  assert.match(r.saida, /agente: catalogo-grafico \(branch catalogo-grafico\/T-0003-licencas\)/);
 });
 
 test('B2: com --base não existe "outros donos": arquivo de outro dono → VIOLAÇÃO', () => {
@@ -575,7 +580,7 @@ test('B3: o main andou depois do branch (CLAUDE.md) → não aparece (merge-base
   git(dir, 'checkout', '-q', 'main');
   mudar(dir, 'CLAUDE.md');
   commitar(dir, 'main andou');
-  git(dir, 'checkout', '-q', 'modulo-robo/T-0003');
+  git(dir, 'checkout', '-q', 'catalogo-grafico/T-0003');
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.doesNotMatch(r.saida, /CLAUDE\.md/);
@@ -584,22 +589,22 @@ test('B3: o main andou depois do branch (CLAUDE.md) → não aparece (merge-base
 test('B4: donos.json, diário de outro agente e recado com outro remetente → VIOLAÇÃO com o motivo', () => {
   const dir = repoB1();
   writeFileSync(join(dir, '.coord/donos.json'), JSON.stringify(JSON.parse(DONOS_REAIS)));
-  mudar(dir, '.coord/diario/modulo-farois.md');
-  escrever(dir, '.coord/recados/testes/R-20261031-080001-modulo-farois.md', RECADO);
+  mudar(dir, '.coord/diario/integracao-placas.md');
+  escrever(dir, '.coord/recados/testes/R-20261031-080001-integracao-placas.md', RECADO);
   commitar(dir, 'invasões');
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 1, r.tudo);
   const v = secao(r.saida, 'VIOLAÇÃO');
   assert.equal(v.length, 3, r.saida);
   assert.ok(v.some((l) => l.startsWith('M .coord/donos.json → dono: alexandre')), v.join('\n'));
-  assert.ok(v.some((l) => l.startsWith('M .coord/diario/modulo-farois.md → dono: modulo-farois — o diário/lidos de modulo-farois pertence a modulo-farois')), v.join('\n'));
-  assert.ok(v.some((l) => /^A \.coord\/recados\/testes\/R-20261031-080001-modulo-farois\.md → dono: modulo-farois — o nome do recado precisa conter o remetente/.test(l)), v.join('\n'));
+  assert.ok(v.some((l) => l.startsWith('M .coord/diario/integracao-placas.md → dono: integracao-placas — o diário/lidos de integracao-placas pertence a integracao-placas')), v.join('\n'));
+  assert.ok(v.some((l) => /^A \.coord\/recados\/testes\/R-20261031-080001-integracao-placas\.md → dono: integracao-placas — o nome do recado precisa conter o remetente/.test(l)), v.join('\n'));
 });
 
 test('B5: recado do próprio agente alterado (M) ou apagado (D) desde o merge-base → VIOLAÇÃO', () => {
   for (const st of ['M', 'D']) {
     const dir = criarRepoReal();
-    git(dir, 'checkout', '-q', '-b', 'engenheiro-software/T-0005');
+    git(dir, 'checkout', '-q', '-b', 'web-site/T-0005');
     if (st === 'M') mudar(dir, RECADO_ENG);
     else unlinkSync(join(dir, RECADO_ENG));
     commitar(dir, 'mexeu no recado');
@@ -611,7 +616,7 @@ test('B5: recado do próprio agente alterado (M) ou apagado (D) desde o merge-ba
 
 test('B6: apagar arquivo de outro dono é VIOLAÇÃO; renomear confere os dois caminhos', () => {
   const dir = criarRepoReal();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0006');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0006');
   git(dir, 'mv', 'packages/ui/src/web/ui.tsx', 'modules/core/app/ui.tsx');
   git(dir, 'rm', '-q', 'modules/vendedor/x.ts');
   commitar(dir, 'renomeou e apagou');
@@ -620,30 +625,30 @@ test('B6: apagar arquivo de outro dono é VIOLAÇÃO; renomear confere os dois c
   assert.deepEqual(secao(r.saida, 'OK'), ['A modules/core/app/ui.tsx']);
   const v = secao(r.saida, 'VIOLAÇÃO');
   assert.equal(v.length, 2, r.saida);
-  assert.ok(v.some((l) => l.startsWith('D modules/vendedor/x.ts → dono: modulo-farois')));
+  assert.ok(v.some((l) => l.startsWith('D modules/vendedor/x.ts → dono: integracao-placas')));
   assert.ok(v.some((l) => l.startsWith('D packages/ui/src/web/ui.tsx → dono: po')));
 });
 
 test('B7: agente explícito vence a inferência do branch', () => {
   const dir = repoB1();
-  const r = rodar(dir, ['verificar', 'modulo-farois', '--base', 'main']);
+  const r = rodar(dir, ['verificar', 'integracao-placas', '--base', 'main']);
   assert.equal(r.codigo, 1, r.tudo);
-  assert.match(r.saida, /agente: modulo-farois \(informado\)/);
-  assert.ok(secao(r.saida, 'VIOLAÇÃO').some((l) => l.startsWith('A modules/core/domain/carteira.ts → dono: modulo-robo')));
+  assert.match(r.saida, /agente: integracao-placas \(informado\)/);
+  assert.ok(secao(r.saida, 'VIOLAÇÃO').some((l) => l.startsWith('A modules/core/domain/carteira.ts → dono: catalogo-grafico')));
 });
 
 test('B8: branch sem padrão (main ou HEAD destacado) e todos os commits com o mesmo trailer → agente do trailer', () => {
   const dir = criarRepoReal();
   git(dir, 'branch', 'inicio');
   mudar(dir, 'modules/vendedor/x.ts');
-  commitarCom(dir, 'T-0011: um', 'modulo-farois');
+  commitarCom(dir, 'T-0011: um', 'integracao-placas');
   escrever(dir, 'modules/vendedor/y.ts');
-  commitarCom(dir, 'T-0011: dois', 'modulo-farois');
+  commitarCom(dir, 'T-0011: dois', 'integracao-placas');
   for (const destacar of [false, true]) {
     if (destacar) git(dir, 'checkout', '-q', '--detach');
     const r = rodar(dir, ['verificar', '--base', 'inicio']);
     assert.equal(r.codigo, 0, r.tudo);
-    assert.match(r.saida, /agente: modulo-farois \(trailer "Agente:" de 2 commit\(s\) do PR\)/);
+    assert.match(r.saida, /agente: integracao-placas \(trailer "Agente:" de 2 commit\(s\) do PR\)/);
     assert.deepEqual(secao(r.saida, 'OK'), ['M modules/vendedor/x.ts', 'A modules/vendedor/y.ts']);
   }
 });
@@ -652,12 +657,12 @@ test('B9: trailers diferentes no mesmo PR → erro "agente ambíguo", código 2'
   const dir = criarRepoReal();
   git(dir, 'checkout', '-q', '-b', 'trabalho-conjunto');
   mudar(dir, 'modules/vendedor/x.ts');
-  commitarCom(dir, 'vendedor', 'modulo-farois');
+  commitarCom(dir, 'vendedor', 'integracao-placas');
   mudar(dir, 'modules/core/app/lib/cargas.ts');
-  commitarCom(dir, 'core', 'modulo-robo');
+  commitarCom(dir, 'core', 'catalogo-grafico');
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 2, r.tudo);
-  assert.match(r.erro, /^Erro: agente ambíguo: modulo-farois, modulo-robo/);
+  assert.match(r.erro, /^Erro: agente ambíguo: catalogo-grafico, integracao-placas/);
 });
 
 test('B10: sem agente, sem padrão de branch e sem trailer → erro de uso, código 2; trailer faltando em um commit também', () => {
@@ -669,10 +674,10 @@ test('B10: sem agente, sem padrão de branch e sem trailer → erro de uso, cód
   assert.equal(r.codigo, 2, r.tudo);
   assert.match(r.erro, /informe o agente ou use branch <agente>\/T-nnnn/);
   escrever(dir, 'modules/vendedor/y.ts');
-  commitarCom(dir, 'com trailer', 'modulo-farois');
+  commitarCom(dir, 'com trailer', 'integracao-placas');
   r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 2, r.tudo);
-  assert.match(r.erro, /commit\(s\) sem o trailer "Agente: modulo-farois": [0-9a-f]{7} \(sem trailer\)/);
+  assert.match(r.erro, /commit\(s\) sem o trailer "Agente: integracao-placas": [0-9a-f]{7} \(sem trailer\)/);
 });
 
 test('B10 (nuvem/*): trailer obrigatório em todos os commits do PR; com ele, o agente vem do trailer', () => {
@@ -693,7 +698,7 @@ test('B10 (CI): HEAD destacado num merge sintético do PR nuvem/* com GITHUB_HEA
   const dir = criarRepoReal();
   git(dir, 'checkout', '-q', '-b', 'nuvem/T-0011-vendedor');
   mudar(dir, 'modules/vendedor/x.ts');
-  commitarCom(dir, 'T-0011: pedido', 'modulo-farois');
+  commitarCom(dir, 'T-0011: pedido', 'integracao-placas');
   git(dir, 'checkout', '-q', 'main');
   mudar(dir, 'CLAUDE.md');
   commitar(dir, 'main andou');
@@ -701,19 +706,19 @@ test('B10 (CI): HEAD destacado num merge sintético do PR nuvem/* com GITHUB_HEA
   git(dir, 'merge', '-q', '--no-ff', '-m', 'Merge sintético do PR', 'nuvem/T-0011-vendedor');
   const r = rodar(dir, ['verificar', '--base', 'main'], { GITHUB_HEAD_REF: 'nuvem/T-0011-vendedor' });
   assert.equal(r.codigo, 0, r.tudo);
-  assert.match(r.saida, /agente: modulo-farois \(trailer "Agente:" de 1 commit\(s\) do PR\)/);
+  assert.match(r.saida, /agente: integracao-placas \(trailer "Agente:" de 1 commit\(s\) do PR\)/);
   assert.deepEqual(secao(r.saida, 'OK'), ['M modules/vendedor/x.ts']);
 });
 
 test('B11: ref inexistente → erro "ref não encontrada", código 2; diff vazio → OK', () => {
   const dir = criarRepoReal();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0003');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0003');
   let r = rodar(dir, ['verificar', '--base', 'xyz']);
   assert.equal(r.codigo, 2, r.tudo);
   assert.match(r.erro, /^Erro: ref não encontrada: xyz/);
   r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 0, r.tudo);
-  assert.match(r.saida, /Resultado: OK — nenhum arquivo alterado, nenhuma violação para modulo-robo/);
+  assert.match(r.saida, /Resultado: OK — nenhum arquivo alterado, nenhuma violação para catalogo-grafico/);
   // sem agente e sem padrão de branch (ex.: push no main): diff vazio também é OK
   git(dir, 'checkout', '-q', 'main');
   r = rodar(dir, ['verificar', '--base', 'main']);
@@ -732,18 +737,18 @@ test('B12: branch alexandre/* → agente alexandre; scripts/coord.mjs e donos.js
   assert.equal(r.codigo, 0, r.tudo);
   assert.match(r.saida, /agente: alexandre \(branch alexandre\/T-0005-verificar\)/);
   assert.deepEqual(secao(r.saida, 'OK'), ['M .coord/donos.json', 'M scripts/coord.mjs']);
-  assert.deepEqual(secao(r.saida, 'Outros donos'), ['M modules/vendedor/x.ts → modulo-farois']);
+  assert.deepEqual(secao(r.saida, 'Outros donos'), ['M modules/vendedor/x.ts → integracao-placas']);
 });
 
 test('funções puras: agenteDoBranch, agenteDosTrailers e remetenteDoRecado', () => {
-  assert.deepEqual(agenteDoBranch('modulo-robo/T-0003'), { agente: 'modulo-robo' });
-  assert.deepEqual(agenteDoBranch('modulo-robo/T-0003-licencas'), { agente: 'modulo-robo' });
-  assert.deepEqual(agenteDoBranch('agente/T-0003-modulo-robo'), { agente: 'modulo-robo' });
+  assert.deepEqual(agenteDoBranch('catalogo-grafico/T-0003'), { agente: 'catalogo-grafico' });
+  assert.deepEqual(agenteDoBranch('catalogo-grafico/T-0003-licencas'), { agente: 'catalogo-grafico' });
+  assert.deepEqual(agenteDoBranch('agente/T-0003-catalogo-grafico'), { agente: 'catalogo-grafico' });
   assert.deepEqual(agenteDoBranch('alexandre/qualquer'), { agente: 'alexandre' });
   assert.deepEqual(agenteDoBranch('refs/heads/testes/T-1'), { agente: 'testes' });
   assert.deepEqual(agenteDoBranch('nuvem/T-0005-x'), { agente: null, nuvem: true });
   assert.deepEqual(agenteDoBranch('fulano/T-0003'), { agente: null });
-  assert.deepEqual(agenteDoBranch('modulo-robo/sem-tarefa'), { agente: null });
+  assert.deepEqual(agenteDoBranch('catalogo-grafico/sem-tarefa'), { agente: null });
   assert.deepEqual(agenteDoBranch('main'), { agente: null });
   assert.match(agenteDoBranch('agente/T-0003-licencas').erro, /indica o agente "licencas"/);
   const c = (sha, corpo) => ({ sha, assunto: 'x', corpo });
@@ -751,9 +756,9 @@ test('funções puras: agenteDoBranch, agenteDosTrailers e remetenteDoRecado', (
   assert.equal(agenteDosTrailers([]).erro, 'sem-trailer');
   assert.equal(agenteDosTrailers([c('a1', 'x')]).erro, 'sem-trailer');
   assert.equal(agenteDosTrailers([c('a1', 'x\n\nAgente: testes'), c('b2', 'y')]).erro, 'parcial');
-  assert.equal(agenteDosTrailers([c('a1', 'Agente: testes'), c('b2', 'Agente: modulo-robo')]).mensagem, 'agente ambíguo: modulo-robo, testes');
+  assert.equal(agenteDosTrailers([c('a1', 'Agente: testes'), c('b2', 'Agente: catalogo-grafico')]).mensagem, 'agente ambíguo: catalogo-grafico, testes');
   assert.equal(agenteDosTrailers([c('a1', 'Agente: fulano')]).erro, 'invalido');
-  assert.equal(remetenteDoRecado('R-20261031-071802-engenheiro-software.md'), 'engenheiro-software');
+  assert.equal(remetenteDoRecado('R-20261031-071802-web-site.md'), 'web-site');
   assert.equal(remetenteDoRecado('R-20261031-071802-2-alexandre.md'), 'alexandre');
   assert.equal(remetenteDoRecado('R-20261031-071802.md'), null);
 });
@@ -778,11 +783,11 @@ test('--por-commit: 3 commits de agentes diferentes, um invadindo caminho alheio
   const dir = criarRepo();
   const inicio = git(dir, 'rev-parse', 'HEAD').trim();
   escrever(dir, 'modules/core/a.ts', 'core\n');
-  escrever(dir, '.coord/diario/modulo-robo.md');
-  const c1 = commitarComo(dir, 'modulo-robo', 'T-0003: core');
+  escrever(dir, '.coord/diario/catalogo-grafico.md');
+  const c1 = commitarComo(dir, 'catalogo-grafico', 'T-0003: core');
   escrever(dir, 'apps/api/x.ts', 'engenheiro\n');
   escrever(dir, 'modules/core/a.ts', 'engenheiro invadiu\n');
-  const c2 = commitarComo(dir, 'engenheiro-software', 'T-0004: api');
+  const c2 = commitarComo(dir, 'web-site', 'T-0004: api');
   escrever(dir, 'docs/status.md');
   escrever(dir, 'scripts/coord-lib.mjs', readFileSync(join(dir, 'scripts', 'coord-lib.mjs'), 'utf8') + '\n');
   const c3 = commitarComo(dir, 'alexandre', 'T-0005: alexandre mexe em tudo');
@@ -790,37 +795,37 @@ test('--por-commit: 3 commits de agentes diferentes, um invadindo caminho alheio
   assert.equal(r.codigo, 1, r.tudo);
   assert.match(r.saida, /Verificação de donos por commit — [0-9a-f]+\.\.HEAD \(3 commit\(s\)\)/);
   const b1 = blocoDoCommit(r.saida, c1);
-  assert.match(b1, /agente: modulo-robo \(trailer\)/);
+  assert.match(b1, /agente: catalogo-grafico \(trailer\)/);
   assert.doesNotMatch(b1, /VIOLAÇÃO/);
-  assert.match(b1, /\.coord\/diario\/modulo-robo\.md — diário do próprio agente/);
+  assert.match(b1, /\.coord\/diario\/catalogo-grafico\.md — diário do próprio agente/);
   const b2 = blocoDoCommit(r.saida, c2);
-  assert.match(b2, /agente: engenheiro-software/);
-  assert.match(b2, /M modules\/core\/a\.ts → dono: modulo-robo/);
+  assert.match(b2, /agente: web-site/);
+  assert.match(b2, /M modules\/core\/a\.ts → dono: catalogo-grafico/);
   assert.doesNotMatch(b2, /apps\/api\/x\.ts → dono/);
   const b3 = blocoDoCommit(r.saida, c3);
   assert.match(b3, /agente: alexandre/);
   assert.doesNotMatch(b3, /VIOLAÇÃO/, 'alexandre nunca viola por dono');
   assert.match(b3, /A docs\/status\.md → gerente-projetos/);
-  assert.match(r.saida, new RegExp(`VIOLAÇÃO em 1 commit\\(s\\):\\n  ${c2} \\(engenheiro-software\\)`));
+  assert.match(r.saida, new RegExp(`VIOLAÇÃO em 1 commit\\(s\\):\\n  ${c2} \\(web-site\\)`));
   assert.match(r.saida, /Resultado: VIOLAÇÃO — 1 de 3 commit\(s\) conferido\(s\)/);
 });
 
 test('--por-commit: sem invasão → 0; commit de merge é ignorado', () => {
   const dir = criarRepo();
   const inicio = git(dir, 'rev-parse', 'HEAD').trim();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0003');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0003');
   escrever(dir, 'modules/core/b.ts');
-  const c1 = commitarComo(dir, 'modulo-robo', 'T-0003: core');
+  const c1 = commitarComo(dir, 'catalogo-grafico', 'T-0003: core');
   git(dir, 'checkout', '-q', 'main');
   escrever(dir, 'apps/api/y.ts');
-  const c2 = commitarComo(dir, 'engenheiro-software', 'T-0004: api');
-  git(dir, 'merge', '-q', '--no-ff', '--no-edit', '-m', 'Merge sem trailer', 'modulo-robo/T-0003');
+  const c2 = commitarComo(dir, 'web-site', 'T-0004: api');
+  git(dir, 'merge', '-q', '--no-ff', '--no-edit', '-m', 'Merge sem trailer', 'catalogo-grafico/T-0003');
   const merge = git(dir, 'rev-parse', '--short', 'HEAD').trim();
   const r = rodar(dir, ['verificar', '--por-commit', `${inicio}..main`]);
   assert.equal(r.codigo, 0, r.tudo);
   assert.match(blocoDoCommit(r.saida, merge), /commit de merge — ignorado/);
-  assert.match(blocoDoCommit(r.saida, c1), /agente: modulo-robo/);
-  assert.match(blocoDoCommit(r.saida, c2), /agente: engenheiro-software/);
+  assert.match(blocoDoCommit(r.saida, c1), /agente: catalogo-grafico/);
+  assert.match(blocoDoCommit(r.saida, c2), /agente: web-site/);
   assert.match(r.saida, /Resultado: OK — 2 commit\(s\) conferido\(s\), nenhuma violação/);
 });
 
@@ -828,22 +833,22 @@ test('--por-commit: commit sem trailer (ou agente desconhecido/ambíguo) → có
   const dir = criarRepo();
   const inicio = git(dir, 'rev-parse', 'HEAD').trim();
   escrever(dir, 'modules/core/a.ts', '1\n');
-  const ok = commitarComo(dir, 'modulo-robo', 'T-0003: com trailer');
+  const ok = commitarComo(dir, 'catalogo-grafico', 'T-0003: com trailer');
   escrever(dir, 'modules/core/a.ts', '2\n');
   const sem = commitarComo(dir, null, 'T-0003: esqueceu o trailer');
   escrever(dir, 'modules/core/a.ts', '3\n');
   const fulano = commitarComo(dir, 'fulano', 'T-0003: agente de fora');
   escrever(dir, 'modules/core/a.ts', '4\n');
-  commitar(dir, 'T-0003: dois agentes\n\nAgente: modulo-robo\nAgente: testes');
+  commitar(dir, 'T-0003: dois agentes\n\nAgente: catalogo-grafico\nAgente: testes');
   const dois = git(dir, 'rev-parse', '--short', 'HEAD').trim();
   const r = rodar(dir, ['verificar', '--por-commit', `${inicio}..HEAD`]);
   assert.equal(r.codigo, 2, r.tudo);
   assert.match(r.erro, /3 commit\(s\) sem agente identificável/);
   assert.match(r.erro, new RegExp(`${sem} T-0003: esqueceu o trailer — sem o trailer "Agente: <nome>"`));
   assert.match(r.erro, new RegExp(`${fulano} T-0003: agente de fora — trailer "Agente: fulano" não é um agente do time`));
-  assert.match(r.erro, new RegExp(`${dois} T-0003: dois agentes — agente ambíguo: modulo-robo, testes`));
+  assert.match(r.erro, new RegExp(`${dois} T-0003: dois agentes — agente ambíguo: catalogo-grafico, testes`));
   assert.doesNotMatch(r.erro, new RegExp(ok));
-  assert.match(blocoDoCommit(r.saida, ok), /agente: modulo-robo/);
+  assert.match(blocoDoCommit(r.saida, ok), /agente: catalogo-grafico/);
 });
 
 test('--por-commit: intervalo vazio → 0; intervalo inválido, ref inexistente ou combinação de modos → 2', () => {
@@ -856,16 +861,16 @@ test('--por-commit: intervalo vazio → 0; intervalo inválido, ref inexistente 
   assert.equal(rodar(dir, ['verificar', '--por-commit']).codigo, 2);
   assert.match(rodar(dir, ['verificar', '--por-commit', 'naoexiste..HEAD']).erro, /ref não encontrada: naoexiste/);
   assert.match(rodar(dir, ['verificar', '--por-commit', `${'0'.repeat(40)}..HEAD`]).erro, /início do intervalo/);
-  assert.match(rodar(dir, ['verificar', 'modulo-robo', '--por-commit', 'HEAD..HEAD']).erro, /não se combina/);
+  assert.match(rodar(dir, ['verificar', 'catalogo-grafico', '--por-commit', 'HEAD..HEAD']).erro, /não se combina/);
   assert.equal(rodar(dir, ['verificar', '--base', 'main', '--por-commit', 'HEAD..HEAD']).codigo, 2);
 });
 
 test('--por-commit: recado existente alterado é violação mesmo para alexandre; recado novo do próprio agente é exceção', () => {
   const dir = criarRepo();
   const inicio = git(dir, 'rev-parse', 'HEAD').trim();
-  escrever(dir, '.coord/recados/gerente-projetos/R-20261031-120000-modulo-robo.md', RECADO);
-  const novo = commitarComo(dir, 'modulo-robo', 'T-0003: recado');
-  appendFileSync(join(dir, '.coord/recados/testes/R-20261031-000000-modulo-robo.md'), 'editado\n');
+  escrever(dir, '.coord/recados/gerente-projetos/R-20261031-120000-catalogo-grafico.md', RECADO);
+  const novo = commitarComo(dir, 'catalogo-grafico', 'T-0003: recado');
+  appendFileSync(join(dir, '.coord/recados/testes/R-20261031-000000-catalogo-grafico.md'), 'editado\n');
   const editou = commitarComo(dir, 'alexandre', 'T-0005: editou recado');
   const r = rodar(dir, ['verificar', '--por-commit', `${inicio}..HEAD`]);
   assert.equal(r.codigo, 1, r.tudo);
@@ -907,33 +912,33 @@ function criarRepoComLock() {
 
 test('v4 lock: pnpm-lock.yaml + package.json do próprio agente no mesmo PR → OK, listado para revisão', () => {
   const dir = criarRepoComLock();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0003-dep');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0003-dep');
   escrever(dir, 'modules/core/package.json', PKG('@macuxi/core', { zod: '^3.23.0' }));
   escrever(dir, 'pnpm-lock.yaml', "lockfileVersion: '9.0'\n# zod\n");
   commitar(dir, 'T-0003: zod');
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 0, r.tudo);
   assert.deepEqual(secao(r.saida, 'OK'), ['M modules/core/package.json']);
-  assert.deepEqual(secao(r.saida, 'Lock acompanhando dependência'), ['M pnpm-lock.yaml → dono: engenheiro-software — lock acompanhando dependência de modules/core']);
-  assert.match(r.saida, /Resultado: OK — 2 arquivo\(s\) alterado\(s\), nenhuma violação para modulo-robo \(1 com lock acompanhando dependência: revisão do revisor-codigo\)/);
+  assert.deepEqual(secao(r.saida, 'Lock acompanhando dependência'), ['M pnpm-lock.yaml → dono: web-site — lock acompanhando dependência de modules/core']);
+  assert.match(r.saida, /Resultado: OK — 2 arquivo\(s\) alterado\(s\), nenhuma violação para catalogo-grafico \(1 com lock acompanhando dependência: revisão do revisor-codigo\)/);
   assert.doesNotMatch(r.saida, /VIOLAÇÃO/);
 });
 
 test('v4 lock: pnpm-lock.yaml sozinho → VIOLAÇÃO', () => {
   const dir = criarRepoComLock();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0003-dep');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0003-dep');
   escrever(dir, 'modules/core/a.ts', 'mudou\n');
   escrever(dir, 'pnpm-lock.yaml', "lockfileVersion: '9.0'\n# solto\n");
   commitar(dir, 'T-0003: lock solto');
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 1, r.tudo);
-  assert.match(secao(r.saida, 'VIOLAÇÃO').join('\n'), /^M pnpm-lock\.yaml → dono: engenheiro-software — fora dos caminhos de modulo-robo/);
+  assert.match(secao(r.saida, 'VIOLAÇÃO').join('\n'), /^M pnpm-lock\.yaml → dono: web-site — fora dos caminhos de catalogo-grafico/);
   assert.deepEqual(secao(r.saida, 'Lock acompanhando dependência'), []);
 });
 
 test('v4 lock: pnpm-lock.yaml + package.json de outro dono → VIOLAÇÃO nos dois', () => {
   const dir = criarRepoComLock();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0003-dep');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0003-dep');
   escrever(dir, 'apps/api/package.json', PKG('@macuxi/api', { zod: '^3.23.0' }));
   escrever(dir, 'pnpm-lock.yaml', "lockfileVersion: '9.0'\n# zod na api\n");
   commitar(dir, 'T-0003: dependência na api');
@@ -941,13 +946,13 @@ test('v4 lock: pnpm-lock.yaml + package.json de outro dono → VIOLAÇÃO nos do
   assert.equal(r.codigo, 1, r.tudo);
   const v = secao(r.saida, 'VIOLAÇÃO');
   assert.equal(v.length, 2, r.saida);
-  assert.match(v.join('\n'), /M apps\/api\/package\.json → dono: engenheiro-software/);
-  assert.match(v.join('\n'), /M pnpm-lock\.yaml → dono: engenheiro-software/);
+  assert.match(v.join('\n'), /M apps\/api\/package\.json → dono: web-site/);
+  assert.match(v.join('\n'), /M pnpm-lock\.yaml → dono: web-site/);
 });
 
 test('v4 lock: pnpm-workspace.yaml só em allowBuilds/onlyBuiltDependencies acompanha; em outra chave é VIOLAÇÃO', () => {
   const dir = criarRepoComLock();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0003-dep');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0003-dep');
   escrever(dir, 'modules/core/package.json', PKG('@macuxi/core', { sharp: '^0.33.0' }));
   escrever(dir, 'pnpm-lock.yaml', "lockfileVersion: '9.0'\n# sharp\n");
   escrever(dir, 'pnpm-workspace.yaml', WORKSPACE.replace('  esbuild: true\n', '  esbuild: true\n  sharp: true\n').replace('  - esbuild\n', '  - esbuild\n  - sharp\n'));
@@ -955,24 +960,24 @@ test('v4 lock: pnpm-workspace.yaml só em allowBuilds/onlyBuiltDependencies acom
   const ok = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(ok.codigo, 0, ok.tudo);
   assert.deepEqual(secao(ok.saida, 'Lock acompanhando dependência'), [
-    'M pnpm-lock.yaml → dono: engenheiro-software — lock acompanhando dependência de modules/core',
-    'M pnpm-workspace.yaml → dono: engenheiro-software — lock acompanhando dependência de modules/core (só allowBuilds/onlyBuiltDependencies)',
+    'M pnpm-lock.yaml → dono: web-site — lock acompanhando dependência de modules/core',
+    'M pnpm-workspace.yaml → dono: web-site — lock acompanhando dependência de modules/core (só allowBuilds/onlyBuiltDependencies)',
   ]);
   // Não commitado também conta (--base soma a árvore de trabalho): mexer em "packages:" vira violação.
   escrever(dir, 'pnpm-workspace.yaml', WORKSPACE.replace('  - "modules/*"\n', '  - "modules/*"\n  - "outros/*"\n').replace('  esbuild: true\n', '  esbuild: true\n  sharp: true\n'));
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 1, r.tudo);
-  assert.match(secao(r.saida, 'VIOLAÇÃO').join('\n'), /^M pnpm-workspace\.yaml → dono: engenheiro-software/);
-  assert.deepEqual(secao(r.saida, 'Lock acompanhando dependência'), ['M pnpm-lock.yaml → dono: engenheiro-software — lock acompanhando dependência de modules/core']);
+  assert.match(secao(r.saida, 'VIOLAÇÃO').join('\n'), /^M pnpm-workspace\.yaml → dono: web-site/);
+  assert.deepEqual(secao(r.saida, 'Lock acompanhando dependência'), ['M pnpm-lock.yaml → dono: web-site — lock acompanhando dependência de modules/core']);
 });
 
 test('v4 lock: sem --base a regra não se aplica (lock de outro dono é informativo, como antes)', () => {
   const dir = criarRepoComLock();
   escrever(dir, 'modules/core/package.json', PKG('@macuxi/core', { zod: '^3.23.0' }));
   escrever(dir, 'pnpm-lock.yaml', "lockfileVersion: '9.0'\n# zod\n");
-  const r = rodar(dir, ['verificar', 'modulo-robo']);
+  const r = rodar(dir, ['verificar', 'catalogo-grafico']);
   assert.equal(r.codigo, 0, r.tudo);
-  assert.deepEqual(secao(r.saida, 'Outros donos (informativo'), ['M pnpm-lock.yaml → engenheiro-software']);
+  assert.deepEqual(secao(r.saida, 'Outros donos (informativo'), ['M pnpm-lock.yaml → web-site']);
 });
 
 test('v4 lock --por-commit: lock + package.json próprio no mesmo commit → OK; lock em commit separado → VIOLAÇÃO', () => {
@@ -981,20 +986,20 @@ test('v4 lock --por-commit: lock + package.json próprio no mesmo commit → OK;
   escrever(dir, 'modules/core/package.json', PKG('@macuxi/core', { zod: '^3.23.0' }));
   escrever(dir, 'pnpm-lock.yaml', "lockfileVersion: '9.0'\n# zod\n");
   escrever(dir, 'pnpm-workspace.yaml', WORKSPACE.replace('  - esbuild\n', '  - esbuild\n  - zod\n'));
-  const c1 = commitarComo(dir, 'modulo-robo', 'T-0003: zod');
+  const c1 = commitarComo(dir, 'catalogo-grafico', 'T-0003: zod');
   escrever(dir, 'pnpm-lock.yaml', "lockfileVersion: '9.0'\n# zod de novo\n");
-  const c2 = commitarComo(dir, 'modulo-robo', 'T-0003: só o lock');
+  const c2 = commitarComo(dir, 'catalogo-grafico', 'T-0003: só o lock');
   const r = rodar(dir, ['verificar', '--por-commit', `${inicio}..HEAD`]);
   assert.equal(r.codigo, 1, r.tudo);
   const b1 = blocoDoCommit(r.saida, c1);
   assert.doesNotMatch(b1, /VIOLAÇÃO/);
-  assert.match(b1, /M pnpm-lock\.yaml → dono: engenheiro-software — lock acompanhando dependência de modules\/core/);
-  assert.match(b1, /M pnpm-workspace\.yaml → dono: engenheiro-software — lock acompanhando dependência de modules\/core \(só allowBuilds\/onlyBuiltDependencies\)/);
+  assert.match(b1, /M pnpm-lock\.yaml → dono: web-site — lock acompanhando dependência de modules\/core/);
+  assert.match(b1, /M pnpm-workspace\.yaml → dono: web-site — lock acompanhando dependência de modules\/core \(só allowBuilds\/onlyBuiltDependencies\)/);
   const b2 = blocoDoCommit(r.saida, c2);
   assert.match(b2, /VIOLAÇÃO/);
-  assert.match(b2, /M pnpm-lock\.yaml → dono: engenheiro-software — fora dos caminhos de modulo-robo/);
-  assert.match(r.saida, new RegExp(`lock acompanhando dependência em 1 commit\\(s\\):\\n  ${c1} \\(modulo-robo\\)`));
-  assert.match(r.saida, new RegExp(`VIOLAÇÃO em 1 commit\\(s\\):\\n  ${c2} \\(modulo-robo\\)`));
+  assert.match(b2, /M pnpm-lock\.yaml → dono: web-site — fora dos caminhos de catalogo-grafico/);
+  assert.match(r.saida, new RegExp(`lock acompanhando dependência em 1 commit\\(s\\):\\n  ${c1} \\(catalogo-grafico\\)`));
+  assert.match(r.saida, new RegExp(`VIOLAÇÃO em 1 commit\\(s\\):\\n  ${c2} \\(catalogo-grafico\\)`));
 });
 
 test('v4: alexandre pelo trailer (--base e --por-commit) é aceito e marcado "identidade alexandre declarada por trailer"', () => {
@@ -1047,7 +1052,7 @@ test('v4 governanca --base: sai 1 com a lista quando o diff mexe em .claude/**, 
 
 test('v4 governanca --base: sai 0 sem caminho de governança (inclui .coord/ fora do donos.json e scripts/ que não são coord*); 2 em erro de uso', () => {
   const dir = criarRepo();
-  git(dir, 'checkout', '-q', '-b', 'modulo-robo/T-0003-x');
+  git(dir, 'checkout', '-q', '-b', 'catalogo-grafico/T-0003-x');
   escrever(dir, 'modules/core/a.ts', 'mudou\n');
   escrever(dir, '.coord/quadro.md');
   escrever(dir, 'scripts/outro.mjs');
@@ -1081,12 +1086,12 @@ test('v4 funções puras: workspaceMudouSoEmBuilds, pacoteDoPackageJson, lockAco
   assert.equal(pacoteDoPackageJson('modules/core/package.json.bak'), null);
   const regras = DONOS.regras.map((r) => ({ ...r, re: globParaRegex(r.padrao) }));
   const mudancas = [{ status: 'M', caminho: 'pnpm-lock.yaml' }, { status: 'M', caminho: 'pnpm-workspace.yaml' }, { status: 'M', caminho: 'modules/core/package.json' }];
-  const sem = classificarMudancas({ agente: 'modulo-robo', mudancas, regras, estrito: true });
+  const sem = classificarMudancas({ agente: 'catalogo-grafico', mudancas, regras, estrito: true });
   assert.equal(sem.violacoes.length, 2, 'sem lockAcompanha (uso dos hooks): violação como antes');
-  const com = classificarMudancas({ agente: 'modulo-robo', mudancas, regras, estrito: true, lockAcompanha: true, workspaceSoBuilds: () => false });
+  const com = classificarMudancas({ agente: 'catalogo-grafico', mudancas, regras, estrito: true, lockAcompanha: true, workspaceSoBuilds: () => false });
   assert.deepEqual(com.violacoes.map((v) => v.caminho), ['pnpm-workspace.yaml']);
   assert.deepEqual(com.acompanhando.map((v) => v.caminho), ['pnpm-lock.yaml']);
-  const apagado = lockAcompanhaDependencia({ agente: 'modulo-robo', resultado: { ok: [{ status: 'M', caminho: 'modules/core/package.json' }], violacoes: [{ status: 'D', caminho: 'pnpm-lock.yaml' }] } });
+  const apagado = lockAcompanhaDependencia({ agente: 'catalogo-grafico', resultado: { ok: [{ status: 'M', caminho: 'modules/core/package.json' }], violacoes: [{ status: 'D', caminho: 'pnpm-lock.yaml' }] } });
   assert.equal(apagado.violacoes.length, 1, 'apagar o lock não é acompanhar');
   assert.deepEqual(mudancasDeGovernanca([
     { status: 'M', caminho: '.claude\\hooks\\x.mjs' }, { status: 'M', caminho: '.coord/donos.json' }, { status: 'M', caminho: '.coord/quadro.md' },
@@ -1117,8 +1122,8 @@ test('anexos: donoDaMudanca e podeAlterar tratam o anexo como arquivo comum do a
   assert.equal(ehAnexoDeRecado('.coord/recados/alexandre/R-1-anexos.md'), false);
   assert.equal(ehAnexoDeRecado('.coord/recados/anexos'), false, 'a pasta sem arquivo não é anexo');
   // recado normal: sem mudança
-  assert.deepEqual(donoDaMudanca('.coord/recados/alexandre/R-20261106-1-engenheiro-software.md', regras),
-    { tipo: 'recado', destino: 'alexandre', arquivo: 'R-20261106-1-engenheiro-software.md', dono: 'engenheiro-software' });
+  assert.deepEqual(donoDaMudanca('.coord/recados/alexandre/R-20261106-1-web-site.md', regras),
+    { tipo: 'recado', destino: 'alexandre', arquivo: 'R-20261106-1-web-site.md', dono: 'web-site' });
   assert.deepEqual(donoDaMudanca('.coord/recados/fulano/x/y.md', regras), { tipo: 'recado-fora', dono: 'sem-dono' });
   // guardião (Edit/Write): alexandre cria e altera; os outros recebem a regra comum de arquivo de outro dono
   const raiz = mkdtempSync(join(tmpdir(), 'coord-anexos-'));
@@ -1133,9 +1138,9 @@ test('anexos: donoDaMudanca e podeAlterar tratam o anexo como arquivo comum do a
   }
   // recado normal no guardião: sem mudança
   assert.match(podeAlterar({ agente: 'alexandre', ferramenta: 'Write', rel: '.coord/recados/fulano/R-1-alexandre.md', raiz, regras }).motivo, /destino de recado inválido: fulano/);
-  escrever(raiz, '.coord/recados/alexandre/R-1-engenheiro-software.md', RECADO);
-  assert.match(podeAlterar({ agente: 'engenheiro-software', ferramenta: 'Edit', rel: '.coord/recados/alexandre/R-1-engenheiro-software.md', raiz, regras }).motivo, /imutáveis/);
-  assert.deepEqual(podeAlterar({ agente: 'engenheiro-software', ferramenta: 'Write', rel: '.coord/recados/alexandre/R-2-engenheiro-software.md', raiz, regras }), { ok: true });
+  escrever(raiz, '.coord/recados/alexandre/R-1-web-site.md', RECADO);
+  assert.match(podeAlterar({ agente: 'web-site', ferramenta: 'Edit', rel: '.coord/recados/alexandre/R-1-web-site.md', raiz, regras }).motivo, /imutáveis/);
+  assert.deepEqual(podeAlterar({ agente: 'web-site', ferramenta: 'Write', rel: '.coord/recados/alexandre/R-2-web-site.md', raiz, regras }), { ok: true });
 });
 
 test('anexos: anexo novo ou alterado pelo alexandre não viola (verificar alexandre, sem agente e branch alexandre/*)', () => {
@@ -1182,7 +1187,7 @@ test('anexos: anexo criado ou alterado por outro agente viola (--base e --por-co
 
   const dir3 = criarRepoReal();
   escrever(dir3, ANEXO_PNG, 'png\n');
-  const arvore = rodar(dir3, ['verificar', 'engenheiro-software']);
+  const arvore = rodar(dir3, ['verificar', 'web-site']);
   assert.equal(arvore.codigo, 0, arvore.tudo);
   assert.deepEqual(secao(arvore.saida, 'Outros donos'), [`A ${ANEXO_PNG} → alexandre`]);
 });
@@ -1190,12 +1195,12 @@ test('anexos: anexo criado ou alterado por outro agente viola (--base e --por-co
 test('anexos: recado normal continua igual ao lado de um anexo (exceção, destino inválido e imutável)', () => {
   const dir = criarRepoReal();
   escrever(dir, ANEXO_PNG, 'png\n');
-  escrever(dir, '.coord/recados/alexandre/R-20261106-090000-engenheiro-software.md', RECADO);
-  escrever(dir, '.coord/recados/fulano/R-20261106-090001-engenheiro-software.md', RECADO);
+  escrever(dir, '.coord/recados/alexandre/R-20261106-090000-web-site.md', RECADO);
+  escrever(dir, '.coord/recados/fulano/R-20261106-090001-web-site.md', RECADO);
   mudar(dir, RECADO_ENG);
-  const r = rodar(dir, ['verificar', 'engenheiro-software']);
+  const r = rodar(dir, ['verificar', 'web-site']);
   assert.equal(r.codigo, 1, r.tudo);
-  assert.deepEqual(secao(r.saida, 'Exceções do protocolo'), ['A .coord/recados/alexandre/R-20261106-090000-engenheiro-software.md — recado novo para alexandre']);
+  assert.deepEqual(secao(r.saida, 'Exceções do protocolo'), ['A .coord/recados/alexandre/R-20261106-090000-web-site.md — recado novo para alexandre']);
   assert.deepEqual(secao(r.saida, 'Outros donos'), [`A ${ANEXO_PNG} → alexandre`]);
   const v = secao(r.saida, 'VIOLAÇÃO');
   assert.equal(v.length, 2, r.saida);
@@ -1224,7 +1229,7 @@ test('T-0123 revisor-codigo: verificar acusa a escrita dele fora de docs/qualida
   assert.equal(r.codigo, 1, r.tudo);
   const v = secao(r.saida, 'VIOLAÇÃO');
   assert.equal(v.length, 1, r.saida);
-  assert.match(v[0], /^M modules\/core\/app\/lib\/cargas\.ts → dono: modulo-robo — fora dos caminhos de revisor-codigo/);
+  assert.match(v[0], /^M modules\/core\/app\/lib\/cargas\.ts → dono: catalogo-grafico — fora dos caminhos de revisor-codigo/);
   assert.ok(secao(r.saida, 'OK').includes(`A ${REDUNDANCIAS}`), r.saida);
 });
 
@@ -1235,33 +1240,33 @@ test('T-0123 revisor-codigo: caixa funciona e o recado de ida e volta passa pela
   assert.equal(vazia.codigo, 0, vazia.tudo);
   assert.match(vazia.saida, /Caixa de revisor-codigo: nada pendente/);
 
-  const ida = rodar(dir, ['enviar', '--de', 'engenheiro-software', '--para', 'revisor-codigo', '--tipo', 'pedido', '--tarefa', 'T-0123',
+  const ida = rodar(dir, ['enviar', '--de', 'web-site', '--para', 'revisor-codigo', '--tipo', 'pedido', '--tarefa', 'T-0123',
     '--assunto', 'Recado de teste (ida)', '--corpo', 'Contexto | Confirme o recebimento | Resposta com --encerra'], env);
   assert.equal(ida.codigo, 0, ida.tudo);
-  const idIda = ida.saida.match(/Recado (R-\S+-engenheiro-software) enviado para revisor-codigo/)?.[1];
+  const idIda = ida.saida.match(/Recado (R-\S+-web-site) enviado para revisor-codigo/)?.[1];
   assert.ok(idIda, ida.saida);
-  assert.match(readFileSync(join(dir, '.coord/recados/revisor-codigo', `${idIda}.md`), 'utf8'), /^de: engenheiro-software\npara: \[revisor-codigo\]$/m);
+  assert.match(readFileSync(join(dir, '.coord/recados/revisor-codigo', `${idIda}.md`), 'utf8'), /^de: web-site\npara: \[revisor-codigo\]$/m);
   const caixa = rodar(dir, ['caixa', 'revisor-codigo'], env);
   assert.match(caixa.saida, /Caixa de revisor-codigo: 1 exigem ação, 0 informativos não lidos/);
-  assert.match(caixa.saida, new RegExp(`${idIda}\\s+\\[pedido\\] de engenheiro-software`));
+  assert.match(caixa.saida, new RegExp(`${idIda}\\s+\\[pedido\\] de web-site`));
 
-  const volta = rodar(dir, ['enviar', '--de', 'revisor-codigo', '--para', 'engenheiro-software', '--cc', 'gerente-projetos', '--tipo', 'resposta',
+  const volta = rodar(dir, ['enviar', '--de', 'revisor-codigo', '--para', 'web-site', '--cc', 'gerente-projetos', '--tipo', 'resposta',
     '--responde-a', idIda, '--encerra', '--tarefa', 'T-0123', '--assunto', 'Recado de teste (volta)', '--corpo', 'Recebido.'], env);
   assert.equal(volta.codigo, 0, volta.tudo);
-  const idVolta = volta.saida.match(/Recado (R-\S+-revisor-codigo) enviado para engenheiro-software, gerente-projetos \(cc\)/)?.[1];
+  const idVolta = volta.saida.match(/Recado (R-\S+-revisor-codigo) enviado para web-site, gerente-projetos \(cc\)/)?.[1];
   assert.ok(idVolta, volta.saida);
-  const texto = readFileSync(join(dir, '.coord/recados/engenheiro-software', `${idVolta}.md`), 'utf8');
+  const texto = readFileSync(join(dir, '.coord/recados/web-site', `${idVolta}.md`), 'utf8');
   assert.match(texto, /^de: revisor-codigo$/m);
   assert.match(texto, new RegExp(`^responde_a: ${idIda}$`, 'm'));
   assert.match(texto, /^encerra: true$/m);
 
   assert.match(rodar(dir, ['caixa', 'revisor-codigo'], env).saida, /nada pendente/, 'o pedido foi encerrado pela resposta');
-  const doEng = rodar(dir, ['caixa', 'engenheiro-software'], env).saida;
+  const doEng = rodar(dir, ['caixa', 'web-site'], env).saida;
   assert.match(doEng, new RegExp(`${idVolta}\\s+\\[resposta\\] de revisor-codigo`));
   const fio = rodar(dir, ['fio', idIda], env);
   assert.equal(fio.codigo, 0, fio.tudo);
-  assert.match(fio.saida, /engenheiro-software → revisor-codigo {2}\[pedido\]/);
-  assert.match(fio.saida, /revisor-codigo → engenheiro-software {2}\[resposta, encerra\]/);
+  assert.match(fio.saida, /web-site → revisor-codigo {2}\[pedido\]/);
+  assert.match(fio.saida, /revisor-codigo → web-site {2}\[resposta, encerra\]/);
   const lido = rodar(dir, ['lido', 'revisor-codigo', idIda], env);
   assert.equal(lido.codigo, 0, lido.tudo);
 
@@ -1269,31 +1274,31 @@ test('T-0123 revisor-codigo: caixa funciona e o recado de ida e volta passa pela
   const v = rodar(dir, ['verificar', 'revisor-codigo']);
   assert.equal(v.codigo, 0, v.tudo);
   const exc = secao(v.saida, 'Exceções do protocolo').join('\n');
-  assert.match(exc, new RegExp(`A \\.coord/recados/engenheiro-software/${idVolta}\\.md — recado novo para engenheiro-software`));
+  assert.match(exc, new RegExp(`A \\.coord/recados/web-site/${idVolta}\\.md — recado novo para web-site`));
   assert.match(exc, /\.coord\/lidos\/revisor-codigo\.txt/);
 });
 
-// ───────────── T-0169: agente modulo-posvenda (donos, guardião Edit/Write, verificar e recados) ─────────────
+// ───────────── T-0169: agente design-de-marca (donos, guardião Edit/Write, verificar e recados) ─────────────
 
 const MANUAL_MARCA = 'docs/marca/manual.md';
 
-test('T-0169 modulo-posvenda: verificar acusa a escrita dele fora de docs/marca/**', () => {
+test('T-0169 design-de-marca: verificar acusa a escrita dele fora de docs/marca/**', () => {
   const dir = criarRepoReal();
-  git(dir, 'checkout', '-q', '-b', 'modulo-posvenda/T-0169-proposta');
+  git(dir, 'checkout', '-q', '-b', 'design-de-marca/T-0169-proposta');
   escrever(dir, MANUAL_MARCA, '# Manual da marca\n');
-  escrever(dir, '.coord/diario/modulo-posvenda.md', '2026-11-12 — T-0169 — proposta\n');
-  commitarCom(dir, 'T-0169: proposta', 'modulo-posvenda');
+  escrever(dir, '.coord/diario/design-de-marca.md', '2026-11-12 — T-0169 — proposta\n');
+  commitarCom(dir, 'T-0169: proposta', 'design-de-marca');
   const ok = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(ok.codigo, 0, ok.tudo);
-  assert.match(ok.saida, /nenhuma violação para modulo-posvenda/);
+  assert.match(ok.saida, /nenhuma violação para design-de-marca/);
 
   mudar(dir, 'packages/ui/src/web/ui.tsx');
-  commitarCom(dir, 'T-0169: trocou a cor por conta própria', 'modulo-posvenda');
+  commitarCom(dir, 'T-0169: trocou a cor por conta própria', 'design-de-marca');
   const r = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(r.codigo, 1, r.tudo);
   const v = secao(r.saida, 'VIOLAÇÃO');
   assert.equal(v.length, 1, r.saida);
-  assert.match(v[0], /^M packages\/ui\/src\/web\/ui\.tsx → dono: po — fora dos caminhos de modulo-posvenda/);
+  assert.match(v[0], /^M packages\/ui\/src\/web\/ui\.tsx → dono: po — fora dos caminhos de design-de-marca/);
 });
 
 // ───────────────────── ADR 0035 (T-0139): recados no repositório próprio ─────────────────────
@@ -1302,8 +1307,8 @@ test('T-0169 modulo-posvenda: verificar acusa a escrita dele fora de docs/marca/
 // depois dela (fora) nada entra nessas pastas.
 
 const MARCA_GITIGNORE = '# Recados e lidos moram no bapajudacatalogo-recados (ADR 0035)\n.coord/recados/\n.coord/lidos/\n';
-const LIDOS_CORE = '.coord/lidos/modulo-robo.txt';
-const RECADO_INICIAL = '.coord/recados/testes/R-20261031-000000-modulo-robo.md';
+const LIDOS_CORE = '.coord/lidos/catalogo-grafico.txt';
+const RECADO_INICIAL = '.coord/recados/testes/R-20261031-000000-catalogo-grafico.md';
 
 /** Corte como o scripts/recados/corte.ps1 deixa: índice sem as pastas e a marca no .gitignore. */
 function cortar(dir) {
@@ -1314,10 +1319,10 @@ function cortar(dir) {
 function repoComLidos() {
   const dir = criarRepo();
   escrever(dir, LIDOS_CORE, 'R-1\n');
-  // como no repositório real, o .gitignore tem dono (engenheiro-software); o alexandre pode alterá-lo
-  escrever(dir, '.coord/donos.json', JSON.stringify({ ...DONOS, regras: [{ padrao: '.gitignore', dono: 'engenheiro-software' }, ...DONOS.regras] }, null, 2));
+  // como no repositório real, o .gitignore tem dono (web-site); o alexandre pode alterá-lo
+  escrever(dir, '.coord/donos.json', JSON.stringify({ ...DONOS, regras: [{ padrao: '.gitignore', dono: 'web-site' }, ...DONOS.regras] }, null, 2));
   escrever(dir, '.gitignore', 'node_modules/\n');
-  commitarComo(dir, 'modulo-robo', 'lidos');
+  commitarComo(dir, 'catalogo-grafico', 'lidos');
   return dir;
 }
 
@@ -1345,8 +1350,8 @@ test('ADR 0035: classificarMudancas no corte aceita só a saída (D) pelo alexan
   const hoje = classificarMudancas({ agente: 'alexandre', mudancas: saida.slice(0, 1), regras, estrito: true });
   assert.match(hoje.violacoes[0].motivo, /recados são imutáveis \(apagado\)/, 'sem a marca, apagar recado continua proibido');
   const fora = classificarMudancas({
-    agente: 'modulo-robo', regras, estrito: false, recados: 'fora',
-    mudancas: [{ status: 'A', caminho: '.coord/recados/testes/R-20261201-000000-modulo-robo.md' }, { status: 'M', caminho: LIDOS_CORE }, { status: 'M', caminho: 'modules/core/a.ts' }],
+    agente: 'catalogo-grafico', regras, estrito: false, recados: 'fora',
+    mudancas: [{ status: 'A', caminho: '.coord/recados/testes/R-20261201-000000-catalogo-grafico.md' }, { status: 'M', caminho: LIDOS_CORE }, { status: 'M', caminho: 'modules/core/a.ts' }],
   });
   assert.equal(fora.violacoes.length, 2, JSON.stringify(fora));
   assert.ok(fora.violacoes.every((v) => /ficam no repositório bapajudacatalogo-recados/.test(v.motivo)));
@@ -1362,7 +1367,7 @@ test('ADR 0035: commit do corte com "Agente: alexandre" passa no --por-commit e 
   cortar(dir);
   const arvore = rodar(dir, ['verificar', 'alexandre']);
   assert.equal(arvore.codigo, 0, arvore.tudo);
-  assert.match(arvore.saida, /D \.coord\/recados\/testes\/R-20261031-000000-modulo-robo\.md — recados e lidos saem/);
+  assert.match(arvore.saida, /D \.coord\/recados\/testes\/R-20261031-000000-catalogo-grafico\.md — recados e lidos saem/);
   const porDono = rodar(dir, ['verificar', '--por-dono']);
   assert.equal(porDono.codigo, 0, porDono.tudo);
   git(dir, 'add', '.gitignore');
@@ -1370,9 +1375,9 @@ test('ADR 0035: commit do corte com "Agente: alexandre" passa no --por-commit e 
   const corte = git(dir, 'rev-parse', '--short', 'HEAD').trim();
   const pc = rodar(dir, ['verificar', '--por-commit', `${inicio}..HEAD`]);
   assert.equal(pc.codigo, 0, pc.tudo);
-  assert.match(blocoDoCommit(pc.saida, corte), /D \.coord\/lidos\/modulo-robo\.txt — recados e lidos saem/);
+  assert.match(blocoDoCommit(pc.saida, corte), /D \.coord\/lidos\/catalogo-grafico\.txt — recados e lidos saem/);
   assert.equal(existsSync(join(dir, RECADO_INICIAL)), true, 'o corte não apaga nada do disco');
-  const depois = rodar(dir, ['verificar', 'modulo-robo']);
+  const depois = rodar(dir, ['verificar', 'catalogo-grafico']);
   assert.equal(depois.codigo, 0, depois.tudo);
   assert.match(depois.saida, /nenhum arquivo alterado/, 'pastas ignoradas somem do verificar');
 });
@@ -1385,7 +1390,7 @@ test('ADR 0035: corte com o trailer de outro agente é VIOLAÇÃO', () => {
   const c = commitarComo(dir, 'gerente-projetos', 'T-0139: corte');
   const pc = rodar(dir, ['verificar', '--por-commit', `${inicio}..HEAD`]);
   assert.equal(pc.codigo, 1, pc.tudo);
-  assert.match(blocoDoCommit(pc.saida, c), /VIOLAÇÃO[\s\S]*D \.coord\/recados\/testes\/R-20261031-000000-modulo-robo\.md → dono: alexandre — só o commit do corte/);
+  assert.match(blocoDoCommit(pc.saida, c), /VIOLAÇÃO[\s\S]*D \.coord\/recados\/testes\/R-20261031-000000-catalogo-grafico\.md → dono: alexandre — só o commit do corte/);
 });
 
 test('ADR 0035: depois do corte, recado ou lidos forçados no repositório são VIOLAÇÃO (--por-commit e --base)', () => {
@@ -1395,14 +1400,14 @@ test('ADR 0035: depois do corte, recado ou lidos forçados no repositório são 
   commitarComo(dir, 'alexandre', 'T-0139: corte');
   const depois = git(dir, 'rev-parse', 'HEAD').trim();
   git(dir, 'checkout', '-q', '-b', 'nuvem/T-0200-x');
-  const novo = '.coord/recados/gerente-projetos/R-20261201-000000-modulo-robo.md';
+  const novo = '.coord/recados/gerente-projetos/R-20261201-000000-catalogo-grafico.md';
   escrever(dir, novo, RECADO);
   escrever(dir, 'modules/core/a.ts', 'mudou\n');
   git(dir, 'add', '-f', novo, 'modules/core/a.ts');
-  const c = commitarComo(dir, 'modulo-robo', 'T-0200: recado pela nuvem');
+  const c = commitarComo(dir, 'catalogo-grafico', 'T-0200: recado pela nuvem');
   const pc = rodar(dir, ['verificar', '--por-commit', `${depois}..HEAD`]);
   assert.equal(pc.codigo, 1, pc.tudo);
-  assert.match(blocoDoCommit(pc.saida, c), /A \.coord\/recados\/gerente-projetos\/R-20261201-000000-modulo-robo\.md → dono: ninguém — recados e lidos agora ficam no repositório bapajudacatalogo-recados/);
+  assert.match(blocoDoCommit(pc.saida, c), /A \.coord\/recados\/gerente-projetos\/R-20261201-000000-catalogo-grafico\.md → dono: ninguém — recados e lidos agora ficam no repositório bapajudacatalogo-recados/);
   const base = rodar(dir, ['verificar', '--base', 'main']);
   assert.equal(base.codigo, 1, base.tudo);
   assert.equal(secao(base.saida, 'VIOLAÇÃO').length, 1, base.saida);

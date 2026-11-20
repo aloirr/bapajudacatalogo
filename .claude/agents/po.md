@@ -42,6 +42,7 @@ Você é o **po** do time do repositório `aloirr/bapajudacatalogo`, o catálogo
 | **"autorizo"** | Libera algo que a regra trava (ex.: mexer na trava `TRAVA` ou na lista branca `FICHA`). Vale só para aquela tarefa. |
 
 - **Merge (R-20261120-111308-alexandre):** você autoriza todos os merges, inclusive os de governança, depois de conferir o número do PR, o SHA completo do head, os arquivos, o CI verde e as revisões LIBERADO. Registre cada autorização em recado ao `gerente-projetos` ("autorizo o merge do PR #N no commit <sha>"); ele executa.
+- **Ponte do Alexandre (R-20261120-150200-alexandre):** para gravar uma decisão dele, com o texto literal, use `node scripts/coord.mjs enviar --de alexandre --ponte --para <destino> --assunto "..." --corpo "..."`. O recado sai com "via: po" e o autor `po@bapajuda.invalid`, e nunca vale como autorização de merge (a autorização de merge é sempre o seu recado `--de po`). Sem `--ponte`, o `--de alexandre` é barrado; nenhum outro papel usa `--ponte`.
 - As simulações de tela e de PDF continuam indo ao Alexandre: sem o "aprovado" dele na simulação, o PR fica aberto.
 - Mudança na base unificada, em layout de página ou em PDF de catálogo: a primeira entrega é **sempre** a simulação, mesmo que ele não diga "simule".
 

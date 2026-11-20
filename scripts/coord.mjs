@@ -5,11 +5,13 @@
 //        [--corpo "..." | --arquivo caminho.md] [--tarefa T-0001] [--prioridade alta|normal|baixa]
 //        [--responde-a <id>] [--encerra] [--contrato modulo.entidade.fato@1]
 //        --de alexandre só na sessão do Alexandre: BAP_AGENTE=alexandre ou terminal fora do Claude
-//        Code (sem CLAUDECODE); com BAP_AGENTE=<agente>, o --de tem de ser esse agente (v5, T-0044).
-//        Recados no GitHub (T-0143, ADR 0039): com a marca da ADR 0035 no .gitignore, enviar e lido gravam direto
-//        no aloirr/bapajudacatalogo-recados (um commit por envio; "enviado" só depois de o GitHub confirmar) e caixa,
-//        pendencias, ler e fio leem o main do GitHub na hora (cache local por commit). Token: BAP_RECADOS_TOKEN,
-//        GH_TOKEN, GITHUB_TOKEN ou gh auth token. BAP_RECADOS=local volta às pastas .coord/recados e .coord/lidos.
+//        Code (sem CLAUDECODE); com BAP_AGENTE=<agente>, o --de tem de ser esse agente.
+//        Ponte (T-0016d): só BAP_AGENTE=po roda --de alexandre --ponte (cabeçalho "via: po", autor po@bapajuda.invalid;
+//        nunca vale como autorização de merge).
+//        Recados no aloirr/bapajudacatalogo-recados: com o clone dele anexado à sessão (ao lado deste repositório,
+//        na home ou em BAP_RECADOS_CLONE), enviar e lido gravam com git (pull --rebase, commit com o nome do agente,
+//        push origin HEAD:main), pela integração de GitHub da sessão; nenhuma chave entra. caixa, pendencias, ler e
+//        fio leem o clone. BAP_RECADOS=local volta às pastas .coord/recados e .coord/lidos.
 //   node scripts/coord.mjs caixa <agente>           recados abertos/não lidos do agente
 //   node scripts/coord.mjs lido <agente> <id> [...]  marca avisos/entregas/respostas como lidos
 //   node scripts/coord.mjs ler <id>                 mostra um recado
@@ -60,14 +62,13 @@ import {
   PESSOAS, classificarMudancas, agruparPorDono, agenteDoBranch, agenteDosTrailers, trailersAgente,
   WORKSPACE_PNPM, workspaceMudouSoEmBuilds, mudancasDeGovernanca, CAMINHOS_DE_GOVERNANCA, estadoDosRecados,
   modoDosRecados, regraDoRecadoNovo, ErroRecados, conexaoDeRecados, atualizarIndiceDeRecados, recadosDoIndice,
-  lidosDoIndice, enviarRecadoNoGitHub, marcarLidosNoGitHub, ehRemetenteDeSistema, cloneDosRecados,
+  lidosDoIndice, enviarRecadoNoGitHub, marcarLidosNoGitHub, ehRemetenteDeSistema, cloneDosRecados, PONTE_DO_ALEXANDRE, DOMINIO_AUTOR,
 } from './coord-lib.mjs';
 
 // Recados no clone anexado à sessão (gravação com git; o proxy da nuvem bloqueia a API): ver cloneDosRecados.
 const CLONE = cloneDosRecados();
 const PASTA = CLONE ? join(CLONE, 'recados') : join(RAIZ, '.coord', 'recados');
 const PASTA_LIDOS = CLONE ? join(CLONE, 'lidos') : join(RAIZ, '.coord', 'lidos');
-const DOMINIO_EMAIL = 'bapajuda.invalid';
 function gitDoClone(args) {
   return execFileSync('git', ['-C', CLONE, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
 }
@@ -82,7 +83,7 @@ function atualizarClone({ obrigatorio = false } = {}) {
 /** git add + commit (autor = quem grava) + push origin HEAD:main, com até 4 tentativas (pull --rebase no meio). */
 function publicarNoClone(arquivos, autor, mensagem) {
   gitDoClone(['add', '--', ...arquivos]);
-  gitDoClone(['-c', `user.name=${autor}`, '-c', `user.email=${autor}@${DOMINIO_EMAIL}`, 'commit', '-q', '-m', mensagem]);
+  gitDoClone(['-c', `user.name=${autor}`, '-c', `user.email=${autor}@${DOMINIO_AUTOR}`, 'commit', '-q', '-m', mensagem]);
   for (let i = 0; ; i++) {
     try { gitDoClone(['push', '-q', 'origin', 'HEAD:main']); break; } catch (e) {
       if (i >= 3) {
@@ -571,9 +572,13 @@ switch (cmd) {
     // terminal dele, fora do Claude Code (sem CLAUDECODE). O guarda-bash também barra o --de alheio,
     // inclusive de subagente (que herda BAP_AGENTE).
     const naSessao = String(process.env.BAP_AGENTE || '').trim().toLowerCase();
-    if (de === 'alexandre' && (naSessao ? naSessao !== 'alexandre' : Boolean(process.env.CLAUDECODE)))
+    // Ponte do po: ver o cabeçalho deste arquivo e o PONTE_DO_ALEXANDRE (coord-lib.mjs).
+    const ponte = Boolean(o.ponte);
+    if (ponte && (naSessao !== PONTE_DO_ALEXANDRE || de !== 'alexandre')) falhar(`--ponte só na sessão do po (BAP_AGENTE=po) e com --de alexandre`);
+    if (ponte && MODO !== 'clone') falhar(`--ponte só com o clone de recados anexado (o commit sai com o autor ${PONTE_DO_ALEXANDRE}@${DOMINIO_AUTOR})`);
+    if (de === 'alexandre' && !ponte && (naSessao ? naSessao !== 'alexandre' : Boolean(process.env.CLAUDECODE)))
       falhar('--de alexandre só na sessão do Alexandre (BAP_AGENTE=alexandre ou o terminal dele, fora do Claude Code). Envie com o seu nome: --de <agente>');
-    if (naSessao && naSessao !== 'alexandre' && PESSOAS.includes(naSessao) && de !== naSessao)
+    if (!ponte && naSessao && naSessao !== 'alexandre' && PESSOAS.includes(naSessao) && de !== naSessao)
       falhar(`esta sessão é de ${naSessao} (BAP_AGENTE): envie com --de ${naSessao}`);
     if (!para.length) falhar('informe --para');
     for (const p of [...para, ...cc]) if (!DESTINOS.includes(p)) falhar(`destinatário inválido: ${p}`);
@@ -604,6 +609,7 @@ switch (cmd) {
       '---',
       `id: ${id}`,
       `de: ${de}`,
+      ...(ponte ? [`via: ${PONTE_DO_ALEXANDRE}`] : []),
       `para: [${para.join(', ')}]`,
       `cc: [${cc.join(', ')}]`,
       `tipo: ${tipo}`,
@@ -635,7 +641,7 @@ switch (cmd) {
         writeFileSync(join(PASTA, d, `${id}.md`), conteudo, 'utf8');
         arquivos.push(`recados/${d}/${id}.md`);
       }
-      const sha = publicarNoClone(arquivos, de, `Recado ${id}: ${de} -> ${destinos.join(', ')}`);
+      const sha = publicarNoClone(arquivos, ponte ? PONTE_DO_ALEXANDRE : de, `Recado ${id}: ${de}${ponte ? ` (via ${PONTE_DO_ALEXANDRE})` : ''} -> ${destinos.join(', ')}`);
       console.log(`Recado ${id} enviado para ${enviadoPara} (git push no main do clone ${CLONE}, commit ${sha})`);
       break;
     }

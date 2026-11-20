@@ -23,17 +23,17 @@ const ident = (p) => identificarAgente({ agentePadrao: 'gerente-projetos', ...p 
 
 test('identificação: na sessão principal, BAP_AGENTE vence argumento, agent_type e branch', () => {
   const r = ident({
-    env: { ...NUVEM, BAP_AGENTE: ' Modulo-Robo ' }, argumento: 'testes', entrada: { agent_type: 'gerente-projetos' },
+    env: { ...NUVEM, BAP_AGENTE: ' Catalogo-Grafico ' }, argumento: 'testes', entrada: { agent_type: 'gerente-projetos' },
     branch: () => 'testes/T-0006',
   });
-  assert.deepEqual(r, { agente: 'modulo-robo', origem: 'variável BAP_AGENTE' });
+  assert.deepEqual(r, { agente: 'catalogo-grafico', origem: 'variável BAP_AGENTE' });
   assert.equal(ident({ env: { BAP_AGENTE: 'alexandre' } }).agente, 'alexandre');
   assert.equal(ident({ env: { ...NUVEM, BAP_AGENTE: 'alexandre' }, entrada: { agent_type: 'gerente-projetos' } }).agente, 'alexandre');
 });
 
 test('identificação (v4): subagente (agent_id) vence BAP_AGENTE; a variável vale só para a sessão principal', () => {
   const env = { BAP_AGENTE: 'alexandre' };
-  assert.deepEqual(ident({ env, entrada: { agent_type: 'modulo-robo', agent_id: 'a1' } }), { agente: 'modulo-robo', origem: 'subagente (agent_type)' });
+  assert.deepEqual(ident({ env, entrada: { agent_type: 'catalogo-grafico', agent_id: 'a1' } }), { agente: 'catalogo-grafico', origem: 'subagente (agent_type)' });
   assert.deepEqual(ident({ env: { ...env, ...NUVEM }, argumento: 'testes', entrada: { agent_type: 'testes', agent_id: 'a2' } }), { agente: 'testes', origem: 'subagente (argumento do hook)' });
   assert.equal(ident({ env, entrada: { agent_type: 'gerente-projetos', agent_id: 'a3' }, branch: () => 'alexandre/x' }).agente, 'gerente-projetos');
   const semTipo = ident({ env, entrada: { agent_id: 'a4' } });
@@ -42,7 +42,7 @@ test('identificação (v4): subagente (agent_id) vence BAP_AGENTE; a variável v
 });
 
 test('identificação: sessão local de agente mantém o agente de hoje (argumento ou agent_type), mesmo em branch de outro', () => {
-  const branch = () => 'modulo-robo/T-0003-licencas';
+  const branch = () => 'catalogo-grafico/T-0003-licencas';
   assert.deepEqual(ident({ argumento: 'testes', branch }), { agente: 'testes', origem: 'argumento do hook' });
   assert.equal(ident({ entrada: { agent_type: 'gerente-projetos' }, branch }).agente, 'gerente-projetos');
   assert.equal(ident({ entrada: { agent_type: 'gerente-projetos' }, env: { CLAUDE_CODE_REMOTE: 'false' }, branch }).agente, 'gerente-projetos');
@@ -50,15 +50,15 @@ test('identificação: sessão local de agente mantém o agente de hoje (argumen
 
 test('identificação: na nuvem, subagente (agent_id ou agent_type diferente do padrão) mantém o próprio agente', () => {
   const branch = () => 'alexandre/T-0005';
-  assert.equal(ident({ env: NUVEM, entrada: { agent_type: 'modulo-robo', agent_id: 'x1' }, branch }).agente, 'modulo-robo');
+  assert.equal(ident({ env: NUVEM, entrada: { agent_type: 'catalogo-grafico', agent_id: 'x1' }, branch }).agente, 'catalogo-grafico');
   assert.equal(ident({ env: NUVEM, entrada: { agent_type: 'gerente-projetos', agent_id: 'x1' }, branch }).agente, 'gerente-projetos');
   assert.equal(ident({ env: NUVEM, entrada: { agent_type: 'testes' }, branch }).agente, 'testes');
 });
 
 test('identificação por branch (sessão principal da nuvem ou sessão manual)', () => {
   const e = { env: NUVEM, entrada: { agent_type: 'gerente-projetos' } };
-  assert.deepEqual(ident({ ...e, branch: () => 'modulo-robo/T-0003-licencas' }), { agente: 'modulo-robo', origem: 'branch modulo-robo/T-0003-licencas' });
-  assert.equal(ident({ ...e, branch: () => 'agente/T-0007-engenheiro-dados' }).agente, 'engenheiro-dados');
+  assert.deepEqual(ident({ ...e, branch: () => 'catalogo-grafico/T-0003-licencas' }), { agente: 'catalogo-grafico', origem: 'branch catalogo-grafico/T-0003-licencas' });
+  assert.equal(ident({ ...e, branch: () => 'agente/T-0007-catalogo-dados' }).agente, 'catalogo-dados');
   assert.equal(ident({ branch: () => 'testes/T-0006' }).agente, 'testes', 'sessão manual local em branch de agente = trabalhar como ele');
   assert.equal(ident({ branch: () => 'main' }).agente, '', 'sessão manual local no main continua liberada');
 });
@@ -67,7 +67,7 @@ test('identificação (v4): branch alexandre/* sem BAP_AGENTE não dá a identid
   const nuvem = ident({ env: NUVEM, entrada: { agent_type: 'gerente-projetos' }, branch: () => 'alexandre/qualquer-coisa' });
   assert.equal(nuvem.agente, 'gerente-projetos', 'sessão principal da nuvem fica restrita ao agent_type');
   assert.match(nuvem.origem, /não concede alexandre/);
-  assert.equal(ident({ entrada: { agent_type: 'modulo-robo' }, branch: () => 'alexandre/x' }).agente, 'modulo-robo', 'sessão local de agente');
+  assert.equal(ident({ entrada: { agent_type: 'catalogo-grafico' }, branch: () => 'alexandre/x' }).agente, 'catalogo-grafico', 'sessão local de agente');
   assert.equal(ident({ branch: () => 'agente/T-0001-alexandre', env: NUVEM, entrada: { agent_type: 'gerente-projetos' } }).agente, 'gerente-projetos');
   assert.notEqual(ident({ env: NUVEM, branch: () => 'alexandre/x' }).agente, 'alexandre', 'nuvem sem agent_type');
   assert.equal(ident({ env: { ...NUVEM, BAP_AGENTE: 'alexandre' }, entrada: { agent_type: 'gerente-projetos' }, branch: () => 'alexandre/x' }).agente, 'alexandre', 'com a variável, sim');
@@ -75,9 +75,9 @@ test('identificação (v4): branch alexandre/* sem BAP_AGENTE não dá a identid
 
 test('identificação por trailer: nuvem/* usa o "Agente:" único dos commits do branch que o têm', () => {
   const e = { env: NUVEM, entrada: { agent_type: 'gerente-projetos' }, branch: () => 'nuvem/T-0005-guardiao-v4' };
-  const r = ident({ ...e, commitsDoBranch: () => [commit('wip sem trailer'), commit('T-0005: x\n\nAgente: modulo-rota\n')] });
-  assert.deepEqual(r, { agente: 'modulo-rota', origem: 'trailer "Agente:" do branch nuvem/T-0005-guardiao-v4' });
-  assert.equal(ident({ ...e, commitsDoBranch: () => [commit('a\n\nAgente: Modulo-Robo'), commit('b\n\nAgente: modulo-robo')] }).agente, 'modulo-robo');
+  const r = ident({ ...e, commitsDoBranch: () => [commit('wip sem trailer'), commit('T-0005: x\n\nAgente: corretor-redundancias\n')] });
+  assert.deepEqual(r, { agente: 'corretor-redundancias', origem: 'trailer "Agente:" do branch nuvem/T-0005-guardiao-v4' });
+  assert.equal(ident({ ...e, commitsDoBranch: () => [commit('a\n\nAgente: Catalogo-Grafico'), commit('b\n\nAgente: catalogo-grafico')] }).agente, 'catalogo-grafico');
 });
 
 test('identificação (v4): trailer "Agente: alexandre" num nuvem/* não dá a identidade alexandre', () => {
@@ -94,7 +94,7 @@ test('identificação ambígua → comportamento restrito (agent_type; nuvem sem
   const nuvem = (commits) => ident({ ...e, branch: () => 'nuvem/T-0009', commitsDoBranch: () => commits });
   assert.equal(nuvem([]).agente, 'gerente-projetos', 'branch nuvem sem commit próprio');
   assert.equal(nuvem([commit('sem trailer')]).agente, 'gerente-projetos');
-  assert.equal(nuvem([commit('Agente: alexandre'), commit('Agente: modulo-robo')]).agente, 'gerente-projetos', 'agentes diferentes');
+  assert.equal(nuvem([commit('Agente: alexandre'), commit('Agente: catalogo-grafico')]).agente, 'gerente-projetos', 'agentes diferentes');
   assert.equal(nuvem([commit('Agente: fulano')]).agente, 'gerente-projetos', 'agente fora do time');
   assert.equal(ident({ ...e, branch: () => 'agente/T-0001-fulano' }).agente, 'gerente-projetos', 'branch de alguém fora do time');
   assert.equal(ident({ ...e, branch: () => 'claude/sessao-xyz' }).agente, 'gerente-projetos', 'branch sem padrão');
@@ -118,8 +118,8 @@ const DONOS = {
     { padrao: 'scripts/coord*.mjs', dono: 'alexandre' },
     { padrao: 'legado/**', dono: 'congelado' },
     { padrao: '.coord/**', dono: 'gerente-projetos' },
-    { padrao: 'modules/core/**', dono: 'modulo-robo' },
-    { padrao: 'apps/**', dono: 'engenheiro-software' },
+    { padrao: 'modules/core/**', dono: 'catalogo-grafico' },
+    { padrao: 'apps/**', dono: 'web-site' },
   ],
 };
 const SETTINGS = { agent: 'gerente-projetos' };
@@ -145,14 +145,14 @@ function criarRepo({ branch, mensagem = 'T-0005: trabalho\n\nAgente: alexandre\n
   git(dir, 'config', 'commit.gpgsign', 'false');
   escrever(dir, '.coord/donos.json', JSON.stringify(DONOS, null, 2));
   escrever(dir, '.claude/settings.json', JSON.stringify(SETTINGS, null, 2));
-  escrever(dir, '.coord/recados/testes/R-20261031-000000-modulo-robo.md', '---\nde: modulo-robo\n---\n');
+  escrever(dir, '.coord/recados/testes/R-20261031-000000-catalogo-grafico.md', '---\nde: catalogo-grafico\n---\n');
   for (const f of ['modules/core/a.ts', 'apps/api/x.ts', 'legado/velho.txt']) escrever(dir, f);
   mkdirSync(join(dir, 'scripts'), { recursive: true });
   mkdirSync(join(dir, '.claude', 'hooks'), { recursive: true });
   copyFileSync(join(RAIZ_REAL, 'scripts', 'coord-lib.mjs'), join(dir, 'scripts', 'coord-lib.mjs'));
   for (const f of ['guarda-donos.mjs', 'guarda-bash.mjs', 'guarda-bash-lib.mjs', 'guarda-merge-lib.mjs']) copyFileSync(join(AQUI, f), join(dir, '.claude', 'hooks', f));
   git(dir, 'add', '-A');
-  git(dir, 'commit', '-q', '-m', 'inicial\n\nAgente: modulo-robo');
+  git(dir, 'commit', '-q', '-m', 'inicial\n\nAgente: catalogo-grafico');
   if (branch) {
     git(dir, 'checkout', '-q', '-b', branch);
     escrever(dir, 'modules/core/a.ts', 'mudou no branch\n');
@@ -199,8 +199,8 @@ test('hook (v4): branch alexandre/* sem BAP_AGENTE não dá poderes de alexandre
   assert.equal(bash(dir, 'echo x > .claude/hooks/x.mjs', SESSAO_NUVEM).codigo, 2);
   const dir2 = criarRepo({ branch: 'alexandre/T-0005-x' });
   assert.equal(editar(dir2, 'scripts/coord.mjs', SESSAO_NUVEM).codigo, 2, 'branch alexandre/* + trailer alexandre');
-  assert.equal(editar(dir2, 'modules/core/a.ts', { entrada: { agent_type: 'modulo-robo' } }).codigo, 0, 'sessão local de agente: o próprio agente');
-  assert.equal(editar(dir2, 'scripts/coord.mjs', { entrada: { agent_type: 'modulo-robo' } }).codigo, 2);
+  assert.equal(editar(dir2, 'modules/core/a.ts', { entrada: { agent_type: 'catalogo-grafico' } }).codigo, 0, 'sessão local de agente: o próprio agente');
+  assert.equal(editar(dir2, 'scripts/coord.mjs', { entrada: { agent_type: 'catalogo-grafico' } }).codigo, 2);
 });
 
 test('hook: sessão da nuvem com BAP_AGENTE=alexandre não é barrada em .claude/ nem em scripts/coord*.mjs', () => {
@@ -218,7 +218,7 @@ test('hook: alexandre identificado continua barrado em congelado e em recado exi
   const r = editar(dir, 'legado/velho.txt', ALEXANDRE_NUVEM);
   assert.equal(r.codigo, 2);
   assert.match(r.erro, /congelada/);
-  assert.equal(editar(dir, '.coord/recados/testes/R-20261031-000000-modulo-robo.md', ALEXANDRE_NUVEM).codigo, 2);
+  assert.equal(editar(dir, '.coord/recados/testes/R-20261031-000000-catalogo-grafico.md', ALEXANDRE_NUVEM).codigo, 2);
   assert.equal(bash(dir, 'echo x >> legado/velho.txt', ALEXANDRE_NUVEM).codigo, 2);
 });
 
@@ -231,7 +231,7 @@ test('hook: mesma sessão da nuvem sem trailer no branch → comportamento atual
 });
 
 test('hook: sessão local de agente não muda (agent_type vence o branch)', () => {
-  const dir = criarRepo({ branch: 'nuvem/T-0005-guardiao-v4', mensagem: 'T-0005: x\n\nAgente: modulo-robo\n' });
+  const dir = criarRepo({ branch: 'nuvem/T-0005-guardiao-v4', mensagem: 'T-0005: x\n\nAgente: catalogo-grafico\n' });
   const local = { entrada: { agent_type: 'gerente-projetos' } };
   assert.equal(editar(dir, '.claude/hooks/guarda-donos.mjs', local).codigo, 2);
   assert.equal(bash(dir, 'echo x > .claude/hooks/x.mjs', local).codigo, 2);
@@ -243,27 +243,27 @@ test('hook: BAP_AGENTE identifica o agente nos dois guardiões', () => {
   const alexandre = { entrada: { agent_type: 'gerente-projetos' }, env: { BAP_AGENTE: 'alexandre' } };
   assert.equal(editar(dir, '.claude/hooks/guarda-donos.mjs', alexandre).codigo, 0);
   assert.equal(bash(dir, 'echo x > .claude/hooks/x.mjs', alexandre).codigo, 0);
-  const core = { env: { BAP_AGENTE: 'modulo-robo' } };
+  const core = { env: { BAP_AGENTE: 'catalogo-grafico' } };
   assert.equal(editar(dir, 'modules/core/a.ts', core).codigo, 0);
   const r = editar(dir, 'apps/api/x.ts', core);
   assert.equal(r.codigo, 2);
-  assert.match(r.erro, /pertence a engenheiro-software/);
+  assert.match(r.erro, /pertence a web-site/);
   assert.equal(bash(dir, 'echo x > apps/api/x.ts', core).codigo, 2);
   assert.equal(editar(dir, 'modules/core/a.ts', { env: { BAP_AGENTE: 'fulano' } }).codigo, 2, 'fora do time');
 });
 
 test('hook: agente pelo nome do branch (sessão principal da nuvem)', () => {
-  const dir = criarRepo({ branch: 'modulo-robo/T-0003-licencas', mensagem: 'sem trailer' });
+  const dir = criarRepo({ branch: 'catalogo-grafico/T-0003-licencas', mensagem: 'sem trailer' });
   assert.equal(editar(dir, 'modules/core/a.ts', SESSAO_NUVEM).codigo, 0);
-  assert.equal(editar(dir, '.coord/quadro.md', SESSAO_NUVEM).codigo, 2, 'como modulo-robo, não como gerente-projetos');
+  assert.equal(editar(dir, '.coord/quadro.md', SESSAO_NUVEM).codigo, 2, 'como catalogo-grafico, não como gerente-projetos');
   assert.equal(bash(dir, 'echo x > .coord/quadro.md', SESSAO_NUVEM).codigo, 2);
 });
 
 test('hook: subagente na nuvem é guardado como ele mesmo, não como o agente do branch', () => {
-  const dir = criarRepo({ branch: 'nuvem/T-0005-guardiao-v4', mensagem: 'T-0005: x\n\nAgente: engenheiro-software\n' });
-  const sub = { entrada: { agent_type: 'modulo-robo', agent_id: 'sub-1' }, env: NUVEM };
+  const dir = criarRepo({ branch: 'nuvem/T-0005-guardiao-v4', mensagem: 'T-0005: x\n\nAgente: web-site\n' });
+  const sub = { entrada: { agent_type: 'catalogo-grafico', agent_id: 'sub-1' }, env: NUVEM };
   assert.equal(editar(dir, '.claude/hooks/guarda-donos.mjs', sub).codigo, 2);
-  assert.equal(editar(dir, 'apps/api/x.ts', sub).codigo, 2, 'não herda o engenheiro-software do trailer');
+  assert.equal(editar(dir, 'apps/api/x.ts', sub).codigo, 2, 'não herda o web-site do trailer');
   assert.equal(editar(dir, 'modules/core/a.ts', sub).codigo, 0);
   assert.equal(bash(dir, 'echo x > scripts/coord.mjs', sub).codigo, 2);
 });
@@ -271,7 +271,7 @@ test('hook: subagente na nuvem é guardado como ele mesmo, não como o agente do
 test('hook (v4): subagente numa sessão com BAP_AGENTE=alexandre continua restrito ao próprio dono', () => {
   const dir = criarRepo();
   for (const env of [{ BAP_AGENTE: 'alexandre' }, { ...NUVEM, BAP_AGENTE: 'alexandre' }]) {
-    const sub = { entrada: { agent_type: 'modulo-robo', agent_id: 'sub-2' }, env };
+    const sub = { entrada: { agent_type: 'catalogo-grafico', agent_id: 'sub-2' }, env };
     for (const f of ['.claude/hooks/guarda-donos.mjs', 'scripts/coord.mjs', 'apps/api/x.ts', '.coord/quadro.md']) {
       const r = editar(dir, f, sub);
       assert.equal(r.codigo, 2, `${f} (${env.CLAUDE_CODE_REMOTE ? 'nuvem' : 'local'}): ${r.erro}`);
@@ -290,16 +290,16 @@ test('hook (T-0123): revisor-codigo só escreve em docs/qualidade/redundancias/*
   writeFileSync(join(dir, '.coord', 'donos.json'), readFileSync(join(RAIZ_REAL, 'scripts', 'fixtures', 'donos-exemplo.json'), 'utf8'));
   // Subagente local (como o gerente o chama): todos os casos.
   const sub = { entrada: { agent_type: 'revisor-codigo', agent_id: 'sub-cr' } };
-  for (const f of ['docs/qualidade/redundancias/2026-11-08-inicio-campo.md', 'docs/qualidade/redundancias/catalogo.md', '.coord/diario/revisor-codigo.md', '.coord/lidos/revisor-codigo.txt', '.coord/recados/modulo-robo/R-20261108-120000-revisor-codigo.md']) {
+  for (const f of ['docs/qualidade/redundancias/2026-11-08-inicio-campo.md', 'docs/qualidade/redundancias/catalogo.md', '.coord/diario/revisor-codigo.md', '.coord/lidos/revisor-codigo.txt', '.coord/recados/catalogo-grafico/R-20261108-120000-revisor-codigo.md']) {
     const r = editar(dir, f, sub);
     assert.equal(r.codigo, 0, `${f}: ${r.erro}`);
   }
-  for (const f of ['modules/core/a.ts', 'apps/api/x.ts', 'docs/qualidade/outra-coisa.md', 'docs/produto/03-regras-e-permissoes.md', '.coord/quadro.md', '.coord/donos.json', '.claude/agents/revisor-codigo.md', '.coord/diario/modulo-robo.md', '.coord/recados/modulo-robo/R-20261108-120000-modulo-robo.md']) {
+  for (const f of ['modules/core/a.ts', 'apps/api/x.ts', 'docs/qualidade/outra-coisa.md', 'docs/produto/03-regras-e-permissoes.md', '.coord/quadro.md', '.coord/donos.json', '.claude/agents/revisor-codigo.md', '.coord/diario/catalogo-grafico.md', '.coord/recados/catalogo-grafico/R-20261108-120000-catalogo-grafico.md']) {
     const r = editar(dir, f, sub);
     assert.equal(r.codigo, 2, `${f} deveria ser bloqueado`);
     assert.match(r.erro, /BLOQUEADO/);
   }
-  assert.match(editar(dir, 'modules/core/a.ts', sub).erro, /pertence a modulo-robo\. deixe um recado: node scripts\/coord\.mjs enviar --de revisor-codigo --para modulo-robo/);
+  assert.match(editar(dir, 'modules/core/a.ts', sub).erro, /pertence a catalogo-grafico\. deixe um recado: node scripts\/coord\.mjs enviar --de revisor-codigo --para catalogo-grafico/);
   assert.equal(bash(dir, 'echo "# RD" > docs/qualidade/redundancias/relatorio.md', sub).codigo, 0, 'Bash no próprio caminho');
   assert.equal(bash(dir, 'echo x > modules/core/a.ts', sub).codigo, 2, 'Bash fora');
   assert.equal(bash(dir, 'sed -i s/a/b/ apps/api/x.ts', sub).codigo, 2, 'sed -i fora');
@@ -313,24 +313,24 @@ test('hook (T-0123): revisor-codigo só escreve em docs/qualidade/redundancias/*
   }
 });
 
-test('hook (T-0169): modulo-posvenda só escreve em docs/marca/**, no próprio diário e em recado novo', () => {
+test('hook (T-0169): design-de-marca só escreve em docs/marca/**, no próprio diário e em recado novo', () => {
   const dir = criarRepo();
   writeFileSync(join(dir, '.coord', 'donos.json'), readFileSync(join(RAIZ_REAL, 'scripts', 'fixtures', 'donos-exemplo.json'), 'utf8'));
-  const sub = { entrada: { agent_type: 'modulo-posvenda', agent_id: 'sub-dm' } };
-  for (const f of ['docs/marca/manual.md', 'docs/marca/propostas/2026-11-12-opcoes.md', '.coord/diario/modulo-posvenda.md', '.coord/lidos/modulo-posvenda.txt', '.coord/recados/po/R-20261112-120000-modulo-posvenda.md']) {
+  const sub = { entrada: { agent_type: 'design-de-marca', agent_id: 'sub-dm' } };
+  for (const f of ['docs/marca/manual.md', 'docs/marca/propostas/2026-11-12-opcoes.md', '.coord/diario/design-de-marca.md', '.coord/lidos/design-de-marca.txt', '.coord/recados/po/R-20261112-120000-design-de-marca.md']) {
     const r = editar(dir, f, sub);
     assert.equal(r.codigo, 0, `${f}: ${r.erro}`);
   }
-  for (const f of ['packages/ui/src/tema/cores.ts', 'docs/design/componentes.md', 'apps/mobile/app.config.ts', 'docs/produto/07-agentes-e-coordenacao.md', '.coord/quadro.md', '.coord/donos.json', '.claude/agents/modulo-posvenda.md', '.claude/skills/modulo-posvenda/SKILL.md', '.coord/diario/po.md', '.coord/recados/po/R-20261112-120000-po.md']) {
+  for (const f of ['packages/ui/src/tema/cores.ts', 'docs/design/componentes.md', 'apps/mobile/app.config.ts', 'docs/produto/07-agentes-e-coordenacao.md', '.coord/quadro.md', '.coord/donos.json', '.claude/agents/design-de-marca.md', '.claude/skills/design-de-marca/SKILL.md', '.coord/diario/po.md', '.coord/recados/po/R-20261112-120000-po.md']) {
     const r = editar(dir, f, sub);
     assert.equal(r.codigo, 2, `${f} deveria ser bloqueado`);
     assert.match(r.erro, /BLOQUEADO/);
   }
-  assert.match(editar(dir, 'packages/ui/src/tema/cores.ts', sub).erro, /pertence a po\. deixe um recado: node scripts\/coord\.mjs enviar --de modulo-posvenda --para po/);
+  assert.match(editar(dir, 'packages/ui/src/tema/cores.ts', sub).erro, /pertence a po\. deixe um recado: node scripts\/coord\.mjs enviar --de design-de-marca --para po/);
   assert.equal(bash(dir, 'echo "# Marca" > docs/marca/manual.md', sub).codigo, 0, 'Bash no próprio caminho');
   assert.equal(bash(dir, 'echo x > packages/ui/a.ts', sub).codigo, 2, 'Bash fora');
   assert.equal(bash(dir, 'cp docs/marca/manual.md docs/design/copia.md', sub).codigo, 2, 'cp para fora');
-  for (const o of [{ entrada: sub.entrada, env: NUVEM }, { entrada: { agent_type: 'modulo-posvenda' } }]) {
+  for (const o of [{ entrada: sub.entrada, env: NUVEM }, { entrada: { agent_type: 'design-de-marca' } }]) {
     const quem = o.env ? 'nuvem' : 'sessão sem agent_id';
     assert.equal(editar(dir, 'docs/marca/manual.md', o).codigo, 0, quem);
     assert.equal(editar(dir, 'docs/design/componentes.md', o).codigo, 2, quem);
@@ -340,13 +340,13 @@ test('hook (T-0169): modulo-posvenda só escreve em docs/marca/**, no próprio d
 // ───────────────────────── Parte 3: cache da identificação por HEAD ─────────────────────────
 
 test('commitsDoBranch: cache por HEAD num arquivo temporário (só refaz o git log quando HEAD ou a base mudam)', () => {
-  const dir = criarRepo({ branch: 'nuvem/T-0005-cache', mensagem: 'T-0005: a\n\nAgente: modulo-robo\n' });
+  const dir = criarRepo({ branch: 'nuvem/T-0005-cache', mensagem: 'T-0005: a\n\nAgente: catalogo-grafico\n' });
   const pastaCache = mkdtempSync(join(tmpdir(), 'guarda-cache-'));
   temporarios.push(pastaCache);
   const arq = arquivoCacheIdentificacao(dir, pastaCache);
   assert.equal(existsSync(arq), false);
   const primeiro = commitsDoBranch(dir, { pastaCache });
-  assert.deepEqual(primeiro.map((c) => c.corpo), ['Agente: modulo-robo']);
+  assert.deepEqual(primeiro.map((c) => c.corpo), ['Agente: catalogo-grafico']);
   const cache = JSON.parse(readFileSync(arq, 'utf8'));
   assert.equal(cache.chave.split('|')[0], git(dir, 'rev-parse', 'HEAD').trim(), 'chave = HEAD | base');
   // Prova de que o cache é usado: com o mesmo HEAD, devolve o que está no arquivo, sem rodar o git.
@@ -355,23 +355,23 @@ test('commitsDoBranch: cache por HEAD num arquivo temporário (só refaz o git l
   // HEAD novo → recalcula.
   escrever(dir, 'modules/core/b.ts');
   git(dir, 'add', '-A');
-  git(dir, 'commit', '-q', '-m', 'T-0005: b\n\nAgente: engenheiro-dados');
-  assert.deepEqual(commitsDoBranch(dir, { pastaCache }).map((c) => c.corpo), ['Agente: engenheiro-dados', 'Agente: modulo-robo']);
+  git(dir, 'commit', '-q', '-m', 'T-0005: b\n\nAgente: catalogo-dados');
+  assert.deepEqual(commitsDoBranch(dir, { pastaCache }).map((c) => c.corpo), ['Agente: catalogo-dados', 'Agente: catalogo-grafico']);
   // A base mudou (main andou) → recalcula também.
   const cache2 = JSON.parse(readFileSync(arq, 'utf8'));
   git(dir, 'branch', '-f', 'main', 'HEAD~1');
-  assert.deepEqual(commitsDoBranch(dir, { pastaCache }).map((c) => c.corpo), ['Agente: engenheiro-dados']);
+  assert.deepEqual(commitsDoBranch(dir, { pastaCache }).map((c) => c.corpo), ['Agente: catalogo-dados']);
   assert.notEqual(JSON.parse(readFileSync(arq, 'utf8')).chave, cache2.chave);
 });
 
 test('refsDoGit/branchAtual: leem HEAD, branch e base do .git (refs soltas, packed-refs e HEAD destacado)', () => {
-  const dir = criarRepo({ branch: 'modulo-robo/T-0003-x' });
+  const dir = criarRepo({ branch: 'catalogo-grafico/T-0003-x' });
   const head = git(dir, 'rev-parse', 'HEAD').trim();
   const main = git(dir, 'rev-parse', 'main').trim();
-  assert.deepEqual(refsDoGit(dir), { branch: 'modulo-robo/T-0003-x', head, base: main });
+  assert.deepEqual(refsDoGit(dir), { branch: 'catalogo-grafico/T-0003-x', head, base: main });
   git(dir, 'pack-refs', '--all');
-  assert.deepEqual(refsDoGit(dir), { branch: 'modulo-robo/T-0003-x', head, base: main }, 'packed-refs');
-  assert.equal(branchAtual(dir), 'modulo-robo/T-0003-x');
+  assert.deepEqual(refsDoGit(dir), { branch: 'catalogo-grafico/T-0003-x', head, base: main }, 'packed-refs');
+  assert.equal(branchAtual(dir), 'catalogo-grafico/T-0003-x');
   git(dir, 'checkout', '-q', '--detach');
   assert.deepEqual(refsDoGit(dir), { branch: null, head, base: main }, 'HEAD destacado');
   assert.equal(branchAtual(dir), null);

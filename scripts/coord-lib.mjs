@@ -12,9 +12,9 @@ import { gunzipSync } from 'node:zlib';
 
 export const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-// Time do Bap Ajuda catálogo (20/11/2026). BAP_AGENTES_TESTE (só nos testes herdados do BAP Central, que usam os
-// nomes antigos) troca a lista; fora dos testes ela nunca é definida.
-const AGENTES_DO_TIME = [
+// Time do Bap Ajuda catálogo (20/11/2026). BAP_AGENTES_TESTE (só nos testes; o CI passa os mesmos 11 nomes, T-0016;
+// guarda-merge-mcp.test.mjs confere) troca a lista; fora dos testes ela nunca é definida.
+export const AGENTES_DO_TIME = [
   'gerente-projetos',
   'po',
   'catalogo-dados',
@@ -27,6 +27,19 @@ const AGENTES_DO_TIME = [
   'design-de-marca',
   'corretor-redundancias',
 ];
+/**
+ * Ponte (T-0016d, R-20261120-150200-alexandre): só este papel grava recado do Alexandre, por
+ * `node scripts/coord.mjs enviar --de alexandre --ponte` (cabeçalho "via: po", autor po@bapajuda.invalid). Recado com
+ * "via:" nunca vale como autorização de merge.
+ */
+export const PONTE_DO_ALEXANDRE = 'po';
+/** Domínio do autor dos commits do coord.mjs nos recados (<agente>@bapajuda.invalid). */
+export const DOMINIO_AUTOR = 'bapajuda.invalid';
+/**
+ * O e-mail de autor <quem>@bapajuda.invalid no texto (RD-0136, um comportamento só): sem letra, dígito, ponto, _ ou -
+ * antes (xpo@... não casa) e com fim de palavra depois (po@bapajuda.invalidade não casa); ignora maiúsculas.
+ */
+export const reAutor = (quem) => new RegExp(`(^|[^a-z0-9._-])${quem}@${DOMINIO_AUTOR.replace(/\./g, '\\.')}\\b`, 'i');
 export const AGENTES = String(process.env.BAP_AGENTES_TESTE || '').trim()
   ? String(process.env.BAP_AGENTES_TESTE).split(',').map((a) => a.trim()).filter(Boolean)
   : AGENTES_DO_TIME;
@@ -136,7 +149,7 @@ export function relativoPorJuncao(abs, juncoes) {
   return null;
 }
 
-export const MOTIVO_CLONE_DE_RECADOS = 'o clone do repositório de recados só muda pelo node scripts/coord.mjs (enviar, lido) e pelo scripts/sincronizar-recados.ps1 (ADR 0035)';
+export const MOTIVO_CLONE_DE_RECADOS = 'o clone de recados só muda pelo node scripts/coord.mjs (enviar, lido); anexos (recados/anexos/**), pelo po e pelo gerente-projetos, com git pull/add/commit/push conferido';
 
 /**
  * Estado dos recados no repositório de código pela marca do .gitignore (ADR 0035), para o verificar:
@@ -733,7 +746,7 @@ export function agenteDaSessao({ argumento, entrada, env = process.env, raiz = R
 //   e nunca sobrescreve: o id é escolhido contra a árvore daquele mesmo commit.
 // - Leitura: índice local (cache fora do repositório) por commit. A cada leitura, compara o commit do cache com o main
 //   (REST compare) e baixa só os arquivos novos (blob a blob; muitos de uma vez, pelo tarball do commit). Os textos do
-//   cache são conferidos pelo hash do git; a lista que autoriza merge (guarda-merge) vem sempre direto do GitHub.
+//   cache são conferidos pelo hash do git; a lista que autoriza merge (lerRecadosDoGerente, guarda-merge-lib.mjs) vem sempre direto do GitHub.
 // - Token só do ambiente: BAP_RECADOS_TOKEN, GH_TOKEN, GITHUB_TOKEN ou `gh auth token`. Nunca vai para arquivo,
 //   argumento de processo ou log (vai ao processo filho pelo stdin).
 

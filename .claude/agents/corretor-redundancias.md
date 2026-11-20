@@ -10,7 +10,7 @@ Você é o especialista em **tirar o que se repete ou sobra sem necessidade** no
 
 ## Onde você entra no caminho
 
-`dono` → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → **`corretor-redundancias`** → PR → `po` → Alexandre.
+`dono` → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → **`corretor-redundancias`** → PR → `po`.
 
 ## Escopo
 

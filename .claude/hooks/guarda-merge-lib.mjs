@@ -1,19 +1,23 @@
 // Guardião v5 (T-0044) — trava do `gh pr merge` no Bash (PreToolUse do guarda-bash.mjs).
-// Funções puras + acesso ao gh e aos recados injetável (testes: .claude/hooks/guarda-merge.test.mjs).
+// Funções puras + acesso ao gh e aos recados injetável (testes: guarda-merge-mcp.test.mjs e guarda-recado.test.mjs).
 // Sem dependências externas.
 //
-// Regras (doc 07, recados R-20261101-151135 e R-20261101-165024 do Alexandre):
+// Regras (R-20261120-111308-alexandre e R-20261120-131230-alexandre):
 //  a) só o gerente-projetos, na sessão principal, executa `gh pr merge` (subagente nunca; identidade
 //     só por fonte confiável: BAP_AGENTE=gerente-projetos ou sessão local com agent_type);
-//  b) o comando é exatamente `gh pr merge <N> -R aloirr/bapajudacatalogo --squash --match-head-commit <sha>`
-//     (+ opcionais --body/--subject), sem prefixo (env, sudo, VAR=...), sem $VAR/$(...)/glob, um
+//  b) o comando é exatamente `gh pr merge <N> -R aloirr/bapajudacatalogo --squash --match-head-commit <sha de 40>
+//     --body "... T-nnnn ... Agente: <dono>"` (+ opcional --subject), sem prefixo (env, sudo, VAR=...), sem $VAR/$(...)/glob, um
 //     merge por comando; --admin, --auto, --merge, --rebase e qualquer outra opção são bloqueados;
-//  c) o hook consulta `gh pr view N -R aloirr/bapajudacatalogo --json files,headRefOid,changedFiles`:
-//     PR com arquivo em CAMINHOS_DE_GOVERNANCA (scripts/coord-lib.mjs) exige um recado do Alexandre
-//     em .coord/recados/gerente-projetos (nome R-...-alexandre.md e `de: alexandre`) com o texto
-//     "autorizo o merge do PR #N no commit <sha>", SHA compatível com o --match-head-commit e com o
-//     headRefOid atual;
-//  d) PR sem caminho de governança passa com a), b) e o headRefOid igual ao --match-head-commit.
+//  c) o hook consulta `gh pr view N -R aloirr/bapajudacatalogo --json files,headRefOid,changedFiles,state,statusCheckRollup`
+//     (PR aberto e CI do PR verde, T-0016 B3):
+//     TODO merge (com ou sem caminho de governança, R-20261120-111308-alexandre; T-0016) exige um recado do po
+//     ou do Alexandre na caixa do gerente-projetos (recados/gerente-projetos do aloirr/bapajudacatalogo-recados;
+//     nome R-...-po.md ou R-...-alexandre.md, `de:` igual ao remetente do nome e `id` igual ao nome) com o texto
+//     "autorizo o merge do PR #N no commit <sha de 40>", SHA igual ao --match-head-commit e ao headRefOid atual;
+//  d) os recados vêm do que está PUBLICADO no main do repositório de recados (clone anexado: origin do clone =
+//     github.com/aloirr/bapajudacatalogo-recados, git fetch e leitura de origin/main, nunca da árvore de trabalho, e o
+//     commit que trouxe o recado tem o autor <remetente>@bapajuda.invalid; sem clone, a API do GitHub). Não deu para
+//     ler = nenhuma autorização.
 //  gh fora do ar, sem login, resposta inválida ou lista de arquivos incompleta → BLOQUEADO
 //  (falha fechada).
 // Também bloqueia o merge "escondido": `gh pr merge` dentro de bash -c/eval/xargs/source/here-doc/
@@ -25,24 +29,33 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, win32, posix } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import {
-  tokenizar, comandosSimples, alvosDoComando, SO_LEITURA, COORD_SO_LEITURA, PACOTES_SO_LEITURA, DESCARTE,
+  tokenizar, comandosSimples, alvosDoComando, SO_LEITURA, COORD_SO_LEITURA, PACOTES_SO_LEITURA, DESCARTE, ehCaminhoDeAnexo,
 } from './guarda-bash-lib.mjs';
 import {
   AGENTES, PESSOAS, CAMINHOS_DE_GOVERNANCA, mudancasDeGovernanca, remetenteDoRecado, modoDosRecados, conexaoDeRecados,
-  recadosDaPastaNoGitHub,
+  recadosDaPastaNoGitHub, cloneDosRecados, MOTIVO_CLONE_DE_RECADOS, PONTE_DO_ALEXANDRE, DOMINIO_AUTOR, reAutor,
 } from '../../scripts/coord-lib.mjs';
 
 export const REPO_OFICIAL = 'aloirr/bapajudacatalogo';
 export const AGENTE_DO_MERGE = 'gerente-projetos';
 /** Origens da identificação (identificarAgente) que confirmam o gerente na sessão principal. */
 export const ORIGENS_CONFIAVEIS = ['variável BAP_AGENTE', 'sessão local (agent_type)'];
-export const PASTA_AUTORIZACOES = '.coord/recados/gerente-projetos';
-export const SHA_VALIDO = /^[0-9a-f]{7,40}$/i;
-/** "autorizo o merge do PR #N no commit <sha>" (maiúsculas/minúsculas e espaços livres; sha entre crases aceito). */
-export const RE_AUTORIZACAO = /(?<!n[aã]o\s{1,3})(?<![a-z])autorizo\s+o\s+merge\s+do\s+PR\s+#(\d+)\s+no\s+commit\s+`?([0-9a-f]{7,40})`?(?![0-9a-z])/gi;
+export const PASTA_AUTORIZACOES = 'recados/gerente-projetos';
+/** Quem autoriza merge por recado (R-20261120-111308-alexandre): o po e o Alexandre. */
+export const AUTORIZADORES = ['po', 'alexandre'];
+/** SHA do head: sempre os 40 caracteres (T-0016, B2: um SHA curto pode casar com outro commit). */
+export const SHA_VALIDO = /^[0-9a-f]{40}$/i;
+/** "autorizo o merge do PR #N no commit <sha de 40>" (maiúsculas/minúsculas e espaços livres; sha entre crases aceito). */
+export const RE_AUTORIZACAO = /(?<!n[aã]o\s{1,3})(?<![a-z])autorizo\s+o\s+merge\s+do\s+PR\s+#(\d+)\s+no\s+commit\s+`?([0-9a-f]{40})`?(?![0-9a-z])/gi;
+/** Regra do merge, uma vez só, para o rodapé das mensagens (RD-0028). */
+export const REGRA_MERGE =
+  'Todo merge: recado do po (ou do Alexandre) em recados/gerente-projetos do aloirr/bapajudacatalogo-recados com ' +
+  '"autorizo o merge do PR #N no commit <sha de 40>" (R-20261120-111308-alexandre); squash com a tarefa (T-nnnn) e ' +
+  '"Agente: <dono>" no corpo (R-20261120-131230-alexandre). Mande ao po o resumo (número, SHA do head, arquivos, CI e ' +
+  'revisões LIBERADO) e espere a autorização dele; aprovação genérica não vale.';
 
 const CABECALHO = '[guardião BAP] BLOQUEADO (gh pr merge):';
-const MODELO = `gh pr merge <N> -R ${REPO_OFICIAL} --squash --match-head-commit <sha> [--subject "<título do squash>"] --body "Agente: <dono da tarefa>"`;
+const MODELO = `gh pr merge <N> -R ${REPO_OFICIAL} --squash --match-head-commit <sha de 40> [--subject "<título do squash>"] --body "<resumo> (T-nnnn)\n\nAgente: <dono da tarefa>"`;
 
 const barras = (p) => String(p).replace(/\\/g, '/');
 const nomeBase = (p) => barras(p).replace(/\/+$/, '').split('/').pop().replace(/\.exe$/i, '').toLowerCase();
@@ -311,7 +324,7 @@ export function mensagemGhApi(erros) {
   return (
     `[guardião BAP] BLOQUEADO (gh api): o gh api só é aceito para LEITURA:\n${erros.map((e) => ` - ${e}`).join('\n')}\n` +
     'Aceito: gh api <endpoint> (sem -f/-F/--input), gh api -X GET <endpoint> -f q=... e gh api graphql -f query=\'query { ... }\'. ' +
-    'Para gravar no GitHub use o comando próprio do gh (gh pr create/comment/edit, gh issue ...); merge só pelo gh pr merge, com as regras do v5.\n' +
+    'Para gravar no GitHub use o comando próprio do gh (gh pr create/comment/edit, gh issue ...); merge só pelo gh pr merge ou pelo merge_pull_request da integração do GitHub, os dois conferidos pelo guardião (T-0016).\n' +
     'Não contorne o bloqueio (script, alias, outra ferramenta): se precisar gravar pela API, peça ao gerente-projetos ou ao Alexandre por recado.'
   );
 }
@@ -343,6 +356,7 @@ export function validarComandoMerge({ palavras, tirados = [], estranho = false, 
   const repos = [];
   let squash = false;
   const shas = [];
+  const corpos = [];
   const posicionais = [];
   let fim = false;
   const valorDe = (i, nome) => {
@@ -364,6 +378,7 @@ export function validarComandoMerge({ palavras, tirados = [], estranho = false, 
         if (valor === null) continue;
         if (nome === '--repo') repos.push(valor);
         if (nome === '--match-head-commit') shas.push(valor);
+        if (nome === '--body') corpos.push(valor);
         continue;
       }
       erros.push(`opção ${nome} não é aceita no gh pr merge (aceitas: -R/--repo, --squash, --match-head-commit, --body, --subject)`);
@@ -379,6 +394,7 @@ export function validarComandoMerge({ palavras, tirados = [], estranho = false, 
         let valor = a.slice(j + 1);
         if (!valor) [valor, i] = valorDe(i, curta);
         if (valor !== null && c === 'R') repos.push(valor);
+        if (valor !== null && c === 'b') corpos.push(valor);
         break;
       }
       erros.push(`opção ${curta} não é aceita no gh pr merge (aceitas: -R/--repo, --squash, --match-head-commit, --body, --subject)`);
@@ -394,8 +410,10 @@ export function validarComandoMerge({ palavras, tirados = [], estranho = false, 
   let sha = null;
   if (!shas.length) erros.push('falta --match-head-commit <sha> (impede que entre commit adicionado depois da conferência)');
   else if (shas.length > 1) erros.push('--match-head-commit repetido: informe um SHA só');
-  else if (!SHA_VALIDO.test(shas[0])) erros.push(`--match-head-commit "${shas[0]}" não é um SHA (7 a 40 caracteres hexadecimais; prefira os 40)`);
+  else if (!SHA_VALIDO.test(shas[0])) erros.push(`--match-head-commit "${shas[0]}" não é o SHA completo (40 caracteres hexadecimais)`);
   else sha = shas[0].toLowerCase();
+  if (corpos.length > 1) erros.push('--body repetido: informe o corpo do squash uma vez só');
+  else erros.push(...errosDoCorpoDoSquash(corpos[0], '--body'));
   let pr = null;
   if (posicionais.length !== 1) erros.push(posicionais.length ? `informe um PR só (veio: ${posicionais.join(' ')})` : 'falta o número do PR (gh pr merge <N> ...)');
   else if (!/^\d+$/.test(posicionais[0])) erros.push(`o PR tem de ser o número (veio "${posicionais[0]}"; URL e branch não são aceitos)`);
@@ -405,11 +423,14 @@ export function validarComandoMerge({ palavras, tirados = [], estranho = false, 
 
 // ───────────────────────────── identidade (regra a) ─────────────────────────────
 
-/** Só o gerente-projetos, na sessão principal, com identidade de fonte confiável. Retorna o motivo do bloqueio ou null. */
-export function motivoIdentidade({ agente, origem = '', subagente = false }) {
-  if (subagente) return `subagente (${agente || 'sem agente'}) nunca executa gh pr merge: devolva ao gerente-projetos, que faz o merge na sessão principal`;
-  if (!agente) return 'sessão sem agente: pelo Claude, só o gerente-projetos executa gh pr merge (o Alexandre faz o merge pelo terminal ou pelo GitHub)';
-  if (agente !== AGENTE_DO_MERGE) return `só o gerente-projetos executa gh pr merge; esta sessão é de ${agente}. Avise o gerente por recado (node scripts/coord.mjs enviar --de ${agente} --para gerente-projetos --tipo entrega ...)`;
+/**
+ * Só o gerente-projetos, na sessão principal, com identidade de fonte confiável (gh pr merge e merge pelo MCP; RD-0137).
+ * Retorna o motivo do bloqueio ou null.
+ */
+export function motivoIdentidade({ agente, origem = '', subagente = false, acao = 'executa gh pr merge' }) {
+  if (subagente) return `subagente (${agente || 'sem agente'}) nunca ${acao}: devolva ao gerente-projetos, que faz o merge na sessão principal`;
+  if (!agente) return `sessão sem agente: pelo Claude, só o gerente-projetos ${acao} (o Alexandre faz o merge pelo terminal ou pelo GitHub)`;
+  if (agente !== AGENTE_DO_MERGE) return `só o gerente-projetos ${acao} (R-20261120-111308-alexandre); esta sessão é de ${agente}. Avise o gerente por recado (node scripts/coord.mjs enviar --de ${agente} --para gerente-projetos --tipo entrega ...)`;
   if (!ORIGENS_CONFIAVEIS.includes(origem))
     return `a identidade gerente-projetos veio de "${origem}", que não é confiável para merge; vale só BAP_AGENTE=gerente-projetos ou a sessão local do gerente`;
   return null;
@@ -417,8 +438,42 @@ export function motivoIdentidade({ agente, origem = '', subagente = false }) {
 
 // ───────────────────────────── PR e autorização (regras c e d) ─────────────────────────────
 
-/** SHA curto (7+) é prefixo do SHA completo? */
-export const shaCompativel = (curto, completo) => Boolean(curto && completo && SHA_VALIDO.test(curto) && String(completo).toLowerCase().startsWith(String(curto).toLowerCase()));
+/** Os dois são o mesmo SHA de 40 caracteres? (T-0016, B2: SHA curto não vale) */
+export const shaCompativel = (a, b) => Boolean(a && b && SHA_VALIDO.test(a) && SHA_VALIDO.test(b) && String(a).toLowerCase() === String(b).toLowerCase());
+
+/** Tarefa do quadro no corpo do squash. */
+export const RE_TAREFA = /\bT-\d{4}\b/;
+const RE_AGENTE = /^\s*Agente:[ \t]*(\S+)[ \t]*$/i;
+
+/** Linhas do último bloco (separado por linha em branco) do corpo do squash: o bloco de trailers do commit. */
+export function ultimoBlocoDaMensagem(mensagem) {
+  const blocos = [];
+  let atual = [];
+  for (const linha of String(mensagem || '').replace(/\r\n?/g, '\n').split('\n')) {
+    if (linha.trim() === '') { if (atual.length) blocos.push(atual); atual = []; } else atual.push(linha);
+  }
+  if (atual.length) blocos.push(atual);
+  return blocos.length ? blocos[blocos.length - 1] : [];
+}
+
+/**
+ * Corpo do commit do squash (R-20261120-131230-alexandre): cita a tarefa (T-nnnn) e tem, no último bloco, um único
+ * "Agente: <dono>" do time (ou alexandre). Vale para o --body do gh pr merge e o commit_message do MCP. Função pura.
+ */
+export function errosDoCorpoDoSquash(corpo, opcao) {
+  const texto = String(corpo ?? '');
+  if (!texto.trim()) return [`falta o corpo do squash (${opcao}) com a tarefa (T-nnnn) e, no fim, "Agente: <dono da tarefa>" (R-20261120-131230-alexandre)`];
+  const erros = [];
+  if (!RE_TAREFA.test(texto)) erros.push(`o corpo do squash (${opcao}) não cita a tarefa (T-nnnn)`);
+  const nomes = ultimoBlocoDaMensagem(texto).map((l) => l.match(RE_AGENTE)).filter(Boolean).map((m) => m[1].toLowerCase());
+  if (!nomes.length) erros.push(`o corpo do squash (${opcao}) não termina com "Agente: <dono da tarefa>"`);
+  else if (nomes.length > 1) erros.push(`o corpo do squash (${opcao}) tem ${nomes.length} "Agente:" no último bloco: um só`);
+  else if (!PESSOAS.includes(nomes[0])) erros.push(`"Agente: ${nomes[0]}" não é do time`);
+  return erros;
+}
+
+/** "Agente: <nome>" do corpo do squash (já validado) ou null. */
+export const agenteDoCorpo = (corpo) => ultimoBlocoDaMensagem(corpo).map((l) => l.match(RE_AGENTE)).find(Boolean)?.[1].toLowerCase() ?? null;
 
 /** Lê o cabeçalho (front matter) de um recado: {meta, corpo} ou null. */
 export function lerCabecalho(texto) {
@@ -433,20 +488,24 @@ export function lerCabecalho(texto) {
 }
 
 /**
- * Autorizações válidas do Alexandre nos recados (função pura).
- * Vale só recado com nome R-...-alexandre.md, `de: alexandre` e `id` igual ao nome do arquivo.
+ * Autorizações de merge válidas nos recados (função pura; T-0016, R-20261120-111308-alexandre).
+ * Vale só recado com nome R-...-<remetente>.md, `de: <remetente>` igual, `id` igual ao nome do arquivo e remetente
+ * na lista (padrão: po e alexandre).
  * @param {{nome: string, texto: string}[]} recados
- * @returns {{pr: number, sha: string, id: string}[]}
+ * @param {{remetentes?: string[]}} [o]
+ * @returns {{pr: number, sha: string, id: string, de: string}[]}
  */
-export function autorizacoesDoAlexandre(recados) {
+export function autorizacoesDeMerge(recados, { remetentes = AUTORIZADORES } = {}) {
   const res = [];
-  for (const { nome, texto } of recados) {
-    if (!/\.md$/i.test(nome) || remetenteDoRecado(nome) !== 'alexandre') continue;
+  for (const { nome, texto } of recados || []) {
+    const de = remetenteDoRecado(nome);
+    if (!/\.md$/i.test(nome) || !de || !remetentes.includes(de)) continue;
     const r = lerCabecalho(texto);
-    if (!r || String(r.meta.de || '').toLowerCase() !== 'alexandre') continue;
+    if (!r || String(r.meta.de || '').trim().toLowerCase() !== de) continue;
     const id = nome.replace(/\.md$/i, '');
     if (r.meta.id !== id) continue;
-    for (const m of `${r.corpo}`.matchAll(RE_AUTORIZACAO)) res.push({ pr: Number(m[1]), sha: m[2].toLowerCase(), id });
+    if (String(r.meta.via || '').trim()) continue; // T-0016d: recado da ponte ("via: po") nunca autoriza merge
+    for (const m of `${r.corpo}`.matchAll(RE_AUTORIZACAO)) res.push({ pr: Number(m[1]), sha: m[2].toLowerCase(), id, de });
   }
   return res;
 }
@@ -462,29 +521,29 @@ export function decidirMerge({ pr, sha, consulta, autorizacoes }) {
   const head = String(consulta.headRefOid || '').toLowerCase();
   const arquivos = consulta.arquivos || [];
   const erros = [];
-  if (!/^[0-9a-f]{40}$/.test(head)) return { ok: false, governanca: [], erros: [`o gh não devolveu o headRefOid do PR #${pr} (falha fechada)`] };
+  if (!SHA_VALIDO.test(head)) return { ok: false, governanca: [], erros: [`o gh não devolveu o headRefOid do PR #${pr} (falha fechada)`] };
   if (typeof consulta.total === 'number' && consulta.total > arquivos.length)
     return { ok: false, governanca: [], erros: [`o gh devolveu ${arquivos.length} de ${consulta.total} arquivos do PR #${pr}: sem a lista completa não dá para descartar caminho de governança (falha fechada). Peça o merge ao Alexandre`] };
   if (!shaCompativel(sha, head))
     erros.push(`o head do PR #${pr} é ${head} e o --match-head-commit é ${sha}: o PR mudou depois da conferência. Confira de novo (CI do PR e do main) antes do merge`);
   const governanca = mudancasDeGovernanca(arquivos.map((caminho) => ({ status: 'M', caminho }))).map((m) => m.caminho);
+  // T-0016 (R-20261120-111308-alexandre): todo merge, de governança ou não, precisa da autorização do po (ou do
+  // Alexandre) em recado, com o número do PR e o SHA do head atual.
   let autorizacao;
-  if (governanca.length) {
-    const doPr = autorizacoes.filter((a) => a.pr === pr);
-    const valida = doPr.find((a) => shaCompativel(a.sha, head) && shaCompativel(sha, head));
-    if (valida) autorizacao = valida.id;
-    else {
-      const lista = governanca.slice(0, 10).map((c) => `   · ${c}`).join('\n') + (governanca.length > 10 ? `\n   · ... e mais ${governanca.length - 10}` : '');
-      const motivo = doPr.length
-        ? `há autorização do Alexandre para o PR #${pr}, mas no commit ${doPr.map((a) => a.sha).join(', ')}, que não é o head atual (${head}): o PR mudou depois da aprovação. NÃO faça o merge; avise o Alexandre`
-        : `não há recado do Alexandre (de: alexandre, em ${PASTA_AUTORIZACOES}) com "autorizo o merge do PR #${pr} no commit ${head}"`;
-      erros.push(
-        `o PR #${pr} altera caminho(s) de governança (${CAMINHOS_DE_GOVERNANCA.join(', ')}):\n${lista}\n` +
-        `   e ${motivo}. Mande ao Alexandre o resumo (CI do PR e do main, head SHA, o que cada arquivo muda) e espere a autorização dele por recado; aprovação genérica não vale`,
-      );
-    }
+  const doPr = (autorizacoes || []).filter((a) => a.pr === pr);
+  const valida = doPr.find((a) => shaCompativel(a.sha, head) && shaCompativel(sha, head));
+  if (valida) autorizacao = valida.id;
+  else {
+    const lista = governanca.length
+      ? `\n   O PR altera caminho(s) de governança (${CAMINHOS_DE_GOVERNANCA.join(', ')}):\n` +
+        governanca.slice(0, 10).map((c) => `   · ${c}`).join('\n') + (governanca.length > 10 ? `\n   · ... e mais ${governanca.length - 10}` : '')
+      : '';
+    const motivo = doPr.length
+      ? `há autorização para o PR #${pr}, mas no commit ${doPr.map((a) => a.sha).join(', ')}, que não é o head atual (${head}): o PR mudou depois da aprovação. NÃO faça o merge; avise o po`
+      : `não há autorização para o PR #${pr} no commit ${head}`;
+    erros.push(`${motivo}${lista}`);
   }
-  return { ok: !erros.length, erros, governanca, ...(autorizacao ? { autorizacao } : {}) };
+  return { ok: !erros.length, erros, governanca, ...(autorizacao ? { autorizacao, autorizadoPor: valida.de } : {}) };
 }
 
 // ───────────────────────────── acesso real (gh e recados) ─────────────────────────────
@@ -524,8 +583,39 @@ export function localizarGh({ env = process.env, plataforma = process.platform, 
 }
 export const ONDE_PROCURA_GH = 'PATH; no Windows também %ProgramFiles%\\GitHub CLI\\gh.exe e %LOCALAPPDATA%\\Programs\\GitHub CLI\\gh.exe';
 
+/** Resumo do CI (avaliarRollup e avaliarChecks): vermelho, ainda rodando ou verde. Função pura. */
+export function resumoDoCi(falhos, pendentes, total) {
+  const lista = (l) => `${l.slice(0, 5).join('; ')}${l.length > 5 ? '; ...' : ''}`;
+  if (falhos.length) return { verde: false, detalhe: `vermelho (${lista(falhos)})` };
+  if (pendentes.length) return { verde: false, detalhe: `ainda rodando (${lista(pendentes)})` };
+  return { verde: true, detalhe: `${total} check(s) verdes` };
+}
+
 /**
- * `gh pr view N -R aloirr/bapajudacatalogo --json files,headRefOid,changedFiles` (timeout de 20 s).
+ * Situação do CI pelo statusCheckRollup do `gh pr view` (T-0016, B3; mesma regra de avaliarChecks: tudo concluído com
+ * só success, T-0016c). CheckRun: status/conclusion; StatusContext: state. Lista vazia = o CI não rodou. Função pura.
+ */
+export function avaliarRollup(rollup) {
+  if (!Array.isArray(rollup)) return { verde: false, detalhe: 'resposta sem statusCheckRollup' };
+  if (!rollup.length) return { verde: false, detalhe: 'nenhum check no head (o CI não rodou)' };
+  const nome = (c) => c?.name || c?.context || '?';
+  const falhos = [];
+  const pendentes = [];
+  for (const c of rollup) {
+    if (c?.__typename === 'StatusContext' || (c?.state !== undefined && c?.status === undefined)) {
+      const st = String(c?.state || '').toLowerCase();
+      if (!CONCLUSOES_VERDES.includes(st)) (st === 'pending' || st === 'expected' ? pendentes : falhos).push(`${nome(c)}: ${st || '?'}`);
+      continue;
+    }
+    if (String(c?.status || '').toLowerCase() !== 'completed') { pendentes.push(nome(c)); continue; }
+    const conc = String(c?.conclusion || '').toLowerCase();
+    if (!CONCLUSOES_VERDES.includes(conc)) falhos.push(`${nome(c)}: ${conc || '?'}`);
+  }
+  return resumoDoCi(falhos, pendentes, rollup.length);
+}
+
+/**
+ * `gh pr view N -R aloirr/bapajudacatalogo --json files,headRefOid,changedFiles,state,statusCheckRollup` (timeout de 20 s).
  * BAP_GH_SIMULADO=<arquivo.mjs>: roda esse script no lugar do gh (só nos testes; a variável é do
  * processo do Claude Code, que o agente não altera).
  */
@@ -533,7 +623,7 @@ export function consultarPrGh(pr, { env = process.env, timeout = 20000, platafor
   const simulado = String(env.BAP_GH_SIMULADO || '').trim();
   const gh = simulado ? null : localizarGh({ env, plataforma, ...(existe ? { existe } : {}) });
   if (!simulado && !gh) return { ok: false, erro: `gh não encontrado (${ONDE_PROCURA_GH})` };
-  const args = ['pr', 'view', String(pr), '-R', REPO_OFICIAL, '--json', 'files,headRefOid,changedFiles'];
+  const args = ['pr', 'view', String(pr), '-R', REPO_OFICIAL, '--json', 'files,headRefOid,changedFiles,state,statusCheckRollup'];
   let saida;
   try {
     saida = simulado
@@ -550,24 +640,185 @@ export function consultarPrGh(pr, { env = process.env, timeout = 20000, platafor
       ok: true, headRefOid: String(j.headRefOid || ''),
       arquivos: j.files.map((f) => barras(f?.path || '')).filter(Boolean),
       total: typeof j.changedFiles === 'number' ? j.changedFiles : undefined,
+      estado: String(j.state || '').toLowerCase(), mesclado: String(j.state || '').toUpperCase() === 'MERGED',
+      ciPr: avaliarRollup(j.statusCheckRollup),
     };
   } catch { return { ok: false, erro: 'resposta do gh não é JSON' }; }
 }
 
+/** git no clone de recados (sem prompt de senha; prazo por chamada: o que resta do prazo total). */
+const gitDoClone = (clone) => (args, { timeout = 20000 } = {}) => execFileSync('git', ['-C', clone, ...args], {
+  encoding: 'utf8', timeout, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true, maxBuffer: 16 * 1024 * 1024,
+  env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+});
+export const REF_PUBLICADA = 'refs/remotes/origin/main';
+/** URL do origin do clone de recados (T-0016, B1): só o GitHub do aloirr/bapajudacatalogo-recados (https ou ssh). */
+export const RE_ORIGIN_RECADOS = /^(https:\/\/github\.com\/|ssh:\/\/git@github\.com\/|git@github\.com:)aloirr\/bapajudacatalogo-recados(\.git)?\/?$/i;
+
 /**
- * Recados da caixa do gerente (nome + texto); pasta ilegível = nenhum. Com os recados no GitHub (T-0143, ADR 0039),
- * a lista vem direto do main do GitHub, nunca do cache local (que um agente poderia adulterar), e só os recados do
- * Alexandre (R-...-alexandre.md) são baixados. Sem GitHub: nenhum (sem autorização, o merge não passa).
+ * Motivo para recusar o origin do clone (T-0016, B1) ou null. O git aplica url.<x>.insteadOf e pushInsteadOf na hora:
+ * vale a URL efetiva (git ls-remote --get-url e git remote get-url --push), que tem de ser o GitHub do repositório de
+ * recados. Assim origin trocado (git remote set-url) e insteadOf para outro lugar são recusados. Função pura.
  */
-export function lerRecadosDoGerente(raiz, { env = process.env, conexao = () => conexaoDeRecados({ env }) } = {}) {
+export function motivoOriginDoClone({ urls = [], urlFetch = '', urlPush = '', simulado = '' }) {
+  const lista = urls.map((u) => String(u).trim()).filter(Boolean);
+  if (lista.length !== 1) return `o clone de recados tem ${lista.length} URL(s) no remote.origin.url (precisa de uma só)`;
+  // BAP_RECADOS_ORIGIN_SIMULADO (só nos testes, como o BAP_GH_SIMULADO; variável do processo do Claude Code, que o
+  // agente não altera): a URL exata do repositório falso no lugar do GitHub.
+  const aceita = (u) => (simulado ? u === simulado : RE_ORIGIN_RECADOS.test(u));
+  for (const [nome, u] of [['remote.origin.url', lista[0]], ['URL efetiva do fetch', urlFetch], ['URL efetiva do push', urlPush]]) {
+    if (!aceita(String(u || '').trim())) return `${nome} do clone de recados é "${String(u || '').trim()}", não github.com/aloirr/bapajudacatalogo-recados (origin trocado ou insteadOf)`;
+  }
+  return null;
+}
+
+/** URLs do origin do clone (configurada e efetivas) para o motivoOriginDoClone; ilegível = vazio (recusado). */
+function urlsDoOrigin(g, env) {
+  const ler = (args) => { try { return g(args); } catch { return ''; } };
+  return {
+    urls: ler(['config', '--get-all', 'remote.origin.url']).split(/\r?\n/),
+    urlFetch: ler(['ls-remote', '--get-url', 'origin']),
+    urlPush: ler(['remote', 'get-url', '--push', 'origin']),
+    simulado: String(env.BAP_RECADOS_ORIGIN_SIMULADO || '').trim(),
+  };
+}
+
+/**
+ * git do po e do gerente-projetos para publicar anexos (T-0016c): só pull, add, commit e push, e só com recados/anexos/**.
+ *  - add: só caminhos (sem -A, -u, ., glob nem $VAR) dentro de recados/anexos/;
+ *  - commit: só -m/-q (sem -a, --author, --amend nem caminho), e tudo o que está staged em recados/anexos/;
+ *  - pull: só --rebase/-q (e origin main); push: só `origin HEAD:main` (ou `origin main`), sem --force, e os commits a
+ *    publicar (origin/main..HEAD) só com recados/anexos/** e com o autor <agente>@bapajuda.invalid;
+ *  - pull e push: o origin do clone é o GitHub do aloirr/bapajudacatalogo-recados (motivoOriginDoClone, B1-b).
+ * @returns {string|null} motivo do bloqueio
+ */
+export function conferirGitDeAnexo({ agente, sub, args = [], cwd, clone, git = gitDoClone(clone), env = process.env }) {
+  const g = (a) => git(a, { timeout: 10000 });
+  const base = barras(clone).replace(/\/+$/, '');
+  const c = barras(cwd).replace(/\/+$/, '');
+  if (c !== base && !c.toLowerCase().startsWith(`${base.toLowerCase()}/`)) return 'pasta fora do clone';
+  const cwdRel = c.slice(base.length).replace(/^\/+/, '');
+  if (cwdRel.split('/')[0].toLowerCase() === '.git') return 'git de anexo só na pasta do clone (git -C <clone>), não no .git';
+  const fora = (lista) => lista.filter((r) => !ehCaminhoDeAnexo(r));
+  if (args.some((a) => a.incerto)) return 'sem $VAR, $(...), glob ou ~ no git de anexo: escreva tudo por extenso';
+  const v = args.map((a) => a.valor);
+  const origem = () => motivoOriginDoClone(urlsDoOrigin(g, env));
+  try {
+    if (sub === 'add') {
+      const caminhos = v.filter((x) => x !== '--');
+      if (!caminhos.length || caminhos.some((x) => x.startsWith('-') || /[*?[]/.test(x))) return 'git add de anexo só com os caminhos, sem opções nem glob';
+      const ruins = fora(caminhos.map((x) => posix.normalize(posix.join(cwdRel, x)).replace(/\/+$/, '')));
+      return ruins.length ? `git add só de recados/anexos/** (veio ${ruins.slice(0, 3).join(', ')}): ${MOTIVO_CLONE_DE_RECADOS}` : null;
+    }
+    if (sub === 'commit') {
+      for (let i = 0; i < v.length; i++) {
+        if (['-m', '--message', '-qm'].includes(v[i])) { i++; continue; }
+        if (/^--message=/.test(v[i]) || v[i] === '-q' || v[i] === '--quiet') continue;
+        return `git commit de anexo só com -m e -q (veio ${v[i]}): nada de -a, --author, --amend nem caminho`;
+      }
+      const staged = g(['diff', '--cached', '--name-only', '--no-renames']).split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+      const ruins = fora(staged);
+      return ruins.length ? `há arquivo staged fora de recados/anexos/ (${ruins.slice(0, 3).join(', ')}): o commit de anexo leva só anexos` : null;
+    }
+    if (sub === 'pull') {
+      const ok = v.every((x) => /^(--rebase|-q|--quiet|--ff-only)$/.test(x)) || (v.filter((x) => !x.startsWith('-')).join(' ') === 'origin main' && v.filter((x) => x.startsWith('-')).every((x) => /^(--rebase|-q|--quiet|--ff-only)$/.test(x)));
+      if (!ok) return 'git pull de anexo só com --rebase/-q (e origin main)';
+      return origem();
+    }
+    if (sub === 'push') {
+      const pos = v.filter((x) => !/^(-q|--quiet)$/.test(x));
+      if (!['origin HEAD:main', 'origin main', 'origin HEAD:refs/heads/main'].includes(pos.join(' '))) return 'git push de anexo só como git push origin HEAD:main (sem --force nem outro destino)';
+      const m = origem();
+      if (m) return m;
+      const arquivos = g(['diff', '--name-only', '--no-renames', `${REF_PUBLICADA}..HEAD`]).split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+      const ruins = fora(arquivos);
+      if (ruins.length) return `os commits a publicar mexem fora de recados/anexos/ (${ruins.slice(0, 3).join(', ')}): ${MOTIVO_CLONE_DE_RECADOS}`;
+      const autores = [...new Set(g(['log', '--format=%ae', `${REF_PUBLICADA}..HEAD`]).split(/\r?\n/).map((x) => x.trim().toLowerCase()).filter(Boolean))];
+      const alheios = autores.filter((a) => a !== `${agente}@${DOMINIO_AUTOR}`);
+      return alheios.length ? `os commits a publicar têm autor de outro (${alheios.join(', ')}): o anexo sai com o autor ${agente}@${DOMINIO_AUTOR}` : null;
+    }
+  } catch (e) {
+    return `não deu para conferir o clone de recados (${String(e?.message || e).split(/\r?\n/)[0].slice(0, 120)}): sem a conferência, bloqueado`;
+  }
+  return MOTIVO_CLONE_DE_RECADOS;
+}
+
+/**
+ * Autor (e-mail) do commit que trouxe cada arquivo da pasta ao REF (o mais recente com status A). Saída de
+ * `git log --diff-filter=A --format=%x01%ae --name-only REF -- pasta`. Função pura.
+ * @returns {Map<string, string>} nome do arquivo → e-mail do autor
+ */
+export function autoresDosRecados(saida) {
+  const res = new Map();
+  for (const bloco of String(saida || '').split('\x01').slice(1)) {
+    const [email, ...arquivos] = bloco.split(/\r?\n/).map((l) => l.trim());
+    for (const a of arquivos.filter(Boolean)) {
+      const nome = a.split('/').pop();
+      if (!res.has(nome)) res.set(nome, String(email || '').toLowerCase());
+    }
+  }
+  return res;
+}
+
+/**
+ * Recados do po e do Alexandre PUBLICADOS no main do repositório de recados, pelo clone anexado (T-0016):
+ *  1. o origin do clone é o GitHub do aloirr/bapajudacatalogo-recados (motivoOriginDoClone);
+ *  2. `git fetch` (força origin/main = o main do GitHub, desfazendo ref adulterada) e leitura de origin/main, nunca da
+ *     árvore de trabalho nem do main local (que um agente poderia alterar sem publicar);
+ *  3. só vale o recado cujo commit de chegada ao main tem o autor <remetente>@bapajuda.invalid (o coord.mjs grava com
+ *     o nome do agente). O autor do git é texto livre: o que impede outro agente de forjá-lo são os guardiões (Write e
+ *     Bash no clone, "po@bapajuda.invalid" e "de: po" no comando e no conteúdo).
+ * Origin errado, fetch que falha ou prazo estourado = exceção (quem chama devolve nenhum recado: falha fechada).
+ */
+export function recadosPublicadosNoClone(clone, { git = gitDoClone(clone), prazo = 30000, agora = () => Date.now(), env = process.env } = {}) {
+  const fim = agora() + prazo;
+  const g = (args, max = 20000) => {
+    const resta = Math.min(max, fim - agora());
+    if (resta <= 0) throw new Error(`prazo de ${Math.round(prazo / 1000)} s para ler os recados estourado`);
+    return git(args, { timeout: resta });
+  };
+  const motivo = motivoOriginDoClone(urlsDoOrigin((args) => g(args, 5000), env));
+  if (motivo) throw new Error(motivo);
+  g(['fetch', '-q', '--no-tags', 'origin', `+refs/heads/main:${REF_PUBLICADA}`]);
+  const nomes = g(['ls-tree', '--name-only', `${REF_PUBLICADA}:${PASTA_AUTORIZACOES}`])
+    .split(/\r?\n/).map((n) => n.trim())
+    .filter((n) => /^R-[^/]+\.md$/i.test(n) && AUTORIZADORES.includes(remetenteDoRecado(n)));
+  if (!nomes.length) return [];
+  const autores = autoresDosRecados(g(['log', '--diff-filter=A', '--no-renames', '--format=%x01%ae', '--name-only', REF_PUBLICADA, '--', PASTA_AUTORIZACOES]));
+  const res = [];
+  for (const nome of nomes) {
+    if (autores.get(nome) !== `${remetenteDoRecado(nome)}@${DOMINIO_AUTOR}`) continue; // autor de outro: não autoriza
+    try { res.push({ nome, texto: g(['show', `${REF_PUBLICADA}:${PASTA_AUTORIZACOES}/${nome}`], 5000) }); } catch { /* ilegível: não autoriza */ }
+  }
+  return res;
+}
+
+/**
+ * Recados da caixa do gerente (nome + texto) que podem autorizar merge (do po e do Alexandre); ilegível = nenhum.
+ *  1. clone do repositório de recados anexado à sessão (cloneDosRecados): o que está publicado no main (acima);
+ *  2. modo GitHub: direto do main pela API, nunca do cache local;
+ *  3. modo local (testes e plano de volta): .coord/recados/gerente-projetos.
+ *  Nos modos 2 e 3 o autor do commit não é conferido: lá só vale o recado do po; o do Alexandre só autoriza pelo clone,
+ *  com o autor alexandre@bapajuda.invalid (R-20261120-141900-alexandre e R-20261120-150200-alexandre).
+ * Sem fonte: nenhum (sem autorização, o merge não passa).
+ */
+/** Único remetente que vale como autorização sem a conferência do autor do commit (modos GitHub e local). */
+const SEM_CONFERIR_AUTOR = 'po';
+
+export function lerRecadosDoGerente(raiz, {
+  env = process.env, conexao = () => conexaoDeRecados({ env }), clone = cloneDosRecados({ env, raiz }), lerClone = recadosPublicadosNoClone,
+} = {}) {
+  if (clone) {
+    try { return lerClone(clone, { env }); } catch { return []; }
+  }
   if (modoDosRecados({ raiz, env }) === 'github') {
     try {
-      return recadosDaPastaNoGitHub({ ...conexao(), pasta: AGENTE_DO_MERGE, filtro: (nome) => remetenteDoRecado(nome) === 'alexandre' });
+      return recadosDaPastaNoGitHub({ ...conexao(), pasta: AGENTE_DO_MERGE, filtro: (nome) => remetenteDoRecado(nome) === SEM_CONFERIR_AUTOR });
     } catch { return []; }
   }
-  const pasta = join(raiz, ...PASTA_AUTORIZACOES.split('/'));
+  const pasta = join(raiz, '.coord', ...PASTA_AUTORIZACOES.split('/'));
   let nomes = [];
-  try { nomes = readdirSync(pasta).filter((n) => /\.md$/i.test(n)); } catch { return []; }
+  try { nomes = readdirSync(pasta).filter((n) => /\.md$/i.test(n) && remetenteDoRecado(n) === SEM_CONFERIR_AUTOR); } catch { return []; }
   const res = [];
   for (const nome of nomes) {
     try { res.push({ nome, texto: readFileSync(join(pasta, nome), 'utf8') }); } catch { /* ilegível: não autoriza */ }
@@ -599,11 +850,7 @@ export function conferirMerge({ comando, agente, origem = '', subagente = false,
     pr = v.pr ?? undefined;
     // Só consulta o GitHub com o comando e a identidade em ordem (sem gastar a chamada à toa).
     if (!erros.length) {
-      let consulta;
-      try { consulta = consultarPr ? consultarPr(v.pr) : { ok: false, erro: 'sem consulta ao gh' }; } catch (e) { consulta = { ok: false, erro: String(e?.message || e) }; }
-      let recados = [];
-      try { recados = lerRecados() || []; } catch { recados = []; }
-      const d = decidirMerge({ pr: v.pr, sha: v.sha, consulta, autorizacoes: autorizacoesDoAlexandre(recados) });
+      const d = conferirPrEAutorizacao({ pr: v.pr, sha: v.sha, consultarPr, lerRecados });
       erros.push(...d.erros);
       governanca = d.governanca;
       autorizacao = d.autorizacao;
@@ -613,12 +860,39 @@ export function conferirMerge({ comando, agente, origem = '', subagente = false,
   return { ok: false, merge: true, pr, governanca, mensagem: mensagemMerge(erros) };
 }
 
+/**
+ * Consulta o PR, lê os recados e decide (terminal e MCP; RD-0139). Consulta ou leitura que falha = sem autorização.
+ * nomeDoSha: como o parâmetro do SHA aparece nas mensagens (--match-head-commit no terminal, expectedHeadSha no MCP).
+ * @returns {{erros: string[], governanca: string[], autorizacao?: string, autorizadoPor?: string}}
+ */
+export function conferirPrEAutorizacao({ pr, sha, consultarPr, lerRecados = () => [], nomeDoSha = '--match-head-commit' }) {
+  let consulta;
+  try { consulta = consultarPr ? consultarPr(pr) : { ok: false, erro: 'sem consulta ao GitHub' }; } catch (e) { consulta = { ok: false, erro: String(e?.message || e) }; }
+  let recados = [];
+  try { recados = lerRecados() || []; } catch { recados = []; }
+  const d = decidirMerge({ pr, sha, consulta, autorizacoes: autorizacoesDeMerge(recados) });
+  const erros = [...errosDoPrNoGitHub(pr, consulta), ...d.erros].map((e) => e.replace(/--match-head-commit/g, nomeDoSha));
+  return { erros, governanca: d.governanca, autorizacao: d.autorizacao, autorizadoPor: d.autorizadoPor };
+}
+
+/**
+ * PR aberto e CI do PR verde (T-0016, B3: vale no terminal, pelo gh pr view, e no MCP, pela API REST). Consulta que
+ * falhou: o erro vem do decidirMerge. Função pura.
+ */
+export function errosDoPrNoGitHub(pr, consulta) {
+  if (!consulta?.ok) return [];
+  const erros = [];
+  if (consulta.mesclado || consulta.estado !== 'open') erros.push(`o PR #${pr} não está aberto (estado: ${consulta.mesclado ? 'já mesclado' : consulta.estado || 'desconhecido'})`);
+  if (!consulta.ciPr?.verde) erros.push(`o CI do PR #${pr} (head ${String(consulta.headRefOid).slice(0, 12)}) não está verde: ${consulta.ciPr?.detalhe || 'sem resposta'}. Espere o CI ficar verde`);
+  return erros;
+}
+
 export function mensagemMerge(erros) {
   return (
     `${CABECALHO}\n${erros.map((e) => ` - ${e}`).join('\n')}\n` +
     `Comando aceito (só o gerente-projetos, na sessão principal): ${MODELO}\n` +
-    `PR de governança: além disso, recado do Alexandre em ${PASTA_AUTORIZACOES} com "autorizo o merge do PR #N no commit <sha>" (doc 07, R-20261101-151135).\n` +
-    'Não contorne o bloqueio (gh api, alias, script, outro comando): se a regra impede o merge, avise o Alexandre por recado.'
+    `${REGRA_MERGE}\n` +
+    'Não contorne o bloqueio (gh api, alias, script, outro comando): se a regra impede o merge, avise o po por recado.'
   );
 }
 
@@ -828,6 +1102,7 @@ export function classificarComando(palavras) {
 
 const RE_RECADOS = /recados/i;
 const RE_ALEXANDRE = /alexandre/i;
+const RE_PO = /(^|[^a-z0-9_])po([^a-z0-9_@]|$)/i;
 
 /**
  * Escritas do comando inteiro (comandos simples, $(...), bash -c e eval literais, cd acompanhado).
@@ -908,11 +1183,15 @@ export function motivosRecadoFalso({ comando, agente, cwd = '' }) {
     if (!nome || nome.incerto || !['node', 'nodejs'].includes(nomeBase(nome.valor))) return;
     const i = args.findIndex((a) => !a.valor.startsWith('-'));
     if (i < 0 || args[i].incerto || nomeBase(args[i].valor) !== 'coord.mjs' || args[i + 1]?.valor !== 'enviar') return;
+    // Ponte: ver PONTE_DO_ALEXANDRE (coord-lib.mjs).
+    const comPonte = args.slice(i + 2).some((a) => a.valor === '--ponte');
+    if (comPonte && agente !== PONTE_DO_ALEXANDRE) motivos.push(`--ponte é só do po (ponte do Alexandre, R-20261120-150200-alexandre); ${agente} envia com --de ${agente}`);
     for (let k = i + 2; k < args.length; k++) {
       if (args[k].valor !== '--de' && !args[k].valor.startsWith('--de=')) continue;
       const de = args[k].valor.startsWith('--de=') ? { valor: args[k].valor.slice(5), incerto: args[k].incerto } : (args[k + 1] || { valor: '', incerto: true });
       const v = String(de.valor).trim().toLowerCase();
       if (de.incerto) motivos.push(`o remetente do recado tem de estar por extenso: --de ${agente} (veio --de ${de.valor})`);
+      else if (v === 'alexandre' && comPonte && agente === PONTE_DO_ALEXANDRE) continue; // a ponte (via: po)
       else if (v === 'alexandre') motivos.push(`recado como alexandre (--de alexandre) só sai da sessão do Alexandre (BAP_AGENTE=alexandre ou o terminal dele); ${agente} envia com --de ${agente}`);
       else if (v !== agente) motivos.push(`o recado sai com o seu nome: --de ${agente} (veio --de ${de.valor})`);
     }
@@ -921,25 +1200,65 @@ export function motivosRecadoFalso({ comando, agente, cwd = '' }) {
   const t = textoNormalizado(String(comando).replace(/\\[ntr]/g, ' '));
   const { escritas, opacos, coord } = escritasDoComando(comando, String(cwd || '').replace(/\\/g, '/'));
   const grava = escritas.length > 0 || opacos.length > 0 || coord;
+  // T-0016 (B1), antes da liberação da leitura (git commit e git -c contam como leitura no v6):
+  //  - GIT_DIR/GIT_WORK_TREE/GIT_CONFIG_*/GIT_*_EMAIL levam o git a outro repositório (o clone de recados) ou trocam o autor;
+  //  - o autor <po|alexandre>@bapajuda.invalid num comando que grava ou faz commit (--author, user.email) é forja.
+  if (agente !== 'alexandre' && /(^|[\s;&|(])(GIT_DIR|GIT_WORK_TREE|GIT_CONFIG[A-Z_]*|GIT_AUTHOR_EMAIL|GIT_COMMITTER_EMAIL)=/.test(String(comando)) && /\bgit\b/.test(t)) {
+    motivos.push(`GIT_DIR, GIT_WORK_TREE, GIT_CONFIG_* e GIT_AUTHOR/COMMITTER_EMAIL no comando não são aceitos (podem levar o git ao clone de recados ou trocar o autor): use git -C <pasta por extenso>; recado só com node scripts/coord.mjs enviar --de ${agente}`);
+    return motivos;
+  }
+  const autorAlheio = AUTORIZADORES.find((q) => q !== agente && reAutor(q).test(t));
+  if (autorAlheio && (grava || /\bcommit\b|--author|user\.email|\bconfig\b/.test(t))) {
+    motivos.push(`o autor ${autorAlheio}@${DOMINIO_AUTOR} no comando: ${agente} não grava commit nem recado em nome de ${autorAlheio} (a autorização de merge vale pelo autor); use node scripts/coord.mjs enviar --de ${agente}`);
+    return motivos;
+  }
   if (!grava) return motivos; // só leitura: passa (v6)
   const citaAlexandre = RE_ALEXANDRE.test(t);
   const citaRecados = RE_RECADOS.test(t);
   const pastaSuspeita = (c) => c === null || RE_RECADOS.test(c);
-  if (/(^|[^a-z0-9_])de:\s*alexandre\b/.test(t)) {
-    motivos.push(`"de: alexandre" no comando: ${agente} não cria recado em nome do Alexandre (só ele, na sessão dele)`);
+  // Cabeçalho "de: <remetente que autoriza merge>" no comando: só o próprio remetente escreve (RD-0141).
+  const deAlheio = AUTORIZADORES.find((q) => q !== agente && new RegExp(`(^|[^a-z0-9_])de:\\s*${q}\\b`).test(t));
+  if (deAlheio) {
+    motivos.push(`"de: ${deAlheio}" no comando: ${agente} não cria recado em nome de ${deAlheio} (a autorização de merge vale pelo remetente); use node scripts/coord.mjs enviar --de ${agente}`);
     return motivos;
   }
-  if (!citaAlexandre) return motivos;
-  const opaco = opacos.find((o) => RE_ALEXANDRE.test(textoNormalizado(o.texto)) || citaRecados || pastaSuspeita(o.cwd));
-  if (opaco)
-    motivos.push(`script (bash -c, node -e, eval...) ou comando opaco (${opaco.motivo}) que pode gravar arquivo e cita alexandre${citaRecados ? ' e recados' : ''}: ${agente} não cria recado em nome do Alexandre; use node scripts/coord.mjs enviar --de ${agente} (para só ler, use ls/cat/grep/git show sem gravar)`);
-  // alvo: incerto, na pasta de recados, com nome de recado do Alexandre (*alexandre*.md: link simbólico
-  // para a pasta de recados) ou gravado numa pasta incerta/de recados (cd)
-  const nomeDeRecado = (v) => /alexandre[^/\\]*\.md$/i.test(barras(v).split('/').pop());
-  const escrita = escritas.find(({ alvo, cwd: c }) => alvo.incerto || RE_RECADOS.test(alvo.valor) || nomeDeRecado(alvo.valor) || pastaSuspeita(c));
-  if (escrita)
-    motivos.push(`comando que grava em "${escrita.alvo.valor}"${escrita.cwd === null ? ' (pasta incerta)' : RE_RECADOS.test(escrita.cwd || '') ? ` (na pasta ${escrita.cwd})` : ''} e cita alexandre: ${agente} não cria, altera, move nem apaga recado em nome do Alexandre; use node scripts/coord.mjs enviar --de ${agente}`);
+  // Remetentes que autorizam merge (alexandre e, desde a T-0016, po): o comando que grava e cita o remetente não cria,
+  // altera, move nem apaga recado dele.
+  const remetentes = [
+    { quem: 'alexandre', nome: 'o Alexandre', cita: citaAlexandre, re: RE_ALEXANDRE, arquivo: /alexandre[^/\\]*\.md$/i },
+    { quem: 'po', nome: 'o po', cita: RE_PO.test(t), re: RE_PO, arquivo: /-po(\.[^/\\]*)?\.md$/i },
+  ].filter((r) => r.quem !== agente && r.cita);
+  for (const r of remetentes) {
+    const opaco = opacos.find((o) => r.re.test(textoNormalizado(o.texto)) || citaRecados || pastaSuspeita(o.cwd));
+    if (opaco)
+      motivos.push(`script (bash -c, node -e, eval...) ou comando opaco (${opaco.motivo}) que pode gravar arquivo e cita ${r.quem}${citaRecados ? ' e recados' : ''}: ${agente} não cria recado em nome d${r.nome}; use node scripts/coord.mjs enviar --de ${agente} (para só ler, use ls/cat/grep/git show sem gravar)`);
+    // alvo: incerto, na pasta de recados, com nome de recado do remetente (*alexandre*.md, *-po.md: link simbólico
+    // para a pasta de recados) ou gravado numa pasta incerta/de recados (cd)
+    const escrita = escritas.find(({ alvo, cwd: c }) => alvo.incerto || RE_RECADOS.test(alvo.valor) || r.arquivo.test(barras(alvo.valor).split('/').pop()) || pastaSuspeita(c));
+    if (escrita)
+      motivos.push(`comando que grava em "${escrita.alvo.valor}"${escrita.cwd === null ? ' (pasta incerta)' : RE_RECADOS.test(escrita.cwd || '') ? ` (na pasta ${escrita.cwd})` : ''} e cita ${r.quem}: ${agente} não cria, altera, move nem apaga recado em nome d${r.nome}; use node scripts/coord.mjs enviar --de ${agente}`);
+  }
   return motivos;
+}
+
+/**
+ * Conteúdo de Write/Edit/MultiEdit/NotebookEdit que forja recado ou commit do po ou do Alexandre (T-0016, B1): cabeçalho
+ * "de: po"/"de: alexandre" ou o autor po@bapajuda.invalid/alexandre@bapajuda.invalid, escrito por outro agente, em
+ * qualquer pasta (um script em /tmp ou na pasta do agente rodaria o git no clone de recados). Função pura.
+ * @returns {string|null} motivo do bloqueio
+ */
+export function motivoConteudoForjado({ agente, textos = [] }) {
+  if (!agente) return null;
+  for (const texto of textos) {
+    const s = String(texto ?? '');
+    for (const quem of AUTORIZADORES) {
+      if (quem === agente) continue;
+      const cabecalho = new RegExp(`^[ \\t]*de:[ \\t]*["']?${quem}["']?[ \\t]*$`, 'im');
+      if (cabecalho.test(s)) return `o texto tem "de: ${quem}": ${agente} não escreve recado em nome de ${quem}; use node scripts/coord.mjs enviar --de ${agente}`;
+      if (reAutor(quem).test(s)) return `o texto tem o autor ${quem}@${DOMINIO_AUTOR}: ${agente} não grava commit em nome de ${quem} (o autor vale como assinatura do recado de autorização)`;
+    }
+  }
+  return null;
 }
 
 // ───────────────────────────── v6 (T-0050): git add/commit/stash de recados do Alexandre ─────────────────────────────
@@ -1042,31 +1361,30 @@ export function mensagemRecadoFalso(agente, motivos) {
   return (
     `[guardião BAP] BLOQUEADO (recado): ${agente} não envia recado em nome de outro:\n` +
     `${motivos.map((m) => ` - ${m}`).join('\n')}\n` +
-    'Recado do Alexandre (sobretudo "autorizo o merge do PR #N no commit <sha>") só ele escreve. Não contorne o bloqueio.'
+    'Recado do Alexandre ou do po (sobretudo "autorizo o merge do PR #N no commit <sha>") só o próprio remetente escreve. Não contorne o bloqueio.'
   );
 }
 
-// ───────────────────────────── guardião v6 (T-0050): merge pela ferramenta MCP do GitHub ─────────────────────────────
+// ───────────────────────────── merge pela ferramenta MCP do GitHub (T-0016) ─────────────────────────────
 //
-// Hook PreToolUse .claude/hooks/guarda-merge-mcp.mjs (matcher das ferramentas MCP com "merge" no nome).
-// Mesmas regras do merge pelo gh do v5, para quem faz o merge pelo MCP (mcp__github__merge_pull_request e variações):
-//  a) só sessão principal (subagente nunca) de um agente do time com identidade conferida (BAP_AGENTE,
-//     sessão local, branch <agente>/T-nnnn ou trailer "Agente:" do branch nuvem/*); alexandre e sessão sem
-//     agente não (o Alexandre faz o merge pelo GitHub);
-//  b) aloirr/bapajudacatalogo, merge_method "squash", SHA esperado de 40 caracteres (campo sha, se a ferramenta
-//     tiver, ou a linha "Head-SHA: <sha>" na commit_message) e commit_message terminando com "Agente: <nome>";
-//     qualquer outro parâmetro = bloqueado; auto-merge e merge de branch sem PR = bloqueados;
-//  c) o hook consulta o GitHub pela API REST (gh api; o GraphQL não responde nas sessões da nuvem):
-//     PR aberto, head = SHA esperado, CI do head do PR verde e CI do main verde (todos os check-runs
-//     concluídos com success/neutral/skipped; "main vermelho = nuvem não faz merge");
-//  d) PR com caminho de governança (CAMINHOS_DE_GOVERNANCA): nunca na nuvem (CLAUDE_CODE_REMOTE=true); localmente
-//     só o gerente-projetos com identidade confiável (como no v5), com o recado do Alexandre "autorizo o merge do
-//     PR #N no commit <sha>" (mesmo N e SHA) e "Agente: alexandre" na commit_message (CI da T-0049).
+// Hook PreToolUse .claude/hooks/guarda-merge-mcp.mjs (matcher das ferramentas MCP com "merge" no nome; casos em
+// guarda-merge-mcp.test.mjs). Regra R-20261120-111308-alexandre: o po autoriza todos os merges, inclusive os de
+// governança; o gerente-projetos executa pela integração do GitHub (mcp__github__merge_pull_request).
+//  a) só o gerente-projetos, na sessão principal (subagente nunca), com identidade confiável (BAP_AGENTE ou sessão
+//     local com agent_type); vale também na nuvem;
+//  b) aloirr/bapajudacatalogo, merge_method "squash" e expectedHeadSha de 40 caracteres (o próprio GitHub recusa o
+//     merge se o head mudou); commit_message obrigatório, com a tarefa (T-nnnn) e "Agente: <dono>" no último bloco
+//     (R-20261120-131230-alexandre); commit_title opcional; qualquer outro parâmetro = bloqueado;
+//     auto-merge e merge de branch sem PR = bloqueados;
+//  c) o hook consulta o GitHub pela API REST (gh api, só leitura): PR aberto, head = expectedHeadSha e CI do head do
+//     PR verde (todos os check-runs concluídos com success; neutral e skipped barram, T-0016c). O CI do main não é conferido: o
+//     ci.yml só roda em pull_request, e o main não tem check-run;
+//  d) recado do po (ou do Alexandre) "autorizo o merge do PR #N no commit <sha>" publicado no main do repositório de
+//     recados (lerRecadosDoGerente), com o mesmo N e o SHA do head.
 //  gh ausente, sem rede, sem login, resposta inválida, lista de arquivos ou de checks incompleta, prazo estourado
 //  → BLOQUEADO (falha fechada).
 
 const CABECALHO_MCP = '[guardião BAP] BLOQUEADO (merge pelo MCP do GitHub):';
-export const SHA_COMPLETO = /^[0-9a-f]{40}$/i;
 /** Parâmetros aceitos na ferramenta de merge (nomes de variações do MCP do GitHub). */
 export const CHAVES_MERGE_MCP = {
   owner: ['owner'],
@@ -1075,12 +1393,12 @@ export const CHAVES_MERGE_MCP = {
   metodo: ['merge_method', 'mergeMethod', 'method'],
   titulo: ['commit_title', 'commitTitle'],
   mensagem: ['commit_message', 'commitMessage'],
-  sha: ['sha', 'expected_head_sha', 'expectedHeadSha', 'head_sha', 'headSha', 'match_head_commit', 'matchHeadCommit'],
+  sha: ['expectedHeadSha', 'expected_head_sha', 'sha', 'head_sha', 'headSha', 'match_head_commit', 'matchHeadCommit'],
 };
 const RE_HEAD_SHA = /^\s*Head-SHA:[ \t]*([0-9a-zA-Z]+)[ \t]*$/gim;
-const RE_AGENTE = /^\s*Agente:[ \t]*(\S+)[ \t]*$/i;
 /** Conclusões de check-run que contam como verde. */
-export const CONCLUSOES_VERDES = ['success', 'neutral', 'skipped'];
+// T-0016c: só success. neutral e skipped barram (merge com neutral é decisão do Alexandre, como no caso do #29).
+export const CONCLUSOES_VERDES = ['success'];
 
 /** mcp__<servidor>__<nome> → {servidor, nome}; null se não for ferramenta MCP. */
 export function partesFerramentaMcp(ferramenta) {
@@ -1106,17 +1424,6 @@ export function tipoFerramentaMerge(ferramenta) {
   return pr ? 'merge-pr' : 'outro-merge';
 }
 
-/** Linhas do último bloco da mensagem (bloco de trailers); [] se a mensagem tem um bloco só. Igual ao CI da T-0049. */
-export function ultimoBlocoDaMensagem(mensagem) {
-  const blocos = [];
-  let atual = [];
-  for (const linha of String(mensagem || '').replace(/\r\n?/g, '\n').split('\n')) {
-    if (linha.trim() === '') { if (atual.length) blocos.push(atual); atual = []; } else atual.push(linha);
-  }
-  if (atual.length) blocos.push(atual);
-  return blocos.length >= 2 ? blocos[blocos.length - 1] : [];
-}
-
 /**
  * Valida os parâmetros da ferramenta de merge (regra b). Função pura.
  * @returns {{erros: string[], pr: number|null, sha: string|null, agenteDoCommit: string|null}}
@@ -1126,7 +1433,7 @@ export function validarEntradaMergeMcp(entrada) {
   const obj = entrada && typeof entrada === 'object' && !Array.isArray(entrada) ? entrada : {};
   const conhecidas = new Set(Object.values(CHAVES_MERGE_MCP).flat());
   const desconhecidas = Object.keys(obj).filter((k) => !conhecidas.has(k));
-  if (desconhecidas.length) erros.push(`parâmetro(s) não aceito(s) no merge: ${desconhecidas.join(', ')} (aceitos: owner, repo, pullNumber, merge_method, commit_title, commit_message, sha)`);
+  if (desconhecidas.length) erros.push(`parâmetro(s) não aceito(s) no merge: ${desconhecidas.join(', ')} (aceitos: owner, repo, pullNumber, merge_method, expectedHeadSha, commit_title, commit_message)`);
   const pegar = (campo) => {
     const presentes = CHAVES_MERGE_MCP[campo].filter((k) => obj[k] !== undefined && obj[k] !== null && obj[k] !== '');
     if (presentes.length > 1 && new Set(presentes.map((k) => String(obj[k]).trim().toLowerCase())).size > 1) erros.push(`${presentes.join(' e ')} com valores diferentes`);
@@ -1148,42 +1455,24 @@ export function validarEntradaMergeMcp(entrada) {
   const metodo = pegar('metodo');
   if (metodo === undefined) erros.push('falta merge_method: "squash" (sem ele o GitHub faz merge commit)');
   else if (String(metodo).trim().toLowerCase() !== 'squash') erros.push(`merge_method "${metodo}" é proibido: use "squash" (o main recebe um commit por PR)`);
-  // SHA esperado: campo próprio e/ou "Head-SHA:" na mensagem; têm de bater
+  // SHA esperado: o parâmetro expectedHeadSha (obrigatório, T-0016); "Head-SHA:" na mensagem, se houver, tem de bater
   const mensagem = pegar('mensagem');
   const titulo = pegar('titulo');
   if (titulo !== undefined && /[\r\n]/.test(String(titulo))) erros.push('commit_title com quebra de linha não é aceito');
-  const shas = new Set();
   const campo = pegar('sha');
-  if (campo !== undefined) shas.add(String(campo).trim().toLowerCase());
-  for (const m of String(mensagem ?? '').matchAll(RE_HEAD_SHA)) shas.add(m[1].toLowerCase());
   let sha = null;
-  if (!shas.size) erros.push('falta o SHA esperado do head: parâmetro sha (se a ferramenta tiver) ou a linha "Head-SHA: <sha de 40 caracteres>" na commit_message');
-  else if (shas.size > 1) erros.push(`SHA esperado repetido com valores diferentes (${[...shas].join(', ')}): informe um só`);
-  else if (!SHA_COMPLETO.test([...shas][0])) erros.push(`SHA esperado "${[...shas][0]}" não tem 40 caracteres hexadecimais`);
-  else sha = [...shas][0];
-  // trailer "Agente:" no último bloco da mensagem (o CI confere o do squash no main)
-  let agenteDoCommit = null;
-  if (mensagem === undefined) erros.push('falta commit_message com o trailer "Agente: <dono da tarefa>" no último bloco (o corpo padrão do GitHub deixa o main vermelho)');
+  if (campo === undefined) erros.push('falta o expectedHeadSha (SHA de 40 caracteres do head do PR que o po autorizou)');
   else {
-    const nomes = ultimoBlocoDaMensagem(mensagem).map((l) => l.match(RE_AGENTE)).filter(Boolean).map((m) => m[1].toLowerCase());
-    if (nomes.length !== 1) erros.push(`a commit_message precisa de exatamente um "Agente: <nome>" no último bloco (veio ${nomes.length})`);
-    else if (!PESSOAS.includes(nomes[0])) erros.push(`"Agente: ${nomes[0]}" não é do time`);
-    else agenteDoCommit = nomes[0];
+    const valor = String(campo).trim().toLowerCase();
+    const naMensagem = [...String(mensagem ?? '').matchAll(RE_HEAD_SHA)].map((m) => m[1].toLowerCase());
+    if (!SHA_VALIDO.test(valor)) erros.push(`expectedHeadSha "${campo}" não tem 40 caracteres hexadecimais`);
+    else if (naMensagem.some((x) => x !== valor)) erros.push(`"Head-SHA:" da commit_message (${naMensagem.join(', ')}) diferente do expectedHeadSha (${valor})`);
+    else sha = valor;
   }
-  return { erros, pr, sha, agenteDoCommit };
-}
-
-/** Origens da identificação aceitas para o merge MCP de PR comum (fonte declarada ou confiável, nunca a "restrita"). */
-export const ORIGENS_MERGE_MCP = /^(variável BAP_AGENTE|argumento do hook|sessão local \(agent_type\)|branch |trailer "Agente:" do branch )/;
-
-/** Quem pode fazer o merge pelo MCP (regra a). Retorna o motivo do bloqueio ou null. */
-export function motivoIdentidadeMcp({ agente, origem = '', subagente = false }) {
-  if (subagente) return `subagente (${agente || 'sem agente'}) nunca faz merge: devolva à sessão principal`;
-  if (!agente) return 'sessão sem agente: pelo Claude, só um agente do time faz o merge (o Alexandre faz pelo GitHub)';
-  if (agente === 'alexandre') return 'a sessão do Alexandre pelo Claude não faz merge: o Alexandre faz o merge pelo GitHub, e o PR de governança fica para o gerente com a autorização dele';
-  if (!AGENTES.includes(agente)) return `a sessão "${agente}" não tem agente do time identificado: na nuvem, comece com o commit vazio com o trailer "Agente: <dono>" no branch nuvem/T-nnnn-...`;
-  if (!ORIGENS_MERGE_MCP.test(origem)) return `a identidade ${agente} veio de "${origem}", que não vale para merge: na nuvem, use o branch nuvem/T-nnnn-... com o trailer "Agente: ${agente}" em todos os commits`;
-  return null;
+  // Corpo do squash (R-20261120-131230-alexandre): a tarefa (T-nnnn) e, no último bloco, um único "Agente: <dono>".
+  const doCorpo = errosDoCorpoDoSquash(mensagem, 'commit_message');
+  erros.push(...doCorpo);
+  return { erros, pr, sha, agenteDoCommit: doCorpo.length ? null : agenteDoCorpo(mensagem) };
 }
 
 /** Situação do CI pelos check-runs de um commit (resposta de GET .../commits/<ref>/check-runs). Função pura. */
@@ -1195,9 +1484,7 @@ export function avaliarChecks(resposta) {
   if (!runs.length) return { verde: false, detalhe: 'nenhum check no commit (o CI não rodou)' };
   const pendentes = runs.filter((r) => r?.status !== 'completed').map((r) => r?.name || '?');
   const falhos = runs.filter((r) => r?.status === 'completed' && !CONCLUSOES_VERDES.includes(String(r.conclusion))).map((r) => `${r?.name || '?'}: ${r?.conclusion}`);
-  if (falhos.length) return { verde: false, detalhe: `vermelho (${falhos.slice(0, 5).join('; ')}${falhos.length > 5 ? '; ...' : ''})` };
-  if (pendentes.length) return { verde: false, detalhe: `ainda rodando (${pendentes.slice(0, 5).join('; ')}${pendentes.length > 5 ? '; ...' : ''})` };
-  return { verde: true, detalhe: `${runs.length} check(s) verdes` };
+  return resumoDoCi(falhos, pendentes, runs.length);
 }
 
 /**
@@ -1205,9 +1492,11 @@ export function avaliarChecks(resposta) {
  * BAP_GH_SIMULADO=<arquivo.mjs>: roda esse script no lugar do gh (só nos testes; a variável é do processo
  * do Claude Code, que o agente não altera).
  * @returns {{ok: boolean, erro?: string, headRefOid?: string, arquivos?: string[], total?: number, estado?: string,
- *   mesclado?: boolean, ciPr?: {verde: boolean, detalhe: string}, ciMain?: {verde: boolean, detalhe: string}}}
+ *   mesclado?: boolean, ciPr?: {verde: boolean, detalhe: string}}}
  */
-export function consultarPrRest(pr, { env = process.env, timeout = 15000, prazo = 80000, agora = () => Date.now(), plataforma = process.platform, existe } = {}) {
+// Prazos (T-0016): consulta REST 60 s no total (15 s por chamada) + recados 30 s = 90 s, abaixo do timeout de 120 s do
+// hook no .claude/settings.json; estourou = BLOQUEADO (falha fechada).
+export function consultarPrRest(pr, { env = process.env, timeout = 15000, prazo = 60000, agora = () => Date.now(), plataforma = process.platform, existe } = {}) {
   const simulado = String(env.BAP_GH_SIMULADO || '').trim();
   const gh = simulado ? null : localizarGh({ env, plataforma, ...(existe ? { existe } : {}) });
   if (!simulado && !gh) return { ok: false, erro: `gh não encontrado (${ONDE_PROCURA_GH})` };
@@ -1231,7 +1520,7 @@ export function consultarPrRest(pr, { env = process.env, timeout = 15000, prazo 
     const base = `repos/${REPO_OFICIAL}`;
     const p = api(`${base}/pulls/${pr}`);
     const head = String(p?.head?.sha || '');
-    if (!SHA_COMPLETO.test(head)) return { ok: false, erro: 'resposta do PR sem head.sha' };
+    if (!SHA_VALIDO.test(head)) return { ok: false, erro: 'resposta do PR sem head.sha' };
     const arquivos = [];
     for (let pagina = 1; pagina <= 35; pagina++) {
       const lista = api(`${base}/pulls/${pr}/files?per_page=100&page=${pagina}`);
@@ -1247,7 +1536,6 @@ export function consultarPrRest(pr, { env = process.env, timeout = 15000, prazo 
       total: typeof p.changed_files === 'number' ? p.changed_files : undefined,
       estado: String(p.state || ''), mesclado: Boolean(p.merged),
       ciPr: avaliarChecks(api(`${base}/commits/${head}/check-runs?per_page=100`)),
-      ciMain: avaliarChecks(api(`${base}/commits/main/check-runs?per_page=100`)),
     };
   } catch (e) {
     return { ok: false, erro: String(e?.message || e) };
@@ -1257,58 +1545,44 @@ export function consultarPrRest(pr, { env = process.env, timeout = 15000, prazo 
 /**
  * Confere uma chamada de ferramenta MCP (PreToolUse). Ferramenta que não é merge → {ok: true, merge: false}
  * sem consultar nada.
- * @param {{ferramenta: string, entrada: object, agente: string, origem?: string, subagente?: boolean, nuvem?: boolean,
+ * @param {{ferramenta: string, entrada: object, agente: string, origem?: string, subagente?: boolean,
  *   consultarPr?: (pr: number) => any, lerRecados?: () => {nome: string, texto: string}[]}} p
- * @returns {{ok: boolean, merge: boolean, mensagem?: string, pr?: number, governanca?: string[], autorizacao?: string}}
+ * @returns {{ok: boolean, merge: boolean, mensagem?: string, pr?: number, governanca?: string[], autorizacao?: string, autorizadoPor?: string}}
  */
-export function conferirMergeMcp({ ferramenta, entrada, agente, origem = '', subagente = false, nuvem = false, consultarPr, lerRecados = () => [] }) {
+export function conferirMergeMcp({ ferramenta, entrada, agente, origem = '', subagente = false, consultarPr, lerRecados = () => [] }) {
   const tipo = tipoFerramentaMerge(ferramenta);
   if (!tipo) return { ok: true, merge: false };
   const erros = [];
-  const ident = motivoIdentidadeMcp({ agente, origem, subagente });
+  const ident = motivoIdentidade({ agente, origem, subagente, acao: 'faz o merge pela integração do GitHub' });
   if (ident) erros.push(ident);
-  if (tipo === 'auto-merge') erros.push('merge automático (auto-merge) é proibido: o merge é na hora, com o head e os dois CIs conferidos');
+  if (tipo === 'auto-merge') erros.push('merge automático (auto-merge) é proibido: o merge é na hora, com o head, o CI e a autorização do po conferidos');
   if (tipo === 'outro-merge') erros.push(`${ferramenta} não é merge de PR: merge de branch sem PR (sem CI do PR) é proibido`);
   let pr;
   let governanca = [];
   let autorizacao;
+  let autorizadoPor;
   if (tipo === 'merge-pr') {
     const v = validarEntradaMergeMcp(entrada);
     erros.push(...v.erros);
     pr = v.pr ?? undefined;
     // Só consulta o GitHub com os parâmetros e a identidade em ordem.
     if (!erros.length) {
-      let consulta;
-      try { consulta = consultarPr ? consultarPr(v.pr) : { ok: false, erro: 'sem consulta ao GitHub' }; } catch (e) { consulta = { ok: false, erro: String(e?.message || e) }; }
-      let recados = [];
-      try { recados = lerRecados() || []; } catch { recados = []; }
-      const d = decidirMerge({ pr: v.pr, sha: v.sha, consulta, autorizacoes: autorizacoesDoAlexandre(recados) });
-      governanca = d.governanca;
-      autorizacao = d.autorizacao;
-      if (consulta?.ok) {
-        if (consulta.mesclado || consulta.estado !== 'open') erros.push(`o PR #${v.pr} não está aberto (estado: ${consulta.mesclado ? 'já mesclado' : consulta.estado || 'desconhecido'})`);
-        if (!consulta.ciPr?.verde) erros.push(`o CI do PR #${v.pr} (head ${String(consulta.headRefOid).slice(0, 12)}) não está verde: ${consulta.ciPr?.detalhe || 'sem resposta'}. Espere o CI ficar verde`);
-        if (!consulta.ciMain?.verde) erros.push(`o CI do main não está verde: ${consulta.ciMain?.detalhe || 'sem resposta'}. Main vermelho = nenhum merge (doc 07); o PR espera com "[PRONTO PARA MERGE]"`);
-      }
-      if (governanca.length) {
-        const lista = `${governanca.slice(0, 5).join(', ')}${governanca.length > 5 ? ', ...' : ''}`;
-        if (nuvem) erros.push(`o PR #${v.pr} altera caminho de governança (${lista}): sessão da nuvem não faz esse merge. Termine com "[PRONTO PARA MERGE]" e o recado ao gerente (PR, head SHA, arquivos); o merge é local, com a autorização do Alexandre`);
-        else if (agente !== AGENTE_DO_MERGE || !ORIGENS_CONFIAVEIS.includes(origem)) erros.push(`PR de governança (${lista}): só o gerente-projetos na sessão local (BAP_AGENTE ou agent_type) faz o merge, com a autorização do Alexandre; esta sessão é de ${agente} (${origem})`);
-        if (v.agenteDoCommit !== 'alexandre') erros.push('PR de governança: a commit_message do squash termina com "Agente: alexandre" (trailer de governança, CI da T-0049)');
-      }
-      erros.push(...d.erros.map((e) => e.replace(/--match-head-commit/g, 'SHA esperado')));
+      const d = conferirPrEAutorizacao({ pr: v.pr, sha: v.sha, consultarPr, lerRecados, nomeDoSha: 'expectedHeadSha' });
+      erros.push(...d.erros);
+      ({ governanca, autorizacao, autorizadoPor } = d);
     }
+    if (!erros.length) return { ok: true, merge: true, pr, governanca, autorizacao, autorizadoPor, agenteDoCommit: v.agenteDoCommit };
   }
-  if (!erros.length) return { ok: true, merge: true, pr, governanca, ...(autorizacao ? { autorizacao } : {}) };
   return { ok: false, merge: true, pr, governanca, mensagem: mensagemMergeMcp(erros) };
 }
 
 export function mensagemMergeMcp(erros) {
   return (
     `${CABECALHO_MCP}\n${erros.map((e) => ` - ${e}`).join('\n')}\n` +
-    'Chamada aceita: merge_pull_request com owner "aloirr", repo "bapajudacatalogo", pullNumber N, merge_method "squash" e commit_message ' +
-    'com "Head-SHA: <sha de 40 caracteres>" e "Agente: <dono da tarefa>" no último bloco; CI do PR e do main verdes.\n' +
-    `PR de governança: só local, pelo gerente-projetos, com o recado do Alexandre em ${PASTA_AUTORIZACOES} "autorizo o merge do PR #N no commit <sha>".\n` +
-    'Não contorne o bloqueio (gh api, outra ferramenta, script): se a regra impede o merge, avise o gerente ou o Alexandre por recado.'
+    'Chamada aceita (só o gerente-projetos, na sessão principal): merge_pull_request com owner "aloirr", repo "bapajudacatalogo", ' +
+    'pullNumber N, merge_method "squash", expectedHeadSha <sha de 40 caracteres> e commit_message "<resumo> (T-nnnn)\\n\\nAgente: <dono>"; ' +
+    'PR aberto, head = expectedHeadSha e CI do PR verde.\n' +
+    `${REGRA_MERGE}\n` +
+    'Não contorne o bloqueio (gh api, outra ferramenta, script): se a regra impede o merge, avise o po por recado.'
   );
 }

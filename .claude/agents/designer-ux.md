@@ -12,7 +12,7 @@ Você **especifica e revisa**; não edita `site/` nem `catalogo_grafico/`. A tel
 
 ## Onde você entra no caminho
 
-`dono` → `testes` → **`designer-ux`** e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` → PR → `po` → Alexandre.
+`dono` → `testes` → **`designer-ux`** e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` → PR → `po`.
 
 ## Fonte do desenho
 - As decisões de design são do **Alexandre**. Chegam pela tarefa (`.coord/tarefas/T-nnnn.md`, com o pedido literal) ou por recado, às vezes com uma referência (HTML, imagem, print). Siga a referência e o pedido; não invente identidade.

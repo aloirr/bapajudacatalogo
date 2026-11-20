@@ -42,6 +42,8 @@
 /* o cabeçalho fica por cima (fixo no início, sticky nas outras telas): o foco e as âncoras param abaixo dele
    (WCAG 2.4.11; designer-ux, T-0018) */
 html { scroll-padding-top: var(--alto-topo); }
+/* o próprio cabeçalho não precisa da folga: focar o menu não faz a página pular (designer-ux) */
+.topo a { scroll-margin-top: calc(-1 * var(--alto-topo)); }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } } /* com reduce, a rolagem vai direto */
 body { margin: 0; font-family: Poppins, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--texto); background: var(--fundo); font-size: 15px; line-height: 1.5; }
 img { max-width: 100%; display: block; }
@@ -58,8 +60,8 @@ main:focus, main:focus-visible { outline: none; }
 .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--escuro); }
 .marca img { height: 46px; width: auto; }
 .marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-2); border-left: 1px solid var(--linha); padding-left: 10px; }
-.menu { display: flex; gap: 22px; }
-.menu a { display: flex; align-items: center; min-height: 44px; text-decoration: none; color: var(--texto); font-weight: 500; font-size: 14px; } /* toque com 44 px */
+.menu { display: flex; gap: 12px; }
+.menu a { display: flex; align-items: center; min-height: 44px; padding-inline: 5px; text-decoration: none; color: var(--texto); font-weight: 500; font-size: 14px; } /* toque com 44 px */
 .menu a:hover { color: var(--verde-txt); }
 
 /* cartão de busca */
@@ -134,8 +136,10 @@ main:focus, main:focus-visible { outline: none; }
 .etq button:hover { background: var(--fundo); color: var(--escuro); }
 .limpar-tudo { height: 44px; border: 0; background: none; color: var(--verde-txt); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0 8px; }
 .lista { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } /* 4 por linha (fA2); 5 a partir de 1680 px; 2 no celular */
-.item { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; text-decoration: none; color: var(--texto); display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
-.item:hover { border-color: var(--verde); box-shadow: var(--sombra); }
+/* o cartão: o da lista e o botão de sistema do início (RD-0147) */
+.item, .sistema { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); text-decoration: none; color: var(--texto); display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
+.item:hover, .sistema:hover { border-color: var(--verde); box-shadow: var(--sombra); }
+.item { overflow: hidden; }
 .item .foto { position: relative; height: var(--foto-cartao); background: #FAFBFA; display: block; overflow: hidden; border-bottom: 1px solid var(--linha); }
 .item .foto img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
 .item .corpo { padding: 6px 8px 8px; display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
@@ -323,7 +327,7 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
 }
 @media (max-width: 640px) {
   :root { --alto-topo: 76px; }
-  .menu { gap: 12px; }
+  .menu { gap: 2px; }
   .menu a { font-size: 13px; white-space: nowrap; } /* 3 itens (op4e): o "Sobre a BAP" aparece também no celular */
   .marca img { height: 38px; }
   .marca { gap: 8px; }
@@ -509,7 +513,8 @@ dialog.painel-c::backdrop { background: var(--veu); }
 /* o exemplo não parece placa digitada (designer-ux): corpo menor, peso 400, sem o espaçamento, como na tela de busca */
 .v-placa-campo input::placeholder { color: var(--texto-2); font-size: 16px; font-weight: 400; letter-spacing: 0; text-transform: none; }
 /* Destaques / Pesquisas recentes: lista tabelada (miniatura, código, descrição de 1 linha, sistema e seta) */
-.recentes-bloco { padding-top: 26px; padding-bottom: 44px; }
+.recentes-bloco, .sistemas-bloco { padding-bottom: 44px; }
+.recentes-bloco { padding-top: 26px; }
 .rec-topo { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .rec-topo h2 { margin: 0 0 2px; }
 .rec-topo .sub { margin: 0; }
@@ -550,14 +555,18 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .marca-faixa h1 { font-size: 26px; }
   .marca-faixa p { font-size: 14px; }
   .mf-bloco { padding: 12px 12px 14px; }
-  .mf-geral input { height: 52px; font-size: 15px; padding: 0 12px; }
+  /* campos de digitação com 16 px no celular: o Safari do iPhone amplia a página ao focar um campo com fonte menor
+     (R-20261120-153600); o .mf-geral input já tem 16 px na regra base. Sem maximum-scale nem user-scalable no viewport */
+  .bq-campo input, .mv-campo select { font-size: 16px; }
+  .mf-geral input { height: 52px; padding: 0 12px; }
   .mf-bloco .bt { height: 52px; padding: 0 16px; }
   .v-placa-campo { height: 52px; }
   .v-placa-campo input { font-size: 22px; letter-spacing: .1em; padding: 0 6px; }
-  .recentes-bloco { padding-top: 18px; padding-bottom: 28px; }
+  .recentes-bloco, .sistemas-bloco { padding-bottom: 28px; }
+  .recentes-bloco { padding-top: 18px; }
   .rec-topo { margin-bottom: 8px; }
-  .rec-topo h2 { font-size: 18px; }
-  .rec-topo .sub { font-size: 13px; }
+  .rec-topo h2, .sistemas-bloco h2 { font-size: 18px; } /* os títulos das seções do início com o mesmo tamanho (MC-0001) */
+  .rec-topo .sub, .sistemas-bloco .sub { font-size: 13px; }
   .rec-todos { font-size: 13px; }
   .rec-lista { padding: 0 12px; }
   .rec-item { gap: 12px; min-height: 56px; padding: 6px 0; }
@@ -621,4 +630,17 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .sb-dados { grid-template-columns: minmax(0, 1fr); }
   .sb-dados div { border-left: 0; padding: 14px 18px; }
   .sb-dados div + div { border-top: 1px solid var(--linha); }
+}
+
+/* botões de sistema do início (R-20261120-152800): os do main, no visual da home nova; 2 colunas no celular */
+.sistemas-bloco { padding-top: 0; }
+.sistemas { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+.sistema { padding: 16px; gap: 2px; } /* o resto do cartão vem do .item */
+.sistema b { font-size: 15px; color: var(--escuro); }
+.sistema span { font-size: 13px; color: var(--texto-2); }
+.sistema i { width: 28px; height: 4px; border-radius: 2px; background: var(--verde); margin-bottom: 10px; }
+@media (max-width: 640px) {
+  .sistemas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .sistema { padding: 12px; }
+  .sistema b { font-size: 14px; }
 }

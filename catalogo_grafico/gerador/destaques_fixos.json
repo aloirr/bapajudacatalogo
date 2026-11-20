@@ -1,0 +1,384 @@
+{
+ "_sobre": "Destaques fixos por família (T-0019, só códigos). Regra: LEIA_GERADOR.md, seção \"Na nuvem\".",
+ "familias": {
+  "Amortecedores": [
+   "AMT7002",
+   "AMT7500",
+   "AMT7000",
+   "AMT7005",
+   "AMT7001"
+  ],
+  "Kit Batente de Amortecedor": [
+   "KAC11409",
+   "KAC11143",
+   "KAC11358",
+   "KAC11420",
+   "KAC11110D"
+  ],
+  "Pivô de Suspensão": [
+   "PIV5000",
+   "PIV5001",
+   "PIV5006",
+   "PIV5005",
+   "PIV5067"
+  ],
+  "Bandejas de Suspensão": [
+   "BAN14502",
+   "BAN14509D",
+   "BAN14509E",
+   "BAN14581EP",
+   "BAN14581DP"
+  ],
+  "Suporte Tensor (Morcego)": [
+   "BAN9501",
+   "BAN9500",
+   "BAN9502",
+   "BAN9503",
+   "BAN9504"
+  ],
+  "Bucha da Barra Estabilizadora": [
+   "BOR11000",
+   "BOR11045",
+   "BOR11059",
+   "BOR11004",
+   "BOR11020"
+  ],
+  "Bieletas": [
+   "BIE20000",
+   "BIE20001",
+   "BIE20006",
+   "BIE20002",
+   "BIE20014"
+  ],
+  "Terminais de Direção": [
+   "TER553072",
+   "TER556017",
+   "TER5597001",
+   "TER556016",
+   "TER5597000"
+  ],
+  "Terminal Axial": [
+   "TAX10192",
+   "TAX10382",
+   "TAX10064",
+   "TAX10647",
+   "TAX10363"
+  ],
+  "Caixa de Direção": [
+   "BAR15002",
+   "BAR15001",
+   "CXD13023",
+   "CXD13062",
+   "BAR15012"
+  ],
+  "Junta Homocinética": [
+   "JUH70006",
+   "JUH70002",
+   "JUH70000",
+   "JUH70012",
+   "JUH70005"
+  ],
+  "Kit Reparo da Junta Homocinética": [
+   "KHC12659",
+   "KHC12599",
+   "KHC12569",
+   "KHC12499",
+   "KHC121649"
+  ],
+  "Trizetas": [
+   "TRI90001",
+   "TRI90000",
+   "TRI90005",
+   "TRI90027",
+   "TRI90004"
+  ],
+  "Semi-Eixo Homocinético": [
+   "SEH80005",
+   "SEH80002",
+   "SEH80000",
+   "SEH80027",
+   "SEH80026"
+  ],
+  "Cruzetas": [
+   "CRU5273",
+   "CRU5153",
+   "CRU5178",
+   "CRUSPL90",
+   "CRU5160"
+  ],
+  "Embreagem Remanufaturada": [
+   "EMB6535R",
+   "EMB6550R",
+   "EMB6585R",
+   "EMB6085R",
+   "EMB6453R"
+  ],
+  "Servo e Cilindro de Embreagem": [
+   "SCE14010",
+   "SCE14002",
+   "SCE14000",
+   "SCE14006",
+   "SCE14012"
+  ],
+  "Pastilha de Freio": [
+   "PAF0085",
+   "PAF0058",
+   "PAF0528",
+   "PAF0094",
+   "PAF1482"
+  ],
+  "Sapata de Freio": [
+   "SFR30008",
+   "SFR30002",
+   "SFR30003",
+   "SFR30004",
+   "SFR30000"
+  ],
+  "Cilindro de Roda": [
+   "CIL8500",
+   "CIL8502",
+   "CIL8507",
+   "CIL8501",
+   "CIL8504"
+  ],
+  "Cuíca de Freio": [
+   "CFR9000",
+   "CFR9001",
+   "CFR9004",
+   "CFR9003",
+   "CFR9007"
+  ],
+  "Catraca de Freio": [
+   "CAF10701",
+   "CAF10700",
+   "CAF10702",
+   "CAF10703",
+   "CAF10704"
+  ],
+  "Sensor ABS": [
+   "ABS4502",
+   "ABS4501",
+   "ABS4500",
+   "ABS4511",
+   "ABS4523"
+  ],
+  "Eletroventiladores": [
+   "ELE1000",
+   "ELE1003",
+   "ELE1001",
+   "ELE1005",
+   "ELE1023"
+  ],
+  "Bomba D'Água": [
+   "BDA50000",
+   "BDA50003",
+   "BDA50001",
+   "BDA50024",
+   "BDA50002"
+  ],
+  "Bomba de Óleo": [
+   "BOL40000",
+   "BOL40002",
+   "BOL40001",
+   "BOL40003",
+   "BOL40007"
+  ],
+  "Interruptores de Pressão do Óleo": [
+   "INT16500",
+   "INT16501",
+   "INT16502",
+   "INT16503",
+   "INT16505"
+  ],
+  "Bomba de Combustível": [
+   "BCE3000",
+   "BCE3001",
+   "BCE3002"
+  ],
+  "Kit de Distribuição": [
+   "KCD2500",
+   "KCD2514",
+   "KCD2520",
+   "KCD2518",
+   "KCD2513"
+  ],
+  "Polias e Tensionadores": [
+   "POL1600",
+   "POL1604",
+   "POL1601",
+   "POL1608",
+   "POL1603"
+  ],
+  "Velas de Ignição": [
+   "VEL7500",
+   "VEL7502",
+   "VEL7503",
+   "VEL7501",
+   "VEL7504"
+  ],
+  "Cabo de Vela": [
+   "CV-G73",
+   "CV-V25",
+   "CV-T09",
+   "CV-G101",
+   "CV-T65"
+  ],
+  "Lâmpadas": [
+   "LAM2011",
+   "LAM2010",
+   "LAM2013",
+   "LAM2001",
+   "LAM2030"
+  ],
+  "Interruptores e Sensores Elétricos": [
+   "INT16510",
+   "INT16504",
+   "INT16513",
+   "INT16543",
+   "INT16524"
+  ],
+  "Baterias": [
+   "60D-MXBF-12",
+   "150D-MX-12",
+   "100E-MXGF-15",
+   "60D-TF-24",
+   "50AD-LP-18"
+  ],
+  "Filtros": [
+   "FLU6001",
+   "FLU6002",
+   "FLU6004",
+   "FLU6011",
+   "FLU6005"
+  ],
+  "Óleo Lubrificante": [
+   "20W50 PROACTIVE100",
+   "5W30 PROACTIVE SM",
+   "15W40 PROACTIVE100",
+   "20W50 4T PROACTIVE",
+   "ATF DEXRON III"
+  ],
+  "Fluidos e Químicos": [
+   "RAD25005P",
+   "SIL3502",
+   "RAD25001",
+   "AER12000",
+   "RAD25005"
+  ],
+  "Cubo de Roda": [
+   "CUB60000",
+   "CUB60001",
+   "CUB60006",
+   "CUB60010",
+   "CUB60007"
+  ],
+  "Rolamentos": [
+   "ROL4529A",
+   "ROL4544A",
+   "ROL0036",
+   "ROL6202-2RS",
+   "ROL3577"
+  ],
+  "Rodas de Aço e Alumínio": [
+   "ROD8004",
+   "ROD8001",
+   "ROD8009",
+   "ROD8000",
+   "ROD8003"
+  ],
+  "Pneus e Câmaras de Ar Moto": [
+   "CAR18",
+   "CAR14",
+   "90/90-18 57P V250R",
+   "CAG17",
+   "CAR10"
+  ],
+  "Palhetas Limpa-Parabrisa": [
+   "CL18",
+   "MF24",
+   "CL16",
+   "CL19",
+   "CL24"
+  ],
+  "Cintas e Catracas": [
+   "CAT10501",
+   "CAT10504",
+   "CAT10503",
+   "CAT10510",
+   "CAT10509"
+  ],
+  "Velas de Ignição Moto": [
+   "VEL7500",
+   "VEL7507",
+   "VEL7525",
+   "VEL7523",
+   "VEL7517"
+  ],
+  "Lâmpadas Moto": [
+   "LAM2020"
+  ],
+  "Filtros Moto": [
+   "FLU6186",
+   "FLU6240"
+  ],
+  "Óleo 4T": [
+   "20W50 4T PROACTIVE",
+   "10W30 PROACTIVE210"
+  ],
+  "Pneus Moto": [
+   "90/90-18 57P V250R",
+   "2.75-18 42P V250F",
+   "90/90-19 52P V307",
+   "80/100-14 49P V250R",
+   "80/100-18 47P V425F"
+  ],
+  "Câmaras de Ar Moto": [
+   "CAR18",
+   "CAR14",
+   "CAG17",
+   "CAR10",
+   "CAJ17"
+  ],
+  "Rolamentos Moto": [
+   "ROL6202-2RS",
+   "ROL6001",
+   "ROL6203-2RS",
+   "ROL6303-2RS",
+   "ROL6003-2RS"
+  ],
+  "Filtros de Ar do Motor": [
+   "FAR6020",
+   "FAR6019",
+   "FAR6045",
+   "FAR6074",
+   "FAR6049"
+  ],
+  "Filtros de Ar da Cabine": [
+   "FAC6000",
+   "FAC6008",
+   "FAC6016",
+   "FAC6018",
+   "FAC6140"
+  ],
+  "Filtros de Combustível": [
+   "FCB6055",
+   "FCB6022",
+   "FCB6029",
+   "FCB6028",
+   "FCB6273"
+  ],
+  "Filtros de Óleo": [
+   "FLU6001",
+   "FLU6002",
+   "FLU6004",
+   "FLU6011",
+   "FLU6005"
+  ],
+  "Outros Filtros": [
+   "FLU6295",
+   "FUR6284",
+   "FUR6334",
+   "FHD6087"
+  ]
+ }
+}

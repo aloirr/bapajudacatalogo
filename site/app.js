@@ -737,7 +737,7 @@
   // ---------- telas ----------
   // Início (T-0018, opção 4c aprovada e op4d, R-20261120-143900): cabeçalho integrado à faixa da marca, "+4.400 produtos
   // no portfólio", a busca geral e, ao lado, a placa Mercosul; embaixo, a lista tabelada de 8 peças (2 colunas no
-  // computador). Sem preço e sem estoque.
+  // computador) e os botões de sistema, que abrem a busca do sistema (R-20261120-152800). Sem preço e sem estoque.
   // Contador (R-20261120-141600, "2) a"): o serviço bapajudacatalogo-placas conta a abertura do produto pelo código
   // (POST /contar) e devolve os mais vistos (GET /mais-vistos?dias=7). Ligado com o serviço v1.1.0 no ar
   // (R-20261120-144530); com false, nenhuma chamada sai e o bloco é sempre "Destaques".
@@ -805,7 +805,7 @@
     const lst = recentes || destaques();
     sec.removeAttribute("aria-busy");
     sec.innerHTML = `<div class="rec-topo"><div><h2>${recentes ? "Pesquisas recentes" : "Destaques"}</h2>
-        <p class="sub">${recentes ? "As mais pesquisadas nos últimos 7 dias" : "Peças com foto e ficha completa"}</p></div>
+        <p class="sub">${recentes ? "As mais abertas nos últimos 7 dias" : "Peças com foto e ficha completa"}</p></div>
         <a class="rec-todos" href="#/busca">Ver todos<span class="so-pc"> os produtos</span> <span aria-hidden="true">›</span></a></div>
       <ul class="rec-lista">${lst.map(pecaHtml).join("")}</ul>`;
   }
@@ -856,7 +856,12 @@
           </div>
         </div>
       </section>
-      <section class="bloco recentes-bloco" aria-busy="true"><ul class="rec-lista espera" aria-hidden="true">${"<li><span class=\"rec-item\"><span class=\"rec-foto\"></span></span></li>".repeat(N_LISTA)}</ul></section>`;
+      <section class="bloco recentes-bloco" aria-busy="true"><ul class="rec-lista espera" aria-hidden="true">${"<li><span class=\"rec-item\"><span class=\"rec-foto\"></span></span></li>".repeat(N_LISTA)}</ul></section>
+      <section class="bloco sistemas-bloco" aria-labelledby="tit-sistemas">
+        <h2 id="tit-sistemas">Navegue por sistema</h2>
+        <p class="sub">Toque em um sistema para ver todos os produtos dele.</p>
+        <div class="sistemas">${contar(BASE.produtos, "si").map(([si, n]) => `<a class="sistema" href="#/busca?si=${encodeURIComponent(si)}"><i aria-hidden="true"></i><b>${esc(titulo(si))}</b><span>${nProd(n)}</span></a>`).join("")}</div>
+      </section>`;
     const sec = app.querySelector(".recentes-bloco");
     if (!CONTADOR_LIGADO) blocoPecas(sec, null);
     else maisVistos().then((lst) => { if (sec.isConnected) blocoPecas(sec, lst); });
