@@ -3,6 +3,7 @@ referência cruzada repetida e OFEREÇA JUNTO. Saída: saidas/Auditoria_Catalogo
 import re, collections, html, sys
 import pandas as pd
 import moto, detalhe as DT, oferta as OF, diferencial as DF
+DF.aplicar_catalogo(moto.FAMS)
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
@@ -119,7 +120,7 @@ c7 = ROW['AMT7014'][1]; c5 = ROW['AMT7500'][1]
 res = [
     ('Caso do vendedor: AMT7014 × AMT7500', 'Procede. Base unificada (aplicação): AMT7014 = Strada Adventure 2001–2020 c/ ABS; AMT7500 = a mesma aplicação s/ ABS. ESTOQUE_BAP descreve os dois só como "AMORTECEDOR SUSPENSAO DIANTEIRO".'),
     ('Referências cruzadas do caso', f"Nakata diferente (AMT7014: HG33093; AMT7500: HG33004). Cofap GP30120 e Monroe 94176 aparecem NOS DOIS códigos — referência repetida para versões diferentes: confirmar com o fornecedor. KYB 340080 só no AMT7014."),
-    ('No catálogo, agora', 'Selo vermelho ao lado do código (c/ ABS / s/ ABS) e, embaixo, o item parecido e o que muda nele (≠ AMT7500 s/ ABS). Mesmo selo nos destaques do impresso, sobre a foto.'),
+    ('No catálogo, agora', 'Desde 20/11 (T-0019) o catálogo não mostra o diferencial nem o item parecido: ficam só nesta auditoria e nas colunas DIFERENCIAL e ITEM_PARECIDO da base.'),
     ('Itens com selo de diferencial', f'{len(sel)} itens (ABS, câmbio, 4x4/4x2, pivô, 8V/16V, diesel/flex, turbo, ar, direção, haste, caneca, kit parcial/completo, estrias, furos...).'),
     ('Pares parecidos SEM diferença no cadastro', f"{len(pares)} pares (prioridade ALTA {sum(p['PRIORIDADE'] == 'ALTA' for p in pares)}): mesma linha, mesmo veículo e anos, e nada no cadastro que separe. É onde o vendedor pode errar — completar com o fornecedor."),
     ('Descrição × catálogo', f'{len(ess)} itens tinham informação essencial só na descrição e agora mostram no DETALHE (kit parcial/completo, sapata c/ ou s/ haste, catraca, medida da bucha, rolamento interno/externo, amortecedor pressurizado/câmbio/4x4...).'),

@@ -7,7 +7,8 @@ Uso (dentro de gerador/):  python base_v11.py [v10.xlsx] [saida.xlsx]
 import sys, collections
 from copy import copy
 import openpyxl
-import moto
+import moto, diferencial
+diferencial.aplicar_catalogo(moto.FAMS)
 
 ENTRADA = sys.argv[1] if len(sys.argv) > 1 else 'saidas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v10.xlsx'
 SAIDA = sys.argv[2] if len(sys.argv) > 2 else 'saidas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v11.xlsx'

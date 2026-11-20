@@ -60,8 +60,8 @@ Para atualizar o estoque, troque o `ESTOQUE_BAP.xlsx` pelo arquivo do dia, com a
 
 | O que gerar | Comando |
 |---|---|
-| Catálogo impresso (gráfica) | `python -c "import print_cat as PC; PC.build('saidas/Catalogo_BAP_2026_A4_grafica.pdf')"` |
-| Catálogo digital | `python -c "import moto, digital2 as D2; D2.build('saidas/Catalogo_BAP_2026_Completo_Digital.pdf')"` |
+| Catálogo impresso (gráfica) | `python -c "import print_cat as PC; PC.build('saidas/Catalogo_BAP_2027_A4_grafica.pdf')"` |
+| Catálogo digital | `python -c "import moto, digital2 as D2; D2.build('saidas/Catalogo_BAP_2027_Completo_Digital.pdf')"` |
 | Base v9 (a partir da v8) | `python base_v9.py` |
 | Apresentação comercial (PDF) | `python apres_bemol.py` |
 | Apresentação comercial (PowerPoint) | `node apres_ppt.js` |

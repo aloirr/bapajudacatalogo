@@ -23,7 +23,7 @@ def refs_moto(r):
     out = []
     for part in re.split(r',\s*(?=[A-Z][A-Z ]+:)', r):
         m = re.match(r'\s*([^:]+):\s*(.+)', part)
-        if m: out.append(m.group(1).strip().title().replace('Camara', 'Câmara') + ' ' + m.group(2).strip())
+        if m and (c := M.ref_cod(m.group(2))): out.append(m.group(1).strip().title().replace('Camara', 'Câmara') + ' ' + c)
     return ' · '.join(out) or '—'
 
 

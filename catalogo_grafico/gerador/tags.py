@@ -1,8 +1,5 @@
-"""Tags embaixo do código (pedido do Alexandre, 23/10): em vez de descrever, mostrar etiquetas curtas
-(DIANT., TRAS., ESQ., DIR., GÁS, ÓLEO, C/ ABS, S/ ABS, 4X4...). O diferencial (o que separa de um item parecido)
-vem em vermelho; as demais em verde. Nada repetido. O que não vira tag fica como texto curto embaixo.
-"""
-import re, html
+"""Tags curtas embaixo do código (DIANT., TRAS., C/ ABS, 4X4...), sem repetir; o que não vira tag fica como texto curto."""
+import re
 import unicodedata
 
 _n = lambda s: ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').lower()
@@ -75,43 +72,26 @@ def extrair(texto, linha):
 
 
 def do_item(fname, r, spec=False):
-    """(vermelhas, verdes, sobra, nota dos parecidos)"""
-    verm = []
-    if r.get('dif'):
-        for d in r['dif'].split(' · '):
-            tg, sb = extrair(d, fname)
-            for x in (tg or [d.upper()]):
-                if x not in verm: verm.append(x)
+    """(tags, sobra)"""
     if spec:
-        return verm, [], '', ''
-    tg, sobra = extrair(r.get('sub') or '', fname)
-    verdes = [x for x in tg if x not in verm]
-    nota = ''
-    if r.get('dif') and r.get('gemeos'):
-        grupos = {}
-        for c, v in sorted(r['gemeos'].items()):
-            if not v: continue
-            lab = ' · '.join(dict.fromkeys(y for d in v for y in (extrair(d, fname)[0] or [d.upper()])))
-            grupos.setdefault(lab, []).append(c)
-        nota = ' | '.join(f'≠ {lab}: {" · ".join(cs[:3])}' for lab, cs in list(grupos.items())[:2])
-    return verm, verdes, sobra, nota
+        return [], ''
+    return extrair(r.get('sub') or '', fname)
 
 
 def medir(lw, tags, largura, size=6.2, pad=3, gap=2.5, lh=10):
     """posições (linha, x) de cada tag dentro da largura; devolve lista e altura"""
     pos, x, ln = [], 0, 0
-    for t, kind in tags:
+    for t in tags:
         w = lw(t, size, 'PB', size * .08) + 2 * pad
         if x and x + w > largura:
             ln += 1; x = 0
-        pos.append((t, kind, x, ln, w)); x += w + gap
+        pos.append((t, x, ln, w)); x += w + gap
     return pos, (ln + 1) * lh if tags else 0
 
 
 def desenhar(dc, lw, x, y, tags, largura, size=6.2, pad=3, gap=2.5, lh=10, max_linhas=9):
     pos, h = medir(lw, tags, largura, size, pad, gap, lh)
-    for t, kind, dx, ln, w in pos:
+    for t, dx, ln, w in pos:
         if ln >= max_linhas: break
-        bg, fg = ('dtag', 'dtext') if kind == 'd' else ('hero', 'gtext')
-        dc.tag(x + dx, y + ln * lh, t, size, bg, fg, pad)
+        dc.tag(x + dx, y + ln * lh, t, size, 'hero', 'gtext', pad)
     return min(h, max_linhas * lh)

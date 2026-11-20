@@ -91,20 +91,10 @@ _DET.aplicar(FAMS)   # DETALHE inteiro e enxuto (sem '…')
 _DET.limpar_datas(FAMS)
 _DET.preencher_aplicacao(FAMS)
 _DET.essencial(FAMS)              # informação essencial da descrição no DETALHE (auditoria 23/10)
-import diferencial as _DIF
-_DIF.aplicar(FAMS)                # selo de diferencial ao lado do código (ex.: c/ ABS × s/ ABS)
-_SITE_COD = set(_SITE.LOG.get('preenchidos', []))
-for f_ in FAMS:                   # aplicação do site (resumida por motor) não serve para achar "item parecido": sem selo
-    for r_ in f_['rows']:
-        g_ = {c: v for c, v in (r_.get('gemeos') or {}).items() if c not in _SITE_COD}
-        if r_['code'] in _SITE_COD or (r_.get('gemeos') and not g_):
-            r_['dif'] = ''; r_['gemeos'] = {}
-        elif r_.get('gemeos') and len(g_) != len(r_['gemeos']):
-            r_['gemeos'] = g_
 import oferta as _OF
 _OF.aplicar(FAMS)                 # OFEREÇA JUNTO em todos os itens
 import fraga_complementos as _FC
-_FC.aplicar(FAMS, moto_only)   # complementos do Fraga aprovados em 13/11, depois do OFEREÇA JUNTO e do selo: só aplicação e referência mudam (refs a mais e veículos a mais)
+_FC.aplicar(FAMS, moto_only)   # complementos do Fraga aprovados em 13/11, depois do OFEREÇA JUNTO: só aplicação e referência mudam (refs a mais e veículos a mais)
 D2.fams = FAMS
 
 if __name__ == '__main__':
