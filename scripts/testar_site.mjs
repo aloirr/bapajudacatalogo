@@ -18,7 +18,7 @@
    diretriz (lista estrita, outra ordem, minúsculas, os mais próximos, marca concorrente, código BAP e EAN exatos)
    e sem resultado; os links antigos (#/busca?cod=, mo=, modelo=, ano=) viram q; as 2 abas (código, descrição ou
    aplicação; placa com campo e botão, sem consultar o serviço) com setas, Home e End; página do produto (foto, aplicação, referências, ficha
-   técnica, ofereça junto, sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
+   técnica, leve também, sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
    básica; prints em 1366 × 768 e 390 × 844.
    Saída: 0 se passou (ou se só sobraram os conhecidos, com --conhecidos) e 1 se falhou.
 
@@ -31,8 +31,8 @@
        veículo"), sem chave liga/desliga e sem o menu
        "Departamentos"; a placa consultada em destaque (etiqueta com X) na faixa, que preenche as listas; o "Limpar tudo"
        não tira o veículo; filtros numa coluna fina à ESQUERDA dos cartões, de cima a baixo (1366 e 1536 px), e no celular
-       no botão "Filtrar (n)" com o painel; cartões: 4 ou 5 na 1ª linha em 1366 (decisão do gerente depois da medida), 5
-       em 1536 e 1920 e 2 em 390 px; os da 1ª e 2ª linha com a mesma altura; texto >= 12 px; o código BAP sobre a foto (canto inferior direito, etiqueta que não
+       no botão "Filtrar (n)" com o painel; cartões (fA2, R-20261120-140900): 4 na 1ª linha em 1366 e 1536 px, 5 em 1920
+       (a partir de 1680 px) e 2 em 390 px (TRANSIÇÃO T-0014: até o PR do site, 4 ou 5 em 1366 e 1536); os da 1ª e 2ª linha com a mesma altura; texto >= 12 px; o código BAP sobre a foto (canto inferior direito, etiqueta que não
        é botão nem link), no rótulo do link do cartão e no alt da foto; no máximo 2 etiquetas de referência à vista
        ("Ref. Cruzada:" e "+N"); "+ Detalhes". A placa só com o serviço interceptado (503 ou veículo falso) e nunca no
        endereço, título, storage ou console.
@@ -645,7 +645,7 @@ async function testarSite(base, ctxJson, dirPrints) {
       }
       detalhe("vazia", N_VAZ, `"xyzqwk nadaexiste", "ZZQ999999" e o link antigo cod=ZZQ999999 → "Nenhum produto encontrado"`);
 
-      // ---- cartões da lista (T-0014, só na tela nova): 6+ na 1ª linha em 1366 e 1536 px, texto do cartão >= 12 px ----
+      // ---- cartões da lista (T-0014, só na tela nova): 4 (ou 5, na transição) na 1ª linha em 1366 e 1536 px, 5 em 1920, 2 em 390; texto >= 12 px ----
       const N_CART = "cartões da lista", QF = "amortecedor";
       const medirCartoes = () => page.evaluate(() => {
         const vis = (el) => { const r = el.getBoundingClientRect(); return r.width > 1 && r.height > 1 && getComputedStyle(el).visibility !== "hidden"; };
@@ -714,9 +714,11 @@ async function testarSite(base, ctxJson, dirPrints) {
           const m = await medirCartoes();
           if (!m.n) falha("cartoes", N_CART, `vazio:${w}`, `${w} px: "${QF}" sem cartões na lista`);
           else {
-            // R-20261120-115432: 5 por linha no computador e 2 no celular (menos só se a lista tiver menos). Com a coluna de
-            // filtros à esquerda (R-20261120-123800), 1366 px aceita 4 ou 5 (o gerente decide depois da medida, T-0014)
-            const quer = w === 1366 ? [4, 5] : [w > 1366 ? 5 : 2];
+            // R-20261120-140900 (fA2): 4 por linha no computador (eram 5), cartão maior; 5 a partir de 1680 px (1920) e 2 no
+            // celular (menos só se a lista tiver menos)
+            // TRANSIÇÃO T-0014: o 5 em 1366 e 1536 sai depois do PR do site (aí fica só o 4 do fA2, ou só o 5 se o fA2 não
+            // for aprovado)
+            const quer = w >= 1680 ? [5] : w > 640 ? [4, 5] : [2];
             if (!quer.map((q) => Math.min(q, m.n)).includes(m.linha1)) falha("cartoes", N_CART, `linha:${w}`, `${w} px: "${QF}" mostra ${m.linha1} cartão(ões) na 1ª linha (pedido: ${quer.join(" ou ")}; cartão de ${m.larg} px)`);
             const A = m.altura;
             if (A.dif > 1) falha("cartoes", N_CART, `altura:${w}`, `${w} px: os ${A.n} cartões da 1ª e 2ª linha não têm a mesma altura: de ${A.min} px (${A.menor}) a ${A.max} px (${A.maior})`);
@@ -1107,9 +1109,12 @@ async function testarSite(base, ctxJson, dirPrints) {
       // ---- página do produto ----
       const N_PROD = "página do produto", N_PRECO = "produto sem preço nem estoque";
       const paginas = [];
-      if (pCod) paginas.push([pCod, "produto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Ofereça junto"]]);
-      if (comFoto) paginas.push([comFoto, "produto-com-foto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Ofereça junto"]]);
+      if (pCod) paginas.push([pCod, "produto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Leve também"]]);
+      if (comFoto) paginas.push([comFoto, "produto-com-foto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Leve também"]]);
       for (const c of ["TER556556", "1"]) if (existe(c)) paginas.push([porCod.get(normCod(c)), "produto-" + c, []]);
+      // R-20261120-141100b-alexandre: o bloco "Ofereça junto" passou a "Leve também" (título exato da seção, como as outras)
+      // TRANSIÇÃO T-0014: o 'Ofereça junto' sai depois do PR do site (até lá, "Leve também" OU "Ofereça junto")
+      const NOMES_SECAO = { "Leve também": ["Leve também", "Ofereça junto"] };
       // T-0014: é a PÁGINA (link direto #/produto/CODIGO), não a janela. O 1º produto abre com o endereço colado
       // numa carga nova da página; os outros, trocando o endereço (sem clique no cartão). Janela aberta = falha.
       let primeira = true;
@@ -1137,13 +1142,13 @@ async function testarSite(base, ctxJson, dirPrints) {
         if (info.h1 !== p.c) falha("produto", N_PROD, `${p.c}:h1`, `${L} ${p.c}: título "${info.h1}"`);
         if (p.i) { if (!info.foto || !info.foto.ok) falha("produto", N_PROD, `${p.c}:foto`, `${L} ${p.c}: a foto ${p.i} não carregou`); }
         else if (!/Foto em breve/.test(info.semFoto)) falha("produto", N_PROD, `${p.c}:sem-foto`, `${L} ${p.c}: sem foto e sem "Foto em breve"`);
-        for (const s of secoesEsperadas) if (!info.secoes.includes(s)) falha("produto", N_PROD, `${p.c}:${s}`, `${L} ${p.c}: sem a seção "${s}"`);
+        for (const s of secoesEsperadas) if (!(NOMES_SECAO[s] || [s]).some((n) => info.secoes.includes(n))) falha("produto", N_PROD, `${p.c}:${s}`, `${L} ${p.c}: sem a seção "${s}"`);
         for (const a of palavrasInternas(info.texto)) falha("tela-preco", N_PRECO, `${a.nome}:${p.c}`, `#/produto/${p.c} mostra "${a.nome}": …${a.trecho}…`);
         if (nome === "produto" || nome === "produto-com-foto") await print(nome);
         conferirConsole(nome);
       }
       teste("tela-preco", N_PRECO);
-      detalhe("produto", N_PROD, paginas.slice(0, 2).map(([p]) => p.c + (p.i ? " (com foto)" : " (Foto em breve)")).join(" e ") + ": foto, aplicação, referências, ficha técnica, ofereça junto; página pelo link direto, sem janela");
+      detalhe("produto", N_PROD, paginas.slice(0, 2).map(([p]) => p.c + (p.i ? " (com foto)" : " (Foto em breve)")).join(" e ") + ": foto, aplicação, referências, ficha técnica, leve também; página pelo link direto, sem janela");
       detalhe("tela-preco", N_PRECO, paginas.map(([p]) => p.c).join(", "));
       await abrir("produto-inexistente", "#/produto/ZZQ999999");
       if (!/não encontrado/.test(await page.evaluate(() => document.body.innerText))) falha("produto", N_PROD, "inexistente", `${L} #/produto/ZZQ999999 sem a mensagem "não encontrado"`);
@@ -1430,7 +1435,7 @@ async function testarSite(base, ctxJson, dirPrints) {
     detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} em destaque na faixa, com o rótulo "Placa" em cima e antes da Marca, e as listas "${CAMPOS_TELA.veiculo || "?"}"; ${CAMPOS_TELA.trava || ""}; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas`);
     detalhe("meuveiculo", "meu veículo", MV.join("; ") + '; faixa logo abaixo do quadro da busca, 5 listas em cascata (Marca, Modelo, Ano, Motor, Versão); sem "Meu veículo", sem "Trocar veículo", sem chave liga/desliga, sem "Departamentos"');
     detalhe("filtros", "filtros da busca", [FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "", FILTRO_SI.coluna || "", FILTRO_SI.painel || "", FILTRO_SI.sempre || "", FILTRO_SI.marcou || ""].filter(Boolean).join("; "));
-    detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 4 ou 5 na 1ª linha em 1366, 5 em 1536 e 1920, 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes"`);
+    detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 4 ou 5 na 1ª linha em 1366 e 1536 (transição; o fA2 pede 4), 5 em 1920 (a partir de 1680), 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes"`);
   }
   if (JANELAS.size) detalhe("janela", "janela do produto", `"+ Detalhes" e código/nome abrem o dialog com o código; Esc fecha e devolve o foco ao cartão; a foto do cartão só amplia (${[...JANELAS].join(" e ")})`);
   else { teste("janela", "janela do produto"); detalhe("janela", "janela do produto", 'o site não tem a janela (sem "+ Detalhes" no cartão): não conferida'); }
