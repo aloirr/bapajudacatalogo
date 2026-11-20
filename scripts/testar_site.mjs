@@ -20,7 +20,20 @@
    aplicação; placa com campo e botão, sem consultar o serviço) com setas, Home e End; página do produto (foto, aplicação, referências, ficha
    técnica, ofereça junto, sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
    básica; prints em 1366 × 768 e 390 × 844.
-   Saída: 0 se passou (ou se só sobraram os conhecidos, com --conhecidos) e 1 se falhou. */
+   Saída: 0 se passou (ou se só sobraram os conhecidos, com --conhecidos) e 1 se falhou.
+
+   T-0014 (20/11/2026): durante a troca de tela, a bateria aceita AS DUAS telas e confere cada uma pelas regras dela.
+     - Tela de hoje ("abas"): 2 abas (código, descrição ou aplicação; placa) e painel lateral de filtros.
+     - Tela nova ("campos"): sem abas, 2 campos lado a lado (q e placa; no celular um embaixo do outro) com UM só botão
+       "Buscar" e Enter nos 2 (os 2 preenchidos: o veículo da placa filtrado pelo texto); exatamente 5 cartões na 1ª
+       linha em 1366, 1536 e 1920 px e 2 em 390 px; texto do cartão >= 12 px; barra horizontal de filtros (número de
+       marcados na linha do nome) com etiquetas "Tirar <nome>"; a etiqueta da placa e as do veículo dentro do quadro da
+       busca, embaixo do campo da placa; placa só com o serviço interceptado (503 ou veículo falso), só na etiqueta
+       dela e nunca no endereço, título, storage ou console (R-20261120-113625 e R-20261120-115432).
+     - Janela do produto (<dialog>, "+ Detalhes"): conferida só se existir no site. A página do produto é sempre
+       conferida pelo link direto #/produto/CODIGO.
+     A tela que o site mostra é detectada sozinha (ver "tela da busca" no resumo).
+     PENDENTE (tarefa depois): quando a tela de hoje sair do site, remover o ramo "abas" e o painel lateral daqui. */
 
 import { createRequire } from "node:module";
 import { createServer } from "node:http";
@@ -110,6 +123,58 @@ function palavrasInternas(texto) {
 // campos que o gerar_site.py grava em cada produto (docs/DADOS_DO_SITE.md); campo novo = conferir antes
 const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "df", "oj", "ip", "an", "i"]);
 const palavraInteira = (texto, palavra) => new RegExp(`(?<![A-Z0-9])${palavra}(?![A-Z0-9])`).test(norm(texto));
+
+// ---------- serviço de placas no teste (T-0005, T-0014) ----------
+// Nunca há consulta real: a rota do serviço é interceptada aqui (503, ou o veículo falso abaixo) e qualquer outro
+// pedido para fora da máquina com a placa é barrado e vira falha.
+// [SUPOSIÇÃO] ZZZ9Z99 é uma placa inventada no formato Mercosul; ela nunca sai da máquina.
+const RX_PLACAS = /bapajudacatalogo-placas\.onrender\.com|\/veiculo(\?|$)/;
+const PLACA_FALSA = "ZZZ9Z99";
+// resposta 200 no contrato do serviço (docs/placas/DESENHO.md, item 6): só dados do veículo
+const VEICULO_FALSO = { montadora: "VW", modelo: "GOL", modelo_lista: ["GOL"], ano: 2018, ano_modelo: 2018, combustivel: "FLEX", cilindradas: 1598, potencia: null, motor: "1.6" };
+
+// Funções que rodam dentro da página (addInitScript): acham os campos, o botão de cada um e os grupos de filtro
+// sem depender do nome da classe, para valer nas 2 telas.
+function ajudaDaPagina() {
+  const visivel = (el) => !!el && !el.closest("[hidden]") && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+  const nome = (el) => {
+    if (!el) return "";
+    const partes = [];
+    if (el.labels) for (const l of el.labels) partes.push(l.textContent);
+    for (const id of (el.getAttribute("aria-labelledby") || "").split(/\s+/).filter(Boolean)) { const x = document.getElementById(id); if (x) partes.push(x.textContent); }
+    partes.push(el.getAttribute("aria-label") || "");
+    return partes.join(" ").replace(/\s+/g, " ").trim();
+  };
+  const raiz = () => document.querySelector(".cartao-busca") || document.querySelector("#app") || document.body;
+  function campos() {
+    const r = raiz();
+    const q = r.querySelector('input[name="q"]');
+    const placa = [...r.querySelectorAll("input")].find((i) => i !== q && /placa/i.test([nome(i), i.id, i.name].join(" "))) || null;
+    return { abas: r.querySelectorAll('[role="tab"]').length, q, placa };
+  }
+  // o botão do campo: o 1º botão visível depois dele (sem "Limpar") e antes do outro campo, quando o outro vem depois
+  function botaoDe(campo, outro) {
+    if (!campo) return null;
+    const segue = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    return [...raiz().querySelectorAll("button")].find((b) => visivel(b) && b.type !== "reset" && !/limpar/i.test(b.textContent)
+      && segue(campo, b) && !(outro && segue(campo, outro) && segue(outro, b))) || null;
+  }
+  const grupos = () => [...document.querySelectorAll("#app button[aria-expanded]")]
+    .filter((b) => visivel(b) && /^(Sistema|Fam[ií]lia|Linha|Categoria)/i.test(b.textContent.trim()));
+  // as opções (o rótulo de cada caixa de marcar) do grupo aberto
+  function opcoes() {
+    const bt = grupos().find((b) => b.getAttribute("aria-expanded") === "true");
+    if (!bt) return [];
+    const alvo = document.getElementById(bt.getAttribute("aria-controls") || "") || bt.parentElement;
+    return [...alvo.querySelectorAll('input[type="checkbox"]')].map((c) => c.closest("label") || (c.labels && c.labels[0]) || c).filter(visivel);
+  }
+  const etiquetas = () => [...document.querySelectorAll("#app button[aria-label]")].filter((b) => visivel(b) && /^Tirar\b/i.test(b.getAttribute("aria-label")));
+  // o quadro da busca: o contêiner do campo da placa (e do q); os botões "Buscar" dele (sem "Limpar" e sem os "x")
+  const quadro = () => { const c = campos(), r = raiz(); return c.placa && r.contains(c.placa) && r !== document.body ? r : (c.placa && (c.placa.closest("section, form[role=search]") || c.placa.parentElement)) || r; };
+  const botoesBuscar = () => [...quadro().querySelectorAll("button")].filter((b) => visivel(b) && b.type !== "reset" && !/limpar/i.test(b.textContent)
+    && !/^Tirar\b/i.test(b.getAttribute("aria-label") || "") && (b.type === "submit" || /buscar/i.test(b.textContent + " " + (b.getAttribute("aria-label") || ""))));
+  window.__bapT = { visivel, nome, campos, botaoDe, grupos, opcoes, etiquetas, quadro, botoesBuscar };
+}
 
 // ---------- resultados ----------
 const TESTES = []; // { id, nome, detalhe, falhas: [{chave, txt}], avisos: [] }
@@ -225,23 +290,39 @@ async function testarSite(base, ctxJson, dirPrints) {
   detalhe("casos", "casos do JSON", `código ${COD}; referência ${refTrw ? "TRW " + refTrw.c : "?"}${refNak ? " e " + refNak.m + " " + refNak.c : ""}; veículo VOLKSWAGEN/Gol/2018; diretriz AMT7005 (KYB 441126), CL14 e EAN ${ean || "?"} (TER551011); ` +
     `geral "amortecedor dianteiro Onix" e "15W40"; produto com foto ${comFoto ? comFoto.c : "?"}; amostra ${amostra.join(", ")}`);
 
+  const TELAS = new Set(), FILTROS = new Set(), JANELAS = new Set(); // o que foi detectado (T-0014), nas 2 larguras
+  const CARTOES = [], FILTRO_SI = {}, CAMPOS_TELA = {};
   const browser = await chromium.launch();
   try {
     for (const [larg, alt] of [[1366, 768], [390, 844]]) {
       const L = `${larg} px`;
       const ctx = await browser.newContext({ viewport: { width: larg, height: alt }, deviceScaleFactor: 1 });
-      // o serviço de placas (T-0005) nunca é chamado de verdade no teste: a rota responde 503 aqui mesmo
+      // o serviço de placas (T-0005) nunca é chamado de verdade no teste: a rota responde aqui mesmo (503, ou o
+      // veículo falso quando PL.resposta está ligado). Pedido para fora com a placa falsa é barrado e vira falha.
       // [SUPOSIÇÃO] o site só chama o serviço quando o cliente busca uma placa; chamada sem a busca vira aviso.
-      await ctx.route(/bapajudacatalogo-placas\.onrender\.com|\/veiculo(\?|$)/, (rota) => {
-        aviso("abas", "abas da busca", `o site chamou o serviço de placas sem busca de placa: ${cortar(rota.request().url().replace(/[?#].*$/, ""), 70)} (respondido 503 no teste, sem rede)`);
+      const PL = { esperando: false, chamadas: 0, resposta: null };
+      await ctx.route((u) => RX_PLACAS.test(u.href) || !u.href.startsWith(base), (rota) => {
+        const req = rota.request(), url = req.url();
+        if (!RX_PLACAS.test(url)) {
+          if ((url + " " + (req.postData() || "")).toUpperCase().includes(PLACA_FALSA)) {
+            falha("placa", "campo da placa", "vazou:" + cortar(url.replace(/[?#].*$/, ""), 60), `${L}: a placa foi para fora da máquina (${cortar(url.replace(/[?#].*$/, ""), 70)}); pedido barrado no teste`);
+            return rota.abort();
+          }
+          return rota.continue();
+        }
+        if (!PL.esperando) aviso("placa", "campo da placa", `o site chamou o serviço de placas sem busca de placa: ${cortar(url.replace(/[?#].*$/, ""), 70)} (respondido 503 no teste, sem rede)`);
+        PL.chamadas++;
+        if (PL.esperando && PL.resposta) return rota.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(PL.resposta) });
         return rota.fulfill({ status: 503, contentType: "application/json", body: '{"erro":"teste: serviço de placas desligado"}' });
       });
+      await ctx.addInitScript(ajudaDaPagina);
       const page = await ctx.newPage();
       let erros = [];
       const local = (u) => String(u || "").startsWith(base);
       page.on("console", (m) => {
         if (m.type() !== "error") return;
         const u = (m.location() || {}).url || "";
+        if (PL.esperando && RX_PLACAS.test(u)) return; // o 503 que o próprio teste deu ao serviço de placas
         if (u && !local(u)) aviso("console", "console sem erro", `erro de recurso de fora (${cortar(u, 60)}): ${cortar(m.text(), 80)}`);
         else erros.push(cortar(m.text(), 120));
       });
@@ -301,6 +382,21 @@ async function testarSite(base, ctxJson, dirPrints) {
       if (parseInt(hero.replace(/\D/g, ""), 10) !== prods.length) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${hero}" produtos, o JSON tem ${prods.length}`);
       conferirConsole("inicio");
       await print("inicio");
+      // qual tela o site mostra (T-0014): "abas" (hoje) ou "campos" (nova, sem abas, q e placa lado a lado)
+      const N_TELA = "tela da busca";
+      const tela = await page.evaluate(() => { const c = window.__bapT.campos(); return c.abas ? "abas" : c.q && c.placa ? "campos" : "?"; });
+      if (tela === "?") falha("tela", N_TELA, "?", `${L}: não reconheci a tela da busca (nem 2 abas, nem o campo q com o da placa)`);
+      TELAS.add(tela);
+      // o botão "Buscar" do campo q: o do formulário único (abas) ou o do próprio campo (campos)
+      const clicarBuscarQ = async () => {
+        if (tela === "abas") return page.click('.form-busca button[type="submit"]');
+        // tela nova (T-0014, R-20261120-115432): UM só botão "Buscar" no quadro, para os 2 campos
+        const n = await page.evaluate(() => window.__bapT.botoesBuscar().length);
+        if (n !== 1) falha("campos-busca", "campos da busca", "botoes", `${L}: o quadro da busca tem ${n} botão(ões) "Buscar" (pedido: 1 só para os 2 campos)`);
+        const h = n ? (await page.evaluateHandle(() => window.__bapT.botoesBuscar()[0])).asElement() : null;
+        if (!h) return page.press('input[name="q"]', "Enter");
+        return h.click();
+      };
 
       // ---- busca por código (T-0011: um campo só, q; o código exato vem sempre em 1º, decisão 4a) ----
       const N_COD = "busca código";
@@ -396,7 +492,7 @@ async function testarSite(base, ctxJson, dirPrints) {
       for (const txt of ["gol 2018 volkswagen", "vw gol 2018"]) {
         await abrir("inicio", "#/");
         await page.fill('input[name="q"]', txt);
-        await page.click('.form-busca button[type="submit"]');
+        await clicarBuscarQ();
         await page.waitForFunction(() => location.hash.startsWith("#/busca"), null, { timeout: 5000 }).catch(() => {});
         await page.waitForTimeout(100);
         const f = await conferirGol(`formulário "${txt}"`);
@@ -507,24 +603,249 @@ async function testarSite(base, ctxJson, dirPrints) {
       }
       detalhe("vazia", N_VAZ, `"xyzqwk nadaexiste", "ZZQ999999" e o link antigo cod=ZZQ999999 → "Nenhum produto encontrado"`);
 
+      // ---- cartões da lista (T-0014, só na tela nova): 6+ na 1ª linha em 1366 e 1536 px, texto do cartão >= 12 px ----
+      const N_CART = "cartões da lista", QF = "amortecedor";
+      const medirCartoes = () => page.evaluate(() => {
+        const vis = (el) => { const r = el.getBoundingClientRect(); return r.width > 1 && r.height > 1 && getComputedStyle(el).visibility !== "hidden"; };
+        const itens = [...document.querySelectorAll(".lista .item")].filter(vis);
+        if (!itens.length) return { n: 0, linha1: 0, pequenos: [], nPeq: 0, foto: "?", larg: 0 };
+        const t0 = itens[0].getBoundingClientRect().top;
+        const linha1 = itens.filter((e) => Math.abs(e.getBoundingClientRect().top - t0) < 4).length;
+        const ate = new Set(itens.slice(0, 24));
+        const pequenos = [];
+        const w = document.createTreeWalker(document.querySelector(".lista"), NodeFilter.SHOW_TEXT);
+        for (let n; (n = w.nextNode());) {
+          const el = n.parentElement;
+          if (!n.textContent.trim() || !el || !ate.has(el.closest(".item")) || !vis(el)) continue;
+          const fs = parseFloat(getComputedStyle(el).fontSize);
+          if (fs < 12) pequenos.push(`${fs} px "${n.textContent.trim().slice(0, 20)}" (${el.tagName.toLowerCase()}${el.classList.length ? "." + [...el.classList].join(".") : ""})`);
+        }
+        const f = itens[0].querySelector(".foto") || itens[0].querySelector("img");
+        const r = f ? f.getBoundingClientRect() : null;
+        return { n: itens.length, linha1, pequenos: [...new Set(pequenos)].slice(0, 6), nPeq: pequenos.length, foto: r ? `${Math.round(r.width)}×${Math.round(r.height)}` : "?", larg: Math.round(itens[0].getBoundingClientRect().width) };
+      });
+      if (tela === "campos") {
+        await abrir("cartoes", "#/busca?q=" + encodeURIComponent(QF));
+        for (const [w, h] of larg === 1366 ? [[1366, 768], [1536, 864], [1920, 1080]] : [[larg, alt]]) {
+          if (w !== larg) { await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(400); }
+          const m = await medirCartoes();
+          if (!m.n) falha("cartoes", N_CART, `vazio:${w}`, `${w} px: "${QF}" sem cartões na lista`);
+          else {
+            // R-20261120-115432: exatamente 5 por linha no computador e 2 no celular (menos só se a lista tiver menos)
+            const quer = Math.min(w >= 1366 ? 5 : 2, m.n);
+            if (m.linha1 !== quer) falha("cartoes", N_CART, `linha:${w}`, `${w} px: "${QF}" mostra ${m.linha1} cartão(ões) na 1ª linha (pedido: ${quer}; cartão de ${m.larg} px)`);
+          }
+          if (m.nPeq) falha("cartoes", N_CART, `fonte:${w}`, `${w} px: ${m.nPeq} texto(s) do cartão abaixo de 12 px, ex.: ${m.pequenos.join("; ")}`);
+          if (w === 390) { const sw = await page.evaluate(() => document.documentElement.scrollWidth); if (sw > 390) falha("largura", "390 px sem rolar de lado", "cartoes", `cartões: scrollWidth = ${sw}`); }
+          CARTOES.push(`${w} px: ${m.linha1} na 1ª linha (cartão ${m.larg} px, foto ${m.foto})`);
+          await page.screenshot({ path: path.join(dirPrints, `cartoes-${w}.png`) });
+          if (w !== larg) { await page.setViewportSize({ width: larg, height: alt }); await page.waitForTimeout(300); }
+        }
+        conferirConsole("cartoes");
+      }
+
+      // ---- filtros: o link com si= filtra nas 2 telas; na barra nova (T-0014), Esc, marcar, etiqueta "Tirar" e o "x" ----
+      const N_FIL = "filtros da busca";
+      await abrir("filtros", "#/busca?q=" + encodeURIComponent(QF));
+      const tipoFiltro = await page.evaluate(() => document.querySelector("aside.filtros") ? "lateral" : window.__bapT.grupos().length ? "barra" : "?");
+      FILTROS.add(tipoFiltro);
+      if (tipoFiltro === "?") falha("filtros", N_FIL, "?", `${L}: não achei os filtros (nem o painel lateral, nem a barra com Sistema, Família, Linha ou Categoria)`);
+      const total0 = await totalTela();
+      const etiquetasTela = () => page.evaluate(() => window.__bapT.etiquetas().map((b) => b.getAttribute("aria-label")));
+      const siCaso = comFoto && comFoto.si; // o sistema do produto com foto (AMT7115: SUSPENSÃO)
+      if (siCaso) {
+        await abrir("filtro-si", `#/busca?q=${encodeURIComponent(QF)}&si=${encodeURIComponent(siCaso)}`);
+        const r = await listaTodos();
+        const fora = r.itens.filter((it) => norm(porCod.get(normCod(it.c))?.si) !== norm(siCaso)).map((it) => it.c);
+        if (!r.itens.length) falha("filtros", N_FIL, "si:vazio", `${L}: link "${QF}" com si=${siCaso}: lista vazia`);
+        if (fora.length) falha("filtros", N_FIL, "si:fora", `${L}: link "${QF}" com si=${siCaso}: ${fora.length} de outro sistema (ex.: ${fora.slice(0, 5).join(", ")})`);
+        if (r.itens.length > total0) falha("filtros", N_FIL, "si:maior", `${L}: link com si=${siCaso} = ${r.itens.length}, mais que "${QF}" sem filtro (${total0})`);
+        if (tipoFiltro === "barra") {
+          const etq = await etiquetasTela();
+          if (!etq.some((t) => norm(t).includes(norm(siCaso)))) falha("filtros", N_FIL, "si:etiqueta", `${L}: link com si=${siCaso} sem a etiqueta "Tirar ..." do filtro (etiquetas: ${etq.join(" | ") || "nenhuma"})`);
+        }
+        FILTRO_SI.n = r.itens.length; FILTRO_SI.si = siCaso;
+        conferirConsole("filtro-si");
+      }
+      if (tipoFiltro === "barra") {
+        await abrir("filtros", "#/busca?q=" + encodeURIComponent(QF));
+        const CAMPO_GRUPO = { SISTEMA: "si", FAMILIA: "fa", LINHA: "li", CATEGORIA: "ca" };
+        const grupos = await page.evaluate(() => window.__bapT.grupos().map((b) => b.textContent.replace(/[▾▴▼▲]/g, "").replace(/\s+/g, " ").trim()));
+        const pegar = async (fn, i) => (await page.evaluateHandle(fn, i)).asElement();
+        const clicarGrupo = async (i) => { const h = await pegar((j) => window.__bapT.grupos()[j] || null, i); if (h) await h.click({ timeout: 5000 }); };
+        const estado = (i) => page.evaluate((j) => { const b = window.__bapT.grupos()[j]; return { exp: b ? b.getAttribute("aria-expanded") : "", ops: window.__bapT.opcoes().map((l) => l.innerText.replace(/\s+/g, " ").trim()) }; }, i);
+        let marcou = null;
+        for (let gi = 0; gi < grupos.length && !marcou; gi++) {
+          const k = CAMPO_GRUPO[norm(grupos[gi]).split(" ")[0]];
+          await clicarGrupo(gi);
+          await page.waitForTimeout(150);
+          const e1 = await estado(gi);
+          if (e1.exp !== "true" || !e1.ops.length) { falha("filtros", N_FIL, "abrir:" + grupos[gi], `${L}: o botão "${grupos[gi]}" não abriu a lista (aria-expanded="${e1.exp}", ${e1.ops.length} opção(ões) à vista)`); continue; }
+          if (gi === 0) {
+            const sw = await page.evaluate(() => document.documentElement.scrollWidth);
+            if (larg === 390 && sw > 390) falha("largura", "390 px sem rolar de lado", "filtro-aberto", `filtro "${grupos[gi]}" aberto: scrollWidth = ${sw}`);
+            await print("filtro-aberto");
+            await page.keyboard.press("Escape");
+            await page.waitForTimeout(150);
+            const e2 = await estado(gi);
+            if (e2.exp !== "false" || e2.ops.length) falha("filtros", N_FIL, "esc", `${L}: o Esc não fechou "${grupos[gi]}" (aria-expanded="${e2.exp}", ${e2.ops.length} opção(ões) à vista)`);
+            if (e2.exp !== "true") { await clicarGrupo(gi); await page.waitForTimeout(150); }
+          }
+          const ops = (await estado(gi)).ops.map((t, i) => { const m = t.match(/^(.*?)\s*\(?(\d[\d.]*)\)?$/); return { i, nome: m ? m[1].trim() : t, n: m ? parseInt(m[2].replace(/\./g, ""), 10) : null }; });
+          const op = ops.find((o) => o.n && o.n < total0);
+          if (!op) { await page.keyboard.press("Escape"); await page.waitForTimeout(100); continue; }
+          marcou = { grupo: grupos[gi], ...op };
+          const hOp = await pegar((j) => window.__bapT.opcoes()[j] || null, op.i);
+          await hOp.click({ timeout: 5000 });
+          await page.waitForFunction((t) => (parseInt(((document.querySelector(".total") || {}).textContent || "").replace(/\D/g, ""), 10) || 0) !== t, total0, { timeout: 5000 }).catch(() => {});
+          await page.waitForTimeout(200);
+          const total1 = await totalTela();
+          marcou.total1 = total1;
+          if (!(total1 > 0 && total1 < total0)) falha("filtros", N_FIL, "marcar", `${L}: marcar "${op.nome}" (${grupos[gi]}) não reduziu a lista: ${total0} → ${total1}`);
+          else if (op.n !== total1) falha("filtros", N_FIL, "contagem", `${L}: "${op.nome}" (${grupos[gi]}) dizia ${op.n}, a lista ficou com ${total1}`);
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await print("filtro-marcado");
+          // R-20261120-115432: o número de marcados fica na mesma linha do nome do filtro (no mesmo texto ou com o centro
+          // na mesma altura)
+          const linha = await page.evaluate((j) => {
+            const b = window.__bapT.grupos()[j];
+            if (!b) return null;
+            const w = document.createTreeWalker(b, NodeFilter.SHOW_TEXT);
+            let nome = null, num = null;
+            for (let n; (n = w.nextNode());) {
+              const t = n.textContent.trim();
+              if (!t || n.parentElement.closest("[aria-hidden=true]")) continue;
+              if (!nome && /[A-Za-zÀ-ú]{3,}/.test(t)) { nome = n; if (/\d/.test(t)) num = n; }
+              else if (!num && /^\(?\d+\)?$/.test(t)) num = n;
+            }
+            const caixa = (n) => { const g = document.createRange(); g.selectNodeContents(n); const x = g.getBoundingClientRect(); return { c: (x.top + x.bottom) / 2, h: x.height, linhas: g.getClientRects().length }; };
+            if (!nome || !num) return { txt: b.textContent.replace(/\s+/g, " ").trim(), achou: false };
+            const a = caixa(nome), c = caixa(num);
+            return { txt: b.textContent.replace(/\s+/g, " ").trim(), achou: true, mesmoTexto: nome === num, linhasNome: a.linhas, ok: nome === num ? a.linhas === 1 : Math.abs(a.c - c.c) < Math.max(a.h, c.h) / 2 };
+          }, gi);
+          if (!linha || !linha.achou) falha("filtros", N_FIL, "numero", `${L}: o botão "${grupos[gi]}" com filtro marcado não mostra o número de marcados ("${linha ? linha.txt : "?"}")`);
+          else if (!linha.ok) falha("filtros", N_FIL, "numero:linha", `${L}: no botão "${linha.txt}", o número não fica na mesma linha do nome`);
+          const etq = await etiquetasTela();
+          const minha = etq.findIndex((t) => norm(t).includes(norm(op.nome)));
+          if (minha < 0) falha("filtros", N_FIL, "etiqueta", `${L}: marcar "${op.nome}" não criou a etiqueta "Tirar ${op.nome}" (etiquetas: ${etq.join(" | ") || "nenhuma"})`);
+          if (k && total1 > 0) {
+            const r = await listaTodos();
+            const fora = r.itens.filter((it) => norm(porCod.get(normCod(it.c))?.[k]) !== norm(op.nome)).map((it) => it.c);
+            if (fora.length) falha("filtros", N_FIL, "marcar:fora", `${L}: com "${op.nome}" (${grupos[gi]}) marcado, ${fora.length} produto(s) de fora (ex.: ${fora.slice(0, 5).join(", ")})`);
+          }
+          if (minha >= 0) {
+            await page.keyboard.press("Escape"); // fecha a lista aberta, para não cobrir a etiqueta
+            await page.waitForTimeout(100);
+            const hx = await pegar((j) => window.__bapT.etiquetas()[j] || null, minha);
+            const clicou = hx ? await hx.click({ timeout: 5000 }).then(() => true, () => false) : false;
+            if (!clicou) falha("filtros", N_FIL, "tirar:clique", `${L}: não consegui clicar no "x" da etiqueta "${etq[minha]}"`);
+            await page.waitForFunction((t) => (parseInt(((document.querySelector(".total") || {}).textContent || "").replace(/\D/g, ""), 10) || 0) === t, total0, { timeout: 5000 }).catch(() => {});
+            await page.waitForTimeout(150);
+            const total2 = await totalTela();
+            if (total2 !== total0) falha("filtros", N_FIL, "tirar", `${L}: o "x" de "${etq[minha]}" não devolveu a lista: ${total1} → ${total2} (sem o filtro: ${total0})`);
+            if ((await etiquetasTela()).some((t) => norm(t).includes(norm(op.nome)))) falha("filtros", N_FIL, "tirar:etiqueta", `${L}: a etiqueta "${etq[minha]}" ficou depois do "x"`);
+          }
+        }
+        if (!grupos.length) falha("filtros", N_FIL, "grupos", `${L}: a barra não tem os grupos Sistema, Família, Linha ou Categoria`);
+        else if (!marcou) falha("filtros", N_FIL, "sem-opcao", `${L}: "${QF}" (${total0}): nenhum grupo abriu com uma opção que reduza a lista`);
+        else FILTRO_SI.marcou = `${L}: "${marcou.nome}" (${marcou.grupo}) ${total0} → ${marcou.total1} e o "x" volta a ${total0}`;
+        conferirConsole("filtros");
+      }
+
+      // ---- janela do produto (T-0014, se existir no site): "+ Detalhes" e código/nome abrem; Esc fecha e devolve o foco;
+      // a foto do cartão só amplia ----
+      const N_JAN = "janela do produto";
+      await abrir("janela", "#/busca?q=" + encodeURIComponent(QF));
+      const temJanela = await page.evaluate(() => [...document.querySelectorAll(".lista .item a, .lista .item button")].some((b) => /\+\s*Detalhes/i.test(b.textContent)));
+      if (temJanela) {
+        JANELAS.add(L);
+        const dialogo = () => page.evaluate(() => { const g = document.querySelector("dialog[open]"); return g ? { txt: g.innerText, tit: ((g.querySelector("h1,h2") || {}).textContent || "").trim(), secoes: g.querySelectorAll(".secao").length } : null; });
+        const focoInfo = () => page.evaluate(() => { const a = document.activeElement; const it = a && a.closest(".item"); return { cod: it ? ((it.querySelector(".cod") || {}).textContent || "").trim() : "", tag: a ? a.tagName.toLowerCase() + (a.classList && a.classList.length ? "." + a.classList[0] : "") : "", hash: location.hash }; });
+        for (const [tipo, idx, rot] of [["detalhes", 0, '"+ Detalhes"'], ["nome", 1, "código e nome"]]) {
+          const h = (await page.evaluateHandle(([t, i]) => {
+            const it = document.querySelectorAll(".lista .item")[i];
+            if (!it) return null;
+            if (t === "detalhes") return [...it.querySelectorAll("a,button")].find((b) => /\+\s*Detalhes/i.test(b.textContent)) || null;
+            const c = it.querySelector(".cod");
+            return c ? c.closest("a,button") || c : null;
+          }, [tipo, idx])).asElement();
+          if (!h) { falha("janela", N_JAN, tipo + ":achar", `${L}: o cartão ${idx + 1} não tem ${rot}`); continue; }
+          const cod = (await h.evaluate((e) => ((e.closest(".item").querySelector(".cod") || {}).textContent || ""))).trim();
+          const hashAntes = await page.evaluate(() => location.hash);
+          await h.click();
+          const abriu = await page.waitForFunction(() => !!document.querySelector("dialog[open]"), null, { timeout: 3000 }).then(() => true, () => false);
+          if (!abriu) {
+            falha("janela", N_JAN, tipo + ":abrir", `${L}: clicar em ${rot} do ${cod} não abriu a janela (endereço: ${await page.evaluate(() => location.hash)})`);
+            await abrir("janela", "#/busca?q=" + encodeURIComponent(QF));
+            continue;
+          }
+          const d = await dialogo();
+          if (!d.txt.includes(cod)) falha("janela", N_JAN, tipo + ":codigo", `${L}: a janela aberta por ${rot} do ${cod} não mostra o código (título "${d.tit}")`);
+          for (const a of palavrasInternas(d.txt)) falha("tela-preco", "produto sem preço nem estoque", `janela:${a.nome}:${cod}`, `janela do ${cod} mostra "${a.nome}": …${a.trecho}…`);
+          const sw = await page.evaluate(() => document.documentElement.scrollWidth);
+          if (larg === 390 && sw > 390) falha("largura", "390 px sem rolar de lado", "janela", `janela do ${cod}: scrollWidth = ${sw}`);
+          if (tipo === "detalhes") await print("janela");
+          await page.keyboard.press("Escape");
+          const fechou = await page.waitForFunction(() => !document.querySelector("dialog[open]"), null, { timeout: 3000 }).then(() => true, () => false);
+          await page.waitForTimeout(200);
+          const f = await focoInfo();
+          if (!fechou) { falha("janela", N_JAN, tipo + ":esc", `${L}: o Esc não fechou a janela do ${cod}`); await abrir("janela", "#/busca?q=" + encodeURIComponent(QF)); continue; }
+          if (f.cod !== cod) falha("janela", N_JAN, tipo + ":foco", `${L}: depois do Esc, o foco foi para ${f.tag || "nada"}${f.cod ? " do " + f.cod : ""} (esperado o cartão do ${cod})`);
+          if (f.hash !== hashAntes) aviso("janela", N_JAN, `${L}: depois do Esc o endereço ficou "${f.hash}" (antes "${hashAntes}")`);
+          conferirConsole("janela");
+        }
+        // a foto do cartão só amplia: não muda o endereço nem abre a janela do produto
+        const hf = (await page.evaluateHandle(() => [...document.querySelectorAll(".lista .item .foto img")].find((i) => !i.closest(".sem-foto")) || null)).asElement();
+        if (hf) {
+          const cod = (await hf.evaluate((e) => ((e.closest(".item").querySelector(".cod") || {}).textContent || ""))).trim();
+          const hashAntes = await page.evaluate(() => location.hash);
+          await hf.scrollIntoViewIfNeeded();
+          await hf.click();
+          await page.waitForTimeout(400);
+          const d = await dialogo();
+          const hashDepois = await page.evaluate(() => location.hash);
+          if (hashDepois !== hashAntes) { falha("janela", N_JAN, "foto:endereco", `${L}: clicar na foto do ${cod} mudou o endereço para "${hashDepois}"`); await abrir("janela", "#/busca?q=" + encodeURIComponent(QF)); }
+          else if (!d) falha("janela", N_JAN, "foto:ampliar", `${L}: clicar na foto do ${cod} não ampliou a foto`);
+          else {
+            if (d.secoes || /Ficha t[eé]cnica|Refer[eê]ncias cruzadas/.test(d.txt)) falha("janela", N_JAN, "foto:janela", `${L}: clicar na foto do ${cod} abriu a janela do produto (devia só ampliar a foto)`);
+            await page.keyboard.press("Escape");
+            const fechou = await page.waitForFunction(() => !document.querySelector("dialog[open]"), null, { timeout: 3000 }).then(() => true, () => false);
+            if (!fechou) falha("janela", N_JAN, "foto:esc", `${L}: o Esc não fechou a foto ampliada do ${cod}`);
+          }
+          conferirConsole("janela-foto");
+        }
+      }
+
       // ---- página do produto ----
       const N_PROD = "página do produto", N_PRECO = "produto sem preço nem estoque";
       const paginas = [];
       if (pCod) paginas.push([pCod, "produto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Ofereça junto"]]);
       if (comFoto) paginas.push([comFoto, "produto-com-foto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Ofereça junto"]]);
       for (const c of ["TER556556", "1"]) if (existe(c)) paginas.push([porCod.get(normCod(c)), "produto-" + c, []]);
+      // T-0014: é a PÁGINA (link direto #/produto/CODIGO), não a janela. O 1º produto abre com o endereço colado
+      // numa carga nova da página; os outros, trocando o endereço (sem clique no cartão). Janela aberta = falha.
+      let primeira = true;
       for (const [p, nome, secoesEsperadas] of paginas) {
+        if (primeira) {
+          primeira = false;
+          await page.goto("about:blank");
+          erros = [];
+          await page.goto(base + "#/produto/" + encodeURIComponent(p.c), { waitUntil: "networkidle" });
+          await page.waitForFunction(() => !document.getElementById("carregando"), null, { timeout: 15000 }).catch(() => {});
+        }
         await abrir(nome, "#/produto/" + encodeURIComponent(p.c));
         const info = await page.evaluate(() => {
-          const img = document.querySelector(".prod-foto img:not(.sem-foto img)");
+          const img = document.querySelector("#app .prod-foto img:not(.sem-foto img)");
           return {
-            h1: ((document.querySelector(".prod-info h1") || {}).textContent || "").trim(),
-            secoes: [...document.querySelectorAll(".prod-info .secao h2")].map((e) => e.textContent.trim()),
-            semFoto: ((document.querySelector(".prod-foto .sem-foto") || {}).textContent || "").trim(),
+            janela: !!document.querySelector("dialog[open]"),
+            h1: ((document.querySelector("#app .prod-info h1") || {}).textContent || "").trim(),
+            secoes: [...document.querySelectorAll("#app .prod-info .secao h2")].map((e) => e.textContent.trim()),
+            semFoto: ((document.querySelector("#app .prod-foto .sem-foto") || {}).textContent || "").trim(),
             foto: img ? { src: img.getAttribute("src"), ok: img.complete && img.naturalWidth > 0 } : null,
             texto: document.body.innerText,
           };
         });
+        if (info.janela) falha("produto", N_PROD, `${p.c}:janela`, `${L} #/produto/${p.c}: abriu uma janela (dialog) no lugar da página`);
         if (info.h1 !== p.c) falha("produto", N_PROD, `${p.c}:h1`, `${L} ${p.c}: título "${info.h1}"`);
         if (p.i) { if (!info.foto || !info.foto.ok) falha("produto", N_PROD, `${p.c}:foto`, `${L} ${p.c}: a foto ${p.i} não carregou`); }
         else if (!/Foto em breve/.test(info.semFoto)) falha("produto", N_PROD, `${p.c}:sem-foto`, `${L} ${p.c}: sem foto e sem "Foto em breve"`);
@@ -534,7 +855,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         conferirConsole(nome);
       }
       teste("tela-preco", N_PRECO);
-      detalhe("produto", N_PROD, paginas.slice(0, 2).map(([p]) => p.c + (p.i ? " (com foto)" : " (Foto em breve)")).join(" e ") + ": foto, aplicação, referências, ficha técnica, ofereça junto");
+      detalhe("produto", N_PROD, paginas.slice(0, 2).map(([p]) => p.c + (p.i ? " (com foto)" : " (Foto em breve)")).join(" e ") + ": foto, aplicação, referências, ficha técnica, ofereça junto; página pelo link direto, sem janela");
       detalhe("tela-preco", N_PRECO, paginas.map(([p]) => p.c).join(", "));
       await abrir("produto-inexistente", "#/produto/ZZQ999999");
       if (!/não encontrado/.test(await page.evaluate(() => document.body.innerText))) falha("produto", N_PROD, "inexistente", `${L} #/produto/ZZQ999999 sem a mensagem "não encontrado"`);
@@ -552,63 +873,254 @@ async function testarSite(base, ctxJson, dirPrints) {
         for (const s of a.semRotulo) falha("a11y", N_A11Y, `rotulo:${nome}:${s}`, `${L} ${nome}: campo sem rótulo (${s})`);
         conferirConsole(nome);
       }
-      // teclado: Tab até as abas, foco visível, Enter abre a aba
+      // teclado e campos: na tela de hoje, Tab até as abas, foco visível, Enter abre a aba, setas; na nova, os 2 campos
       await page.goto(base + "#/", { waitUntil: "networkidle" });
       await page.waitForFunction(() => !document.getElementById("carregando"), null, { timeout: 15000 }).catch(() => {});
-      let passos = 0;
-      for (let i = 1; i <= 30; i++) { await page.keyboard.press("Tab"); if (await page.evaluate(() => document.activeElement.matches(".abas button"))) { passos = i; break; } }
-      if (!passos) falha("a11y", N_A11Y, "tab", `${L}: o Tab não chega às abas da busca em 30 passos`);
-      else {
-        const foco = await page.evaluate(() => { const cs = getComputedStyle(document.activeElement); return { o: cs.outlineStyle, w: parseFloat(cs.outlineWidth) || 0, s: cs.boxShadow }; });
-        if ((foco.o === "none" || foco.w === 0) && (!foco.s || foco.s === "none")) falha("a11y", N_A11Y, "foco", `${L}: foco nas abas sem contorno visível`);
-        if (larg === 1366) await page.screenshot({ path: path.join(dirPrints, `foco-teclado-${larg}.png`) });
-      }
-      // as 2 abas da T-0011 (R-20261120-104703): "Busca por código, descrição ou aplicação" e "Busca por placa" (Em breve)
-      const abasTela = await page.evaluate(() => [...document.querySelectorAll(".abas button")].map((b) => ({ aba: b.dataset.aba, txt: b.textContent.replace(/\s+/g, " ").trim(), role: b.getAttribute("role") })));
-      const nomesAbas = abasTela.map((x) => x.txt);
-      if (abasTela.length !== 2 || !/c[oó]digo, descri[cç][aã]o ou aplica[cç][aã]o/i.test(nomesAbas[0] || "") || !/placa/i.test(nomesAbas[1] || ""))
-        falha("abas", "abas da busca", "nomes", `${L}: abas = ${nomesAbas.map((t) => `"${t}"`).join(", ") || "nenhuma"} (esperado 2: código, descrição ou aplicação; placa)`);
-      if (abasTela.some((x) => x.role !== "tab")) falha("abas", "abas da busca", "role", `${L}: aba sem role="tab"`);
-      const abaAtiva = () => page.evaluate(() => {
-        const sel = [...document.querySelectorAll(".abas button")].filter((b) => b.getAttribute("aria-selected") === "true").map((b) => b.dataset.aba);
-        const vis = [...document.querySelectorAll(".form-busca [data-campos]")].filter((c) => !c.hidden).map((c) => c.dataset.campos);
-        const painel = document.querySelector('.form-busca [data-campos="placa"]');
-        const visivel = (el) => !!el && !el.hidden && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
-        const campo = painel && painel.querySelector("input");
-        const botao = [...document.querySelectorAll(".form-busca button, .cartao-busca button")].filter((b) => !b.closest(".abas")).find((b) => visivel(b) && /buscar/i.test(b.textContent));
-        return { foco: document.activeElement?.dataset?.aba || "", sel: sel.join(","), vis: vis.join(","), campo: visivel(campo), botao: !!botao };
-      });
-      const [aT, aP] = [abasTela[0]?.aba, abasTela[1]?.aba];
-      if (aT && aP) {
-        // Enter na aba Placa abre o painel, com o campo da placa e o botão "Buscar". Não digita placa nem busca:
-        // o serviço de placas não existe no CI nem na sessão (aviso do gerente, 20/11/2026), e placa real não entra em teste.
-        await page.focus(`.abas button[data-aba="${aP}"]`);
-        await page.keyboard.press("Enter");
-        const e = await abaAtiva();
-        if (e.sel !== aP || e.vis !== aP) falha("a11y", N_A11Y, "enter", `${L}: Enter na aba Placa: selecionada "${e.sel}", painel "${e.vis}"`);
+      if (tela === "abas") {
+        let passos = 0;
+        for (let i = 1; i <= 30; i++) { await page.keyboard.press("Tab"); if (await page.evaluate(() => document.activeElement.matches(".abas button"))) { passos = i; break; } }
+        if (!passos) falha("a11y", N_A11Y, "tab", `${L}: o Tab não chega às abas da busca em 30 passos`);
         else {
-          if (!e.campo) falha("abas", "abas da busca", "placa:campo", `${L}: a aba Placa não mostra o campo da placa`);
-          if (!e.botao) falha("abas", "abas da busca", "placa:botao", `${L}: a aba Placa não mostra o botão "Buscar"`);
+          const foco = await page.evaluate(() => { const cs = getComputedStyle(document.activeElement); return { o: cs.outlineStyle, w: parseFloat(cs.outlineWidth) || 0, s: cs.boxShadow }; });
+          if ((foco.o === "none" || foco.w === 0) && (!foco.s || foco.s === "none")) falha("a11y", N_A11Y, "foco", `${L}: foco nas abas sem contorno visível`);
+          if (larg === 1366) await page.screenshot({ path: path.join(dirPrints, `foco-teclado-${larg}.png`) });
         }
-        // setas, Home e End trocam entre as 2 abas (padrão ARIA): a aba com foco é a selecionada e o painel dela aparece.
-        // Começa com o foco na aba Placa (o Enter na aba de texto leva o foco para o campo q, de propósito).
-        await page.focus(`.abas button[data-aba="${aP}"]`);
-        for (const [tecla, esperada] of [["ArrowRight", aT], ["ArrowLeft", aP], ["ArrowLeft", aT], ["ArrowRight", aP], ["Home", aT], ["End", aP], ["Home", aT]]) {
-          await page.keyboard.press(tecla);
-          const r = await abaAtiva();
-          if (r.foco !== esperada || r.sel !== esperada || r.vis !== esperada)
-            falha("a11y", N_A11Y, "tecla:" + tecla + ">" + esperada, `${L}: ${tecla} devia ir para a aba "${esperada}": foco "${r.foco}", selecionada "${r.sel}", painel "${r.vis}"`);
+        // as 2 abas da T-0011 (R-20261120-104703): "Busca por código, descrição ou aplicação" e "Busca por placa" (Em breve)
+        const abasTela = await page.evaluate(() => [...document.querySelectorAll(".abas button")].map((b) => ({ aba: b.dataset.aba, txt: b.textContent.replace(/\s+/g, " ").trim(), role: b.getAttribute("role") })));
+        const nomesAbas = abasTela.map((x) => x.txt);
+        if (abasTela.length !== 2 || !/c[oó]digo, descri[cç][aã]o ou aplica[cç][aã]o/i.test(nomesAbas[0] || "") || !/placa/i.test(nomesAbas[1] || ""))
+          falha("abas", "abas da busca", "nomes", `${L}: abas = ${nomesAbas.map((t) => `"${t}"`).join(", ") || "nenhuma"} (esperado 2: código, descrição ou aplicação; placa)`);
+        if (abasTela.some((x) => x.role !== "tab")) falha("abas", "abas da busca", "role", `${L}: aba sem role="tab"`);
+        const abaAtiva = () => page.evaluate(() => {
+          const sel = [...document.querySelectorAll(".abas button")].filter((b) => b.getAttribute("aria-selected") === "true").map((b) => b.dataset.aba);
+          const vis = [...document.querySelectorAll(".form-busca [data-campos]")].filter((c) => !c.hidden).map((c) => c.dataset.campos);
+          const painel = document.querySelector('.form-busca [data-campos="placa"]');
+          const visivel = (el) => !!el && !el.hidden && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+          const campo = painel && painel.querySelector("input");
+          const botao = [...document.querySelectorAll(".form-busca button, .cartao-busca button")].filter((b) => !b.closest(".abas")).find((b) => visivel(b) && /buscar/i.test(b.textContent));
+          return { foco: document.activeElement?.dataset?.aba || "", sel: sel.join(","), vis: vis.join(","), campo: visivel(campo), botao: !!botao };
+        });
+        const [aT, aP] = [abasTela[0]?.aba, abasTela[1]?.aba];
+        if (aT && aP) {
+          // Enter na aba Placa abre o painel, com o campo da placa e o botão "Buscar". Não digita placa nem busca:
+          // o serviço de placas não existe no CI nem na sessão (aviso do gerente, 20/11/2026), e placa real não entra em teste.
+          await page.focus(`.abas button[data-aba="${aP}"]`);
+          await page.keyboard.press("Enter");
+          const e = await abaAtiva();
+          if (e.sel !== aP || e.vis !== aP) falha("a11y", N_A11Y, "enter", `${L}: Enter na aba Placa: selecionada "${e.sel}", painel "${e.vis}"`);
+          else {
+            if (!e.campo) falha("abas", "abas da busca", "placa:campo", `${L}: a aba Placa não mostra o campo da placa`);
+            if (!e.botao) falha("abas", "abas da busca", "placa:botao", `${L}: a aba Placa não mostra o botão "Buscar"`);
+          }
+          // setas, Home e End trocam entre as 2 abas (padrão ARIA): a aba com foco é a selecionada e o painel dela aparece.
+          // Começa com o foco na aba Placa (o Enter na aba de texto leva o foco para o campo q, de propósito).
+          await page.focus(`.abas button[data-aba="${aP}"]`);
+          for (const [tecla, esperada] of [["ArrowRight", aT], ["ArrowLeft", aP], ["ArrowLeft", aT], ["ArrowRight", aP], ["Home", aT], ["End", aP], ["Home", aT]]) {
+            await page.keyboard.press(tecla);
+            const r = await abaAtiva();
+            if (r.foco !== esperada || r.sel !== esperada || r.vis !== esperada)
+              falha("a11y", N_A11Y, "tecla:" + tecla + ">" + esperada, `${L}: ${tecla} devia ir para a aba "${esperada}": foco "${r.foco}", selecionada "${r.sel}", painel "${r.vis}"`);
+          }
         }
+        conferirConsole("teclado");
+        detalhe("abas", "abas da busca", nomesAbas.map((t) => `"${t}"`).join(" e ") + '; a de placa abre com o campo e o botão "Buscar" (sem consultar o serviço)');
+        detalhe("a11y", N_A11Y, `campos com rótulo, imagens com alt, Tab chega às abas${passos ? ` (${passos} passos)` : ""}, foco visível, Enter abre a aba, setas, Home e End trocam entre as 2 abas`);
+      } else if (tela === "campos") {
+        // ---- tela nova (T-0014): sem abas, campo q e campo da placa, cada um com botão e Enter ----
+        const N_CB = "campos da busca", N_PL = "campo da placa";
+        const focoVisivel = () => page.evaluate(() => { const cs = getComputedStyle(document.activeElement); return (cs.outlineStyle !== "none" && (parseFloat(cs.outlineWidth) || 0) > 0) || (!!cs.boxShadow && cs.boxShadow !== "none"); });
+        // teclado: Tab chega ao campo q e depois ao da placa, com foco visível nos 2
+        let pq = 0, pp = 0;
+        for (let i = 1; i <= 40 && !pp; i++) {
+          await page.keyboard.press("Tab");
+          const qual = await page.evaluate(() => { const c = window.__bapT.campos(); return document.activeElement === c.q ? "q" : document.activeElement === c.placa ? "placa" : ""; });
+          if (qual === "q" && !pq) { pq = i; if (!(await focoVisivel())) falha("a11y", N_A11Y, "foco:q", `${L}: foco no campo q sem contorno visível`); if (larg === 1366) await page.screenshot({ path: path.join(dirPrints, `foco-teclado-${larg}.png`) }); }
+          if (qual === "placa") { pp = i; if (!(await focoVisivel())) falha("a11y", N_A11Y, "foco:placa", `${L}: foco no campo da placa sem contorno visível`); }
+        }
+        if (!pq) falha("a11y", N_A11Y, "tab:q", `${L}: o Tab não chega ao campo q em 40 passos`);
+        if (!pp) falha("a11y", N_A11Y, "tab:placa", `${L}: o Tab não chega ao campo da placa em 40 passos`);
+        else if (pq && pp < pq) falha("a11y", N_A11Y, "tab:ordem", `${L}: o Tab passa na placa (${pp}) antes do q (${pq}); o q fica à esquerda`);
+        // rótulo, botão próprio e posição: lado a lado no computador (q à esquerda, placa menor), um embaixo do outro no celular
+        const posicao = () => page.evaluate(() => {
+          const T = window.__bapT, c = T.campos();
+          const r = (e) => { const b = e.getBoundingClientRect(); return { x: b.left, y: b.top, w: b.width, r: b.right, b: b.bottom }; };
+          return { nq: T.nome(c.q), np: T.nome(c.placa), q: r(c.q), p: r(c.placa), nb: T.botoesBuscar().length };
+        });
+        const conferirPosicao = (pos, w) => {
+          if (w >= 1000) {
+            const mesmaLinha = pos.p.y < pos.q.b && pos.q.y < pos.p.b;
+            if (!mesmaLinha || pos.p.x < pos.q.r - 1) falha("campos-busca", N_CB, `lado:${w}`, `${w} px: o campo da placa não fica ao lado (à direita) do campo q (q x=${Math.round(pos.q.x)}..${Math.round(pos.q.r)} y=${Math.round(pos.q.y)}; placa x=${Math.round(pos.p.x)} y=${Math.round(pos.p.y)})`);
+            if (pos.p.w >= pos.q.w) falha("campos-busca", N_CB, `menor:${w}`, `${w} px: o campo da placa (${Math.round(pos.p.w)} px) não é menor que o q (${Math.round(pos.q.w)} px)`);
+          } else if (pos.p.y < pos.q.b - 1) falha("campos-busca", N_CB, `embaixo:${w}`, `${w} px: o campo da placa não fica embaixo do q (q termina em y=${Math.round(pos.q.b)}, placa começa em y=${Math.round(pos.p.y)})`);
+        };
+        const pos = await posicao();
+        if (!pos.nq) falha("a11y", N_A11Y, "rotulo:q", `${L}: o campo q sem rótulo acessível`);
+        if (!/placa/i.test(pos.np)) falha("a11y", N_A11Y, "rotulo:placa", `${L}: o campo da placa sem rótulo acessível com "placa" ("${pos.np}")`);
+        if (pos.nb !== 1) falha("campos-busca", N_CB, "botoes", `${L}: o quadro da busca tem ${pos.nb} botão(ões) "Buscar" (pedido: 1 só para os 2 campos)`);
+        conferirPosicao(pos, larg);
+        if (larg === 1366) {
+          await page.setViewportSize({ width: 1536, height: 864 }); await page.waitForTimeout(300);
+          conferirPosicao(await posicao(), 1536);
+          await page.setViewportSize({ width: larg, height: alt }); await page.waitForTimeout(300);
+        }
+        CAMPOS_TELA.rotulos = `q "${pos.nq}" e placa "${pos.np}"`;
+
+        // ---- campo da placa: Enter e botão chamam o serviço (interceptado, 503); com o veículo falso, a etiqueta ----
+        const PL_RX = new RegExp(PLACA_FALSA.slice(0, 3) + "[\\s-]?" + PLACA_FALSA.slice(3), "i");
+        const consoleTxt = [];
+        const ouvirConsole = (m) => consoleTxt.push(m.text());
+        page.on("console", ouvirConsole);
+        const reqLocal = [];
+        const ouvirReq = (r) => { if (local(r.url())) reqLocal.push(r.url()); };
+        page.on("request", ouvirReq);
+        // a placa fora da tela: endereço, título, localStorage, sessionStorage
+        const placaFora = (onde) => page.evaluate((fonte) => {
+          const rx = new RegExp(fonte, "i"), achou = [];
+          if (rx.test(decodeURIComponent(location.href))) achou.push("endereço (location.href)");
+          if (rx.test(document.title)) achou.push("título da página");
+          for (const [nome, st] of [["localStorage", localStorage], ["sessionStorage", sessionStorage]])
+            for (let i = 0; i < st.length; i++) { const k = st.key(i); if (rx.test(k + " " + st.getItem(k))) achou.push(nome); }
+          return [...new Set(achou)];
+        }, PL_RX.source).then((lst) => { for (const x of lst) falha("placa", N_PL, `fora:${x}`, `${L} ${onde}: a placa aparece no ${x}`); });
+        const pegarPlaca = async () => (await page.evaluateHandle(() => window.__bapT.campos().placa)).asElement();
+        const textoCartao = () => page.evaluate(() => (document.querySelector(".cartao-busca") || document.body).innerText);
+        const esperarChamada = async (antes) => { for (let i = 0; i < 50 && PL.chamadas === antes; i++) await page.waitForTimeout(100); return PL.chamadas > antes; };
+        for (const como of ["Enter", "botão"]) {
+          await abrir("inicio", "#/sobre"); await abrir("inicio", "#/");
+          const antesTxt = await textoCartao(), antesN = PL.chamadas;
+          PL.esperando = true; PL.resposta = null;
+          const hp = await pegarPlaca();
+          await hp.fill(PLACA_FALSA);
+          if (como === "Enter") await hp.press("Enter");
+          else {
+            const hb = (await page.evaluateHandle(() => window.__bapT.botoesBuscar()[0] || null)).asElement();
+            if (hb) await hb.click(); else falha("campos-busca", N_CB, "botoes", `${L}: o quadro da busca não tem o botão "Buscar"`);
+          }
+          const chamou = await esperarChamada(antesN);
+          await page.waitForTimeout(400);
+          PL.esperando = false;
+          if (!chamou) falha("placa", N_PL, "chamou:" + como, `${L}: ${como} no campo da placa não chamou o serviço (interceptado, 503)`);
+          else {
+            const h = await page.evaluate(() => location.hash);
+            if (h !== "#/") falha("placa", N_PL, "503:tela:" + como, `${L}: com o serviço em 503, ${como} na placa mudou a tela para "${h}"`);
+            if ((await textoCartao()) === antesTxt) falha("placa", N_PL, "503:msg:" + como, `${L}: com o serviço em 503, ${como} na placa não mostrou nenhuma mensagem`);
+          }
+          await placaFora(`(503, ${como})`);
+          if (como === "Enter" && larg === 390) await print("placa-503");
+          conferirConsole("placa-503");
+        }
+        // veículo falso (200): a placa só na etiqueta dela, com o "x"; o veículo em etiquetas separadas, sem caixa alta
+        await abrir("inicio", "#/sobre"); await abrir("inicio", "#/");
+        PL.esperando = true; PL.resposta = VEICULO_FALSO;
+        const antesN = PL.chamadas;
+        const hp = await pegarPlaca();
+        await hp.fill(PLACA_FALSA);
+        await hp.press("Enter");
+        const chamou = await esperarChamada(antesN);
+        await page.waitForFunction(() => location.hash.startsWith("#/busca"), null, { timeout: 5000 }).catch(() => {});
+        await page.waitForTimeout(400);
+        PL.esperando = false; PL.resposta = null;
+        if (!chamou) falha("placa", N_PL, "chamou:veiculo", `${L}: Enter no campo da placa não chamou o serviço (veículo falso)`);
+        const v = await page.evaluate((fonte) => {
+          const T = window.__bapT, rx = new RegExp(fonte, "gi"), rxT = new RegExp(fonte, "i"), conta = (s) => (String(s).match(rx) || []).length;
+          const c = T.campos();
+          const xPlaca = T.etiquetas().find((b) => rxT.test(b.getAttribute("aria-label") + " " + (b.parentElement ? b.parentElement.textContent : "")));
+          const etq = xPlaca ? xPlaca.parentElement : null;
+          const total = conta(document.documentElement.outerHTML), naEtq = etq ? conta(etq.outerHTML) : 0, noCampo = c.placa ? conta(c.placa.outerHTML) : 0;
+          // R-20261120-115432: a etiqueta da placa e as do veículo ficam DENTRO do quadro da busca (o contêiner do campo
+          // da placa), embaixo do campo da placa; abaixo da barra de filtros, só o termo, os filtros e o "Limpar tudo"
+          const Q = T.quadro(), fimPlaca = c.placa ? c.placa.getBoundingClientRect().bottom : 0;
+          const folha = (e) => !e.children.length && T.visivel(e) && !e.closest("script, style");
+          const txt = (e) => e.textContent.replace(/\s+/g, " ").trim();
+          const folhas = [...Q.querySelectorAll("*")].filter((e) => folha(e) && e.getBoundingClientRect().top >= fimPlaca - 1).map(txt).filter(Boolean);
+          const foraQuadro = [...document.querySelectorAll("#app *")].filter((e) => folha(e) && !Q.contains(e) && !e.closest(".lista, h1, .total, dialog")).map(txt).filter((t) => /\bgol\b/i.test(t));
+          return { hash: location.hash, etq: etq ? txt(etq) : "", xLabel: xPlaca ? xPlaca.getAttribute("aria-label") : "", fora: total - naEtq - noCampo, folhas, foraQuadro,
+            etqDentro: !!etq && Q.contains(etq), etqEmbaixo: !!etq && etq.getBoundingClientRect().top >= fimPlaca - 1, itens: document.querySelectorAll(".lista .item").length };
+        }, PL_RX.source);
+        if (!v.hash.startsWith("#/busca")) falha("placa", N_PL, "veiculo:tela", `${L}: com o veículo falso, a placa não levou à lista (endereço "${v.hash}")`);
+        if (!v.itens) falha("placa", N_PL, "veiculo:lista", `${L}: o veículo falso (VW GOL 2018) trouxe a lista vazia`);
+        if (!v.etq) falha("placa", N_PL, "etiqueta", `${L}: sem a etiqueta da placa com o "x" (etiquetas "Tirar ...": ${(await page.evaluate(() => window.__bapT.etiquetas().map((b) => b.getAttribute("aria-label")))).join(" | ") || "nenhuma"})`);
+        if (v.fora > 0) falha("placa", N_PL, "dom", `${L}: a placa aparece ${v.fora} vez(es) no DOM fora da etiqueta dela e do campo`);
+        if (v.etq && !v.etqDentro) falha("placa", N_PL, "etiqueta:quadro", `${L}: a etiqueta da placa ("${cortar(v.etq, 40)}") fica fora do quadro da busca (pedido: dentro, embaixo do campo da placa)`);
+        else if (v.etq && !v.etqEmbaixo) falha("placa", N_PL, "etiqueta:embaixo", `${L}: a etiqueta da placa não fica embaixo do campo da placa`);
+        if (v.foraQuadro.length) falha("placa", N_PL, "veiculo:fora-quadro", `${L}: o veículo aparece fora do quadro da busca (abaixo dos filtros?): ${cortar(v.foraQuadro.join(" | "), 120)}`);
+        const mm = v.folhas.find((t) => /\bgol\b/i.test(t) && /volkswagen|\bvw\b/i.test(t));
+        if (!mm) falha("placa", N_PL, "veiculo:marca", `${L}: sem a etiqueta do veículo com marca e modelo (Volkswagen Gol) no quadro da busca, embaixo do campo da placa; textos ali: ${cortar(v.folhas.join(" | "), 160) || "nenhum"}`);
+        else if (mm === mm.toUpperCase()) falha("placa", N_PL, "veiculo:caixa-alta", `${L}: marca e modelo em caixa alta: "${mm}" (pedido: sem tudo maiúsculo)`);
+        if (mm && !v.folhas.some((t) => /\b2018\b/.test(t) && !/\bgol\b/i.test(t))) falha("placa", N_PL, "veiculo:ano", `${L}: o ano 2018 não vem numa etiqueta separada da marca e modelo`);
+        if (mm && !v.folhas.some((t) => /\b1[.,]6\b/.test(t) && !/\bgol\b/i.test(t) && !/\b2018\b/.test(t))) falha("placa", N_PL, "veiculo:cilindrada", `${L}: a cilindrada 1.6 não vem numa etiqueta separada`);
+        await placaFora("(veículo falso)");
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await print("busca-placa");
+        const listaVei = (await listaTodos()).itens.map((i) => i.c);
+        // o "x" da placa: a placa some do DOM
+        if (v.etq) {
+          const hx = (await page.evaluateHandle((fonte) => { const rx = new RegExp(fonte, "i"); return window.__bapT.etiquetas().find((b) => rx.test(b.getAttribute("aria-label") + " " + (b.parentElement ? b.parentElement.textContent : ""))) || null; }, PL_RX.source)).asElement();
+          const clicou = hx ? await hx.click({ timeout: 5000 }).then(() => true, () => false) : false;
+          await page.waitForTimeout(400);
+          if (!clicou) falha("placa", N_PL, "x:clique", `${L}: não consegui clicar no "x" da etiqueta da placa ("${v.xLabel}")`);
+          const resta = await page.evaluate((fonte) => { const rx = new RegExp(fonte, "gi"); const c = window.__bapT.campos(); return (document.documentElement.outerHTML.match(rx) || []).length - (c.placa ? (c.placa.outerHTML.match(rx) || []).length : 0); }, PL_RX.source);
+          if (resta > 0) falha("placa", N_PL, "x:some", `${L}: depois do "x", a placa continua no DOM (${resta} vez(es))`);
+          await placaFora("(depois do x)");
+        }
+        // os 2 campos preenchidos (R-20261120-115432, 1 botão só): placa + "amortecedor" = a lista do veículo filtrada pelo
+        // texto. Esperado: os produtos da lista do veículo (acima) que têm "AMORTECEDOR" no texto, nem mais nem menos.
+        const TXT2 = "amortecedor";
+        const esperado2 = listaVei.filter((c) => norm(textoDe(porCod.get(normCod(c)) || {})).includes(norm(TXT2)));
+        const dois = [];
+        for (const como of ["Enter no campo geral", "Enter no campo da placa", "botão"]) {
+          await abrir("inicio", "#/sobre"); await abrir("inicio", "#/");
+          PL.esperando = true; PL.resposta = VEICULO_FALSO;
+          const n0 = PL.chamadas;
+          await page.fill('input[name="q"]', TXT2);
+          await (await pegarPlaca()).fill(PLACA_FALSA);
+          if (como === "botão") { const hb = (await page.evaluateHandle(() => window.__bapT.botoesBuscar()[0] || null)).asElement(); if (hb) await hb.click(); }
+          else if (como === "Enter no campo geral") await page.press('input[name="q"]', "Enter");
+          else await (await pegarPlaca()).press("Enter");
+          const ch = await esperarChamada(n0);
+          await page.waitForFunction(() => location.hash.startsWith("#/busca"), null, { timeout: 5000 }).catch(() => {});
+          await page.waitForTimeout(400);
+          PL.esperando = false; PL.resposta = null;
+          if (!ch) { falha("placa", N_PL, "dois:chamou:" + como, `${L}: placa + "${TXT2}", ${como}: não consultou a placa`); continue; }
+          const got = (await listaTodos()).itens.map((i) => i.c);
+          const falta = esperado2.filter((c) => !got.includes(c)), sobra = got.filter((c) => !esperado2.includes(c));
+          if (!got.length || falta.length || sobra.length)
+            falha("placa", N_PL, "dois:lista:" + como, `${L}: placa (VW GOL 2018) + "${TXT2}", ${como}: ${got.length} produto(s), esperado ${esperado2.length} (os do veículo com "${TXT2}")` +
+              (falta.length ? `; faltam ${falta.slice(0, 5).join(", ")}` : "") + (sobra.length ? `; sobram ${sobra.slice(0, 5).join(", ")}` : ""));
+          await placaFora(`(placa + "${TXT2}", ${como})`);
+          if (como === "botão") { await page.evaluate(() => window.scrollTo(0, 0)); await print("busca-placa-texto"); }
+          dois.push(`${como} = ${got.length}`);
+          conferirConsole("placa-texto");
+        }
+        CAMPOS_TELA.dois = `placa + "${TXT2}" = ${esperado2.length} de ${listaVei.length} do veículo (${dois.join("; ")})`;
+        page.off("console", ouvirConsole);
+        page.off("request", ouvirReq);
+        if (consoleTxt.some((t) => PL_RX.test(t))) falha("placa", N_PL, "console", `${L}: a placa aparece no console`);
+        const reqComPlaca = reqLocal.filter((u) => PL_RX.test(decodeURIComponent(u)));
+        if (reqComPlaca.length) falha("placa", N_PL, "pedido-local", `${L}: a placa foi num pedido ao site: ${cortar(reqComPlaca[0], 80)}`);
+        conferirConsole("placa-veiculo");
+        CAMPOS_TELA.placa = v.etq ? `etiqueta "${cortar(v.etq, 40)}"` : "";
+        CAMPOS_TELA.veiculo = mm || "";
+        detalhe("a11y", N_A11Y, `campos com rótulo, imagens com alt, Tab chega ao campo q e ao da placa (${pq} e ${pp} passos), foco visível nos 2`);
       }
-      conferirConsole("teclado");
-      detalhe("abas", "abas da busca", nomesAbas.map((t) => `"${t}"`).join(" e ") + '; a de placa abre com o campo e o botão "Buscar" (sem consultar o serviço)');
-      detalhe("a11y", N_A11Y, `campos com rótulo, imagens com alt, Tab chega às abas${passos ? ` (${passos} passos)` : ""}, foco visível, Enter abre a aba, setas, Home e End trocam entre as 2 abas`);
 
       await ctx.close();
     }
   } finally {
     await browser.close();
   }
+  const nomeTela = { abas: "a de hoje (2 abas: código, descrição ou aplicação; placa)", campos: "a nova (sem abas: q e placa lado a lado)", "?": "não reconhecida" };
+  detalhe("tela", "tela da busca", [...TELAS].map((t) => nomeTela[t] || t).join(" e ") + "; filtros: " + ([...FILTROS].map((f) => ({ lateral: "painel lateral", barra: "barra horizontal" })[f] || "não achados").join(" e ") || "?"));
+  teste("tela", "tela da busca");
+  const siTxt = FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "";
+  detalhe("filtros", "filtros da busca", [siTxt, FILTRO_SI.marcou ? "barra: Esc fecha; " + FILTRO_SI.marcou + "; etiqueta \"Tirar\" criada e tirada" : ""].filter(Boolean).join("; "));
+  if (TELAS.has("campos")) {
+    detalhe("campos-busca", "campos da busca", `${CAMPOS_TELA.rotulos || "?"}; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro; q com Enter e botão (busca código e veículo)`);
+    detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} e veículo "${CAMPOS_TELA.veiculo || "?"}" sem caixa alta, ano e cilindrada separados, dentro do quadro da busca embaixo da placa; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM`);
+    detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 5 na 1ª linha no computador e 2 no celular; texto do cartão >= 12 px`);
+  }
+  if (JANELAS.size) detalhe("janela", "janela do produto", `"+ Detalhes" e código/nome abrem o dialog com o código; Esc fecha e devolve o foco ao cartão; a foto do cartão só amplia (${[...JANELAS].join(" e ")})`);
+  else { teste("janela", "janela do produto"); detalhe("janela", "janela do produto", 'o site não tem a janela (sem "+ Detalhes" no cartão): não conferida'); }
   detalhe("largura", "390 px sem rolar de lado", "scrollWidth <= 390 em todas as telas abertas");
   detalhe("console", "console sem erro", "0 erro do site nas telas abertas, nas 2 larguras");
   teste("largura", "390 px sem rolar de lado");

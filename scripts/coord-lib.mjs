@@ -23,6 +23,9 @@ const AGENTES_DO_TIME = [
   'integracao-placas',
   'testes',
   'revisor-codigo',
+  'designer-ux',
+  'design-de-marca',
+  'corretor-redundancias',
 ];
 export const AGENTES = String(process.env.BAP_AGENTES_TESTE || '').trim()
   ? String(process.env.BAP_AGENTES_TESTE).split(',').map((a) => a.trim()).filter(Boolean)
