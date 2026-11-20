@@ -54,8 +54,19 @@ def sem_acento(s: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
 
 
-def refs_de(texto: str) -> list[dict]:
-    """'REFERENCIAS CRUZADAS - AMPRI: 24125, TRW: X' → [{'m': 'AMPRI', 'c': '24125'}, ...]."""
+# Referência que é o próprio produto (T-0017, R-20261120-154100): as marcas da BAP ("BAP PN_2: BS14" no BS14) e todo
+# código igual ao CODIGO_BAP (sem espaço e sem pontuação) não vão para o site. É um filtro a mais: não troca o corte do
+# "| ANTERIOR" nem do "BAP BOX". [SUPOSIÇÃO] "BAPTA PN" pode ser código de fornecedor; sai do mesmo jeito.
+MARCAS_PROPRIAS = {"BAP", "BAP PN_2", "BAPTA PN"}
+
+
+def so_codigo(s: str) -> str:
+    return re.sub(r"[^A-Z0-9]", "", sem_acento(s).upper())
+
+
+def refs_de(texto: str, codigo: str = "") -> list[dict]:
+    """'REFERENCIAS CRUZADAS - AMPRI: 24125, TRW: X' → [{'m': 'AMPRI', 'c': '24125'}, ...], sem as do próprio produto."""
+    proprio = so_codigo(codigo)
     t = re.sub(r"^\s*REFER[ÊE]NCIAS?\s+CRUZADAS?\s*[-:]\s*", "", texto, flags=re.I)
     saida = []
     for parte in re.split(r"\s*[;,]\s*(?=[A-ZÀ-Ú0-9 .&/\-]{2,30}:)|\s+/\s+(?=[A-ZÀ-Úa-z][\w .&-]{1,30}\s+\S)", t):
@@ -70,7 +81,8 @@ def refs_de(texto: str) -> list[dict]:
                 saida.append({"m": m.group(1).strip(), "c": cod})
         else:
             saida.append({"m": "", "c": parte})
-    return saida
+    return [x for x in saida if re.sub(r"\s+", " ", x["m"].upper()) not in MARCAS_PROPRIAS
+            and not (proprio and so_codigo(x["c"]) == proprio)]
 
 
 # Ficha técnica do site: SÓ o que está nesta lista (os DADOS_ADICIONAIS também têm custo de importação, MOQ,
@@ -223,7 +235,7 @@ def ler_base(caminho: Path) -> list[dict]:
             "c": cod,
             "d": g(r, "DESCRICAO"),
             "a": apl,
-            "r": refs_de(g(r, "REFERENCIAS_CRUZADAS")),
+            "r": refs_de(g(r, "REFERENCIAS_CRUZADAS"), cod),
             "x": [e for e in extras if sem_acento(e[0]).upper() not in ("CATEGORIA", "MONTADORA")],
             "mo": mont,
             "an": list(anos_de(brutos)) if anos_de(brutos) else [],

@@ -1303,10 +1303,21 @@
   }
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
+  // Linhas da lista da aplicação (T-0017, R-20261120-153900): cada " ; " (bloco de marca) começa linha nova e, dentro do
+  // bloco, cada " · " também; o pedaço que é só ano ("2011 até 2014", "2009>", "2007–2012", "01/1979–12/1998",
+  // "2014 em Diante", "2010") fica na linha do veículo de antes ("BMW - X1 2.0 L 16V · 2011 até 2014"). Só a tela: a
+  // busca continua lendo o p.a inteiro.
+  const ANO_APL = String.raw`(?:\d{2}\/)?(?:19|20)\d{2}`;
+  const SO_ANO = new RegExp(`^\\(?${ANO_APL}(?:\\s*(?:até|a|–|-|\\/)\\s*${ANO_APL})?(?:\\s*(?:>|→|até|em diante))?\\)?$`, "i");
+  const linhasAplic = (a) => String(a || "").split(/\s+;\s+/).flatMap((bloco) => bloco.split(/\s+·\s+/).reduce((ls, x) => {
+    if (ls.length && SO_ANO.test(x.trim())) ls[ls.length - 1] += " · " + x; else ls.push(x);
+    return ls;
+  }, [])).filter((x) => x.trim());
   function produtoHtml(p, naJanela) {
     const H = naJanela ? "h2" : "h1", H2 = naJanela ? "h3" : "h2", H3 = naJanela ? "h4" : "h3";
-    const aplicacoes = String(p.a || "").split(/\s+·\s+(?=[A-ZÀ-Úa-zà-ú0-9])/).length > 1 && (p.a || "").length > 160
-      ? `<ul class="aplic">${p.a.split(/\s+·\s+/).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p.a)}</p>`;
+    const linhas = linhasAplic(p.a);
+    const aplicacoes = linhas.length > 1 && (p.a || "").length > 160
+      ? `<ul class="aplic">${linhas.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p.a)}</p>`;
     const refs = (p.r || []).filter((x) => x.c);
     const ficha = [];
     if (p.po) ficha.push(["Posição", titulo(p.po)]);

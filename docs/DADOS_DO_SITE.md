@@ -7,7 +7,7 @@
 | `c` | CODIGO_BAP |
 | `d` | DESCRICAO |
 | `a` | APLICACAO |
-| `r` | REFERENCIAS_CRUZADAS, separadas em marca e código. O que vem depois de "\| ANTERIOR" e o "BAP BOX USD" saem. |
+| `r` | REFERENCIAS_CRUZADAS, separadas em marca e código. O que vem depois de "\| ANTERIOR" e o "BAP BOX USD" saem. Também saem as referências do próprio produto (T-0017): as marcas "BAP", "BAP PN_2" e "BAPTA PN" e todo código igual ao CODIGO_BAP, sem espaço e sem pontuação (374 referências em 372 produtos na v18). |
 | `x` | ficha técnica: só a lista branca `FICHA` dos DADOS_ADICIONAIS |
 | `mo` | montadora (dos DADOS_ADICIONAIS ou do começo da aplicação, normalizada: GM → CHEVROLET, VW → VOLKSWAGEN...) |
 | `an` | ANO_INICIO e ANO_FIM, quando existem |
