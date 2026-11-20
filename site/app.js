@@ -25,6 +25,8 @@
   // e os filtros, abaixo da barra.
   let VEICULO_PLACA = null;
   const app = document.getElementById("app");
+  const TITULO = document.title; // o do index.html: "Catálogo online BAP · Componentes de qualidade"
+  const tituloProduto = (p) => p.c + " · " + p.d + " · " + TITULO.split(" · ")[0]; // "<código> · <descrição> · Catálogo online BAP"
   let BASE = null;           // { gerado_em, total, produtos }
   const NOME_MARCA = new Map(); // marca sem acento → como a base escreve
   let TEM_VE = false;        // o produtos.json tem o campo "ve" (T-0017) em algum produto
@@ -742,7 +744,7 @@
   const SERVICO = PLACAS_URL.replace(/\/veiculo$/, ""); // a mesma URL base da placa
   const RECENTES_MIN = 20, RECENTES_MS = 3000; // menos de 20 aberturas em 7 dias, erro ou mais de 3 s: "Destaques"
   const N_LISTA = 8; // linhas da lista do início (op4c; o serviço devolve até 8)
-  // a imagem da faixa do início (e do convite ao catálogo na Sobre): um lugar só para trocar (op4f em simulação)
+  // a imagem da faixa do início (e do convite ao catálogo na Sobre): um lugar só para trocar
   const IMG_FAIXA = { src: "assets/hero_faixa.webp", w: 979, h: 661, alt: "Amortecedor, kit batente, óleos, bateria e peças de freio BAP" }; // a B (R-20261120-145600)
   let MAIS_VISTOS = null; // a resposta, uma vez por carga da página (só em memória)
   const CONTADOS = new Set(); // [SUPOSIÇÃO] cada código conta uma vez por carga da página
@@ -921,18 +923,17 @@
   }
 
   // ---------- filtros e etiquetas (R-20261120-113148 e R-20261120-123800, Alexandre) ----------
-  // Um grupo por filtro (Linha, Categoria, Sistema, Família), aberto, com caixas de marcar (uma ou mais) e a contagem;
-  // o botão do grupo só recolhe. Ficam na coluna à esquerda dos cartões (no celular, no painel "Filtrar"). A lógica:
-  // si=, fa=, li= e ca= no endereço (repetidos quando há mais de um) e a contagem sobre o resultado sem o próprio
-  // filtro. Abaixo, as etiquetas do termo (q) e de cada filtro marcado, com o X, e o "Limpar tudo". A placa e o
-  // veículo ficam no quadro da busca (montarBusca).
-  // ordem dos grupos, no computador e no celular: Linha, Categoria, Sistema, Família (R-20261120-145600-alexandre)
+  // Um grupo por filtro, aberto, com caixas de marcar (uma ou mais) e a contagem, na ordem fixa Linha, Categoria,
+  // Sistema, Família, no computador e no celular (R-20261120-145600-alexandre); o botão do grupo só recolhe. Ficam na
+  // coluna à esquerda dos cartões (no celular, no painel "Filtrar"). A lógica: si=, fa=, li= e ca= no endereço
+  // (repetidos quando há mais de um). As opções de cada grupo e a ordem delas vêm da busca sem nenhum filtro marcado
+  // (não somem ao marcar outro); a contagem, da busca com os outros filtros. Com 0, a opção fica cinza e desabilitada
+  // (a marcada, nunca). Abaixo, as etiquetas do termo (q) e de cada filtro marcado, com o X, e o "Limpar tudo". A
+  // placa e o veículo ficam no quadro da busca (montarBusca).
   const ROT_FILTRO = { li: "Linha", ca: "Categoria", si: "Sistema", fa: "Família" };
   let FILTRO_FOCO = null; // { k, v, y }: o que reabrir e focar depois de refazer a lista
   function montarFiltros(pr, todos) {
     const barra = app.querySelector(".barra-filtros");
-    // as opções não somem ao marcar outra: a lista e a ordem de cada grupo vêm da busca sem nenhum filtro marcado;
-    // a contagem, da busca com os outros filtros. Com 0, a opção fica cinza e desabilitada (a marcada, nunca).
     const semFiltros = new URLSearchParams(pr); Object.keys(ROT_FILTRO).forEach((k) => semFiltros.delete(k));
     const universo = semFiltros.toString() === pr.toString() ? todos : buscar(semFiltros);
     barra.innerHTML = Object.keys(ROT_FILTRO).map((k) => {
@@ -1417,7 +1418,7 @@
       app.innerHTML = `<div class="pagina-produto"><div class="vazio"><b>Produto ${esc(codigo)} não encontrado</b><a href="#/busca?cod=${encodeURIComponent(codigo)}">Buscar como referência cruzada</a></div></div>`;
       return;
     }
-    document.title = p.c + " · " + p.d + " · Catálogo online BAP";
+    document.title = tituloProduto(p);
     contarAbertura(p); // T-0018: conta a abertura do produto
     const daLista = ROTA_ANTERIOR && ROTA_ANTERIOR.startsWith("#/busca");
     app.innerHTML = `<div class="pagina-produto produto-conteudo">
@@ -1453,7 +1454,7 @@
       <div class="janela-corpo produto-conteudo">${produtoHtml(p, true)}</div>`;
     dlg.querySelector(".janela-x").addEventListener("click", () => fecharJanela(true));
     ligarAcoes(dlg);
-    document.title = p.c + " · " + p.d + " · Catálogo online BAP";
+    document.title = tituloProduto(p);
     document.documentElement.classList.add("com-janela");
     if (!dlg.open) dlg.showModal();
     dlg.querySelector(".janela-corpo").scrollTop = 0;
@@ -1469,7 +1470,7 @@
     dlg.close();
     dlg.innerHTML = ""; // a janela fechada fica vazia: não sobra produto para o PDF
     document.documentElement.classList.remove("com-janela");
-    document.title = "Catálogo online BAP · Componentes de qualidade";
+    document.title = TITULO;
     const quem = LINK_CARTAO && LINK_CARTAO.isConnected ? LINK_CARTAO : linkDoCartao(cod);
     LINK_CARTAO = null;
     if (quem) quem.focus({ preventScroll: true });
@@ -1541,7 +1542,7 @@
     ESTADO_LISTA = null;
     ROTA_ANTERIOR = ROTA_ATUAL;
     ROTA_ATUAL = location.hash || "#/";
-    document.title = "Catálogo online BAP · Componentes de qualidade";
+    document.title = TITULO;
     let volta = null;
     if (ehProduto) telaProduto(cod);
     else if (caminho === "/busca") {
@@ -1569,7 +1570,7 @@
     if (CLICOU_CARTAO) LINK_CARTAO = lk;
     // o botão verde do rodapé (op4e) volta ao topo; o foco vai para o conteúdo
     if (ev.target.closest(".rodape-topo")) {
-      window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      window.scrollTo({ top: 0 }); // suave ou direto pelo scroll-behavior do CSS (reduce)
       app.focus({ preventScroll: true });
     }
   });

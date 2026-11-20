@@ -28,6 +28,7 @@
   --largura: 1880px;
   --foto-cartao: 150px;
   --foto-cartao-cel: 55px;
+  --alto-topo: 84px; /* altura do cabeçalho e uma folga: scroll-padding-top e a foto do produto (76 px no celular) */
   /* fundo da faixa do início e do topo da Sobre (T-0018): só tokens; o verde translúcido é o --verde no color-mix */
   --fundo-faixa: radial-gradient(900px 420px at 88% 30%, color-mix(in srgb, var(--verde) 35%, transparent) 0%, transparent 65%),
                  linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%);
@@ -38,9 +39,8 @@
 * { box-sizing: border-box; }
 /* o cabeçalho fica por cima (fixo no início, sticky nas outras telas): o foco e as âncoras param abaixo dele
    (WCAG 2.4.11; designer-ux, T-0018) */
-html { scroll-behavior: smooth; scroll-padding-top: 84px; }
-@media (max-width: 640px) { html { scroll-padding-top: 76px; } }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html { scroll-padding-top: var(--alto-topo); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } } /* com reduce, a rolagem vai direto */
 body { margin: 0; font-family: Poppins, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--texto); background: var(--fundo); font-size: 15px; line-height: 1.5; }
 img { max-width: 100%; display: block; }
 a { color: var(--verde-txt); }
@@ -57,7 +57,7 @@ main:focus, main:focus-visible { outline: none; }
 .marca img { height: 46px; width: auto; }
 .marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-2); border-left: 1px solid var(--linha); padding-left: 10px; }
 .menu { display: flex; gap: 22px; }
-.menu a { text-decoration: none; color: var(--texto); font-weight: 500; font-size: 14px; padding-block: 12px; } /* toque com 44 px ou mais */
+.menu a { display: flex; align-items: center; min-height: 44px; text-decoration: none; color: var(--texto); font-weight: 500; font-size: 14px; } /* toque com 44 px */
 .menu a:hover { color: var(--verde-txt); }
 
 /* cartão de busca */
@@ -114,7 +114,7 @@ main:focus, main:focus-visible { outline: none; }
 @media (hover: hover) { .filtro-lista label:hover { background: var(--branco); } }
 /* opção com 0 produtos: fica na lista, na mesma ordem, em --texto-2 (~5:1 no --verde-claro) e desabilitada */
 .filtro-lista label.off, .filtro-lista label.off input { cursor: not-allowed; }
-.filtro-lista label.off span, .filtro-lista label.off em { color: var(--texto-2); }
+.filtro-lista label.off span { color: var(--texto-2); } /* o nome; a contagem (em) já é --texto-2 */
 @media (hover: hover) { .filtro-lista label.off:hover { background: none; } }
 /* computador: a coluna à esquerda, compacta */
 .lado-filtros .filtro-bt { height: 30px; padding: 0 6px; font-size: 12px; }
@@ -195,7 +195,7 @@ main:focus, main:focus-visible { outline: none; }
 .trilha a:hover { color: var(--verde-txt); }
 /* foto pequena ao lado das informações (T-0014); clicar amplia (dialog.zoom) */
 .prod { display: grid; grid-template-columns: var(--foto-pc) minmax(0, 1fr); gap: 24px; align-items: start; }
-.prod-foto-box { position: sticky; top: 84px; }
+.prod-foto-box { position: sticky; top: var(--alto-topo); }
 .prod-foto { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); aspect-ratio: 1 / 1; display: grid; place-items: center; overflow: hidden; }
 .prod-foto img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
 .foto-zoom { display: block; width: 100%; height: 100%; padding: 0; border: 0; border-radius: var(--raio); background: none; cursor: zoom-in; }
@@ -309,8 +309,8 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
 .rodape .rodape-copy { grid-column: 1; grid-row: 1; font-size: 14px; font-weight: 500; line-height: 1.5; text-wrap: balance; }
 .rodape .mini { grid-column: 1; grid-row: 2; font-size: 12px; color: var(--borda-campo); } /* ~12:1 no --escuro */
 .rodape-topo { grid-column: 2; grid-row: 1 / span 2; width: 48px; height: 48px; border-radius: 50%; border: 0; cursor: pointer;
-  display: grid; place-items: center; background: var(--verde); color: var(--escuro); box-shadow: 0 6px 16px var(--veu); transition: background-color .15s, transform .15s; }
-.rodape-topo:hover { background: var(--verde); box-shadow: 0 6px 16px var(--veu), var(--sombra); } /* o mesmo verde, sombra mais forte (design-de-marca) */
+  display: grid; place-items: center; background: var(--verde); color: var(--escuro); box-shadow: 0 6px 16px var(--veu); transition: box-shadow .15s, transform .15s; }
+.rodape-topo:hover { box-shadow: 0 6px 16px var(--veu), var(--sombra); } /* o mesmo verde, sombra mais forte (design-de-marca) */
 .rodape-topo:focus-visible { outline: 3px solid var(--branco); outline-offset: 3px; }
 @media (prefers-reduced-motion: no-preference) { .rodape-topo:hover { transform: translateY(-2px); } }
 @media (prefers-reduced-motion: reduce) { .rodape-topo { transition: none; } }
@@ -321,6 +321,7 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
   .prod-dados { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 640px) {
+  :root { --alto-topo: 76px; }
   .menu { gap: 12px; }
   .menu a { font-size: 13px; white-space: nowrap; } /* 3 itens (op4e): o "Sobre a BAP" aparece também no celular */
   .marca img { height: 38px; }
@@ -460,7 +461,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 }
 
 /* ===== Início (T-0018, opção 4c): faixa da marca, busca geral e placa Mercosul lado a lado, lista tabelada ===== */
-/* só tokens do :root; o verde translúcido é o --verde misturado (color-mix), com o fundo liso antes, de reserva */
+/* só tokens do :root; o verde translúcido é o --verde misturado (color-mix) */
 /* op4d: no início o cabeçalho fica por cima da faixa, transparente, com o logo e o menu em branco; ao rolar, --escuro */
 .inicio-marca .topo { position: fixed; left: 0; right: 0; background: transparent; border-bottom-color: transparent; transition: background-color .2s, box-shadow .2s; }
 .inicio-marca.topo-rolou .topo { background: var(--escuro); box-shadow: var(--sombra); }
@@ -470,10 +471,10 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .inicio-marca .menu a:hover { color: var(--verde); }
 @media (prefers-reduced-motion: reduce) { .inicio-marca .topo { transition: none; } }
 .inicio-marca .topo :focus-visible { outline-color: var(--verde); } /* no escuro, 3:1 ou mais */
-.marca-faixa, .sb-topo { color: var(--branco); position: relative; overflow: hidden; background: var(--escuro); background: var(--fundo-faixa); }
+.marca-faixa, .sb-topo { color: var(--branco); position: relative; overflow: hidden; background-color: var(--escuro); background-image: var(--fundo-faixa); }
 /* a faixa começa atrás do cabeçalho (52 px do logo + 20 px); o véu --escuro no alto garante o contraste do branco */
 .inicio-marca .marca-faixa { padding-top: 72px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px), var(--fundo-faixa); }
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px), var(--fundo-faixa); }
 .marca-faixa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--verde); }
 .marca-faixa-in { max-width: 1200px; margin: 0 auto; padding: 26px 16px 34px; display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "txt foto" "busca busca"; gap: 18px 32px; align-items: center; }
