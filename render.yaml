@@ -1,0 +1,19 @@
+# Catálogo BAP online no Render (site estático, sem servidor).
+# Render → New → Blueprint → aloirr/bapajudacatalogo. Publica só a pasta site/ (a base .xlsx NÃO vai para o ar).
+services:
+  - type: web
+    name: bapajudacatalogo
+    runtime: static
+    buildCommand: echo "site estatico: os dados vem prontos de scripts/gerar_site.py"
+    staticPublishPath: ./site
+    pullRequestPreviewsEnabled: false
+    headers:
+      - path: /data/*
+        name: Cache-Control
+        value: no-cache
+      - path: /img/*
+        name: Cache-Control
+        value: public, max-age=604800
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff

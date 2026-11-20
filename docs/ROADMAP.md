@@ -1,0 +1,24 @@
+# Roadmap do catálogo BAP online (20/11/2026)
+
+| Fase | Entrega | Situação |
+|---|---|---|
+| 1 | Site estático com a busca geral, por veículo (montadora, modelo, ano, sistema) e por código ou referência cruzada. A página do produto tem foto, aplicação, referências, ficha técnica e ofereça junto. | **Feito** (20/11) |
+| 2 | Publicar no Render: Blueprint do `render.yaml`, depois domínio (ex.: `catalogo.bapautoparts.com.br`) [SUPOSIÇÃO] | A fazer |
+| 3 | **Consulta por placa (API PLACAS)** | A fazer. Detalhe abaixo. |
+| 4 | Fotos que faltam (lista no `site/data/produtos.json`: produtos sem `i`). Busca por medida (pneus, rolamentos, baterias). | A fazer |
+| 5 | BAP Ajuda 2.0 como aplicativo, lendo os mesmos dados deste repositório | Planejar |
+
+## Fase 3 em detalhe: a consulta por placa
+
+1. **Serviço web pequeno** no Render (uma função ou um Web Service):
+   - Recebe a placa e chama a API PLACAS com a chave guardada em variável de ambiente (`API_PLACAS_TOKEN`).
+   - Devolve montadora, modelo, ano e motor.
+   - A chave **nunca** vai para o navegador.
+2. **Cache** por placa (24 h), para economizar consultas. Limite de chamadas por IP.
+3. No site, a aba **PLACA** chama o serviço e preenche a busca por veículo (montadora, modelo e ano).
+4. **Antes de ligar:** confirmar com o Alexandre o contrato e o custo por consulta, o formato da resposta e a LGPD (não guardar placa ligada a pessoa).
+
+## Sincronização
+
+- Hoje: `ATUALIZAR_CATALOGO.bat` no PC (base e fotos do OneDrive → GitHub → Render).
+- Depois: rodar todo dia, junto com a sincronização da BAP Central feita pelas assistentes.

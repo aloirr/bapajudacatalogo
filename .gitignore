@@ -1,0 +1,20 @@
+# BAP Ajuda catálogo (20/11/2026)
+# NUNCA versionar chaves e credenciais (API PLACAS, Google, etc.: variável de ambiente no Render)
+.env
+.env.*
+config.json
+*_config.json
+*.pem
+*.key
+# dado interno de estoque e preço não entra neste repositório
+**/ESTOQUE_BAP*.xlsx
+**/TABELA_BAP*.xlsx
+# lixo
+__pycache__/
+*.py[cod]
+~$*
+desktop.ini
+Thumbs.db
+.venv/
+venv/
+node_modules/
