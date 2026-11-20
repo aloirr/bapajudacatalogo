@@ -28,6 +28,9 @@
   --largura: 1880px;
   --foto-cartao: 150px;
   --foto-cartao-cel: 55px;
+  /* fundo da faixa do início e do topo da Sobre (T-0018): só tokens; o verde translúcido é o --verde no color-mix */
+  --fundo-faixa: radial-gradient(900px 420px at 88% 30%, color-mix(in srgb, var(--verde) 35%, transparent) 0%, transparent 65%),
+                 linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%);
 }
 .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .so-impressao { display: none; }
@@ -54,8 +57,8 @@ main:focus, main:focus-visible { outline: none; }
 .menu a:hover { color: var(--verde-txt); }
 
 /* cartão de busca */
-.cartao-busca { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); max-width: 1100px; margin: -110px auto 0; position: relative; z-index: 2; overflow: hidden; }
-.pagina-busca .cartao-busca { margin-top: 16px; max-width: none; }
+.cartao-busca { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); position: relative; z-index: 2; overflow: hidden; }
+.pagina-busca .cartao-busca { margin-top: 16px; }
 /* sem abas, um botão só (R-20261120-112950 e R-20261120-115432): busca geral, placa (menor) e o "Buscar";
    a placa consultada e o veículo ficam embaixo do campo da placa */
 .form-busca { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px) auto; gap: 8px 14px; padding: 12px 16px; align-items: start; }
@@ -315,8 +318,12 @@ table.tab-veiculos td:last-child { white-space: normal; min-width: 72px; } /* o 
   .marca { gap: 8px; }
   .marca span { font-size: 10px; line-height: 1.2; letter-spacing: .1em; padding-left: 8px; } /* "Catálogo online" em 2 linhas (T-0018) */
   .so-cel { display: inline; }
-  .cartao-busca { margin: -110px 12px 0; }
   .pagina-busca .cartao-busca { margin: 16px 0 0; }
+  .rodape { margin-top: 40px; }
+  .rodape-in { padding: 18px 16px 20px; column-gap: 14px; row-gap: 10px; }
+  .rodape .rodape-copy { font-size: 12px; line-height: 1.55; }
+  .rodape-topo { grid-row: 1; }
+  .rodape .mini { grid-column: 1 / -1; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--branco) 10%, transparent); }
   .form-busca { grid-template-columns: minmax(0, 1fr); padding: 12px; }
   .bq-bt { padding-top: 0; }
   .bq-bt .bt { width: 100%; justify-content: center; }
@@ -454,29 +461,25 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .inicio-marca .menu a:hover { color: var(--verde); }
 @media (prefers-reduced-motion: reduce) { .inicio-marca .topo { transition: none; } }
 .inicio-marca .topo :focus-visible { outline-color: var(--verde); } /* no escuro, 3:1 ou mais */
-.marca-faixa, .sb-topo { color: var(--branco); position: relative; overflow: hidden; background: var(--escuro);
-  background: radial-gradient(900px 420px at 88% 30%, color-mix(in srgb, var(--verde) 35%, transparent) 0%, transparent 65%),
-              linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%); }
+.marca-faixa, .sb-topo { color: var(--branco); position: relative; overflow: hidden; background: var(--escuro); background: var(--fundo-faixa); }
 /* a faixa começa atrás do cabeçalho (52 px do logo + 20 px); o véu --escuro no alto garante o contraste do branco */
 .inicio-marca .marca-faixa { padding-top: 72px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px),
-              radial-gradient(900px 420px at 88% 30%, color-mix(in srgb, var(--verde) 35%, transparent) 0%, transparent 65%),
-              linear-gradient(120deg, var(--escuro) 0%, var(--texto) 50%, var(--verde-esc) 100%); }
+  background: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px), var(--fundo-faixa); }
 .marca-faixa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--verde); }
 .marca-faixa-in { max-width: 1200px; margin: 0 auto; padding: 26px 16px 34px; display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "txt foto" "busca busca"; gap: 18px 32px; align-items: center; }
 .mf-texto { grid-area: txt; }
-.mf-selo { display: inline-block; margin: 0 0 14px; padding: 4px 12px; border-radius: 999px; background: color-mix(in srgb, var(--verde) 16%, transparent); color: var(--verde); font-size: 12px; font-weight: 600; letter-spacing: .08em; }
+.mf-selo, .sb-selo { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; } /* o selo: base comum */
+.mf-selo { margin: 0 0 14px; background: color-mix(in srgb, var(--verde) 16%, transparent); color: var(--verde); letter-spacing: .08em; }
 .marca-faixa h1 { font-size: clamp(28px, 3.3vw, 42px); line-height: 1.12; font-weight: 700; margin: 0 0 12px; }
-.marca-faixa h1 em { font-style: normal; color: var(--verde); }
+.marca-faixa h1 em, .sb-txt h1 em { font-style: normal; color: var(--verde); }
 .marca-faixa p { margin: 0; color: var(--branco); font-size: 16px; max-width: 520px; } /* a frase de apoio (op4d): --branco, o mais forte também onde passa sobre o verde */
 /* "+4.400 produtos no portfólio" (op4d): o número grande e o rótulo com o fio --verde */
 .marca-faixa .mf-num { display: flex; align-items: center; gap: 12px; margin: 4px 0 12px; }
 .mf-num b { font-size: clamp(36px, 4vw, 52px); font-weight: 700; line-height: 1; color: var(--branco); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
 .mf-num span { font-size: 13px; font-weight: 600; line-height: 1.25; letter-spacing: .08em; text-transform: uppercase; color: var(--branco); border-left: 3px solid var(--verde); padding-left: 12px; }
-.mf-foto { grid-area: foto; display: flex; justify-content: center; }
-/* kit amortecedor + kit batente (assets/hero_kit.webp, das fotos AMT7183 e KAP11846D): luz suave atrás e sombra */
-.mf-foto { position: relative; }
+/* a imagem da faixa (IMG_FAIXA no app.js): luz suave atrás e sombra */
+.mf-foto { grid-area: foto; position: relative; display: flex; justify-content: center; }
 .mf-foto::before { content: ""; position: absolute; inset: 6% 10%; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--branco) 22%, transparent), transparent); }
 .mf-foto img { position: relative; max-height: 230px; width: auto; height: auto; filter: drop-shadow(0 16px 22px var(--veu)); }
 .mf-busca { grid-area: busca; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: 14px; align-items: stretch; }
@@ -556,9 +559,8 @@ dialog.painel-c::backdrop { background: var(--veu); }
 /* ===== Sobre a BAP (T-0018, sobre1): texto do PDF "Empresa", fotos de produtos BAP; o fundo do topo é o da faixa do início ===== */
 .sobre { --sb-larg: 1160px; }
 .sb-topo-in { max-width: var(--sb-larg); margin: 0 auto; padding: 56px 16px 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: 32px; align-items: center; }
-.sb-selo { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .12em; color: var(--escuro); background: var(--verde); border-radius: 999px; padding: 4px 12px; margin-bottom: 16px; }
+.sb-selo { margin-bottom: 16px; background: var(--verde); color: var(--escuro); letter-spacing: .12em; }
 .sb-txt h1 { font-size: clamp(28px, 3.6vw, 44px); line-height: 1.12; margin: 0 0 18px; font-weight: 700; }
-.sb-txt h1 em { font-style: normal; color: var(--verde); }
 .sb-txt p { margin: 0; color: var(--branco); font-size: 17px; max-width: 520px; }
 .sb-fotos { position: relative; height: 320px; }
 .sb-fotos img { position: absolute; filter: drop-shadow(0 18px 24px var(--veu)); }
@@ -609,11 +611,4 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .sb-dados { grid-template-columns: minmax(0, 1fr); }
   .sb-dados div { border-left: 0; padding: 14px 18px; }
   .sb-dados div + div { border-top: 1px solid var(--linha); }
-}
-@media (max-width: 640px) {
-  .rodape { margin-top: 40px; }
-  .rodape-in { padding: 18px 16px 20px; column-gap: 14px; row-gap: 10px; }
-  .rodape .rodape-copy { font-size: 12px; line-height: 1.55; }
-  .rodape-topo { grid-row: 1; }
-  .rodape .mini { grid-column: 1 / -1; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--branco) 10%, transparent); }
 }

@@ -592,21 +592,11 @@
     if (pr && pr.get("q")) form.elements.q.value = pr.get("q");
     // a busca na tela já não tem o veículo da placa (o X dela, outra marca ou modelo): a placa some da memória
     if (VEICULO_PLACA && chaveVeiculo(pr) !== VEICULO_PLACA.chave) VEICULO_PLACA = null;
-    const aviso = (html) => { statusPlaca.hidden = false; statusPlaca.innerHTML = html; };
-    campoPlaca.addEventListener("input", () => { campoPlaca.value = soPlaca(campoPlaca.value).slice(0, 7); });
     // a busca nova de texto fica com o veículo da tela (marca, modelo, ano, motor e versão)
     const veiAtual = () => { const r = lerRota(); const o = {}; if (r.caminho === "/busca") for (const k of VEI_K) if (r.params.get(k)) o[k] = r.params.get(k); return o; };
-    const travar = (sim) => { btBuscar.disabled = sim; if (sim) cartao.setAttribute("aria-busy", "true"); else cartao.removeAttribute("aria-busy"); };
-    form.addEventListener("submit", (ev) => {
-      ev.preventDefault();
-      if (btBuscar.disabled) return; // consultando
-      if (!campoPlaca.value.trim()) { // só texto (ou nada): busca o texto
-        VEICULO_PLACA = null; // busca nova de texto: a placa some e as listas destravam; o veículo continua pela rota (vm, vmo...)
-        irPara("/busca", Object.assign(veiAtual(), { q: form.elements.q.value.trim() }));
-        return;
-      }
-      buscarPelaPlaca(campoPlaca.value, form.elements.q.value.trim(), { aviso, travar, campo: campoPlaca });
-    });
+    form.addEventListener("submit", submitPlaca(campoPlaca, statusPlaca, {
+      q: () => form.elements.q.value.trim(), botoes: [btBuscar], ocupado: cartao,
+      texto: (q) => irPara("/busca", Object.assign(veiAtual(), { q })) }));
   }
 
   // ---------- busca por placa (T-0005) ----------
@@ -619,6 +609,20 @@
   // A busca pela placa das 2 telas (quadro da busca e início): valida, consulta e, achado o veículo, vai para a busca
   // com ele e com o texto q. LGPD: a placa vai só no corpo do POST e fica só em memória (VEICULO_PLACA, com a chave
   // do veículo que ela preencheu); no endereço vai o veículo, nunca a placa. travar(true/false): botões e aria-busy.
+  // O submit das 2 telas: o campo da placa fica em maiúsculas, só letras e números; com a placa vazia, busca o texto
+  // (a placa some da memória e as listas destravam; o veículo continua pela rota); com a placa, buscarPelaPlaca.
+  // botoes: os "Buscar" que travam na consulta; ocupado: o elemento que ganha aria-busy.
+  function submitPlaca(campo, status, { q, botoes, ocupado, texto }) {
+    const aviso = (html) => { status.hidden = false; status.innerHTML = html; };
+    const travar = (sim) => { botoes.forEach((b) => { b.disabled = sim; }); if (sim) ocupado.setAttribute("aria-busy", "true"); else ocupado.removeAttribute("aria-busy"); };
+    campo.addEventListener("input", () => { campo.value = soPlaca(campo.value).slice(0, 7); });
+    return (ev) => {
+      ev.preventDefault();
+      if (botoes[0].disabled) return; // consultando
+      if (!campo.value.trim()) { VEICULO_PLACA = null; texto(q()); return; }
+      buscarPelaPlaca(campo.value, q(), { aviso, travar, campo });
+    };
+  }
   function buscarPelaPlaca(placaBruta, q, { aviso, travar, campo }) {
     const placa = soPlaca(placaBruta);
     if (!PLACA_OK.test(placa)) { aviso(MSG_PLACA[400]); if (campo) campo.focus(); return; }
@@ -856,17 +860,8 @@
     // buscarPelaPlaca (o veículo e o texto q juntos)
     const fG = app.querySelector("#form-geral");
     const fP = app.querySelector("#form-placa"), cP = fP.querySelector("#campo-placa"), st = fP.querySelector("#status-placa");
-    const bts = app.querySelectorAll(".mf-busca button");
-    const aviso = (h) => { st.hidden = false; st.innerHTML = h; };
-    const travar = (sim) => { bts.forEach((b) => { b.disabled = sim; }); if (sim) fP.setAttribute("aria-busy", "true"); else fP.removeAttribute("aria-busy"); };
-    cP.addEventListener("input", () => { cP.value = soPlaca(cP.value).slice(0, 7); });
-    const buscarInicio = (ev) => {
-      ev.preventDefault();
-      if (bts[0].disabled) return; // consultando
-      const q = fG.elements.q.value.trim();
-      if (!cP.value.trim()) { VEICULO_PLACA = null; irPara("/busca", { q }); return; }
-      buscarPelaPlaca(cP.value, q, { aviso, travar, campo: cP });
-    };
+    const buscarInicio = submitPlaca(cP, st, { q: () => fG.elements.q.value.trim(), botoes: [...app.querySelectorAll(".mf-busca button")],
+      ocupado: fP, texto: (q) => irPara("/busca", { q }) });
     fG.addEventListener("submit", buscarInicio);
     fP.addEventListener("submit", buscarInicio);
   }
@@ -1414,7 +1409,7 @@
       app.innerHTML = `<div class="pagina-produto"><div class="vazio"><b>Produto ${esc(codigo)} não encontrado</b><a href="#/busca?cod=${encodeURIComponent(codigo)}">Buscar como referência cruzada</a></div></div>`;
       return;
     }
-    document.title = p.c + " · " + p.d + " · Catálogo BAP";
+    document.title = p.c + " · " + p.d + " · Catálogo online BAP";
     contarAbertura(p); // T-0018: conta a abertura do produto
     const daLista = ROTA_ANTERIOR && ROTA_ANTERIOR.startsWith("#/busca");
     app.innerHTML = `<div class="pagina-produto produto-conteudo">
@@ -1450,7 +1445,7 @@
       <div class="janela-corpo produto-conteudo">${produtoHtml(p, true)}</div>`;
     dlg.querySelector(".janela-x").addEventListener("click", () => fecharJanela(true));
     ligarAcoes(dlg);
-    document.title = p.c + " · " + p.d + " · Catálogo BAP";
+    document.title = p.c + " · " + p.d + " · Catálogo online BAP";
     document.documentElement.classList.add("com-janela");
     if (!dlg.open) dlg.showModal();
     dlg.querySelector(".janela-corpo").scrollTop = 0;
@@ -1466,7 +1461,7 @@
     dlg.close();
     dlg.innerHTML = ""; // a janela fechada fica vazia: não sobra produto para o PDF
     document.documentElement.classList.remove("com-janela");
-    document.title = "Catálogo BAP · Componentes de qualidade";
+    document.title = "Catálogo online BAP · Componentes de qualidade";
     const quem = LINK_CARTAO && LINK_CARTAO.isConnected ? LINK_CARTAO : linkDoCartao(cod);
     LINK_CARTAO = null;
     if (quem) quem.focus({ preventScroll: true });
@@ -1538,7 +1533,7 @@
     ESTADO_LISTA = null;
     ROTA_ANTERIOR = ROTA_ATUAL;
     ROTA_ATUAL = location.hash || "#/";
-    document.title = "Catálogo BAP · Componentes de qualidade";
+    document.title = "Catálogo online BAP · Componentes de qualidade";
     let volta = null;
     if (ehProduto) telaProduto(cod);
     else if (caminho === "/busca") {
