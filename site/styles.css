@@ -143,24 +143,26 @@ main:focus, main:focus-visible { outline: none; }
 .lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(max(var(--cartao-min), calc((100% - 4 * 12px) / 5)), 1fr)); gap: 12px; } /* no máximo 5 por linha */
 .item { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; text-decoration: none; color: var(--texto); display: flex; flex-direction: column; transition: border-color .15s, box-shadow .15s; }
 .item:hover { border-color: var(--verde); box-shadow: var(--sombra); }
-.item .foto { height: var(--foto-cartao); background: #FAFBFA; display: block; overflow: hidden; border-bottom: 1px solid var(--linha); }
+.item .foto { position: relative; height: var(--foto-cartao); background: #FAFBFA; display: block; overflow: hidden; border-bottom: 1px solid var(--linha); }
 .item .foto img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
-.item .corpo { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.item .corpo { padding: 8px 8px 10px; display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
 /* cartão (T-0014): foto = botão de ampliar; código e nome = link da janela; "+ Detalhes" = link em forma de botão */
 .item .foto .foto-zoom { border-radius: 0; }
 .item .foto .foto-zoom:focus-visible { outline-offset: -3px; }
 .item-link { display: flex; flex-direction: column; gap: 2px; min-height: 44px; color: inherit; text-decoration: none; border-radius: 6px; }
-.item-link:hover .cod { color: var(--verde-esc); text-decoration: underline; }
+.item-link:hover .desc { color: var(--verde-esc); text-decoration: underline; }
 .item-pe { margin-top: auto; padding-top: 6px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .bt-detalhes { width: 100%; height: 44px; padding: 0 10px; font-size: 13px; justify-content: center; }
+/* código BAP sobre a foto, no canto inferior direito (R-20261120-122300): não é botão; o clique passa para a foto */
+.item .foto-cod { position: absolute; right: 4px; bottom: 4px; padding: 1px 5px; border-radius: 5px; background: var(--escuro); color: var(--branco) !important; font-size: 12px !important; font-weight: 600 !important; line-height: 1.3; letter-spacing: 0; pointer-events: none; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); }
 .item .cod { font-weight: 700; font-size: 14px; color: var(--escuro); letter-spacing: .02em; }
 .item .desc { font-size: 12px; font-weight: 600; line-height: 1.35; color: var(--texto); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .item .apl { font-size: 12px; line-height: 1.4; color: var(--texto-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.item .refs { display: flex; flex-wrap: wrap; gap: 4px; position: relative; min-width: 0; }
-.item .ref { font-size: 12px; font-weight: 600; line-height: 1.2; padding: 3px 7px; border: 1px solid var(--linha); border-radius: 6px; background: var(--fundo); color: var(--texto); font-variant-numeric: tabular-nums; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .refs { display: flex; flex-wrap: wrap; gap: 3px; position: relative; min-width: 0; }
+.item .ref { font-size: 12px; font-weight: 600; line-height: 1.2; padding: 3px 4px; border: 1px solid var(--linha); border-radius: 6px; background: var(--fundo); color: var(--texto); font-variant-numeric: tabular-nums; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item .ref[hidden] { display: none; }
 /* "Ref. Cruzada:" e o balão da marca (R-20261120-120700): cada código é um botão; a área de toque passa de 44 px */
-.item .refs-rot { font-size: 12px; font-weight: 600; color: var(--texto-2); line-height: 1.2; padding: 4px 2px 3px 0; white-space: nowrap; }
+.item .refs-rot { font-size: 12px; font-weight: 500; color: var(--texto-2); line-height: 1.2; padding: 4px 0 3px; white-space: nowrap; }
 .item button.ref { font-family: inherit; cursor: help; position: relative; overflow: visible; }
 .item button.ref > span { display: block; overflow: hidden; text-overflow: ellipsis; }
 .item button.ref::before { content: ""; position: absolute; inset: -11px -2px; } /* toque com 44 px de altura */
@@ -168,8 +170,9 @@ main:focus, main:focus-visible { outline: none; }
 .balao { position: absolute; z-index: 40; max-width: 240px; padding: 6px 10px; border-radius: 8px; background: var(--escuro); color: var(--branco); font-size: 13px; font-weight: 600; line-height: 1.3; box-shadow: var(--sombra); pointer-events: none; }
 .balao[hidden] { display: none; }
 .item .sem-foto { gap: 2px; font-size: 12px; line-height: 1.2; }
+.sim-m-a .item .sem-foto, .sim-m-b .item .sem-foto { padding-bottom: 22px; } /* o código fica embaixo, à direita (SIMULAÇÃO ?m=) */
 .item .sem-foto img { width: 24px !important; }
-.item .ref-mais { background: var(--verde-claro); border-color: transparent; color: var(--verde-txt); }
+.item .ref-mais { background: none; border-color: transparent; color: var(--texto-2); padding-left: 2px; padding-right: 2px; } /* "+N" discreto (R-20261120-122300) */
 .sem-foto { width: 100%; height: 100%; display: grid; place-items: center; color: #A8B0AB; font-size: 12px; text-align: center; gap: 6px; align-content: center; }
 .sem-foto img { width: 44px !important; height: auto !important; opacity: .35; padding: 0 !important; }
 .mais { display: flex; justify-content: center; margin: 24px 0 0; }
@@ -295,69 +298,79 @@ dialog.zoom::backdrop { background: transparent; }
   .janela-corpo { padding: 14px 16px 24px; }
 }
 
-/* ---------- SIMULAÇÃO T-0014 (R-20261120-120700): ?f=A|B|C e ?v=A|B|C; sai na entrega, fica a opção escolhida ---------- */
-/* f=A: barra compacta dentro do quadro da busca */
-.sim-f-a .cartao-busca { overflow: visible; }
-.barra-no-quadro { margin: 0; padding: 10px 16px 12px; border-top: 1px solid var(--linha); gap: 6px; }
-.barra-no-quadro .filtro-bt { height: 36px; padding: 0 12px; font-size: 13px; }
-/* f=B: coluna lateral fina e recolhível */
-.res-grade { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 14px; }
-.res-grade.recolhido { grid-template-columns: 44px minmax(0, 1fr); }
-.lado-filtros { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow: auto; }
-.painel-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 12px; border-bottom: 1px solid var(--linha); }
-.painel-cab b { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
-.painel-recolher, .painel-x { width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; font-size: 20px; cursor: pointer; color: var(--texto); }
-.painel-recolher:hover, .painel-x:hover { background: var(--fundo); }
-.lado-filtros .painel-ok { display: none; }
-.res-grade.recolhido .painel-cab { padding: 0; justify-content: center; border: 0; }
-.res-grade.recolhido .painel-cab b, .res-grade.recolhido .painel-corpo { display: none; }
-.lado-filtros .barra-filtros, .painel-c .barra-filtros { flex-direction: column; flex-wrap: nowrap; gap: 0; margin: 0; }
+/* ---------- SIMULAÇÃO T-0014 (R-20261120-122100): ?m=A|B; sai na entrega, fica o modelo escolhido ---------- */
+/* Departamentos e caminho */
+.deptos-linha { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; margin: 14px 0 0; }
+.deptos { position: relative; }
+.deptos-bt { height: 44px; padding: 0 16px; border: 0; border-radius: 8px; background: var(--escuro); color: var(--branco); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.deptos-lista { position: absolute; top: calc(100% + 6px); left: 0; z-index: 25; min-width: 240px; margin: 0; padding: 6px; list-style: none; background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); box-shadow: var(--sombra); max-height: 70vh; overflow: auto; }
+.deptos-lista[hidden] { display: none; }
+.deptos-lista a { display: flex; justify-content: space-between; gap: 12px; min-height: 44px; align-items: center; padding: 0 10px; border-radius: 8px; color: var(--texto); text-decoration: none; font-size: 14px; }
+.deptos-lista a:hover, .deptos-lista a[aria-current] { background: var(--verde-claro); }
+.deptos-lista em { font-style: normal; font-size: 12px; color: var(--texto-2); }
+.deptos-trilha { font-size: 13px; align-items: center; }
+.deptos-trilha a, .deptos-trilha span { color: var(--texto-2); }
+/* Meu veículo */
+.meu-veiculo { background: var(--verde-claro); border-radius: var(--raio); padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 8px; }
+.mv-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mv-tit { font-weight: 700; font-size: 14px; color: var(--escuro); }
+.mv-placa { margin: -4px 0 0; font-size: 12px; color: var(--texto-2); }
+.mv-listas { display: flex; flex-direction: column; gap: 8px; }
+.mv-campo { display: flex; flex-direction: column; gap: 2px; font-size: 12px; font-weight: 600; color: var(--texto-2); }
+.mv-campo select { height: 44px; border: 1px solid #CFD5D1; border-radius: 8px; padding: 0 8px; font: inherit; font-size: 14px; font-weight: 500; color: var(--texto); background: var(--branco); min-width: 0; width: 100%; }
+.mv-campo select:disabled { color: var(--texto-2); background: var(--fundo); }
+.mv-trocar { align-self: flex-start; height: 44px; padding: 0 12px; border: 1px solid var(--linha); border-radius: 8px; background: var(--branco); color: var(--escuro); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+/* chave liga/desliga (input checkbox com role="switch") */
+.chave { position: relative; display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; justify-content: flex-end; cursor: pointer; }
+.chave input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.chave-trilho { width: 40px; height: 24px; border-radius: 12px; background: #9AA39D; position: relative; transition: background .15s; }
+.chave-trilho::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--branco); transition: transform .15s; }
+.chave input:checked + .chave-trilho { background: var(--verde-esc); }
+.chave input:checked + .chave-trilho::after { transform: translateX(16px); }
+.chave input:focus-visible + .chave-trilho { outline: 3px solid var(--verde); outline-offset: 2px; }
+.chave input:disabled + .chave-trilho { opacity: .5; }
+/* A: coluna à esquerda */
+.res-grade { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 14px; }
+.lado-filtros { display: flex; flex-direction: column; gap: 10px; }
+.res-grade .lado-filtros { position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow: auto; }
+.lado-tit { margin: 0; font-size: 18px; font-weight: 700; color: var(--escuro); }
+.lado-sub { margin: 4px 0 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-2); }
+.lado-filtros .barra-filtros, .painel-c .barra-filtros { flex-direction: column; flex-wrap: nowrap; gap: 0; margin: 0; background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; }
 .lado-filtros .filtro, .painel-c .filtro { position: static; border-bottom: 1px solid var(--linha); }
+.lado-filtros .filtro:last-child, .painel-c .filtro:last-child { border-bottom: 0; }
 .lado-filtros .filtro-bt, .painel-c .filtro-bt { width: 100%; justify-content: space-between; border: 0; border-radius: 0; background: none; padding: 0 12px; text-transform: uppercase; font-size: 12px; letter-spacing: .05em; color: var(--texto-2); }
 .lado-filtros .filtro-bt.ativo, .painel-c .filtro-bt.ativo { background: var(--verde-claro); color: var(--escuro); }
-.lado-filtros .filtro-lista, .painel-c .filtro-lista { position: static; width: auto; min-width: 0; max-width: none; max-height: 240px; border: 0; border-radius: 0; box-shadow: none; padding: 0 4px 6px; }
+.lado-filtros .filtro-lista, .painel-c .filtro-lista { position: static; width: auto; min-width: 0; max-width: none; max-height: 220px; border: 0; border-radius: 0; box-shadow: none; padding: 0 4px 6px; }
 .res-conteudo .res-topo { margin-top: 0; }
-.bt-filtrar { display: none; }
-/* f=C: botão "Filtrar (n)" ao lado do título e painel por cima */
-.sim-f-c .bt-filtrar { display: inline-flex; height: 44px; margin-right: auto; }
-.sim-f-c .res-topo { justify-content: flex-start; }
-.sim-f-c .res-topo .total { margin-left: auto; }
-dialog.painel-c { margin: 0 0 0 auto; width: min(380px, 100vw); max-width: 100vw; height: 100dvh; max-height: 100dvh; padding: 0; border: 0; background: var(--branco); color: var(--texto); box-shadow: -10px 0 40px rgba(21, 21, 21, .25); }
+.bt-filtrar { display: inline-flex; height: 44px; }
+.sim-m-a .res-topo, .sim-m-b .res-topo { justify-content: flex-start; }
+.sim-m-a .res-topo .total, .sim-m-b .res-topo .total { margin-left: auto; }
+/* B: faixa deitada abaixo do quadro da busca */
+.faixa-modelo { margin: 12px 0 0; padding: 10px 12px; background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); display: flex; flex-direction: column; gap: 10px; }
+.faixa-modelo .meu-veiculo { flex-direction: row; align-items: flex-end; flex-wrap: wrap; gap: 8px 12px; }
+.faixa-modelo .mv-cab { flex-direction: column; align-items: flex-start; gap: 0; }
+.faixa-modelo .mv-listas { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.faixa-modelo .mv-placa { margin: 0; align-self: center; }
+.faixa-modelo .barra-filtros { margin: 0; }
+/* painel por cima (celular): fundo escurecido e foco preso (dialog com showModal) */
+dialog.painel-c { margin: 0 0 0 auto; width: min(380px, 100vw); max-width: 100vw; height: 100dvh; max-height: 100dvh; padding: 0; border: 0; background: var(--fundo); color: var(--texto); box-shadow: -10px 0 40px rgba(21, 21, 21, .25); }
 dialog.painel-c[open] { display: flex; flex-direction: column; }
-dialog.painel-c::backdrop { background: rgba(21, 21, 21, .45); }
-.painel-c .painel-corpo { flex: 1; overflow: auto; }
-.painel-pe { padding: 12px; border-top: 1px solid var(--linha); }
+dialog.painel-c::backdrop { background: rgba(21, 21, 21, .55); }
+.painel-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 4px 14px; background: var(--branco); border-bottom: 1px solid var(--linha); }
+.painel-cab b { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
+.painel-x { width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; font-size: 20px; cursor: pointer; color: var(--texto); }
+.painel-c .painel-corpo { flex: 1; overflow: auto; padding: 12px; }
+.painel-pe { padding: 12px; background: var(--branco); border-top: 1px solid var(--linha); }
 .painel-pe .bt { width: 100%; justify-content: center; }
-/* v=A: faixa de resumo acima da lista */
-.faixa-veiculo { display: flex; align-items: center; justify-content: space-between; gap: 8px 14px; flex-wrap: wrap; margin: 12px 0 0; padding: 6px 6px 6px 14px; border-radius: var(--raio); background: var(--verde-claro); color: var(--escuro); font-size: 14px; }
-.faixa-x, .cv-x { height: 44px; padding: 0 12px; border: 1px solid var(--linha); border-radius: 8px; background: var(--branco); color: var(--escuro); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
-.faixa-x:hover, .cv-x:hover { border-color: var(--verde); }
-.placa-txt, .cv-placa b, .pilula-placa b { letter-spacing: .04em; }
-/* v=B: cartão do veículo ao lado do quadro da busca */
-.cartao-busca.com-veiculo { display: grid; grid-template-columns: minmax(0, 1fr) 250px; align-items: stretch; }
-.cartao-veiculo { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-left: 1px solid var(--linha); background: var(--fundo); }
-.cv-rot { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-2); }
-.cv-nome { font-size: 18px; line-height: 1.2; color: var(--escuro); }
-.cv-linha { font-size: 14px; color: var(--texto); }
-.cv-placa { font-size: 13px; color: var(--texto-2); margin-bottom: 6px; }
-.cv-x { margin-top: auto; align-self: flex-start; }
-/* v=C: pílula dentro do campo da placa */
-.pilula-placa { display: flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 0 0 12px; border: 1px solid var(--verde); border-radius: 8px; background: var(--verde-claro); color: var(--escuro); font-size: 14px; min-width: 0; }
-.pilula-placa > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pilula-placa button { width: 44px; height: 42px; border: 0; background: none; font-size: 15px; cursor: pointer; color: var(--escuro); flex: none; }
-.bq-placa input[hidden] { display: none; }
+/* faixa curta do veículo acima da lista (celular no A) */
+.faixa-veiculo { display: flex; align-items: center; justify-content: space-between; gap: 6px 12px; flex-wrap: wrap; margin: 12px 0 0; padding: 6px 6px 6px 12px; border-radius: var(--raio); background: var(--verde-claro); color: var(--escuro); font-size: 13px; }
+.faixa-x { height: 44px; padding: 0 12px; border: 1px solid var(--linha); border-radius: 8px; background: var(--branco); color: var(--escuro); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.placa-txt, .mv-placa b { letter-spacing: .04em; }
 @media (max-width: 900px) {
-  .res-grade { grid-template-columns: minmax(0, 1fr); margin-top: 0; }
-  .sim-f-b .bt-filtrar { display: inline-flex; height: 44px; }
-  .lado-filtros { display: none; }
-  .filtros-abertos .lado-filtros { display: block; position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 30; max-height: 80dvh; border-radius: var(--raio) var(--raio) 0 0; box-shadow: 0 -10px 40px rgba(21, 21, 21, .3); }
-  .filtros-abertos .lado-filtros .painel-ok { display: inline-flex; height: 44px; align-items: center; padding: 0 14px; border: 0; border-radius: 8px; background: var(--verde); color: var(--branco); font: inherit; font-weight: 600; cursor: pointer; }
-  .filtros-abertos .lado-filtros .painel-recolher { display: none; }
-  html.filtros-abertos { overflow: hidden; }
-  .cartao-busca.com-veiculo { grid-template-columns: minmax(0, 1fr); }
-  .cartao-veiculo { border-left: 0; border-top: 1px solid var(--linha); }
-}
-@media (max-width: 640px) {
+  .res-grade { grid-template-columns: minmax(0, 1fr); }
+  .faixa-modelo .mv-listas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .faixa-modelo .meu-veiculo { flex-direction: column; align-items: stretch; }
+  .faixa-modelo .mv-cab { flex-direction: row; align-items: center; justify-content: space-between; }
   dialog.painel-c { width: 100vw; }
 }
 
