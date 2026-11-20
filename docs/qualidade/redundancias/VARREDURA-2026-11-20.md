@@ -16,7 +16,7 @@
 |---|---|---|---|---|
 | RD-0162 | R1 | início, faixa (`site/app.js:828`, `.mf-selo`) | etiqueta "BAP AUTO PARTS" logo abaixo do cabeçalho com o logo | EM CORREÇÃO (PR da aplicação; R-20261120-155400, item 1) |
 | RD-0163 | R2 | início, faixa (`site/app.js:831`) | "Busque por código, referência, veículo ou placa." acima dos campos "Código, descrição ou aplicação" e "Placa do veículo" | EM CORREÇÃO (PR da aplicação; R-20261120-155430 e R-20261120-155600, item 2) |
-| RD-0146 | R3 | início, "Navegue por sistema" | "Toque em um sistema para ver todos os produtos dele." | EM CORREÇÃO (PR da aplicação). Não está no ar: o texto só existe no PR #46 (head 43e76e2), ainda aberto. |
+| RD-0146 | R3 | início, "Navegue por sistema" | "Toque em um sistema para ver todos os produtos dele." | EM CORREÇÃO (PR da aplicação). No ar desde o merge do #46 (03723ac), depois desta varredura. |
 
 ## 2. Casos novos pelas R1 a R4
 
@@ -113,7 +113,7 @@
 Redundâncias varredura no ar (R1 a R4) · 20/11/2026 16:10 (Manaus) · VOLTA PARA AJUSTE
 - RD-0162 R1 início etiqueta "BAP AUTO PARTS" (dono web-site) · EM CORREÇÃO (PR da aplicação)
 - RD-0163 R2 início "Busque por código, referência, veículo ou placa." (dono web-site) · EM CORREÇÃO (PR da aplicação)
-- RD-0146 R3 "Toque em um sistema…" (dono web-site) · EM CORREÇÃO (PR da aplicação; não está no ar)
+- RD-0146 R3 "Toque em um sistema…" (dono web-site) · EM CORREÇÃO (PR da aplicação; no ar desde o #46, 03723ac)
 - RD-0164 alta R4 site/app.js:804-805 "Pesquisas recentes" × "As mais pesquisadas…", e o dado são aberturas (dono web-site) · ABERTO
 - RD-0165 média R1 site/app.js:1487 Sobre, etiqueta "A BAP" (dono web-site) · ABERTO
 - RD-0166 média R2 site/app.js:1509 Sobre, "Acesse nosso catálogo completo." sobre o "Ver o catálogo" (dono web-site) · ABERTO, manter? se for texto do PDF Empresa
