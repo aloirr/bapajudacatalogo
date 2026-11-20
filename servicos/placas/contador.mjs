@@ -9,7 +9,7 @@ export const FUSO_MANAUS = -4 * 60 * 60 * 1000;
 const GUARDA_DIAS = 30;                 // arquivo com mais de 30 dias é apagado
 export const JANELA_MAX = 30;           // /mais-vistos aceita dias de 1 a 30
 export const JANELA_PADRAO = 7;         // /mais-vistos sem dias
-export const MAIS_VISTOS = 4;           // quantos códigos o /mais-vistos devolve
+const MAIS_VISTOS = 4;           // quantos códigos o /mais-vistos devolve
 const RENOVAR_MS = 6 * 60 * 60 * 1000;  // lê a lista de códigos de novo a cada 6 h
 const TENTAR_DE_NOVO_MS = 60 * 1000;    // se a leitura falhou, tenta em 1 min
 const ESPERA_GRAVAR_MS = 5000;          // junta as aberturas antes de gravar
@@ -106,7 +106,7 @@ export function criarContador({ pasta = null, log = () => {} } = {}) {
   }
 
   function contar(codigo) {
-    faxina(Date.now());
+    faxina();
     const hoje = ultimoDia;
     let m = dias.get(hoje);
     if (!m) { m = new Map(); dias.set(hoje, m); }
@@ -150,14 +150,14 @@ export function criarContador({ pasta = null, log = () => {} } = {}) {
 export function criarCatalogo({ url, log = () => {} }) {
   let codigos = null;
   // Corpo lido em pedaços, contando bytes; passou de CATALOGO_MAX, desiste.
-  async function lerAte(res, max) {
-    if (Number(res.headers.get('content-length')) > max) { await res.body?.cancel(); return null; }
+  async function lerAte(res) {
+    if (Number(res.headers.get('content-length')) > CATALOGO_MAX) { await res.body?.cancel(); return null; }
     if (!res.body) return '';
     const partes = [];
     let tam = 0;
     for await (const b of res.body) {
       tam += b.length;
-      if (tam > max) return null; // sair do for await cancela o resto do corpo
+      if (tam > CATALOGO_MAX) return null; // sair do for await cancela o resto do corpo
       partes.push(b);
     }
     return Buffer.concat(partes).toString('utf8');
@@ -171,7 +171,7 @@ export function criarCatalogo({ url, log = () => {} }) {
         signal: AbortSignal.timeout(20000),
       });
       if (!res.ok) { await res.body?.cancel(); return false; }
-      const t = await lerAte(res, CATALOGO_MAX);
+      const t = await lerAte(res);
       if (t === null) return false;
       const j = JSON.parse(t);
       if (!j || !Array.isArray(j.produtos)) return false;

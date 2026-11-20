@@ -166,6 +166,7 @@ test('sem API_PLACAS_TOKEN dá 503 indisponivel', async () => {
 });
 
 test('limite por IP: só conta o que chega à API, usa o ÚLTIMO X-Forwarded-For', async () => {
+  await longeDaVirada();
   const s = await subir();
   // 400 não conta: 20 placas inválidas e depois uma nova ainda passa.
   for (let i = 0; i < 20; i++) assert.equal((await veiculo(s, 'XX', { ip: '203.0.113.9' })).status, 400);
@@ -359,7 +360,7 @@ async function esperarCatalogo(s) {
   await esperarLog(s, /catalogo (ok|indisponivel)/);
   assert.match(s.logs(), /catalogo ok 6\b/);
 }
-// Os limites usam a janela do minuto do relógio: não começa nos últimos 8 s do minuto.
+// Os limites (placa e contador) usam a janela do minuto do relógio: não começa nos últimos 8 s do minuto.
 async function longeDaVirada() {
   const resto = 60000 - (Date.now() % 60000);
   if (resto < 8000) await new Promise((r) => setTimeout(r, resto + 50));

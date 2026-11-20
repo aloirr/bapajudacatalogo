@@ -281,25 +281,26 @@ function preChecagem(res, p) {
   return res.end();
 }
 // Fecha o pedido com o log só de rota, status e tempo.
-function fimDe(nome, res, p) {
+function fimDe(res, p) {
   return (status, obj, extra = {}) => {
-    log(`${nome} ${status} ${Date.now() - p.inicio}ms`);
+    log(`${p.nome} ${status} ${Date.now() - p.inicio}ms`);
     if (status !== 204) return responder(res, status, obj, { ...p.cors, ...extra });
     res.writeHead(204, { ...p.cors, 'Cache-Control': 'no-store', ...extra });
     return res.end();
   };
 }
 
-// Nome da rota para o log (nunca o endereço cru).
-const ROTAS = { '/saude': 'saude', '/veiculo': 'veiculo', '/contar': 'contar', '/mais-vistos': 'mais-vistos' };
-const nomeDaRota = (url) => ROTAS[(url || '').split('?')[0]] || 'rota';
+// Uma tabela só: rota -> função. O nome no log sai da rota (nunca o endereço cru).
+const ROTAS = { '/saude': tratarSaude, '/veiculo': tratarVeiculo, '/contar': tratarContar, '/mais-vistos': tratarMaisVistos };
 
-async function tratar(req, res) {
+function pedido(req) {
   const origemOk = process.env.ORIGEM_PERMITIDA || null;
   const origem = req.headers.origin;
   const origemCerta = Boolean(origemOk && origem === origemOk);
   const [rota, query] = (req.url || '').split('?');
-  const p = {
+  return {
+    rota,
+    nome: ROTAS[rota] ? rota.slice(1) : 'rota',
     inicio: Date.now(),
     origem,
     origemCerta,
@@ -307,21 +308,23 @@ async function tratar(req, res) {
     temQuery: query !== undefined,
     query: query || '',
   };
+}
 
-  if (rota === '/saude') {
-    if (req.method !== 'GET' && req.method !== 'HEAD') return responder(res, 405, { erro: 'metodo' }, { Allow: 'GET' });
-    return responder(res, 200, { ok: true });
-  }
-  if (rota === '/veiculo') return tratarVeiculo(req, res, p);
-  if (rota === '/contar') return tratarContar(req, res, p);
-  if (rota === '/mais-vistos') return tratarMaisVistos(req, res, p);
-  return responder(res, 404, { erro: 'rota' });
+async function tratar(req, res, p) {
+  const h = ROTAS[p.rota];
+  if (!h) return responder(res, 404, { erro: 'rota' });
+  return h(req, res, p);
+}
+
+async function tratarSaude(req, res) {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return responder(res, 405, { erro: 'metodo' }, { Allow: 'GET' });
+  return responder(res, 200, { ok: true });
 }
 
 async function tratarVeiculo(req, res, p) {
   if (req.method === 'OPTIONS') return preChecagem(res, p);
   if (req.method !== 'POST') return responder(res, 405, { erro: 'metodo' }, { ...p.cors, ...SO_POST });
-  const fim = fimDe('veiculo', res, p);
+  const fim = fimDe(res, p);
   if (p.origem && !p.origemCerta) return fim(403, { erro: 'origem' });
 
   const bruto = await lerCorpo(req);
@@ -349,7 +352,7 @@ async function tratarVeiculo(req, res, p) {
 async function tratarContar(req, res, p) {
   if (req.method === 'OPTIONS') return preChecagem(res, p);
   if (req.method !== 'POST') return responder(res, 405, { erro: 'metodo' }, { ...p.cors, ...SO_POST });
-  const fim = fimDe('contar', res, p);
+  const fim = fimDe(res, p);
   if (!p.origemCerta) { req.resume(); return fim(403, { erro: 'origem' }); }
   const lim = limiteContar(chave(ipDoPedido(req)), Date.now());
   if (lim) { req.resume(); return fim(429, { erro: lim.erro }, { 'Retry-After': String(lim.espera) }); }
@@ -368,7 +371,7 @@ async function tratarContar(req, res, p) {
 // GET /mais-vistos?dias=7 -> {"total": N, "itens": [{"codigo","n"}]} (até MAIS_VISTOS).
 async function tratarMaisVistos(req, res, p) {
   if (req.method !== 'GET' && req.method !== 'HEAD') return responder(res, 405, { erro: 'metodo' }, { ...p.cors, Allow: 'GET' });
-  const fim = fimDe('mais-vistos', res, p);
+  const fim = fimDe(res, p);
   if (p.origem && !p.origemCerta) return fim(403, { erro: 'origem' });
   let dias = JANELA_PADRAO;
   const q = new URLSearchParams(p.query);
@@ -385,9 +388,9 @@ export function iniciar(porta = process.env.PORT !== undefined ? Number(process.
   contador.abrir();
   catalogo.iniciar();
   const srv = http.createServer((req, res) => {
-    const t0 = Date.now();
-    tratar(req, res).catch(() => {
-      log(`${nomeDaRota(req.url)} 503 ${Date.now() - t0}ms`);
+    const p = pedido(req);
+    tratar(req, res, p).catch(() => {
+      log(`${p.nome} 503 ${Date.now() - p.inicio}ms`);
       if (!res.headersSent) responder(res, 503, { erro: 'indisponivel' });
       else res.destroy();
     });
