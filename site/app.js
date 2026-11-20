@@ -1121,16 +1121,25 @@
       return true;
     });
   }
-  // cada item: o código em negrito e a descrição (d) do catálogo, numa linha que abre o produto (R-20261120-132000 e
-  // 132200); fora do catálogo: o código e a nota "fora do catálogo", sem link. No PDF vai o texto, sem link.
+  // cada item (opção B, R-20261120-140600): a miniatura da foto (até 48 px), o código em negrito e a descrição (d) do
+  // catálogo, num cartão que abre o produto (R-20261120-132000 e 132200); fora do catálogo: o código e a nota
+  // "fora do catálogo", sem link. A miniatura é enfeite (alt vazio): o código e a descrição já dizem o item.
+  // No PDF vai o texto, sem link e sem miniatura.
+  const miniHtml = (p) => `<span class="rel-foto" aria-hidden="true">${p && p.i
+    ? `<img src="img/${encodeURIComponent(p.i)}" alt="" loading="lazy" onerror="this.onerror=null;this.src='assets/logo_escuro.png';this.className='sem'">`
+    : '<img class="sem" src="assets/logo_escuro.png" alt="">'}</span>`;
   function itensRelHtml(cods) {
     return `<ul class="itens-rel">${cods.map((c) => {
       const p = POR_COD.get(normCod(c));
       return p
-        ? `<li><a class="item-rel" href="#/produto/${encodeURIComponent(p.c)}"><b>${esc(p.c)}</b><span title="${esc(p.d)}">${esc(p.d)}</span></a></li>`
-        : `<li><span class="item-rel fora"><b>${esc(c)}</b><span>fora do catálogo</span></span></li>`;
+        ? `<li><a class="item-rel" href="#/produto/${encodeURIComponent(p.c)}">${miniHtml(p)}<span class="rel-txt"><b>${esc(p.c)}</b><span title="${esc(p.d)}">${esc(p.d)}</span></span></a></li>`
+        : `<li><span class="item-rel fora">${miniHtml(null)}<span class="rel-txt"><b>${esc(c)}</b><span>fora do catálogo</span></span></span></li>`;
     }).join("")}</ul>`;
   }
+  // "Ofereça junto" (faixa verde-clara) e "Itens parecidos" (branco), logo abaixo dos botões e antes da aplicação
+  // (opção B, R-20261120-140600): o título à esquerda no computador e em cima no celular
+  const secRelHtml = (H2, tit, classe, cods) => cods.length
+    ? `<section class="secao rel ${classe}"><${H2} class="secao-tit">${tit}</${H2}>${itensRelHtml(cods)}</section>` : "";
 
   // Tabela da aplicação: uma linha por veículo do "ve" (Marca, Modelo, Cilindrada, Versão, Ano). Marca, Modelo e
   // Versão são do "ve". SIMULAÇÃO: a base ainda não tem cilindrada nem ano por veículo; aqui eles saem do trecho da
@@ -1228,10 +1237,10 @@
               <button class="bt bt-claro bt-mini bt-pdf" type="button">Salvar em PDF</button>
             </div>
           </div>
+          ${secRelHtml(H2, "Ofereça junto", "rel-oj", junto)}
+          ${secRelHtml(H2, "Itens parecidos", "rel-ip", parecido)}
           ${dados}
           ${p.df ? `<section class="secao"><${H2} class="secao-tit">Diferencial BAP</${H2}><p>${esc(p.df)}</p></section>` : ""}
-          ${junto.length ? `<section class="secao"><${H2} class="secao-tit">Ofereça junto</${H2}>${itensRelHtml(junto)}</section>` : ""}
-          ${parecido.length ? `<section class="secao"><${H2} class="secao-tit">Itens parecidos</${H2}>${itensRelHtml(parecido)}</section>` : ""}
         </div>
       </div>
       <div class="so-impressao rod-pdf">As fotos são ilustrativas. Confira sempre a aplicação antes da compra.<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;

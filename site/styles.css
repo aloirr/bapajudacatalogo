@@ -221,15 +221,25 @@ table.t th, table.t td { text-align: left; padding: 4px 6px; border-bottom: 1px 
 table.t th { color: var(--texto-2); font-weight: 500; width: 42%; }
 table.t td { white-space: pre-line; }
 table.t td.c { font-weight: 600; font-variant-numeric: tabular-nums; }
-/* "Ofereça junto" e "Itens parecidos": código em negrito e descrição, na linha neutra (opção A); 2 colunas no
-   computador, 1 no celular */
-.itens-rel { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.item-rel { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-height: 44px; padding: 6px 10px; border-radius: 8px; background: var(--branco); color: var(--escuro); box-shadow: var(--contorno-neutro); text-decoration: none; }
+/* "Ofereça junto" e "Itens parecidos" (opção B, R-20261120-140600): logo abaixo dos botões e antes da aplicação, na
+   largura do conteúdo. "Ofereça junto" numa faixa --verde-claro; "Itens parecidos" no branco, no mesmo padrão. Título
+   à esquerda no computador e em cima no celular; cartões brancos com a miniatura (até 48 px), o código e a descrição */
+.rel { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 8px 12px; }
+.secao.rel .secao-tit { margin: 0; }
+.rel-oj { background: var(--verde-claro); border-color: transparent; }
+.rel-oj .secao-tit { color: var(--verde-txt); } /* 5,8:1 no --verde-claro */
+.itens-rel { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 270px)); gap: 8px; }
+.item-rel { display: flex; align-items: center; gap: 10px; min-height: 44px; height: 100%; padding: 6px 10px 6px 6px; border-radius: 8px; background: var(--branco); color: var(--escuro); text-decoration: none; }
+.rel-ip .item-rel { box-shadow: var(--contorno-neutro); }
 a.item-rel:hover { background: var(--fundo); }
+.rel-foto { flex: none; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 6px; background: var(--branco); box-shadow: var(--contorno-neutro); overflow: hidden; }
+.rel-foto img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+.rel-foto img.sem { width: 30px; height: auto; opacity: .35; padding: 0; }
+.rel-txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .item-rel b { font-size: max(var(--min), calc(14px * var(--t))); font-weight: 700; font-variant-numeric: tabular-nums; }
-.item-rel span { font-size: max(var(--min), calc(13px * var(--t))); color: var(--texto); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.item-rel.fora span { color: var(--texto-2); }
-@media (max-width: 640px) { .itens-rel { grid-template-columns: minmax(0, 1fr); } }
+.rel-txt span { font-size: max(var(--min), calc(13px * var(--t))); color: var(--texto); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.item-rel.fora .rel-txt span { color: var(--texto-2); }
+@media (max-width: 640px) { .rel, .itens-rel { grid-template-columns: minmax(0, 1fr); } } /* celular: título em cima e um cartão por linha, sem rolar de lado */
 .aviso { font-size: max(var(--min), calc(12.5px * var(--t))); color: var(--texto-2); margin-top: 8px; }
 
 /* janela do produto (T-0014): no computador e no celular */
@@ -418,7 +428,15 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .tab-rola { display: block !important; overflow: visible; } /* no PDF vai a tabela, mesmo no celular */
   table.tab-veiculos th { width: auto; }
   .apl-completa { display: none; } /* no PDF vai a tabela */
-  .item-rel { min-height: 0; padding: 1mm 2mm; } /* no PDF: código e descrição, sem link */
+  /* no PDF: "Ofereça junto" e "Itens parecidos" depois da aplicação e do diferencial, como antes; código e
+     descrição, sem link e sem miniatura, no branco */
+  .prod-info > .rel { order: 1; display: block; }
+  .rel-oj { background: var(--branco); border-color: var(--linha); }
+  .rel-oj .secao-tit { color: var(--texto-2); }
+  .secao.rel .secao-tit { margin-bottom: 1.5mm; }
+  .itens-rel { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5mm; }
+  .item-rel { min-height: 0; padding: 1mm 2mm; box-shadow: var(--contorno-neutro); }
+  .rel-foto { display: none; }
   .lista-veiculos { display: none !important; }
   .rod-pdf { margin-top: 5mm; padding-top: 2mm; border-top: 1px solid var(--linha); font-size: 7.5pt; color: var(--texto-2); }
 }
