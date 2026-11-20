@@ -32,12 +32,12 @@ py -3 -m http.server 8000 -d site
 
 Depois abra http://localhost:8000.
 
-**Atualizar o catálogo online:** dê dois cliques em `ATUALIZAR_CATALOGO.bat`. Ele faz quatro coisas:
+**Atualizar o catálogo online** (T-0012; o `ATUALIZAR_CATALOGO.bat` não existe mais):
 
-1. traz a base e as fotos do OneDrive;
-2. gera o site;
-3. confere que não há dado interno;
-4. envia ao GitHub. O Render publica sozinho.
+- A base oficial é a do repositório (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`). O OneDrive deixou de ser a fonte.
+- **Correção de produto:** peça no chat do PO. O time mostra a simulação e, com o "aprovado", grava a nova versão (`dados/versoes/`), o `LOG_CORRECOES` e o site.
+- **Fotos novas:** no GitHub, na pasta `fotos-novas/`, use **Add file → Upload files**, com os arquivos `CODIGO.jpg`, e escolha **"Create a new branch… and start a pull request"**. O time reduz as fotos, gera o site, confere e pede o "aprovado".
+- **Publicação:** o Render publica sozinho a cada merge no `main` (regra 5a, recado R-20261120-100005-alexandre).
 
 ## Testar antes de entregar
 
