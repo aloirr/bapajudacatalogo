@@ -83,13 +83,19 @@ def segs_from_base(app):
     return segs
 
 
+def ref_cod(c):
+    """código da referência sem o histórico interno ('| ANTERIOR: ...') e sem o preço de compra ('BAP BOX USD ...'),
+    como no scripts/gerar_site.py (refs_de)"""
+    return re.sub(r'(?i)\s*BAP\s+BOX\b.*$', '', c.split(' | ')[0]).strip()
+
+
 def refs_from_base(s):
     if not isinstance(s, str) or not s.strip(): return ''
     out = []
     for p in re.split(r';\s*', s):
         m = re.match(r'^\s*([^:]+?)\s*:\s*(.+)$', p)
-        if m and not re.search(r'(?i)bap|similar|aplica', m.group(1)):
-            b = m.group(1).strip(); out.append(f"{b.title() if len(b) > 4 else b.upper()} {m.group(2).strip()}")
+        if m and not re.search(r'(?i)bap|similar|aplica', m.group(1)) and ref_cod(m.group(2)):
+            b = m.group(1).strip(); out.append(f"{b.title() if len(b) > 4 else b.upper()} {ref_cod(m.group(2))}")
     return ' · '.join(out[:6])
 
 

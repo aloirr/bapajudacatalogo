@@ -1,9 +1,5 @@
-"""Tags embaixo do código (pedido do Alexandre, 23/10): em vez de descrever, mostrar etiquetas curtas
-(DIANT., TRAS., ESQ., DIR., GÁS, ÓLEO, C/ ABS, S/ ABS, 4X4...), todas em verde e tiradas só do DETALHE.
-Nada repetido. O que não vira tag fica como texto curto embaixo. Sem o selo vermelho do diferencial e sem
-itens parecidos (Alexandre, 20/11, T-0019: "saem do site e do pdf").
-"""
-import re, html
+"""Tags curtas embaixo do código (DIANT., TRAS., C/ ABS, 4X4...), sem repetir; o que não vira tag fica como texto curto."""
+import re
 import unicodedata
 
 _n = lambda s: ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').lower()

@@ -7,7 +7,7 @@ Fonte: entradas/complementos_fraga_13112026.json (gerado por aud/complementos.py
 Formato da aplicação igual ao de 12/11 (site_aplicacoes): montadora em negrito + "Veículo motor · anos".
 No A4 (print_cat) a aplicação fica a de antes: o impresso já corta a aplicação e mostra 2 referências; com o complemento
 28 itens sairiam das tabelas. [SUPOSIÇÃO]
-Chamado no moto.py DEPOIS do selo de diferencial (o texto resumido do Fraga não gera selo).
+Guarda a aplicação de antes em r['_segs_antes_fraga']: o diferencial.py (auditoria) usa essa, não a do Fraga.
 """
 import json, os, re
 import site_aplicacoes as _S

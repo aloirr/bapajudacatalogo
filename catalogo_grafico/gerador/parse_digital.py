@@ -1,5 +1,5 @@
 import pymupdf, re, json, html, os
-SRC='saidas/Catalogo_BAP_2026_Completo_Digital.pdf'
+SRC='saidas/Catalogo_BAP_2027_Completo_Digital.pdf'
 d=pymupdf.open(SRC)
 def spans(pg): return [s for b in pg.get_text('dict')['blocks'] for l in b.get('lines',[]) for s in l['spans'] if s['text'].strip()]
 def save_img(pg, out, minw=40):

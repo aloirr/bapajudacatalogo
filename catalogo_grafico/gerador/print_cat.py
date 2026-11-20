@@ -263,9 +263,8 @@ def cards(dc, f, top, y):
         dc.label(x + 9, yc + 7 + (15 - cs) * .6, r['code'], cs, 'black', 'PB')
         if r.get('nov'): dc.tag(x + cw - 9 - 36, yc + 9, 'NOVO', 6.8, 'otag', 'otext', 4)
         import tags as TG
-        tl = D2.tag_list(f, r)
+        tl, sb = TG.do_item(f['name'], r, f['spec'])
         hh = TG.desenhar(dc, lw, x + 9, yc + 7 + 16.5 + 2, tl, tw, max_linhas=2) if tl else 0
-        sb = TG.do_item(f['name'], r, f['spec'])[1]
         if sb and hh < 12: dc.text(x + 9, yc + 7 + 16.5 + 2 + hh + 1, tw, html.escape(D2.datas.fix_text(sb)), 7.4, 9.6, 'gtext', 'PM')
         yb = yc + fixed_code
         dc.rect(x, yb, cw, 1, fill='line2')
@@ -292,7 +291,7 @@ def row_cells(f, r, cols, widths):
     for (t, w0, k), w in zip(cols, widths):
         if k == 'code':
             import tags as TG
-            tl = D2.tag_list(f, r); sm = D2.sub_mk(f, r)
+            tl, sm = D2.tags_e_sobra(f, r)
             th = TG.medir(lw, tl, w0)[1] if tl else 0
             sh = para_h(sm, 7.2, 9.4, w0, 'PM') if sm else 0
             r['_tl'], r['_sm'] = tl, sm

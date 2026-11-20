@@ -210,25 +210,11 @@ class Doc:
 
 
 # ---------------------------------------------------------------- linhas da tabela
-def sub_mk(f, r):
-    """texto que sobra depois das tags"""
+def tags_e_sobra(f, r):
+    """(tags, texto que sobra já escapado) embaixo do código"""
     import tags as TG
-    sobra = TG.do_item(f['name'], r, f['spec'])[1]
-    return html.escape(sobra, quote=False) if sobra else ''
-
-
-def tags_x0(r, cs=9.5):
-    return lw(r['code'], cs, 'PB') + 6 + (lw('NOVO', 6.8, 'PB', .544) + 14 if r.get('nov') else 0)
-
-
-def tags_na_linha(r, tl, cs=9.5):
-    """as tags cabem ao lado do código?"""
-    return False                              # tags sempre embaixo do código (Alexandre, 23/10)
-
-
-def tag_list(f, r):
-    import tags as TG
-    return TG.do_item(f['name'], r, f['spec'])[0]
+    tl, sobra = TG.do_item(f['name'], r, f['spec'])
+    return tl, html.escape(sobra, quote=False) if sobra else ''
 
 
 def prep_rows(f, linhas=None):
@@ -239,11 +225,11 @@ def prep_rows(f, linhas=None):
         else:
             mk = f'<font color="{C["grey"]}">Aplicação em cadastro — consulte o vendedor BAP</font>'
         refs = html.escape(r['refs'] or '—', quote=False)
-        sm = sub_mk(f, r)
+        tl, sm = tags_e_sobra(f, r)
+        r['_tl'] = tl
         ch = 12.5 + (para_h(sm, SF, SL, CODE_W, 'PM') + 1.5 if sm else 0)
         import tags as TG
-        tl = tag_list(f, r)
-        if tl and not tags_na_linha(r, tl): ch += TG.medir(lw, tl, CODE_W)[1] + 1
+        if tl: ch += TG.medir(lw, tl, CODE_W)[1] + 1
         r['_ch'] = ch + RPAD
         aw = app_w(f)
         ex = html.escape(r.get('extra', '') or '—', quote=False) if f.get('extra_col') else ''
@@ -325,12 +311,9 @@ def table_page(dc, f, rows, pg, cont, primeira=None):
             dc.label(x, y + 16, '(continuação)', SF, 'grey', 'PM')
         elif r['nov']: dc.tag(x + lw(r['code'], cs, 'PB') + 6, y + 3.5, 'NOVO', 6.8, 'otag', 'otext', 4)
         ys = y + 16
-        if not it['cont']:                        # tags embaixo do código
+        if not it['cont'] and r['_tl']:           # tags embaixo do código
             import tags as TG
-            tl = tag_list(f, r)
-            if tl and tags_na_linha(r, tl, cs):
-                TG.desenhar(dc, lw, x + tags_x0(r, cs), y + 4.2, tl, CODE_W - tags_x0(r, cs))
-            elif tl: ys += TG.desenhar(dc, lw, x, y + 16, tl, CODE_W) + 1
+            ys += TG.desenhar(dc, lw, x, y + 16, r['_tl'], CODE_W) + 1
         if sm: dc.text(x, ys, CODE_W, sm, SF, SL, 'gtext', 'PM')
         if it['para'] is not None:
             c = dc.c; c.saveState(); c.scale(S, S)

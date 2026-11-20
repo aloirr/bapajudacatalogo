@@ -5,7 +5,8 @@
    barra estabilizadora, cabine, sensor, rolamento, pivô, defletor, válvulas, gás/óleo, estrias/dentes/furos.
 3. "Gêmeos" = itens da mesma linha com o mesmo veículo (montadora + modelo + anos que se cruzam + mesma posição/lado).
 4. O diferencial de um item é o atributo que ele tem e o gêmeo não tem (ou tem o oposto).
-Resultado: r['dif'] (texto curto para o selo ao lado do código) e r['gemeos'] (códigos parecidos).
+Resultado: r['dif'] (texto curto do diferencial) e r['gemeos'] (códigos parecidos), para a auditoria e a base_v11.
+Os PDFs não mostram (T-0019, 20/11).
 """
 import re, collections, unicodedata
 
@@ -214,6 +215,27 @@ def ordem(l):
     return (ORD.index(l) if l in ORD else 99, l)
 
 
+def _segs_antes(r):
+    """aplicação de antes dos complementos do Fraga (o texto resumido do Fraga não gera diferencial)"""
+    import fraga_complementos as FC
+    if r['code'] in FC.LOG['nova']: return []           # aplicação toda do Fraga: não havia aplicação antes
+    return r.get('_segs_antes_fraga') or r.get('segs') or []
+
+
+def aplicar_catalogo(fams):
+    """aplicar() nas famílias do moto.py, sem os itens com a aplicação do site (resumida por motor)"""
+    import site_aplicacoes as SITE
+    aplicar(fams)
+    cod = set(SITE.LOG.get('preenchidos', []))
+    for f in fams:
+        for r in f['rows']:
+            g = {c: v for c, v in (r.get('gemeos') or {}).items() if c not in cod}
+            if r['code'] in cod or (r.get('gemeos') and not g):
+                r['dif'] = ''; r['gemeos'] = {}
+            elif r.get('gemeos') and len(g) != len(r['gemeos']):
+                r['gemeos'] = g
+
+
 def aplicar(fams, max_selo=2):
     """roda a análise sobre as famílias do catálogo e grava r['dif'] (selo) e r['gemeos'] em cada linha"""
     import detalhe as DT
@@ -225,7 +247,7 @@ def aplicar(fams, max_selo=2):
         for r in f['rows']:
             c = r['code'].strip().upper()
             d = dict(linha=f['name'], spec=bool(f.get('spec')), code=c, sub=r.get('sub') or '',
-                     segs=r.get('segs') or [], base=B.get(c, {}), desc_est=str(E.get(r['code']) or ''))
+                     segs=_segs_antes(r), base=B.get(c, {}), desc_est=str(E.get(r['code']) or ''))
             rows.append(d); ref.append(r)
     analisar(rows)
     por_cod = {}
