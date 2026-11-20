@@ -1049,9 +1049,10 @@
   const anoServe = (e, ano) => casaAno(e, ano) !== 0; // o ano da base (an) primeiro, depois a aplicação (T-0011); sem ano: serve
   // Motor = a cilindrada da aplicação ("1.8"); Versão = o 3º item do "ve" (T-0017). Produto que não diz o motor ou
   // a versão serve para qualquer um.
-  function casaVeiculo(e, v) {
+  // pelaAplicacao: o produto sem "ve" num JSON com "ve" é comparado pela aplicação, como no JSON antigo ("Leve também")
+  function casaVeiculo(e, v, pelaAplicacao) {
     const ve = veDe(e);
-    if (TEM_VE && !ve) return false;
+    if (TEM_VE && !ve && !pelaAplicacao) return false;
     const hits = ve ? ve.filter((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo)) : null;
     if (ve ? !hits.length : !daMarca(e, v.vm) || (v.vmo && !temPalavra(e.apl, v.vmo))) return false;
     if (v.va && !anoServe(e, v.va)) return false;
@@ -1073,10 +1074,10 @@
   // opções de cada lista, só com o que existe para a escolha anterior, com a contagem de produtos
   // (designer-ux: a contagem é só dentro do resultado da busca e dos filtros atuais, sem o próprio veículo)
   let E_DE = null; // produto → entrada do INDICE
+  const entradaDe = (p) => (E_DE || (E_DE = new Map(INDICE.map((e) => [e.p, e])))).get(p);
   function opcoesVeiculo(v, pr) {
-    if (!E_DE) E_DE = new Map(INDICE.map((e) => [e.p, e]));
     const semVei = new URLSearchParams(pr); VEI_K.forEach((k) => semVei.delete(k));
-    const base = buscar(semVei).map((p) => E_DE.get(p));
+    const base = buscar(semVei).map(entradaDe);
     const marcas = new Map(), modelos = new Map(), anos = new Map(), motores = new Map(), versoes = new Map();
     let semMotor = 0, semVersao = 0;
     for (const e of base) {
@@ -1257,6 +1258,19 @@
   // "Leve também" (faixa verde-clara), logo abaixo dos botões e antes da aplicação (opção B, R-20261120-140600): o título
   // à esquerda no computador e em cima no celular. "Itens parecidos" e "Diferencial BAP" saíram da tela e da ficha
   // impressa do site (R-20261120-155900-alexandre e R-20261120-160300-alexandre)
+  // "Leve também" conforme o veículo da placa ou das listas (R-20261120-181930-alexandre e R-20261120-182200-alexandre):
+  // fica o item que serve no veículo pela regra do filtro "Meu veículo" (casaVeiculo), só com a marca, o modelo e o ano;
+  // o item sem "ve", pela aplicação (a marca e o modelo escritos nela, como no JSON antigo). Ficam sempre o item sem
+  // aplicação ou com "universal" nela e o fora do catálogo. Sem veículo, a lista inteira do oj; sem nenhum, a seção
+  // some. Só na tela. O veículo (VEI_LEVE) é o da lista por baixo da janela ou, na página, o da busca ou do produto de
+  // onde se clicou (cartão ou "Leve também"); o endereço digitado e o voltar ou avançar até a página ficam sem veículo (render).
+  let VEI_LEVE = null; // { vm, vmo, va, vmt, vv } ou null
+  const veiculoDoHash = (h) => { const pr = new URLSearchParams(String(h || "").split("?")[1] || ""); return pr.get("vm") ? veiculoDaRota(pr) : null; };
+  const servemNoVeiculo = (cods, v) => !v || !v.vm ? cods : cods.filter((c) => {
+    const p = POR_COD.get(normCod(c)), e = p && entradaDe(p);
+    return !e || (!veDe(e) && (!e.apl || temPalavra(e.apl, "UNIVERSAL")))
+      || casaVeiculo(e, { vm: v.vm, vmo: v.vmo, va: v.va }, true); // marca, modelo e ano; sem motor e sem versão
+  });
   const secJunto = (H2, cods) => cods.length
     ? `<section class="secao rel rel-oj"><${H2} class="secao-tit">Leve também</${H2}>${itensRelHtml(cods)}</section>` : "";
 
@@ -1462,7 +1476,7 @@
     if (p.la) ficha.push(["Lado", titulo(p.la)]);
     if (p.de) ficha.push(["Detalhe", p.de]);
     (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
-    const junto = listaCodigos(p.oj);
+    const junto = servemNoVeiculo(listaCodigos(p.oj), VEI_LEVE);
     const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e, embaixo, "Outros veículos e detalhes" (restoAplicacao);
     // no PDF, o texto inteiro vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
@@ -1674,7 +1688,12 @@
     // janela (computador e celular): da lista, o produto abre na janela e a lista fica por baixo, do jeito que estava.
     // Só o clique no cartão abre a janela; o endereço digitado ou colado (#/produto/CODIGO) abre a página.
     const listaNaTela = ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && CLICOU_CARTAO;
-    CLICOU_CARTAO = false;
+    const porClique = CLICOU_CARTAO || CLICOU_LEVE;
+    CLICOU_CARTAO = CLICOU_LEVE = false;
+    // veículo do "Leve também" (servemNoVeiculo): na janela, o da lista por baixo; na página, só pelo clique (o da busca
+    // ou o do produto de onde veio); fora do produto, nenhum
+    VEI_LEVE = !ehProduto ? null : (JANELA || listaNaTela) && ESTADO_LISTA ? veiculoDoHash(ESTADO_LISTA.hash)
+      : !porClique ? null : String(ROTA_ATUAL).startsWith("#/busca") ? veiculoDoHash(ROTA_ATUAL) : VEI_LEVE;
     if (ehProduto && (JANELA || listaNaTela) && abrirJanela(cod)) return;
     if (JANELA) {
       const voltouNaLista = ESTADO_LISTA && location.hash === ESTADO_LISTA.hash;
@@ -1707,11 +1726,13 @@
 
   window.addEventListener("hashchange", render);
   // o código e nome ou o "+ Detalhes" do cartão foi clicado (mouse, toque ou Enter) sem Ctrl, Shift ou Cmd
-  let CLICOU_CARTAO = false, LINK_CARTAO = null;
+  let CLICOU_CARTAO = false, LINK_CARTAO = null, CLICOU_LEVE = false; // CLICOU_LEVE: um item do "Leve também" (VEI_LEVE)
   document.addEventListener("click", (ev) => {
     const lk = ev.target.closest('.lista .item a[href^="#/produto/"]');
-    CLICOU_CARTAO = !!lk && !(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) && ev.button === 0;
+    const simples = !(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey) && ev.button === 0;
+    CLICOU_CARTAO = !!lk && simples;
     if (CLICOU_CARTAO) LINK_CARTAO = lk;
+    CLICOU_LEVE = !!ev.target.closest('a.item-rel[href^="#/produto/"]') && simples;
     // o botão verde do rodapé (op4e) volta ao topo; o foco vai para o conteúdo
     if (ev.target.closest(".rodape-topo")) {
       window.scrollTo({ top: 0 }); // suave ou direto pelo scroll-behavior do CSS (reduce)
