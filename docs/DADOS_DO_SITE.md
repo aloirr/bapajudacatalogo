@@ -15,6 +15,7 @@
 | `po`, `la`, `de`, `df` | POSICAO, LADO, DETALHE_CATALOGO, DIFERENCIAL |
 | `ip`, `oj` | ITEM_PARECIDO, OFERECA_JUNTO |
 | `i` | foto em `site/img/` |
+| `gerado_em` | data e hora da geração, em hora de Manaus (`America/Manaus`; sem os dados de fuso, UTC−4 fixo). O site mostra "base atualizada em". |
 | `ve` | veículos do filtro "Meu veículo", da aba `VEICULOS` (v17, T-0017): lista de `[FABRICANTE, MODELO, VERSAO]`, a VERSAO só quando existe. Ex.: `[["VOLKSWAGEN","Gol","G5"],["VOLKSWAGEN","Saveiro"]]`. |
 
 **Campo `ve` (T-0017):**
@@ -24,6 +25,12 @@
 - Fabricante, modelo e versão vão como estão na aba, sem caixa alta forçada: o site formata.
 - O produto sem linha "separado" não ganha o campo. Se a base não tem a aba `VEICULOS`, nenhum produto ganha o campo e o JSON sai como antes.
 - Da aba `VEICULOS` **não vão** para o site: `ORIGEM`, `SITUACAO`, `MOTIVO`, `ANO_INICIO` e `ANO_FIM`. A aba `MODELOS_VEICULO` (dicionário) também não vai.
+- **Regra temporária `VE_FORA_TEMP`** (R-20261120-132530-alexandre): Renault 12, 19 e 21 e Peugeot 2008 (modelo numérico lido de data ou medida) saem do `ve` e, com ele, do filtro "Meu veículo" e da tabela da aplicação. O texto da aplicação (`a`) e a busca não mudam. Sai na v18 (T-0017).
+
+**No detalhe do produto** (o site monta a partir do JSON, sem campo novo):
+
+- **Tabela da aplicação:** uma linha por veículo do `ve`, com Marca · Modelo · Cilindrada · Versão · Ano. Marca, modelo e versão vêm do `ve`; a cilindrada e o ano ainda são lidos do texto da aplicação (o `an`, se houver, vale primeiro), até a v19. Sem achar: "—".
+- **Ofereça junto** (`oj`) e **Itens parecidos** (`ip`): cada item com o código e a descrição (`d`) do catálogo, abrindo o produto; o código fora do catálogo aparece sozinho, sem link.
 
 **Nunca vai para o site:**
 
