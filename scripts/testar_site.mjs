@@ -1353,16 +1353,14 @@ async function testarSite(base, ctxJson, dirPrints) {
           // R-20261120-124800: o rótulo "Placa" à vista, em cima da placa
           if (etq && faixa) {
             const re = etq.getBoundingClientRect();
-            const r = [...faixa.querySelectorAll("*")].find((e) => !e.children.length && T.visivel(e) && /^Placa:?$/i.test(e.textContent.trim()) && (() => { const x = e.getBoundingClientRect(); return x.width > 2 && x.bottom <= topoP + 2 && x.right > re.left && x.left < re.right; })());
-            // transição p1 (R-20261120-175400 e R-20261120-181200-alexandre): até 640 px, o rótulo pode sair só da vista,
-            // com as declarações da .vh (absolute, 1×1 px, overflow hidden, clip 0, nowrap), no DOM e apontado pelo
-            // aria-labelledby da placa. Acima de 640 px, só vale o rótulo à vista.
+            const ehRotP = (e) => !e.children.length && /^Placa:?$/i.test(e.textContent.trim());
+            const r = [...faixa.querySelectorAll("*")].find((e) => ehRotP(e) && T.visivel(e) && (() => { const x = e.getBoundingClientRect(); return x.width > 2 && x.bottom <= topoP + 2 && x.right > re.left && x.left < re.right; })());
+            // transição p1 (ver o cabeçalho): até 640 px vale também o rótulo .vh apontado pelo aria-labelledby da placa; acima, só o rótulo à vista
             const vh = (e) => { const cs = getComputedStyle(e), x = e.getBoundingClientRect();
               return cs.position === "absolute" && x.width <= 1 && x.height <= 1 && cs.overflow === "hidden" && /^rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)$/.test(cs.clip)
-                && cs.whiteSpace === "nowrap" && cs.display !== "none" && cs.visibility !== "hidden" && !e.closest('[hidden],[aria-hidden="true"]'); };
+                && cs.whiteSpace === "nowrap" && T.visivel(e) && !e.closest('[aria-hidden="true"]'); };
             const ids = (etq.getAttribute("aria-labelledby") || "").split(/\s+/).filter(Boolean);
-            const rVh = !r && window.innerWidth <= 640 && [...faixa.querySelectorAll("[id]")].find((e) => !e.children.length && /^Placa:?$/i.test(e.textContent.trim())
-              && ids.includes(e.id) && document.getElementById(e.id) === e && vh(e));
+            const rVh = !r && window.innerWidth <= 640 && [...faixa.querySelectorAll("[id]")].find((e) => ehRotP(e) && ids.includes(e.id) && document.getElementById(e.id) === e && vh(e));
             rotP = r ? "ok" : rVh ? "ok-vh" : [...faixa.querySelectorAll("*")].filter((e) => !e.children.length && T.visivel(e) && /placa/i.test(e.textContent)).map((e) => e.textContent.trim()).join(" | ") || "nenhum";
           }
           const antesMarca = !!etq && !!listas[0] && !!(etq.compareDocumentPosition(listas[0]) & Node.DOCUMENT_POSITION_FOLLOWING);
@@ -1380,7 +1378,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         else if (v.etq && !v.naFaixa) falha("placa", N_PL, "etiqueta:faixa", `${L}: a etiqueta da placa ("${cortar(v.etq, 40)}") fica fora da faixa do veículo${v.noQuadro ? " (no quadro da busca)" : ""} (pedido: em destaque na faixa, no lugar da chave)`);
         // [SUPOSIÇÃO] "em destaque": o texto da placa com fonte de 16 px ou mais
         if (v.etq && v.fonteP < 16) falha("placa", N_PL, "etiqueta:destaque", `${L}: a placa na faixa com fonte de ${v.fonteP} px (destaque: 16 px ou mais)`);
-        if (v.etq && v.naFaixa && v.rotP !== "ok" && v.rotP !== "ok-vh") falha("placa", N_PL, "etiqueta:rotulo", `${L}: sem o rótulo "Placa" à vista em cima da placa na faixa (textos com "placa" ali: ${cortar(v.rotP, 80)})`);
+        if (v.etq && v.naFaixa && !/^ok/.test(v.rotP)) falha("placa", N_PL, "etiqueta:rotulo", `${L}: sem o rótulo "Placa" à vista em cima da placa na faixa${larg <= 640 ? " nem só para o leitor de tela (.vh, apontado pelo aria-labelledby da placa)" : ""} (textos com "placa" ali: ${cortar(v.rotP, 80)})`);
         if (v.etq && v.naFaixa && !v.antesMarca) falha("placa", N_PL, "etiqueta:ordem", `${L}: a placa não vem antes da Marca na faixa (ordem pedida: Placa · Marca · Modelo · Ano · Motor · Versão)`);
         const esperadoSel = [/volkswagen|\bvw\b/i, /\bgol\b/i, /\b2018\b/, /\b1[.,]6\b/], nomesSel = ["Marca", "Modelo", "Ano", "Motor"];
         esperadoSel.forEach((rx, i) => { if (v.temFaixa && !rx.test(v.sel[i] || "")) falha("placa", N_PL, "veiculo:lista:" + nomesSel[i], `${L}: depois da placa (VW GOL 2018 1.6), a lista ${nomesSel[i]} ficou com "${v.sel[i] || "(nada)"}"`); });
@@ -1449,7 +1447,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         conferirConsole("placa-veiculo");
         CAMPOS_TELA.placa = v.etq ? `etiqueta "${cortar(v.etq, 40)}"` : "";
         CAMPOS_TELA.veiculo = mm || "";
-        if (v.rotP === "ok" || v.rotP === "ok-vh") (CAMPOS_TELA.rotulo ||= []).push(`${L}: ${v.rotP === "ok" ? "à vista" : "só para o leitor de tela (.vh, aria-labelledby)"}`);
+        if (/^ok/.test(v.rotP)) (CAMPOS_TELA.rotulo ||= []).push(`${L}: ${v.rotP === "ok" ? "à vista" : "só para o leitor de tela (.vh, aria-labelledby)"}`);
         detalhe("a11y", N_A11Y, `campos com rótulo, imagens com alt, Tab chega ao campo q e ao da placa (${pq} e ${pp} passos), foco visível nos 2`);
       }
 
