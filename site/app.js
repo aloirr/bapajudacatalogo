@@ -6,6 +6,12 @@
   "use strict";
 
   const POR_PAGINA = 24;
+  // SIMULAÇÃO T-0014 (sai na entrega final, fica só a versão e o tamanho escolhidos pelo Alexandre):
+  //   ?v=A  página do produto com "Voltar" (padrão)  ·  ?v=B  produto numa janela por cima da lista
+  //   ?t=30 texto da página do produto 30% menor      ·  ?t=50  50% menor  ·  sem ?t, o tamanho de hoje
+  const SIM = new URLSearchParams(location.search);
+  const VERSAO = SIM.get("v") === "B" ? "B" : "A";
+  if (SIM.get("t") === "30" || SIM.get("t") === "50") document.documentElement.classList.add("t" + SIM.get("t"));
   const app = document.getElementById("app");
   let BASE = null;           // { gerado_em, total, produtos }
   let POR_COD = new Map();   // código → produto
@@ -194,9 +200,60 @@
         <span class="cod">${esc(p.c)}</span>
         <span class="desc">${esc(p.d)}</span>
         ${p.a ? `<span class="apl">${esc(p.a)}</span>` : ""}
-        <span class="tag">${esc([p.si, p.li].filter(Boolean).join(" · "))}</span>
+        ${refsHtml(p)}
       </div></a>`;
   }
+
+  // Etiquetas do cartão (T-0014): só o código das referências cruzadas da concorrência, sem a marca.
+  // Fica fora o código da própria BAP (marca "BAP PN_2", "BAPTA PN" e o código igual ao do produto).
+  const MAX_ETIQUETAS = 12; // no DOM; o que não couber em 2 linhas vira "+N" (ajustarEtiquetas)
+  function codigosConcorrencia(p) {
+    const vistos = new Set([normCod(p.c)]);
+    const out = [];
+    for (const x of p.r || []) {
+      if (!x.c || /^BAP/i.test(x.m || "")) continue;
+      // vários códigos no mesmo campo: " / ", ",", ";", "|", quebra de linha ou " OU " (a "/" grudada fica: CU20006/1)
+      const pedacos = String(x.c).split(/\s*[;,|\n]\s*|\s+\/\s*|\/\s+|\s+OU\s+/i)
+        .map((c) => c.replace(/^[^:]*:\s*/, "").replace(/\s*\([^)]*\)\s*$/, "").trim()) // tira "REFERENCIAS ...:" e "(SCANIA)"
+        // separados só por espaço: são vários códigos se todo pedaço tem 5+ caracteres e número ("95941670 90498745");
+        // "AK 8071A" e "1 421 186" ficam inteiros
+        .flatMap((c) => { const w = c.split(/\s+/); return w.length > 1 && w.every((t) => t.length >= 5 && /\d/.test(t)) ? w : [c]; });
+      for (const c of pedacos) {
+        const k = normCod(c);
+        if (k.length < 3 || vistos.has(k)) continue;
+        vistos.add(k);
+        out.push(c);
+      }
+    }
+    return out;
+  }
+  function refsHtml(p) {
+    const cods = codigosConcorrencia(p);
+    if (!cods.length) return "";
+    const extra = Math.max(0, cods.length - MAX_ETIQUETAS);
+    return `<span class="refs" data-extra="${extra}"><span class="vh">Referências: </span>${cods.slice(0, MAX_ETIQUETAS).map((c) => `<span class="ref">${esc(c)}</span>`).join("")}<span class="ref ref-mais"${extra ? "" : " hidden"}>+${extra}</span></span>`;
+  }
+  // mostra as etiquetas que cabem em 2 linhas e troca o resto por "+N"
+  function ajustarEtiquetas(raiz) {
+    for (const box of raiz.querySelectorAll(".refs")) {
+      const tags = [...box.querySelectorAll(".ref:not(.ref-mais)")];
+      const mais = box.querySelector(".ref-mais");
+      const extra = +box.dataset.extra || 0;
+      tags.forEach((t) => (t.hidden = false));
+      mais.hidden = true;
+      const limite = tags[0].offsetTop + tags[0].offsetHeight * 1.5 + 4; // fim da 2ª linha (o topo dela)
+      let escondidas = 0;
+      for (const t of tags) if (t.offsetTop > limite) { t.hidden = true; escondidas++; }
+      if (!escondidas && !extra) continue;
+      mais.hidden = false;
+      const vis = tags.filter((t) => !t.hidden);
+      mais.textContent = "+" + (escondidas + extra);
+      while (mais.offsetTop > limite && vis.length > 1) { vis.pop().hidden = true; escondidas++; mais.textContent = "+" + (escondidas + extra); }
+      mais.setAttribute("aria-label", "e mais " + (escondidas + extra));
+    }
+  }
+  let tAjuste = 0;
+  window.addEventListener("resize", () => { clearTimeout(tAjuste); tAjuste = setTimeout(() => ajustarEtiquetas(app), 150); });
 
   function montarBusca(container, pr, abaInicial) {
     const tpl = document.getElementById("tpl-busca").content.cloneNode(true);
@@ -319,25 +376,29 @@
     function pagina() {
       lista.insertAdjacentHTML("beforeend", todos.slice(mostrando, mostrando + POR_PAGINA).map(itemHtml).join(""));
       mostrando = Math.min(todos.length, mostrando + POR_PAGINA);
+      ajustarEtiquetas(lista);
       mais.innerHTML = mostrando < todos.length ? `<button class="bt bt-claro" type="button">Carregar mais (${fmt(todos.length - mostrando)} restantes)</button>` : "";
     }
     mais.addEventListener("click", pagina);
     if (!todos.length) {
       lista.outerHTML = `<div class="vazio"><b>Nenhum produto encontrado</b>Confira o código ou tente menos palavras. Na busca por veículo, deixe o ano em branco para ver todas as versões.</div>`;
     } else pagina();
+    // volta do produto (T-0014): reabre a mesma lista com os mesmos cartões carregados e a mesma rolagem
+    const volta = VOLTA_LISTA && VOLTA_LISTA.hash === location.hash ? VOLTA_LISTA : null;
+    VOLTA_LISTA = null;
+    if (volta) while (mostrando < Math.min(volta.n, todos.length)) pagina();
+    ESTADO_LISTA = { hash: location.hash, n: () => mostrando };
+    return volta;
   }
 
   function listaCodigos(txt) {
     return String(txt || "").split(/\s*[·,;/|]\s*|\s+/).map((c) => c.trim()).filter((c) => c && POR_COD.has(normCod(c)));
   }
 
-  function telaProduto(codigo) {
-    const p = POR_COD.get(normCod(codigo));
-    if (!p) {
-      app.innerHTML = `<div class="pagina-produto"><div class="vazio"><b>Produto ${esc(codigo)} não encontrado</b><a href="#/busca?cod=${encodeURIComponent(codigo)}">Buscar como referência cruzada</a></div></div>`;
-      return;
-    }
-    document.title = p.c + " · " + p.d + " · Catálogo BAP";
+  // Conteúdo do produto (T-0014), igual na página (A) e na janela (B). Na janela os títulos descem um nível
+  // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
+  function produtoHtml(p, naJanela) {
+    const H = naJanela ? "h2" : "h1", H2 = naJanela ? "h3" : "h2";
     const aplicacoes = String(p.a || "").split(/\s+·\s+(?=[A-ZÀ-Úa-zà-ú0-9])/).length > 1 && (p.a || "").length > 160
       ? `<ul class="aplic">${p.a.split(/\s+·\s+/).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p.a)}</p>`;
     const refs = (p.r || []).filter((x) => x.c);
@@ -347,31 +408,109 @@
     if (p.de) ficha.push(["Detalhe", p.de]);
     (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
     const junto = listaCodigos(p.oj), parecido = listaCodigos(p.ip);
-    const linkTxt = location.href.split("#")[0] + "#/produto/" + encodeURIComponent(p.c);
-    app.innerHTML = `<div class="pagina-produto">
-      <nav class="trilha" aria-label="Você está em"><a href="#/">Início</a>›<a href="#/busca?si=${encodeURIComponent(p.si || "")}">${esc(titulo(p.si || "Produtos"))}</a>${p.fa ? `›<a href="#/busca?si=${encodeURIComponent(p.si || "")}&fa=${encodeURIComponent(p.fa)}">${esc(titulo(p.fa))}</a>` : ""}›<span>${esc(p.c)}</span></nav>
+    const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
+    const secApl = p.a ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${aplicacoes}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
+    const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
+    const secFicha = ficha.length ? `<section class="secao"><${H2} class="secao-tit">Ficha técnica</${H2}><table class="t"><tbody>${ficha.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</tbody></table></section>` : "";
+    const dados = secApl && (secRefs || secFicha)
+      ? `<div class="prod-dados"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`
+      : `<div class="prod-dados um"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`;
+    return `<div class="so-impressao cab-pdf"><img src="assets/logo_escuro.png" alt="BAP componentes de qualidade"><span>Ficha do produto · Catálogo BAP</span></div>
       <div class="prod">
         <div class="prod-foto">${fotoHtml(p, true)}</div>
         <div class="prod-info">
-          <h1>${esc(p.c)}</h1>
-          <div class="desc">${esc(p.d)}</div>
-          <div class="selos">${[p.ca, p.si, p.fa, p.li].filter(Boolean).map((s, i) => `<span class="selo ${i === 1 ? "v" : ""}">${esc(titulo(s))}</span>`).join("")}${p.p ? `<span class="selo">${esc(p.p)}</span>` : ""}</div>
-          <div class="acoes">
-            <button class="bt bt-mini" type="button" data-copiar="${esc(p.c)}">Copiar código</button>
-            <a class="bt bt-claro bt-mini" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent("BAP " + p.c + " · " + p.d + "\n" + linkTxt)}">Enviar no WhatsApp</a>
+          <div class="prod-cab">
+            <${H} id="${naJanela ? "janela-tit" : "produto-tit"}">${esc(p.c)}</${H}>
+            <div class="desc">${esc(p.d)}</div>
+            <div class="selos">${[p.ca, p.si, p.fa, p.li].filter(Boolean).map((s, i) => `<span class="selo ${i === 1 ? "v" : ""}">${esc(titulo(s))}</span>`).join("")}${p.p ? `<span class="selo">${esc(p.p)}</span>` : ""}</div>
+            <div class="acoes">
+              <button class="bt bt-mini" type="button" data-copiar="${esc(p.c)}">Copiar código</button>
+              <button class="bt bt-claro bt-mini bt-pdf" type="button">Salvar em PDF</button>
+            </div>
           </div>
-          ${p.a ? `<section class="secao"><h2>Aplicação</h2>${aplicacoes}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : ""}
-          ${refs.length ? `<section class="secao"><h2>Referências cruzadas</h2><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : ""}
-          ${ficha.length ? `<section class="secao"><h2>Ficha técnica</h2><table class="t"><tbody>${ficha.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</tbody></table></section>` : ""}
-          ${p.df ? `<section class="secao"><h2>Diferencial BAP</h2><p>${esc(p.df)}</p></section>` : ""}
-          ${junto.length ? `<section class="secao"><h2>Ofereça junto</h2><div class="links-cod">${junto.map((c) => `<a href="#/produto/${encodeURIComponent(c)}">${esc(c)}</a>`).join("")}</div></section>` : ""}
-          ${parecido.length ? `<section class="secao"><h2>Itens parecidos</h2><div class="links-cod">${parecido.map((c) => `<a href="#/produto/${encodeURIComponent(c)}">${esc(c)}</a>`).join("")}</div></section>` : ""}
+          ${dados}
+          ${p.df ? `<section class="secao"><${H2} class="secao-tit">Diferencial BAP</${H2}><p>${esc(p.df)}</p></section>` : ""}
+          ${junto.length ? `<section class="secao nao-imprime"><${H2} class="secao-tit">Ofereça junto</${H2}><div class="links-cod">${junto.map((c) => `<a href="#/produto/${encodeURIComponent(c)}">${esc(c)}</a>`).join("")}</div></section>` : ""}
+          ${parecido.length ? `<section class="secao nao-imprime"><${H2} class="secao-tit">Itens parecidos</${H2}><div class="links-cod">${parecido.map((c) => `<a href="#/produto/${encodeURIComponent(c)}">${esc(c)}</a>`).join("")}</div></section>` : ""}
         </div>
-      </div></div>`;
-    app.querySelector("[data-copiar]").addEventListener("click", (ev) => {
+      </div>
+      <div class="so-impressao rod-pdf">As fotos são ilustrativas. Confira sempre a aplicação antes da compra.<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
+  }
+  function ligarAcoes(raiz) {
+    raiz.querySelector("[data-copiar]").addEventListener("click", (ev) => {
       const c = ev.currentTarget.dataset.copiar;
       (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).then(() => toast("Código " + c + " copiado"), () => toast(c));
     });
+    // "Salvar em PDF": a impressão do navegador, com a folha A4 do styles.css (@media print); o vendedor escolhe
+    // "Salvar como PDF". Sem biblioteca e sem servidor.
+    raiz.querySelector(".bt-pdf").addEventListener("click", () => window.print());
+  }
+
+  function telaProduto(codigo) {
+    const p = POR_COD.get(normCod(codigo));
+    if (!p) {
+      app.innerHTML = `<div class="pagina-produto"><div class="vazio"><b>Produto ${esc(codigo)} não encontrado</b><a href="#/busca?cod=${encodeURIComponent(codigo)}">Buscar como referência cruzada</a></div></div>`;
+      return;
+    }
+    document.title = p.c + " · " + p.d + " · Catálogo BAP";
+    const daLista = ROTA_ANTERIOR && ROTA_ANTERIOR.startsWith("#/busca");
+    app.innerHTML = `<div class="pagina-produto produto-conteudo">
+      <div class="prod-topo nao-imprime">
+        <button class="bt bt-claro bt-voltar" type="button"><span aria-hidden="true">←</span> ${daLista ? "Voltar aos resultados" : "Voltar"}</button>
+        <nav class="trilha" aria-label="Você está em"><a href="#/">Início</a>›<a href="#/busca?si=${encodeURIComponent(p.si || "")}">${esc(titulo(p.si || "Produtos"))}</a>${p.fa ? `›<a href="#/busca?si=${encodeURIComponent(p.si || "")}&fa=${encodeURIComponent(p.fa)}">${esc(titulo(p.fa))}</a>` : ""}›<span>${esc(p.c)}</span></nav>
+      </div>
+      ${produtoHtml(p, false)}</div>`;
+    // Voltar: volta no histórico quando veio de outra tela do catálogo; com o link aberto direto, vai ao início
+    app.querySelector(".bt-voltar").addEventListener("click", () => { if (ROTA_ANTERIOR) history.back(); else irPara("/"); });
+    ligarAcoes(app);
+  }
+
+  // ---------- janela do produto (versão B da simulação) ----------
+  // Abre por cima da lista sem sair dela. A rota continua #/produto/<CODIGO> (o endereço serve para mandar o
+  // link), então o voltar do celular fecha a janela. <dialog> com showModal(): o fundo fica inerte (o foco
+  // não sai da janela) e o Esc fecha. Ao fechar, o foco volta ao cartão.
+  let JANELA = null; // { dlg, pilha: [hash dos produtos abertos na janela], cod }
+  function abrirJanela(codigo) {
+    const p = POR_COD.get(normCod(codigo));
+    if (!p) return false;
+    let dlg = document.getElementById("janela-produto");
+    if (!dlg) {
+      dlg = document.createElement("dialog");
+      dlg.id = "janela-produto";
+      dlg.className = "janela";
+      dlg.setAttribute("aria-modal", "true");
+      dlg.setAttribute("aria-labelledby", "janela-tit");
+      document.body.appendChild(dlg);
+      dlg.addEventListener("cancel", (ev) => { ev.preventDefault(); fecharJanela(true); }); // Esc
+      dlg.addEventListener("click", (ev) => { if (ev.target === dlg) fecharJanela(true); }); // clique no fundo
+      dlg.addEventListener("close", () => { if (JANELA) fecharJanela(true); }); // fechou sem passar pelo cancel
+    }
+    if (!JANELA) JANELA = { dlg, pilha: [], cod: p.c };
+    const pilha = JANELA.pilha;
+    if (pilha.length > 1 && pilha[pilha.length - 2] === location.hash) pilha.pop(); // voltar do celular
+    else if (pilha[pilha.length - 1] !== location.hash) pilha.push(location.hash);
+    dlg.innerHTML = `<div class="janela-barra nao-imprime"><span>Produto</span><button class="janela-x" type="button" aria-label="Fechar a janela do produto">✕</button></div>
+      <div class="janela-corpo produto-conteudo">${produtoHtml(p, true)}</div>`;
+    dlg.querySelector(".janela-x").addEventListener("click", () => fecharJanela(true));
+    ligarAcoes(dlg);
+    document.title = p.c + " · " + p.d + " · Catálogo BAP";
+    document.documentElement.classList.add("com-janela");
+    if (!dlg.open) dlg.showModal();
+    dlg.querySelector(".janela-corpo").scrollTop = 0;
+    dlg.querySelector(".janela-x").focus();
+    return true;
+  }
+  // pelo X, Esc ou fundo: volta no histórico (todos os produtos abertos dentro da janela); o hashchange fecha
+  function fecharJanela(peloBotao) {
+    if (!JANELA) return;
+    if (peloBotao) { history.go(-JANELA.pilha.length); return; }
+    const { dlg, cod } = JANELA;
+    JANELA = null;
+    dlg.close();
+    document.documentElement.classList.remove("com-janela");
+    document.title = "Catálogo BAP · Componentes de qualidade";
+    const cartao = app.querySelector(`.item[href="#/produto/${encodeURIComponent(cod)}"]`);
+    if (cartao) cartao.focus({ preventScroll: true });
   }
 
   function telaSobre() {
@@ -381,14 +520,40 @@
       <p><a class="bt" href="#/busca">Ver todos os produtos</a></p></div>`;
   }
 
+  let ROTA_ATUAL = null, ROTA_ANTERIOR = null; // hash da tela na frente e da anterior (para o Voltar)
+  let ESTADO_LISTA = null; // a lista na tela: { hash, n() }
+  let VOLTA_LISTA = null;  // a lista que ficou para trás: { hash, n, y, cod }
   function render() {
     if (!BASE) return;
     const { caminho, params } = lerRota();
+    const ehProduto = caminho.startsWith("/produto/");
+    const cod = ehProduto ? decodeURIComponent(caminho.slice(9)) : "";
+    // versão B: da lista, o produto abre na janela e a lista fica por baixo, do jeito que estava
+    if (VERSAO === "B") {
+      const listaNaTela = ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL;
+      if (ehProduto && (JANELA || listaNaTela) && abrirJanela(cod)) return;
+      if (JANELA) {
+        const voltouNaLista = ESTADO_LISTA && location.hash === ESTADO_LISTA.hash;
+        fecharJanela(false);
+        if (voltouNaLista) { ROTA_ATUAL = location.hash; return; }
+      }
+    }
+    if (ESTADO_LISTA && ESTADO_LISTA.hash === ROTA_ATUAL && ehProduto) VOLTA_LISTA = { hash: ROTA_ATUAL, n: ESTADO_LISTA.n(), y: window.scrollY, cod };
+    ESTADO_LISTA = null;
+    ROTA_ANTERIOR = ROTA_ATUAL;
+    ROTA_ATUAL = location.hash || "#/";
     document.title = "Catálogo BAP · Componentes de qualidade";
-    if (caminho.startsWith("/produto/")) telaProduto(decodeURIComponent(caminho.slice(9)));
-    else if (caminho === "/busca") telaBusca(params);
+    let volta = null;
+    if (ehProduto) telaProduto(cod);
+    else if (caminho === "/busca") volta = telaBusca(params);
     else if (caminho === "/sobre") telaSobre();
     else telaInicio();
+    if (volta) {
+      window.scrollTo({ top: volta.y, behavior: "instant" });
+      const cartao = app.querySelector(`.item[href="#/produto/${encodeURIComponent(volta.cod)}"]`);
+      (cartao || app).focus({ preventScroll: true });
+      return;
+    }
     window.scrollTo(0, 0);
     app.focus({ preventScroll: true });
   }
