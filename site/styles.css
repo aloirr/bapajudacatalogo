@@ -240,15 +240,14 @@ table.t th, table.t td { text-align: left; padding: 4px 6px; border-bottom: 1px 
 table.t th { color: var(--texto-2); font-weight: 500; width: 42%; }
 table.t td { white-space: pre-line; }
 table.t td.c { font-weight: 600; font-variant-numeric: tabular-nums; }
-/* "Leve também" (era "Ofereça junto", R-20261120-141100b) e "Itens parecidos" (opção B, R-20261120-140600): logo
-   abaixo dos botões e antes da aplicação, na largura do conteúdo. "Leve também" numa faixa --verde-claro; "Itens parecidos" no branco, no mesmo padrão. Título
+/* "Leve também" (era "Ofereça junto", R-20261120-141100b; opção B, R-20261120-140600): logo
+   abaixo dos botões e antes da aplicação, na largura do conteúdo, numa faixa --verde-claro. Título
    à esquerda no computador e em cima no celular; cartões brancos com a miniatura (até 48 px), o código e a descrição */
 @media screen {
   .rel { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 8px 12px; }
   .secao.rel .secao-tit { margin: 0; }
   .rel-oj { background: var(--verde-claro); border-color: transparent; }
   .rel-oj .secao-tit { color: var(--verde-txt); } /* 5,8:1 no --verde-claro */
-  .rel-ip { display: none; } /* "Itens parecidos" só no PDF (R-20261120-155900-alexandre) */
 }
 .itens-rel { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 270px)); gap: 8px; }
 .item-rel { display: flex; align-items: center; gap: 10px; min-height: 44px; height: 100%; padding: 6px 10px 6px 6px; border-radius: 8px; background: var(--branco); color: var(--escuro); text-decoration: none; }
@@ -454,7 +453,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   table.t th { width: 46%; }
   .tab-rola { display: block !important; overflow: visible; } /* no PDF vai a tabela, mesmo no celular */
   table.tab-veiculos th { width: auto; }
-  /* no PDF: "Leve também" e "Itens parecidos" depois da aplicação e do diferencial, como antes; código e
+  /* no PDF: "Leve também" depois da aplicação, como antes; código e
      descrição, sem link e sem miniatura, no branco */
   .prod-info > .rel { order: 1; }
   .itens-rel { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5mm; }

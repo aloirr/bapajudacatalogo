@@ -780,7 +780,7 @@
   }
   // Destaques (critério fixo): foto, aplicação, referência cruzada, ficha técnica e ofereça junto; um por sistema, dos
   // sistemas com mais produtos; no sistema, o menor código. Sem N_LISTA assim, afrouxa nessa ordem: sem o ofereça
-  // junto, e depois repete sistema. O diferencial BAP saiu da tela e do critério (R-20261120-155900-alexandre).
+  // junto, e depois repete sistema. O diferencial BAP saiu do site, do PDF e do critério (R-20261120-155900 e -160300).
   let DESTAQUES = null;
   function destaques() {
     if (DESTAQUES) return DESTAQUES;
@@ -1224,7 +1224,7 @@
     depois.forEach((el) => conteudo.appendChild(el));
   }
 
-  // códigos de "Leve também" (campo oj) e "Itens parecidos": os do catálogo e os que têm cara de código (letra e número),
+  // códigos de "Leve também" (campo oj): os do catálogo e os que têm cara de código (letra e número),
   // sem repetir; as observações soltas ("s/ ar", "c/ ar") ficam fora
   function listaCodigos(txt) {
     const vistos = new Set();
@@ -1251,8 +1251,8 @@
     }).join("")}</ul>`;
   }
   // "Leve também" (faixa verde-clara), logo abaixo dos botões e antes da aplicação (opção B, R-20261120-140600): o título
-  // à esquerda no computador e em cima no celular. "Itens parecidos" e "Diferencial BAP" saíram da tela e ficam só no
-  // PDF (R-20261120-155900-alexandre; a decisão foi não mudar os PDFs)
+  // à esquerda no computador e em cima no celular. "Itens parecidos" e "Diferencial BAP" saíram do site e do PDF
+  // (R-20261120-155900-alexandre e R-20261120-160300-alexandre)
   const secRelHtml = (H2, tit, classe, cods) => cods.length
     ? `<section class="secao rel ${classe}"><${H2} class="secao-tit">${tit}</${H2}>${itensRelHtml(cods)}</section>` : "";
 
@@ -1352,7 +1352,7 @@
     if (p.la) ficha.push(["Lado", titulo(p.la)]);
     if (p.de) ficha.push(["Detalhe", p.de]);
     (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
-    const junto = listaCodigos(p.oj), parecido = listaCodigos(p.ip);
+    const junto = listaCodigos(p.oj);
     const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e o texto original fica em "Ver aplicação completa";
     // no PDF, o texto vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
@@ -1385,9 +1385,7 @@
             </div>
           </div>
           ${secRelHtml(H2, "Leve também", "rel-oj", junto)}
-          ${secRelHtml(H2, "Itens parecidos", "rel-ip", parecido)}
           ${dados}
-          ${p.df ? `<section class="secao so-impressao"><${H2} class="secao-tit">Diferencial BAP</${H2}><p>${esc(p.df)}</p></section>` : ""}
         </div>
       </div>
       <div class="so-impressao rod-pdf">As fotos são ilustrativas. Confira sempre a aplicação antes da compra.<br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
