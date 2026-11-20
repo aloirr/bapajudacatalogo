@@ -834,8 +834,7 @@
       const base = marcados.length ? buscar(semEste) : todos;
       const op = contar(base, k).slice(0, 40);
       for (const v of marcados) if (!op.some(([x]) => x === v)) op.push([v, 0]);
-      // grupo sem escolha de verdade (1 opção, desmarcada, com todos os produtos): não aparece
-      if (!op.length || (op.length === 1 && !marcados.length && op[0][1] === todos.length)) return "";
+      if (!op.length) return ""; // a coluna aparece sempre, mesmo com uma opção só (R-20261120-130300)
       return `<div class="filtro" data-k="${k}">
         <button class="filtro-bt${marcados.length ? " ativo" : ""}" type="button" aria-expanded="true" aria-controls="filtro-${k}"><span>${ROT_FILTRO[k]}${marcados.length ? ` <b>(${marcados.length})</b>` : ""}</span><span class="seta" aria-hidden="true">▾</span></button>
         <div class="filtro-lista" id="filtro-${k}" role="group" aria-label="${ROT_FILTRO[k]}">${op.map(([v, n]) =>
@@ -1003,8 +1002,11 @@
     const v = veiculoDaRota(pr);
     const op = opcoesVeiculo(v, pr);
     const mem = VEICULO_PLACA && VEICULO_PLACA.chave === chaveVeiculo(pr) ? VEICULO_PLACA : null;
-    const lista = (k, rot, todos, valor, ativo0, fmtV) => { const ativo = ativo0 && (op[k].length > 0 || !!valor); return `<label class="mv-campo"><span>${rot}</span>
-      <select data-k="${k}"${ativo ? "" : " disabled"}><option value="">${ativo ? todos : "—"}</option>${ativo ? op[k].map(([x, n]) =>
+    // com a placa consultada (R-20261120-130300): as 5 listas travadas, em cinza, com os valores da placa; o ✕ destrava
+    const lista = (k, rot, todos, valor, ativo0, fmtV) => {
+      if (mem) return `<label class="mv-campo"><span>${rot}</span><select data-k="${k}" class="travada" disabled><option>${valor ? esc(fmtV(valor)) : "—"}</option></select></label>`;
+      const ativo = ativo0 && (op[k].length > 0 || !!valor); return `<label class="mv-campo"><span>${rot}</span>
+      <select data-k="${k}"${ativo ? "" : " disabled"}><option value="">${todos}</option>${ativo ? op[k].map(([x, n]) =>
         `<option value="${esc(String(x))}"${String(x) === String(valor) ? " selected" : ""}>${esc(fmtV(x))} (${fmt(n)})</option>`).join("") : ""}</select></label>`; }; // lista sem opção: desabilitada com "—"
     const resumo = nomeVeiculo(pr);
     return `<section class="meu-veiculo faixa-modelo${MV_ABERTO ? " aberto" : ""}" aria-label="Veículo">
@@ -1051,7 +1053,6 @@
     const nMarcados = Object.keys(ROT_FILTRO).reduce((t, k) => t + pr.getAll(k).filter(Boolean).length, 0);
     document.getElementById("busca-topo").insertAdjacentHTML("afterend", meuVeiculoHtml(pr)); // um bloco só (um aria-label)
     ligarMeuVeiculo(app.querySelector(".pagina-busca .meu-veiculo"), pr);
-    if (!barra.querySelector(".filtro")) return; // nenhum grupo com escolha de verdade: sem coluna e sem "Filtrar"
     if (CELULAR.matches) {
       const rotulo = "Filtrar" + (nMarcados ? ` (${nMarcados})` : "");
       topo.querySelector("h1").insertAdjacentHTML("afterend", `<button type="button" class="bt bt-claro bt-mini bt-filtrar" aria-haspopup="dialog">${rotulo}</button>`);
