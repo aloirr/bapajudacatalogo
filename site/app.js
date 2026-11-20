@@ -1268,8 +1268,7 @@
   // primeiro. Sem achar: "—".
   const fmtFaixa = ([de, ate]) => de <= SEM_INICIO ? "até " + ate : ate >= SEM_FIM ? de + "–" : de === ate ? String(de) : de + "–" + ate;
   // o ano sem fim ("2006–"): o leitor de tela ouve "2006 em diante" (o " em diante" fica só para ele, na .vh). Com
-  // várias faixas na célula (R-20261120-165900-alexandre), cada uma num .faixa que não quebra, com a vírgula no fim
-  // ("2011–2019," "2020–2022"): a linha quebra só entre as faixas e nunca começa com ","
+  // várias faixas na célula (R-20261120-165900-alexandre), cada uma num .faixa, com a vírgula no fim ("2011–2019,")
   const SEP_FAIXAS = ", ";
   const faixasDaCelula = (an) => String(an || "").split(SEP_FAIXAS).filter(Boolean);
   const anoHtml = (an) => faixasDaCelula(an).map((f, i, l) => `<span class="faixa">${esc(f)}${/–$/.test(f) ? '<span class="vh"> em diante</span>' : ""}${i < l.length - 1 ? "," : ""}</span>`).join(" ");
@@ -1278,13 +1277,14 @@
   // cilindrada ("EcoSport 01/2003–12/2007 1.0, 01/2003–12/2013 1.6"); a lista de anos ("(1995–1996, 1999–2009)",
   // "Monza 01/82 - 12/89, 01/90 - 12/96") fica junta
   const RX_PEDACO_ANO = /\s*[·;:|]\s*|\s+\+\s+|(?<=\b\d{2}\/\d{2}\)?)\s+(?=[A-Z])|(?<=(?:19|20)\d{2}>)\s+(?=\d)|\s*,\s*(?=\d)(?!(?:\d{2}\/)*(?:19[5-9]\d|20[0-2]\d)(?!\d)|\d{2}\/\d{2}(?!\d))|(?<=\d[.,]\d)\s*,\s*(?=\d)/;
-  // a marca no meio do pedaço ("Atego - 2005 em Diante Mercedes-Benz 1418 Atego") começa outro veículo
   const RX_SO_MES_ANO = /^\(?\d{2}\/\d{2}(?:\s*[-–]\s*\d{2}\/\d{2})?\)?$/; // "01/90 - 12/96"
+  const soAnoPedaco = (x) => (SO_ANO.test(x) || RX_SO_MES_ANO.test(x)) && faixasDoTexto(x).length > 0; // o pedaço só de ano
   let RX_MARCA_MEIO = null, RX_MARCA_ANTES = null;
-  const rxMarcaAntes = () => RX_MARCA_ANTES || (RX_MARCA_ANTES = new RegExp(String.raw`(?:^|[^A-Z0-9])(?:${[...NOME_MARCA.keys(),
-    ...Object.values(APELIDOS).join(" ").split(" ")].filter(Boolean).map(reEsc).join("|")})\s+$`));
-  const rxMarcaNoMeio = () => RX_MARCA_MEIO || (RX_MARCA_MEIO = new RegExp(String.raw`\s+(?=(?:${[...NOME_MARCA.keys(),
-    ...Object.values(APELIDOS).join(" ").split(" ")].filter(Boolean).map(reEsc).join("|")})(?![A-Z0-9]))`));
+  let ALT_MARCAS = null; // as marcas e os apelidos (GM, VW, MB…) para os regex da coluna Ano
+  const altMarcas = () => ALT_MARCAS || (ALT_MARCAS = [...NOME_MARCA.keys(), ...Object.values(APELIDOS).join(" ").split(" ")].filter(Boolean).map(reEsc).join("|"));
+  const rxMarcaAntes = () => RX_MARCA_ANTES || (RX_MARCA_ANTES = new RegExp(String.raw`(?:^|[^A-Z0-9])(?:${altMarcas()})\s+$`));
+  // a marca no meio do pedaço ("Atego - 2005 em Diante Mercedes-Benz 1418 Atego") começa outro veículo
+  const rxMarcaNoMeio = () => RX_MARCA_MEIO || (RX_MARCA_MEIO = new RegExp(String.raw`\s+(?=(?:${altMarcas()})(?![A-Z0-9]))`));
   function linhasVeiculos(p) {
     if (!Array.isArray(p.ve) || !p.ve.length) return [];
     const apl = String(p.a || ""), up = semAcento(apl).toUpperCase();
@@ -1319,15 +1319,9 @@
       for (const o of outras) { const x = rxPalavra(o, "g"); x.lastIndex = ini; const y = x.exec(tu); if (y && y.index < fim) fim = y.index; }
       return t.slice(ver ? ini - ver.length : 0, fim);
     };
-    // Todas as faixas do modelo na coluna Ano (R-20261120-165900-alexandre). A célula nunca mostra um ano em que a peça
-    // possa não servir; um ano a menos pode, porque "Outros veículos e detalhes" mostra tudo (decisão do gerente no PR #54).
-    // O trecho vai em pedaços (RX_PEDACO_ANO, os separadores de veículo do RX_SEP_VEICULO e a marca no meio) e em
-    // entradas: o modelo (ou a versão, no 1º pedaço) e os pedaços só de ano depois dele; para no 1º pedaço de outro
-    // veículo com ano ("Frontier (1998–2004) e Xterra (2000>)"). Só entra a entrada pura: sem nada além do que a linha
-    // da tabela já tem (modelo, versão do ve, a cilindrada da linha e o ano). Qualificador (lado, outra cilindrada, a
-    // válvula que a linha não tem, palavra de variante como "Dualogic", "Manual", "4x4", "com A/C", "750 kg") tira a
-    // entrada da célula e ela fica em "Outros". Sem a versão da linha no 1º pedaço ("R 164 ... 2000–2005" na linha do
-    // R 580) ou com o modelo numa lista antes dos anos ("Brava, Doblô · 2000–2003 / 2002>"): nenhuma ("—").
+    // Coluna Ano com todas as faixas do modelo (R-20261120-165900-alexandre; a regra e os exemplos estão no
+    // docs/DADOS_DO_SITE.md): o trecho vai em pedaços e em entradas (o modelo e os pedaços só de ano depois dele); só
+    // entra a entrada pura, sem nada além do que a linha já tem.
     const doModelo = (t, m, ver, cil) => {
       // só o bloco do modelo: o " ; " (com espaço dos dois lados, como no linhasAplic) começa outro bloco de marca ("WR-V
       // 1.5 L 16V · 2017 até 2020 ; VW - Spacecross"); o ";" colado separa veículos do mesmo bloco ("X1 2015 2022; X1 2023 →")
@@ -1355,10 +1349,10 @@
       for (const [k, x] of ps.entries()) {
         if (k && modelos.some((o) => o !== m && o.includes(m) && x.startsWith(o))) break; // o modelo mais longo ("Palio Weekend")
         if (!k || doM(x)) { entradas.push({ partes: [x], puro: puro(x) && !pendente }); pendente = false; }
-        else if ((SO_ANO.test(x) || RX_SO_MES_ANO.test(x)) && faixasDoTexto(x).length) entradas[entradas.length - 1].partes.push(x);
+        else if (soAnoPedaco(x)) entradas[entradas.length - 1].partes.push(x);
         else if (faixasDoTexto(x).length || rxMarcaAntes().test(x + " ")) break; // outro veículo com ano ou a marca; "2036" de "2036 Axor" não é ano
         // o nome seguido do pedaço só de ano é outro veículo ("Galloper 2.5 L · 1998–2004 · H1 Starex · 2000–2026")
-        else if (ps[k + 1] && SO_ANO.test(ps[k + 1]) && faixasDoTexto(ps[k + 1]).length) break;
+        else if (ps[k + 1] && soAnoPedaco(ps[k + 1])) break;
         // detalhe sem ano: qualifica a entrada de antes ("Dualogic", "Diant", "com A/C") e a de depois ("2036 · Axor")
         else { entradas[entradas.length - 1].puro = false; pendente = true; }
       }
@@ -1377,9 +1371,7 @@
         if (x) { t = t.slice(0, x.index + x[1].length); repetido = true; }
       }
       const cil = cilDe(t)[0] || "";
-      // só as faixas das entradas puras (doModelo), sem repetir e em ordem crescente ("2011–2019, 2020–2022"), para quem
-      // olha só a tabela não achar que a peça não serve (R-20261120-165900-alexandre). Uma faixa no trecho (a 1ª entrada
-      // do modelo repetido) e nenhuma entrada pura: ela, como antes; mais de uma faixa e nenhuma pura: "—"
+      // só as faixas das entradas puras (doModelo); uma faixa no trecho e nenhuma pura: ela, como antes; várias e nenhuma pura: "—"
       // no trecho cortado no meio de uma palavra ou número no limite dos 120, o ano não lê o último pedaço, que está
       // partido ("Worker 17-25" de "17-250", "2015 até 20"); a cilindrada lê o trecho inteiro, como antes (testes, PR #54)
       const semPartido = (x) => { if (!cortado.has(m) || !cheio.endsWith(x)) return x; const k = Math.max(...[...x.matchAll(/[·;,]/g)].map((y) => y.index)); return k > m.length ? x.slice(0, k) : x; };
@@ -1429,8 +1421,8 @@
   // acento, sem maiúscula, com "Pick up" igual a "Pick-Up" e sem o "–" entre o modelo e o ano) só é coberto quando a
   // tabela tem o modelo (o mais longo que casa: "Duster Oroch" antes de "Duster") e a versão citada, TODAS as
   // cilindradas e válvulas dele e a faixa de anos dele, e não sobra mais nada (o "exc. Si", o "(Enc. Mod. Antigo)", o
-  // "Sportback", o "Axor 2035"). O pedaço só de ano ("04/2002–07/2012 / Meriva") é coberto pela faixa de uma linha da
-  // tabela. A linha só sai quando todos os veículos dela são cobertos.
+  // "Sportback", o "Axor 2035"). O pedaço só de ano ("04/2002–07/2012 / Meriva") é coberto pela linha do veículo de antes
+  // (sem veículo antes, por uma linha da tabela). A linha só sai quando todos os veículos dela são cobertos.
   const SOBRA_APL = /\b(?:L|ATE|A|EM DIANTE|DIANTE)\b|[\s·>→–\-\/().,]+/g;
   const chaveApl = (t) => norm(t).replace(/([A-Z])-(?=[A-Z0-9])|([0-9])-(?=[A-Z])/g, "$1$2 ");
   // Devolve as linhas da tabela que cobrem o veículo (ou null). A faixa do texto tem de estar na célula Ano da PRÓPRIA
