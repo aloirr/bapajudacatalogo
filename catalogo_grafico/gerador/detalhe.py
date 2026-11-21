@@ -104,8 +104,13 @@ def _in(k, st):
     return k in st or _sing(k) in {_sing(x) for x in st}
 
 
-def _tail(code, s):
-    """texto cortado em '…': mantém o começo (com acento) e completa com o cadastro"""
+TAIL_LOG = []   # B9 (T-0019): (código, o que o _tail deixou de juntar porque a aplicação já mostra)
+
+
+def _tail(code, s, apl=''):
+    """texto cortado em '…': mantém o começo (com acento) e completa com o cadastro. B9 (T-0019, RD-0252): o que a
+    aplicação do item já mostra não entra (SCE14002: a DESCRICAO repete a aplicação "MBB LS 1630 1929 ..." e o
+    subtítulo do destaque ficava com 4 linhas)."""
     base = s.rstrip('.… ').strip()
     toks = base.split()
     d = _desc().get(code)
@@ -120,6 +125,23 @@ def _tail(code, s):
             if dbk[j] == k or (len(k) >= 4 and dbk[j].startswith(k[:4])):
                 pos = j; break
     rest = db[pos + 1:] if pos >= 0 else []
+    if apl and rest:
+        # sai o trecho que repete a aplicação: 5 ou mais palavras seguidas do cadastro que estão todas na aplicação
+        # (um sinal solto, como o "-", no meio do trecho vai junto); trecho curto fica ("750MM", "VW", "12V")
+        ak = {_key(t) for t in re.split(r'[\s·;/]+', apl) if _key(t)}
+        na = [(_key(t) in ak) if re.search(r'\w', t) else None for t in rest]
+        tira, k = set(), 0
+        while k < len(rest):
+            if not na[k]: k += 1; continue
+            j = k
+            while j < len(rest) and na[j] is not False: j += 1
+            while j > k and na[j - 1] is None: j -= 1
+            if sum(1 for i in range(k, j) if na[i]) >= 5: tira.update(range(k, j))
+            k = max(j, k + 1)
+        if tira:
+            TAIL_LOG.append((code, ' '.join(rest[i] for i in sorted(tira))))
+            rest = [t for i, t in enumerate(rest) if i not in tira]
+            while rest and not re.search(r'\w', rest[-1]): rest.pop()     # sem "-" sozinho no fim
     rest2 = []
     for t in rest:
         if any(ch.isdigit() for ch in t) or (t.isupper() and len(t) <= 3 and t.isalpha() and _key(t) not in ABREV and _key(t) not in STOP):
@@ -131,12 +153,12 @@ def _tail(code, s):
     return out
 
 
-def compacto(name, code, sub):
+def compacto(name, code, sub, apl=''):
     s = str(sub or '').strip()
     if not s:
         return s
     if s.endswith('…') or s.endswith('...'):
-        s = _tail(code, s)
+        s = _tail(code, s, apl)
     s = re.sub(r'(?i)servi[cç]o\s*/\s*estacionamento(\s+estacionamento)?', 'serv./estac.', s)
     s = re.sub(r'(?i)\b([cs])/(?=\w)', r'\1/ ', s)
     toks = s.split()
@@ -179,7 +201,8 @@ def aplicar(fams):
     for f in fams:
         for r in f['rows']:
             if r.get('sub'):
-                novo = compacto(f['name'], r['code'], r['sub'])
+                apl = ''.join(t for t, b in (r.get('segs') or []))      # B9: o _tail não repete a aplicação
+                novo = compacto(f['name'], r['code'], r['sub'], apl)
                 if novo != r['sub']:
                     r['sub_orig'] = r['sub']; r['sub'] = novo; n += 1
     return n

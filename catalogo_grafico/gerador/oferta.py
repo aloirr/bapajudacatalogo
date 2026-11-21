@@ -8,6 +8,7 @@ a mesma posição (dianteiro/traseiro) e o mesmo lado. Sem par por veículo, ent
 import re, collections
 import cross as X
 import detalhe as DT
+from site_regras import G as _G      # "Leve também" por sistema: G.SIS_COMPAT e G.sistemas_de (T-0019)
 
 ADITIVO, AGUA = 'RAD25005P', 'RAD25009P'
 DOT3, DOT4 = 'FLU15001', 'FLU15002'
@@ -63,6 +64,36 @@ QUIMICO = [(r'AGUA DESMIN', f'{ADITIVO} (aditivo)'), (r'FLUIDO|ADITIVO', f'{AGUA
            (r'DESENGRIPANTE|DESCARBONIZANTE', 'Velas e bomba de comb.')]
 LOG = collections.Counter()
 
+# ---------------------------------------------------------------- "Leve também" por sistema (T-0019)
+# A peça oferecida é do mesmo sistema do item ou de um sistema compatível. A tabela (G.SIS_COMPAT: origem -> sistemas
+# aceitos, não simétrica) e a leitura dos sistemas do item (G.sistemas_de: o SISTEMA da base; no rolamento, o que o texto
+# dele diz, como "CÂMBIO E DIFERENCIAL" no ROL32008 e no ROL32009) são as do site, no scripts/gerar_site.py (dono:
+# web-site), sem cópia: o site e os PDFs dão o mesmo "Leve também" (R-20261121-200058-alexandre).
+_SIS = {}
+SIS_LOG = []          # (item, oferta que saiu, sistemas do item, sistemas da oferta)
+
+
+def _txt(v):
+    return v.strip() if isinstance(v, str) else ''
+
+
+def sistemas(code):
+    """sistemas do item pela regra do site (G.sistemas_de), com os campos da base unificada"""
+    c = code.strip().upper()
+    if c not in _SIS:
+        import montar as _M, taxo
+        b = _M.BASE_D.get(taxo.norm(c))
+        _SIS[c] = set() if b is None else set(_G.sistemas_de(
+            _txt(b.PRODUTO), _txt(b.SISTEMA), _txt(b.DESCRICAO), _txt(b.DETALHE_CATALOGO), _txt(b.DADOS_ADICIONAIS)))
+    return _SIS[c]
+
+
+def sis_ok(origem, oferta):
+    """a oferta é do mesmo sistema do item ou de um compatível (SIS_COMPAT); sem sistema na base, fica"""
+    so, sd = sistemas(origem), sistemas(oferta)
+    if not so or not sd: return True
+    return any(d in _G.SIS_COMPAT.get(o, (o,)) for o in so for d in sd)
+
 
 def _pos(code):
     b = DT._base10().get(code.strip().upper(), {})
@@ -83,6 +114,8 @@ def _pares(r, cand, lado=True, maxn=2):
     out = []
     for rb, (mb, eb, vb, yb), bb, (pb, lb, fb) in cand:
         if rb['code'] == r['code']: continue
+        if not sis_ok(r['code'], rb['code']):
+            SIS_LOG.append((r['code'], rb['code'], sorted(sistemas(r['code'])), sorted(sistemas(rb['code'])))); continue
         mi = m & mb
         if not mi: continue
         if ba and bb and not (ba & bb): continue
@@ -144,8 +177,27 @@ def aplicar(fams):
                 r['extra'] = next((s for p, s in QUIMICO if re.search(p, t)), '—'); LOG[(nome, 'sugestão fixa')] += 1
             else:
                 r['extra'] = fixa or '—'; LOG[(nome, 'sugestão fixa')] += 1
+    _por_sistema(fams)
     _so_codigo(fams)
     return LOG
+
+
+def _por_sistema(fams):
+    """o par que veio pronto (cross.py, sugestão fixa com código) também segue o sistema: o código de outro sistema
+    sai; sem nenhum, fica o traço (o _so_codigo)"""
+    cods = {r['code'].strip().upper() for f in fams for r in f['rows']}
+    for f in fams:
+        if f.get('moto'): continue
+        for r in f['rows']:
+            e = r.get('extra')
+            if not e or e == '—': continue
+            ps = e.split(' · ')
+            fica = [p for p in ps if re.sub(r'\s*\(.*?\)', '', p).strip().upper() not in cods
+                    or sis_ok(r['code'], re.sub(r'\s*\(.*?\)', '', p).strip())]
+            if len(fica) != len(ps):
+                for p in ps:
+                    if p not in fica: SIS_LOG.append((r['code'], p, sorted(sistemas(r['code'])), sorted(sistemas(p))))
+                r['extra'] = ' · '.join(fica) or '—'; LOG[(f['name'], 'fora do sistema')] += 1
 
 
 TEM_COD = re.compile(r'\b(?=[A-Z0-9./-]*\d)[A-Z][A-Z0-9./-]{3,}|\b\d{1,3}[./]\d{2,3}-\d{2}\b')
