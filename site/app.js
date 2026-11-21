@@ -26,7 +26,7 @@
   let VEICULO_PLACA = null;
   const app = document.getElementById("app");
   const TITULO = document.title; // o do index.html: "Catálogo online BAP · Componentes de qualidade"
-  const tituloProduto = (p) => p.c + " · " + p.d + " · " + TITULO.split(" · ")[0]; // "<código> · <descrição> · Catálogo online BAP"
+  const tituloProduto = (p) => p.c + " · " + anoMaisTxt(p.d) + " · " + TITULO.split(" · ")[0]; // "<código> · <descrição> · Catálogo online BAP"
   let BASE = null;           // { gerado_em, total, produtos }
   const NOME_MARCA = new Map(); // marca sem acento → como a base escreve
   let TEM_VE = false;        // o produtos.json tem o campo "ve" (T-0017) em algum produto
@@ -44,16 +44,17 @@
   const norm = (s) => semAcento(String(s || "")).toUpperCase().replace(/\s+/g, " ").trim();
   const normCod = (s) => semAcento(String(s || "")).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  // Ano sem fim na tela (T-0018, R-20261120-195900-alexandre): "2015>", "2015 →", "2015->", "2015 em Diante" e "2015–"
-  // sem o ano final aparecem como "2015+"; o leitor de tela ouve "2015 em diante" (o "+" fica escondido dele e o
-  // " em diante" vai na .vh). A faixa com fim ("2012–2016", "1998>2009", "2012>20", "1999->2008") não muda. Só o
-  // desenho: o JSON, a busca e a leitura dos anos continuam com o texto da base.
+  // Ano sem fim na tela, na aplicação e na descrição (T-0018, R-20261120-195900 e R-20261120-201100-alexandre):
+  // "2015>", "2015 →", "2015->", "2015 em Diante" e "2015–" sem o ano final aparecem como "2015+"; o leitor de tela
+  // ouve "2015 em diante" (o "+" fica escondido dele e o " em diante" vai na .vh). A faixa com fim ("2012–2016",
+  // "1998>2009", "2012>20", "1999->2008") não muda. Só o desenho: o JSON, a busca e a leitura dos anos continuam com
+  // o texto da base.
   const RX_ANO_ABERTO = /(?<![\d\/])((?:\d{2}\/){0,2}(?:19|20)\d{2})(?:\s*-?>+|\s*→|\s+em\s+diante\b|–)(?!\s*\d)/gi;
   const ANO_MAIS = '<span aria-hidden="true">+</span><span class="vh"> em diante</span>';
   const anoMaisHtml = (s) => { const t = String(s == null ? "" : s); let h = "", k = 0;
     for (const m of t.matchAll(RX_ANO_ABERTO)) { h += esc(t.slice(k, m.index)) + esc(m[1]) + ANO_MAIS; k = m.index + m[0].length; }
     return h + esc(t.slice(k)); };
-  const anoMaisTxt = (s) => String(s == null ? "" : s).replace(RX_ANO_ABERTO, "$1+"); // o title, sem HTML
+  const anoMaisTxt = (s, fim = "+") => String(s == null ? "" : s).replace(RX_ANO_ABERTO, (_, ano) => ano + fim); // o title e o título da aba ("+"); o alt (" em diante")
   const MINUSC = new Set(["e", "de", "da", "do", "das", "dos", "com", "sem", "para", "p/", "c/", "s/"]);
   const titulo = (s) => bonito(s); // um nome sem caixa alta só (bonito, mais abaixo)
   const fmt = (n) => Number(n).toLocaleString("pt-BR");
@@ -454,7 +455,7 @@
   const SEM_FOTO = '<img src="assets/logo_escuro.png" alt="">Foto em breve'; // o miolo do "Foto em breve"
   // a foto grande (produto) carrega logo e na frente (fetchpriority); no cartão, lazy, menos os da 1ª linha (logo)
   function fotoHtml(p, grande, logo) {
-    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + p.d)}" loading="${grande || logo ? "eager" : "lazy"}"${grande ? ' fetchpriority="high"' : ""} onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:${esc(JSON.stringify(SEM_FOTO)).replace(/"/g, "&quot;")}}))">`;
+    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + anoMaisTxt(p.d, " em diante"))}" loading="${grande || logo ? "eager" : "lazy"}"${grande ? ' fetchpriority="high"' : ""} onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:${esc(JSON.stringify(SEM_FOTO)).replace(/"/g, "&quot;")}}))">`;
     return `<div class="sem-foto">${SEM_FOTO}</div>`;
   }
   // a foto com o botão de ampliar (no cartão e no produto); sem foto, só o "Foto em breve"
@@ -474,7 +475,7 @@
         <span class="foto-cod" aria-hidden="true">${esc(p.c)}</span></div>
       <div class="corpo">
         <a class="item-link" href="${href}"><span class="cod vh">${esc(p.c)}</span><span class="vh"> · </span>
-        <span class="desc" title="${esc(p.d)}">${esc(p.d)}</span></a>
+        <span class="desc" title="${esc(anoMaisTxt(p.d))}">${anoMaisHtml(p.d)}</span></a>
         <span class="apl"${p.a ? ` title="${esc(anoMaisTxt(p.a))}"` : ""}>${anoMaisHtml(p.a)}</span>
         <div class="item-pe">${refsHtml(p)}
           <a class="bt bt-claro bt-detalhes" href="${href}">+ Detalhes<span class="vh"> do ${esc(p.c)}</span></a></div>
@@ -823,7 +824,7 @@
   // a linha da lista: miniatura, código, descrição de 1 linha, sistema (só no computador) e a seta
   const pecaHtml = (p) => `<li><a class="rec-item" href="#/produto/${encodeURIComponent(p.c)}">
       <span class="rec-foto">${fotoHtml(p)}</span>
-      <span class="rec-txt"><b>${esc(p.c)}</b><span>${esc(titulo(p.d))}</span></span>
+      <span class="rec-txt"><b>${esc(p.c)}</b><span>${anoMaisHtml(titulo(p.d))}</span></span>
       <span class="rec-si">${esc(titulo(p.si))}</span><span class="rec-seta" aria-hidden="true">›</span></a></li>`;
   function blocoPecas(sec, recentes) {
     const lst = recentes || destaques();
@@ -1266,7 +1267,7 @@
     return `<ul class="itens-rel">${cods.map((c) => {
       const p = POR_COD.get(normCod(c));
       return p
-        ? `<li><a class="item-rel" href="#/produto/${encodeURIComponent(p.c)}">${miniHtml(p)}<span class="rel-txt"><b>${esc(p.c)}</b><span title="${esc(p.d)}">${esc(p.d)}</span></span></a></li>`
+        ? `<li><a class="item-rel" href="#/produto/${encodeURIComponent(p.c)}">${miniHtml(p)}<span class="rel-txt"><b>${esc(p.c)}</b><span title="${esc(anoMaisTxt(p.d))}">${anoMaisHtml(p.d)}</span></span></a></li>`
         : `<li><span class="item-rel fora">${miniHtml(null)}<span class="rel-txt"><b>${esc(c)}</b><span>fora do catálogo</span></span></span></li>`;
     }).join("")}</ul>`;
   }
@@ -1525,7 +1526,7 @@
         <div class="prod-info">
           <div class="prod-cab">
             <${H} id="${naJanela ? "janela-tit" : "produto-tit"}">${esc(p.c)}</${H}>
-            <div class="desc">${esc(p.d)}</div>
+            <div class="desc">${anoMaisHtml(p.d)}</div>
             <div class="selos">${[p.ca, p.li].filter(Boolean).map((s) => `<span class="selo">${esc(titulo(s))}</span>`).join("")}</div>
             <div class="acoes">
               <button class="bt bt-mini" type="button" data-copiar="${esc(p.c)}">Copiar código</button>
