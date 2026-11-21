@@ -156,8 +156,8 @@ SEM_ESTOQUE, novos = [], []
 def _em_diante(app):
     """'2011/...' -> '2011>' ; '06/...' -> '2006>' (ano com 4 dígitos, '>' = em diante)"""
     if not isinstance(app, str): return app
-    app = re.sub(r'\b((?:19|20)\d{2})\s*/\s*\.{2,}', r'\1>', app)
-    return re.sub(r'(?<![\d/])(\d{2})\s*/\s*\.{2,}', lambda m: ('20' if int(m.group(1)) <= 30 else '19') + m.group(1) + '>', app)
+    app = re.sub(r'\b(' + datas.Y + r')\s*/\s*\.{2,}', r'\1>', app)
+    return re.sub(r'(?<![\d/])(\d{2})\s*/\s*\.{2,}', lambda m: str(datas.yy(m.group(1))) + '>', app)
 
 
 _ja = {norm(r['code']) for rs in rows_by_line.values() for r in rs}
