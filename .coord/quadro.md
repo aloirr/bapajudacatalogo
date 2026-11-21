@@ -32,7 +32,7 @@ Rodada aprovada no R-20261120-235000-alexandre ("Faca o quer e publique. Depois 
 - Pergunta que só o Alexandre responde: aquele item para e o resto segue. O merge segue a regra de sempre (testes, revisões LIBERADO, CI verde e a autorização do PO por número e SHA).
 
 1. Registros (gerente-projetos): os PRs da tarde e da noite (#34 a #79) e o quadro.
-2. PDFs 2027 com a v23 (catalogo-grafico), T-0019, com o ajuste preventivo do "Gol DE 1999"; uma geração só, depois da v23.
+2. PDFs 2027 com a v23 (catalogo-grafico), T-0019, com o ajuste preventivo do "Gol DE 1999"; uma geração só, depois da v23 (opção permitida pelo R-20261120-235000, "se for mais simples", escolhida pelo gerente).
 3. v23 (catalogo-dados), T-0017: o CRU100 com os dados do LOG da v21, o SCE14002 "1929–19321934" e o FAC6108 "em Diante" sem ano; depois, o JSON do site (web-site).
 4. RD-0212 (web-site), T-0017.
 5. Depois de publicar tudo, o time para: nenhum trabalho novo; o gerente desliga as rondas e a reserva, e o PO desliga as rondas. A volta é só com a palavra do Alexandre ("retornar" ou equivalente). O CV-F35 segue esperando a fonte do ano final.
