@@ -209,10 +209,8 @@ def extras_de(texto: str) -> list[list[str]]:
     return itens
 
 
-# "Leve também" pelo sistema da peça (T-0018, R-20261121-200058-alexandre): fonte única do site e dos PDFs. O site lê
-# a tabela do produtos.json (campo sc) e o catalogo_grafico/gerador/oferta.py, daqui mesmo (pelo site_regras), sem
-# cópia. SIS_COMPAT: origem -> sistemas aceitos, com o próprio; não é simétrica (o semi-eixo oferece o cubo; o cubo não
-# oferece o rolamento de câmbio). Sistema fora da tabela aceita só ele mesmo.
+# "Leve também" pelo sistema da peça (T-0018): fonte única do site (campo sc) e dos PDFs (site_regras). Regra:
+# docs/DADOS_DO_SITE.md, campos sc e ss.
 SIS_COMPAT = {
     "SUSPENSÃO": ("SUSPENSÃO", "DIREÇÃO"),
     "DIREÇÃO": ("DIREÇÃO", "SUSPENSÃO"),
@@ -227,10 +225,8 @@ SIS_COMPAT = {
     "LUBRIFICANTES": ("LUBRIFICANTES", "FILTRAÇÃO", "ELÉTRICA"),
     "QUÍMICOS": ("QUÍMICOS", "ARREFECIMENTO", "FREIO"),
 }
-# "CÂMBIO E DIFERENCIAL" não é SISTEMA da base: a base põe TODO rolamento em RODAGEM, o de câmbio também (ROL32008,
-# ROL32009). O rolamento ganha os sistemas que o texto dele diz (DESCRICAO, DETALHE_CATALOGO e a POSICAO dos
-# DADOS_ADICIONAIS): roda, câmbio e diferencial, cardã ou semi-eixo, motor; sem nada no texto, fica o SISTEMA da base.
-# Vai para o JSON só o nome do sistema (campo ss), e só quando difere do si.
+# A base põe todo rolamento em RODAGEM (ROL32008, ROL32009); os sistemas dele vêm do texto (sistemas_de). Campo ss:
+# docs/DADOS_DO_SITE.md.
 ROL_SISTEMAS = [
     (re.compile(r"CAMBIO|DIFERENCIAL|COROA|PINHAO|SATELITE|CAIXA DE (?:MUDANCA|MARCHA)|EIXO (?:PILOTO|PRIMARIO|"
                 r"SECUNDARIO|INTERMEDIARIO)|CONTRA ?EIXO|TRANSMISSAO MANUAL|REDUTOR|TOMADA DE FORCA"), "CÂMBIO E DIFERENCIAL"),
@@ -240,15 +236,18 @@ ROL_SISTEMAS = [
 ]
 
 
-def sistemas_de(produto: str, sistema: str, descricao: str, detalhe: str, brutos: str) -> list[str]:
-    """Sistemas do item para o "Leve também": o SISTEMA da base; no rolamento, os que o texto dele diz."""
-    base = [sistema.strip().upper()] if sistema.strip() else []
+def sistema_base(s: str) -> list[str]:
+    return [s.strip().upper()] if s.strip() else []
+
+
+def sistemas_de(produto: str, sistema: str, descricao: str, detalhe: str, posicao: str) -> list[str]:
+    """Sistemas do item para o "Leve também": o SISTEMA da base; no rolamento, os que o texto dele diz (a posicao é o
+    valor da chave POSICAO dos DADOS_ADICIONAIS)."""
     if produto.strip() != "Rolamentos":
-        return base
-    m = re.search(r"POSICAO:\s*([^|]*)", brutos)
-    t = sem_acento(" | ".join(x for x in (descricao, detalhe, m.group(1) if m else "") if x)).upper()
+        return sistema_base(sistema)
+    t = sem_acento(" | ".join(x for x in (descricao, detalhe, posicao) if x)).upper()
     achou = sorted({nome for rx, nome in ROL_SISTEMAS if rx.search(t)})
-    return achou or base
+    return achou or sistema_base(sistema)
 
 
 def anos_de(texto: str) -> tuple[int, int] | None:
@@ -346,7 +345,8 @@ def ler_base(caminho: Path) -> list[dict]:
         brutos = g(r, "DADOS_ADICIONAIS")
         extras = extras_de(brutos)
         # montadora: lida antes de tirar a chave dos extras
-        mont = montadora_de([[k.strip(), v.strip()] for k, v in (p.split(":", 1) for p in brutos.split("|") if ":" in p)], apl)
+        pares = [[k.strip(), v.strip()] for k, v in (p.split(":", 1) for p in brutos.split("|") if ":" in p)]
+        mont = montadora_de(pares, apl)
         produtos.append({
             "c": cod,
             "d": g(r, "DESCRICAO"),
@@ -365,9 +365,10 @@ def ler_base(caminho: Path) -> list[dict]:
             "de": g(r, "DETALHE_CATALOGO"),
             "oj": g(r, "OFERECA_JUNTO"),
         })
-        ss = sistemas_de(g(r, "PRODUTO"), g(r, "SISTEMA"), g(r, "DESCRICAO"), g(r, "DETALHE_CATALOGO"), brutos)
-        if ss != ([g(r, "SISTEMA").upper()] if g(r, "SISTEMA") else []):
-            produtos[-1]["ss"] = ss
+        p = produtos[-1]
+        ss = sistemas_de(p["p"], p["si"], p["d"], p["de"], dict(pares).get("POSICAO", ""))
+        if ss != sistema_base(p["si"]):
+            p["ss"] = ss
     ve = veiculos_de(wb)
     for p in produtos:
         if p["c"] in ve:
