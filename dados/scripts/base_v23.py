@@ -25,10 +25,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import openpyxl
-
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from base_comum import RAIZ, acrescentar_leia_me, acrescentar_log, limpo, parar, rodar  # noqa: E402
+from base_comum import (RAIZ, acrescentar_leia_me, acrescentar_log, conferir_celulas, ler_antes_depois,  # noqa: E402
+                        limpo, parar, rodar, vazio)
 
 SIM = RAIZ / "dados" / "simulacoes" / "T-0017-v23" / "SIMULACAO_v23_T-0017.xlsx"
 TAREFA, DATA = "T-0017", "21/11/2026"
@@ -47,8 +46,8 @@ LEIA_ME = [
                            "trecho da Kia fica como está (T-0017)."),
     ("VEICULOS (FAC6108)", "Eclipse Cross: ANO_INICIO, ANO_FIM e ANO_DUVIDA ficam vazios (o 2009–2012 era o da "
                            "Outlander); o veículo fica sem ano, como a APLICACAO desde a v21 (T-0017)."),
-    ("SCE14002", "Nada muda: o '1929–19321934' já tinha virado '1929 · 1932 · 1934' na v21 (T-0017)."),
-    ("Não entram", "Nenhuma marca nova de ano incerto; nenhuma linha nova na VEICULOS."),
+    ("Não entram", "SCE14002 (o texto quebrado já saiu na v21); nenhuma marca nova de ano incerto; nenhuma linha nova "
+                   "na VEICULOS."),
     ("Formato", "Mesmas abas e colunas da v22 (as 5 primeiras da PRODUTOS, que a BAP Central lê, na mesma ordem). 4 "
                 "linhas no LOG_CORRECOES (uma por célula). Aprovação antecipada do Alexandre para esta rodada "
                 "(R-20261120-235000-alexandre)."),
@@ -57,22 +56,12 @@ LEIA_ME = [
 
 
 def ler() -> list[dict]:
-    """A aba ANTES_DEPOIS da simulação: uma linha por célula."""
-    wb = openpyxl.load_workbook(SIM, read_only=True)
-    it = wb["ANTES_DEPOIS"].iter_rows(values_only=True)
-    cab = list(next(it))
-    if cab != CAB:
-        raise SystemExit(f"[PARADO] cabeçalho da ANTES_DEPOIS: {cab}")
-    linhas = [dict(zip(CAB, r)) for r in it if r[0]]
-    wb.close()
+    """A aba ANTES_DEPOIS da simulação: uma linha por célula, as 4 esperadas e todas com ENTRA = sim."""
+    linhas = ler_antes_depois(SIM, CAB)
     achado = {(x["CODIGO_BAP"], x["ABA"], x["COLUNA"]) for x in linhas}
     if achado != ESPERADO or len(linhas) != len(ESPERADO) or any(x["ENTRA"] != "sim" for x in linhas):
         raise SystemExit(f"[PARADO] a simulação traz {sorted(achado)} ({len(linhas)} linhas); esperado {ESPERADO}")
     return linhas
-
-
-def vazio(v):
-    return None if v == "(vazio)" else v
 
 
 def aplicar(wb, linhas):
@@ -127,17 +116,5 @@ def aplicar(wb, linhas):
     return {"PRODUTOS": set(fp), "VEICULOS": set(fv)}, ult, leia_n, (fp, fv)
 
 
-def conferir_valores(p: Path, extra) -> list[str]:
-    """Na base gravada, cada célula tem o valor da gravação."""
-    fp, fv = extra
-    wb = openpyxl.load_workbook(p, read_only=False)
-    dif = []
-    for aba, feitas in (("PRODUTOS", fp), ("VEICULOS", fv)):
-        ws = wb[aba]
-        dif += [f"{aba} {ws.cell(n, c).coordinate}: valor diferente do da gravação"
-                for (n, c), v in feitas.items() if ws.cell(n, c).value != v]
-    return dif
-
-
 if __name__ == "__main__":
-    rodar(22, 23, ler, aplicar, conferir_valores)
+    rodar(22, 23, ler, aplicar, conferir_celulas)

@@ -4,6 +4,8 @@ Os base_v15 a base_v19 ficam como rodaram (são o registro de cada versão); da 
 mora aqui: limpo, sha, a assinatura de formatação da célula, a conferência célula a célula contra a versão anterior,
 a linha nova no LOG_CORRECOES e a gravação da base com a cópia em dados/versoes/. Da v20 em diante, também o fluxo
 do main() (--conferir, "vNN já existe", sha da versão anterior, pasta temporária, comparar e gravar): rodar() (RD-0217).
+Da v23 em diante, também a leitura da aba ANTES_DEPOIS da simulação, o "(vazio)" e a conferência do valor gravado em
+cada célula (RD-0247; o base_v22.py fica como rodou).
 """
 from __future__ import annotations
 
@@ -24,6 +26,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 BASE = RAIZ / "dados" / "BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx"
 VERSOES = RAIZ / "dados" / "versoes"
 CAB_LOG = ["TIPO", "ABA", "CODIGO_ANTES_OU_NOVO", "CODIGO_REFERENCIA", "OBSERVACAO"]
+VAZIO = "(vazio)"                     # como a simulação mostra a célula vazia
 
 
 def versao(n: int) -> Path:
@@ -55,6 +58,35 @@ def parar(erros: list[str]) -> None:
         for e in erros[:30]:
             print("   ", e)
         sys.exit(2)
+
+
+def vazio(v):
+    """O valor da simulação na base: "(vazio)" é a célula vazia."""
+    return None if v == VAZIO else v
+
+
+def ler_antes_depois(sim: Path, cab: list[str]) -> list[dict]:
+    """A aba ANTES_DEPOIS da simulação, uma linha por célula, depois de conferir o cabeçalho."""
+    wb = openpyxl.load_workbook(sim, read_only=True)
+    it = wb["ANTES_DEPOIS"].iter_rows(values_only=True)
+    achado = list(next(it))
+    if achado != cab:
+        raise SystemExit(f"[PARADO] cabeçalho da ANTES_DEPOIS: {achado}")
+    linhas = [dict(zip(cab, r)) for r in it if r[0]]
+    wb.close()
+    return linhas
+
+
+def conferir_celulas(p: Path, extra) -> list[str]:
+    """Na base gravada, cada célula tem o valor da gravação. extra = (feitas na PRODUTOS, feitas na VEICULOS)."""
+    fp, fv = extra
+    wb = openpyxl.load_workbook(p, read_only=False)
+    dif = []
+    for aba, feitas in (("PRODUTOS", fp), ("VEICULOS", fv)):
+        ws = wb[aba]
+        dif += [f"{aba} {ws.cell(n, c).coordinate}: valor diferente do da gravação"
+                for (n, c), v in feitas.items() if ws.cell(n, c).value != v]
+    return dif
 
 
 def acrescentar_log(wb, linhas: list[list]) -> int:
