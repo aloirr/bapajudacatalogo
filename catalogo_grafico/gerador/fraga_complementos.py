@@ -10,6 +10,7 @@ No A4 (print_cat) a aplicação fica a de antes: o impresso já corta a aplicaç
 Guarda a aplicação de antes em r['_segs_antes_fraga']: o diferencial.py (auditoria) usa essa, não a do Fraga.
 """
 import json, os, re
+import datas
 import site_aplicacoes as _S
 
 ARQ = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'entradas', 'complementos_fraga_13112026.json')
@@ -36,16 +37,16 @@ def _norm(s):
     """texto para comparar: as datas como no PDF (datas.para_pdf: "1993-1995" e "1993>1995" = "1993–1995", "2015 em Diante"
     = "2015+"), sem acento, maiúsculo, só palavras, números e "+", sem o "até" e o "DE" antes do ano ("1993 até 1995" =
     "1993–1995", "DE 1999–2002" = "1999–2002")"""
-    import unicodedata, datas
+    import unicodedata
     s = datas.para_pdf(s)
     s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').upper()
     t = re.findall(r'[A-Z0-9]+|\+', s)
     t = [x for k, x in enumerate(t)
-         if not (x in ('ATE', 'DE') and k + 1 < len(t) and re.fullmatch(r'(?:19|20)\d{2}', t[k + 1]))]
+         if not (x in ('ATE', 'DE') and k + 1 < len(t) and re.fullmatch(datas.Y, t[k + 1]))]
     return ' ' + ' '.join(t) + ' '
 
 
-_ANO = re.compile(r'(?<!\d)(?:19|20)\d{2}(?!\d)')
+_ANO = re.compile(r'(?<!\d)' + datas.Y + r'(?!\d)')
 _SEP = re.compile(r'((?:\s*[·;\n]\s*)+)')
 
 
@@ -74,7 +75,7 @@ def aplicacao_unica(segs):
         tira = set()
         for ent in ents:
             ch = _norm(' '.join(txt[i] for i in ent))
-            if any(not re.fullmatch(r'(?:19|20)\d\d|\+', w) for w in ch.split()):   # só o ano: fica
+            if any(not re.fullmatch(datas.Y + r'|\+', w) for w in ch.split()):   # só o ano: fica
                 if (marca, ch) in vistos: tira.update(ent)
                 vistos.add((marca, ch))
         if not tira:

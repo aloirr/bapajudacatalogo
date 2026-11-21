@@ -45,11 +45,12 @@ def fix_text(t):
 
 def em_diante(t):
     """"em diante" = "AAAA+" nos PDFs (R-20261120-194600-alexandre, item 4: "troque por 2015+"; R-20261120-195900 e
-    R-20261120-201100-alexandre), num lugar só: '2015 em Diante', '2015>', '03/2015>', '2008->' e '2025 →' sem ano depois
+    R-20261120-201100-alexandre): '2015 em Diante', '2015>', '03/2015>', '2008->' e '2025 →' sem ano depois
     -> '2015+' (antes "2015–", da R-20261120-175000); letra ou "(" logo depois ganha um espaço ("2001+ GM"). É a mesma
     regra do site (site/app.js, anoMaisHtml): "AAAA+", com o espaço depois do "+" antes de uma letra ou de "(".
     '1999->2008' e '1999 → 2008' são faixa -> '1999–2008'; '>1994' ("até") fica. Só no desenho do PDF (aplicação,
-    DETALHE e subtítulo), depois do fix_text: a base e o fix_text não mudam."""
+    DETALHE e subtítulo), depois do fix_text: a base e o fix_text não mudam. O "2011/..." (ano com reticências) vira
+    "2011>" antes, no montar._em_diante, antes do cross.py, porque o "Leve também" depende dele (RD-0235)."""
     t = re.sub(r'((?:\d{2}/)?' + Y + r')\s*(?:->|→)\s*((?:\d{2}/)?' + Y + r')', r'\1–\2', t)
     t = re.sub(r'((?:\d{2}/)?' + Y + r')\s+em\s+diante\b', r'\1+', t, flags=re.I)
     t = re.sub(r'((?:\d{2}/)?' + Y + r')\s*(?:-?>|→)(?!\s*\d+(?![\dA-Za-z]))', r'\1+', t)
