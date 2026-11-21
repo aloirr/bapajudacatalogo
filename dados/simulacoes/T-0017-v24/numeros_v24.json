@@ -1,0 +1,30 @@
+{
+ "base_sha256": "05eeb19ac26bc5ec1d5be44b55739ef0b1b09bf37a666927aefcdab9de96d129",
+ "referencias": 12373,
+ "referencias_repetidas": 1369,
+ "referencias_genericas": 166,
+ "pares_com_a_mesma_referencia": 755,
+ "casos_pares_com_veiculos_diferentes": 626,
+ "veiculos_testados": 3239,
+ "validos": 22,
+ "codigos_que_mudam": 12,
+ "linhas_novas_veiculos": 22,
+ "fora": 3219,
+ "fora_por_motivo": {
+  "referência genérica (suspeita)": 569,
+  "outra referência da mesma marca diverge (item diferente)": 1693,
+  "produto ou peça diferente (PRODUTO/DESCRICAO)": 395,
+  "medida diferente (DESCRICAO/DETALHE_CATALOGO)": 47,
+  "montadoras sem nada em comum entre A e B (suspeita)": 34,
+  "posição diferente": 5,
+  "muda ABS/s/ ABS": 7,
+  "muda c/ ou s/ (ex.: c/ parafuso, c/ pivô)": 4,
+  "veículo já está na APLICACAO de A": 442,
+  "V sem ano em B": 1,
+  "ano de V na VEICULOS de B não bate com a APLICACAO de B": 2,
+  "linha de V em B é duvidosa ou tem ANO_DUVIDA": 18,
+  "só há anúncio da internet como prova": 2
+ },
+ "log_previsto": 44,
+ "amt7500_amt7014_validos": 0
+}
