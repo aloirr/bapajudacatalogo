@@ -60,29 +60,37 @@ def sem_acento(s: str) -> str:
 # "| ANTERIOR" nem do "BAP BOX". [SUPOSIÇÃO] "BAPTA PN" pode ser código de fornecedor; sai do mesmo jeito.
 MARCAS_PROPRIAS = {"BAP", "BAP PN_2", "BAPTA PN"}
 
+def nomes_re(nomes) -> str:
+    """Trecho da TRAVA para uma lista de nomes: até 3 sinais (espaço, hífen, ponto...) entre cada letra ("Sun-Rise")."""
+    return "|".join(r"[\W_]{0,3}".join(map(re.escape, n)) for n in sorted(nomes))
+
+
 # Fornecedor da BAP é dado interno (regra 1 do CLAUDE.md): a SUNRISE (P10 da v19, R-20261120-194900-po). A referência sai do
 # site quando o nome está no rótulo da marca, inteiro ou dentro dele ("SUNRISE PN", "Pruduct Pn Sunrise"); na base o dado fica.
-# A TRAVA usa o FORNECEDOR_RE, montado desta lista com até 3 sinais (espaço, hífen, ponto...) entre cada letra ("Sun-Rise",
-# "SUN.RISE"): se o nome voltar por qualquer campo, o script para. Só em maiúsculas, sem espaço e sem pontuação.
+# A TRAVA usa o FORNECEDOR_RE (nomes_re desta lista; o digital2.py dos PDFs também): se o nome voltar por qualquer campo,
+# o script para. Só em maiúsculas, sem espaço e sem pontuação.
 FORNECEDORES = {"SUNRISE"}
-FORNECEDOR_RE = "|".join(r"[\W_]{0,3}".join(map(re.escape, f)) for f in sorted(FORNECEDORES))
+FORNECEDOR_RE = nomes_re(FORNECEDORES)
 
 # Marca da concorrência que só aparece na referência cruzada (T-0017): a AUTOIMPACT (R-20261121-112900-alexandre, "Auto
 # impact e ampri sao marcas da concorrencia. Eles devem aparecer apenas na referencia cruzada."; saiu do FORNECEDORES com o
-# "autorizo" do R-20261121-113400-alexandre). A referência vai para o site; o nome só pode estar na marca da referência
-# (r[].m inteiro, sem o " PN"). Em qualquer outro campo (descrição, aplicação, ficha, código da referência, veículos...) a
-# TRAVA para o script: o CONCORRENTE_RE entra nela, e só o r[].m é mascarado (sem_marca_concorrente). A AMPRI não entra
-# aqui: o nome dela nunca foi barrado.
+# "autorizo" do R-20261121-113400-alexandre). A referência vai para o site; onde o nome pode estar: ver o
+# sem_marca_concorrente. A AMPRI não entra aqui: o nome dela nunca foi barrado.
 CONCORRENTES_SO_NA_REF = {"AUTOIMPACT"}
-CONCORRENTE_RE = "|".join(r"[\W_]{0,3}".join(map(re.escape, f)) for f in sorted(CONCORRENTES_SO_NA_REF))
+CONCORRENTE_RE = nomes_re(CONCORRENTES_SO_NA_REF)
 
 
 def so_codigo(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", sem_acento(s).upper())
 
 
-# o refs_de procura o fornecedor no rótulo passado pelo so_codigo ("f in rot"), e o sem_marca_concorrente compara o rótulo
-# do mesmo jeito: as duas listas têm de estar nesse formato
+def e_concorrente(marca: str) -> bool:
+    """A marca (já sem o " PN") é da CONCORRENTES_SO_NA_REF, sem espaço e sem pontuação ("Auto-Impact")."""
+    return so_codigo(marca) in CONCORRENTES_SO_NA_REF
+
+
+# o refs_de procura o fornecedor no rótulo passado pelo so_codigo ("f in rot"), e o e_concorrente compara pelo so_codigo:
+# as duas listas têm de estar nesse formato
 assert all(f == so_codigo(f) for f in FORNECEDORES | CONCORRENTES_SO_NA_REF), \
     "FORNECEDORES e CONCORRENTES_SO_NA_REF em maiúsculas, sem espaço e sem pontuação"
 assert not FORNECEDORES & CONCORRENTES_SO_NA_REF, "a mesma marca não pode ser fornecedor e concorrente"
@@ -122,9 +130,8 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
                 if (not {re.sub(r"\s+", " ", x.upper()) for x in (bruta, marca)} & MARCAS_PROPRIAS
                         and not any(f in rot for f in FORNECEDORES)):
                     # a concorrência sai sempre com o nome canônico ("Auto-Impact PN" → "AUTOIMPACT"): a mesma forma
-                    # que o sem_marca_concorrente compara na TRAVA e que o teste confere
-                    canon = so_codigo(marca)
-                    saida.append({"m": canon if canon in CONCORRENTES_SO_NA_REF else marca, "c": cod})
+                    # que o sem_marca_concorrente compara na TRAVA
+                    saida.append({"m": so_codigo(marca) if e_concorrente(marca) else marca, "c": cod})
         else:
             saida.append({"m": "", "c": parte})
     vistos, unicas = set(), []
@@ -134,7 +141,7 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
             vistos.add(k); unicas.append(x)
     # a referência da concorrência (CONCORRENTES_SO_NA_REF) vai por último, para a Bosch e a Tecfil ficarem à vista (T-0017,
     # "1 a"); o sort é estável: a ordem da célula fica entre elas e entre as outras. Os PDFs usam este refs_de (montar.py).
-    unicas.sort(key=lambda x: so_codigo(x["m"]) in CONCORRENTES_SO_NA_REF)
+    unicas.sort(key=lambda x: e_concorrente(x["m"]))
     return unicas
 
 
@@ -378,22 +385,25 @@ def fotos(produtos: list[dict], pasta: Path) -> int:
 
 
 # TRAVA: dado interno nunca vai para o site público (os fornecedores entram pelo FORNECEDOR_RE; o concorrente, pelo
-# CONCORRENTE_RE, com só a marca da referência fora da busca: ver sem_marca_concorrente)
+# CONCORRENTE_RE: ver sem_marca_concorrente)
 TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|R\$|"
                    + FORNECEDOR_RE + "|" + CONCORRENTE_RE, re.I)
 
 
 def sem_marca_concorrente(p: dict) -> dict:
-    """Cópia do produto para a TRAVA: a marca da referência que É o concorrente (r[].m inteiro) vira "*"; o resto fica."""
+    """Cópia do produto para a TRAVA, nas duas voltas (produto a produto e o arquivo inteiro): o nome do concorrente
+    (CONCORRENTES_SO_NA_REF) só pode estar na marca da referência, r[].m inteiro (e_concorrente); só essa marca vira "*".
+    Em qualquer outro campo (descrição, aplicação, ficha, código da referência, veículos, rótulo composto...) o nome fica
+    e a TRAVA para o script."""
     if not p.get("r"):
         return p
     q = dict(p)
-    q["r"] = [dict(x, m="*") if so_codigo(x.get("m", "")) in CONCORRENTES_SO_NA_REF else x for x in p["r"]]
+    q["r"] = [dict(x, m="*") if e_concorrente(x.get("m", "")) else x for x in p["r"]]
     return q
 
 
 def conferir(produtos: list[dict]) -> list[str]:
-    """Varre cada produto inteiro (todos os campos, o "ve" também; do "r", só a marca do concorrente fica de fora)."""
+    """Varre cada produto inteiro (todos os campos, o "ve" também), pelo sem_marca_concorrente."""
     achados = []
     for p in produtos:
         m = TRAVA.search(json.dumps(sem_marca_concorrente(p), ensure_ascii=False))
@@ -441,7 +451,7 @@ def main():
     dados = {"gerado_em": datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"), "fonte": Path(a.base).name,
              "total": len(produtos), "produtos": produtos}
     texto = json.dumps(dados, ensure_ascii=False, separators=(",", ":"))
-    # segunda volta: o arquivo inteiro, como vai ser gravado (só a marca do concorrente na referência mascarada)
+    # segunda volta: o arquivo inteiro, como vai ser gravado (pelo sem_marca_concorrente)
     m = TRAVA.search(json.dumps(dict(dados, produtos=[sem_marca_concorrente(p) for p in produtos]),
                                 ensure_ascii=False, separators=(",", ":")))
     if m:
