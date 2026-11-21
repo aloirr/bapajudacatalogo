@@ -162,7 +162,10 @@ function palavrasSinais(v) {
 // É a lista do que é PERMITIDO, não do que é obrigatório: produto sem um destes campos não falha. TRANSIÇÃO T-0017:
 // o PR #50 (web-site/T-0017-aplicacao-tela) tira "df" e "ip" do JSON; eles ficam aqui até esse PR entrar no main.
 // "ve" (T-0017, v17): veículos da aba VEICULOS, lista de [FABRICANTE, MODELO] ou [FABRICANTE, MODELO, VERSAO], textos não vazios
-const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "df", "oj", "ip", "an", "i", "ve"]);
+// "ss" (T-0018, R-20261121-200058): sistema da peça para o "Leve também", opcional, lista de textos não vazios
+const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "df", "oj", "ip", "an", "i", "ve", "ss"]);
+// lista não vazia de textos não vazios (formato do "ve" e do "ss")
+const textosOk = (l) => Array.isArray(l) && l.length > 0 && l.every((t) => typeof t === "string" && t.trim());
 const palavraInteira = (texto, palavra) => new RegExp(`(?<![A-Z0-9])${palavra}(?![A-Z0-9])`).test(norm(texto));
 
 // ---------- serviço de placas no teste (T-0005, T-0014) ----------
@@ -313,11 +316,20 @@ function testarJson(arqJson) {
   for (const p of prods) {
     if (!("ve" in p)) continue;
     comVe++;
-    const ok = Array.isArray(p.ve) && p.ve.length && p.ve.every((x) => Array.isArray(x) && (x.length === 2 || x.length === 3) && x.every((t) => typeof t === "string" && t.trim()));
+    const ok = Array.isArray(p.ve) && p.ve.length && p.ve.every((x) => textosOk(x) && (x.length === 2 || x.length === 3));
     if (!ok) veRuim.push(`${p.c}: ${cortar(JSON.stringify(p.ve), 60)}`); else nVe += p.ve.length;
   }
   if (veRuim.length) falha("campos", N_CAMPOS, "ve:formato", `"ve" fora do formato [fabricante, modelo, versão?] em ${veRuim.length} produto(s), ex.: ${veRuim.slice(0, 3).join("; ")}`);
-  detalhe("campos", N_CAMPOS, novos.size ? "" : `só os ${CAMPOS.size} campos conhecidos` + (comVe ? `; "ve" em ${fmt(comVe)} produtos (${fmt(nVe)} veículos) no formato [fabricante, modelo, versão?]` : `; sem "ve"`));
+  // formato do "ss" (T-0018): quando existe, lista de textos não vazios (ex.: ["CÂMBIO E DIFERENCIAL"])
+  const ssRuim = [];
+  let comSs = 0;
+  for (const p of prods) {
+    if (!("ss" in p)) continue;
+    comSs++;
+    if (!textosOk(p.ss)) ssRuim.push(`${p.c}: ${cortar(JSON.stringify(p.ss), 60)}`);
+  }
+  if (ssRuim.length) falha("campos", N_CAMPOS, "ss:formato", `"ss" fora do formato [sistema, ...] (textos não vazios) em ${ssRuim.length} produto(s), ex.: ${ssRuim.slice(0, 3).join("; ")}`);
+  detalhe("campos", N_CAMPOS, novos.size ? "" : `só os ${CAMPOS.size} campos conhecidos` + (comVe ? `; "ve" em ${fmt(comVe)} produtos (${fmt(nVe)} veículos) no formato [fabricante, modelo, versão?]` : `; sem "ve"`) + (comSs ? `; "ss" em ${fmt(comSs)} produtos` : `; sem "ss"`));
   // palavra interna: cabeçalho e cada produto
   const cab = { ...dados }; delete cab.produtos;
   for (const a of palavrasInternas(textoDe(cab)).concat(palavrasSinais(cab))) falha("palavra", N_PAL, `${a.nome}:(cabeçalho)`, `(cabeçalho do JSON) "${a.nome}": …${a.trecho}…`);
