@@ -6,7 +6,7 @@ Pedido: **R-20261121-190649-alexandre**, item 3. O CV-F35 foi confirmado no **R-
   - a v26 sai como simulada, com "Mbb" virando "MB";
   - as outras grafias da antiga lista "fica de fora" também entram (seção 3b);
   - o "MB … MB" do BOL40041 e do TER555249 fica.
-- Gravada pelo `dados/scripts/base_v26.py` sobre a v25, com a cópia em `dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v26.xlsx` (sha256 `8e0c222e…47cc`, o mesmo da base).
+- Gravada pelo `dados/scripts/base_v26.py` sobre a v25, com a cópia em `dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v26.xlsx` (sha256 `3a9f589d…2f2a`, o mesmo da base).
 - Regra fixa (R-20261120-213300): nenhuma marca nova de ano incerto, e nenhum produto sai.
 
 ## 1. Contagem
@@ -19,20 +19,21 @@ Pedido: **R-20261121-190649-alexandre**, item 3. O CV-F35 foi confirmado no **R-
 | Produtos que saem | 0 (a PRODUTOS continua com 4.695 linhas) |
 | Células com a marca de revisão (PRODUTOS + VEICULOS) | 5.122 → 5.120 (a Parati e o Santana do CIL8546 saem da revisão; nada novo marcado) |
 | LOG_CORRECOES | 49 linhas, uma por célula: 35 APLICACAO, 10 VEICULOS e 4 VEICULO_NOVO |
-| Site (gerar_site) | 4.419 produtos nos dois; mudam 34 produtos (33 no "a" e 3 no "ve"); 12.154 → 12.160 veículos no "ve". O 42 e o 116 mudam na base, mas não estão no site (NO_CATALOGO_DIGITAL = NÃO) |
+| Site (gerar_site) | 4.419 nos dois; mudam 34 produtos (seção 7) |
 
 Por item do pedido:
-- 1 (SCE14002): 1 célula, junto com o item 6, e 3 linhas novas.
+- 1 (SCE14002): 1 célula, junto com o item 6.
 - 2 (CRU100 Bongo): 2 células, a APLICACAO e o ANO_DUVIDA.
-- 3 (VEICULOS): 8 células (Parati e Santana) e 4 linhas novas (3 LS e a HR).
+- 3 (VEICULOS): 8 células (Parati e Santana) e as linhas novas (os LS do SCE14002 e a HR).
 - 4 (CV-F35): 1 célula.
 - 5 (MF22): nada muda, só foi conferido.
 - 6 (nomes): 33 células, mais a do SCE14002. Por grafia: "Mbb" 9, "Vwc" 2, "NEW Beetle" 10, "MBB" 5, "Vw" 3, "NEW BEETLE" 5, "New beetle" 1 e "New Beatle" 1. O CL21 tem duas grafias na mesma célula, por isso as 15 trocas novas dão 14 células novas.
 
 **Conferência:** a base simulada foi comparada célula a célula com a v25 pelo `base_comum.comparar`.
-- Resultado: PRODUTOS 35 mudaram, de 35 esperadas; VEICULOS 10, de 10, mais 4 linhas no fim.
-- Depois da gravação, o `base_v26.py --conferir` deu 0, com o LOG_CORRECOES +49 linhas e o LEIA-ME +8.
+- Resultado: PRODUTOS 35 mudaram, de 35 esperadas; VEICULOS 10, de 10, mais as linhas novas no fim.
+- Depois da gravação, o `base_v26.py --conferir` deu 0, com o LEIA-ME +8 linhas.
 - Diferenças fora do permitido: 0.
+- A marca de revisão não aparece nas linhas novas do LOG_CORRECOES nem do LEIA-ME, fora o nome da coluna ANO_DUVIDA.
 
 ## 2. Nomes de montadora (item 6): o que a base mais usa
 - **Mercedes-Benz:** na APLICACAO, "MB" aparece 347 vezes; "MERCEDES-BENZ", 255; "MERCEDES BENZ", 89; "Mercedes-Benz", 32. No prefixo "MARCA - ", "MB" aparece 223 vezes e "MERCEDES-BENZ", 20.
@@ -42,7 +43,6 @@ Por item do pedido:
   - [SUPOSIÇÃO] O "c" de caminhões some; o número do modelo (13180, 16210...) já diz que é caminhão.
 - **"NEW Beetle" → "New Beetle"**, como em todas as linhas da VEICULOS e da MODELOS_VEICULO.
 - A troca é só da palavra inteira, com a caixa exata. Nada muda dentro de outra palavra.
-- Aprovado depois ("3 a"): "MBB" → "MB", "Vw" → "VW" e "NEW BEETLE", "New beetle" e "New Beatle" → "New Beetle" (seção 3b).
 
 ## 3. Antes e depois (PRODUTOS · APLICACAO)
 Nas células longas vai só o trecho que muda. A célula inteira está na aba ANTES_DEPOIS da planilha.
@@ -73,7 +73,6 @@ Nas células longas vai só o trecho que muda. A célula inteira está na aba AN
 
 - **SCE14002:** os números 1929, 1932 e 1934 ganham o "LS" e passam a ser modelos. Na base, nenhum desses números vira ano: as linhas LS da VEICULOS ficam sem ano.
   - O site já descarta ano de 4 dígitos antes de 1950, então a busca não muda.
-  - O "LS1941" fica junto, como no exemplo do gerente e no texto de hoje.
 - **CRU100:** "a partir de 07/2017" no formato da casa ("em diante" com ">"), como o "02/2009>" e o "2013>" da base.
 
 ## 3b. Antes e depois: as outras grafias aprovadas ("3 a")
@@ -144,8 +143,7 @@ Nas células longas vai só o trecho que muda. A célula inteira está na aba AN
 - **Outras abas** (LOG_CORRECOES, INCLUIDOS_V7, ROLAMENTOS_INTEGRADOS, VELAS_INTEGRADAS, INTEGRADOS_V6 e o MOTIVO da VEICULOS): são histórico e citação do texto antigo. Ficam.
 - **Fora da base:** o `catalogo_grafico/gerador/digital_data.json` ainda tem o texto antigo do SCE14002 ("1929–19321934"). Os PDFs leem 19AA e 20AA como ano (`datas.py`). Fica com o `catalogo-grafico`, que é o dono do arquivo, como diz o R-20261121-195140-alexandre.
 
-## 7. No site (gerar_site.py rodado com a v26 gravada; o produtos.json voltou ao do main, porque vai em PR do web-site)
-- Sem `[PARADO]`: 4.419 produtos nos dois, a TRAVA passa e nenhum produto entra ou sai. A marca de revisão não aparece no JSON.
+## 7. No site (gerar_site.py rodado com a v26 gravada: sem `[PARADO]`, a TRAVA passa e a marca de revisão não aparece no JSON; o produtos.json voltou ao do main, porque vai em PR do web-site)
 - **"ve" (filtro "Meu veículo"):**
   - SCE14002 ganha MERCEDES-BENZ LS 1929, LS 1932 e LS 1934;
   - CRU100 ganha HYUNDAI HR;
@@ -157,10 +155,4 @@ Nas células longas vai só o trecho que muda. A célula inteira está na aba AN
   - as referências, a ficha, a TRAVA e a FICHA.
 
 ## 8. Formato
-- Não há coluna nova nem aba nova, e as 5 primeiras colunas da PRODUTOS ficam iguais. A VEICULOS ganha 4 linhas no fim.
-- LOG_CORRECOES: 49 linhas, uma por célula e uma por linha nova. O texto inteiro está na base; a aba LOG_CORRECOES_PREVISTO da planilha traz o resumo.
-- O LEIA-ME ganha o bloco da v26 no topo (8 linhas).
-- Gravação: o `dados/scripts/base_v26.py` lê a ANTES_DEPOIS e a VEICULOS_NOVA desta planilha e grava pelo `base_comum.rodar`, com `novas_no_fim={"VEICULOS": 4}`.
-  - Ele confere que o SCE14002 e o CRU100 têm o texto aprovado.
-  - Confere que as outras 33 células trocam só as palavras aprovadas.
-  - Confere que as células e as linhas da VEICULOS são as aprovadas.
+Não há coluna nova nem aba nova, e as 5 primeiras colunas da PRODUTOS ficam iguais. O LEIA-ME ganha o bloco da v26 no topo. Gravação: `dados/scripts/base_v26.py`, que lê a ANTES_DEPOIS e a VEICULOS_NOVA desta planilha.

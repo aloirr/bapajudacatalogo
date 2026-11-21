@@ -26,7 +26,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from base_comum import (CAB_VEICULOS, RAIZ, acrescentar_leia_me, acrescentar_linhas,  # noqa: E402
-                        acrescentar_log, conferir_celulas, ler_antes_depois, limpo, parar, rodar, vazio)
+                        acrescentar_log, antes_log, conferir_cabecalho, conferir_celulas, ler_antes_depois, limpo,
+                        linhas_por_codigo, parar, rodar, vazio)
 
 SIM = RAIZ / "dados" / "simulacoes" / "T-0017-v26" / "SIMULACAO_v26_T-0017.xlsx"
 TAREFA, DATA = "T-0017", "21/11/2026"
@@ -69,11 +70,6 @@ LEIA_ME = [
 ]
 
 
-def antes_log(v) -> str:
-    """O valor de antes no LOG: a marca da revisão da P12 não é escrita de novo (regra R-20261120-213300)."""
-    return "vazio" if v is None else "(o da revisão da P12)" if "duvid" in str(v).lower() else f"'{v}'"
-
-
 def so_nomes(antes: str, depois: str) -> bool:
     """depois = antes com só as trocas de palavra aprovadas (palavra inteira, caixa exata)."""
     a, d = re.split(r"(\W+)", antes), re.split(r"(\W+)", depois)
@@ -112,14 +108,10 @@ def ler() -> tuple[list[dict], list[list]]:
 def aplicar(wb, dados):
     cel, novas = dados
     wp, wv = wb["PRODUTOS"], wb["VEICULOS"]
-    if [limpo(c.value) for c in wv[1]] != CAB_VEICULOS:
-        raise SystemExit("[PARADO] cabeçalho da VEICULOS mudou")
-    cp = [limpo(c.value) for c in wp[1]]
-    ic, ia = cp.index("CODIGO_BAP") + 1, cp.index("APLICACAO") + 1
+    conferir_cabecalho(wv, CAB_VEICULOS)
+    ia = [limpo(c.value) for c in wp[1]].index("APLICACAO") + 1
     iv = {k: i + 1 for i, k in enumerate(CAB_VEICULOS)}
-    linha_p: dict[str, list[int]] = {}
-    for n in range(2, wp.max_row + 1):
-        linha_p.setdefault(limpo(wp.cell(n, ic).value), []).append(n)
+    linha_p = linhas_por_codigo(wp)
     origem = f"Simulação em dados/simulacoes/T-0017-v26/; aprovado em {APROVACAO}. {TAREFA} (v26), {DATA}"
     erros, fp, fv, log = [], {}, {}, []
     for x in cel:

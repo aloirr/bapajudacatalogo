@@ -6,7 +6,8 @@ a linha nova no LOG_CORRECOES e a gravação da base com a cópia em dados/verso
 do main() (--conferir, "vNN já existe", sha da versão anterior, pasta temporária, comparar e gravar): rodar() (RD-0217).
 Da v23 em diante, também a leitura da aba ANTES_DEPOIS da simulação, o "(vazio)" e a conferência do valor gravado em
 cada célula (RD-0247; o base_v22.py fica como rodou). Da v24 em diante, as linhas novas no fim de uma aba (ex.: a
-VEICULOS): acrescentar_linhas grava e o comparar confere (novas_no_fim).
+VEICULOS): acrescentar_linhas grava e o comparar confere (novas_no_fim). Da v26 em diante, também antes_log,
+linhas_por_codigo e conferir_cabecalho (RD-0272; os base_v22 a base_v25 ficam como rodaram).
 """
 from __future__ import annotations
 
@@ -66,6 +67,26 @@ def parar(erros: list[str]) -> None:
 def vazio(v):
     """O valor da simulação na base: "(vazio)" é a célula vazia."""
     return None if v == VAZIO else v
+
+
+def antes_log(v) -> str:
+    """O valor de antes no LOG: a marca da revisão da P12 não é escrita de novo (regra R-20261120-213300)."""
+    return "vazio" if v is None else "(o da revisão da P12)" if "duvid" in str(v).lower() else f"'{v}'"
+
+
+def conferir_cabecalho(ws, cab: list[str]) -> None:
+    """Para se o cabeçalho da aba não for cab (os nomes, na ordem)."""
+    if [limpo(c.value) for c in ws[1]] != cab:
+        raise SystemExit(f"[PARADO] cabeçalho da {ws.title} mudou")
+
+
+def linhas_por_codigo(ws) -> dict[str, list[int]]:
+    """{CODIGO_BAP: [linhas]} da aba (a coluna CODIGO_BAP é achada pelo cabeçalho)."""
+    ic = [limpo(c.value) for c in ws[1]].index("CODIGO_BAP") + 1
+    linhas: dict[str, list[int]] = {}
+    for n in range(2, ws.max_row + 1):
+        linhas.setdefault(limpo(ws.cell(n, ic).value), []).append(n)
+    return linhas
 
 
 def ler_antes_depois(sim: Path, cab: list[str], aba: str = "ANTES_DEPOIS") -> list[dict]:

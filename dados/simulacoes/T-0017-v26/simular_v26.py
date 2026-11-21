@@ -39,8 +39,8 @@ from openpyxl.styles import Alignment, Font
 
 RAIZ = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(RAIZ / "dados" / "scripts")]
-from base_comum import (CAB_LOG, CAB_VEICULOS, VAZIO, acrescentar_linhas, comparar, limpo,  # noqa: E402
-                        sha, versao)
+from base_comum import (CAB_LOG, CAB_VEICULOS, VAZIO, acrescentar_linhas, antes_log, comparar,  # noqa: E402
+                        conferir_cabecalho, limpo, linhas_por_codigo, sha, versao)
 
 TAREFA, DATA = "T-0017", "21/11/2026"
 PEDIDO = "R-20261121-190649-alexandre, item 3"
@@ -58,33 +58,30 @@ CIL_TEXTO = "Parati, Quantum, Santana, Saveiro / Royale, Versailles / Cordoba, I
 CIL_MOTIVO = 'cita FORD, SEAT, VOLKSWAGEN sem dizer o modelo (ou só com número): "VW / FORD / SEAT"'
 # 4. CV-F35
 CVF_TRECHO = "Fiesta 1.6 16v / Sigma 05/2010–04/2013"
-# 6. nomes: palavra inteira, caixa exata (não troca "MBB", "NEW BEETLE" nem dentro de outra palavra)
-NOMES = [("Mbb", re.compile(r"(?<![A-Za-zÀ-ú0-9])Mbb(?![A-Za-zÀ-ú0-9])"), "MB"),
-         ("Vwc", re.compile(r"(?<![A-Za-zÀ-ú0-9])Vwc(?![A-Za-zÀ-ú0-9])"), "VW"),
-         ("NEW Beetle", re.compile(r"(?<![A-Za-zÀ-ú0-9])NEW Beetle(?![A-Za-zÀ-ú0-9])"), "New Beetle"),
-         # as outras grafias, aprovadas no R-20261121-195140-alexandre ("3 a")
-         ("MBB", re.compile(r"(?<![A-Za-zÀ-ú0-9])MBB(?![A-Za-zÀ-ú0-9])"), "MB"),
-         ("Vw", re.compile(r"(?<![A-Za-zÀ-ú0-9])Vw(?![A-Za-zÀ-ú0-9])"), "VW"),
-         ("NEW BEETLE", re.compile(r"(?<![A-Za-zÀ-ú0-9])NEW BEETLE(?![A-Za-zÀ-ú0-9])"), "New Beetle"),
-         ("New beetle", re.compile(r"(?<![A-Za-zÀ-ú0-9])New beetle(?![A-Za-zÀ-ú0-9])"), "New Beetle"),
-         ("New Beatle", re.compile(r"(?<![A-Za-zÀ-ú0-9])New Beatle(?![A-Za-zÀ-ú0-9])"), "New Beetle")]
+# 6. nomes: palavra inteira, caixa exata (nunca dentro de outra palavra)
+def palavra(t): return re.compile(rf"(?<![A-Za-zÀ-ú0-9]){re.escape(t)}(?![A-Za-zÀ-ú0-9])")
+
+
+NOMES = [(t, palavra(t), troca) for t, troca in (
+    ("Mbb", "MB"), ("Vwc", "VW"), ("NEW Beetle", "New Beetle"),
+    # as outras grafias, aprovadas no R-20261121-195140-alexandre ("3 a")
+    ("MBB", "MB"), ("Vw", "VW"), ("NEW BEETLE", "New Beetle"), ("New beetle", "New Beetle"),
+    ("New Beatle", "New Beetle"))]
 ESPERADO_NOMES = {"Mbb": 9, "Vwc": 2, "NEW Beetle": 10,          # células da APLICACAO de hoje (v25) com cada grafia
                   "MBB": 5, "Vw": 3, "NEW BEETLE": 5, "New beetle": 1, "New Beatle": 1}
 # variações que NÃO entram (vão para a aba FORA, para o Alexandre decidir se quer)
-PARECIDOS = re.compile(r"(?i)(?<![A-Za-zÀ-ú0-9])(mbb|vwc|vw|new\s*be[ea]tle)(?![A-Za-zÀ-ú0-9])")
+# (a mesma borda da palavra(), com qualquer caixa e espaço: "@" marca o lugar do miolo)
+PARECIDOS = re.compile("(?i)" + palavra("@").pattern.replace("@", r"(mbb|vwc|vw|new\s*be[ea]tle)"))
 
 FONTE_SCE = ("Decidido pelo Alexandre (R-20261121-190649-alexandre, item 3: '1929 · 1932 · 1934' são modelos LS da "
-             "Mercedes-Benz, não anos; R-20261121-195140-alexandre, '2 a': 'Mbb' vira 'MB'). 'MB' e 'VW' como a base mais escreve a montadora.")
+             "Mercedes-Benz, não anos; '2 a' da aprovação: 'Mbb' vira 'MB').")
 FONTE_CRU = "Decidido pelo Alexandre (R-20261121-190649-alexandre, item 3: Kia Bongo a partir de 07/2017, '2017+')."
 FONTE_VEI = ("Decidido pelo Alexandre (R-20261121-190649-alexandre, item 3: entram como normais, separado e sem "
              "MOTIVO e sem ANO_DUVIDA, com o ano do texto; só estes casos, sem reabrir a P12).")
 FONTE_CVF = ("Decidido pelo Alexandre (R-20261121-190933-alexandre, '1 a': 2010–2013, como no texto "
              "'05/2010–04/2013').")
 FONTE_NOM = ("Decidido pelo Alexandre (R-20261121-190649-alexandre, item 3: 'Mbb' e 'Vwc' com a escrita certa da "
-             "montadora e 'New Beetle'; R-20261121-195140-alexandre: '2 a' MB, '3 a' as outras grafias também, '4 a' "
-             "o resto do texto fica). Na APLICACAO, a base escreve 'MB' 347 vezes (Mercedes-Benz 32, "
-             "MERCEDES-BENZ 255) e 'VW' 896 (Volkswagen 15, VOLKSWAGEN 506); o prefixo 'MARCA - ' usa 'MB' 223 e 'VW' "
-             "609 vezes.")
+             "montadora e 'New Beetle'; '3 a' da aprovação: as outras grafias também).")
 
 # linhas novas da VEICULOS (no fim da aba), na ordem de CAB_VEICULOS
 NOVAS = [["SCE14002", "MERCEDES-BENZ", "LS", "1929", None, None, "automático", "separado", None, None, None],
@@ -99,11 +96,6 @@ FONTE_NOVAS = {"SCE14002": FONTE_VEI + " Como as linhas LS 1630 e LS 1941 do mes
 
 def vz(v):
     return VAZIO if v in (None, "") else v
-
-
-def antes_log(v) -> str:
-    """O valor de antes no LOG: a marca da revisão da P12 não é escrita de novo (regra R-20261120-213300)."""
-    return "(o da revisão da P12)" if "duvid" in str(v).lower() else f"'{v}'"
 
 
 def contar_duvidoso(wb) -> dict:
@@ -138,12 +130,10 @@ def main(base, saida):
     wb = openpyxl.load_workbook(base)
     wp, wv = wb["PRODUTOS"], wb["VEICULOS"]
     cp = [limpo(c.value) for c in wp[1]]
-    assert [limpo(c.value) for c in wv[1]] == CAB_VEICULOS
+    conferir_cabecalho(wv, CAB_VEICULOS)
     ic, ia = cp.index("CODIGO_BAP") + 1, cp.index("APLICACAO") + 1
     iv = {k: i + 1 for i, k in enumerate(CAB_VEICULOS)}
-    linha_de = {}
-    for n in range(2, wp.max_row + 1):
-        linha_de.setdefault(limpo(wp.cell(n, ic).value), []).append(n)
+    linha_de = linhas_por_codigo(wp)
     duv_antes = contar_duvidoso(wb)
     n_prod, n_veic, ult_log = wp.max_row, wv.max_row, wb["LOG_CORRECOES"].max_row
 
