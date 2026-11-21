@@ -22,21 +22,18 @@ Uso: python3 dados/scripts/base_v24.py            (grava)
 from __future__ import annotations
 
 import sys
-from copy import copy
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from base_comum import (RAIZ, acrescentar_leia_me, acrescentar_log, conferir_celulas, ler_antes_depois,  # noqa: E402
-                        limpo, parar, rodar, vazio)
+from base_comum import (CAB_VEICULOS, RAIZ, acrescentar_leia_me, acrescentar_linhas, acrescentar_log,  # noqa: E402
+                        conferir_celulas, ler_antes_depois, limpo, parar, rodar, vazio)
 
 SIM = RAIZ / "dados" / "simulacoes" / "T-0017-v24" / "SIMULACAO_v24_T-0017.xlsx"
 TAREFA, DATA = "T-0017", "21/11/2026"
 APROVACAO = "R-20261121-112900-alexandre ('1) a': v24 com os 21 veículos; '2) a': as regras de segurança ficam)"
-COLS_V = ["CODIGO_BAP", "FABRICANTE", "MODELO", "VERSAO", "ANO_INICIO", "ANO_FIM", "ORIGEM", "SITUACAO", "MOTIVO",
-          "CILINDRADA", "ANO_DUVIDA"]
 CAB = ["CODIGO_A", "LINHA_PRODUTOS", "FABRICANTE", "MODELO_V", "ANOS (de B)", "TRECHO_COPIADO_DE_B", "REFERENCIA_PROVA",
        "CODIGO_B", "OUTROS_B", "FAMILIA", "POSICAO", "LADO", "APLICACAO_ANTES", "APLICACAO_DEPOIS",
-       "VEICULOS_LINHA_NOVA (" + " | ".join(COLS_V) + ")", "OBS", "NO_SITE"]
+       "VEICULOS_LINHA_NOVA (" + " | ".join(CAB_VEICULOS) + ")", "OBS", "NO_SITE"]
 N_VEICULOS, N_CODIGOS = 21, 12
 DE_B = ("FABRICANTE", "MODELO", "VERSAO", "ANO_INICIO", "ANO_FIM", "ORIGEM", "SITUACAO")   # iguais à linha de V em B
 
@@ -51,9 +48,8 @@ LEIA_ME = [
     ("Não entram", "Os 3.296 casos da aba FORA da simulação (dados/simulacoes/T-0017-v24/), com o motivo de cada um; "
                    "o Palio no AMT7500 e no AMT7014 (só anúncio como prova nesta rodada); nenhuma marca nova de ano "
                    "incerto; nenhum produto sai."),
-    ("Formato", "Mesmas abas e colunas da v23 (as 5 primeiras da PRODUTOS, que a BAP Central lê, na mesma ordem). A "
-                "VEICULOS ganha 21 linhas no fim. 42 linhas no LOG_CORRECOES (duas por veículo). Aprovado em "
-                "R-20261121-112900-alexandre."),
+    ("Formato", "Mesmas abas e colunas da v23 (as 5 primeiras da PRODUTOS, que a BAP Central lê, na mesma ordem). 42 "
+                "linhas no LOG_CORRECOES (duas por veículo). Aprovado em R-20261121-112900-alexandre."),
     (None, None),
 ]
 
@@ -69,7 +65,7 @@ def ler() -> list[dict]:
 
 def linha_nova(texto: str) -> dict:
     """A linha nova da VEICULOS como a simulação a mostra ("-" = vazio; os anos são números)."""
-    v = dict(zip(COLS_V, (None if x == "-" else x for x in texto.split(" | "))))
+    v = dict(zip(CAB_VEICULOS, (None if x == "-" else x for x in texto.split(" | "))))
     for k in ("ANO_INICIO", "ANO_FIM"):
         v[k] = int(v[k]) if v[k] is not None else None
     return v
@@ -78,7 +74,7 @@ def linha_nova(texto: str) -> dict:
 def aplicar(wb, linhas):
     wv, wp = wb["VEICULOS"], wb["PRODUTOS"]
     cv = [limpo(c.value) for c in wv[1]]
-    if cv != COLS_V:
+    if cv != CAB_VEICULOS:
         raise SystemExit(f"[PARADO] cabeçalho da VEICULOS: {cv}")
     cp = [limpo(c.value) for c in wp[1]]
     ip = {c: cp.index(c) + 1 for c in ("CODIGO_BAP", "APLICACAO")}
@@ -87,7 +83,7 @@ def aplicar(wb, linhas):
         linha_p.setdefault(limpo(wp.cell(n, ip["CODIGO_BAP"]).value), []).append(n)
     veic: dict[str, list[dict]] = {}
     for r in wv.iter_rows(min_row=2, max_row=wv.max_row, values_only=True):
-        veic.setdefault(limpo(r[0]), []).append(dict(zip(COLS_V, r)))
+        veic.setdefault(limpo(r[0]), []).append(dict(zip(CAB_VEICULOS, r)))
 
     erros, fp, novas, log = [], {}, [], []
     origem = (f"Simulação em dados/simulacoes/T-0017-v24/ (aba VALIDOS); aprovado em {APROVACAO}. {TAREFA} (v24), "
@@ -125,15 +121,7 @@ def aplicar(wb, linhas):
     parar(erros)
     for (n, c), val in fp.items():
         wp.cell(n, c).value = val
-    ult_v, fv = wv.max_row, {}
-    for i, v in enumerate(novas, 1):
-        for c, k in enumerate(COLS_V, 1):
-            cel, modelo = wv.cell(ult_v + i, c), wv.cell(ult_v, c)
-            cel.value = v[k]
-            cel._style = copy(modelo._style)            # o formato da última linha de hoje
-            fv[(ult_v + i, c)] = v[k]
-    if wv.auto_filter.ref:
-        wv.auto_filter.ref = f"A1:{wv.auto_filter.ref.split(':')[1].rstrip('0123456789')}{wv.max_row}"
+    fv = acrescentar_linhas(wv, [[v[k] for k in CAB_VEICULOS] for v in novas])
     ult = acrescentar_log(wb, log)
     leia_n = acrescentar_leia_me(wb, LEIA_ME)
     print(f"  células: PRODUTOS {len(fp)}; VEICULOS +{len(novas)} linhas; LOG_CORRECOES +{len(log)}; "

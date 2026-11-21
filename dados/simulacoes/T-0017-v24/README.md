@@ -1,13 +1,7 @@
-# T-0017 · v24 da base unificada: SIMULAÇÃO aprovada (R-20261121-112900-alexandre, '1) a') e gravada na v24 (sha256 `3b0dc932…e85e`)
+# T-0017 · v24 da base unificada: SIMULAÇÃO aprovada (R-20261121-112900-alexandre, '1) a') e gravada
 
 Pedido: **R-20261121-102700-alexandre** ("reveja tudo e valide os casos iguais"). Auditoria das referências cruzadas repetidas, com a regra de prova do recado, e revisão do AMT7500 e do AMT7014.
-- Base de partida: v23 do main 3748c34 (sha256 `05eeb19a…d129`). Gravada pelo `dados/scripts/base_v24.py` sobre a v23, com a cópia em `dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v24.xlsx` (sha256 `3b0dc932…e85e`).
-- Regra fixa (R-20261120-213300): nada novo marcado nem escrito como duvidoso. Nenhum produto sai.
-- 2ª rodada, depois da revisão do 128efb3:
-  - o trecho que entra em A é copiado, literal, da APLICACAO de B;
-  - os casos também vêm da APLICACAO;
-  - o ABS é padronizado;
-  - código com "/" não vira referência.
+- Base de partida: v23 do main 3748c34 (sha256 `05eeb19a…d129`). Gravada pelo `dados/scripts/base_v24.py` sobre a v23, com a cópia em `dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v24.xlsx` (sha256 `2f57ba30…5d10`).
 
 ## Arquivos
 - `RESUMO.md`: as contagens, os casos válidos, os motivos de quem ficou fora e a conclusão do AMT7500 e do AMT7014.

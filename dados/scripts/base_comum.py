@@ -6,7 +6,7 @@ a linha nova no LOG_CORRECOES e a gravação da base com a cópia em dados/verso
 do main() (--conferir, "vNN já existe", sha da versão anterior, pasta temporária, comparar e gravar): rodar() (RD-0217).
 Da v23 em diante, também a leitura da aba ANTES_DEPOIS da simulação, o "(vazio)" e a conferência do valor gravado em
 cada célula (RD-0247; o base_v22.py fica como rodou). Da v24 em diante, as linhas novas no fim de uma aba (ex.: a
-VEICULOS), com o filtro estendido até a nova última linha (novas_no_fim).
+VEICULOS): acrescentar_linhas grava e o comparar confere (novas_no_fim).
 """
 from __future__ import annotations
 
@@ -27,6 +27,8 @@ RAIZ = Path(__file__).resolve().parents[2]
 BASE = RAIZ / "dados" / "BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx"
 VERSOES = RAIZ / "dados" / "versoes"
 CAB_LOG = ["TIPO", "ABA", "CODIGO_ANTES_OU_NOVO", "CODIGO_REFERENCIA", "OBSERVACAO"]
+CAB_VEICULOS = ["CODIGO_BAP", "FABRICANTE", "MODELO", "VERSAO", "ANO_INICIO", "ANO_FIM", "ORIGEM", "SITUACAO", "MOTIVO",
+                "CILINDRADA", "ANO_DUVIDA"]
 VAZIO = "(vazio)"                     # como a simulação mostra a célula vazia
 
 
@@ -67,7 +69,7 @@ def vazio(v):
 
 
 def ler_antes_depois(sim: Path, cab: list[str], aba: str = "ANTES_DEPOIS") -> list[dict]:
-    """A aba da simulação (ANTES_DEPOIS; na v24, VALIDOS), uma linha por mudança, depois de conferir o cabeçalho."""
+    """A aba da simulação (por padrão, a ANTES_DEPOIS), uma linha por mudança, depois de conferir o cabeçalho."""
     wb = openpyxl.load_workbook(sim, read_only=True)
     it = wb[aba].iter_rows(values_only=True)
     achado = list(next(it))
@@ -104,7 +106,7 @@ def acrescentar_log(wb, linhas: list[list]) -> int:
 
 def acrescentar_linhas(ws, linhas: list[list]) -> dict[tuple[int, int], object]:
     """Põe as linhas no fim da aba, com o formato da última linha de hoje, e estende o filtro até a nova última linha
-    (da v25; o base_v24.py fica como rodou). Devolve {(linha, coluna): valor}, para o conferir_celulas."""
+    (da v24). Devolve {(linha, coluna): valor}, para o conferir_celulas."""
     ult, feitas = ws.max_row, {}
     for i, linha in enumerate(linhas, 1):
         for c, v in enumerate(linha, 1):

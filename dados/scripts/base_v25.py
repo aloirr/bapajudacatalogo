@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from base_comum import (RAIZ, acrescentar_leia_me, acrescentar_linhas, acrescentar_log,  # noqa: E402
+from base_comum import (CAB_VEICULOS, RAIZ, acrescentar_leia_me, acrescentar_linhas, acrescentar_log,  # noqa: E402
                         conferir_celulas, ler_antes_depois, limpo, parar, rodar, vazio)
 
 SIM = RAIZ / "dados" / "simulacoes" / "T-0017-v25" / "SIMULACAO_v25_T-0017.xlsx"
@@ -29,8 +29,6 @@ TAREFA, DATA = "T-0017", "21/11/2026"
 APROVACAO = "R-20261121-154533-alexandre ('1) a', via po)"
 COD, TRECHO = "AMT7500", " ; FIAT - Palio Weekend Adventure 2000–2007 · s/ ABS"
 CAB = ["CODIGO_BAP", "ABA", "LINHA", "COLUNA", "ANTES", "DEPOIS", "FONTE", "ENTRA"]
-COLS_V = ["CODIGO_BAP", "FABRICANTE", "MODELO", "VERSAO", "ANO_INICIO", "ANO_FIM", "ORIGEM", "SITUACAO", "MOTIVO",
-          "CILINDRADA", "ANO_DUVIDA"]
 NOVA = [COD, "FIAT", "Palio Weekend", "Adventure", 2000, 2007, "automático", "separado", None, None, None]
 
 LEIA_ME = [
@@ -42,8 +40,8 @@ LEIA_ME = [
                                 "ANO_DUVIDA, no fim da aba (T-0017)."),
     ("Não entram", "O 'Palio, Siena' do anúncio da Nakata (nenhum catálogo antigo confirma) e o AMT7014 (c/ ABS); "
                    "nenhuma marca nova de ano incerto; nenhum produto sai."),
-    ("Formato", "Mesmas abas e colunas da v24 (as 5 primeiras da PRODUTOS, que a BAP Central lê, na mesma ordem). A "
-                f"VEICULOS ganha 1 linha no fim. 2 linhas no LOG_CORRECOES. Aprovado em {APROVACAO}."),
+    ("Formato", "Mesmas abas e colunas da v24 (as 5 primeiras da PRODUTOS, que a BAP Central lê, na mesma ordem). 2 "
+                f"linhas no LOG_CORRECOES. Aprovado em {APROVACAO}."),
     (None, None),
 ]
 
@@ -51,11 +49,11 @@ LEIA_ME = [
 def ler() -> tuple[dict, list]:
     """A célula da ANTES_DEPOIS e a linha da VEICULOS_NOVA da simulação, conferidas com o que foi aprovado."""
     cel = ler_antes_depois(SIM, CAB)
-    nova = ler_antes_depois(SIM, COLS_V + ["FONTE"], "VEICULOS_NOVA")
+    nova = ler_antes_depois(SIM, CAB_VEICULOS + ["FONTE"], "VEICULOS_NOVA")
     if (len(cel) != 1 or (cel[0]["CODIGO_BAP"], cel[0]["ABA"], cel[0]["COLUNA"], cel[0]["ENTRA"])
             != (COD, "PRODUTOS", "APLICACAO", "sim") or cel[0]["DEPOIS"] != cel[0]["ANTES"] + TRECHO):
         raise SystemExit(f"[PARADO] a ANTES_DEPOIS da simulação não é a aprovada: {cel}")
-    if len(nova) != 1 or [vazio(nova[0][k]) for k in COLS_V] != NOVA:
+    if len(nova) != 1 or [vazio(nova[0][k]) for k in CAB_VEICULOS] != NOVA:
         raise SystemExit(f"[PARADO] a VEICULOS_NOVA da simulação não é a aprovada: {nova}")
     return cel[0], NOVA
 
@@ -63,7 +61,7 @@ def ler() -> tuple[dict, list]:
 def aplicar(wb, dados):
     x, nova = dados
     wp, wv = wb["PRODUTOS"], wb["VEICULOS"]
-    if [limpo(c.value) for c in wv[1]] != COLS_V:
+    if [limpo(c.value) for c in wv[1]] != CAB_VEICULOS:
         raise SystemExit("[PARADO] cabeçalho da VEICULOS mudou")
     cp = [limpo(c.value) for c in wp[1]]
     ic, ia = cp.index("CODIGO_BAP") + 1, cp.index("APLICACAO") + 1
