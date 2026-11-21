@@ -24,12 +24,8 @@ Gravada pelo `dados/scripts/base_v21.py` sobre a v20 (sha256 `4372f449…d24b`).
   - As linhas de baixo subiram 3, e o filtro da aba termina na nova última linha.
 - **P14** (fora da planilha; pedida depois): o ANO_FIM perdido na VEICULOS, só onde o texto da APLICACAO prova.
   - **ELE1084 Gol:** fica 1984–1994, porque o texto diz "1984->1994".
-  - **KF27 Civic:** fica 2006–2006, porque o texto diz "Civic 2006", sem o "→" que a mesma célula usa para "em diante".
-  - **CV-F35 Fiesta:** ficou 2010 em diante. O texto tem "Fiesta … 05/2010–04/2013" e também "Fiesta … Ti-Vct/ Sigma 04/2013" (a partir de 04/2013), e a linha junta os dois pela faixa mais larga (V3 da v20).
-
-> **[SUPOSIÇÃO] para o PO levar ao Alexandre (P14):**
-> - **KF27, exceção à regra V4 da v20.** Pela V4a, ano solto sem mês quer dizer "a partir de" (2006 em diante). Aqui "Civic 2006" virou **2006–2006**, porque, na mesma célula, o "em diante" vem marcado com "→" (Blazer EV 2025 →, Cruze 2017 →) e o Civic não tem a seta. Se ele preferir a regra V4, volta a 2006 em diante.
-> - **CV-F35 ficou sem mudança (2010 em diante).** O texto tem o Fiesta de 05/2010 a 04/2013 e também o Fiesta Ti-Vct a partir de 04/2013. Pela V3 da v20 (a faixa mais larga), o "em diante" fica. Se ele quiser 2010–2013, o Fiesta Ti-Vct de 2013 em diante deixa de achar o produto no filtro.
+  - **KF27 Civic:** fica 2006–2006, porque o texto diz "Civic 2006", sem o "→" que a mesma célula usa para "em diante". [SUPOSIÇÃO] exceção à V4a; se o Alexandre preferir a V4, volta a 2006 em diante.
+  - **CV-F35 Fiesta:** ficou 2010 em diante. O texto tem "Fiesta … 05/2010–04/2013" e também "Fiesta … Ti-Vct/ Sigma 04/2013" (a partir de 04/2013), e a linha junta os dois pela faixa mais larga (V3 da v20). Se ele quiser 2010–2013, o Fiesta Ti-Vct de 2013 em diante deixa de achar o produto.
 
 ## O que NÃO entrou, e por quê
 Pela decisão "nao marque nem escreva nada como duvidoso", nada novo foi marcado ou escrito como duvidoso. As abas da planilha continuam aqui como foram mostradas:
