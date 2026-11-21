@@ -89,9 +89,14 @@ def medir(lw, tags, largura, size=6.2, pad=3, gap=2.5, lh=10):
     return pos, (ln + 1) * lh if tags else 0
 
 
+def altura(lw, tags, largura, size=6.2, pad=3, gap=2.5, lh=10, max_linhas=9):
+    """altura que o desenhar ocupa (até max_linhas), sem desenhar"""
+    return min(medir(lw, tags, largura, size, pad, gap, lh)[1], max_linhas * lh)
+
+
 def desenhar(dc, lw, x, y, tags, largura, size=6.2, pad=3, gap=2.5, lh=10, max_linhas=9):
     pos, h = medir(lw, tags, largura, size, pad, gap, lh)
     for t, dx, ln, w in pos:
         if ln >= max_linhas: break
         dc.tag(x + dx, y + ln * lh, t, size, 'hero', 'gtext', pad)
-    return min(h, max_linhas * lh)
+    return altura(lw, tags, largura, size, pad, gap, lh, max_linhas)
