@@ -165,7 +165,10 @@ TAG_LINHAS = 2               # linhas de tags no cartão
 import json as _json
 # destaques fixos (T-0019, R-20261120-153200): os 5 do catálogo de 13/11, só códigos
 _DF = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'destaques_fixos.json')
-DESTAQUES_FIXOS = _json.load(open(_DF, encoding='utf-8'))['familias'] if os.path.exists(_DF) else {}
+DESTAQUES_FIXOS = {}
+if os.path.exists(_DF):
+    with open(_DF, encoding='utf-8') as _fdf:
+        DESTAQUES_FIXOS = _json.load(_fdf)['familias']
 LOG_DESTAQUES = {}      # (família, código ou '—') -> motivo do completamento
 
 

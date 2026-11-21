@@ -43,7 +43,8 @@ OBS_DISP = 'Consulte a disponibilidade na sua região.'   # rodapé das páginas
 LEGAL_R = ' — material exclusivo do time BAP. Proibida a distribuição a clientes e terceiros. Imagens ilustrativas.'
 
 # ---------------------------------------------------------------- dados + correções
-fams = json.load(open('digital_data.json'))
+with open('digital_data.json') as _fdd:
+    fams = json.load(_fdd)
 for _f in fams:                                  # " nan" (célula vazia) depois da montadora: sai e a marca fica (P3 da v21)
     for _r in _f['rows']:
         for _sg in _r.get('segs') or []:

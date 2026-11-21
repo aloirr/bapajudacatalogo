@@ -53,7 +53,8 @@ for i,pg in enumerate(d):
         plain=re.sub(r'\s+',' ',''.join(t for t,b in segs)).strip()
         if plain.startswith('Aplicação em cadastro'): segs=[]
         cur['rows'].append(dict(code=c['text'].strip(), nov=nov, sub=sub, segs=segs, refs=re.sub(r'\s+',' ',refs).strip()))
-json.dump(fams, open('digital_data.json','w'), ensure_ascii=False)
+with open('digital_data.json','w') as _f:
+    json.dump(fams, _f, ensure_ascii=False)
 for f in fams: print(f"{f['name'][:30]:30} {f['group'][:22]:22} cnt={f['count']:4} rows={len(f['rows']):4} spec={f['spec']} lanc={f['lanc']} img={bool(f['img'])}")
 # imagens da capa/contracapa e logo
 for i,(pno) in enumerate([0]):
