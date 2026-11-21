@@ -10,9 +10,9 @@
      --json <arquivo>        testa outro produtos.json no lugar de site/data/produtos.json (o servidor entrega
                              esse arquivo em data/produtos.json). Serve para as provas com cópia temporária.
      --prints <pasta>        onde gravar os prints (padrão: testes/prints/ultima).
-     --sem-navegador         só os testes do JSON (palavra interna, campos, total), sem abrir o Chromium.
+     --sem-navegador         só os testes do JSON (palavra interna, AUTOIMPACT, campos, total), sem abrir o Chromium.
 
-   O que testa: palavra interna no JSON; campos e total do JSON; servidor estático de site/ numa porta livre;
+   O que testa: palavra interna no JSON (a SUNRISE também); a AUTOIMPACT só na marca da referência cruzada; campos e total do JSON; servidor estático de site/ numa porta livre;
    a busca de um campo só (q) da T-0011, palavra por palavra: código (exato em 1º, com e sem espaço ou hífen),
    referência cruzada, veículo (montadora + modelo + ano, sem Golf no Gol), geral (texto livre), os exemplos da
    diretriz (lista estrita, outra ordem, minúsculas, os mais próximos, marca concorrente, código BAP e EAN exatos)
@@ -87,6 +87,9 @@ const cortar = (s, n = 70) => { s = String(s ?? "").replace(/\s+/g, " ").trim();
 // como separador, para "CUSTO_COMPRA" também ser pego.
 // "custo" só como palavra inteira (decisão 5a do Alexandre, recado R-20261120-093235-alexandre: "Custom" não conta).
 // [SUPOSIÇÃO] o plural "custos" conta como a mesma palavra. As outras palavras valem em qualquer lugar do texto.
+// Nome com até 3 sinais (espaço, hífen, ponto, "_"...) entre cada letra, como o FORNECEDOR_RE da TRAVA do gerar_site.py
+// ("AUTO.IMPACT", "Sun-Rise"). Recebe o nome em maiúsculas; o texto já vem sem acento e em maiúsculas.
+const comSinais = (nome) => new RegExp([...nome].join("[\\W_]{0,3}"));
 const PALAVRAS = [
   ["estoque", /ESTOQUE/],
   ["preço", /PRECO/],
@@ -100,6 +103,7 @@ const PALAVRAS = [
   ["LINHA_ORIGEM", /LINHA[_ ]?ORIGEM/],
   ["OBS_INTERNA", /OBS[_ ]?INTERNA/],
   ["R$", /R\s?\$/],
+  ["SUNRISE", comSinais("SUNRISE")], // fornecedor (T-0019): em qualquer lugar é falha
 ];
 // Texto de um produto para a varredura: as chaves e os valores JÁ DECODIFICADOS, percorrendo o objeto. Não use o
 // JSON.stringify: nele a quebra de linha vira os caracteres "\n", colados na palavra seguinte ("\nCUSTO" escaparia
@@ -113,6 +117,30 @@ function textoDe(v) {
     else partes.push(String(x));
   })(v);
   return partes.join(" | ");
+}
+// AUTOIMPACT (R-20261121-113400-alexandre, T-0017): marca concorrente, pode aparecer só no rótulo da marca da
+// referência cruzada (r[].m). Em qualquer outro lugar do produto (chave ou valor: d, a, x, de, ve, r[].c, p, ca, si,
+// fa, li, oj, po, rótulo composto...) é falha. Cada texto é conferido sozinho (os sinais não pulam de um campo a outro).
+const RX_AUTOIMPACT = comSinais("AUTOIMPACT");
+function autoimpactForaDaRef(v) {
+  const achou = [];
+  (function andar(x, onde) {
+    if (x == null) return;
+    if (Array.isArray(x)) { x.forEach((y, i) => andar(y, `${onde}[${i}]`)); return; }
+    if (typeof x === "object") {
+      for (const [k, y] of Object.entries(x)) {
+        const aqui = onde ? `${onde}.${k}` : k;
+        if (RX_AUTOIMPACT.test(norm(k))) achou.push({ onde: aqui + " (chave)", trecho: cortar(k, 60) });
+        if (/^r\[\d+\]\.m$/.test(aqui)) continue; // o único lugar permitido
+        andar(y, aqui);
+      }
+      return;
+    }
+    const t = norm(x);
+    const m = t.match(RX_AUTOIMPACT);
+    if (m) achou.push({ onde: onde || "(valor)", trecho: cortar(t.slice(Math.max(0, m.index - 25), m.index + m[0].length + 25), 80) });
+  })(v, "");
+  return achou;
 }
 // vale para o texto do JSON (textoDe) e para o texto da tela do produto; quebra de linha e tab viram espaço
 function palavrasInternas(texto) {
@@ -294,6 +322,16 @@ function testarJson(arqJson) {
     for (const a of palavrasInternas(textoDe(p))) falha("palavra", N_PAL, `${a.nome}:${p.c}`, `${p.c} "${a.nome}": …${a.trecho}…`);
   }
   teste("palavra", N_PAL);
+  // AUTOIMPACT só no rótulo da marca da referência cruzada (r[].m); o cabeçalho do JSON não pode ter
+  const N_AI = "AUTOIMPACT só na ref. cruzada";
+  let naRef = 0;
+  for (const a of autoimpactForaDaRef(cab)) falha("autoimpact", N_AI, `(cabeçalho):${a.onde}`, `(cabeçalho do JSON) ${a.onde}: …${a.trecho}…`);
+  for (const p of prods) {
+    for (const a of autoimpactForaDaRef(p)) falha("autoimpact", N_AI, `${p.c}:${a.onde}`, `${p.c} ${a.onde}: …${a.trecho}…`);
+    for (const r of Array.isArray(p.r) ? p.r : []) if (r && RX_AUTOIMPACT.test(norm(r.m))) naRef++;
+  }
+  teste("autoimpact", N_AI);
+  detalhe("autoimpact", N_AI, `${fmt(naRef)} referência(s) com a AUTOIMPACT na marca (r[].m), o único lugar permitido`);
   return { dados, prods, porCod: new Map(prods.map((p) => [normCod(p.c), p])) };
 }
 
@@ -1532,7 +1570,7 @@ function resumo(conhecidos, opcoes) {
       const vistos = new Set((t ? t.falhas : []).map((f) => f.chave));
       const sumiram = k.chaves.filter((c) => !vistos.has(c));
       if (sumiram.length && t && !opcoes.semNavegador) detalhes.push(`\n[conhecidos] AVISO ${k.tarefa}: ${sumiram.length} de ${k.chaves.length} não aparecem mais (resolvidos? tire de ${path.relative(RAIZ, opcoes.conhecidos)})`);
-    } else if (!(opcoes.semNavegador && !["palavra", "json", "campos", "unico"].includes(k.teste))) {
+    } else if (!(opcoes.semNavegador && !["palavra", "json", "campos", "unico", "autoimpact"].includes(k.teste))) {
       detalhes.push(`\n[conhecidos] AVISO ${k.tarefa} (${k.teste}): nenhum achado aparece mais. Resolvido? Tire de ${path.relative(RAIZ, opcoes.conhecidos)}.`);
     }
   }
