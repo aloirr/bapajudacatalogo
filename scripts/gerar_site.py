@@ -236,6 +236,11 @@ ROL_SISTEMAS = [
 ]
 
 
+def pares_de(brutos: str) -> list[list[str]]:
+    """chave: valor dos DADOS_ADICIONAIS, separados por "|" (montadora e POSICAO do sistemas_de)"""
+    return [[k.strip(), v.strip()] for k, v in (p.split(":", 1) for p in brutos.split("|") if ":" in p)]
+
+
 def sistema_base(s: str) -> list[str]:
     return [s.strip().upper()] if s.strip() else []
 
@@ -345,7 +350,7 @@ def ler_base(caminho: Path) -> list[dict]:
         brutos = g(r, "DADOS_ADICIONAIS")
         extras = extras_de(brutos)
         # montadora: lida antes de tirar a chave dos extras
-        pares = [[k.strip(), v.strip()] for k, v in (p.split(":", 1) for p in brutos.split("|") if ":" in p)]
+        pares = pares_de(brutos)
         mont = montadora_de(pares, apl)
         produtos.append({
             "c": cod,
