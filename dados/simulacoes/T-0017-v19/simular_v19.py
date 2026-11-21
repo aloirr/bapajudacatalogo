@@ -1,7 +1,10 @@
-"""T-0017 · SIMULAÇÃO da v19 (APLICACAO e REFERENCIAS_CRUZADAS da aba PRODUTOS). Só lê a base.
+"""T-0017 · SIMULAÇÃO da v19 (APLICACAO, REFERENCIAS_CRUZADAS e OFERECA_JUNTO da aba PRODUTOS). Só lê a base.
 
 Uso:
-    python3 simular_v19.py <base.xlsx> <pasta_de_saida>
+    python3 simular_v19.py <base.xlsx> <pasta_de_saida> [<oj_pares.json>]
+
+    <oj_pares.json>: os pares do OFERECA_JUNTO medidos no site (P13). Sem ele, refaz só a APLICACAO e a
+    REFERENCIAS_CRUZADAS.
 
 Saídas na pasta:
     SIMULACAO_v19_T-0017.xlsx      uma aba por item (CODIGO_BAP, COLUNA, ANTES, DEPOIS, REGRA, TIPO, PERGUNTA)
@@ -12,8 +15,8 @@ Saídas na pasta:
   tem o valor original (v18) e o final.
 - TIPO: AUTOMÁTICO (regra mecânica), CASO A CASO (correção proposta célula a célula) ou DÚVIDA (depende da
   pergunta Pn ao Alexandre; o DEPOIS é a recomendação).
-- Nunca lê nem escreve preço, custo ou estoque: só as colunas APLICACAO e REFERENCIAS_CRUZADAS (e, para os
-  contadores, CATEGORIA, SISTEMA, NO_CATALOGO_DIGITAL, STATUS_CADASTRO e a aba VEICULOS/MODELOS_VEICULO).
+- Nunca lê nem escreve preço, custo ou estoque: só as colunas APLICACAO, REFERENCIAS_CRUZADAS e OFERECA_JUNTO
+  (e, para os contadores, CATEGORIA, SISTEMA, NO_CATALOGO_DIGITAL, STATUS_CADASTRO e a aba VEICULOS/MODELOS_VEICULO).
 """
 from __future__ import annotations
 

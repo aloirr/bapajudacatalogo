@@ -1,0 +1,265 @@
+{
+ "total": {
+  "linhas_antes": 17270,
+  "linhas_depois": 17270,
+  "produtos": 4210,
+  "linhas_com_modelo": 16750,
+  "linhas_sem_modelo": 520,
+  "repetidas_cod_fab_mod_ver": 0,
+  "situacao": {
+   "separado": 12150,
+   "duvidoso": 5120
+  },
+  "origem": {
+   "automático": 17270
+  }
+ },
+ "separado": {
+  "linhas": 12148,
+  "produtos": 3616,
+  "com_cilindrada": 4926,
+  "sem_cilindrada": 7222,
+  "cilindrada_varias": 2169,
+  "com_ano": 10265,
+  "sem_ano": 1883,
+  "faixa_completa": 7172,
+  "so_inicio_em_diante": 3026,
+  "so_fim_ate": 67,
+  "ano_duvidoso": 2042,
+  "ano_duvidoso_herdado": 1623,
+  "ano_duvidoso_aa_aa": 137,
+  "ano_duvidoso_fim_antes": 0,
+  "ano_duvidoso_solto_mm_aaaa": 320,
+  "ano_firme": 8223,
+  "com_os_dois": 4717,
+  "par_cil_ano_perdido": 2056,
+  "veiculo_repetido_no_texto": 2306,
+  "ano_solto_mm_aaaa": 362,
+  "ano_solto_aaaa": 428,
+  "fonte_v18": 0,
+  "nao_achado_no_texto": 0
+ },
+ "duvidoso_com_modelo": {
+  "linhas": 4602,
+  "produtos": 535,
+  "com_cilindrada": 2071,
+  "sem_cilindrada": 2531,
+  "cilindrada_varias": 753,
+  "com_ano": 3667,
+  "sem_ano": 935,
+  "faixa_completa": 2774,
+  "so_inicio_em_diante": 879,
+  "so_fim_ate": 14,
+  "ano_duvidoso": 194,
+  "ano_duvidoso_herdado": 168,
+  "ano_duvidoso_aa_aa": 4,
+  "ano_duvidoso_fim_antes": 1,
+  "ano_duvidoso_solto_mm_aaaa": 22,
+  "ano_firme": 3473,
+  "com_os_dois": 2019,
+  "par_cil_ano_perdido": 1108,
+  "veiculo_repetido_no_texto": 1230,
+  "ano_solto_mm_aaaa": 32,
+  "ano_solto_aaaa": 348,
+  "fonte_v18": 0,
+  "nao_achado_no_texto": 101
+ },
+ "todas_com_modelo": {
+  "linhas": 16750,
+  "produtos": 4057,
+  "com_cilindrada": 6997,
+  "sem_cilindrada": 9753,
+  "cilindrada_varias": 2922,
+  "com_ano": 13932,
+  "sem_ano": 2818,
+  "faixa_completa": 9946,
+  "so_inicio_em_diante": 3905,
+  "so_fim_ate": 81,
+  "ano_duvidoso": 2236,
+  "ano_duvidoso_herdado": 1791,
+  "ano_duvidoso_aa_aa": 141,
+  "ano_duvidoso_fim_antes": 1,
+  "ano_duvidoso_solto_mm_aaaa": 342,
+  "ano_firme": 11696,
+  "com_os_dois": 6736,
+  "par_cil_ano_perdido": 3164,
+  "veiculo_repetido_no_texto": 3536,
+  "ano_solto_mm_aaaa": 394,
+  "ano_solto_aaaa": 776,
+  "fonte_v18": 0,
+  "nao_achado_no_texto": 101
+ },
+ "tipos_de_ano_separado": [
+  [
+   "AAAA-AAAA",
+   4552
+  ],
+  [
+   "MM/AAAA-MM/AAAA",
+   2331
+  ],
+  [
+   "AAAA>",
+   2062
+  ],
+  [
+   "ano solto AAAA",
+   428
+  ],
+  [
+   "ano solto MM/AAAA",
+   362
+  ],
+  [
+   "MM/AA MM/AA",
+   201
+  ],
+  [
+   "AA/AA ambíguo",
+   137
+  ],
+  [
+   "AA/AA",
+   125
+  ],
+  [
+   "após AAAA",
+   108
+  ],
+  [
+   "AAAA AAAA",
+   108
+  ],
+  [
+   "AA/...",
+   101
+  ],
+  [
+   "até AAAA",
+   67
+  ]
+ ],
+ "cilindradas_separado": [
+  [
+   "1.6",
+   1662
+  ],
+  [
+   "2.0",
+   1112
+  ],
+  [
+   "1.0",
+   1108
+  ],
+  [
+   "1.8",
+   992
+  ],
+  [
+   "1.4",
+   841
+  ],
+  [
+   "1.5",
+   354
+  ],
+  [
+   "1.3",
+   345
+  ],
+  [
+   "2.5",
+   282
+  ],
+  [
+   "2.8",
+   179
+  ],
+  [
+   "3.0",
+   175
+  ],
+  [
+   "2.4",
+   134
+  ],
+  [
+   "2.2",
+   118
+  ],
+  [
+   "2.3",
+   84
+  ],
+  [
+   "2.7",
+   81
+  ],
+  [
+   "1.2",
+   76
+  ],
+  [
+   "3.2",
+   65
+  ],
+  [
+   "3.5",
+   61
+  ],
+  [
+   "1.9",
+   57
+  ],
+  [
+   "4.0",
+   41
+  ],
+  [
+   "4.3",
+   39
+  ]
+ ],
+ "produtos_com_conjunto_diferente_no_texto_v19": 44,
+ "suspeitos_aa_aaaa": 17,
+ "perguntas": {
+  "V3": {
+   "linhas": 2950,
+   "separado": 1936,
+   "produtos": 1149
+  },
+  "V4": {
+   "linhas": 764,
+   "separado": 420,
+   "produtos": 229
+  },
+  "V5": {
+   "linhas": 2,
+   "separado": 0,
+   "produtos": 2
+  },
+  "V6": {
+   "linhas": 2,
+   "separado": 2,
+   "produtos": 2
+  },
+  "V7": {
+   "linhas": 359,
+   "separado": 336,
+   "produtos": 190
+  },
+  "V9": {
+   "linhas": 2338,
+   "separado": 0,
+   "produtos": 326
+  }
+ },
+ "sem_produto_no_site": 0,
+ "log_previsto": 3815,
+ "amostra": {
+  "produtos": 50,
+  "marcas": 37,
+  "linhas": 169
+ }
+}
