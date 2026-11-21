@@ -13,7 +13,8 @@ Uso (na raiz do repositório bapajudacatalogo):
 - Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (desde a v17, T-0017). Só as
   linhas SITUACAO = separado; as duvidosas ficam fora até a revisão. Sem a aba, o JSON sai como antes.
 - Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
-  ou de importação, fornecedor e o nome de cada um dos FORNECEDORES), o script PARA e não grava (ver TRAVA abaixo).
+  ou de importação, fornecedor, o nome de cada um dos FORNECEDORES e o da concorrência fora da marca da referência
+  cruzada), o script PARA e não grava (ver TRAVA abaixo).
 """
 from __future__ import annotations
 
@@ -59,21 +60,32 @@ def sem_acento(s: str) -> str:
 # "| ANTERIOR" nem do "BAP BOX". [SUPOSIÇÃO] "BAPTA PN" pode ser código de fornecedor; sai do mesmo jeito.
 MARCAS_PROPRIAS = {"BAP", "BAP PN_2", "BAPTA PN"}
 
-# Fornecedor da BAP é dado interno (regra 1 do CLAUDE.md): a AUTOIMPACT é fornecedor das palhetas (R-20261120-184000-alexandre,
-# item 5: "é fornecedor de palheta sim.") e a SUNRISE também (P10 da v19, R-20261120-194900-po). A referência sai do site
-# quando o nome está no rótulo da marca, inteiro ou dentro dele ("AUTOIMPACT PN", "Pruduct Pn Sunrise"); na base o dado fica.
-# A TRAVA usa o FORNECEDOR_RE, montado desta lista com até 3 sinais (espaço, hífen, ponto...) entre cada letra ("AUTO.IMPACT",
-# "Sun-Rise"): se o nome voltar por outro campo, o script para. Só em maiúsculas, sem espaço e sem pontuação.
-FORNECEDORES = {"AUTOIMPACT", "SUNRISE"}
+# Fornecedor da BAP é dado interno (regra 1 do CLAUDE.md): a SUNRISE (P10 da v19, R-20261120-194900-po). A referência sai do
+# site quando o nome está no rótulo da marca, inteiro ou dentro dele ("SUNRISE PN", "Pruduct Pn Sunrise"); na base o dado fica.
+# A TRAVA usa o FORNECEDOR_RE, montado desta lista com até 3 sinais (espaço, hífen, ponto...) entre cada letra ("Sun-Rise",
+# "SUN.RISE"): se o nome voltar por qualquer campo, o script para. Só em maiúsculas, sem espaço e sem pontuação.
+FORNECEDORES = {"SUNRISE"}
 FORNECEDOR_RE = "|".join(r"[\W_]{0,3}".join(map(re.escape, f)) for f in sorted(FORNECEDORES))
+
+# Marca da concorrência que só aparece na referência cruzada (T-0017): a AUTOIMPACT (R-20261121-112900-alexandre, "Auto
+# impact e ampri sao marcas da concorrencia. Eles devem aparecer apenas na referencia cruzada."; saiu do FORNECEDORES com o
+# "autorizo" do R-20261121-113400-alexandre). A referência vai para o site; o nome só pode estar na marca da referência
+# (r[].m inteiro, sem o " PN"). Em qualquer outro campo (descrição, aplicação, ficha, código da referência, veículos...) a
+# TRAVA para o script: o CONCORRENTE_RE entra nela, e só o r[].m é mascarado (sem_marca_concorrente). A AMPRI não entra
+# aqui: o nome dela nunca foi barrado.
+CONCORRENTES_SO_NA_REF = {"AUTOIMPACT"}
+CONCORRENTE_RE = "|".join(r"[\W_]{0,3}".join(map(re.escape, f)) for f in sorted(CONCORRENTES_SO_NA_REF))
 
 
 def so_codigo(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", sem_acento(s).upper())
 
 
-# o refs_de procura o fornecedor no rótulo passado pelo so_codigo ("f in rot"): a lista tem de estar nesse formato
-assert all(f == so_codigo(f) for f in FORNECEDORES), "FORNECEDORES em maiúsculas, sem espaço e sem pontuação"
+# o refs_de procura o fornecedor no rótulo passado pelo so_codigo ("f in rot"), e o sem_marca_concorrente compara o rótulo
+# do mesmo jeito: as duas listas têm de estar nesse formato
+assert all(f == so_codigo(f) for f in FORNECEDORES | CONCORRENTES_SO_NA_REF), \
+    "FORNECEDORES e CONCORRENTES_SO_NA_REF em maiúsculas, sem espaço e sem pontuação"
+assert not FORNECEDORES & CONCORRENTES_SO_NA_REF, "a mesma marca não pode ser fornecedor e concorrente"
 
 
 # Rótulo da referência só com a marca (RD-0200): os prefixos e o " PN" do fim; a lista está no docs/DADOS_DO_SITE.md (campo r).
@@ -105,7 +117,7 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
                 bruta = m.group(1).strip()
                 marca = PREFIXO_E_PN.sub("", bruta).strip()
                 # a marca própria é vista antes e depois da limpeza ("BAPTA PN" e "CROSS REFERENCIAS - BAP" saem); o
-                # fornecedor sai se o nome estiver em qualquer ponto do rótulo ("AUTOIMPACT PN", "Pruduct Pn Sunrise")
+                # fornecedor sai se o nome estiver em qualquer ponto do rótulo ("SUNRISE PN", "Pruduct Pn Sunrise")
                 rot = so_codigo(bruta)
                 if (not {re.sub(r"\s+", " ", x.upper()) for x in (bruta, marca)} & MARCAS_PROPRIAS
                         and not any(f in rot for f in FORNECEDORES)):
@@ -359,16 +371,26 @@ def fotos(produtos: list[dict], pasta: Path) -> int:
     return feitas
 
 
-# TRAVA: dado interno nunca vai para o site público (os fornecedores entram pelo FORNECEDOR_RE)
+# TRAVA: dado interno nunca vai para o site público (os fornecedores entram pelo FORNECEDOR_RE; o concorrente, pelo
+# CONCORRENTE_RE, com só a marca da referência fora da busca: ver sem_marca_concorrente)
 TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|R\$|"
-                   + FORNECEDOR_RE, re.I)
+                   + FORNECEDOR_RE + "|" + CONCORRENTE_RE, re.I)
+
+
+def sem_marca_concorrente(p: dict) -> dict:
+    """Cópia do produto para a TRAVA: a marca da referência que É o concorrente (r[].m inteiro) vira "*"; o resto fica."""
+    if not p.get("r"):
+        return p
+    q = dict(p)
+    q["r"] = [dict(x, m="*") if so_codigo(x.get("m", "")) in CONCORRENTES_SO_NA_REF else x for x in p["r"]]
+    return q
 
 
 def conferir(produtos: list[dict]) -> list[str]:
-    """Varre cada produto inteiro (todos os campos, o "ve" também)."""
+    """Varre cada produto inteiro (todos os campos, o "ve" também; do "r", só a marca do concorrente fica de fora)."""
     achados = []
     for p in produtos:
-        m = TRAVA.search(json.dumps(p, ensure_ascii=False))
+        m = TRAVA.search(json.dumps(sem_marca_concorrente(p), ensure_ascii=False))
         if m:
             achados.append(f"{p['c']}: '{m.group(0)}'")
     return achados
@@ -413,7 +435,9 @@ def main():
     dados = {"gerado_em": datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"), "fonte": Path(a.base).name,
              "total": len(produtos), "produtos": produtos}
     texto = json.dumps(dados, ensure_ascii=False, separators=(",", ":"))
-    m = TRAVA.search(texto)                  # segunda volta: o arquivo inteiro, como vai ser gravado
+    # segunda volta: o arquivo inteiro, como vai ser gravado (só a marca do concorrente na referência mascarada)
+    m = TRAVA.search(json.dumps(dict(dados, produtos=[sem_marca_concorrente(p) for p in produtos]),
+                                ensure_ascii=False, separators=(",", ":")))
     if m:
         print(f"[PARADO] o JSON sairia com dado interno (nada foi gravado): '{m.group(0)}'")
         sys.exit(2)
