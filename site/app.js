@@ -27,7 +27,7 @@
   const app = document.getElementById("app");
   const TITULO = document.title; // o do index.html: "Catálogo online BAP · Componentes de qualidade"
   const tituloProduto = (p) => p.c + " · " + anoMaisTxt(p.d) + " · " + TITULO.split(" · ")[0]; // "<código> · <descrição> · Catálogo online BAP"
-  let BASE = null;           // { gerado_em, total, produtos }
+  let BASE = null;           // { gerado_em, total, sc, produtos } (sc: sistemas compatíveis do "Leve também", T-0018)
   const NOME_MARCA = new Map(); // marca sem acento → como a base escreve
   let TEM_VE = false;        // o produtos.json tem o campo "ve" (T-0017) em algum produto
   let POR_COD = new Map();   // código → produto
@@ -1317,6 +1317,13 @@
         || casaVeiculo(e, { vm: v.vm, vmo: v.vmo, va: v.va }, true); // marca, modelo e ano; sem motor e sem versão
     });
   };
+  // "Leve também" pelo sistema da peça (T-0018): campos sc e ss do produtos.json; regra em docs/DADOS_DO_SITE.md.
+  const sistemasDe = (p) => p.ss || (p.si ? [String(p.si).toUpperCase()] : []);
+  const sisOk = (aberto, p) => {
+    const so = sistemasDe(aberto), sd = sistemasDe(p);
+    return !so.length || !sd.length || so.some((o) => sd.some((d) => ((BASE.sc || {})[o] || [o]).includes(d)));
+  };
+  const doSistema = (cods, aberto) => cods.filter((c) => { const p = POR_COD.get(normCod(c)); return !p || sisOk(aberto, p); });
   const secJunto = (H2, cods) => cods.length
     ? `<section class="secao rel rel-oj"><${H2} class="secao-tit">Leve também</${H2}>${itensRelHtml(cods)}</section>` : "";
 
@@ -1382,9 +1389,8 @@
     // docs/DADOS_DO_SITE.md): o trecho vai em pedaços e em entradas (o modelo e os pedaços só de ano depois dele); só
     // entra a entrada pura, sem nada além do que a linha já tem.
     const doModelo = (t, m, ver, cil) => {
-      // só o bloco do modelo: o " ; " (com espaço dos dois lados, como no linhasAplic) começa outro bloco de marca ("WR-V
-      // 1.5 L 16V · 2017 até 2020 ; VW - Spacecross"); o ";" colado separa veículos do mesmo bloco ("X1 2015 2022; X1 2023 →")
-      const ps = norm(t).split(/\s+;\s+/)[0].split(RX_PEDACO_ANO).flatMap((x) => x.split(RX_SEP_VEICULO)).flatMap((x) => x.split(rxMarcaNoMeio()))
+      // só o bloco do modelo (BLOCO_APL: " ; " começa outro bloco de marca, "WR-V 1.5 L 16V · 2017 até 2020 ; VW - Spacecross"); o ";" colado separa veículos do mesmo bloco ("X1 2015 2022; X1 2023 →")
+      const ps = norm(t).split(BLOCO_APL)[0].split(RX_PEDACO_ANO).flatMap((x) => x.split(RX_SEP_VEICULO)).flatMap((x) => x.split(rxMarcaNoMeio()))
         .map((x) => x.trim()).filter(Boolean);
       const lista = /([^·;:|,\/]*)[,\/]\s*$/.exec(up.slice(Math.max(0, inicio.get(m) - 40), inicio.get(m)));
       const emLista = lista && !/\d/.test(lista[1]) && modelos.some((o) => o !== m && rxPalavra(o).test(lista[1])); // outro modelo do ve antes da "," ou "/"
@@ -1470,11 +1476,16 @@
   // Linhas da lista da aplicação (T-0017, R-20261120-153900): cada " ; " (bloco de marca) começa linha nova e, dentro do
   // bloco, cada " · " também; o pedaço só de ano fica na linha do veículo de antes ("BMW - X1 2.0 L 16V · 2011 até
   // 2014"). Só a tela: a busca continua lendo o p.a inteiro.
-  const linhasAplic = (a) => String(a || "").split(/\s+;\s+/).flatMap((bloco) => bloco.split(/\s+·\s+/).reduce((ls, x) => {
+  const BLOCO_APL = /\s+;\s+/;                                  // separa um bloco de marca do outro
+  const RX_MARCA_BLOCO = /^[A-ZÀ-Ú][A-ZÀ-Ú /&.]{0,30}?\s-\s/;   // a marca do começo do bloco ("FIAT - ")
+  const linhasAplic = (a) => String(a || "").split(BLOCO_APL).flatMap((bloco) => bloco.split(/\s+·\s+/).reduce((ls, x) => {
     if (ls.length && SO_ANO.test(x.trim())) ls[ls.length - 1] += " · " + x; else ls.push(x);
     return ls;
   }, [])).filter((x) => x.trim());
-  const ulAplic = (ls) => `<ul class="aplic">${ls.map((x) => `<li>${anoMaisHtml(x)}</li>`).join("")}</ul>`;
+  // item: o texto da linha ou, em "Outros veículos e detalhes", { dono, det } (o veículo em negrito e os detalhes dele)
+  const ulAplic = (ls) => `<ul class="aplic">${ls.map((x) => `<li>${typeof x === "string" ? anoMaisHtml(x) : x.det.length
+    ? `<b class="apl-dono">${anoMaisHtml(x.dono)}</b>: ${x.det.map(anoMaisHtml).join(" · ")}`
+    : anoMaisHtml(x.dono)}</li>`).join("")}</ul>`;
   // "Outros veículos e detalhes" (R-20261120-155900-alexandre, RD-0174 e as revisões do PR #50): abaixo da tabela, só
   // as linhas do texto que a tabela não cobre. A comparação é por veículo: a linha se divide em " / ", na vírgula e no
   // " - " antes de um nome, e depois de um ano seguido de um nome ("Logan 2014> Sandero 2014>"). Cada veículo (sem
@@ -1506,11 +1517,23 @@
   }
   // o que separa um veículo do outro na linha (texto sem acento e em maiúsculas); também na coluna Ano (doModelo)
   const RX_SEP_VEICULO = /\s+\/\s*|\s*\/\s+|\s*,\s*(?=[A-Z])|\s+[–—-]\s+(?=[A-Z])|(?<=(?:19|20)\d{2}(?:>|\/?\.{3})?\)?)\s+(?=[A-Z])(?!(?:ATE|A|AO|EM DIANTE)\b)/;
-  const restoAplicacao = (p, tab) => linhasAplic(p.a).filter((l) => {
-    const vs = chaveApl(l).replace(/^[A-Z][A-Z /&.]{0,30}?\s-\s/, "") // sem a marca do começo do bloco
+  const linhaCoberta = (l, tab) => {
+    const vs = chaveApl(l).replace(RX_MARCA_BLOCO, "") // sem a marca do começo do bloco
       .split(RX_SEP_VEICULO).map((v) => v.replace(/\s+[–—-]\s+/g, " ").trim()).filter(Boolean);
     let antes = null;
-    return !vs.every((v, k) => (antes = cobreVeiculo(v, tab, vs.slice(k + 1).find((x) => faixasDoTexto(x).length), SO_ANO.test(v) ? antes : null)));
+    return vs.every((v, k) => (antes = cobreVeiculo(v, tab, vs.slice(k + 1).find((x) => faixasDoTexto(x).length), SO_ANO.test(v) ? antes : null)));
+  };
+  // B11 (T-0018): o detalhe sem veículo vai no item do veículo de antes, no mesmo bloco (docs/DADOS_DO_SITE.md, "Outros
+  // veículos e detalhes"). A linha é veículo quando é a 1ª do bloco, tem ano ou a tabela a cobre.
+  const restoAplicacao = (p, tab) => String(p.a || "").split(BLOCO_APL).flatMap((bloco) => {
+    const grupos = [];
+    for (const [k, l] of linhasAplic(bloco).entries()) {
+      const coberta = linhaCoberta(l, tab);
+      if (!k || coberta || faixasDoTexto(l).length) grupos.push({ dono: l, coberto: coberta, det: [] });
+      else grupos[grupos.length - 1].det.push(l);
+    }
+    return grupos.filter((g) => !g.coberto || g.det.length)
+      .map((g) => ({ dono: g.coberto ? g.dono.replace(RX_MARCA_BLOCO, "") : g.dono, det: g.det }));
   });
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
@@ -1524,7 +1547,7 @@
     if (p.la) ficha.push(["Lado", titulo(p.la)]);
     if (p.de) ficha.push(["Detalhe", p.de]);
     (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
-    const junto = servemNoVeiculo(listaCodigos(p.oj), VEI_LEVE, p);
+    const junto = servemNoVeiculo(doSistema(listaCodigos(p.oj), p), VEI_LEVE, p);
     const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e, embaixo, "Outros veículos e detalhes" (restoAplicacao);
     // no PDF, o texto inteiro vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")

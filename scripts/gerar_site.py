@@ -209,6 +209,47 @@ def extras_de(texto: str) -> list[list[str]]:
     return itens
 
 
+# "Leve também" pelo sistema da peça (T-0018): fonte única do site (campo sc) e dos PDFs (site_regras). Regra:
+# docs/DADOS_DO_SITE.md, campos sc e ss.
+SIS_COMPAT = {
+    "SUSPENSÃO": ("SUSPENSÃO", "DIREÇÃO"),
+    "DIREÇÃO": ("DIREÇÃO", "SUSPENSÃO"),
+    "TRANSMISSÃO": ("TRANSMISSÃO", "CÂMBIO E DIFERENCIAL", "RODAGEM"),
+    "CÂMBIO E DIFERENCIAL": ("CÂMBIO E DIFERENCIAL", "TRANSMISSÃO"),
+    "RODAGEM": ("RODAGEM", "FREIO"),
+    "FREIO": ("FREIO", "RODAGEM", "QUÍMICOS"),
+    "ARREFECIMENTO": ("ARREFECIMENTO", "MOTOR", "QUÍMICOS"),
+    "MOTOR": ("MOTOR", "ARREFECIMENTO", "FILTRAÇÃO", "ELÉTRICA"),
+    "ELÉTRICA": ("ELÉTRICA", "MOTOR", "LUBRIFICANTES"),
+    "FILTRAÇÃO": ("FILTRAÇÃO", "MOTOR", "LUBRIFICANTES"),
+    "LUBRIFICANTES": ("LUBRIFICANTES", "FILTRAÇÃO", "ELÉTRICA"),
+    "QUÍMICOS": ("QUÍMICOS", "ARREFECIMENTO", "FREIO"),
+}
+# A base põe todo rolamento em RODAGEM (ROL32008, ROL32009); os sistemas dele vêm do texto (sistemas_de). Campo ss:
+# docs/DADOS_DO_SITE.md.
+ROL_SISTEMAS = [
+    (re.compile(r"CAMBIO|DIFERENCIAL|COROA|PINHAO|SATELITE|CAIXA DE (?:MUDANCA|MARCHA)|EIXO (?:PILOTO|PRIMARIO|"
+                r"SECUNDARIO|INTERMEDIARIO)|CONTRA ?EIXO|TRANSMISSAO MANUAL|REDUTOR|TOMADA DE FORCA"), "CÂMBIO E DIFERENCIAL"),
+    (re.compile(r"CARDA|SEMI.?EIXO|EMBREAGEM|MANCAL CENTRAL"), "TRANSMISSÃO"),
+    (re.compile(r"\bRODA|\bCUBO"), "RODAGEM"),
+    (re.compile(r"ALTERNADOR|POLIA|TENSOR|INDUZIDO|ELETROVENTILADOR|COMANDO"), "MOTOR"),
+]
+
+
+def sistema_base(s: str) -> list[str]:
+    return [s.strip().upper()] if s.strip() else []
+
+
+def sistemas_de(produto: str, sistema: str, descricao: str, detalhe: str, posicao: str) -> list[str]:
+    """Sistemas do item para o "Leve também": o SISTEMA da base; no rolamento, os que o texto dele diz (a posicao é o
+    valor da chave POSICAO dos DADOS_ADICIONAIS)."""
+    if produto.strip() != "Rolamentos":
+        return sistema_base(sistema)
+    t = sem_acento(" | ".join(x for x in (descricao, detalhe, posicao) if x)).upper()
+    achou = sorted({nome for rx, nome in ROL_SISTEMAS if rx.search(t)})
+    return achou or sistema_base(sistema)
+
+
 def anos_de(texto: str) -> tuple[int, int] | None:
     ini = re.search(r"ANO_INICIO:\s*(\d{4})", texto)
     fim = re.search(r"ANO_FIM:\s*(\d{4})", texto)
@@ -304,7 +345,8 @@ def ler_base(caminho: Path) -> list[dict]:
         brutos = g(r, "DADOS_ADICIONAIS")
         extras = extras_de(brutos)
         # montadora: lida antes de tirar a chave dos extras
-        mont = montadora_de([[k.strip(), v.strip()] for k, v in (p.split(":", 1) for p in brutos.split("|") if ":" in p)], apl)
+        pares = [[k.strip(), v.strip()] for k, v in (p.split(":", 1) for p in brutos.split("|") if ":" in p)]
+        mont = montadora_de(pares, apl)
         produtos.append({
             "c": cod,
             "d": g(r, "DESCRICAO"),
@@ -323,6 +365,10 @@ def ler_base(caminho: Path) -> list[dict]:
             "de": g(r, "DETALHE_CATALOGO"),
             "oj": g(r, "OFERECA_JUNTO"),
         })
+        p = produtos[-1]
+        ss = sistemas_de(p["p"], p["si"], p["d"], p["de"], dict(pares).get("POSICAO", ""))
+        if ss != sistema_base(p["si"]):
+            p["ss"] = ss
     ve = veiculos_de(wb)
     for p in produtos:
         if p["c"] in ve:
@@ -463,7 +509,7 @@ def main():
     if com_ve:
         print(f"  veículos: {com_ve} produtos com 've' ({sum(len(p['ve']) for p in produtos if 've' in p)} veículos)")
     dados = {"gerado_em": datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"), "fonte": Path(a.base).name,
-             "total": len(produtos), "produtos": produtos}
+             "total": len(produtos), "sc": SIS_COMPAT, "produtos": produtos}
     texto = json.dumps(dados, ensure_ascii=False, separators=(",", ":"))
     # segunda volta: o arquivo inteiro, como vai ser gravado (pelo sem_marca_concorrente)
     m = TRAVA.search(json.dumps(dict(dados, produtos=[sem_marca_concorrente(p) for p in produtos]),
