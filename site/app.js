@@ -1265,8 +1265,8 @@
   // impressa do site (R-20261120-155900-alexandre e R-20261120-160300-alexandre)
   // "Leve também" conforme o veículo da placa ou das listas (R-20261120-181930-alexandre e R-20261120-182200-alexandre):
   // com veículo, fica o item que serve nele pela regra do filtro "Meu veículo" (casaVeiculo), só com a marca, o modelo e
-  // o ano; o item sem "ve", pela aplicação (a marca e o modelo escritos nela, como no JSON antigo). Com veículo, ficam
-  // sempre o item sem aplicação, o UNIVERSAL e o fora do catálogo. Sem veículo, a lista inteira do oj, menos o item UNIVERSAL
+  // o ano; o item sem "ve", pela aplicação (a marca e o modelo escritos nela, como no JSON antigo); ficam sempre o item
+  // sem aplicação, o UNIVERSAL e o fora do catálogo. Sem veículo, a lista inteira do oj, menos o item UNIVERSAL
   // (sem "ve" e com "universal" na aplicação) de outra família (fa) que a do produto aberto (R-20261120-191700-alexandre
   // e R-20261120-192000-alexandre: "sem a placa"); sem nenhum, a seção some. Só na tela. O veículo (VEI_LEVE) é o da
   // lista por baixo da janela ou, na página, o da busca ou do produto de onde se clicou (cartão ou "Leve também"); o
@@ -1417,11 +1417,12 @@
   function tabelaVeiculos(linhas) {
     if (!linhas.length) return "";
     const traco = '<span aria-label="não informado">—</span>';
-    // computador e PDF: a tabela; celular (até 480 px): uma lista por veículo, sem rolar de lado
+    // computador e PDF: a tabela, com o "—" na coluna vazia; celular (até 480 px): uma lista por veículo, sem rolar de
+    // lado, só com o que veio ("Cilindrada 1.6 · Ano 2017–", "Ano 2017–" ou "Cilindrada 1.6"; sem os dois, só o nome)
     return `<div class="tab-rola"><table class="t tab-veiculos"><thead><tr><th scope="col">Marca</th><th scope="col">Modelo</th><th scope="col">Cilindrada</th><th scope="col">Versão</th><th scope="col">Ano</th></tr></thead>
       <tbody>${linhas.map((l) => `<tr>${l.map((c, i) => `<td>${c ? (i === 4 ? anoHtml(c) : esc(c)) : traco}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
       <ul class="lista-veiculos">${linhas.map(([ma, mo, ci, ve, an]) => `<li><b>${esc([ma, mo, ve].filter(Boolean).join(" "))}</b>${ci || an
-        ? `<span>Cilindrada ${ci ? esc(ci) : traco} · Ano ${an ? anoHtml(an) : traco}</span>` : ""}</li>`).join("")}</ul>`;
+        ? `<span>${[ci && `Cilindrada ${esc(ci)}`, an && `Ano ${anoHtml(an)}`].filter(Boolean).join(" · ")}</span>` : ""}</li>`).join("")}</ul>`;
   }
   // Cilindradas do texto, com a válvula quando vem junto ("2.0 L 16V" → "2.0 16V", "1.8 8v" → "1.8 8V"): a coluna
   // Cilindrada da tabela mostra as duas (decisão do gerente sobre o RD-0174)
