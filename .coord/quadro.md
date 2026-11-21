@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 20/11/2026 23:54 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 21/11/2026 15:14 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -20,26 +20,29 @@ Atualizado em 20/11/2026 23:54 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | EM ANDAMENTO (filtros f1 no ar pelo #45 da T-0018; falta o aperto do testes) | #29, #35, #36, #39, #41, #45 |
 | [T-0015](tarefas/T-0015.md) | Três agentes novos: corretor-redundancias, design-de-marca e designer-ux | gerente-projetos | po, revisor-codigo | CONCLUÍDA | #30 |
 | [T-0016](tarefas/T-0016.md) | Guardião com a regra de merge do PO, conferência dos merges pelo GitHub e limpeza do CI e do coord.mjs | alexandre | gerente-projetos, testes, revisor-codigo | EM ANDAMENTO (#34 no main; pacote d na sessão filha) | #34, #48 |
-| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v22 e o JSON dela no ar; v23 e o JSON dela em andamento, com o RD-0212) | #32, #33, #37, #38, #50, #54, #55, #59, #60, #63, #67, #71, #75, #76, #78, #79 |
-| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | EM ANDAMENTO (home, tag, "Leve também" pelo veículo, "AAAA+" e a tarefa C no ar; falta o aperto do testes) | #42, #43, #45, #46, #49, #50, #52, #53, #56, #57, #58, #62, #65, #66, #74 |
-| [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | EM ANDAMENTO (PDFs 2027 com a v21 no main; os da v23 em andamento) | #40, #47, #51, #61, #64, #70, #77 |
+| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v25, a AUTOIMPACT na referência cruzada e os PDFs da v25 no ar; v26 em simulação) | #32, #33, #37, #38, #50, #54, #55, #59, #60, #63, #67, #71, #75, #76, #78, #79, #82, #83, #86, #87, #88, #89, #90 |
+| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | EM ANDAMENTO (home, tag, "Leve também" pelo veículo, "AAAA+", a tarefa C e o RD-0212 no ar; "Leve também" pelo sistema da peça em simulação; falta o aperto do testes) | #42, #43, #45, #46, #49, #50, #52, #53, #56, #57, #58, #62, #65, #66, #74, #81 |
+| [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | EM ANDAMENTO (PDFs 2027 com a v25 e a AUTOIMPACT por último no main; bloco B e "Leve também" pelo sistema da peça em simulação) | #40, #47, #51, #61, #64, #70, #77, #84, #90 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 
 ## Fila
-Rodada aprovada no R-20261120-235000-alexandre ("Faca o quer e publique. Depois pare ate eu mandar retornar"), em paralelo quando os donos são diferentes. Main 6f7b7af (#79).
-- Só nesta rodada, as simulações têm aprovação antecipada, pela recomendação do gerente e do dono, e ficam em `recados/anexos` para o Alexandre ver depois.
-- Limites: nada novo marcado ou escrito como duvidoso; nenhum produto sai do catálogo; nenhuma tela muda de layout; a FICHA e a TRAVA não afrouxam; nada de preço, estoque ou fornecedor.
-- Pergunta que só o Alexandre responde: aquele item para e o resto segue. O merge segue a regra de sempre (testes, revisões LIBERADO, CI verde e a autorização do PO por número e SHA).
+Pendências do R-20261121-190649-alexandre, com o CV-F35 do R-20261121-190933. Main 8de7a6d (#90). Os PRs seguem a regra de sempre (testes, revisões LIBERADO, CI verde e a autorização do PO por número e SHA); as simulações vão ao Alexandre antes de qualquer PR (regra 3).
 
-1. Registros (gerente-projetos): os PRs da tarde e da noite (#34 a #79) e o quadro.
-2. PDFs 2027 com a v23 (catalogo-grafico), T-0019, com o ajuste preventivo do "Gol DE 1999"; uma geração só, depois da v23 (opção permitida pelo R-20261120-235000, "se for mais simples", escolhida pelo gerente).
-3. v23 (catalogo-dados), T-0017: o CRU100 com os dados do LOG da v21, o SCE14002 "1929–19321934" e o FAC6108 "em Diante" sem ano; depois, o JSON do site (web-site).
-4. RD-0212 (web-site), T-0017.
-5. Depois de publicar tudo, o time para: nenhum trabalho novo; o gerente desliga as rondas e a reserva, e o PO desliga as rondas. A volta é só com a palavra do Alexandre ("retornar" ou equivalente). O CV-F35 segue esperando a fonte do ano final.
+1. Bloco A, limpeza (em andamento):
+   - registros dos PRs #80 a #90 e o quadro (gerente-projetos);
+   - CATALOGO.md, com o RD-0253 a RD-0267 (corretor-redundancias);
+   - Bosch do MF21 e arquivos fechados nos PDFs (catalogo-grafico) [SUPOSIÇÃO: os "arquivos fechados" são o ResourceWarning];
+   - peso do CL18, os números da ficha sem resto de ponto flutuante (web-site);
+   - README da v25 [SUPOSIÇÃO: catalogo-dados] e os worktrees [SUPOSIÇÃO: gerente-projetos].
+2. Bloco B, layout (em simulação): espaço inseparável e palavra sozinha; o RD-0252 do SCE14002; a tag NOVO na p. 20 do A4; o "s/ ABS" repetido no AMT7500 do site.
+3. v26 (catalogo-dados), T-0017 (em simulação): o SCE14002 com os modelos LS; a Kia Bongo do CRU100 "2017+"; na VEICULOS, como normais, a Hyundai HR do CRU100, os LS do SCE14002 e a Parati e o Santana do CIL8546; o CV-F35 2010–2013; a "AUTOIMPACT MA21" do MF22 fica; "Mbb", "Vwc" e "New Beetle" padronizados.
+4. "Leve também" pelo sistema da peça, no site (T-0018) e nos PDFs (T-0019) (em simulação), com a contagem do que muda.
+5. Home: o BS10 fica como 8º destaque; nada a fazer.
 
-## Regras novas de hoje
+## Regras novas (20 e 21/11)
 - Merge: o PO autoriza todos os merges, inclusive os de governança, conferindo número, head, arquivos, CI verde e revisão LIBERADO; o gerente executa (R-20261120-111133 e R-20261120-111308-alexandre). As simulações de tela e de PDF continuam indo ao Alexandre.
 - Publicação: o Render publica sozinho a cada merge no `main` (regra 5a, R-20261120-100005-alexandre).
 - Horas nas tarefas: no "Pedido (literal)" vai a hora do chat; no Registro, a hora do recado (`criado_em`) e, nos merges, a do `git log origin/main`. Por isso pode haver 1 minuto de diferença.
 - Rondas do PO e do gerente a cada 30 min; graphify antes de explorar código (R-20261120-203700-alexandre, T-0020).
 - BAP Central: não segura a v19 nem a v20 por enquanto (R-20261120-192100-alexandre).
+- AUTOIMPACT e AMPRI são concorrentes: só na referência cruzada, e a AUTOIMPACT por último, no site e nos PDFs (R-20261121-112900, o "autorizo" do R-20261121-113400 e o R-20261121-154314-alexandre). A SUNRISE continua como fornecedor, barrada em tudo.
