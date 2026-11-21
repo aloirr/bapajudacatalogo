@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0253**.
+O próximo número livre é o **RD-0268**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -116,8 +116,29 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0250 | baixa | doc | catalogo_grafico/LEIA-ME.md:85 | o histórico da rodada dentro do guia | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82; 6d5ac4c, #84) |
 | RD-0251 | baixa | código (docstring de teste) | catalogo_grafico/gerador/teste_fraga_complementos.py | a docstring repetia a regra do "DE" e o comando | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82; 6d5ac4c, #84) |
 | RD-0252 | média | texto (PDF) | A4 p21 e Digital p110, SCE14002: catalogo_grafico/gerador/detalhe.py (aplicar/compacto/_tail), print_cat.py:261 | o subtítulo do cartão repete a aplicação e estica a faixa dos 5 cartões; já existia antes da v23 | T-0019 | catalogo-grafico | ABERTO (Simule; fora da rodada R-20261120-235000-alexandre, que não muda layout) |
+| RD-0253 | baixa | código (teste) | scripts/testar_site.mjs, palavrasInternas e autoimpactForaDaRef | o recorte em volta do achado (`t.slice(m.index - 25 … + 25)`) escrito 2 vezes (vira `trechoEm`) | T-0017 | testes | CORRIGIDO (8eaddab; 366b55c, #86) |
+| RD-0254 | média | código (teste) | scripts/testar_site.mjs, textoDe e autoimpactForaDaRef | 2 varreduras do objeto do produto, cada uma com o seu `andar` (vira `folhas(v, f, onde)`, a única) | T-0017 | testes | CORRIGIDO (8eaddab; 366b55c, #86) |
+| RD-0255 | média | código | scripts/gerar_site.py, FORNECEDOR_RE e CONCORRENTE_RE | a mesma montagem da regex (até 3 sinais entre as letras) escrita 2 vezes (vira `nomes_re(nomes)`; as regex não mudam) | T-0017 | web-site | CORRIGIDO (069a4e6; be7efe8, #87) |
+| RD-0256 | média | código (regra) | scripts/gerar_site.py, refs_de (rótulo e sort) e sem_marca_concorrente | `so_codigo(marca) in CONCORRENTES_SO_NA_REF` em 3 lugares (vira `e_concorrente(marca)`) | T-0017 | web-site | CORRIGIDO (069a4e6; be7efe8, #87) |
+| RD-0257 | baixa | código (comentário) | scripts/gerar_site.py, CONCORRENTES_SO_NA_REF, refs_de e TRAVA | onde o nome do concorrente pode estar, dito em 4 comentários (fica na docstring do `sem_marca_concorrente`; os outros apontam para ela) | T-0017 | web-site | CORRIGIDO (069a4e6; be7efe8, #87) |
+| RD-0258 | baixa | doc | docs/DADOS_DO_SITE.md, seção da TRAVA | a passagem da AUTOIMPACT de fornecedor a concorrente contada de novo no fim do parágrafo (fica 1 vez, com "ver o campo `r`") | T-0017 | web-site | CORRIGIDO (069a4e6; be7efe8, #87) |
+| RD-0259 | baixa | código (comentário) | catalogo_grafico/gerador/digital2.py (trava) e fraga_complementos.py (fim do aplicar) | comentários que ainda diziam que a AUTOIMPACT é fornecedor ("os FORNECEDORES (AUTOIMPACT, SUNRISE)"; "trazem AUTOIMPACT, fornecedor") | T-0017 | catalogo-grafico | CORRIGIDO (9e203da; 8de7a6d, #90) |
+| RD-0260 | média | código | dados/scripts/base_v24.py, aplicar | as linhas novas da VEICULOS (cópia do formato da última linha e filtro estendido) reescritas à mão, igual ao `base_comum.acrescentar_linhas` (sai o `copy`; usa o `acrescentar_linhas`) | T-0017 | catalogo-dados | CORRIGIDO (ab3d6c4; 6819c7b, #88) |
+| RD-0261 | média | código | dados/scripts/base_v24.py e base_v25.py | o cabeçalho da VEICULOS (`COLS_V`, 11 colunas) copiado nos 2 scripts (vira `base_comum.CAB_VEICULOS`) | T-0017 | catalogo-dados | CORRIGIDO (ab3d6c4; 6819c7b, #88) |
+| RD-0262 | baixa | texto (base) | base v24 e v25, aba LEIA-ME (linha Formato) | "A VEICULOS ganha 21 linhas no fim" (v24) e "ganha 1 linha no fim" (v25) repetiam a linha da VEICULOS do mesmo LEIA-ME | T-0017 | catalogo-dados | CORRIGIDO (ab3d6c4; 6819c7b, #88) |
+| RD-0263 | média | doc | dados/simulacoes/T-0017-v24/README.md e T-0017-v25/README.md | o sha256 no título e de novo na Base de partida; a regra fixa e as regras da 2ª rodada (v24) e o pedido literal (v25), que o RESUMO já traz | T-0017 | catalogo-dados | CORRIGIDO (ab3d6c4; 6819c7b, #88) |
+| RD-0264 | baixa | código (docstring) | dados/scripts/base_comum.py, docstring do módulo, ler_antes_depois e acrescentar_linhas | as docstrings contavam de novo o histórico da v24 e da v25 ("na v24, VALIDOS"; "da v25; o base_v24.py fica como rodou") | T-0017 | catalogo-dados | CORRIGIDO (ab3d6c4; 6819c7b, #88) |
+| RD-0265 | média | doc | catalogo_grafico/gerador/LEIA_GERADOR.md, linha do fornecedor e da concorrência | o como funciona da trava (Doc.ref, caixa, TRAVA_PDF_REF, "AUTO IMPACT") repetia o comentário do `digital2.trava_pdf` (fica a regra e onde ela mora) | T-0017 | catalogo-grafico | CORRIGIDO (3aff7e0; 8de7a6d, #90) |
+| RD-0266 | baixa | código | catalogo_grafico/gerador/montar.py, refs_pela_regra e refs_unicas | o `concorrente_por_ultimo` chamado nos 2 (o `refs_unicas` já ordena o que passa pelo `refs_pela_regra`) | T-0017 | catalogo-grafico | MANTIDO (o `site_aplicacoes._refs_antes`, lido pelo `lista_aplicacoes_site.py`, sai do `refs_pela_regra` sem passar pelo `refs_unicas`) |
+| RD-0267 | baixa | código (comentário) | catalogo_grafico/gerador/fraga_complementos.py, fim do aplicar | o comentário repetia a regra da AUTOIMPACT (concorrência, por último), que é do `montar.refs_unicas` | T-0017 | catalogo-grafico | CORRIGIDO (3aff7e0; 8de7a6d, #90) |
 
 ## Notas
+
+### Registros de 21/11/2026, tarde (PRs #86 a #90)
+- O git confirma o número e a correção de cada achado nos commits do dono (8eaddab, 069a4e6, 9e203da, ab3d6c4, 3aff7e0) e nos squashes do main: 366b55c (#86), be7efe8 (#87), 6819c7b (#88) e 8de7a6d (#90). O #89 (45320cf, produtos.json da v25) não teve achado.
+- RD-0259, RD-0265 e RD-0267: corrigidos no PR #90 (T-0017 e T-0019); o RD-0259 é do commit da trava (9e203da), e o RD-0265 e o RD-0267, do 3aff7e0.
+- RD-0266 fica MANTIDO: a ordem dupla protege o `_refs_antes` do `lista_aplicacoes_site.py`, que não passa pelo `refs_unicas` (3aff7e0; LIBERADO "RD-0266 mantido, sem segurar" no R-20261121-185939-po).
+- [SUPOSIÇÃO] Severidades: dos pareceres do corretor-redundancias entregues ao gerente-projetos em 21/11/2026, não versionados; os recados do po (R-20261121-155407, R-20261121-160331, R-20261121-180352 e R-20261121-185939) só citam os números. O texto de cada linha, e a divisão do RD-0260 ao RD-0264 por item, segue o diff da correção (ab3d6c4).
 
 ### Registros de 20/11/2026, noite
 - Do RD-0193 ao RD-0235, os achados vêm dos pareceres dos PRs #54 a #70, sem relatório por PR no Git; a coluna Resumo diz só "achado do parecer do #N" quando o recado não guardou o texto.
