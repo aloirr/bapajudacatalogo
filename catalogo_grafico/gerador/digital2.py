@@ -100,8 +100,8 @@ def sem_viuva(mk):
     """B8 (T-0019): a última palavra não fica sozinha na última linha. Troca por espaço inseparável o último espaço do
     texto (fora das marcas <...>); se a palavra de antes é só um separador ("·", "/", "-"), prende mais um espaço, para a
     última linha não começar com o separador ("1730 · 111693")."""
-    txt = [k for k, t in enumerate(re.split(r'(<[^>]*>)', mk)) if not t.startswith('<')]
     partes = re.split(r'(<[^>]*>)', mk)
+    txt = [k for k, t in enumerate(partes) if not t.startswith('<')]
     pos = [(k, j) for k in txt for j in range(len(partes[k]))]        # cada letra do texto, fora das marcas
     while pos and partes[pos[-1][0]][pos[-1][1]].isspace(): pos.pop()  # sem o espaço do fim
     s = ''.join(partes[k][j] for k, j in pos)
@@ -118,7 +118,7 @@ def sem_viuva(mk):
     return ''.join(partes)
 
 
-def refs_juntas(refs, sep=' · '):
+def refs_juntas(refs):
     """B8 (T-0019): a marca e o código da referência na mesma linha ("Autoimpact PU14", "Cofap GP32986"): o espaço
     entre a marca (1 palavra; 2 nas marcas de 2 nomes, como "Magneti Marelli") e o código vira espaço inseparável. O
     resto continua quebrando como antes (entre as referências e dentro de código com espaço, "3400 700 639")."""
@@ -131,7 +131,7 @@ def refs_juntas(refs, sep=' · '):
         p = x.split(' ')
         if len(p) > n: x = ' '.join(p[:n]) + NBSP + ' '.join(p[n:])
         out.append(x)
-    return sep.join(out)
+    return ' · '.join(out)
 
 
 datas_re = re.compile(r'(?<![\w/])((?:\d{2}/)?' + datas.Y + r')((?:–(?:\d{2}/)?' + datas.Y + r')|–|\+)?(?![\w/])')

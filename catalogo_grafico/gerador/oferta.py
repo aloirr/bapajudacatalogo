@@ -68,13 +68,9 @@ LOG = collections.Counter()
 # A peça oferecida é do mesmo sistema do item ou de um sistema compatível. A tabela (G.SIS_COMPAT: origem -> sistemas
 # aceitos, não simétrica) e a leitura dos sistemas do item (G.sistemas_de: o SISTEMA da base; no rolamento, o que o texto
 # dele diz, como "CÂMBIO E DIFERENCIAL" no ROL32008 e no ROL32009) são as do site, no scripts/gerar_site.py (dono:
-# web-site), sem cópia: o site e os PDFs dão o mesmo "Leve também" (R-20261121-200058-alexandre).
+# web-site), sem cópia (R-20261121-200058-alexandre). Só a regra e a tabela são as mesmas: a lista do site filtra o
+# OFERECA_JUNTO da base; a do PDF é o par calculado por veículo (abaixo), filtrado pela mesma regra.
 _SIS = {}
-SIS_LOG = []          # (item, oferta que saiu, sistemas do item, sistemas da oferta)
-
-
-def _txt(v):
-    return v.strip() if isinstance(v, str) else ''
 
 
 def sistemas(code):
@@ -84,14 +80,9 @@ def sistemas(code):
         import montar as _M, taxo
         b = _M.BASE_D.get(taxo.norm(c))
         _SIS[c] = set() if b is None else set(_G.sistemas_de(
-            _txt(b.PRODUTO), _txt(b.SISTEMA), _txt(b.DESCRICAO), _txt(b.DETALHE_CATALOGO), _posicao(_txt(b.DADOS_ADICIONAIS))))
+            _G.limpar(b.PRODUTO), _G.limpar(b.SISTEMA), _G.limpar(b.DESCRICAO), _G.limpar(b.DETALHE_CATALOGO),
+            dict(_G.pares_de(_G.limpar(b.DADOS_ADICIONAIS))).get("POSICAO", "")))
     return _SIS[c]
-
-
-def _posicao(brutos):
-    """valor da chave POSICAO dos DADOS_ADICIONAIS, lido como no scripts/gerar_site.py (5º argumento do G.sistemas_de)"""
-    pares = [[k.strip(), v.strip()] for k, v in (p.split(":", 1) for p in brutos.split("|") if ":" in p)]
-    return dict(pares).get("POSICAO", "")
 
 
 def sis_ok(origem, oferta):
@@ -120,8 +111,7 @@ def _pares(r, cand, lado=True, maxn=2):
     out = []
     for rb, (mb, eb, vb, yb), bb, (pb, lb, fb) in cand:
         if rb['code'] == r['code']: continue
-        if not sis_ok(r['code'], rb['code']):
-            SIS_LOG.append((r['code'], rb['code'], sorted(sistemas(r['code'])), sorted(sistemas(rb['code'])))); continue
+        if not sis_ok(r['code'], rb['code']): continue
         mi = m & mb
         if not mi: continue
         if ba and bb and not (ba & bb): continue
@@ -188,6 +178,11 @@ def aplicar(fams):
     return LOG
 
 
+def _cod(p):
+    """o código de uma oferta, sem o que vem entre parênteses ("RAD25005P (aditivo)")"""
+    return re.sub(r'\s*\(.*?\)', '', p).strip()
+
+
 def _por_sistema(fams):
     """o par que veio pronto (cross.py, sugestão fixa com código) também segue o sistema: o código de outro sistema
     sai; sem nenhum, fica o traço (o _so_codigo)"""
@@ -198,11 +193,8 @@ def _por_sistema(fams):
             e = r.get('extra')
             if not e or e == '—': continue
             ps = e.split(' · ')
-            fica = [p for p in ps if re.sub(r'\s*\(.*?\)', '', p).strip().upper() not in cods
-                    or sis_ok(r['code'], re.sub(r'\s*\(.*?\)', '', p).strip())]
+            fica = [p for p in ps if _cod(p).upper() not in cods or sis_ok(r['code'], _cod(p))]
             if len(fica) != len(ps):
-                for p in ps:
-                    if p not in fica: SIS_LOG.append((r['code'], p, sorted(sistemas(r['code'])), sorted(sistemas(p))))
                 r['extra'] = ' · '.join(fica) or '—'; LOG[(f['name'], 'fora do sistema')] += 1
 
 
@@ -213,7 +205,7 @@ def _so_codigo(fams):
     """sem item do portfólio para oferecer, fica só o traço (Alexandre, 23/10)"""
     cods = {r['code'].strip().upper() for f in fams for r in f['rows']}
     def tem(e):
-        return any(re.sub(r'\s*\(.*?\)', '', p).strip().upper() in cods for p in e.split(' · ')) or bool(TEM_COD.search(e))
+        return any(_cod(p).upper() in cods for p in e.split(' · ')) or bool(TEM_COD.search(e))
     for f in fams:
         for r in f['rows']:
             e = r.get('extra')

@@ -104,7 +104,6 @@ def _in(k, st):
     return k in st or _sing(k) in {_sing(x) for x in st}
 
 
-TAIL_LOG = []   # B9 (T-0019): (código, o que o _tail deixou de juntar porque a aplicação já mostra)
 # B9: a grafia antiga da montadora que a v26 trocou só na APLICACAO (T-0017: "Mbb" → "MB", "Vwc" → "VW") conta como a
 # mesma palavra; a DESCRICAO ainda tem "MBB" e "VWC" (SCE14002)
 MONT_ANTIGA = {'mbb': 'mb', 'vwc': 'vw'}
@@ -147,7 +146,6 @@ def _tail(code, s, apl=''):
             if sum(1 for i in range(k, j) if na[i]) >= 5: tira.update(range(k, j))
             k = max(j, k + 1)
         if tira:
-            TAIL_LOG.append((code, ' '.join(rest[i] for i in sorted(tira))))
             rest = [t for i, t in enumerate(rest) if i not in tira]
             while rest and not re.search(r'\w', rest[-1]): rest.pop()     # sem "-" sozinho no fim
     rest2 = []
