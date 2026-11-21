@@ -48,7 +48,7 @@ LEIA_ME = [
     ("VEICULOS (FAC6108)", "Eclipse Cross: ANO_INICIO, ANO_FIM e ANO_DUVIDA ficam vazios (o 2009–2012 era o da "
                            "Outlander); o veículo fica sem ano, como a APLICACAO desde a v21 (T-0017)."),
     ("SCE14002", "Nada muda: o '1929–19321934' já tinha virado '1929 · 1932 · 1934' na v21 (T-0017)."),
-    ("Não entram", "Nada novo marcado ou escrito como duvidoso; nenhuma linha nova na VEICULOS."),
+    ("Não entram", "Nenhuma marca nova de ano incerto; nenhuma linha nova na VEICULOS."),
     ("Formato", "Mesmas abas e colunas da v22 (as 5 primeiras da PRODUTOS, que a BAP Central lê, na mesma ordem). 4 "
                 "linhas no LOG_CORRECOES (uma por célula). Aprovação antecipada do Alexandre para esta rodada "
                 "(R-20261120-235000-alexandre)."),
