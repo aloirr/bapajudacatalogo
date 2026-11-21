@@ -30,10 +30,10 @@ Pendências do R-20261121-190649-alexandre, com o CV-F35 do R-20261121-190933. M
 
 1. Bloco A, limpeza (em andamento):
    - registros dos PRs #80 a #90 e o quadro (gerente-projetos);
-   - CATALOGO.md, com o RD-0253 a RD-0267 (corretor-redundancias);
-   - Bosch do MF21 e arquivos fechados nos PDFs (catalogo-grafico) [SUPOSIÇÃO: os "arquivos fechados" são o ResourceWarning];
+   - CATALOGO.md, com o RD-0253 a RD-0267 (corretor-redundancias): no main pelo #91;
+   - Bosch do MF21 e o ResourceWarning do gerador dos PDFs (catalogo-grafico);
    - peso do CL18, os números da ficha sem resto de ponto flutuante (web-site);
-   - README da v25 [SUPOSIÇÃO: catalogo-dados] e os worktrees [SUPOSIÇÃO: gerente-projetos].
+   - README da v25 (catalogo-dados, junto da v26) e os worktrees antigos (gerente-projetos: feito).
 2. Bloco B, layout (em simulação): espaço inseparável e palavra sozinha; o RD-0252 do SCE14002; a tag NOVO na p. 20 do A4; o "s/ ABS" repetido no AMT7500 do site.
 3. v26 (catalogo-dados), T-0017 (em simulação): o SCE14002 com os modelos LS; a Kia Bongo do CRU100 "2017+"; na VEICULOS, como normais, a Hyundai HR do CRU100, os LS do SCE14002 e a Parati e o Santana do CIL8546; o CV-F35 2010–2013; a "AUTOIMPACT MA21" do MF22 fica; "Mbb", "Vwc" e "New Beetle" padronizados.
 4. "Leve também" pelo sistema da peça, no site (T-0018) e nos PDFs (T-0019) (em simulação), com a contagem do que muda.
