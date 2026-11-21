@@ -2,7 +2,6 @@
 
 Pedido: **R-20261120-235000-alexandre**, item 1.3. Nesta rodada houve **aprovação antecipada**: a simulação segue a recomendação do dono e do gerente, sem esperar o "aprovado" de cada ponto.
 - Os limites: nada novo duvidoso, nenhum produto sai, nenhuma coluna muda de formato, nada de preço, estoque ou fornecedor.
-- O antes e o depois de cada célula, a recomendação de cada caso e o que ficou de fora estão no `RESUMO.md`.
 
 Gravada pelo `dados/scripts/base_v23.py` sobre a v22 (sha256 `0c403c37…54ba`). A v23 tem sha256 `05eeb19a…d129`.
 
