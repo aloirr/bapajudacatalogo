@@ -82,6 +82,7 @@ Para atualizar o estoque, troque o `ESTOQUE_BAP.xlsx` pelo arquivo do dia, com a
   - `print_cat.py`: desenho e montagem do catálogo impresso (CMYK, sangria de 3 mm, fotos da pasta `bap`).
 - **Dados de apoio:**
   - `digital_data.json`: dados de todos os itens do catálogo (aplicações completas e equivalências), extraídos do catálogo digital de 13/10.
+    - É entrada fixa (o `parse_digital.py` não roda de novo): a aplicação dos itens que já estavam no catálogo vem daqui, não da base. Correção da base em item antigo precisa ser feita também aqui (T-0019, v23: CRU100, SCE14002 e FAC6108).
   - `parse_digital.py`: refaz esse arquivo a partir de um PDF digital.
 - **Correções em PDF pronto:** `fixpdf.py` e `aplicar_datas.py`. Só para ajuste pontual.
 
