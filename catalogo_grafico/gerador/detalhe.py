@@ -105,6 +105,14 @@ def _in(k, st):
 
 
 TAIL_LOG = []   # B9 (T-0019): (código, o que o _tail deixou de juntar porque a aplicação já mostra)
+# B9: a grafia antiga da montadora que a v26 trocou só na APLICACAO (T-0017: "Mbb" → "MB", "Vwc" → "VW") conta como a
+# mesma palavra; a DESCRICAO ainda tem "MBB" e "VWC" (SCE14002)
+MONT_ANTIGA = {'mbb': 'mb', 'vwc': 'vw'}
+
+
+def _kmont(t):
+    k = _key(t)
+    return MONT_ANTIGA.get(k, k)
 
 
 def _tail(code, s, apl=''):
@@ -128,8 +136,8 @@ def _tail(code, s, apl=''):
     if apl and rest:
         # sai o trecho que repete a aplicação: 5 ou mais palavras seguidas do cadastro que estão todas na aplicação
         # (um sinal solto, como o "-", no meio do trecho vai junto); trecho curto fica ("750MM", "VW", "12V")
-        ak = {_key(t) for t in re.split(r'[\s·;/]+', apl) if _key(t)}
-        na = [(_key(t) in ak) if re.search(r'\w', t) else None for t in rest]
+        ak = {_kmont(t) for t in re.split(r'[\s·;/]+', apl) if _key(t)}
+        na = [(_kmont(t) in ak) if re.search(r'\w', t) else None for t in rest]
         tira, k = set(), 0
         while k < len(rest):
             if not na[k]: k += 1; continue

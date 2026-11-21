@@ -15,6 +15,7 @@ from site_regras import G
 
 SERVO = 'SERVO EMBREAGEM MBB LS 1630 1929 1932 1934 LS1941 VWC 16210 17240 1730 - 111693'   # DESCRICAO do SCE14002 (v25)
 SERVO_APL = 'Servo Embreagem Mbb LS 1630 1929 · 1932 · 1934 LS1941 Vwc 16210 17240 1730 · 111693'
+SERVO_APL_V26 = 'Servo Embreagem MB LS 1630 · LS 1929 · LS 1932 · LS 1934 · LS1941 VW 16210 17240 1730 · 111693'   # v26
 
 
 def linha(code):
@@ -32,6 +33,13 @@ class B9Subtitulo(unittest.TestCase):
         sub = 'Servo embreagem cilindro curto sem indicador…'
         self.assertEqual(self.compacto(SERVO, sub, SERVO_APL), 'Servo embreagem cilindro curto s/ indicador')
         self.assertIn('MBB LS 1630', self.compacto(SERVO, sub, ''))          # sem a aplicação, como antes
+
+    def test_grafia_antiga_da_montadora(self):
+        # v26 (T-0017): a APLICACAO passou a "MB" e "VW"; o "MBB" e o "VWC" da DESCRICAO contam como a mesma palavra
+        sub = 'Servo embreagem cilindro curto sem indicador…'
+        self.assertEqual(self.compacto(SERVO, sub, SERVO_APL_V26), 'Servo embreagem cilindro curto s/ indicador')
+        _, r = linha('SCE14002')
+        self.assertEqual(r['sub'], 'Servo embreagem cilindro curto s/ indicador')   # a linha do catálogo, com a v26
 
     def test_trecho_curto_fica(self):
         out = self.compacto('KIT EMBREAGEM 750MM VW GOL', 'Kit embreagem…', 'VW Gol 1999')

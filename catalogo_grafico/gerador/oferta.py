@@ -84,8 +84,14 @@ def sistemas(code):
         import montar as _M, taxo
         b = _M.BASE_D.get(taxo.norm(c))
         _SIS[c] = set() if b is None else set(_G.sistemas_de(
-            _txt(b.PRODUTO), _txt(b.SISTEMA), _txt(b.DESCRICAO), _txt(b.DETALHE_CATALOGO), _txt(b.DADOS_ADICIONAIS)))
+            _txt(b.PRODUTO), _txt(b.SISTEMA), _txt(b.DESCRICAO), _txt(b.DETALHE_CATALOGO), _posicao(_txt(b.DADOS_ADICIONAIS))))
     return _SIS[c]
+
+
+def _posicao(brutos):
+    """valor da chave POSICAO dos DADOS_ADICIONAIS, lido como no scripts/gerar_site.py (5º argumento do G.sistemas_de)"""
+    pares = [[k.strip(), v.strip()] for k, v in (p.split(":", 1) for p in brutos.split("|") if ":" in p)]
+    return dict(pares).get("POSICAO", "")
 
 
 def sis_ok(origem, oferta):
