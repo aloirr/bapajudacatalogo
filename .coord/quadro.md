@@ -26,7 +26,7 @@ Atualizado em 20/11/2026 21:12 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 
 ## Fila
-Plano A, B, C e D já, em paralelo quando os donos são diferentes (R-20261120-211200-alexandre: "porque para amanha? se voce ja fez o que tinha que fazer?"). Main e1d9f59 no ar desde 21:07; nenhum PR aberto.
+Plano A, B, C e D já, em paralelo quando os donos são diferentes (R-20261120-211200-alexandre: "porque para amanha? se voce ja fez o que tinha que fazer?"). Main e1d9f59 no ar desde 21:07; abertos só os PRs de registros (#72 e #73).
 1. A · registros (gerente-projetos): a noite neste PR (#54, #58 a #67, #69 a #71); a tarde (#34, #45 a #53, #55 a #57) fica pendente.
 2. B · simulação da v21 (catalogo-dados), T-0017: as faixas fechadas com ">"; vai ao Alexandre antes de gravar.
 3. C · ajustes do site (web-site), T-0018: o listaCodigos com "/", a lista Modelo com 1 produto e o código morto.
