@@ -176,16 +176,16 @@ def rotulo(k: str) -> str:
     return k[:1].upper() + k[1:].lower() if (k.isupper() or k.islower()) else k
 
 
-# Número com mais de 3 casas na ficha (resto de ponto flutuante da planilha, "0.12000000000000001" no peso do CL18, T-0017):
-# sai com no máximo 3 casas (meio para cima) e sem zeros à direita ("0.12"). Só quando o valor inteiro é um número com
-# ponto: o "2,7252" no meio de um texto não muda.
-NUMERO_LONGO = re.compile(r"^-?\d+\.\d{4,}$")
+# Resto de ponto flutuante na ficha ("0.12000000000000001" no peso do CL18, T-0017): o número com mais de 6 casas sai com
+# no máximo 6 (meio para cima) e sem zeros à direita ("0.12"). A casa de verdade fica ("0.1265" do BV10 não muda). Só
+# quando o valor inteiro é um número com ponto: o "2,7252" no meio de um texto não muda.
+NUMERO_LONGO = re.compile(r"^-?\d+\.\d{7,}$")
 
 
 def numero_curto(v: str) -> str:
     if not NUMERO_LONGO.match(v):
         return v
-    s = format(Decimal(v).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP), "f").rstrip("0").rstrip(".")
+    s = format(Decimal(v).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP), "f").rstrip("0").rstrip(".")
     return "0" if s in ("-0", "") else s
 
 
