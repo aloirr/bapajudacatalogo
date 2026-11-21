@@ -1389,9 +1389,8 @@
     // docs/DADOS_DO_SITE.md): o trecho vai em pedaços e em entradas (o modelo e os pedaços só de ano depois dele); só
     // entra a entrada pura, sem nada além do que a linha já tem.
     const doModelo = (t, m, ver, cil) => {
-      // só o bloco do modelo: o " ; " (com espaço dos dois lados, como no linhasAplic) começa outro bloco de marca ("WR-V
-      // 1.5 L 16V · 2017 até 2020 ; VW - Spacecross"); o ";" colado separa veículos do mesmo bloco ("X1 2015 2022; X1 2023 →")
-      const ps = norm(t).split(/\s+;\s+/)[0].split(RX_PEDACO_ANO).flatMap((x) => x.split(RX_SEP_VEICULO)).flatMap((x) => x.split(rxMarcaNoMeio()))
+      // só o bloco do modelo (BLOCO_APL: " ; " começa outro bloco de marca, "WR-V 1.5 L 16V · 2017 até 2020 ; VW - Spacecross"); o ";" colado separa veículos do mesmo bloco ("X1 2015 2022; X1 2023 →")
+      const ps = norm(t).split(BLOCO_APL)[0].split(RX_PEDACO_ANO).flatMap((x) => x.split(RX_SEP_VEICULO)).flatMap((x) => x.split(rxMarcaNoMeio()))
         .map((x) => x.trim()).filter(Boolean);
       const lista = /([^·;:|,\/]*)[,\/]\s*$/.exec(up.slice(Math.max(0, inicio.get(m) - 40), inicio.get(m)));
       const emLista = lista && !/\d/.test(lista[1]) && modelos.some((o) => o !== m && rxPalavra(o).test(lista[1])); // outro modelo do ve antes da "," ou "/"
