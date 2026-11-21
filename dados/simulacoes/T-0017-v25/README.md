@@ -1,7 +1,7 @@
-# T-0017 · v25 da base unificada: SIMULAÇÃO (nada gravado)
+# T-0017 · v25 da base unificada: SIMULAÇÃO aprovada (R-20261121-154533-alexandre) e gravada (sha256 `3e6792ef…ab2c`)
 
 Pedido: **R-20261121-112900-alexandre**, item 4: "coloque o palio no amt7500 assim como na internet. Olhe os catalagos unificados antigos para validar".
-- Base de partida: v24 (sha256 `a77de850…04d2`), da branch catalogo-dados/T-0017-v24. A base não foi gravada e não há v25 em `dados/versoes/`.
+- Base de partida: v24 (sha256 `a77de850…04d2`). Gravada pelo `dados/scripts/base_v25.py` sobre a v24, com a cópia em `dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v25.xlsx` (sha256 `3e6792ef…ab2c`).
 - Regra fixa (R-20261120-213300): nada novo marcado nem escrito como duvidoso. Nenhum produto sai.
 
 ## Arquivos

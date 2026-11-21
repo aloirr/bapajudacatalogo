@@ -102,6 +102,21 @@ def acrescentar_log(wb, linhas: list[list]) -> int:
     return ult
 
 
+def acrescentar_linhas(ws, linhas: list[list]) -> dict[tuple[int, int], object]:
+    """Põe as linhas no fim da aba, com o formato da última linha de hoje, e estende o filtro até a nova última linha
+    (da v25; o base_v24.py fica como rodou). Devolve {(linha, coluna): valor}, para o conferir_celulas."""
+    ult, feitas = ws.max_row, {}
+    for i, linha in enumerate(linhas, 1):
+        for c, v in enumerate(linha, 1):
+            cel = ws.cell(ult + i, c)
+            cel.value = v
+            cel._style = copy(ws.cell(ult, c)._style)
+            feitas[(ult + i, c)] = v
+    if ws.auto_filter.ref:
+        ws.auto_filter.ref = re.sub(r"\d+$", str(ws.max_row), ws.auto_filter.ref)
+    return feitas
+
+
 def acrescentar_leia_me(wb, linhas: list[tuple]) -> int:
     """Põe as linhas no topo do LEIA-ME, como da v15 à v18 (nada sai; as antigas descem com a altura).
 
