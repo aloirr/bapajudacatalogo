@@ -98,7 +98,6 @@
       return { desc, apl };
     });
     // Códigos de uma referência (T-0011, B2): só o que tem cara de código, nunca palavra de aplicação.
-    // - Nakata dos kits KHC traz a aplicação inteira depois de "APLICAÇÃO REVISADA": dali em diante não é código.
     // - Pedaços separados por / ; , | = ( ) e "OU"; o rótulo antes de ":" sai ("Cofap: KJH04202" → KJH04202).
     // - O pedaço inteiro vira um código só se tem número e cada palavra tem número ou é sigla de até 4 letras que
     //   não é veículo ("NJH07 5123" → NJH075123, "BTC 39115", "6309 2RS C3"; "Corsa 1.0" não vira CORSA10).
@@ -106,7 +105,7 @@
     //   16V e 4X4 não são código).
     const partes = (x) => {
       const out = [];
-      for (let pd of String(x.c || "").split(/APLICA[ÇC][ÃA]O/i)[0].split(/[\/;,|=()\n]| OU /i)) {
+      for (let pd of String(x.c || "").split(/[\/;,|=()\n]| OU /i)) {
         const ws = norm(pd.replace(/^.*:/, "")).split(" ").filter((w) => normCod(w));
         if (!ws.length || !ws.some((w) => /\d/.test(w))) continue;
         if (ws.every((w) => /\d/.test(w) || (normCod(w).length <= 4 && !ehVeiculo(normCod(w))))) out.push(normCod(ws.join("")));
@@ -1144,7 +1143,7 @@
     const top = (m, n) => [...m.entries()].filter(([x, q]) => q > 0 || x === v.vm || x === v.vmo).sort((a, b) => b[1] - a[1]).slice(0, n);
     return {
       vm: top(marcas, 60).sort((a, b) => a[0].localeCompare(b[0])),
-      vmo: top(modelos, 80).filter(([x, q]) => q >= 2 || x === v.vmo).sort((a, b) => a[0].localeCompare(b[0])), // JSON antigo: tira o que aparece 1 vez só
+      vmo: top(modelos, 80).filter(([x, q]) => TEM_VE || q >= 2 || x === v.vmo).sort((a, b) => a[0].localeCompare(b[0])), // só no JSON antigo (modelo lido da aplicação) sai o que aparece 1 vez; com o "ve", fica (T-0018: com 1 produto, a lista ficava vazia)
       va: [...anos.entries()].filter(([x, q]) => q > 0 || x === v.va).sort((a, b) => b[0] - a[0]),
       vmt: [...motores.entries()].filter(([x, q]) => q > 0 || x === v.vmt).sort((a, b) => a[0].localeCompare(b[0])),
       vv: [...versoes.entries()].filter(([x, q]) => q > 0 || x === v.vv).sort((a, b) => a[0].localeCompare(b[0])),
@@ -1256,15 +1255,28 @@
   }
 
   // códigos de "Leve também" (campo oj): os do catálogo e os que têm cara de código (letra e número),
-  // sem repetir; as observações soltas ("s/ ar", "c/ ar") ficam fora
+  // sem repetir; as observações soltas ("s/ ar", "c/ ar") ficam fora. O código do catálogo com "/" ou espaço
+  // ("ROL39590/39520", "90/90-18 57P V250R") fica inteiro (T-0018); o resto se divide também no "/" e no espaço.
+  let COD_COMPOSTO = null; // os códigos do catálogo com "/" ou espaço, em maiúsculas, do mais longo ao mais curto
   function listaCodigos(txt) {
-    const vistos = new Set();
-    return String(txt || "").split(/\s*[·,;/|]\s*|\s+/).map((c) => c.trim()).filter((c) => {
+    COD_COMPOSTO = COD_COMPOSTO || BASE.produtos.map((p) => String(p.c).toUpperCase()).filter((c) => /[\/\s]/.test(c)).sort((x, y) => y.length - x.length);
+    const vistos = new Set(), out = [];
+    const pegar = (c) => {
       const k = normCod(c);
-      if (!k || vistos.has(k) || !(POR_COD.has(k) || (k.length >= 4 && /[A-Z]/.test(k) && /\d/.test(k)))) return false;
+      if (!k || vistos.has(k) || !(POR_COD.has(k) || (k.length >= 4 && /[A-Z]/.test(k) && /\d/.test(k)))) return;
       vistos.add(k);
-      return true;
-    });
+      out.push(c);
+    };
+    for (const pd of String(txt || "").split(/\s*[·,;|]\s*/)) {
+      const up = pd.toUpperCase();
+      let fim = 0;
+      for (const m of pd.matchAll(/[^\s\/]+/g)) {
+        if (m.index < fim) continue; // ainda dentro do código inteiro de antes
+        const c = COD_COMPOSTO.find((x) => up.startsWith(x, m.index) && !/[A-Z0-9]/.test(up.charAt(m.index + x.length)));
+        if (c) { pegar(pd.substr(m.index, c.length)); fim = m.index + c.length; } else pegar(m[0]);
+      }
+    }
+    return out;
   }
   // cada item (opção B, R-20261120-140600): a miniatura da foto (até 48 px), o código em negrito e a descrição (d) do
   // catálogo, num cartão que abre o produto (R-20261120-132000 e 132200); fora do catálogo: o código e a nota
@@ -1456,7 +1468,7 @@
   // antes do RX_ANO_ABERTO, que também usa.
   const FAIXA_APL = String.raw`${ANO_APL}(?:\s*(?:at[ée]|a|–|-)\s*${ANO_APL})?(?:\s*(?:>|→|em diante|at[ée]))?`;
   const SO_ANO = new RegExp(String.raw`^(?:\(?(?:[-–]\s*|at[ée]\s+)?${FAIXA_APL}(?:\s*\/\s*${FAIXA_APL})?\)?|${ANO_APL}(?:\s*,\s*${ANO_APL})+)$`, "i");
-  const RX_ANO = new RegExp(String.raw`(?<!\d)(?:\d{2}\/){0,2}((?:19|20)\d{2})(?!\d)`, "g");
+  const RX_ANO = new RegExp(String.raw`(?<!\d)${ANO_APL}(?<=(\d{4}))(?!\d)`, "g"); // o ANO_APL termina no ano de 4 dígitos: o grupo 1
   // Linhas da lista da aplicação (T-0017, R-20261120-153900): cada " ; " (bloco de marca) começa linha nova e, dentro do
   // bloco, cada " · " também; o pedaço só de ano fica na linha do veículo de antes ("BMW - X1 2.0 L 16V · 2011 até
   // 2014"). Só a tela: a busca continua lendo o p.a inteiro.
