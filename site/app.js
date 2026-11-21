@@ -51,10 +51,13 @@
   // o texto da base.
   const RX_ANO_ABERTO = /(?<![\d\/])((?:\d{2}\/){0,2}(?:19|20)\d{2})(?:\s*-?>+|\s*→|\s+em\s+diante\b|–)(?!\s*\d)/gi;
   const ANO_MAIS = '<span aria-hidden="true">+</span><span class="vh"> em diante</span>';
+  // o ano colado ao nome seguinte ("2001>GM: Equipa", "2014>Seat") ganha um espaço depois do "+": "2001+ GM: Equipa"
+  const espacoDepois = (t, i) => (/[\p{L}(]/u.test(t.charAt(i)) ? " " : "");
   const anoMaisHtml = (s) => { const t = String(s == null ? "" : s); let h = "", k = 0;
-    for (const m of t.matchAll(RX_ANO_ABERTO)) { h += esc(t.slice(k, m.index)) + esc(m[1]) + ANO_MAIS; k = m.index + m[0].length; }
+    for (const m of t.matchAll(RX_ANO_ABERTO)) { h += esc(t.slice(k, m.index)) + esc(m[1]) + ANO_MAIS; k = m.index + m[0].length; h += espacoDepois(t, k); }
     return h + esc(t.slice(k)); };
-  const anoMaisTxt = (s, fim = "+") => String(s == null ? "" : s).replace(RX_ANO_ABERTO, (_, ano) => ano + fim); // o title e o título da aba ("+"); o alt (" em diante")
+  const anoMaisTxt = (s, fim = "+") => String(s == null ? "" : s) // o title e o título da aba ("+"); o alt (" em diante")
+    .replace(RX_ANO_ABERTO, (x, ano, i, t) => ano + fim + espacoDepois(t, i + x.length));
   const MINUSC = new Set(["e", "de", "da", "do", "das", "dos", "com", "sem", "para", "p/", "c/", "s/"]);
   const titulo = (s) => bonito(s); // um nome sem caixa alta só (bonito, mais abaixo)
   const fmt = (n) => Number(n).toLocaleString("pt-BR");
