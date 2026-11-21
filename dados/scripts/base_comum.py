@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import collections
 import hashlib
+import re
 import shutil
 import sys
 import tempfile
@@ -81,7 +82,8 @@ def linhas_novas(wb, log_ult: int, leia_n: int) -> dict[str, list[tuple]]:
 
 
 def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rotulo: str,
-             colunas_novas: dict[str, list[str]] | None = None, leia_n: int = 0) -> list[str]:
+             colunas_novas: dict[str, list[str]] | None = None, leia_n: int = 0,
+             removidas: dict[str, set[int]] | None = None) -> list[str]:
     """Diferenças entre a base nova e a versão anterior fora das permitidas. Lista vazia = só o que a tarefa pede.
 
     celulas: {aba: {(linha, coluna), ...}} que TÊM de mudar de valor (a formatação delas não pode mudar).
@@ -89,8 +91,11 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
     colunas_novas: {aba: [nomes]} das colunas acrescentadas no fim da aba (regra 6). O cabeçalho delas tem de ser
     esses nomes; fora das células permitidas, ficam vazias; a formatação, a largura e o filtro delas são novos.
     leia_n: linhas novas no topo do LEIA-ME (as antigas descem leia_n linhas).
+    removidas: {aba: {linhas da versão anterior que saem}} (da v21); as de baixo sobem, e o filtro termina na nova
+    última linha. As células de celulas ficam na numeração da versão anterior.
     """
     colunas_novas = colunas_novas or {}
+    removidas = removidas or {}
     a, b = openpyxl.load_workbook(novo), openpyxl.load_workbook(velho)
     if a.sheetnames != b.sheetnames:
         return [f"abas: {a.sheetnames} x {b.sheetnames}"]
@@ -103,6 +108,8 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
         if nome == "LEIA-ME" and leia_n:
             desloc, extra = leia_n, set(range(1, leia_n + 1))
         pode = celulas.get(nome, set())
+        fora = removidas.get(nome, set())
+        sobe = (lambda r, f=tuple(sorted(fora)): r - sum(x < r for x in f)) if fora else (lambda r: r)
         novas = colunas_novas.get(nome, [])
         mc = wb_.max_column                  # guardado: ler wb_.cell() além dele aumenta o max_column
         ncol = mc + len(novas)
@@ -111,25 +118,29 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
             dif.append(f"{nome}: colunas {wa.max_column} x {mc} + {len(novas)}")
         if [c.value for c in wa[1 + desloc]] != [c.value for c in wb_[1]] + novas:
             dif.append(f"{nome}: cabeçalho mudou")
-        if wa.max_row != wb_.max_row + len(extra):
-            dif.append(f"{nome}: linhas {wa.max_row} x {wb_.max_row} + {len(extra)}")
+        if wa.max_row != wb_.max_row + len(extra) - len(fora):
+            dif.append(f"{nome}: linhas {wa.max_row} x {wb_.max_row} + {len(extra)} - {len(fora)}")
         if wa.freeze_panes != wb_.freeze_panes:
             dif.append(f"{nome}: freeze_panes")
         filtro = wb_.auto_filter.ref
         if novas and filtro:
             filtro = filtro.replace(get_column_letter(mc), get_column_letter(ncol))
+        if fora and filtro:
+            filtro = re.sub(r"\d+$", lambda m: str(sobe(int(m.group(0)) + 1) - 1), filtro)
         if wa.auto_filter.ref != filtro:
             dif.append(f"{nome}: auto_filter")
         if ({k: d.width for k, d in wa.column_dimensions.items() if k not in letras_novas}
                 != {k: d.width for k, d in wb_.column_dimensions.items()}):
             dif.append(f"{nome}: larguras de coluna")
         ha = {r: d.height for r, d in wa.row_dimensions.items() if d.height and r not in extra}
-        hb = {r + desloc: d.height for r, d in wb_.row_dimensions.items() if d.height}
+        hb = {sobe(r) + desloc: d.height for r, d in wb_.row_dimensions.items() if d.height and r not in fora}
         if ha != hb:
             dif.append(f"{nome}: alturas de linha")
         for r in range(1, wb_.max_row + 1):
+            if r in fora:
+                continue
             for c in range(1, ncol + 1):
-                ca, cb = wa.cell(r + desloc, c), wb_.cell(r, c)
+                ca, cb = wa.cell(sobe(r) + desloc, c), wb_.cell(r, c)
                 conta[nome] += 1
                 if c > mc:                             # coluna nova: só as células permitidas têm valor
                     if (r, c) in pode:
@@ -163,7 +174,7 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
 
 
 def rodar(anterior: int, nova: int, ler, aplicar, conferir_extra=None,
-          colunas_novas: dict[str, list[str]] | None = None) -> None:
+          colunas_novas: dict[str, list[str]] | None = None, removidas: dict[str, set[int]] | None = None) -> None:
     """O main() de cada base_vNN.py (RD-0217): grava a v<nova> a partir da v<anterior>, ou, com --conferir, só compara.
 
     ler() -> dados da simulação aprovada; aplicar(wb, dados) -> (celulas, log_ult, leia_n, extra), como em comparar();
@@ -177,7 +188,7 @@ def rodar(anterior: int, nova: int, ler, aplicar, conferir_extra=None,
     dados = ler()
 
     def diferencas(p: Path, wb, celulas, ult, leia_n, extra) -> list[str]:
-        dif = comparar(p, va, celulas, ult, f"v{anterior}", colunas_novas, leia_n)
+        dif = comparar(p, va, celulas, ult, f"v{anterior}", colunas_novas, leia_n, removidas)
         esperado, achado = linhas_novas(wb, ult, leia_n), linhas_novas(openpyxl.load_workbook(p), ult, leia_n)
         for aba in esperado:
             if achado[aba] != esperado[aba]:
