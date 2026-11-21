@@ -155,6 +155,9 @@ def section_title(dc, y, s):
 # ---------------------------------------------------------------- página de linha
 APP_FS, APP_LD = 9.4, 12.6
 CARD_FS = 8.2
+SB_Y = 7 + 16.5 + 2          # cartão de destaque: tags e subtítulo começam aqui, abaixo do código
+SB_FS, SB_LH = 7.4, 9.6      # subtítulo do cartão (Poppins Medium)
+TAG_LINHAS = 2               # linhas de tags no cartão
 
 
 import json as _json
@@ -249,6 +252,15 @@ def cards(dc, f, top, y):
         r['_card_cut'] = t                    # aplicação cortada no destaque: o digital repete o item na tabela
         apps.append(m)
     ah = max(para_h(m, CARD_FS, CARD_FS * 1.34, tw) for m in apps)
+    import tags as TG
+    tsb = []                              # (tags, altura das tags, subtítulo já em markup ou None)
+    for r in top:
+        tl, sb = TG.do_item(f['name'], r, f['spec'])
+        hh = TG.altura(lw, tl, tw, max_linhas=TAG_LINHAS) if tl else 0
+        tsb.append((tl, hh, html.escape(D2.datas.para_pdf(sb)) if sb and hh < 12 else None))
+    # subtítulo comprido (SCE14002, 4 linhas): a faixa do código cresce em todos os cartões e não encosta na aplicação
+    extra = max([0] + [SB_Y + hh + 1 + para_h(sm, SB_FS, SB_LH, tw, 'PM') + 4 - fixed_code for tl, hh, sm in tsb if sm])
+    fixed_code += extra
     ch = PH + fixed_code + 1 + 6 + ah + 6 + 1 + 5 + rh + 6
     for k, (r, m, rf) in enumerate(zip(top, apps, refsl)):
         x = MX + k * (cw + gap)
@@ -262,10 +274,9 @@ def cards(dc, f, top, y):
         while cs > 9 and lw(r['code'], cs, 'PB') > tw - (40 if r.get('nov') else 0): cs -= .5
         dc.label(x + 9, yc + 7 + (15 - cs) * .6, r['code'], cs, 'black', 'PB')
         if r.get('nov'): dc.tag(x + cw - 9 - 36, yc + 9, 'NOVO', 6.8, 'otag', 'otext', 4)
-        import tags as TG
-        tl, sb = TG.do_item(f['name'], r, f['spec'])
-        hh = TG.desenhar(dc, lw, x + 9, yc + 7 + 16.5 + 2, tl, tw, max_linhas=2) if tl else 0
-        if sb and hh < 12: dc.text(x + 9, yc + 7 + 16.5 + 2 + hh + 1, tw, html.escape(D2.datas.para_pdf(sb)), 7.4, 9.6, 'gtext', 'PM')
+        tl, hh, sm = tsb[k]
+        if tl: TG.desenhar(dc, lw, x + 9, yc + SB_Y, tl, tw, max_linhas=TAG_LINHAS)
+        if sm: dc.text(x + 9, yc + SB_Y + hh + 1, tw, sm, SB_FS, SB_LH, 'gtext', 'PM')
         yb = yc + fixed_code
         dc.rect(x, yb, cw, 1, fill='line2')
         dc.text(x + 9, yb + 1 + 6, tw, m, CARD_FS, CARD_FS * 1.34, 'ink')

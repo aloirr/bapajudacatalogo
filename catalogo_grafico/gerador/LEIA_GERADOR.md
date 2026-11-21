@@ -47,7 +47,7 @@ Versão de 12/11/2026 (atualizada pelo PC EMPRESA; antes 27/10 pelo PC PESSOAL).
 `https://catalogobap.catalogofraga.com.br` → aba CÓDIGO DA PEÇA → Buscar → Ver detalhes: Aplicação Detalhada (montadora, veículo, versão, motor, anos) e Produtos Similares (Tecfil). A nuvem do Cowork não acessa (proxy); usar o navegador do app. Novo código achado lá: acrescentar em `entradas/aplicacoes_site_bap.json` no mesmo formato (`{código: [ref, "MONTADORA§Modelo motor · anos · ...¦MONTADORA§..."]}`).
 
 ## Rodapé (27/10)
-Páginas internas dos três catálogos: esquerda "www.bapautoparts.com.br · @bapautoparts", centro o nº da página, direita "Verifique a disponibilidade e estoque de sua região." (`digital2.OBS_DISP`); embaixo o aviso de uso interno. Capa e contracapa sem a observação.
+Páginas internas dos três catálogos: esquerda "www.bapautoparts.com.br · @bapautoparts", centro o nº da página, direita "Consulte a disponibilidade na sua região." (`digital2.OBS_DISP`, R-20261120-212000-alexandre); embaixo o aviso de uso interno. Capa e contracapa sem a observação.
 
 ## Regra de sintonia
 Mudou um script: gravar a versão nova **aqui** (mesmo nome) e no OneDrive `catalogo_bap\gerador\`, e anotar no Registro do `agente_catalogo_bap.md` com o nome da conversa.
