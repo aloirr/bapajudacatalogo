@@ -112,9 +112,9 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0246 | baixa | doc | dados/simulacoes/T-0017-v23/RESUMO.md | o trecho da Kia dito 2 vezes | T-0017 | catalogo-dados | CORRIGIDO (84b9e6f; 2945a37, #82) |
 | RD-0247 | média | código | dados/scripts/base_v23.py | `vazio`, `conferir_valores` e a leitura da ANTES_DEPOIS copiados da v22 (vão para o base_comum) | T-0017 | catalogo-dados | CORRIGIDO (2165c8c; 2945a37, #82) |
 | RD-0248 | baixa | texto (base) | base v23, aba LEIA-ME | a linha "SCE14002: nada muda" à parte; o LEIA-ME ficou +6 | T-0017 | catalogo-dados | CORRIGIDO (2165c8c; 2945a37, #82) |
-| RD-0249 | média | doc | catalogo_grafico/simulacoes/T-0019-pdf-v23/README.md | o antes e o depois repetidos, a Linha Moto 2 vezes e "Nenhum script mudou" contra o 2fe2940 | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82, #84) |
-| RD-0250 | baixa | doc | catalogo_grafico/LEIA-ME.md:85 | o histórico da rodada dentro do guia | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82, #84) |
-| RD-0251 | baixa | código (docstring de teste) | catalogo_grafico/gerador/teste_fraga_complementos.py | a docstring repetia a regra do "DE" e o comando | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82, #84) |
+| RD-0249 | média | doc | catalogo_grafico/simulacoes/T-0019-pdf-v23/README.md | o antes e o depois repetidos, a Linha Moto 2 vezes e "Nenhum script mudou" contra o 2fe2940 | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82; 6d5ac4c, #84) |
+| RD-0250 | baixa | doc | catalogo_grafico/LEIA-ME.md:85 | o histórico da rodada dentro do guia | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82; 6d5ac4c, #84) |
+| RD-0251 | baixa | código (docstring de teste) | catalogo_grafico/gerador/teste_fraga_complementos.py | a docstring repetia a regra do "DE" e o comando | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82; 6d5ac4c, #84) |
 | RD-0252 | média | texto (PDF) | A4 p21 e Digital p110, SCE14002 (detalhe.essencial; catalogo_grafico/gerador/print_cat.py:261) | o subtítulo do cartão repete a aplicação e estica a faixa dos 5 cartões; já existia antes da v23 | T-0019 | catalogo-grafico | ABERTO (Simule; fora da rodada R-20261120-235000-alexandre, que não muda layout) |
 
 ## Notas
@@ -127,7 +127,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - RD-0212: fechado pelo #81 (f4636ec). O achado era do parecer do PR #58 (T-0018); a linha antiga dizia T-0017 e "PRs #54 a #59".
 - RD-0239 a RD-0244: o git confirma o número, o arquivo e a correção em cada commit (117c2b0, e1e185d, f87ed94, 9f9dbfc), e os squashes 92170da (#75), 7f063a9 (#77) e bfad64e (#78) têm o mesmo conteúdo dos heads aprovados. [SUPOSIÇÃO] A severidade não ficou no git nem nos recados; fica "—".
 - RD-0245 a RD-0248: corrigidos antes do merge do #82 (LIBERADO no fb3f533, R-20261121-010800-po).
-- RD-0249 a RD-0252: o PR #84 (head 1aa3f82) ainda está aberto; os CORRIGIDO valem pelo commit da branch até o merge. Na reconferência dos PDFs, a numeração do RD-0249 ao RD-0251 saiu trocada; vale a do parecer original, a desta tabela.
+- RD-0249 a RD-0252: na reconferência dos PDFs, a numeração do RD-0249 ao RD-0251 saiu trocada; vale a do parecer original, a desta tabela.
 - RD-0252 mexe no layout do PDF: é "Simule" (o catalogo-grafico mostra antes, e a simulação vai ao Alexandre pelo po).
 
 ### Renumerações (20/11/2026)
