@@ -26,7 +26,7 @@ from pathlib import Path
 import openpyxl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from base_comum import RAIZ, acrescentar_leia_me, acrescentar_log, limpo, parar, rodar, subir  # noqa: E402
+from base_comum import RAIZ, acrescentar_leia_me, acrescentar_log, limpo, parar, rodar  # noqa: E402
 
 SIM = RAIZ / "dados" / "simulacoes" / "T-0017-v22" / "SIMULACAO_v22_T-0017.xlsx"
 TAREFA, DATA = "T-0017", "21/11/2026"
@@ -34,7 +34,6 @@ APROVACAO = "R-20261120-223000-alexandre ('Siga recomendação do gerente': P1 =
 CAB = ["CODIGO_BAP", "ABA", "LINHA", "COLUNA", "FABRICANTE", "MODELO", "VERSAO", "ANO_INICIO_HOJE", "ANTES", "DEPOIS",
        "FORMA", "PROVA_NA_APLICACAO", "SITUACAO", "ENTRA"]
 ESPERADO = {"sim": 23, "só com P1 = a": 4, "só com P2 = a": 3}
-SEM_REMOVIDAS: set[int] = set()
 
 LEIA_ME = [
     ("BASE BAP UNIFICADA v22 (21/11/2026)", None),
@@ -142,14 +141,14 @@ def aplicar(wb, linhas):
 
 
 def conferir_valores(p: Path, extra) -> list[str]:
-    """Na base gravada, cada célula tem o valor da gravação (nenhuma linha saiu: subir() devolve a mesma linha)."""
+    """Na base gravada, cada célula tem o valor da gravação."""
     fp, fv = extra
     wb = openpyxl.load_workbook(p, read_only=False)
     dif = []
     for aba, feitas in (("PRODUTOS", fp), ("VEICULOS", fv)):
         ws = wb[aba]
-        dif += [f"{aba} {ws.cell(subir(n, SEM_REMOVIDAS), c).coordinate}: valor diferente do da gravação"
-                for (n, c), v in feitas.items() if ws.cell(subir(n, SEM_REMOVIDAS), c).value != v]
+        dif += [f"{aba} {ws.cell(n, c).coordinate}: valor diferente do da gravação"
+                for (n, c), v in feitas.items() if ws.cell(n, c).value != v]
     return dif
 
 
