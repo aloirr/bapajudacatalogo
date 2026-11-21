@@ -35,12 +35,14 @@ def segs_de(apl):
 
 def _norm(s):
     """texto para comparar: as datas como no PDF (datas.para_pdf: "1993-1995" e "1993>1995" = "1993–1995", "2015 em Diante"
-    = "2015+"), sem acento, maiúsculo, só palavras, números e "+", sem o "DE" antes do ano ("DE 1999–2002" = "1999–2002")
-    e sem o "até" entre dois anos ("1993 até 1995" = "1993–1995"). O "até" sem ano antes (">1994" e "até 1995") fica como
-    o marcador "ATE": "Gol >1994" e "Gol até 1995" não são "Gol 1994" e "Gol 1995" (T-0019)."""
+    = "2015+"), sem acento, maiúsculo, só palavras, números e "+", sem o "DE" antes do ano ("DE 1999–2002" = "1999–2002";
+    também colado: "Gol DE1999" = "Gol 1999", T-0019) e sem o "até" entre dois anos ("1993 até 1995" = "1993–1995"). O
+    "DE" fora dessa posição fica ("Gol DE LUXE 1999", "Gol 1999 DE"). O "até" sem ano antes (">1994" e "até 1995") fica
+    como o marcador "ATE": "Gol >1994" e "Gol até 1995" não são "Gol 1994" e "Gol 1995" (T-0019)."""
     import unicodedata
     s = datas.para_pdf(s)
     s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').upper()
+    s = re.sub(r'\bDE(?=' + datas.Y + r'(?!\d))', 'DE ', s)   # "DE1999" = "DE 1999"
     t = re.findall(r'[A-Z0-9]+|\+|>', s)
     eano = lambda k: 0 <= k < len(t) and re.fullmatch(datas.Y, t[k])
     t = ['ATE' if x == '>' else x for k, x in enumerate(t) if x != '>' or eano(k + 1)]   # ">1994" = "até 1994"
