@@ -87,9 +87,6 @@ const cortar = (s, n = 70) => { s = String(s ?? "").replace(/\s+/g, " ").trim();
 // como separador, para "CUSTO_COMPRA" também ser pego.
 // "custo" só como palavra inteira (decisão 5a do Alexandre, recado R-20261120-093235-alexandre: "Custom" não conta).
 // [SUPOSIÇÃO] o plural "custos" conta como a mesma palavra. As outras palavras valem em qualquer lugar do texto.
-// Nome com até 3 sinais (espaço, hífen, ponto, "_"...) entre cada letra, como o FORNECEDOR_RE da TRAVA do gerar_site.py
-// ("AUTO.IMPACT", "Sun-Rise"). Recebe o nome em maiúsculas; o texto já vem sem acento e em maiúsculas.
-const comSinais = (nome) => new RegExp([...nome].join("[\\W_]{0,3}"));
 const PALAVRAS = [
   ["estoque", /ESTOQUE/],
   ["preço", /PRECO/],
@@ -103,56 +100,62 @@ const PALAVRAS = [
   ["LINHA_ORIGEM", /LINHA[_ ]?ORIGEM/],
   ["OBS_INTERNA", /OBS[_ ]?INTERNA/],
   ["R$", /R\s?\$/],
-  ["SUNRISE", comSinais("SUNRISE")], // fornecedor (T-0019): em qualquer lugar é falha
 ];
-// Texto de um produto para a varredura: as chaves e os valores JÁ DECODIFICADOS, percorrendo o objeto. Não use o
-// JSON.stringify: nele a quebra de linha vira os caracteres "\n", colados na palavra seguinte ("\nCUSTO" escaparia
-// da fronteira de palavra). Cada valor fica separado por " | ".
+// Nome com até 3 sinais (espaço, hífen, ponto, "_"...) entre cada letra, como o FORNECEDOR_RE da TRAVA do gerar_site.py
+// ("AUTO.IMPACT", "Sun-Rise"). Recebe o nome em maiúsculas; o texto já vem sem acento e em maiúsculas.
+// Os nomes com sinais são conferidos TEXTO POR TEXTO (folhas), nunca no textoDe: o " | " entre os campos são 3 sinais
+// e juntaria "SUN" de um campo com "RISE" do seguinte.
+const comSinais = (nome) => new RegExp([...nome].join("[\\W_]{0,3}"));
+// SUNRISE: fornecedor (T-0019), falha em qualquer lugar do JSON (chave ou valor, r[].m também)
+const PALAVRAS_SINAIS = [["SUNRISE", comSinais("SUNRISE")]];
+// o trecho em volta do achado (m = resultado do match)
+const trechoEm = (t, m) => cortar(t.slice(Math.max(0, m.index - 25), m.index + m[0].length + 25), 80);
+// Cada texto do objeto, com o lugar: f(onde, texto) para cada chave ("r[0].m (chave)") e cada valor ("r[0].m"), já
+// decodificados. Não use o JSON.stringify: nele a quebra de linha vira os caracteres "\n", colados na palavra seguinte
+// ("\nCUSTO" escaparia da fronteira de palavra).
+function folhas(v, f, onde = "") {
+  if (v == null) return;
+  if (Array.isArray(v)) return v.forEach((y, i) => folhas(y, f, `${onde}[${i}]`));
+  if (typeof v === "object") { for (const [k, y] of Object.entries(v)) { const aqui = onde ? `${onde}.${k}` : k; f(aqui + " (chave)", k); folhas(y, f, aqui); } return; }
+  f(onde || "(valor)", String(v));
+}
+// Texto de um produto para a varredura da PALAVRAS: as chaves e os valores, separados por " | ".
 function textoDe(v) {
   const partes = [];
-  (function andar(x) {
-    if (x == null) return;
-    if (Array.isArray(x)) x.forEach(andar);
-    else if (typeof x === "object") for (const [k, y] of Object.entries(x)) { partes.push(k); andar(y); }
-    else partes.push(String(x));
-  })(v);
+  folhas(v, (_, t) => partes.push(t));
   return partes.join(" | ");
 }
 // AUTOIMPACT (R-20261121-113400-alexandre, T-0017): marca concorrente, pode aparecer só no rótulo da marca da
-// referência cruzada (r[].m). Em qualquer outro lugar do produto (chave ou valor: d, a, x, de, ve, r[].c, p, ca, si,
-// fa, li, oj, po, rótulo composto...) é falha. Cada texto é conferido sozinho (os sinais não pulam de um campo a outro).
+// referência cruzada (r[].m), e lá só o nome inteiro: "AUTOIMPACT" ou "AUTOIMPACT PN" ("AUTOIMPACT LINHA" é falha).
+// Em qualquer outro lugar do produto (chave ou valor: d, a, x, de, ve, r[].c, p, ca, si, fa, li, oj, po...) é falha.
+// [SUPOSIÇÃO] em r[].m o nome inteiro é escrito sem sinais no meio: "AUTO IMPACT" ou "Auto-Impact PN" ali também é falha.
 const RX_AUTOIMPACT = comSinais("AUTOIMPACT");
+const RX_RF_MARCA = /^r\[\d+\]\.m$/;
+const AUTOIMPACT_INTEIRO = new Set(["AUTOIMPACT", "AUTOIMPACT PN"]);
 function autoimpactForaDaRef(v) {
   const achou = [];
-  (function andar(x, onde) {
-    if (x == null) return;
-    if (Array.isArray(x)) { x.forEach((y, i) => andar(y, `${onde}[${i}]`)); return; }
-    if (typeof x === "object") {
-      for (const [k, y] of Object.entries(x)) {
-        const aqui = onde ? `${onde}.${k}` : k;
-        if (RX_AUTOIMPACT.test(norm(k))) achou.push({ onde: aqui + " (chave)", trecho: cortar(k, 60) });
-        if (/^r\[\d+\]\.m$/.test(aqui)) continue; // o único lugar permitido
-        andar(y, aqui);
-      }
-      return;
-    }
+  folhas(v, (onde, x) => {
     const t = norm(x);
     const m = t.match(RX_AUTOIMPACT);
-    if (m) achou.push({ onde: onde || "(valor)", trecho: cortar(t.slice(Math.max(0, m.index - 25), m.index + m[0].length + 25), 80) });
-  })(v, "");
+    if (!m || (RX_RF_MARCA.test(onde) && AUTOIMPACT_INTEIRO.has(t))) return;
+    achou.push({ onde: RX_RF_MARCA.test(onde) ? onde + " (rótulo composto)" : onde, trecho: trechoEm(t, m) });
+  });
   return achou;
 }
 // vale para o texto do JSON (textoDe) e para o texto da tela do produto; quebra de linha e tab viram espaço
-function palavrasInternas(texto) {
+function palavrasInternas(texto, lista = PALAVRAS) {
   const t = semAcento(texto).toUpperCase().replace(/\s+/g, " ");
   const achou = [];
-  for (const [nome, rx] of PALAVRAS) {
+  for (const [nome, rx] of lista) {
     const m = t.match(rx);
-    if (m) {
-      const i = m.index;
-      achou.push({ nome, trecho: cortar(t.slice(Math.max(0, i - 25), i + m[0].length + 25), 80) });
-    }
+    if (m) achou.push({ nome, trecho: trechoEm(t, m) });
   }
+  return achou;
+}
+// as palavras com sinais, texto por texto (folhas) de um objeto do JSON
+function palavrasSinais(v) {
+  const achou = [];
+  folhas(v, (onde, t) => { for (const a of palavrasInternas(t, PALAVRAS_SINAIS)) achou.push({ ...a, onde }); });
   return achou;
 }
 // campos que o gerar_site.py grava em cada produto (docs/DADOS_DO_SITE.md); campo novo = conferir antes
@@ -317,9 +320,9 @@ function testarJson(arqJson) {
   detalhe("campos", N_CAMPOS, novos.size ? "" : `só os ${CAMPOS.size} campos conhecidos` + (comVe ? `; "ve" em ${fmt(comVe)} produtos (${fmt(nVe)} veículos) no formato [fabricante, modelo, versão?]` : `; sem "ve"`));
   // palavra interna: cabeçalho e cada produto
   const cab = { ...dados }; delete cab.produtos;
-  for (const a of palavrasInternas(textoDe(cab))) falha("palavra", N_PAL, `${a.nome}:(cabeçalho)`, `(cabeçalho do JSON) "${a.nome}": …${a.trecho}…`);
+  for (const a of palavrasInternas(textoDe(cab)).concat(palavrasSinais(cab))) falha("palavra", N_PAL, `${a.nome}:(cabeçalho)`, `(cabeçalho do JSON) "${a.nome}": …${a.trecho}…`);
   for (const p of prods) {
-    for (const a of palavrasInternas(textoDe(p))) falha("palavra", N_PAL, `${a.nome}:${p.c}`, `${p.c} "${a.nome}": …${a.trecho}…`);
+    for (const a of palavrasInternas(textoDe(p)).concat(palavrasSinais(p))) falha("palavra", N_PAL, `${a.nome}:${p.c}`, `${p.c} "${a.nome}"${a.onde ? ` em ${a.onde}` : ""}: …${a.trecho}…`);
   }
   teste("palavra", N_PAL);
   // AUTOIMPACT só no rótulo da marca da referência cruzada (r[].m); o cabeçalho do JSON não pode ter
@@ -328,10 +331,10 @@ function testarJson(arqJson) {
   for (const a of autoimpactForaDaRef(cab)) falha("autoimpact", N_AI, `(cabeçalho):${a.onde}`, `(cabeçalho do JSON) ${a.onde}: …${a.trecho}…`);
   for (const p of prods) {
     for (const a of autoimpactForaDaRef(p)) falha("autoimpact", N_AI, `${p.c}:${a.onde}`, `${p.c} ${a.onde}: …${a.trecho}…`);
-    for (const r of Array.isArray(p.r) ? p.r : []) if (r && RX_AUTOIMPACT.test(norm(r.m))) naRef++;
+    for (const r of Array.isArray(p.r) ? p.r : []) if (r && AUTOIMPACT_INTEIRO.has(norm(r.m))) naRef++;
   }
   teste("autoimpact", N_AI);
-  detalhe("autoimpact", N_AI, `${fmt(naRef)} referência(s) com a AUTOIMPACT na marca (r[].m), o único lugar permitido`);
+  detalhe("autoimpact", N_AI, `${fmt(naRef)} referência(s) com a AUTOIMPACT na marca (r[].m, nome inteiro), o único lugar permitido`);
   return { dados, prods, porCod: new Map(prods.map((p) => [normCod(p.c), p])) };
 }
 
