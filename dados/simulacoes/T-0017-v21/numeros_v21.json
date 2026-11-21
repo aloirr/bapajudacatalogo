@@ -1,0 +1,165 @@
+{
+ "resumo": [
+  [
+   "01_FAIXAS_E_ANOS_COLADOS",
+   16,
+   15,
+   3,
+   10,
+   3,
+   0
+  ],
+  [
+   "02_NAN",
+   17,
+   17,
+   0,
+   0,
+   17,
+   0
+  ],
+  [
+   "03_MF21_MF22",
+   4,
+   2,
+   0,
+   2,
+   0,
+   2
+  ],
+  [
+   "04_SEM_ANO_NO_FIM",
+   21,
+   21,
+   0,
+   0,
+   21,
+   0
+  ],
+  [
+   "05_LINHAS_REPETIDAS",
+   18,
+   18,
+   18,
+   0,
+   0,
+   0
+  ],
+  [
+   "06_ANO_SOLTO_QUEBRA",
+   25,
+   21,
+   19,
+   6,
+   0,
+   0
+  ],
+  [
+   "07_DUAS_MARCAS_REF",
+   87,
+   87,
+   0,
+   0,
+   87,
+   0
+  ],
+  [
+   "07b_RT_REF",
+   246,
+   246,
+   0,
+   0,
+   246,
+   0
+  ],
+  [
+   "08_ATRIBUTO_REPETIDO",
+   16,
+   16,
+   16,
+   0,
+   0,
+   0
+  ],
+  [
+   "09_ANO_DE_VARIANTE",
+   617,
+   468,
+   0,
+   0,
+   617,
+   0
+  ],
+  [
+   "10_V7_V8",
+   10,
+   4,
+   0,
+   0,
+   10,
+   0
+  ],
+  [
+   "10b_V8_VEICULOS_NOVOS",
+   57,
+   39,
+   0,
+   0,
+   50,
+   7
+  ],
+  [
+   "11_LINHAS_FALSAS",
+   3,
+   3,
+   0,
+   0,
+   3,
+   0
+  ]
+ ],
+ "cont6": 57,
+ "cont6b": 32,
+ "cont6c": 6,
+ "cont2": 18,
+ "cont4": 50,
+ "cont5": [
+  18,
+  126
+ ],
+ "cont8": 16,
+ "cont7": {
+  "COFAP": 81,
+  "NAKATA": 6,
+  "RT#": 246
+ },
+ "ef7": {
+  "trechos com 2 marcas antes": 333,
+  "trechos com 2 marcas depois": 0
+ },
+ "cont9": {
+  "linhas do site": 617,
+  "células ANO_DUVIDA": 617
+ },
+ "cont10": {
+  "V8 lido errado": 3,
+  "V8 entra (sim)": 48,
+  "V8 entra (não)": 7
+ },
+ "pares_JUH70010": [
+  "KHC12869",
+  "KHC12909"
+ ],
+ "faixas_par": [
+  "1999–2006",
+  "2000–2013",
+  "2000–2014",
+  "2003–2007",
+  "2003–2013",
+  "2006–2010"
+ ],
+ "apl_mudadas": 105,
+ "ref_mudadas": 334,
+ "veic_mudadas": 627,
+ "log": 945
+}
