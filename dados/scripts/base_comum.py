@@ -5,7 +5,8 @@ mora aqui: limpo, sha, a assinatura de formatação da célula, a conferência c
 a linha nova no LOG_CORRECOES e a gravação da base com a cópia em dados/versoes/. Da v20 em diante, também o fluxo
 do main() (--conferir, "vNN já existe", sha da versão anterior, pasta temporária, comparar e gravar): rodar() (RD-0217).
 Da v23 em diante, também a leitura da aba ANTES_DEPOIS da simulação, o "(vazio)" e a conferência do valor gravado em
-cada célula (RD-0247; o base_v22.py fica como rodou).
+cada célula (RD-0247; o base_v22.py fica como rodou). Da v24 em diante, as linhas novas no fim de uma aba (ex.: a
+VEICULOS), com o filtro estendido até a nova última linha (novas_no_fim).
 """
 from __future__ import annotations
 
@@ -65,13 +66,13 @@ def vazio(v):
     return None if v == VAZIO else v
 
 
-def ler_antes_depois(sim: Path, cab: list[str]) -> list[dict]:
-    """A aba ANTES_DEPOIS da simulação, uma linha por célula, depois de conferir o cabeçalho."""
+def ler_antes_depois(sim: Path, cab: list[str], aba: str = "ANTES_DEPOIS") -> list[dict]:
+    """A aba da simulação (ANTES_DEPOIS; na v24, VALIDOS), uma linha por mudança, depois de conferir o cabeçalho."""
     wb = openpyxl.load_workbook(sim, read_only=True)
-    it = wb["ANTES_DEPOIS"].iter_rows(values_only=True)
+    it = wb[aba].iter_rows(values_only=True)
     achado = list(next(it))
     if achado != cab:
-        raise SystemExit(f"[PARADO] cabeçalho da ANTES_DEPOIS: {achado}")
+        raise SystemExit(f"[PARADO] cabeçalho da {aba}: {achado}")
     linhas = [dict(zip(cab, r)) for r in it if r[0]]
     wb.close()
     return linhas
@@ -129,7 +130,7 @@ def linhas_novas(wb, log_ult: int, leia_n: int) -> dict[str, list[tuple]]:
 
 def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rotulo: str,
              colunas_novas: dict[str, list[str]] | None = None, leia_n: int = 0,
-             removidas: dict[str, set[int]] | None = None) -> list[str]:
+             removidas: dict[str, set[int]] | None = None, novas_no_fim: dict[str, int] | None = None) -> list[str]:
     """Diferenças entre a base nova e a versão anterior fora das permitidas. Lista vazia = só o que a tarefa pede.
 
     celulas: {aba: {(linha, coluna), ...}} que TÊM de mudar de valor (a formatação delas não pode mudar).
@@ -139,9 +140,14 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
     leia_n: linhas novas no topo do LEIA-ME (as antigas descem leia_n linhas).
     removidas: {aba: {linhas da versão anterior que saem}} (da v21); as de baixo sobem, e o filtro termina na nova
     última linha. As células de celulas ficam na numeração da versão anterior.
+    novas_no_fim: {aba: quantas linhas novas no fim da aba} (da v24). As linhas de cima não mudam de lugar; o filtro
+    termina na nova última linha; o valor das linhas novas é conferido à parte (conferir_extra do rodar()).
     """
     colunas_novas = colunas_novas or {}
     removidas = removidas or {}
+    novas_no_fim = novas_no_fim or {}
+    if set(novas_no_fim) & ({"LOG_CORRECOES", "LEIA-ME"} | set(removidas)):
+        raise ValueError("novas_no_fim não vale para o LOG_CORRECOES, o LEIA-ME nem aba com linhas removidas")
     a, b = openpyxl.load_workbook(novo), openpyxl.load_workbook(velho)
     if a.sheetnames != b.sheetnames:
         return [f"abas: {a.sheetnames} x {b.sheetnames}"]
@@ -153,6 +159,9 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
             extra = set(range(log_ult + 1, wa.max_row + 1))
         if nome == "LEIA-ME" and leia_n:
             desloc, extra = leia_n, set(range(1, leia_n + 1))
+        n_fim = novas_no_fim.get(nome, 0)
+        if n_fim:
+            extra = set(range(wb_.max_row + 1, wb_.max_row + n_fim + 1))
         pode = celulas.get(nome, set())
         fora = removidas.get(nome, set())
         novas = colunas_novas.get(nome, [])
@@ -172,6 +181,8 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
             filtro = filtro.replace(get_column_letter(mc), get_column_letter(ncol))
         if fora and filtro:
             filtro = re.sub(r"\d+$", lambda m: str(subir(int(m.group(0)) + 1, fora) - 1), filtro)
+        if n_fim and filtro:
+            filtro = re.sub(r"\d+$", lambda m: str(int(m.group(0)) + n_fim), filtro)
         if wa.auto_filter.ref != filtro:
             dif.append(f"{nome}: auto_filter")
         if ({k: d.width for k, d in wa.column_dimensions.items() if k not in letras_novas}
@@ -219,7 +230,8 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
 
 
 def rodar(anterior: int, nova: int, ler, aplicar, conferir_extra=None,
-          colunas_novas: dict[str, list[str]] | None = None, removidas: dict[str, set[int]] | None = None) -> None:
+          colunas_novas: dict[str, list[str]] | None = None, removidas: dict[str, set[int]] | None = None,
+          novas_no_fim: dict[str, int] | None = None) -> None:
     """O main() de cada base_vNN.py (RD-0217): grava a v<nova> a partir da v<anterior>, ou, com --conferir, só compara.
 
     ler() -> dados da simulação aprovada; aplicar(wb, dados) -> (celulas, log_ult, leia_n, extra), como em comparar();
@@ -233,7 +245,7 @@ def rodar(anterior: int, nova: int, ler, aplicar, conferir_extra=None,
     dados = ler()
 
     def diferencas(p: Path, wb, celulas, ult, leia_n, extra) -> list[str]:
-        dif = comparar(p, va, celulas, ult, f"v{anterior}", colunas_novas, leia_n, removidas)
+        dif = comparar(p, va, celulas, ult, f"v{anterior}", colunas_novas, leia_n, removidas, novas_no_fim)
         esperado, achado = linhas_novas(wb, ult, leia_n), linhas_novas(openpyxl.load_workbook(p), ult, leia_n)
         for aba in esperado:
             if achado[aba] != esperado[aba]:
