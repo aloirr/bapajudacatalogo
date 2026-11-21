@@ -150,9 +150,9 @@ def aplicar(fams, filtro_moto=None):
                 r['refs'] = novas if atual in ('', '—', '-') else atual.rstrip(' ·,') + ' · ' + novas
                 LOG['ref'].append(r['code'])
     # no fim, em todos os itens dos 3 PDFs: cada veículo uma vez na aplicação (aplicacao_unica, RD-0222); a regra do
-    # site nas referências que vieram escritas (o Fraga e o site de 12/11 trazem AUTOIMPACT, fornecedor;
-    # montar.refs_pela_regra) e cada referência uma vez, na ordem da 1ª (o Fraga repete as do catálogo; a base às vezes
-    # também; RD-0194)
+    # site nas referências que vieram escritas (montar.refs_pela_regra: sai o fornecedor; a AUTOIMPACT, que o Fraga e o
+    # site de 12/11 trazem, é concorrência e fica, por último, T-0017) e cada referência uma vez, na ordem da 1ª (o Fraga
+    # repete as do catálogo; a base às vezes também; RD-0194), com a concorrência no fim (montar.concorrente_por_ultimo)
     import montar as _M
     LOG['fora'], LOG['repetidas'], LOG['apl_repetida'], feitos = [], [], [], set()
     n = lambda s: len(s.split(' · ')) if s else 0

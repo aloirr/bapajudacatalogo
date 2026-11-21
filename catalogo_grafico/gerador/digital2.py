@@ -113,6 +113,7 @@ class Doc:
         self.c = canvas.Canvas(path, pagesize=(W * S, H * S), initialFontName='PR')
         self.c.setTitle(f'Catálogo BAP {ANO} — Completo (uso interno)'); self.c.setAuthor('BAP Auto Parts')
         self.c.setPageCompression(1)
+        self.areas_ref = []
 
     def X(self, x): return x * S
     def Y(self, y): return (H - y) * S
@@ -138,6 +139,15 @@ class Doc:
     def text(self, x, y, w, mk, size, lead, color='ink', font='PR'):
         p = Paragraph(mk, ParagraphStyle('t', fontName=font, fontSize=size * S, leading=lead * S, textColor=HexColor(C[color])))
         pw, ph = p.wrap(w * S, 1e6); p.drawOn(self.c, self.X(x), self.Y(y) - ph)
+        return ph
+
+    def ref(self, x, y, w, mk, size, lead, color='sec', font='PR'):
+        """referências cruzadas: desenha como o text e guarda a caixa (página, x0, y0, x1, y1 em pontos, com o y de cima
+        para baixo, como no PyMuPDF), para a trava_pdf deixar a concorrência só ali (T-0017)"""
+        ph = self.text(x, y, w, mk, size, lead, color, font)
+        y0 = self.c._pagesize[1] - self.Y(y)
+        self.areas_ref.append((self.c.getPageNumber() - 1, (self.X(x), y0, self.X(x + w), y0 + ph)))
+        return ph
 
     _cache = {}
 
@@ -339,7 +349,7 @@ def table_page(dc, f, rows, pg, cont, primeira=None):
         if f.get('extra_col'):
             if not it['cont']: dc.text(xr, y + 3.5, EXTRA_W, r.get('_extra_mk', '—'), RF, RL, 'gtext', 'PM')
             xr += EXTRA_W + GAP
-        if refs: dc.text(xr, y + 3.5, REF_W, refs, RF, RL, 'sec')
+        if refs: dc.ref(xr, y + 3.5, REF_W, refs, RF, RL, 'sec')
         y += h
     dc.footer(pg); dc.end()
 
@@ -502,24 +512,49 @@ def pagina_sistema(dc, grupo, key, itens, pg):
     dc.end()
 
 
-# Trava dos PDFs (T-0019): fornecedor não sai em nenhum dos 3 PDFs: os FORNECEDORES (AUTOIMPACT, SUNRISE) do site
-# (G.FORNECEDORES do scripts/gerar_site.py, RD-0220, RD-0227; R-20261120-184000-alexandre, item 5, e R-20261120-194900-po);
-# a referência sai pelo refs_de (montar.refs_pela_regra). O nome é procurado pelo G.FORNECEDOR_RE do site (RD-0226), com
-# até 3 sinais entre cada letra ("AUTO IMPACT", "Auto-Impact", "Sun-Rise"). Se ele voltar por qualquer texto, o build para
-# e o PDF fica com o fim ".BLOQUEADO" (não entregar).
+# Trava dos PDFs (T-0019, T-0017): o fornecedor não sai em nenhum dos 3 PDFs, em nenhum texto: os G.FORNECEDORES do site
+# (a SUNRISE; R-20261120-194900-po), pelo G.FORNECEDOR_RE (RD-0226: até 3 sinais entre cada letra, "Sun-Rise"). A
+# AUTOIMPACT é concorrência (G.CONCORRENTES_SO_NA_REF; "autorizo" do R-20261121-113400-alexandre): só pode estar nas
+# referências cruzadas. O G.CONCORRENTE_RE vale em todo o texto, menos no das referências. O texto do PDF é corrido, então
+# a exceção vem antes de juntar: o desenho guarda a caixa de cada referência (Doc.ref, nos destaques e nas tabelas) e a
+# palavra com o centro numa dessas caixas é vista só pelo TRAVA_PDF_REF. A referência sai pelo refs_de
+# (montar.refs_pela_regra). Se um nome passar onde não pode, o build para e o PDF fica com o fim ".BLOQUEADO" (não entregar).
 from site_regras import G as _G
-TRAVA_PDF = re.compile(_G.FORNECEDOR_RE, re.I)
+TRAVA_PDF = re.compile(_G.FORNECEDOR_RE + '|' + _G.CONCORRENTE_RE, re.I)   # fora das referências
+TRAVA_PDF_REF = re.compile(_G.FORNECEDOR_RE, re.I)                          # dentro das referências
 
 
-def trava_pdf(out):
+def textos_pdf(page, caixas):
+    """(texto fora das referências, texto das referências) da página: cada palavra, na ordem do PDF, vai para o 2º se o
+    centro dela estiver numa das caixas (x0, y0, x1, y1) do Doc.ref"""
+    fora, dentro = [], []
+    for x0, y0, x1, y1, w, *_ in page.get_text('words'):
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        (dentro if any(a <= cx <= c and b <= cy <= d for a, b, c, d in caixas) else fora).append(w)
+    return ' '.join(fora), ' '.join(dentro)
+
+
+def achados_pdf(d, areas=()):
+    """[(página, trecho)] de cada nome que a trava barra no PDF aberto (pymupdf), com as caixas das referências (Doc.ref)"""
+    por_pg = {}
+    for pg, cx in areas: por_pg.setdefault(pg, []).append(cx)
+    out = []
+    for i, p in enumerate(d):
+        for t, rx in zip(textos_pdf(p, por_pg.get(i, ())), (TRAVA_PDF, TRAVA_PDF_REF)):
+            if (m := rx.search(t)): out.append((i + 1, t[max(0, m.start() - 40):m.end() + 20]))
+    return out
+
+
+def trava_pdf(out, areas=()):
     import os, pymupdf
     with pymupdf.open(out) as d:
-        achados = [(i + 1, p.get_text()) for i, p in enumerate(d) if TRAVA_PDF.search(p.get_text())]
+        achados = achados_pdf(d, areas)
     if not achados: return
     os.replace(out, out + '.BLOQUEADO')
-    ex = [f"pág. {pg}: ...{t[max(0, m.start() - 40):m.end() + 20]}..." for pg, t in achados[:5] for m in [TRAVA_PDF.search(t)]]
-    raise SystemExit(f"[PARADO] {os.path.basename(out)} sairia com nome de fornecedor em {len(achados)} página(s) "
-                     f"(ficou em {os.path.basename(out)}.BLOQUEADO):\n  " + '\n  '.join(x.replace('\n', ' ') for x in ex))
+    ex = [f"pág. {pg}: ...{t}..." for pg, t in achados[:5]]
+    raise SystemExit(f"[PARADO] {os.path.basename(out)} sairia com nome de fornecedor ou da concorrência fora da referência "
+                     f"em {len({pg for pg, t in achados})} página(s) (ficou em {os.path.basename(out)}.BLOQUEADO):\n  "
+                     + '\n  '.join(x.replace('\n', ' ') for x in ex))
 
 
 def build(out):
@@ -549,7 +584,7 @@ def build(out):
             table_page(dc, f, rows, p0 + j, j > 0, (PC, top, k) if j == 0 else None)
     contracapa(dc)
     dc.c.showOutline(); dc.c.save()
-    trava_pdf(out)
+    trava_pdf(out, dc.areas_ref)
     PC.log_destaques()
     return pg + 1, entries
 
