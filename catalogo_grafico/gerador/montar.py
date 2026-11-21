@@ -106,28 +106,44 @@ def ref_txt(m, c, marca=lambda m: m.title() if len(m) > 4 else m.upper()):
 
 def refs_pela_regra(s):
     """referências já escritas ('Axios 0 · Autoimpact TR10 · Nakata N370': catálogo antigo, site de 12/11, Fraga de 13/11)
-    sem as que o refs_de tira pela marca ou pelo código: código vazio, marca própria e fornecedor (a AUTOIMPACT, T-0019,
-    R-20261120-184000-alexandre item 5). 'Marca Código' vira 'Marca: Código' para o refs_de; o resto fica como está."""
+    sem as que o refs_de tira pela marca ou pelo código: código vazio, marca própria e fornecedor (G.FORNECEDORES). A
+    AUTOIMPACT é concorrência (G.CONCORRENTES_SO_NA_REF, T-0017): fica, por último (concorrente_por_ultimo). 'Marca Código'
+    vira 'Marca: Código' para o refs_de; o resto fica como está."""
     ps = [p for p in (s or '').split(' · ') if not ((m := re.fullmatch(r'([^\d]+) (\S+)', p)) and not ref_lista(f'{m[1]}: {m[2]}'))]
-    return ' · '.join(ps)
+    return ' · '.join(concorrente_por_ultimo(ps))
+
+
+def e_ref_concorrente(p):
+    """'Autoimpact PA14', 'Auto Impact TR 10' -> True: as primeiras palavras, antes do código, são uma marca da
+    concorrência pelo G.e_concorrente (a mesma regra do refs_de do site, sem cópia); 'SK132S' -> False"""
+    ws = p.split()
+    return any(G.e_concorrente(' '.join(ws[:k])) for k in range(1, len(ws)))
+
+
+def concorrente_por_ultimo(ps):
+    """referências já escritas ('Marca Código'): a da concorrência (e_ref_concorrente) vai para o fim, para a Bosch e a
+    Tecfil ficarem à vista (T-0017, "1 a"); o sort é estável: a ordem fica entre elas e entre as outras"""
+    return sorted(ps, key=e_ref_concorrente)
 
 
 def refs_from_base(s, codigo=''):
     """até 10 referências, sem repetida: com a vírgula separada, cabem as que antes iam juntas nos 6 trechos entre ";"
-    (com 6, 58 referências que o main mostra sairiam de 35 itens) [SUPOSIÇÃO]"""
+    (com 6, 58 referências que o main mostra sairiam de 35 itens) [SUPOSIÇÃO]. A concorrência já vem por último do
+    refs_de e o refs_unicas a mantém lá: o corte das 10 tira ela primeiro."""
     out = [ref_txt(m, c) for m, c in ref_lista(s, codigo) if not re.search(r'(?i)bap|similar|aplica|descri', m)]
     return ' · '.join(refs_unicas(' · '.join(out)).split(' · ')[:10])
 
 
 def refs_unicas(s):
     """'Axios 1443 · Kit & Cia 10285 · Axios 1443' -> 'Axios 1443 · Kit & Cia 10285': cada referência uma vez, na ordem
-    da 1ª (RD-0194). Igual = mesma marca e código sem espaço, pontuação e acento (gerar_site.so_codigo)."""
+    da 1ª (RD-0194), com a concorrência por último (concorrente_por_ultimo). Igual = mesma marca e código sem espaço,
+    pontuação e acento (gerar_site.so_codigo)."""
     vistos, out = set(), []
     for p in (s or '').split(' · '):
         k = G.so_codigo(p)
         if k and k in vistos: continue
         vistos.add(k); out.append(p)
-    return ' · '.join(out)
+    return ' · '.join(concorrente_por_ultimo(out))
 
 
 def pos_sub(desc):

@@ -37,6 +37,7 @@ class PDoc(D2.Doc):
         from reportlab.pdfgen import canvas
         self.c = canvas.Canvas(path, pagesize=((W + 2 * BPX) * S, (H + 2 * BPX) * S), initialFontName='PR')
         self.c.setTitle(f'Catálogo BAP {ANO} — Impressão A4 (uso interno)'); self.c.setAuthor('BAP Auto Parts')
+        self.areas_ref = []                       # caixas das referências, para a trava (D2.Doc.ref)
 
     def X(self, x): return (x + BPX) * S
     def Y(self, y): return (H - y + BPX) * S
@@ -71,6 +72,7 @@ class PDoc(D2.Doc):
         mk = mk.replace('#5b5f5b', 'cmyk(0,0,0,0.68)')
         p = Paragraph(mk, ParagraphStyle('t', fontName=font, fontSize=size * S, leading=lead * S, textColor=col(color)))
         pw, ph = p.wrap(w * S, 1e6); p.drawOn(self.c, self.X(x), self.Y(y) - ph)
+        return ph                                 # o D2.Doc.ref usa a altura
 
     _cache = {}
 
@@ -283,7 +285,7 @@ def cards(dc, f, top, y):
         yr = y + ch - (5 + rh + 6)
         dc.rect(x + 1, yr, cw - 2, 5 + rh + 6 - 1, fill='zebra')
         dc.rect(x, yr, cw, 1, fill='line2')
-        dc.text(x + 9, yr + 5, tw, rf, 7.8, 10.4, 'sec')
+        dc.ref(x + 9, yr + 5, tw, rf, 7.8, 10.4, 'sec')
     return y + ch
 
 
@@ -323,7 +325,7 @@ def row_cells(f, r, cols, widths):
             cells.append(('text', s_, para_h(s_, 7.8, 10.4, w, 'PM'), 7.8, 10.4, 'gtext', 'PM'))
         elif k == 'refs':
             s_ = '<br/>'.join(html.escape(x) for x in (r.get('refs') or '—').split(' · ')[:2])
-            cells.append(('text', s_, para_h(s_, 8.4, 11.2, w), 8.4, 11.2, 'sec', 'PR'))
+            cells.append(('ref', s_, para_h(s_, 8.4, 11.2, w), 8.4, 11.2, 'sec', 'PR'))
     return cells, max(c[2] for c in cells) + 9
 
 
@@ -350,8 +352,8 @@ def draw_rows(dc, f, rows, y, cols, widths, ymax):
                 if r.get('_tl'): yy += TG.desenhar(dc, lw, x, yy, r['_tl'], w)
                 if r.get('_sm'): dc.text(x, yy + 1, w, r['_sm'], 7.2, 9.4, 'gtext', 'PM')
             else:
-                _, m, hh, sz, ld, cl, fn = c_
-                dc.text(x, y + 4.5, w, m, sz, ld, cl, fn)
+                k_, m, hh, sz, ld, cl, fn = c_
+                (dc.ref if k_ == 'ref' else dc.text)(x, y + 4.5, w, m, sz, ld, cl, fn)
             x += w + 10
         y += h; n += 1
     return y, n
@@ -588,7 +590,7 @@ def build(out, moto_pages_n=2):
         anotacoes(dc, pgn); pgn += 1; total += 1
     contracapa(dc)
     dc.c.save()
-    D2.trava_pdf(out)
+    D2.trava_pdf(out, dc.areas_ref)
     log_destaques()
     return total, shown, np_
 
