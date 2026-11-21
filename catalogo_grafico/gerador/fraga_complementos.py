@@ -114,7 +114,8 @@ def ref_fmt(p):
 
 def carregar():
     if not os.path.exists(ARQ): return {}
-    return {c.upper(): v for c, v in json.load(open(ARQ, encoding='utf-8')).items()}
+    with open(ARQ, encoding='utf-8') as f:
+        return {c.upper(): v for c, v in json.load(f).items()}
 
 
 def aplicar(fams, filtro_moto=None):

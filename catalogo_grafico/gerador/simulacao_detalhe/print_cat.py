@@ -29,7 +29,9 @@ import os
 import hashlib
 _D = 'entradas/bap'
 os.makedirs(_D, exist_ok=True)
-_h = lambda f: hashlib.md5(open(os.path.join(_D, f), 'rb').read()).hexdigest()
+def _h(f):
+    with open(os.path.join(_D, f), 'rb') as _fh:
+        return hashlib.md5(_fh.read()).hexdigest()
 PLACEHOLDER = _h('FLU15002.jpg') if os.path.exists(os.path.join(_D, 'FLU15002.jpg')) else None          # arte "IMAGEM INDISPONÍVEL" (1.031 arquivos iguais)
 IMG = {taxo.norm(os.path.splitext(f)[0]): os.path.join(_D, f)
        for f in os.listdir(_D) if f.lower().endswith(('.jpg', '.jpeg', '.png')) and _h(f) != PLACEHOLDER}

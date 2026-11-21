@@ -31,7 +31,9 @@ def _modelo(t):
 def carregar():
     d = {}
     for arq in ARQS:
-        if os.path.exists(arq): d.update(json.load(open(arq, encoding='utf-8')))
+        if os.path.exists(arq):
+            with open(arq, encoding='utf-8') as f:
+                d.update(json.load(f))
     out = {}
     for c, v in d.items():
         ref, apl = v[0], v[1]
