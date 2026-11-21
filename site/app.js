@@ -1301,9 +1301,7 @@
   // o ano; o item sem "ve", pela aplicação (a marca e o modelo escritos nela, como no JSON antigo); ficam sempre o item
   // sem aplicação, o UNIVERSAL e o fora do catálogo. Sem veículo, a lista inteira do oj, menos o item UNIVERSAL
   // (sem "ve" e com "universal" na aplicação) de outra família (fa) que a do produto aberto (R-20261120-191700-alexandre
-  // e R-20261120-192000-alexandre: "sem a placa"); sem nenhum, a seção some. Só na tela. O veículo (VEI_LEVE) é o da
-  // lista por baixo da janela ou, na página, o da busca ou do produto de onde se clicou (cartão ou "Leve também"); o
-  // endereço digitado e o voltar ou avançar até a página ficam sem veículo (render).
+  // e R-20261120-192000-alexandre: "sem a placa"); sem nenhum, a seção some. Só na tela. O VEI_LEVE vem do render.
   let VEI_LEVE = null; // { vm, vmo, va, vmt, vv } ou null
   const veiculoDoHash = (h) => { const pr = new URLSearchParams(String(h || "").split("?")[1] || ""); return pr.get("vm") ? veiculoDaRota(pr) : null; };
   // false: com veículo (placa ou listas), o UNIVERSAL fica sempre, como no #58; true: a regra da família vale também com veículo
