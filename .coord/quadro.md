@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 20/11/2026 21:12 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 20/11/2026 23:54 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -17,22 +17,25 @@ Atualizado em 20/11/2026 21:12 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0011](tarefas/T-0011.md) | Busca palavra por palavra no catálogo online (só produtos) e aba Placa | web-site | testes | CONCLUÍDA | #26, #27 |
 | [T-0012](tarefas/T-0012.md) | Fim do ATUALIZAR_CATALOGO.bat: o repositório é a base oficial | gerente-projetos | po, web-site | CONCLUÍDA | #16, #17 |
 | [T-0013](tarefas/T-0013.md) | Filtros do resultado abrem todos expandidos | web-site | testes | CONCLUÍDA | #20 |
-| [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | EM ANDAMENTO (filtros f1 no PR da home; falta o aperto do testes) | #29, #35, #36, #39, #41 |
+| [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | EM ANDAMENTO (filtros f1 no ar pelo #45 da T-0018; falta o aperto do testes) | #29, #35, #36, #39, #41, #45 |
 | [T-0015](tarefas/T-0015.md) | Três agentes novos: corretor-redundancias, design-de-marca e designer-ux | gerente-projetos | po, revisor-codigo | CONCLUÍDA | #30 |
-| [T-0016](tarefas/T-0016.md) | Guardião com a regra de merge do PO, conferência dos merges pelo GitHub e limpeza do CI e do coord.mjs | alexandre | gerente-projetos, testes, revisor-codigo | EM ANDAMENTO (pacote d na sessão filha) | #34 |
-| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v19 e v20 no ar; v21 a simular) | #32, #33, #37, #38, #54, #59, #60, #63, #67, #71 |
-| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | EM ANDAMENTO (tag, "Leve também" pelo veículo e "AAAA+" no ar; tarefa C a fazer) | #42, #43, #58, #62, #65, #66 |
-| [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | EM ANDAMENTO (PDFs 2027 com a v19 no main; v20 na próxima geração) | #40, #61, #64, #70 |
+| [T-0016](tarefas/T-0016.md) | Guardião com a regra de merge do PO, conferência dos merges pelo GitHub e limpeza do CI e do coord.mjs | alexandre | gerente-projetos, testes, revisor-codigo | EM ANDAMENTO (#34 no main; pacote d na sessão filha) | #34, #48 |
+| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v22 e o JSON dela no ar; v23 e o JSON dela em andamento, com o RD-0212) | #32, #33, #37, #38, #50, #54, #55, #59, #60, #63, #67, #71, #75, #76, #78, #79 |
+| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | EM ANDAMENTO (home, tag, "Leve também" pelo veículo, "AAAA+" e a tarefa C no ar; falta o aperto do testes) | #42, #43, #45, #46, #49, #50, #52, #53, #56, #57, #58, #62, #65, #66, #74 |
+| [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | EM ANDAMENTO (PDFs 2027 com a v21 no main; os da v23 em andamento) | #40, #47, #51, #61, #64, #70, #77 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 
 ## Fila
-Plano A, B, C e D já, em paralelo quando os donos são diferentes (R-20261120-211200-alexandre: "porque para amanha? se voce ja fez o que tinha que fazer?"). Main e1d9f59 no ar desde 21:07; abertos só os PRs de registros (#72 e #73).
-1. A · registros (gerente-projetos): a noite neste PR (#54, #58 a #67, #69 a #71); a tarde (#34, #45 a #53, #55 a #57) fica pendente.
-2. B · simulação da v21 (catalogo-dados), T-0017: as faixas fechadas com ">"; vai ao Alexandre antes de gravar.
-3. C · ajustes do site (web-site), T-0018: o listaCodigos com "/", a lista Modelo com 1 produto e o código morto.
-4. D · PDFs com a v20 na próxima geração (catalogo-grafico), T-0019, com simulação, depois do "aprovado" da v21.
-5. Com o Alexandre, sem segurar o resto: o site ler a VEICULOS (cilindrada e ano da v20) e o rodapé dos PDFs.
-6. T-0016: o pacote d; T-0014: o aperto do testes; T-0006: a proposta (não há código).
+Rodada aprovada no R-20261120-235000-alexandre ("Faca o quer e publique. Depois pare ate eu mandar retornar"), em paralelo quando os donos são diferentes. Main 6f7b7af (#79).
+- Só nesta rodada, as simulações têm aprovação antecipada, pela recomendação do gerente e do dono, e ficam em `recados/anexos` para o Alexandre ver depois.
+- Limites: nada novo marcado ou escrito como duvidoso; nenhum produto sai do catálogo; nenhuma tela muda de layout; a FICHA e a TRAVA não afrouxam; nada de preço, estoque ou fornecedor.
+- Pergunta que só o Alexandre responde: aquele item para e o resto segue. O merge segue a regra de sempre (testes, revisões LIBERADO, CI verde e a autorização do PO por número e SHA).
+
+1. Registros (gerente-projetos): os PRs da tarde e da noite (#34 a #79) e o quadro.
+2. PDFs 2027 com a v23 (catalogo-grafico), T-0019, com o ajuste preventivo do "Gol DE 1999"; uma geração só, depois da v23 (opção permitida pelo R-20261120-235000, "se for mais simples", escolhida pelo gerente).
+3. v23 (catalogo-dados), T-0017: o CRU100 com os dados do LOG da v21, o SCE14002 "1929–19321934" e o FAC6108 "em Diante" sem ano; depois, o JSON do site (web-site).
+4. RD-0212 (web-site), T-0017.
+5. Depois de publicar tudo, o time para: nenhum trabalho novo; o gerente desliga as rondas e a reserva, e o PO desliga as rondas. A volta é só com a palavra do Alexandre ("retornar" ou equivalente). O CV-F35 segue esperando a fonte do ano final.
 
 ## Regras novas de hoje
 - Merge: o PO autoriza todos os merges, inclusive os de governança, conferindo número, head, arquivos, CI verde e revisão LIBERADO; o gerente executa (R-20261120-111133 e R-20261120-111308-alexandre). As simulações de tela e de PDF continuam indo ao Alexandre.
