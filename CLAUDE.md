@@ -64,3 +64,9 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
 - **Donos:** `.coord/donos.json` (a primeira regra que casa manda). Governança (`.claude`, `donos.json`, `coord*.mjs`, `.github`, `render.yaml`, `CLAUDE.md`, `.gitignore`): merge como em **Merge**, acima.
 - Recado do celular: issue com o formulário **Recado** no `aloirr/bapajudacatalogo-recados` (conta domontecristo).
 <!-- /SESSOES-E-RECADOS -->
+
+## Graphify (mapa do código, T-0020)
+- O mapa fica em `graphify-out/` (fora do Git). Ele é montado no setup do ambiente, só com o código: `GRAPHIFY_BACKEND=none graphify extract . --code-only` e depois `graphify cluster-only .` (sem `GRAPHIFY_BACKEND=none` ele chama um LLM e gasta token: nunca rode sem).
+- **Antes de procurar no código**, use o mapa: `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou `graphify explain "<conceito>"`. Abra o arquivo só nas linhas que o mapa apontar. Ponha esta regra no prompt de todo subagente que explora código.
+- **Depois de mudar código**, rode `graphify update .`.
+- PDFs, imagens e docs ficam fora do mapa.
