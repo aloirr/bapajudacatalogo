@@ -35,14 +35,17 @@ def segs_de(apl):
 
 def _norm(s):
     """texto para comparar: as datas como no PDF (datas.para_pdf: "1993-1995" e "1993>1995" = "1993–1995", "2015 em Diante"
-    = "2015+"), sem acento, maiúsculo, só palavras, números e "+", sem o "até" e o "DE" antes do ano ("1993 até 1995" =
-    "1993–1995", "DE 1999–2002" = "1999–2002")"""
+    = "2015+"), sem acento, maiúsculo, só palavras, números e "+", sem o "DE" antes do ano ("DE 1999–2002" = "1999–2002")
+    e sem o "até" entre dois anos ("1993 até 1995" = "1993–1995"). O "até" sem ano antes (">1994" e "até 1995") fica como
+    o marcador "ATE": "Gol >1994" e "Gol até 1995" não são "Gol 1994" e "Gol 1995" (T-0019)."""
     import unicodedata
     s = datas.para_pdf(s)
     s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').upper()
-    t = re.findall(r'[A-Z0-9]+|\+', s)
+    t = re.findall(r'[A-Z0-9]+|\+|>', s)
+    eano = lambda k: 0 <= k < len(t) and re.fullmatch(datas.Y, t[k])
+    t = ['ATE' if x == '>' else x for k, x in enumerate(t) if x != '>' or eano(k + 1)]   # ">1994" = "até 1994"
     t = [x for k, x in enumerate(t)
-         if not (x in ('ATE', 'DE') and k + 1 < len(t) and re.fullmatch(datas.Y, t[k + 1]))]
+         if not (eano(k + 1) and (x == 'DE' or (x == 'ATE' and eano(k - 1))))]
     return ' ' + ' '.join(t) + ' '
 
 
@@ -75,7 +78,7 @@ def aplicacao_unica(segs):
         tira = set()
         for ent in ents:
             ch = _norm(' '.join(txt[i] for i in ent))
-            if any(not re.fullmatch(datas.Y + r'|\+', w) for w in ch.split()):   # só o ano: fica
+            if any(not re.fullmatch(datas.Y + r'|\+|ATE', w) for w in ch.split()):   # só o ano (ou "até 2008"): fica
                 if (marca, ch) in vistos: tira.update(ent)
                 vistos.add((marca, ch))
         if not tira:

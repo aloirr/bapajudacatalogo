@@ -39,11 +39,15 @@ SITE = 'https://www.bapautoparts.com.br'
 LOGO = 'dimg/capa_0.png'
 LEGAL_B = 'USO INTERNO E CONFIDENCIAL'
 SITE_IG = 'www.bapautoparts.com.br  ·  @bapautoparts'
-OBS_DISP = 'Verifique a disponibilidade e estoque de sua região.'   # rodapé das páginas (Alexandre, 27/10)
+OBS_DISP = 'Consulte a disponibilidade na sua região.'   # rodapé das páginas (R-20261120-212000-alexandre, "3) a")
 LEGAL_R = ' — material exclusivo do time BAP. Proibida a distribuição a clientes e terceiros. Imagens ilustrativas.'
 
 # ---------------------------------------------------------------- dados + correções
 fams = json.load(open('digital_data.json'))
+for _f in fams:                                  # " nan" (célula vazia) depois da montadora: sai e a marca fica (P3 da v21)
+    for _r in _f['rows']:
+        for _sg in _r.get('segs') or []:
+            if not _sg[1]: _sg[0] = re.sub(r'^(\s*)nan(?=\s*(?:·|;|$))', r'\1', _sg[0]).replace('  ·', ' ·')
 byname = {f['name']: f for f in fams}
 pneus, inter = byname['Pneus e Câmaras de Ar Moto'], byname['Interruptores']
 mov = [r for r in pneus['rows'] if r['code'].startswith('INT16')]
