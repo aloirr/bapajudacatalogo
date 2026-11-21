@@ -36,7 +36,7 @@ ABBR = [(r'\bExe?ce?to\b', 'exc.'), (r'\bExceto\b', 'exc.'), (r'\bexceto\b', 'ex
         (r'\b[Cc]om [Bb]arra [Ee]stabilizadora\b', 'c/ barra estab.'), (r'\b[Ss]em [Bb]arra [Ee]stabilizadora\b', 's/ barra estab.'),
         (r'\bAutomático\b', 'Aut.'), (r'\bautomático\b', 'aut.'), (r'\bHidráulica\b', 'Hidr.'), (r'\bhidráulica\b', 'hidr.'),
         (r'\bMecânica\b', 'Mec.'), (r'\bmecânica\b', 'mec.'), (r'\bGasolina\b', 'Gas.'), (r'\bDiesel\b', 'Diesel'),
-        (r'\b((?:\d{2}/)?(?:19|20)\d{2})\s+em diante\b', r'\1>'), (r'\bDianteiro\b', 'Diant.'), (r'\bTraseiro\b', 'Tras.'),
+        (r'\bDianteiro\b', 'Diant.'), (r'\bTraseiro\b', 'Tras.'),
         (r'\bdianteiro\b', 'diant.'), (r'\btraseiro\b', 'tras.'), (r'\bdianteira\b', 'diant.'), (r'\btraseira\b', 'tras.'),
         (r'\bDianteira\b', 'Diant.'), (r'\bTraseira\b', 'Tras.'), (r'\bEsquerdo\b', 'Esq.'), (r'\bDireito\b', 'Dir.'),
         (r'\bTodos os modelos\b', 'todos'), (r'\s+/\s+', ' / '), (r'\s+,', ','), (r'\s{2,}', ' '), (r'\.\.(?!\.)', '.')]

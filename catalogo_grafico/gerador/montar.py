@@ -84,24 +84,17 @@ def segs_from_base(app):
     return segs
 
 
-# [provisório, RD-0193] Dois cortes só do PDF que deveriam morar no refs_de do scripts/gerar_site.py (dono: web-site), para o
-# site e os PDFs terem uma regra só: o "#N/A" (JUH70105), que vai para a lista dos vazios do refs_de ("cod not in ..."), e
-# o ", APLICAÇÃO REVISADA ..." dos kits KHC (em ref_lista, abaixo; o site corta no app.js). A v19 da base tira a aplicação
-# de dentro das REFERENCIAS_CRUZADAS: depois dela o segundo corte fica sem efeito. Os dois saem quando o refs_de tirar.
-SEM_CODIGO = {'#N/A'}
-
-
 def ref_lista(s, codigo=''):
     """referências da base [(marca, código)] pela regra do site (gerar_site.refs_de): separa por ";" e por ",", tira o
     histórico "| ANTERIOR", o preço de compra, o código vazio, o prefixo "CROSS REFERENCES - " e o " PN" da marca.
     Trecho sem marca só fica se for código (palavras com número, separadas por " / ": "REFERENCIAS CRUZADAS: SK132S"
     -> ('', 'SK132S'), "W8BC / W7BC"); nota de cadastro e pedaço de marca ("SKF" de "SKF / PERFEC PN: ...") ficam fora.
-    [provisório, RD-0193; ver SEM_CODIGO] O código para antes do ", APLICAÇÃO REVISADA ..." dos kits KHC."""
+    O "#N/A" sai no refs_de (código vazio); a aplicação saiu de dentro das referências na v19 da base (RD-0193)."""
     if not isinstance(s, str) or not s.strip(): return []
     out = []
     for x in G.refs_de(s, str(codigo or '')):
-        c = re.split(r'(?i),?\s*APLICA[ÇC][ÃA]O\b', x['c'])[0].strip(' ,')
-        if c and c.upper() not in SEM_CODIGO and (x['m'] or re.fullmatch(r'[\w.\-]*\d[\w.\-]*(?:\s*/\s*[\w.\-]*\d[\w.\-]*)*', c)):
+        c = x['c']
+        if c and (x['m'] or re.fullmatch(r'[\w.\-]*\d[\w.\-]*(?:\s*/\s*[\w.\-]*\d[\w.\-]*)*', c)):
             out.append((x['m'], c))
     return out
 
@@ -163,8 +156,8 @@ SEM_ESTOQUE, novos = [], []
 def _em_diante(app):
     """'2011/...' -> '2011>' ; '06/...' -> '2006>' (ano com 4 dígitos, '>' = em diante)"""
     if not isinstance(app, str): return app
-    app = re.sub(r'\b((?:19|20)\d{2})\s*/\s*\.{2,}', r'\1>', app)
-    return re.sub(r'(?<![\d/])(\d{2})\s*/\s*\.{2,}', lambda m: ('20' if int(m.group(1)) <= 30 else '19') + m.group(1) + '>', app)
+    app = re.sub(r'\b(' + datas.Y + r')\s*/\s*\.{2,}', r'\1>', app)
+    return re.sub(r'(?<![\d/])(\d{2})\s*/\s*\.{2,}', lambda m: str(datas.yy(m.group(1))) + '>', app)
 
 
 _ja = {norm(r['code']) for rs in rows_by_line.values() for r in rs}

@@ -10,6 +10,7 @@ No A4 (print_cat) a aplicação fica a de antes: o impresso já corta a aplicaç
 Guarda a aplicação de antes em r['_segs_antes_fraga']: o diferencial.py (auditoria) usa essa, não a do Fraga.
 """
 import json, os, re
+import datas
 import site_aplicacoes as _S
 
 ARQ = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'entradas', 'complementos_fraga_13112026.json')
@@ -30,6 +31,68 @@ def segs_de(apl):
         segs += [[marca, True], [' ' + ' · '.join(itens) + ' · ', False]]
     if segs: segs[-1][0] = segs[-1][0].rstrip(' ·') + ' '
     return segs
+
+
+def _norm(s):
+    """texto para comparar: as datas como no PDF (datas.para_pdf: "1993-1995" e "1993>1995" = "1993–1995", "2015 em Diante"
+    = "2015+"), sem acento, maiúsculo, só palavras, números e "+", sem o "até" e o "DE" antes do ano ("1993 até 1995" =
+    "1993–1995", "DE 1999–2002" = "1999–2002")"""
+    import unicodedata
+    s = datas.para_pdf(s)
+    s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').upper()
+    t = re.findall(r'[A-Z0-9]+|\+', s)
+    t = [x for k, x in enumerate(t)
+         if not (x in ('ATE', 'DE') and k + 1 < len(t) and re.fullmatch(datas.Y, t[k + 1]))]
+    return ' ' + ' '.join(t) + ' '
+
+
+_ANO = re.compile(r'(?<!\d)' + datas.Y + r'(?!\d)')
+_SEP = re.compile(r'((?:\s*[·;\n]\s*)+)')
+
+
+def aplicacao_unica(segs):
+    """cada veículo uma vez na aplicação, na ordem do 1º (RD-0222, R-20261120-195900-alexandre: "cada aplicação aparece
+    UMA vez só"): a base já traz o texto do Fraga em 109 itens, e às vezes repete o veículo nela mesma (FSE6167).
+    Veículo = os trechos entre "·", ";" ou quebra de linha até o que tem o ano ("Fiorino 1.0 L 8V · 1993 até 1995",
+    "LS 1632 10.0 L 10V - DE 1999–2002"); o que sobra no fim do trecho vai com o último ("S10 ... 2012>20 · Dupla").
+    Compara pela montadora (a última em negrito, com o BR_SHORT) e pelo _norm do texto. Trecho sem ano e trecho só com
+    o ano ficam sempre. Montadora que fica sem veículo sai junto."""
+    import montar as _M
+    vistos, out, marca, mudou = set(), [], '', False
+    for t, b in segs:
+        if b: marca = _M.BR_SHORT.get(t.strip().upper(), t.strip().upper())
+        if b or not t.strip(' ·;\n'):
+            if not b and out and not out[-1][1] and out[-1][0].rstrip().endswith('·'): continue   # um separador só
+            out.append([t, b]); continue
+        p = _SEP.split(t)                    # texto, separador, texto, ..., texto
+        txt = p[0::2]
+        ents, ent = [], []
+        for k, x in enumerate(txt):
+            if not x.strip(): continue
+            ent.append(k)
+            if _ANO.search(x): ents.append(ent); ent = []
+        if ent and ents: ents[-1] += ent   # o que sobra no fim é do último ("S10 ... 2012>20 · Dupla")
+        tira = set()
+        for ent in ents:
+            ch = _norm(' '.join(txt[i] for i in ent))
+            if any(not re.fullmatch(datas.Y + r'|\+', w) for w in ch.split()):   # só o ano: fica
+                if (marca, ch) in vistos: tira.update(ent)
+                vistos.add((marca, ch))
+        if not tira:
+            out.append([t, b]); continue
+        mudou = True
+        # sai o veículo repetido e o separador depois de cada trecho dele
+        novo = ''.join(x for k, x in enumerate(p) if k // 2 not in tira)
+        if t[:1].isspace() and not novo[:1].isspace(): novo = ' ' + novo
+        if not novo.strip(' ·;\n'):
+            if out and out[-1][1]: out.pop()     # montadora sem veículo
+            if not out or out[-1][0].rstrip().endswith('·'): continue
+            novo = ' · '
+        out.append([novo, b])
+    if not mudou: return segs
+    while out and not out[-1][1] and not out[-1][0].strip(' ·;\n'): out.pop()
+    if out and not out[-1][1]: out[-1][0] = out[-1][0].rstrip(' ·;\n') + ' '
+    return out
 
 
 DUAS = ('MAGNETI MARELLI', 'KIT & CIA', 'ORIGINAL OEM', 'LS AUTOMOTIVE')
@@ -81,11 +144,12 @@ def aplicar(fams, filtro_moto=None):
                 r['_refs_antes_fraga'] = atual
                 r['refs'] = novas if atual in ('', '—', '-') else atual.rstrip(' ·,') + ' · ' + novas
                 LOG['ref'].append(r['code'])
-    # no fim, em todos os itens dos 3 PDFs: a regra do site nas que vieram escritas (o Fraga e o site de 12/11 trazem
-    # AUTOIMPACT, fornecedor; montar.refs_pela_regra) e cada referência uma vez, na ordem da 1ª (o Fraga repete as do
-    # catálogo; a base às vezes também; RD-0194)
+    # no fim, em todos os itens dos 3 PDFs: cada veículo uma vez na aplicação (aplicacao_unica, RD-0222); a regra do
+    # site nas referências que vieram escritas (o Fraga e o site de 12/11 trazem AUTOIMPACT, fornecedor;
+    # montar.refs_pela_regra) e cada referência uma vez, na ordem da 1ª (o Fraga repete as do catálogo; a base às vezes
+    # também; RD-0194)
     import montar as _M
-    LOG['fora'], LOG['repetidas'], feitos = [], [], set()
+    LOG['fora'], LOG['repetidas'], LOG['apl_repetida'], feitos = [], [], [], set()
     n = lambda s: len(s.split(' · ')) if s else 0
     for f in fams:
         for r in f['rows']:
@@ -94,4 +158,8 @@ def aplicar(fams, filtro_moto=None):
             regra = _M.refs_pela_regra(antes); r['refs'] = _M.refs_unicas(regra)
             if regra != antes: LOG['fora'].append((r['code'], n(antes) - n(regra)))
             if r['refs'] != regra: LOG['repetidas'].append((r['code'], n(regra) - n(r['refs'])))
+            for k in ('segs', '_segs_antes_fraga'):          # o A4 usa a de antes do Fraga (print_cat)
+                if r.get(k):
+                    u = aplicacao_unica(r[k])
+                    if u != r[k]: r[k] = u; LOG['apl_repetida'].append((r['code'], k))
     return LOG

@@ -87,7 +87,7 @@ def markup(segs):
     return ''.join(out)
 
 
-datas_re = re.compile(r'(?<![\w/])((?:\d{2}/)?(?:19|20)\d{2})((?:–(?:\d{2}/)?(?:19|20)\d{2})|–|>)?(?![\w/])')
+datas_re = re.compile(r'(?<![\w/])((?:\d{2}/)?' + datas.Y + r')((?:–(?:\d{2}/)?' + datas.Y + r')|–|\+)?(?![\w/])')
 
 # ---------------------------------------------------------------- desenho
 _pc = {}
@@ -498,12 +498,13 @@ def pagina_sistema(dc, grupo, key, itens, pg):
     dc.end()
 
 
-# Trava dos PDFs (T-0019): fornecedor não sai em nenhum dos 3 PDFs (a AUTOIMPACT, das palhetas: R-20261120-184000-alexandre,
-# item 5). A lista é a do site (G.FORNECEDORES do scripts/gerar_site.py, RD-0220); a referência sai pelo refs_de
-# (montar.refs_pela_regra). Aqui o nome é procurado com até 3 sinais entre cada letra ("AUTO IMPACT", "Auto-Impact",
-# "AUTO.IMPACT"). Se ele voltar por qualquer texto, o build para e o PDF fica com o fim ".BLOQUEADO" (não entregar).
+# Trava dos PDFs (T-0019): fornecedor não sai em nenhum dos 3 PDFs: os FORNECEDORES (AUTOIMPACT, SUNRISE) do site
+# (G.FORNECEDORES do scripts/gerar_site.py, RD-0220, RD-0227; R-20261120-184000-alexandre, item 5, e R-20261120-194900-po);
+# a referência sai pelo refs_de (montar.refs_pela_regra). O nome é procurado pelo G.FORNECEDOR_RE do site (RD-0226), com
+# até 3 sinais entre cada letra ("AUTO IMPACT", "Auto-Impact", "Sun-Rise"). Se ele voltar por qualquer texto, o build para
+# e o PDF fica com o fim ".BLOQUEADO" (não entregar).
 from site_regras import G as _G
-TRAVA_PDF = re.compile('|'.join(r'[\W_]{0,3}'.join(map(re.escape, f)) for f in _G.FORNECEDORES), re.I)
+TRAVA_PDF = re.compile(_G.FORNECEDOR_RE, re.I)
 
 
 def trava_pdf(out):
