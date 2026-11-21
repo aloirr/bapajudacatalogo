@@ -43,6 +43,20 @@ def assinatura(c):
         c.number_format,)
 
 
+def subir(r: int, removidas) -> int:
+    """A linha r da versão anterior na versão nova, depois de tiradas as linhas de removidas (as de baixo sobem)."""
+    return r - sum(x < r for x in removidas)
+
+
+def parar(erros: list[str]) -> None:
+    """Para sem gravar, mostrando até 30 erros (da v21 em diante; os scripts antigos ficam como rodaram)."""
+    if erros:
+        print("[PARADO] nada foi gravado:")
+        for e in erros[:30]:
+            print("   ", e)
+        sys.exit(2)
+
+
 def acrescentar_log(wb, linhas: list[list]) -> int:
     """Acrescenta as linhas no fim do LOG_CORRECOES (nenhuma linha antiga sai). Devolve a última linha de antes."""
     lg = wb["LOG_CORRECOES"]
@@ -109,7 +123,6 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
             desloc, extra = leia_n, set(range(1, leia_n + 1))
         pode = celulas.get(nome, set())
         fora = removidas.get(nome, set())
-        sobe = (lambda r, f=tuple(sorted(fora)): r - sum(x < r for x in f)) if fora else (lambda r: r)
         novas = colunas_novas.get(nome, [])
         mc = wb_.max_column                  # guardado: ler wb_.cell() além dele aumenta o max_column
         ncol = mc + len(novas)
@@ -126,21 +139,21 @@ def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rot
         if novas and filtro:
             filtro = filtro.replace(get_column_letter(mc), get_column_letter(ncol))
         if fora and filtro:
-            filtro = re.sub(r"\d+$", lambda m: str(sobe(int(m.group(0)) + 1) - 1), filtro)
+            filtro = re.sub(r"\d+$", lambda m: str(subir(int(m.group(0)) + 1, fora) - 1), filtro)
         if wa.auto_filter.ref != filtro:
             dif.append(f"{nome}: auto_filter")
         if ({k: d.width for k, d in wa.column_dimensions.items() if k not in letras_novas}
                 != {k: d.width for k, d in wb_.column_dimensions.items()}):
             dif.append(f"{nome}: larguras de coluna")
         ha = {r: d.height for r, d in wa.row_dimensions.items() if d.height and r not in extra}
-        hb = {sobe(r) + desloc: d.height for r, d in wb_.row_dimensions.items() if d.height and r not in fora}
+        hb = {subir(r, fora) + desloc: d.height for r, d in wb_.row_dimensions.items() if d.height and r not in fora}
         if ha != hb:
             dif.append(f"{nome}: alturas de linha")
         for r in range(1, wb_.max_row + 1):
             if r in fora:
                 continue
             for c in range(1, ncol + 1):
-                ca, cb = wa.cell(sobe(r) + desloc, c), wb_.cell(r, c)
+                ca, cb = wa.cell(subir(r, fora) + desloc, c), wb_.cell(r, c)
                 conta[nome] += 1
                 if c > mc:                             # coluna nova: só as células permitidas têm valor
                     if (r, c) in pode:

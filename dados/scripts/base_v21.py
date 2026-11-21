@@ -32,7 +32,7 @@ from pathlib import Path
 import openpyxl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from base_comum import RAIZ, acrescentar_leia_me, acrescentar_log, limpo, rodar, versao  # noqa: E402
+from base_comum import RAIZ, acrescentar_leia_me, acrescentar_log, limpo, parar, rodar, subir, versao  # noqa: E402
 
 SIM = RAIZ / "dados" / "simulacoes" / "T-0017-v21" / "SIMULACAO_v21_T-0017.xlsx"
 TAREFA, DATA = "T-0017", "21/11/2026"
@@ -87,10 +87,8 @@ LEIA_ME = [
     ("VEICULOS (P14)", "ANO_FIM que se perdeu, só onde o texto da APLICACAO prova: ELE1084 Gol 1984 -> 1984–1994 "
                        "('1984->1994') e KF27 Civic 2006 -> 2006–2006 ('Civic 2006', sem o '→' dos outros) "
                        "(R-20261120-213900-alexandre) (T-0017)."),
-    ("Não entram", "Nada novo marcado ou escrito como duvidoso (P9 a P12 da simulação): na VEICULOS só mudam as 2 "
-                   "células da P14."),
-    ("Formato", "Mesmas abas e colunas da v20 (as 5 primeiras da PRODUTOS, que a BAP Central lê, na mesma ordem). A "
-                "PRODUTOS tem 3 linhas a menos. 443 linhas no LOG_CORRECOES (uma por código na PRODUTOS e uma por célula na "
+    ("Não entram", "Nada novo marcado ou escrito como duvidoso (P9 a P12 da simulação)."),
+    ("Formato", "Mesmas abas e colunas da v20 (as 5 primeiras da PRODUTOS, que a BAP Central lê, na mesma ordem). 443 linhas no LOG_CORRECOES (uma por código na PRODUTOS e uma por célula na "
                 "VEICULOS). Aprovado pelo Alexandre "
                 "em 20/11/2026 (R-20261120-213300-alexandre e R-20261120-213800-alexandre)."),
     (None, None),
@@ -178,11 +176,7 @@ def aplicar(wb, celulas):
             continue
         feitas[(n, c)] = depois
         obs.setdefault(cod, []).append((coluna, f"{coluna}: '{antes}' -> '{depois}' ({texto})"))
-    if erros:
-        print("[PARADO] nada foi gravado:")
-        for e in erros[:30]:
-            print("   ", e)
-        sys.exit(2)
+    parar(erros)
     for (n, c), v in feitas.items():
         ws.cell(n, c).value = v
 
@@ -252,9 +246,8 @@ def conferir_valores(p: Path, extra) -> list[str]:
     ws = wb["PRODUTOS"]
     dif_v = [f"VEICULOS {wb['VEICULOS'].cell(n, c).coordinate}: valor diferente do da gravação"
              for (n, c), v in feitas_v.items() if wb["VEICULOS"].cell(n, c).value != v]
-    sobe = lambda r: r - sum(x < r for x in REMOVIDAS)  # noqa: E731
-    dif = [f"PRODUTOS {ws.cell(sobe(n), c).coordinate}: valor diferente do da gravação"
-           for (n, c), v in feitas.items() if ws.cell(sobe(n), c).value != v]
+    dif = [f"PRODUTOS {ws.cell(subir(n, REMOVIDAS), c).coordinate}: valor diferente do da gravação"
+           for (n, c), v in feitas.items() if ws.cell(subir(n, REMOVIDAS), c).value != v]
     ficou = [r[0].value for r in ws.iter_rows(min_row=2, max_col=1) if limpo(r[0].value) in FALSAS]
     return dif + dif_v + ([f"PRODUTOS: as linhas falsas ainda estão lá: {ficou}"] if ficou else [])
 

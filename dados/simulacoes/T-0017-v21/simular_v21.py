@@ -397,7 +397,7 @@ for cod in ("Veículo", "HYUNDAI", "KIA MOTORS"):
 for cod in apl:
     if apl[cod] != APL0[cod] and re.search(r"\bnan\b", apl[cod]):
         raise SystemExit(f"[PARADO] sobrou nan em {cod}")
-sys.path.insert(0, "/home/user/wt-v21/scripts")
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
 import gerar_site as g  # noqa: E402  (só o refs_de, para medir o efeito do item 7 no site)
 
 ef7 = collections.Counter()
