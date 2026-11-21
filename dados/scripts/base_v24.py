@@ -2,8 +2,8 @@
 
 Pedido: R-20261121-102700-alexandre ("reveja tudo e valide os casos iguais"). Aprovado em R-20261121-112900-alexandre
 ("1) a": a v24 com os 21 veículos; "2) a": as regras de segurança ficam). A simulação é a da aba VALIDOS de
-dados/simulacoes/T-0017-v24/ (commit bdcd5e9). Regra fixa (R-20261120-213300): nada novo marcado nem escrito como
-duvidoso; nenhum produto sai.
+dados/simulacoes/T-0017-v24/ (commit bdcd5e9). Regra fixa (R-20261120-213300): nenhuma marca nova de ano incerto;
+nenhum produto sai.
 
 O que faz (regra 4 do CLAUDE.md):
 1. Para cada linha da VALIDOS (21 veículos em 12 códigos), depois de conferir o valor de hoje:
@@ -121,7 +121,7 @@ def aplicar(wb, linhas):
         log.append(["VEICULO_NOVO", "VEICULOS", a, b,
                     f"VEICULOS: linha nova no fim da aba, {v['FABRICANTE']} {v['MODELO']} {anos}, CILINDRADA "
                     f"{v['CILINDRADA'] or 'vazia'} (a linha do {b}, com a CILINDRADA do trecho copiado), separado, "
-                    f"sem MOTIVO e sem ANO_DUVIDA. Nada marcado como duvidoso. {origem}"])
+                    f"sem MOTIVO e sem ANO_DUVIDA. {origem}"])
     parar(erros)
     for (n, c), val in fp.items():
         wp.cell(n, c).value = val

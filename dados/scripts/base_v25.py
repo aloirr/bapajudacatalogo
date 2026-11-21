@@ -4,7 +4,7 @@ Pedido: R-20261121-112900-alexandre, item 4 ("coloque o palio no amt7500 assim c
 unificados antigos para validar"). Aprovado em R-20261121-154533-alexandre ("1) a", via po). A simulação é a de
 dados/simulacoes/T-0017-v25/: nenhum catálogo antigo tem Palio no AMT7500 ou nas referências dele, e a fonte é o anúncio
 da Cofap GP30120, aceito pelo Alexandre neste caso. Ficam de fora o "Palio, Siena" e o AMT7014. Regra fixa
-(R-20261120-213300): nada novo marcado nem escrito como duvidoso.
+(R-20261120-213300): nenhuma marca nova de ano incerto.
 
 O que faz (regra 4 do CLAUDE.md):
 1. AMT7500, APLICACAO: acrescenta no fim " ; FIAT - Palio Weekend Adventure 2000–2007 · s/ ABS" (o resto não muda);
@@ -86,7 +86,7 @@ def aplicar(wb, dados):
             f"{origem}"],
            ["VEICULO_NOVO", "VEICULOS", COD, None,
             f"VEICULOS: linha nova no fim da aba (linha {wv.max_row}), FIAT Palio Weekend Adventure 2000–2007, "
-            f"separado, sem MOTIVO e sem ANO_DUVIDA. Nada marcado como duvidoso. {origem}"]]
+            f"separado, sem MOTIVO e sem ANO_DUVIDA. {origem}"]]
     ult = acrescentar_log(wb, log)
     leia_n = acrescentar_leia_me(wb, LEIA_ME)
     print(f"  células: PRODUTOS 1; VEICULOS +1 linha; LOG_CORRECOES +{len(log)}; LEIA-ME +{leia_n}")
