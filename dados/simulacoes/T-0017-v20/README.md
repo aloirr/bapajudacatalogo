@@ -8,7 +8,7 @@ Gravada na v20 pelo `dados/scripts/base_v20.py`, depois da v19 (PR #60).
 
 ## O que foi gravado
 - **Fonte:** a v19 (sha256 `f4a610c9…8668`).
-- **Mudam a aba VEICULOS e 3 células da APLICACAO**, mais as linhas novas do LOG_CORRECOES (uma por código e aba) e do topo do LEIA-ME.
+- **Mudam a aba VEICULOS e 5 células da APLICACAO** (as 3 do 1996 e as 2 da V6a), mais as linhas novas do LOG_CORRECOES (uma por código e aba) e do topo do LEIA-ME.
   - As outras abas não mudam.
 - **As células são as da aba `VEICULOS_DEPOIS` desta simulação**, com as 9 recomendações (V1 a V9):
   - ANO_INICIO e ANO_FIM preenchidos (ANO_FIM vazio = em diante; ANO_INICIO vazio = até);
@@ -18,6 +18,16 @@ Gravada na v20 pelo `dados/scripts/base_v20.py`, depois da v19 (PR #60).
 - **Nenhuma linha entra nem sai:** são 17.270, e o veículo de cada uma (código, fabricante, modelo, versão e origem) não muda.
 - **Partida:** a simulação foi feita sobre a v19 recriada numa cópia. Refeita sobre a v19 gravada (PR #60), a VEICULOS sai idêntica: a P9 (CFR9006) só mexe na REFERENCIAS_CRUZADAS.
 - **O LEIA-ME** ganha no topo o bloco da v20 e o da v19, que a v19 não escreveu.
+
+## V6a: o New Civic dos TER (R-20261120-191700-alexandre)
+A V6a, aprovada no "4) a", também muda a APLICACAO. Ela foi gravada exatamente como na aba CASOS_DO_TESTES, na coluna "APLICACAO proposta (v20)".
+
+| Código | APLICACAO antes | APLICACAO depois |
+|---|---|---|
+| TER5599096 | HONDA - New Civic 06/2011 · Dir | HONDA - New Civic 2006–2011 · Dir |
+| TER5599097 | HONDA - New Civic 06/2011 · Esq | HONDA - New Civic 2006–2011 · Esq |
+
+- O "06" é 2006: o New Civic é de 2006 a 2011, como o par TAX10288. Na VEICULOS, os 2 já ficam com ANO_INICIO 2006 e ANO_FIM 2011.
 
 ## O 1960 que é 1996 (R-20261120-194600-alexandre)
 Como na P3 da v19, o "1960" era 1996 digitado errado. Muda só o ano; o resto do texto fica.
@@ -41,13 +51,12 @@ Como na P3 da v19, o "1960" era 1996 digitado errado. Muda só o ano; o resto do
 | SITUACAO (V5) | 2 |
 | MOTIVO (V5) | 2 |
 
-Na PRODUTOS, mudam 3 células da APLICACAO (o 1996).
+Na PRODUTOS, mudam 5 células da APLICACAO: as 3 do 1996 e as 2 da V6a.
 
-O LOG_CORRECOES ganha 3.818 linhas: 3.815 da VEICULOS (uma por código) e 3 da APLICACAO. O LEIA-ME ganha 13.
+O LOG_CORRECOES ganha 3.820 linhas: 3.815 da VEICULOS (uma por código) e 5 da APLICACAO. O LEIA-ME ganha 14.
 
 ## Fica para depois
-- **V6, APLICACAO do TER5599096 e do TER5599097** ("New Civic 06/2011" → "2006–2011"): é texto da PRODUTOS e não entrou nesta versão (além do 1996, só a VEICULOS muda).
-- **V7, JUH70010:** a v19 deixou "02/2009>" no texto. Se for "2002–2009", também é texto da PRODUTOS.
+- **V7, JUH70010:** a v19 deixou "02/2009>" no texto. Se for "2002–2009", é texto da PRODUTOS e não foi simulado.
 - **V8:** o conjunto de veículos que o texto da v19 mudaria (44 produtos), o "BMW X1" lido de "M14 X 1,5" e o "ml" lido como o modelo ML no extrator.
 - Tudo isso precisa de simulação própria (regra 3).
 
@@ -68,5 +77,5 @@ O resumo com as perguntas e as recomendações está em `recados/anexos/T-0017/v
 
 **Não muda:**
 - as 9 colunas de antes da VEICULOS, com a mesma ordem e o mesmo nome, e as 17.270 linhas;
-- o formato da aba PRODUTOS, com as 5 primeiras colunas que a BAP Central lê. O conteúdo da APLICACAO (coluna 3) muda em 3 células;
+- o formato da aba PRODUTOS, com as 5 primeiras colunas que a BAP Central lê. O conteúdo da APLICACAO (coluna 3) muda em 5 células;
 - a MODELOS_VEICULO e as outras abas.

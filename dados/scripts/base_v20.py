@@ -5,6 +5,8 @@ veículo): a) seguir as 9 recomendações (V1 a V9), 'aprovado', e gravar como v
 R-20261120-194600-alexandre ("2) 1996"): na APLICACAO do CXD13179, do ELE1018 e do ELE1030, o "1960>" do bloco
 "FORA DA FROTA BRASILEIRA - Fora DA Frota Nacional" é 1996 digitado errado (como a P3 da v19) e vira "1996>".
 A VEICULOS desses 3 códigos não tem o ano 1960 (o bloco não tem veículo), então lá nada muda por isso.
+A V6a, aprovada no mesmo "4) a", também muda a APLICACAO: no TER5599096 e no TER5599097, "HONDA - New Civic 06/2011"
+vira "HONDA - New Civic 2006–2011", como na aba CASOS_DO_TESTES da simulação ("APLICACAO proposta (v20)").
 A simulação aprovada é a de dados/simulacoes/T-0017-v20/ (cópia da recados/anexos/T-0017/veiculos-sim/). Ela foi
 feita sobre a v19 recriada numa cópia; refeita sobre a v19 gravada (PR #60), a VEICULOS sai idêntica (a P9 só mexe na
 REFERENCIAS_CRUZADAS).
@@ -16,13 +18,14 @@ O que faz (regra 4 do CLAUDE.md):
    do FLU15001 e do FLU15002 ("ml" é mililitro, não o Mercedes-Benz ML). Se algo não bater, para sem gravar.
    Única troca no texto da simulação: o MOTIVO da V5 diz "(T-0017, v19)" e é gravado como "(T-0017, v20)", a versão
    em que entra.
-2. Troca o "1960>" por "1996>" nas 3 células da APLICACAO (confere que é a única ocorrência de 1960 no texto).
+2. Troca o "1960>" por "1996>" nas 3 células da APLICACAO (confere que é a única ocorrência de 1960 no texto) e grava
+   a APLICACAO proposta da V6a nas 2 células do TER (confere que a de hoje é a "APLICACAO hoje (v19)" da simulação).
    Grava as células e acrescenta no fim do LOG_CORRECOES uma linha por código e aba, com o que mudou, a T-0017 e a
    data.
    No topo do LEIA-ME entram o bloco da v20 e o da v19 (a v19 não o escreveu e o título ficou "v18"; revisor do #60),
-   como da v15 à v18. Na PRODUTOS só mudam as 3 células da APLICACAO; as outras abas não mudam.
+   como da v15 à v18. Na PRODUTOS só mudam as 5 células da APLICACAO; as outras abas não mudam.
 3. Compara célula a célula (valor e formatação), em todas as abas, a base nova com a v19: só podem mudar essas
-   células (VEICULOS e as 3 da APLICACAO), as linhas novas do LOG_CORRECOES e as do topo do LEIA-ME (com o texto
+   células (VEICULOS e as 5 da APLICACAO), as linhas novas do LOG_CORRECOES e as do topo do LEIA-ME (com o texto
    conferido, não só a contagem); as 2 colunas novas só têm valor nas células da simulação.
 4. Grava a base e uma cópia idêntica em dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v20.xlsx.
 
@@ -58,6 +61,7 @@ CODIGOS = 3815
 APROVACAO_1960 = "R-20261120-194600-alexandre"
 COD_1960 = ("CXD13179", "ELE1018", "ELE1030")
 TROCA_1960 = ("Fora DA Frota Nacional 1960>", "Fora DA Frota Nacional 1996>")
+COD_V6 = ("TER5599096", "TER5599097")      # V6a: a APLICACAO proposta da aba CASOS_DO_TESTES
 
 LEIA_ME = [
     ("BASE BAP UNIFICADA v20 (20/11/2026)", None),
@@ -72,13 +76,15 @@ LEIA_ME = [
                       "não filtra; 2236 linhas) (V1 e V2)."),
     ("APLICACAO", "CXD13179, ELE1018 e ELE1030: 'FORA DA FROTA BRASILEIRA - Fora DA Frota Nacional 1960>' -> '... "
                   "1996>' (o 1960 era 1996 digitado errado, como a P3 da v19; R-20261120-194600-alexandre) (T-0017)."),
+    ("APLICACAO (V6)", "TER5599096 e TER5599097: 'HONDA - New Civic 06/2011' -> 'HONDA - New Civic 2006–2011' (o "
+                       "'06' é 2006, como o par TAX10288) (T-0017)."),
     ("VEICULOS (correção)", "FLU15001 e FLU15002 (fluido DOT 3 e DOT 4, universais): o 'Mercedes-Benz ML' era o '500 "
                             "ml'; SITUACAO separado -> duvidoso, com o motivo (V5). Nenhuma linha entrou nem saiu "
                             "(17270)."),
     ("Formato", "A VEICULOS ganha 2 colunas no fim (CILINDRADA e ANO_DUVIDA); as 9 de antes ficam na mesma ordem e com"
-                " o mesmo nome. Aba PRODUTOS com o formato igual ao da v19; só mudam 3 células da APLICACAO (as 5 "
-                "primeiras colunas, que a BAP Central lê, ficam na mesma ordem). 3818 linhas no LOG_CORRECOES (uma por"
-                " código e aba: 3815 da VEICULOS e 3 da APLICACAO). Aprovado pelo Alexandre em 20/11/2026 "
+                " o mesmo nome. Aba PRODUTOS com o formato igual ao da v19; só mudam 5 células da APLICACAO (as 5 "
+                "primeiras colunas, que a BAP Central lê, ficam na mesma ordem). 3820 linhas no LOG_CORRECOES (uma por"
+                " código e aba: 3815 da VEICULOS e 5 da APLICACAO). Aprovado pelo Alexandre em 20/11/2026 "
                 "(R-20261120-191700-alexandre: V1 a V9 como recomendado; R-20261120-194600-alexandre: o 1996)."),
     (None, None),
     ("BASE BAP UNIFICADA v19 (20/11/2026)", None),
@@ -107,8 +113,14 @@ def ler():
     cab = list(next(ad))
     il, ic, ip = cab.index("LINHA_NA_VEICULOS"), cab.index("CODIGO_BAP"), cab.index("PERGUNTA")
     perguntas = {int(r[il]): (limpo(r[ic]), limpo(r[ip])) for r in ad if r[il] is not None}
+    ct = wb["CASOS_DO_TESTES"].iter_rows(values_only=True)
+    cab = list(next(ct))
+    ih, ix = cab.index("APLICACAO hoje (v19)"), cab.index("APLICACAO proposta (v20, não entra na v19)")
+    v6 = {limpo(r[0]): (r[ih], r[ix]) for r in ct if r and limpo(r[1]) == "V6"}
     wb.close()
-    return linhas, perguntas
+    if sorted(v6) != sorted(COD_V6):
+        raise SystemExit(f"[PARADO] V6: a simulação traz {sorted(v6)}; esperado {list(COD_V6)}")
+    return linhas, perguntas, v6
 
 
 def depois(cab: list[str], linhas: list[list]) -> list[list]:
@@ -126,7 +138,7 @@ def depois(cab: list[str], linhas: list[list]) -> list[list]:
 
 
 def aplicar(wb, dados):
-    sim, perguntas = dados
+    sim, perguntas, v6 = dados
     ws = wb[ABA]
     cab = [limpo(c.value) for c in ws[1]]
     cab_sim = [limpo(v) for v in sim[0]]
@@ -190,26 +202,36 @@ def aplicar(wb, dados):
 
     linhas = [["VEICULO_ANO_CILINDRADA", ABA, cod, None, obs_log(k, regras[cod])]
               for cod, k in sorted(por_cod.items())]
-    feitas_1960, linhas_1960 = corrigir_1960(wb)
-    ult = acrescentar_log(wb, linhas + linhas_1960)
+    feitas_aplic, linhas_aplic = corrigir_aplicacao(wb, v6)
+    ult = acrescentar_log(wb, linhas + linhas_aplic)
     leia_n = acrescentar_leia_me(wb, LEIA_ME)
-    print(f"  células: VEICULOS {dict(conta)} em {len(por_cod)} códigos; PRODUTOS APLICACAO {len(feitas_1960)}; "
-          f"LOG_CORRECOES +{len(linhas) + len(linhas_1960)}; LEIA-ME +{leia_n}")
-    return {ABA: set(feitas), "PRODUTOS": set(feitas_1960)}, ult, leia_n, (feitas, feitas_1960, cab_sim)
+    print(f"  células: VEICULOS {dict(conta)} em {len(por_cod)} códigos; PRODUTOS APLICACAO {len(feitas_aplic)}; "
+          f"LOG_CORRECOES +{len(linhas) + len(linhas_aplic)}; LEIA-ME +{leia_n}")
+    return {ABA: set(feitas), "PRODUTOS": set(feitas_aplic)}, ult, leia_n, (feitas, feitas_aplic, cab_sim)
 
 
-def corrigir_1960(wb) -> tuple[dict, list[list]]:
-    """O "1960>" -> "1996>" na APLICACAO dos 3 códigos (R-20261120-194600-alexandre).
+def corrigir_aplicacao(wb, v6: dict) -> tuple[dict, list[list]]:
+    """As 5 células da APLICACAO: o "1960>" -> "1996>" dos 3 códigos (R-20261120-194600-alexandre) e a V6a dos 2 TER.
 
     Para (sem gravar) se o texto não for o esperado."""
     ws = wb["PRODUTOS"]
     cab = [limpo(c.value) for c in ws[1]]
     ic, ia = cab.index("CODIGO_BAP") + 1, cab.index("APLICACAO") + 1
     achados = {limpo(ws.cell(n, ic).value): n for n in range(2, ws.max_row + 1)
-               if limpo(ws.cell(n, ic).value) in COD_1960}
-    if sorted(achados) != sorted(COD_1960):
-        raise SystemExit(f"[PARADO] 1960: achados {sorted(achados)} na PRODUTOS; esperado {list(COD_1960)}")
+               if limpo(ws.cell(n, ic).value) in COD_1960 + COD_V6}
+    if sorted(achados) != sorted(COD_1960 + COD_V6):
+        raise SystemExit(f"[PARADO] APLICACAO: achados {sorted(achados)} na PRODUTOS; esperado {COD_1960 + COD_V6}")
     feitas, linhas = {}, []
+    for cod in COD_V6:
+        n, (hoje, proposta) = achados[cod], v6[cod]
+        antes = ws.cell(n, ia).value
+        if antes != hoje or not proposta or proposta == hoje:
+            raise SystemExit(f"[PARADO] {cod}: a APLICACAO de hoje não é a 'APLICACAO hoje (v19)' da simulação")
+        feitas[(n, ia)] = proposta
+        linhas.append(["CORRECAO_APLICACAO", "PRODUTOS", cod, None,
+                       f"APLICACAO: '{antes}' -> '{proposta}' (V6a: o '06' é 2006; o New Civic é de 2006 a 2011, como "
+                       f"o par TAX10288). Antes e depois em dados/simulacoes/T-0017-v20/ (aba CASOS_DO_TESTES); "
+                       f"aprovado em {APROVACAO} (V6a). {TAREFA} (v20), {DATA}"])
     for cod in COD_1960:
         n = achados[cod]
         antes = str(ws.cell(n, ia).value or "")
@@ -246,11 +268,11 @@ def obs_log(k: collections.Counter, regras: set[str]) -> str:
 
 
 def conferir_valores(p: Path, extra) -> list[str]:
-    """Na base gravada, a VEICULOS inteira é a da simulação (com a troca da V5), linha a linha, e as 3 da APLICACAO."""
-    feitas, feitas_1960, cab_sim = extra
+    """Na base gravada, a VEICULOS inteira é a da simulação (com a troca da V5), linha a linha, e as 5 da APLICACAO."""
+    feitas, feitas_aplic, cab_sim = extra
     wb = openpyxl.load_workbook(p)
     dif = [f"PRODUTOS {wb['PRODUTOS'].cell(n, c).coordinate}: valor diferente do da gravação"
-           for (n, c), v in feitas_1960.items() if wb["PRODUTOS"].cell(n, c).value != v]
+           for (n, c), v in feitas_aplic.items() if wb["PRODUTOS"].cell(n, c).value != v]
     ws = wb[ABA]
     sim = depois(cab_sim, ler()[0][1:])
     base = list(ws.iter_rows(min_row=2, values_only=True))
