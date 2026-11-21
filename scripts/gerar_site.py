@@ -129,6 +129,9 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
         k = (re.sub(r"\W", "", sem_acento(x["m"]).upper()), so_codigo(x["c"]))
         if k not in vistos and not (proprio and k[1] == proprio):
             vistos.add(k); unicas.append(x)
+    # a referência da concorrência (CONCORRENTES_SO_NA_REF) vai por último, para a Bosch e a Tecfil ficarem à vista (T-0017,
+    # "1 a"); o sort é estável: a ordem da célula fica entre elas e entre as outras. Os PDFs usam este refs_de (montar.py).
+    unicas.sort(key=lambda x: so_codigo(x["m"]) in CONCORRENTES_SO_NA_REF)
     return unicas
 
 
