@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0239**.
+O próximo número livre é o **RD-0253**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -75,7 +75,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0209 | — | — | parecer do PR #54 (coluna Ano na aplicação) | achado do parecer do #54 | T-0017 | web-site | CORRIGIDO (22c342e, #54) |
 | RD-0210 | — | — | parecer do PR #54 | achado do parecer do #54 | T-0017 | web-site | CORRIGIDO (22c342e, #54) |
 | RD-0211 | — | — | parecer do PR #54 | achado do parecer do #54 | T-0017 | web-site | CORRIGIDO (22c342e, #54) |
-| RD-0212 | — | — | parecer dos PRs #54 a #59 [SUPOSIÇÃO: dono web-site] | achado deixado em aberto | T-0017 | web-site | ABERTO |
+| RD-0212 | baixa | código (comentário) | site/app.js, servemNoVeiculo | o comentário repetia a origem do VEI_LEVE explicada no render; termina em "O VEI_LEVE vem do render." (parecer do PR #58) | T-0018 | web-site | CORRIGIDO (f4636ec, #81) |
 | RD-0213 | — | — | parecer do PR #59 (AUTOIMPACT fora do site, TRAVA) | achado do parecer do #59 | T-0017 | web-site | CORRIGIDO (4943a0f, #59) |
 | RD-0214 | — | — | parecer do PR #59 | achado do parecer do #59 | T-0017 | web-site | CORRIGIDO (4943a0f, #59) |
 | RD-0215 | — | texto (R1) | site, cartões com veículo | a tag "✓ Compatível" repete a faixa do veículo nos cartões. **Era o RD-0175 do parecer da tag**, renumerado | T-0018 | web-site | MANTIDO (Alexandre, R-20261120-191700, "3) a") |
@@ -102,12 +102,34 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0236 | baixa | doc | .coord/tarefas/T-0017.md | repetição nos docs do #73 | T-0017 | gerente-projetos | CORRIGIDO (11f2353, #73) |
 | RD-0237 | baixa | doc | .coord/tarefas/T-0020.md | repetição nos docs do #73 | T-0020 | gerente-projetos | CORRIGIDO (11f2353, #73) |
 | RD-0238 | baixa | doc | .coord/tarefas/T-nnnn.md, linha Branch | repetição nos docs do #73 | — | gerente-projetos | CORRIGIDO (11f2353, #73) |
+| RD-0239 | — | código | base_comum.py, comparar; base_v21.py, conferir_valores | a conta da linha que sobe depois das removidas escrita 2 vezes (vira `subir(r, removidas)` no base_comum) | T-0017 | catalogo-dados | CORRIGIDO (117c2b0; 92170da, #75) |
+| RD-0240 | — | código | dados/scripts/base_v21.py, aplicar | o bloco "[PARADO] nada foi gravado" escrito no script (vira `parar(erros)` no base_comum, da v21 em diante) | T-0017 | catalogo-dados | CORRIGIDO (117c2b0; 92170da, #75) |
+| RD-0241 | — | texto (base) | base v21, aba LEIA-ME (dados/scripts/base_v21.py, LEIA_ME) | 2 frases repetidas: "na VEICULOS só mudam as 2 células da P14" e "A PRODUTOS tem 3 linhas a menos" | T-0017 | catalogo-dados | CORRIGIDO (117c2b0; 92170da, #75) |
+| RD-0242 | — | doc | dados/simulacoes/T-0017-v21/README.md, P14 | o bloco [SUPOSIÇÃO] repetia o KF27 e o CV-F35 da lista logo acima (vira uma frase em cada item) | T-0017 | catalogo-dados | CORRIGIDO (e1e185d; 92170da, #75) |
+| RD-0243 | — | código | catalogo_grafico/gerador/print_cat.py; tags.py | o subtítulo do cartão de destaque com as constantes (7 + 16.5 + 2, 7.4/9.6, 2 linhas) e a altura das tags repetidas na medida e no desenho (viram `SB_Y`, `SB_FS`/`SB_LH`, `TAG_LINHAS` e `tags.altura`) | T-0019 | catalogo-grafico | CORRIGIDO (f87ed94; 7f063a9, #77) |
+| RD-0244 | — | código | dados/scripts/base_v22.py, conferir_valores | `subir()` com `SEM_REMOVIDAS` vazio, sem efeito (sai; usa `ws.cell(n, c)` direto) | T-0017 | catalogo-dados | CORRIGIDO (9f9dbfc; bfad64e, #78) |
+| RD-0245 | média | doc | dados/simulacoes/T-0017-v23/README.md | o README repetia o RESUMO e a seção Arquivos | T-0017 | catalogo-dados | CORRIGIDO (84b9e6f, fb3f533; 2945a37, #82) |
+| RD-0246 | baixa | doc | dados/simulacoes/T-0017-v23/RESUMO.md | o trecho da Kia dito 2 vezes | T-0017 | catalogo-dados | CORRIGIDO (84b9e6f; 2945a37, #82) |
+| RD-0247 | média | código | dados/scripts/base_v23.py | `vazio`, `conferir_valores` e a leitura da ANTES_DEPOIS copiados da v22 (vão para o base_comum) | T-0017 | catalogo-dados | CORRIGIDO (2165c8c; 2945a37, #82) |
+| RD-0248 | baixa | texto (base) | base v23, aba LEIA-ME | a linha "SCE14002: nada muda" à parte; o LEIA-ME ficou +6 | T-0017 | catalogo-dados | CORRIGIDO (2165c8c; 2945a37, #82) |
+| RD-0249 | média | doc | catalogo_grafico/simulacoes/T-0019-pdf-v23/README.md | o antes e o depois repetidos, a Linha Moto 2 vezes e "Nenhum script mudou" contra o 2fe2940 | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82; 6d5ac4c, #84) |
+| RD-0250 | baixa | doc | catalogo_grafico/LEIA-ME.md:85 | o histórico da rodada dentro do guia | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82; 6d5ac4c, #84) |
+| RD-0251 | baixa | código (docstring de teste) | catalogo_grafico/gerador/teste_fraga_complementos.py | a docstring repetia a regra do "DE" e o comando | T-0019 | catalogo-grafico | CORRIGIDO (1aa3f82; 6d5ac4c, #84) |
+| RD-0252 | média | texto (PDF) | A4 p21 e Digital p110, SCE14002: catalogo_grafico/gerador/detalhe.py (aplicar/compacto/_tail), print_cat.py:261 | o subtítulo do cartão repete a aplicação e estica a faixa dos 5 cartões; já existia antes da v23 | T-0019 | catalogo-grafico | ABERTO (Simule; fora da rodada R-20261120-235000-alexandre, que não muda layout) |
 
 ## Notas
 
 ### Registros de 20/11/2026, noite
 - Do RD-0193 ao RD-0235, os achados vêm dos pareceres dos PRs #54 a #70, sem relatório por PR no Git; a coluna Resumo diz só "achado do parecer do #N" quando o recado não guardou o texto.
 - O RD-0175 e o RD-0176 do parecer da tag passaram a RD-0215 e RD-0216. [SUPOSIÇÃO] Os números do RD-0174 ao RD-0192, do RD-0195 ao RD-0198 e do RD-0203 ao RD-0206 saíram em pareceres sem linha aqui (o RD-0196 ao RD-0198 corrigidos no #53; o RD-0203 e o RD-0204, no PR do celular).
+
+### Registros de 20/11/2026, fim da noite (PRs #75 a #84)
+- RD-0212: fechado pelo #81 (f4636ec). O achado era do parecer do PR #58 (T-0018); a linha antiga dizia T-0017 e "PRs #54 a #59".
+- RD-0239 a RD-0244: o git confirma o número, o arquivo e a correção em cada commit (117c2b0, e1e185d, f87ed94, 9f9dbfc), e os squashes 92170da (#75), 7f063a9 (#77) e bfad64e (#78) têm o mesmo conteúdo dos heads aprovados. [SUPOSIÇÃO] A severidade não ficou no git nem nos recados; fica "—".
+- RD-0245 a RD-0248: corrigidos antes do merge do #82 (LIBERADO no fb3f533, R-20261121-010800-po).
+- RD-0249 a RD-0252: na reconferência dos PDFs, a numeração do RD-0249 ao RD-0251 saiu trocada; vale a do parecer original, a desta tabela.
+- RD-0252 mexe no layout do PDF: é "Simule" (o catalogo-grafico mostra antes, e a simulação vai ao Alexandre pelo po).
+- Severidades do RD-0212 e do RD-0245 ao RD-0252 e numeração do RD-0249 ao RD-0251: dos pareceres do corretor-redundancias entregues ao gerente-projetos em 21/11/2026, não versionados [SUPOSIÇÃO quanto à fonte versionada].
 
 ### Renumerações (20/11/2026)
 
