@@ -46,17 +46,24 @@
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   // Ano sem fim na tela, na aplicação e na descrição (T-0018, R-20261120-195900 e R-20261120-201100-alexandre):
   // "2015>", "2015 →", "2015->", "2015 em Diante" e "2015–" sem o ano final aparecem como "2015+"; o leitor de tela
-  // ouve "2015 em diante" (o "+" fica escondido dele e o " em diante" vai na .vh). A faixa com fim ("2012–2016",
-  // "1998>2009", "2012>20", "1999->2008") não muda. Só o desenho: o JSON, a busca e a leitura dos anos continuam com
-  // o texto da base.
-  const RX_ANO_ABERTO = /(?<![\d\/])((?:\d{2}\/){0,2}(?:19|20)\d{2})(?:\s*-?>+|\s*→|\s+em\s+diante\b|–)(?!\s*\d)/gi;
-  const ANO_MAIS = '<span aria-hidden="true">+</span><span class="vh"> em diante</span>';
+  // ouve "2015 em diante" (o "+" fica escondido dele e o EM_DIANTE vai na .vh). A faixa com fim não muda. Só o
+  // desenho: o JSON, a busca e a leitura dos anos continuam com o texto da base.
+  // O ano da aplicação ("2011", "01/1979", "01/01/2012"); a leitura dos pedaços só de ano (FAIXA_APL) também usa.
+  const ANO_APL = String.raw`(?:\d{2}\/){0,2}(?:19|20)\d{2}`;
+  // Os marcadores são os do "em diante" do FAIXA_APL, mais o ">>", o "->" e o "–" sem o ano final; sem o "até" (o
+  // "2014 até" sem fim não é ano aberto, PR #54). Depois do marcador, só o ano que fecha a faixa (4 dígitos, com o
+  // mês ou não, ou 2 dígitos) ou o número colado no marcador fazem dele uma faixa com fim: "2012>20", "1998>2009",
+  // "2012 > 2016", "2007–06/2009", "2012–2016", "2012–16", "1999->2008" e os colados "2015–20162017", "2008–20202024"
+  // e "09/1993>1201". Com espaço e outro número ("2015> 3CIL", "2001> 206 1.4"), é ano aberto.
+  const RX_ANO_ABERTO = new RegExp(String.raw`(?<![\d\/])(${ANO_APL})(?:\s*-?>+(?!>)|\s*→|\s+em\s+diante\b|–)(?!\d|\s*(?:${ANO_APL}|\d{2}(?!\d)))`, "gi");
+  const EM_DIANTE = " em diante";
+  const ANO_MAIS = `<span aria-hidden="true">+</span><span class="vh">${EM_DIANTE}</span>`;
   // o ano colado ao nome seguinte ("2001>GM: Equipa", "2014>Seat") ganha um espaço depois do "+": "2001+ GM: Equipa"
   const espacoDepois = (t, i) => (/[\p{L}(]/u.test(t.charAt(i)) ? " " : "");
   const anoMaisHtml = (s) => { const t = String(s == null ? "" : s); let h = "", k = 0;
     for (const m of t.matchAll(RX_ANO_ABERTO)) { h += esc(t.slice(k, m.index)) + esc(m[1]) + ANO_MAIS; k = m.index + m[0].length; h += espacoDepois(t, k); }
     return h + esc(t.slice(k)); };
-  const anoMaisTxt = (s, fim = "+") => String(s == null ? "" : s) // o title e o título da aba ("+"); o alt (" em diante")
+  const anoMaisTxt = (s, fim = "+") => String(s == null ? "" : s) // o title e o título da aba ("+"); o alt (EM_DIANTE)
     .replace(RX_ANO_ABERTO, (x, ano, i, t) => ano + fim + espacoDepois(t, i + x.length));
   const MINUSC = new Set(["e", "de", "da", "do", "das", "dos", "com", "sem", "para", "p/", "c/", "s/"]);
   const titulo = (s) => bonito(s); // um nome sem caixa alta só (bonito, mais abaixo)
@@ -458,7 +465,7 @@
   const SEM_FOTO = '<img src="assets/logo_escuro.png" alt="">Foto em breve'; // o miolo do "Foto em breve"
   // a foto grande (produto) carrega logo e na frente (fetchpriority); no cartão, lazy, menos os da 1ª linha (logo)
   function fotoHtml(p, grande, logo) {
-    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + anoMaisTxt(p.d, " em diante"))}" loading="${grande || logo ? "eager" : "lazy"}"${grande ? ' fetchpriority="high"' : ""} onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:${esc(JSON.stringify(SEM_FOTO)).replace(/"/g, "&quot;")}}))">`;
+    if (p.i) return `<img src="img/${encodeURIComponent(p.i)}" alt="${esc(p.c + " · " + anoMaisTxt(p.d, EM_DIANTE))}" loading="${grande || logo ? "eager" : "lazy"}"${grande ? ' fetchpriority="high"' : ""} onerror="(this.closest('.foto-zoom')||this).replaceWith(Object.assign(document.createElement('div'),{className:'sem-foto',innerHTML:${esc(JSON.stringify(SEM_FOTO)).replace(/"/g, "&quot;")}}))">`;
     return `<div class="sem-foto">${SEM_FOTO}</div>`;
   }
   // a foto com o botão de ampliar (no cartão e no produto); sem foto, só o "Foto em breve"
@@ -1445,8 +1452,8 @@
   const cilDe = (t) => [...String(t || "").matchAll(RX_CIL)].map((m) => m[1].replace(",", ".") + (m[2] ? " " + m[2] + "V" : ""));
   // Ano da aplicação: "2011", "01/1979", "01/01/2012". O pedaço só de ano: "2011 até 2014", "2009>", "2007–2012",
   // "2014 em Diante", "até 2009", "- 12/2020", "01/01/2012 A 31/12/2015", "2000–2003 / 2002>", "(2009>)" e a lista
-  // "2012, 2013, 2014". "1924–1979 até 2026" (modelo de caminhão na frente) não é só ano.
-  const ANO_APL = String.raw`(?:\d{2}\/){0,2}(?:19|20)\d{2}`;
+  // "2012, 2013, 2014". "1924–1979 até 2026" (modelo de caminhão na frente) não é só ano. O ANO_APL fica no começo,
+  // antes do RX_ANO_ABERTO, que também usa.
   const FAIXA_APL = String.raw`${ANO_APL}(?:\s*(?:at[ée]|a|–|-)\s*${ANO_APL})?(?:\s*(?:>|→|em diante|at[ée]))?`;
   const SO_ANO = new RegExp(String.raw`^(?:\(?(?:[-–]\s*|at[ée]\s+)?${FAIXA_APL}(?:\s*\/\s*${FAIXA_APL})?\)?|${ANO_APL}(?:\s*,\s*${ANO_APL})+)$`, "i");
   const RX_ANO = new RegExp(String.raw`(?<!\d)(?:\d{2}\/){0,2}((?:19|20)\d{2})(?!\d)`, "g");
