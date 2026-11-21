@@ -48,3 +48,5 @@ O resumo com as perguntas e as recomendações está em `recados/anexos/T-0017/v
 - A BAP Central lê as 5 primeiras colunas da PRODUTOS: CODIGO_BAP, DESCRICAO, APLICACAO, REFERENCIAS_CRUZADAS e DADOS_ADICIONAIS.
   - CODIGO_BAP, DESCRICAO e DADOS_ADICIONAIS não mudam.
   - O **conteúdo** da APLICACAO e da REFERENCIAS_CRUZADAS muda. Isso pede um aviso de conteúdo, e não de formato.
+- O histórico "| ANTERIOR" fica na REFERENCIAS_CRUZADAS (só sai o preço dele) e o site o corta no `refs_de` do `gerar_site.py`.
+  - A base também é lida pela BAP Central e pelo PDF, que não passam pelo refs_de; o filtro do site fica como proteção.
