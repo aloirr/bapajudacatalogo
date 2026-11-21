@@ -5,8 +5,9 @@ SIMULACAO_v24_T-0017.xlsx (LEIA, VALIDOS, FORA, GENERICAS, AMT7500_AMT7014) e nu
 
 Regra de prova: o veículo V entra no produto A quando outro produto B tem a MESMA referência (marca + código, que
 não seja genérica), a mesma FAMILIA, peça, medida e POSICAO, LADO compatível, nada que os separe (outra referência
-da mesma marca, ABS, Locker, cabine, c/ ou s/, DIFERENCIAL, ITEM_PARECIDO) e B já tem V com ano certo na VEICULOS,
-que bate com a APLICACAO de B. O ano vem de B, nunca da internet. Cada teste que falha é um motivo da aba FORA.
+da mesma marca, ABS, Locker, cabine, c/ ou s/, DIFERENCIAL, ITEM_PARECIDO) e o trecho de V na APLICACAO de B se
+isola sem ambiguidade, com ano que bate com a VEICULOS de B. O trecho entra em A COPIADO de B, literal; o ano nunca
+vem da internet. Cada teste que falha é um motivo da aba FORA.
 
 Uso: python3 -I simular_v24.py <base.xlsx> <pasta_saida>
 """
@@ -28,7 +29,7 @@ from gerar_site import refs_de, sem_acento, so_codigo  # noqa: E402  (a mesma le
 GENERICA_CODIGOS = 5        # [SUPOSIÇÃO] referência em 5 ou mais códigos BAP é "muitos códigos"
 SEM_MARCA = re.compile(r"^([A-Za-zÀ-ú][A-Za-zÀ-ú&-]{1,20})\s+((?:[A-Za-z]{1,4}\s+)?\S*\d\S*)$")   # "Nakata HG 33010"
 LADO_OS_DOIS = {"", "ESQUERDO E DIREITO"}        # [SUPOSIÇÃO] sem lado = os dois lados
-MARCAS = {"ABS": r"(?:c/|s/|com|sem)\s*abs", "Locker": r"locker",
+MARCAS = {"ABS": r"[cs]/ abs", "Locker": r"locker",
           "cabine": r"cab(?:ine|\.)\s*(?:dupla|simples|estendida)", "c/ ou s/": r"\b[cs]/\s*[a-zà-ú][a-zà-ú.]*"}
 # palavras da DESCRICAO que não mudam a peça: embalagem ("JOGO VELA" = "VELA UNIDADE"), ligação, posição e lado
 NEUTRAS = {"JOGO", "PAR", "UNIDADE", "UND", "UN", "DE", "DA", "DO", "DAS", "DOS", "E", "DIANTEIRO", "DIANTEIRA",
@@ -36,12 +37,17 @@ NEUTRAS = {"JOGO", "PAR", "UNIDADE", "UND", "UN", "DE", "DA", "DO", "DAS", "DOS"
 MOTIVOS = ["referência genérica (suspeita)", "outra referência da mesma marca diverge (item diferente)",
            "família diferente", "produto ou peça diferente (PRODUTO/DESCRICAO)",
            "medida diferente (DESCRICAO/DETALHE_CATALOGO)", "montadoras sem nada em comum entre A e B (suspeita)",
-           "posição diferente", "lado diferente",
-           "muda ABS/s/ ABS", "muda Locker", "muda cabine",
+           "posição diferente", "lado diferente", "muda ABS/s/ ABS", "muda Locker", "muda cabine",
            "muda c/ ou s/ (ex.: c/ parafuso, c/ pivô)", "diferença no DIFERENCIAL/ITEM_PARECIDO",
-           "veículo já está na APLICACAO de A", "V sem ano em B",
-           "ano de V na VEICULOS de B não bate com a APLICACAO de B", "linha de V em B é duvidosa ou tem ANO_DUVIDA",
-           "anos diferentes entre os produtos B", "só há anúncio da internet como prova"]
+           "veículo já está na APLICACAO de A", "trecho de V em B não isolável", "V sem ano no trecho de B",
+           "ano de V na VEICULOS de B não bate com o trecho de V em B",
+           "as faixas do trecho de V em B têm intervalo (a VEICULOS juntaria)", "linha de V em B é duvidosa ou tem ANO_DUVIDA",
+           "trechos diferentes entre os produtos B",
+           "[SUPOSIÇÃO] V já está em A com outro trecho: somar trecho a veículo que já existe fica sem método",
+           "só há anúncio da internet como prova"]
+M = {m: i for i, m in enumerate(MOTIVOS)}
+BLOCO_FAB = re.compile(r"^([A-ZÀ-Ú][A-ZÀ-Ú0-9/&. -]*?)\s+-\s+(.*)$")     # "VW - Polo ...", "VW/FORD/SEAT - Parati"
+ANO = re.compile(r"(?<!\d)(?:19|20)\d\d(?!\d)")
 ANUNCIO = ("COFAP", "GP30120", "Palio Weekend Adventure", "anúncios ligam a Cofap GP30120 ao 'Palio Weekend Adventure "
            "2000/2007'; nenhum produto BAP com essa referência tem o Palio")
 FOCO = ("AMT7500", "AMT7014", "AMT7506", "AMT7510")
@@ -61,18 +67,23 @@ def chaves(texto, codigo):
             if not achou:
                 continue
             m, c = achou.groups()
-        partes = [so_codigo(x) for x in re.split(r"\s*[,/]\s*", c)]
-        if any(len(x) < 3 for x in partes):            # "ARL4152 /1" e "PSC80/2" são outro código, não dois
-            partes = [so_codigo(c)]
-        for k in partes:
-            if re.search(r"\d", k) and len(k) >= 3:
+        for cc in re.split(r"\s+/\s+|\s*,\s*", c):      # lista de códigos: " / " ou ","
+            k = so_codigo(cc)
+            # código com "/" (medida de pneu "HB37 110/70-17", "PD/62-NA", "ARL4152 /1") não vira referência
+            if "/" not in cc and re.search(r"\d", k) and len(k) >= 3:
                 out.add((so_codigo(m), k))
     return out
 
 
+def padrao(t):
+    """"com abs", "c/abs" e "c/ abs" são o mesmo; "sem abs", "s/abs" e "s/ abs" também (vale para todo c/ e s/)."""
+    t = re.sub(r"\bsem\s+", "s/ ", re.sub(r"\bcom\s+", "c/ ", re.sub(r"\s+", " ", t)))
+    return re.sub(r"\b([cs])/\s*", r"\1/ ", t)
+
+
 def marcas(p):
     """ABS, Locker e cabine do texto do produto; o que vem depois de "exc."/"exceto" no trecho é exclusão."""
-    t = " · ".join(limpo(p[k]) for k in ("DESCRICAO", "APLICACAO", "DIFERENCIAL", "DETALHE_CATALOGO")).lower()
+    t = padrao(" · ".join(limpo(p[k]) for k in ("DESCRICAO", "APLICACAO", "DIFERENCIAL", "DETALHE_CATALOGO")).lower())
     sai = {}
     for nome, rx in MARCAS.items():
         achados = set()
@@ -80,7 +91,7 @@ def marcas(p):
             corte = re.search(r"\bexc(?:eto|\.)", trecho)
             for m in re.finditer(rx, trecho):
                 exc = corte and m.start() > corte.start()
-                achados.add(("exc. " if exc else "") + re.sub(r"\s+", " ", m.group(0)))
+                achados.add(("exc. " if exc else "") + m.group(0))
         sai[nome] = tuple(sorted(achados))
     return sai
 
@@ -106,6 +117,52 @@ def diverge(ra, rb):
     for m, c in rb:
         mb[m].add(c)
     return any(not ma[m] & mb[m] for m in set(ma) & set(mb))
+
+
+def itens(texto):
+    """(prefixo, item) da APLICACAO: blocos pelo ";" (com o "FAB - " do começo) e itens pelo "·" e pela ","."""
+    for bloco in re.split(r"\s*;\s*|\n+", limpo(texto)):
+        m = BLOCO_FAB.match(bloco)
+        pref, corpo = (m.group(1), m.group(2)) if m else ("", bloco)
+        for it in re.split(r"\s+·\s+|,\s+", corpo):
+            if it.strip():
+                yield pref, it.strip()
+
+
+def trecho(texto, nomes, maiores):
+    """Os itens de V, literais: começam pelo nome (ou apelido) de V e não por um modelo maior ("Polo Sedan" não é
+    "Polo"). None quando V aparece fora do começo de um item (não isolável) ou em blocos de prefixo diferente."""
+    comeca = lambda n, xs: any(n == x or n.startswith(x + " ") for x in xs)      # noqa: E731
+    achados = [(p, it) for p, it in itens(texto) if comeca(norm(it), nomes) and not comeca(norm(it), maiores)]
+    t = norm(texto)
+    def pos(xs):
+        return {m.start() for x in xs for m in re.finditer(rf"(?<![A-Z0-9]){re.escape(x)}(?![A-Z0-9])", t)}
+
+    if not achados or len(pos(nomes) - pos(maiores)) != len(achados) or len({p for p, _ in achados}) > 1:
+        return None
+    return achados[0][0], [it for _, it in achados]
+
+
+def faixa(its):
+    """(início, fim, buraco) do trecho: o menor e o maior ano (fim None quando um item é "AAAA>" ou "em diante") e se
+    as faixas deixam anos de fora no meio (2002–2006 e 2012–2014: a VEICULOS juntaria em 2002–2014)."""
+    faixas = []
+    for it in its:
+        a = [int(x) for x in ANO.findall(it)]
+        if not a:
+            return None
+        faixas.append((min(a), 9999 if re.search(rf"{max(a)}\s*>|em diante", it, re.I) else max(a)))
+    faixas.sort()
+    ini, fim, buraco = faixas[0][0], faixas[0][1], False
+    for i, f in faixas[1:]:
+        buraco |= i > fim + 1
+        fim = max(fim, f)
+    return ini, None if fim == 9999 else fim, buraco
+
+
+def cilindradas(its):
+    achadas = re.findall(r"(?<![\d.,])(\d[.,]\d)(?![\d.,])", " ".join(its))
+    return " / ".join(sorted({x.replace(",", ".") for x in achadas}))
 
 
 def anos(v):
@@ -140,92 +197,119 @@ def main(base, saida):
             idx[k].add(c)
     rep = {k: sorted(v) for k, v in idx.items() if len(v) >= 2}
     familias = {k: sorted({limpo(prod[c]["FAMILIA"]) for c in v}) for k, v in rep.items()}
-    generica = {k for k, v in rep.items() if len(familias[k]) > 1 or len(v) >= GENERICA_CODIGOS}
+    gen_familia = {k for k in rep if len(familias[k]) > 1}                  # [SUPOSIÇÃO] os dois limites
+    gen_codigos = {k for k, v in rep.items() if len(v) >= GENERICA_CODIGOS}
+    generica = gen_familia | gen_codigos
     comum = collections.defaultdict(set)                       # par (A, B) -> referências em comum
     for k, v in sorted(rep.items()):
         for a, b in itertools.combinations(v, 2):
             comum[a, b].add(k)
-    casos = {par: refs for par, refs in comum.items() if set(veic[par[0]]) != set(veic[par[1]])}
+
+    isolados = {}
+
+    def isolar(c, v):
+        """O trecho de V na APLICACAO de c (prefixo, itens) ou None; os modelos maiores vêm da VEICULOS de c."""
+        if (c, v) not in isolados:
+            nomes = apelidos.get(v, [v[1]])
+            outros = [n for w in veic[c] if w != v for n in apelidos.get(w, [w[1]])]
+            maiores = [n for n in outros if any(n.startswith(x + " ") for x in nomes)]
+            isolados[c, v] = trecho(prod[c]["APLICACAO"], nomes, maiores)
+        return isolados[c, v]
+
+    # 2. os casos: veículo novo (V em B e não em A, na VEICULOS) ou o mesmo veículo com outro trecho na APLICACAO
+    candidatos, nao_comparaveis, casos = [], 0, set()
+    for (x, y), refs in comum.items():
+        for a, b in ((x, y), (y, x)):
+            for v in sorted(set(veic[b]) - set(veic[a])):
+                candidatos.append((a, b, v, refs, True))
+                casos.add((x, y))
+        for v in sorted(set(veic[x]) & set(veic[y])):
+            tx, ty = isolar(x, v), isolar(y, v)
+            if tx is None or ty is None:
+                nao_comparaveis += 1                              # [SUPOSIÇÃO] sem trecho isolável, não se compara
+            elif [norm(i) for i in tx[1]] != [norm(i) for i in ty[1]]:
+                candidatos.append((x, y, v, refs, False))
+                casos.add((x, y))
     mk = {c: marcas(prod[c]) for c in {x for par in casos for x in par} | set(FOCO)}
 
-    # 2. cada veículo V de B que falta em A, testado na ordem dos MOTIVOS (o índice do motivo = até onde passou)
-    def testar(a, b, v, refs):
+    def testar(a, b, v, refs, novo, gen):
+        """O índice do primeiro motivo que falha (na ordem dos MOTIVOS), ou None quando passa em tudo."""
         pa, pb = prod[a], prod[b]
-        if not refs - generica:
-            return 0
-        if diverge(refs_de_cod[a], refs_de_cod[b]):
-            return 1
-        if limpo(pa["FAMILIA"]) != limpo(pb["FAMILIA"]):
-            return 2
-        if peca(pa) != peca(pb):
-            return 3
-        ma, mb = medidas(pa), medidas(pb)
-        if ma and mb and ma != mb:
-            return 4
+        if not refs - gen:
+            return M["referência genérica (suspeita)"]
         fa, fb = {f for f, _ in veic[a]}, {f for f, _ in veic[b]}
-        if fa and fb and not fa & fb:
-            return 5
-        if limpo(pa["POSICAO"]) != limpo(pb["POSICAO"]):
-            return 6
         la, lb = limpo(pa["LADO"]), limpo(pb["LADO"])
-        if la != lb and not {la, lb} <= LADO_OS_DOIS:
-            return 7
-        for i, nome in enumerate(MARCAS, 8):
-            if mk[a][nome] != mk[b][nome]:
-                return i
         dif = {limpo(pa["DIFERENCIAL"]), limpo(pb["DIFERENCIAL"])} - {""}
-        if len(dif) > 1 or b in limpo(pa["ITEM_PARECIDO"]) or a in limpo(pb["ITEM_PARECIDO"]):
-            return 12
+        ma, mb = medidas(pa), medidas(pb)
+        for i, falha in enumerate([
+                diverge(refs_de_cod[a], refs_de_cod[b]), limpo(pa["FAMILIA"]) != limpo(pb["FAMILIA"]),
+                peca(pa) != peca(pb), bool(ma and mb and ma != mb), bool(fa and fb and not fa & fb),
+                limpo(pa["POSICAO"]) != limpo(pb["POSICAO"]), la != lb and not {la, lb} <= LADO_OS_DOIS,
+                *(mk[a][n] != mk[b][n] for n in MARCAS),
+                len(dif) > 1 or b in limpo(pa["ITEM_PARECIDO"]) or a in limpo(pb["ITEM_PARECIDO"])], 1):
+            if falha:
+                return i
+        if not novo:
+            return M[next(m for m in MOTIVOS if m.startswith("[SUPOSIÇÃO] V já está em A"))]
         ta = norm(pa["APLICACAO"])
         if any(re.search(rf"\b{re.escape(n)}\b", ta) or (len(so_codigo(n)) >= 5 and so_codigo(n) in so_codigo(ta))
                for n in apelidos.get(v, [v[1]])):
-            return 13
-        linhas, tb = veic[b][v], limpo(pb["APLICACAO"])
-        if any(x["ANO_INICIO"] in (None, "") for x in linhas):
-            return 14
-        if any(str(x["ANO_INICIO"]) not in tb or not re.search(
-                rf"{x['ANO_FIM']}" if x["ANO_FIM"] else rf"{x['ANO_INICIO']}\s*(?:>|em diante)", tb, re.I)
-               for x in linhas):
-            return 15
-        if any(limpo(x["SITUACAO"]) != "separado" or limpo(x["ANO_DUVIDA"]) for x in linhas):
-            return 16
+            return M["veículo já está na APLICACAO de A"]
+        tb = isolar(b, v)
+        if tb is None or len(veic[b][v]) != 1:          # [SUPOSIÇÃO] V com mais de uma linha (versões) em B
+            return M["trecho de V em B não isolável"]
+        f, r = faixa(tb[1]), veic[b][v][0]
+        if f is None:
+            return M["V sem ano no trecho de B"]
+        if (r["ANO_INICIO"], r["ANO_FIM"] or None) != f[:2]:
+            return M["ano de V na VEICULOS de B não bate com o trecho de V em B"]
+        if f[2]:
+            return M["as faixas do trecho de V em B têm intervalo (a VEICULOS juntaria)"]
+        if limpo(r["SITUACAO"]) != "separado" or limpo(r["ANO_DUVIDA"]):
+            return M["linha de V em B é duvidosa ou tem ANO_DUVIDA"]
         return None
 
-    prova = collections.defaultdict(list)                     # (A, V) -> [(B, refs, resultado)]
-    for (x, y), refs in casos.items():
-        for a, b in ((x, y), (y, x)):
-            for v in sorted(set(veic[b]) - set(veic[a])):
-                prova[a, v].append((b, refs, testar(a, b, v, refs)))
+    def copia(b, v):
+        pref, its = isolar(b, v)
+        return f"{pref or v[0]} - " + " · ".join(its)
 
-    validos, fora = [], []
-    for (a, v), bs in sorted(prova.items()):
-        ok = [x for x in bs if x[2] is None]
-        faixas = {tuple((limpo(r["VERSAO"]), r["ANO_INICIO"], r["ANO_FIM"]) for r in veic[b][v]) for b, _, _ in ok}
-        if ok and len(faixas) == 1:
-            validos.append((a, v, ok))
-        else:
-            melhor = max(bs, key=lambda x: 99 if x[2] is None else x[2])
-            fora.append((a, v, melhor, MOTIVOS.index("anos diferentes entre os produtos B") if ok else melhor[2], bs))
+    def avaliar(gen):
+        prova = collections.defaultdict(list)                     # (A, V, novo) -> [(B, refs, resultado)]
+        for a, b, v, refs, novo in candidatos:
+            prova[a, v, novo].append((b, refs, testar(a, b, v, refs, novo, gen)))
+        validos, fora = [], []
+        for (a, v, novo), bs in sorted(prova.items()):
+            ok = [x for x in bs if x[2] is None]
+            if ok and len({copia(b, v) for b, _, _ in ok}) == 1:
+                validos.append((a, v, ok))
+            else:
+                melhor = max(bs, key=lambda x: 99 if x[2] is None else x[2])
+                fora.append((a, v, melhor, M["trechos diferentes entre os produtos B"] if ok else melhor[2], bs))
+        return validos, fora
+
+    validos, fora = avaliar(generica)
+    sem_limite = {"sem nenhum limite": len(avaliar(set())[0]), "só o de famílias": len(avaliar(gen_familia)[0]),
+                  "só o de 5 códigos": len(avaliar(gen_codigos)[0])}
 
     def ref_txt(refs):
         return ", ".join(f"{m}: {c}" for m, c in sorted(refs))
 
-    def veic_txt(v, linhas):
-        return " / ".join(" ".join(x for x in (limpo(r["MODELO"]), limpo(r["VERSAO"]), limpo(r["CILINDRADA"]),
-                                               anos(r)) if x) for r in linhas)
-
+    no_site = {c for c, p in prod.items()
+               if limpo(p["NO_CATALOGO_DIGITAL"]).upper() != "NÃO" and limpo(p["STATUS_CADASTRO"]).upper() != "INATIVO"}
     lin_val, lin_vei, texto = [], [], {}
     for a, v, ok in validos:                      # o texto vai somando: o DEPOIS da última linha de A é o final
         b, refs, _ = ok[0]
-        pa, rows = prod[a], veic[b][v]
+        pa, r, (_, its) = prod[a], veic[b][v][0], isolar(b, v)
         antes = texto.get(a, limpo(pa["APLICACAO"]))
-        depois = texto[a] = (antes + " ; " if antes else "") + f"{v[0]} - " + veic_txt(v, rows)
-        novas = [{**r, "CODIGO_BAP": a} for r in rows]
-        lin_val.append([a, linha[a], v[0], limpo(rows[0]["MODELO"]), " / ".join(anos(r) for r in rows),
-                        ref_txt(refs - generica), b, ", ".join(x[0] for x in ok[1:]), limpo(pa["FAMILIA"]),
-                        limpo(pa["POSICAO"]) or VAZIO, limpo(pa["LADO"]) or VAZIO, antes or VAZIO, depois,
-                        " || ".join(" | ".join(limpo(n[k]) or "-" for k in cv) for n in novas)])
-        lin_vei += novas
+        depois = texto[a] = (antes + " ; " if antes else "") + copia(b, v)
+        nova = {**r, "CODIGO_BAP": a, "CILINDRADA": cilindradas(its) or None}     # bate com o trecho copiado
+        obs = "" if limpo(nova["CILINDRADA"]) == limpo(r["CILINDRADA"]) else (
+            f"CILINDRADA do trecho copiado; a VEICULOS de B diz '{limpo(r['CILINDRADA'])}'")
+        lin_val.append([a, linha[a], v[0], limpo(r["MODELO"]), anos(r), copia(b, v), ref_txt(refs - generica), b,
+                        ", ".join(x[0] for x in ok[1:]), limpo(pa["FAMILIA"]), limpo(pa["POSICAO"]) or VAZIO,
+                        limpo(pa["LADO"]) or VAZIO, antes or VAZIO, depois,
+                        " | ".join(limpo(nova[k]) or "-" for k in cv), obs, "sim" if a in no_site else "não"])
+        lin_vei.append(nova)
     lin_fora = [[a, v[0], limpo(veic[m[0]][v][0]["MODELO"]), MOTIVOS[i], m[0], ref_txt(m[1]),
                  limpo(prod[a]["FAMILIA"]), limpo(prod[m[0]]["FAMILIA"]),
                  "; ".join(f"{b} ({'passa' if r is None else MOTIVOS[r]})" for b, _, r in bs if b != m[0])]
@@ -270,8 +354,15 @@ def main(base, saida):
     por_motivo = collections.Counter(x[3] for x in lin_fora)
     num = {"base_sha256": sha(Path(base)), "referencias": len(idx), "referencias_repetidas": len(rep),
            "referencias_genericas": len(generica), "pares_com_a_mesma_referencia": len(comum),
-           "casos_pares_com_veiculos_diferentes": len(casos), "veiculos_testados": len(prova),
+           "casos": len(casos),
+           "casos_so_pela_aplicacao": len({k for k in casos if set(veic[k[0]]) == set(veic[k[1]])}),
+           "veiculos_comuns_nao_comparaveis_suposicao": nao_comparaveis,
+           "veiculos_testados": len(validos) + len(fora),
+           "veiculos_testados_por_trecho_diferente": len({(a, v) for a, _, v, _, novo in candidatos if not novo}),
            "validos": len(validos), "codigos_que_mudam": len({x[0] for x in validos}),
+           "validos_se_o_limite_de_generica_mudar": sem_limite,
+           "site": {"codigos": sorted({x[0] for x in validos} & no_site),
+                    "veiculos": sum(x[0] in no_site for x in validos)},
            "linhas_novas_veiculos": len(lin_vei), "fora": len(lin_fora),
            "fora_por_motivo": {m: por_motivo[m] for m in MOTIVOS if por_motivo[m]},
            "log_previsto": len(validos) + len(lin_vei), "amt7500_amt7014_validos": len(palio)}
@@ -283,15 +374,17 @@ def main(base, saida):
               f"Base de partida: v23 (sha256 {num['base_sha256'][:8]}…{num['base_sha256'][-4:]}). "
               "Pedido: R-20261121-102700-alexandre.",
               "Regra fixa (R-20261120-213300): nada novo marcado nem escrito como duvidoso. Nenhum produto sai.",
-              f"{num['referencias_repetidas']} referências repetidas; {num['casos_pares_com_veiculos_diferentes']} "
-              f"casos (pares com veículos diferentes); {num['veiculos_testados']} veículos testados: "
-              f"{num['validos']} válidos e {num['fora']} fora (2 deles são o Palio do AMT7500 e do AMT7014, só com anúncio).",
+              f"{num['referencias_repetidas']} referências repetidas; {num['casos']} "
+              f"casos (pares com veículos ou trechos diferentes); {num['veiculos_testados']} veículos testados: "
+              f"{num['validos']} válidos e {num['fora']} fora (2 deles: o Palio do AMT7500 e do AMT7014, só anúncio).",
               "Cada linha da VALIDOS soma ao texto: o APLICACAO_DEPOIS da última linha de cada código é o texto final.",
+              "O TRECHO_COPIADO_DE_B é o texto de V na APLICACAO de B, literal (só o 'FAB - ' do bloco vem junto).",
               *conclusao]:
         le.append([t])
-    abas = {"VALIDOS": (["CODIGO_A", "LINHA_PRODUTOS", "FABRICANTE", "MODELO_V", "ANOS (de B)", "REFERENCIA_PROVA",
-                         "CODIGO_B", "OUTROS_B", "FAMILIA", "POSICAO", "LADO", "APLICACAO_ANTES",
-                         "APLICACAO_DEPOIS", "VEICULOS_LINHA_NOVA (" + " | ".join(cv) + ")"], lin_val),
+    abas = {"VALIDOS": (["CODIGO_A", "LINHA_PRODUTOS", "FABRICANTE", "MODELO_V", "ANOS (de B)", "TRECHO_COPIADO_DE_B",
+                         "REFERENCIA_PROVA", "CODIGO_B", "OUTROS_B", "FAMILIA", "POSICAO", "LADO", "APLICACAO_ANTES",
+                         "APLICACAO_DEPOIS", "VEICULOS_LINHA_NOVA (" + " | ".join(cv) + ")", "OBS", "NO_SITE"],
+                        lin_val),
             "FORA": (["CODIGO_A", "FABRICANTE", "MODELO_V", "MOTIVO", "CODIGO_B", "REFERENCIAS_EM_COMUM",
                       "FAMILIA_A", "FAMILIA_B", "OUTROS_B (motivo)"], lin_fora),
             "GENERICAS": (["REFERENCIA", "CODIGOS", "FAMILIAS", "CODIGOS_BAP"], lin_gen),
@@ -315,7 +408,7 @@ def main(base, saida):
     json.dump(num, open(saida / "numeros_v24.json", "w"), ensure_ascii=False, indent=1)
     print(json.dumps(num, ensure_ascii=False, indent=1))
     for x in lin_val[:10]:
-        print(" VALIDO", x[0], "<-", x[3], x[4], "|", x[5], "| B =", x[6])
+        print(" VALIDO", x[0], "<-", x[5], "|", x[6], "| B =", x[7])
     for t in conclusao:
         print(" ", t)
 
