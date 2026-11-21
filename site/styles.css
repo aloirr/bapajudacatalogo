@@ -327,6 +327,7 @@ table.tab-veiculos th:nth-child(5), table.tab-veiculos td:nth-child(5) { width: 
   .lista-veiculos li > span { display: block; color: var(--texto-2); }
 }
 .apl-resto { margin-top: 12px; } /* "Outros veículos e detalhes": o que a tabela não cobre, aberto */
+.apl-dono { font-weight: 600; } /* B11 (T-0018): o veículo dono do detalhe em "Outros veículos e detalhes" */
 
 /* rodapé (T-0018 op4e): --escuro, a linha --verde e o padrão de ícones automotivos (SVG inline, traço branco a 7%) */
 .rodape { position: relative; margin-top: 56px; color: var(--branco); border-top: 3px solid var(--verde); background-color: var(--escuro);

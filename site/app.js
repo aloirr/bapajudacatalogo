@@ -1317,6 +1317,17 @@
         || casaVeiculo(e, { vm: v.vm, vmo: v.vmo, va: v.va }, true); // marca, modelo e ano; sem motor e sem versão
     });
   };
+  // "Leve também" pelo sistema da peça (T-0018, R-20261121-200058-alexandre): só peça do MESMO sistema da peça aberta ou
+  // de um sistema compatível. A tabela vem do produtos.json (campo sc: origem → sistemas aceitos, com o próprio), a mesma
+  // dos PDFs: as duas saem do SIS_COMPAT do gerar_site.py. Sistema fora da tabela aceita só ele mesmo. O rolamento traz
+  // os sistemas do texto dele no campo ss ("CÂMBIO E DIFERENCIAL", que não é SISTEMA da base). Sem sistema (fora do
+  // catálogo ou sem SISTEMA na base), o item fica.
+  const sistemasDe = (p) => p.ss || (p.si ? [String(p.si).toUpperCase()] : []);
+  const sisOk = (aberto, p) => {
+    const so = sistemasDe(aberto), sd = sistemasDe(p);
+    return !so.length || !sd.length || so.some((o) => sd.some((d) => ((BASE.sc || {})[o] || [o]).includes(d)));
+  };
+  const doSistema = (cods, aberto) => cods.filter((c) => { const p = POR_COD.get(normCod(c)); return !p || sisOk(aberto, p); });
   const secJunto = (H2, cods) => cods.length
     ? `<section class="secao rel rel-oj"><${H2} class="secao-tit">Leve também</${H2}>${itensRelHtml(cods)}</section>` : "";
 
@@ -1506,12 +1517,30 @@
   }
   // o que separa um veículo do outro na linha (texto sem acento e em maiúsculas); também na coluna Ano (doModelo)
   const RX_SEP_VEICULO = /\s+\/\s*|\s*\/\s+|\s*,\s*(?=[A-Z])|\s+[–—-]\s+(?=[A-Z])|(?<=(?:19|20)\d{2}(?:>|\/?\.{3})?\)?)\s+(?=[A-Z])(?!(?:ATE|A|AO|EM DIANTE)\b)/;
-  const restoAplicacao = (p, tab) => linhasAplic(p.a).filter((l) => {
+  const linhaCoberta = (l, tab) => {
     const vs = chaveApl(l).replace(/^[A-Z][A-Z /&.]{0,30}?\s-\s/, "") // sem a marca do começo do bloco
       .split(RX_SEP_VEICULO).map((v) => v.replace(/\s+[–—-]\s+/g, " ").trim()).filter(Boolean);
     let antes = null;
-    return !vs.every((v, k) => (antes = cobreVeiculo(v, tab, vs.slice(k + 1).find((x) => faixasDoTexto(x).length), SO_ANO.test(v) ? antes : null)));
+    return vs.every((v, k) => (antes = cobreVeiculo(v, tab, vs.slice(k + 1).find((x) => faixasDoTexto(x).length), SO_ANO.test(v) ? antes : null)));
+  };
+  // B11 (T-0018, R-20261121-200058-alexandre): o detalhe sem veículo ("s/ ABS", "Adventure", "exc. Locker")
+  // aparece junto do veículo a que pertence, num item só: o veículo de antes no mesmo bloco (" ; "). A linha é veículo
+  // quando é a 1ª do bloco, tem ano ou a tabela a cobre; senão, é detalhe dela. O item: o veículo (sem a marca do começo
+  // do bloco, em negrito) e, depois dos dois-pontos, os detalhes que a tabela não cobre, separados por " · ". O veículo
+  // que a tabela não cobre aparece como antes, com os detalhes dele no mesmo item.
+  const restoAplicacao = (p, tab) => String(p.a || "").split(/\s+;\s+/).flatMap((bloco) => {
+    const grupos = [];
+    for (const [k, l] of linhasAplic(bloco).entries()) {
+      const coberta = linhaCoberta(l, tab);
+      if (!k || coberta || faixasDoTexto(l).length || !grupos.length) grupos.push({ dono: l, coberto: coberta, det: [] });
+      else if (!coberta) grupos[grupos.length - 1].det.push(l);
+    }
+    return grupos.filter((g) => !g.coberto || g.det.length)
+      .map((g) => ({ dono: g.coberto ? g.dono.replace(/^[A-ZÀ-Ú][A-ZÀ-Ú /&.]{0,30}?\s-\s/, "") : g.dono, coberto: g.coberto, det: g.det }));
   });
+  const ulResto = (gs) => `<ul class="aplic">${gs.map((g) => `<li>${g.det.length
+    ? `<b class="apl-dono">${anoMaisHtml(g.dono)}</b>: ${g.det.map(anoMaisHtml).join(" · ")}`
+    : anoMaisHtml(g.dono)}</li>`).join("")}</ul>`;
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
@@ -1524,14 +1553,14 @@
     if (p.la) ficha.push(["Lado", titulo(p.la)]);
     if (p.de) ficha.push(["Detalhe", p.de]);
     (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
-    const junto = servemNoVeiculo(listaCodigos(p.oj), VEI_LEVE, p);
+    const junto = servemNoVeiculo(doSistema(listaCodigos(p.oj), p), VEI_LEVE, p);
     const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e, embaixo, "Outros veículos e detalhes" (restoAplicacao);
     // no PDF, o texto inteiro vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
     // não sumirem do material do cliente
     const tv = linhasVeiculos(p), tab = tabelaVeiculos(tv), resto = tab && p.a ? restoAplicacao(p, tv) : [];
     const miolo = tab
-      ? tab + (resto.length ? `<div class="apl-resto nao-imprime"><${H3} class="secao-tit">Outros veículos e detalhes</${H3}>${ulAplic(resto)}</div>` : "")
+      ? tab + (resto.length ? `<div class="apl-resto nao-imprime"><${H3} class="secao-tit">Outros veículos e detalhes</${H3}>${ulResto(resto)}</div>` : "")
         + (p.a ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
       : p.a ? aplicacoes : "";
     const secApl = miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
