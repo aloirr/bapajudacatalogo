@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0174**.
+O próximo número livre é o **RD-0236**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -64,8 +64,47 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0171 | média | texto | produto (site/app.js:1342) | os selos repetem o sistema e a família da trilha | varredura 20/11 | web-site | ABERTO |
 | RD-0172 | baixa | texto | site/app.js:1488, 1499, 1503-1504 (Sobre) | h2 repetido no começo do parágrafo e no h1; texto aprovado do PDF Empresa. **Era o RD-0134 da T-0018**, renumerado em 20/11/2026 | T-0018 | web-site | MANTIDO (decisão do po) |
 | RD-0173 | baixa | código (comentário) | guarda-merge-lib.mjs (PR #34) | cabeçalho c/d sem a regra "Alexandre só pelo clone"; JSDoc do `lerRecadosDoGerente` separado da função. **Saiu como RD-0146 no reteste do #34**, renumerado em 20/11/2026 | T-0016 | alexandre | ABERTO (próximo PR de governança) |
+| RD-0193 | — | texto e código | scripts/gerar_site.py:104; catalogo_grafico/gerador/montar.py:92 | "#N/A" e "APLICAÇÃO REVISADA" nas referências cruzadas (site e PDF); os PDFs passam a usar o `refs_de` do site | T-0019 | web-site, catalogo-grafico | CORRIGIDO (ad63e05, #64; fc62222, #70) |
+| RD-0194 | — | texto (PDF) | catalogo_grafico/gerador/montar.py:122-124 | "EQUIVALE A" com a mesma referência repetida nos PDFs (vira `refs_unicas`) | T-0019 | catalogo-grafico | CORRIGIDO (3ceffef, #61) |
+| RD-0199 | — | texto | scripts/gerar_site.py:90 | histórico interno "\| ANTERIOR" nas referências cruzadas | T-0017 | web-site | CORRIGIDO (9347ce5, #55) |
+| RD-0200 | — | texto | scripts/gerar_site.py:79 | rótulo da referência com " PN" e prefixos (CROSS REFERENCES, REF. CRUZADA...): fica só a marca | T-0017 | web-site | CORRIGIDO (9347ce5, #55) |
+| RD-0201 | — | texto | scripts/gerar_site.py:116 | a mesma referência (marca e código) repetida na célula | T-0017 | web-site | CORRIGIDO (9347ce5, #55) |
+| RD-0202 | baixa | código (comentário) | scripts/gerar_site.py | comentário longo | T-0017 | web-site | CORRIGIDO (9347ce5, #55) |
+| RD-0207 | — | — | parecer do PR #58 ("Leve também" só do veículo escolhido) | achado do parecer do #58 | T-0018 | web-site | CORRIGIDO (ef4d027, #58) |
+| RD-0208 | — | — | parecer do PR #58 | achado do parecer do #58 | T-0018 | web-site | CORRIGIDO (ef4d027, #58) |
+| RD-0209 | — | — | parecer do PR #54 (coluna Ano na aplicação) | achado do parecer do #54 | T-0017 | web-site | CORRIGIDO (22c342e, #54) |
+| RD-0210 | — | — | parecer do PR #54 | achado do parecer do #54 | T-0017 | web-site | CORRIGIDO (22c342e, #54) |
+| RD-0211 | — | — | parecer do PR #54 | achado do parecer do #54 | T-0017 | web-site | CORRIGIDO (22c342e, #54) |
+| RD-0212 | — | — | parecer dos PRs #54 a #59 [SUPOSIÇÃO: dono web-site] | achado deixado em aberto | T-0017 | web-site | ABERTO |
+| RD-0213 | — | — | parecer do PR #59 (AUTOIMPACT fora do site, TRAVA) | achado do parecer do #59 | T-0017 | web-site | CORRIGIDO (4943a0f, #59) |
+| RD-0214 | — | — | parecer do PR #59 | achado do parecer do #59 | T-0017 | web-site | CORRIGIDO (4943a0f, #59) |
+| RD-0215 | — | texto (R1) | site, cartões com veículo | a tag "✓ Compatível" repete a faixa do veículo nos cartões. **Era o RD-0175 do parecer da tag**, renumerado | T-0018 | web-site | MANTIDO (Alexandre, R-20261120-191700, "3) a") |
+| RD-0216 | — | texto (R1) | site, "Leve também" | a tag no "Leve também" repete a faixa do veículo. **Era o RD-0176 do parecer da tag**, renumerado | T-0018 | web-site | MANTIDO (Alexandre, R-20261120-191700, "3) a") |
+| RD-0217 | — | código | dados/scripts/base_vNN.py | o main() repetido em cada `base_vNN.py` (vira `base_comum.rodar`) | T-0017 | catalogo-dados | CORRIGIDO (b8f84b0, #67) |
+| RD-0218 | — | doc | README da v19 | README da v19 repetindo o que já está em outro lugar | T-0017 | catalogo-dados | CORRIGIDO (b8f84b0, #67) |
+| RD-0219 | — | dado | base unificada, APLICACAO | linhas repetidas na mesma célula da APLICACAO | T-0017 | catalogo-dados | ABERTO (destino: simulação da v21) |
+| RD-0220 | — | código | catalogo_grafico/gerador/site_regras.py | regras do site copiadas nos PDFs (os PDFs carregam o `gerar_site.py`, sem cópia) | T-0019 | catalogo-grafico | CORRIGIDO (3ceffef, #61) |
+| RD-0221 | — | código | catalogo_grafico/gerador/datas.py:62 | `fix_text` e `em_diante` repetidos no desenho (vira uma função) | T-0019 | catalogo-grafico | CORRIGIDO (3ceffef, #61) |
+| RD-0222 | — | texto (PDF) | catalogo_grafico/gerador/fraga_complementos.py:54, 147 | a mesma aplicação repetida no item (109 itens): `aplicacao_unica` | T-0019 | catalogo-grafico | CORRIGIDO (fc62222, #70) |
+| RD-0223 | — | — | parecer do PR #62 (tag "✓ Compatível" e UNIVERSAL do "Leve também") | achado do parecer do #62 | T-0018 | web-site | CORRIGIDO (841d874, #62) |
+| RD-0224 | — | — | parecer do PR #62 | achado do parecer do #62 | T-0018 | web-site | CORRIGIDO (841d874, #62) |
+| RD-0225 | — | — | parecer do PR #62 | achado do parecer do #62 | T-0018 | web-site | CORRIGIDO (841d874, #62) |
+| RD-0226 | — | código | scripts/gerar_site.py; catalogo_grafico/gerador/digital2.py:503 | regra do nome do fornecedor repetida (os PDFs usam o `G.FORNECEDOR_RE` do site) | T-0019 | web-site, catalogo-grafico | CORRIGIDO (ad63e05, #64; fc62222, #70) |
+| RD-0227 | — | código | catalogo_grafico/gerador/digital2.py:502 | lista de fornecedores repetida (usa o `G.FORNECEDORES`) | T-0019 | catalogo-grafico | CORRIGIDO (fc62222, #70) |
+| RD-0228 | — | — | parecer do PR #66 ("AAAA+" no site) | achado do parecer do #66 | T-0018 | web-site | CORRIGIDO (a6cd50b, #66) |
+| RD-0229 | — | — | parecer do PR #66 | achado do parecer do #66 | T-0018 | web-site | CORRIGIDO (a6cd50b, #66) |
+| RD-0230 | — | — | parecer do PR #70 (PDFs 2027 com a v19) | achado do parecer do #70 | T-0019 | catalogo-grafico | CORRIGIDO (fc62222, #70) |
+| RD-0231 | — | doc | CLAUDE.md (PR #69, graphify) | achado do parecer do #69 | T-0020 | alexandre | CORRIGIDO (374dd14, #69) |
+| RD-0232 | — | doc | CLAUDE.md (PR #69) | achado do parecer do #69 | T-0020 | alexandre | CORRIGIDO (374dd14, #69) |
+| RD-0233 | — | — | parecer do PR #70 | achado do parecer do #70 | T-0019 | catalogo-grafico | CORRIGIDO (fc62222, #70) |
+| RD-0234 | — | — | parecer do PR #70 | achado do parecer do #70 | T-0019 | catalogo-grafico | CORRIGIDO (fc62222, #70) |
+| RD-0235 | — | código | catalogo_grafico/gerador/datas.py:53 | "AAAA>" tratado depois do "Leve também" (passa a `montar._em_diante`, antes do `cross.py`) | T-0019 | catalogo-grafico | CORRIGIDO (fc62222, #70) |
 
 ## Notas
+
+### Registros de 20/11/2026, noite
+- Do RD-0193 ao RD-0235, os achados vêm dos pareceres dos PRs #54 a #70, sem relatório por PR no Git; a coluna Resumo diz só "achado do parecer do #N" quando o recado não guardou o texto.
+- O RD-0175 e o RD-0176 do parecer da tag passaram a RD-0215 e RD-0216. [SUPOSIÇÃO] Os números do RD-0174 ao RD-0192, do RD-0195 ao RD-0198 e do RD-0203 ao RD-0206 saíram em pareceres sem linha aqui (o RD-0196 ao RD-0198 corrigidos no #53; o RD-0203 e o RD-0204, no PR do celular).
 
 ### Renumerações (20/11/2026)
 
