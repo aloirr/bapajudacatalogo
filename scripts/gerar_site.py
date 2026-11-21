@@ -13,7 +13,7 @@ Uso (na raiz do repositório bapajudacatalogo):
 - Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (desde a v17, T-0017). Só as
   linhas SITUACAO = separado; as duvidosas ficam fora até a revisão. Sem a aba, o JSON sai como antes.
 - Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
-  ou de importação, fornecedor, AUTOIMPACT), o script PARA e não grava (ver TRAVA abaixo).
+  ou de importação, fornecedor e o nome de cada um dos FORNECEDORES), o script PARA e não grava (ver TRAVA abaixo).
 """
 from __future__ import annotations
 
@@ -60,13 +60,20 @@ def sem_acento(s: str) -> str:
 MARCAS_PROPRIAS = {"BAP", "BAP PN_2", "BAPTA PN"}
 
 # Fornecedor da BAP é dado interno (regra 1 do CLAUDE.md): a AUTOIMPACT é fornecedor das palhetas (R-20261120-184000-alexandre,
-# item 5: "é fornecedor de palheta sim."). A referência dessas marcas sai do site, conferida como as MARCAS_PROPRIAS; na base
-# o dado fica. A TRAVA também tem o nome: se ele voltar por outro campo, o script para.
-FORNECEDORES = {"AUTOIMPACT"}
+# item 5: "é fornecedor de palheta sim.") e a SUNRISE também (P10 da v19, R-20261120-194900-po). A referência sai do site
+# quando o nome está no rótulo da marca, inteiro ou dentro dele ("AUTOIMPACT PN", "Pruduct Pn Sunrise"); na base o dado fica.
+# A TRAVA usa o FORNECEDOR_RE, montado desta lista com até 3 sinais (espaço, hífen, ponto...) entre cada letra ("AUTO.IMPACT",
+# "Sun-Rise"): se o nome voltar por outro campo, o script para. Só em maiúsculas, sem espaço e sem pontuação.
+FORNECEDORES = {"AUTOIMPACT", "SUNRISE"}
+FORNECEDOR_RE = "|".join(r"[\W_]{0,3}".join(map(re.escape, f)) for f in sorted(FORNECEDORES))
 
 
 def so_codigo(s: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", sem_acento(s).upper())
+
+
+# o refs_de procura o fornecedor no rótulo passado pelo so_codigo ("f in rot"): a lista tem de estar nesse formato
+assert all(f == so_codigo(f) for f in FORNECEDORES), "FORNECEDORES em maiúsculas, sem espaço e sem pontuação"
 
 
 # Rótulo da referência só com a marca (RD-0200): os prefixos e o " PN" do fim; a lista está no docs/DADOS_DO_SITE.md (campo r).
@@ -94,12 +101,14 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
         m = re.match(r"^([^:]{1,40}):\s*(.+)$", parte)
         if m:
             cod = re.sub(r"\s*BAP\s+BOX\b.*$", "", m.group(2), flags=re.I).strip()   # tira o preço de compra
-            if cod and cod not in ("-", "0", "--", "N/A"):
+            if cod and cod.upper() not in ("-", "0", "--", "N/A", "#N/A"):   # "#N/A": erro de fórmula da planilha (RD-0193)
                 bruta = m.group(1).strip()
                 marca = PREFIXO_E_PN.sub("", bruta).strip()
-                # a marca própria e o fornecedor são vistos antes e depois da limpeza ("BAPTA PN", "CROSS REFERENCIAS - BAP"
-                # e "AUTOIMPACT PN" saem)
-                if not {re.sub(r"\s+", " ", x.upper()) for x in (bruta, marca)} & (MARCAS_PROPRIAS | FORNECEDORES):
+                # a marca própria é vista antes e depois da limpeza ("BAPTA PN" e "CROSS REFERENCIAS - BAP" saem); o
+                # fornecedor sai se o nome estiver em qualquer ponto do rótulo ("AUTOIMPACT PN", "Pruduct Pn Sunrise")
+                rot = so_codigo(bruta)
+                if (not {re.sub(r"\s+", " ", x.upper()) for x in (bruta, marca)} & MARCAS_PROPRIAS
+                        and not any(f in rot for f in FORNECEDORES)):
                     saida.append({"m": marca, "c": cod})
         else:
             saida.append({"m": "", "c": parte})
@@ -350,9 +359,9 @@ def fotos(produtos: list[dict], pasta: Path) -> int:
     return feitas
 
 
-# TRAVA: dado interno nunca vai para o site público
-# (AUTOIMPACT: ver FORNECEDORES; aqui junto ou com até 3 sinais entre AUTO e IMPACT: espaço, hífen, ponto...)
-TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|AUTO[\W_]{0,3}IMPACT|R\$", re.I)
+# TRAVA: dado interno nunca vai para o site público (os fornecedores entram pelo FORNECEDOR_RE)
+TRAVA = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|BAP\s+BOX|CUSTO\s+(DE\s+)?(COMPRA|IMPORT)|FORNECEDOR|R\$|"
+                   + FORNECEDOR_RE, re.I)
 
 
 def conferir(produtos: list[dict]) -> list[str]:
