@@ -1,7 +1,5 @@
-"""Teste curto do _norm e da aplicacao_unica (fraga_complementos.py, T-0019): o "DE" antes do ano não conta na
-comparação ("Gol DE 1999" = "Gol 1999"); o "DE" em outra posição conta. Só a biblioteca padrão.
-Rodar dentro de catalogo_grafico/gerador/:  PYTHONHASHSEED=0 python3 -m unittest -v teste_fraga_complementos
-"""
+"""Teste do _norm e da aplicacao_unica (fraga_complementos.py, T-0019); a regra do "DE" está na docstring do _norm.
+Como rodar: LEIA_GERADOR.md (tabela de comandos). Só a biblioteca padrão."""
 import unittest
 
 import fraga_complementos as F

@@ -6,11 +6,8 @@ Autorização: R-20261120-235000-alexandre, com aprovação antecipada nesta rod
 - **Depois:** os PDFs novos, já em `catalogo_grafico/entregas/`.
 
 ## O que mudou no gerador
-- `gerador/digital_data.json`, que é entrada fixa (extraída do catálogo digital de 13/10). A aplicação dos itens antigos vem dele, e não da base. Três textos ficaram iguais aos da base v23:
-  - CRU100: "Hyunday HR (07/2017)" → "Hyundai HR 2.5 4x2 (04/2007–12/2017)";
-  - SCE14002: "1929–1932" "1934" → "1929 · 1932 · 1934";
-  - FAC6108: "Eclipse Cross 1.5 L 16V · em Diante ·" → "Eclipse Cross 1.5 L 16V ·" (sem ano, como a base).
-- Nenhum script mudou nesta geração.
+- `gerador/digital_data.json` (entrada fixa; ver `catalogo_grafico/LEIA-ME.md`): CRU100, SCE14002 e FAC6108 ficaram com o texto da base v23. O antes e o depois estão na tabela abaixo.
+- `gerador/fraga_complementos.py` (`2fe2940`): o "DE" colado no ano ("DE1999") conta como "DE 1999". Não muda nenhum texto dos PDFs.
 
 ## Diferenças de texto (PyMuPDF, página a página)
 | PDF | Página | Antes | Depois |
@@ -21,7 +18,6 @@ Autorização: R-20261120-235000-alexandre, com aprovação antecipada nesta rod
 | Digital | 110 (destaque e tabela) | … LS 1630 1929–19321934 LS1941 … | … LS 1630 1929 · 1932 · 1934 LS1941 … |
 | Digital | 141 (ELE1068, v22 P2) | Uno 1.1 Brio/1.3/1.5/1.6R 19/84->1995 | Uno 1.1 Brio/1.3/1.5/1.6R 1984–1995 |
 | Digital | 206 | Cross 1.5 L 16V · em Diante · Outlander | Cross 1.5 L 16V · Outlander |
-| Linha Moto | — | nenhuma | nenhuma |
 
 As outras mudanças da v22 e da v23 estão na aba VEICULOS, que os PDFs não leem.
 
