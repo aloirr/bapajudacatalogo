@@ -66,8 +66,7 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
 <!-- /SESSOES-E-RECADOS -->
 
 ## Graphify (mapa do código, T-0020)
-- O mapa fica em `graphify-out/` (fora do Git). Ele é montado no setup do ambiente, só com o código e sem LLM: `GRAPHIFY_BACKEND=none graphify extract . --code-only` e depois `graphify cluster-only .`.
+- O mapa fica em `graphify-out/` (fora do Git). Ele é montado no setup do ambiente, só com o código: `GRAPHIFY_BACKEND=none graphify extract . --code-only` e depois `graphify cluster-only .` (sem `GRAPHIFY_BACKEND=none` ele chama um LLM e gasta token: nunca rode sem).
 - **Antes de procurar no código**, use o mapa: `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou `graphify explain "<conceito>"`. Abra o arquivo só nas linhas que o mapa apontar. Ponha esta regra no prompt de todo subagente que explora código.
-- **Depois de mudar código**, rode `graphify update .` (não gasta token).
-- Sem `GRAPHIFY_BACKEND=none`, o graphify chama um LLM e gasta token: não rode sem ele. PDFs, imagens e docs ficam fora do mapa.
-- Os hooks do graphify em `.claude/settings.json` saem em silêncio quando o graphify não está instalado.
+- **Depois de mudar código**, rode `graphify update .`.
+- PDFs, imagens e docs ficam fora do mapa.
