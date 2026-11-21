@@ -121,7 +121,10 @@ def refs_de(texto: str, codigo: str = "") -> list[dict]:
                 rot = so_codigo(bruta)
                 if (not {re.sub(r"\s+", " ", x.upper()) for x in (bruta, marca)} & MARCAS_PROPRIAS
                         and not any(f in rot for f in FORNECEDORES)):
-                    saida.append({"m": marca, "c": cod})
+                    # a concorrência sai sempre com o nome canônico ("Auto-Impact PN" → "AUTOIMPACT"): a mesma forma
+                    # que o sem_marca_concorrente compara na TRAVA e que o teste confere
+                    canon = so_codigo(marca)
+                    saida.append({"m": canon if canon in CONCORRENTES_SO_NA_REF else marca, "c": cod})
         else:
             saida.append({"m": "", "c": parte})
     vistos, unicas = set(), []
