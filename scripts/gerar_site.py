@@ -24,6 +24,7 @@ import re
 import sys
 import unicodedata
 from datetime import datetime, timedelta, timezone
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -175,13 +176,26 @@ def rotulo(k: str) -> str:
     return k[:1].upper() + k[1:].lower() if (k.isupper() or k.islower()) else k
 
 
+# Número com mais de 3 casas na ficha (resto de ponto flutuante da planilha, "0.12000000000000001" no peso do CL18, T-0017):
+# sai com no máximo 3 casas (meio para cima) e sem zeros à direita ("0.12"). Só quando o valor inteiro é um número com
+# ponto: o "2,7252" no meio de um texto não muda.
+NUMERO_LONGO = re.compile(r"^-?\d+\.\d{4,}$")
+
+
+def numero_curto(v: str) -> str:
+    if not NUMERO_LONGO.match(v):
+        return v
+    s = format(Decimal(v).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP), "f").rstrip("0").rstrip(".")
+    return "0" if s in ("-0", "") else s
+
+
 def extras_de(texto: str) -> list[list[str]]:
     itens, vistos = [], set()
     for parte in texto.split("|"):
         if ":" not in parte:
             continue
         k, v = parte.split(":", 1)
-        k, v = k.strip(), v.strip()
+        k, v = k.strip(), numero_curto(v.strip())     # antes do filtro: "0.0001" vira "0" e sai como o "0"
         if not v or v.lower().startswith("http") or v.lower() in ("nan", "none", "-", "0"):
             continue
         chave = re.sub(r"\s+", "_", sem_acento(k).upper())
