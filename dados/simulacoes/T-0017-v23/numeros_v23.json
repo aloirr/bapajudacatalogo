@@ -1,0 +1,14 @@
+{
+ "base_sha256": "0c403c37efc1ca0c204e63d01102db4d08dc9bf7d5dbdd1b278840721a0c54ba",
+ "celulas": 4,
+ "por_aba": {
+  "PRODUTOS": 1,
+  "VEICULOS": 3
+ },
+ "codigos": [
+  "CRU100",
+  "FAC6108"
+ ],
+ "fora": 4,
+ "log_previsto": 4
+}
