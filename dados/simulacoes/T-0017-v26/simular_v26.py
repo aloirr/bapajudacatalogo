@@ -1,6 +1,9 @@
-"""T-0017 v26 (SIMULAÇÃO, nada é gravado na base): SCE14002, CRU100, VEICULOS, CV-F35 e nomes de montadora.
+"""T-0017 v26 (SIMULAÇÃO, aprovada; este script só lê a base): SCE14002, CRU100, VEICULOS, CV-F35 e nomes.
 
 Pedido: R-20261121-190649-alexandre, item 3 (e o R-20261121-190933-alexandre, que confirma o CV-F35 2010–2013).
+Aprovado em R-20261121-195140-alexandre ("1 a 2 a 3 a 4 a", via po): a v26 como simulada, "Mbb" → "MB", as outras
+grafias da aba FORA também ("MBB", "NEW BEETLE", "New beetle", "New Beatle" e "Vw") e o "MB … MB" fica. A gravação é
+a do dados/scripts/base_v26.py, que lê a ANTES_DEPOIS e a VEICULOS_NOVA desta simulação.
 Só lê a base. Monta, numa pasta temporária, a base como ficaria (para conferir com o base_comum.comparar que só mudam
 as células e as linhas desta tarefa) e roda o scripts/gerar_site.py numa cópia, com a v25 e com a simulada, para dizer
 o que muda no site. Nada é gravado em dados/BASE_*, em dados/versoes/ nem em site/.
@@ -12,13 +15,14 @@ o que muda no site. Nada é gravado em dados/BASE_*, em dados/versoes/ nem em si
    existem como duvidoso: passam a separado, com 1983–2006).
 4. CV-F35: Fiesta 2010–2013 (ANO_FIM 2013; o texto traz "05/2010–04/2013").
 5. MF22: a "AUTOIMPACT MA21" fica (só conferido).
-6. Nomes: "Mbb" → "MB", "Vwc" → "VW" e "NEW Beetle" → "New Beetle", na APLICACAO, palavra inteira e com a caixa exata.
+6. Nomes: "Mbb" e "MBB" → "MB"; "Vwc" e "Vw" → "VW"; "NEW Beetle", "NEW BEETLE", "New beetle" e "New Beatle" →
+   "New Beetle". Só na APLICACAO, palavra inteira e com a caixa exata.
 
 Monta SIMULACAO_v26_T-0017.xlsx (LEIA, ANTES_DEPOIS, VEICULOS_NOVA, FORA, SITE, LOG_CORRECOES_PREVISTO) e
 numeros_v26.json.
 
 Uso, na raiz do repositório:
-    python3 -I dados/simulacoes/T-0017-v26/simular_v26.py dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx \
+    python3 -I dados/simulacoes/T-0017-v26/simular_v26.py dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v25.xlsx \
         dados/simulacoes/T-0017-v26
 """
 import collections
@@ -57,20 +61,28 @@ CVF_TRECHO = "Fiesta 1.6 16v / Sigma 05/2010–04/2013"
 # 6. nomes: palavra inteira, caixa exata (não troca "MBB", "NEW BEETLE" nem dentro de outra palavra)
 NOMES = [("Mbb", re.compile(r"(?<![A-Za-zÀ-ú0-9])Mbb(?![A-Za-zÀ-ú0-9])"), "MB"),
          ("Vwc", re.compile(r"(?<![A-Za-zÀ-ú0-9])Vwc(?![A-Za-zÀ-ú0-9])"), "VW"),
-         ("NEW Beetle", re.compile(r"(?<![A-Za-zÀ-ú0-9])NEW Beetle(?![A-Za-zÀ-ú0-9])"), "New Beetle")]
-ESPERADO_NOMES = {"Mbb": 9, "Vwc": 2, "NEW Beetle": 10}          # células da APLICACAO de hoje (v25)
+         ("NEW Beetle", re.compile(r"(?<![A-Za-zÀ-ú0-9])NEW Beetle(?![A-Za-zÀ-ú0-9])"), "New Beetle"),
+         # as outras grafias, aprovadas no R-20261121-195140-alexandre ("3 a")
+         ("MBB", re.compile(r"(?<![A-Za-zÀ-ú0-9])MBB(?![A-Za-zÀ-ú0-9])"), "MB"),
+         ("Vw", re.compile(r"(?<![A-Za-zÀ-ú0-9])Vw(?![A-Za-zÀ-ú0-9])"), "VW"),
+         ("NEW BEETLE", re.compile(r"(?<![A-Za-zÀ-ú0-9])NEW BEETLE(?![A-Za-zÀ-ú0-9])"), "New Beetle"),
+         ("New beetle", re.compile(r"(?<![A-Za-zÀ-ú0-9])New beetle(?![A-Za-zÀ-ú0-9])"), "New Beetle"),
+         ("New Beatle", re.compile(r"(?<![A-Za-zÀ-ú0-9])New Beatle(?![A-Za-zÀ-ú0-9])"), "New Beetle")]
+ESPERADO_NOMES = {"Mbb": 9, "Vwc": 2, "NEW Beetle": 10,          # células da APLICACAO de hoje (v25) com cada grafia
+                  "MBB": 5, "Vw": 3, "NEW BEETLE": 5, "New beetle": 1, "New Beatle": 1}
 # variações que NÃO entram (vão para a aba FORA, para o Alexandre decidir se quer)
 PARECIDOS = re.compile(r"(?i)(?<![A-Za-zÀ-ú0-9])(mbb|vwc|vw|new\s*be[ea]tle)(?![A-Za-zÀ-ú0-9])")
 
 FONTE_SCE = ("Decidido pelo Alexandre (R-20261121-190649-alexandre, item 3: '1929 · 1932 · 1934' são modelos LS da "
-             "Mercedes-Benz, não anos). 'MB' e 'VW' como a base mais escreve a montadora.")
+             "Mercedes-Benz, não anos; R-20261121-195140-alexandre, '2 a': 'Mbb' vira 'MB'). 'MB' e 'VW' como a base mais escreve a montadora.")
 FONTE_CRU = "Decidido pelo Alexandre (R-20261121-190649-alexandre, item 3: Kia Bongo a partir de 07/2017, '2017+')."
 FONTE_VEI = ("Decidido pelo Alexandre (R-20261121-190649-alexandre, item 3: entram como normais, separado e sem "
-             "duvidoso, com o ano do texto; só estes casos, sem reabrir a P12).")
+             "MOTIVO e sem ANO_DUVIDA, com o ano do texto; só estes casos, sem reabrir a P12).")
 FONTE_CVF = ("Decidido pelo Alexandre (R-20261121-190933-alexandre, '1 a': 2010–2013, como no texto "
              "'05/2010–04/2013').")
 FONTE_NOM = ("Decidido pelo Alexandre (R-20261121-190649-alexandre, item 3: 'Mbb' e 'Vwc' com a escrita certa da "
-             "montadora e 'New Beetle'). Na APLICACAO, a base escreve 'MB' 347 vezes (Mercedes-Benz 32, "
+             "montadora e 'New Beetle'; R-20261121-195140-alexandre: '2 a' MB, '3 a' as outras grafias também, '4 a' "
+             "o resto do texto fica). Na APLICACAO, a base escreve 'MB' 347 vezes (Mercedes-Benz 32, "
              "MERCEDES-BENZ 255) e 'VW' 896 (Volkswagen 15, VOLKSWAGEN 506); o prefixo 'MARCA - ' usa 'MB' 223 e 'VW' "
              "609 vezes.")
 
@@ -87,6 +99,11 @@ FONTE_NOVAS = {"SCE14002": FONTE_VEI + " Como as linhas LS 1630 e LS 1941 do mes
 
 def vz(v):
     return VAZIO if v in (None, "") else v
+
+
+def antes_log(v) -> str:
+    """O valor de antes no LOG: a marca da revisão da P12 não é escrita de novo (regra R-20261120-213300)."""
+    return "(o da revisão da P12)" if "duvid" in str(v).lower() else f"'{v}'"
 
 
 def contar_duvidoso(wb) -> dict:
@@ -156,7 +173,8 @@ def main(base, saida):
             novo = t
             for _, rx, troca in NOMES:
                 novo = rx.sub(troca, novo)
-            apl[cod] = (n, t, novo, "6", FONTE_NOM)
+            trocas = ", ".join(f"'{nome}' → '{troca}'" for nome, _, troca in NOMES if nome in achou)
+            apl[cod] = (n, t, novo, "6", f"Troca: {trocas}. " + FONTE_NOM)
         for m in PARECIDOS.finditer(t):          # o que é parecido mas não entra
             if not any(rx.fullmatch(m.group(0)) for _, rx, _ in NOMES) and m.group(0) not in ("VW", "New Beetle"):
                 parecidos.append([cod, "PRODUTOS", n, "APLICACAO", m.group(0),
@@ -183,7 +201,7 @@ def main(base, saida):
     assert CIL_TEXTO in apl_cil, apl_cil
     for mod in ("Parati", "Santana"):
         (r,) = linhas_veic("CIL8546", "VOLKSWAGEN", mod)
-        f = FONTE_VEI + f" Ano do texto: '{CIL_TEXTO}'. A linha já existe (duvidoso): passa a normal, sem linha nova."
+        f = FONTE_VEI + f" Ano do texto: '{CIL_TEXTO}'. A linha já existe (na revisão da P12, fora do site): passa a normal, sem linha nova."
         celula(r, "ANO_INICIO", None, 1983, "3", f)
         celula(r, "ANO_FIM", None, 2006, "3", f)
         celula(r, "SITUACAO", "duvidoso", "separado", "3", f)
@@ -207,24 +225,15 @@ def main(base, saida):
          "colunas lidas pelo BAP Ajuda e pela BAP Central e vem do cadastro (ERP); o pedido é a escrita no catálogo."],
         ["vários", "PRODUTOS · DADOS_ADICIONAIS", "'MBB', 'New Beetle' etc. ficam: é a cópia da fonte (Farj, rolamentos), "
          "dado de origem."],
-        ["TER555082, TER555218, ROL32011, ROL6204-2RS-C3, ROL683/672", "PRODUTOS · APLICACAO",
-         "'MBB' em maiúsculas (5 células) não é o 'Mbb' do pedido. Se o Alexandre quiser, entra igual ('MB') na mesma "
-         "v26: pergunta."],
-        ["FAC6249, FAC6301, FAR6210, 42, CUB60042", "PRODUTOS · APLICACAO", "'NEW BEETLE' fica: o bloco inteiro está em "
-         "maiúsculas ('VOLKSWAGEN NEW BEETLE 2.0 L 8V')."],
-        ["ELE1049", "PRODUTOS · APLICACAO", "'New beetle' (b minúsculo) não é o 'NEW Beetle' do pedido. Pergunta: entra "
-         "como 'New Beetle'?"],
-        ["CL21", "PRODUTOS · APLICACAO", "'New Beatle' (grafia errada) fica: não foi pedido. Na mesma célula, o "
-         "'NEW Beetle' muda. Pergunta: corrigir para 'New Beetle'?"],
-        ["CXD13055, 116, TAX10007", "PRODUTOS · APLICACAO", "'Vw' (Vw Touareg, Vw Apollo) não é o 'Vwc' do pedido. "
-         "Pergunta: entra como 'VW'?"],
-        ["TER555249, BOL40041", "PRODUTOS · APLICACAO", "Só a palavra muda, como pede a regra 4. Fica 'MB - Accelo 1016C MB "
-         "816 …' e 'MB - MB/Diesel' (a marca repetida já estava lá, escrita 'Mbb'); tirar a repetição é outra mudança."],
+        ["CUB60039", "PRODUTOS · APLICACAO", "'VW BEATLE' fica: não estava na lista aprovada (R-20261121-195140-alexandre, "
+         "'3 a')."],
+        ["TER555249, BOL40041", "PRODUTOS · APLICACAO", "Só a palavra muda: fica 'MB - Accelo 1016C MB 816 …' e 'MB - MB/Diesel' "
+         "(R-20261121-195140-alexandre, '4 a': o 'MB … MB' fica)."],
         ["SCE14002", "PRODUTOS · APLICACAO", "'LS1941' fica junto, como no exemplo do gerente e no texto de hoje; "
          "'16210 17240 1730' e '111693' (VW) ficam."],
         ["SCE14002", "VEICULOS", "Os VW do texto (16210, 17240, 1730) não entram: o pedido é só os LS."],
-        ["CIL8546", "VEICULOS", "Quantum, Saveiro, Royale, Versailles, Cordoba e Ibiza continuam duvidoso: o pedido é só "
-         "Parati e Santana, sem reabrir a P12."],
+        ["CIL8546", "VEICULOS", "Quantum, Saveiro, Royale, Versailles, Cordoba e Ibiza ficam como estão (fora do filtro do "
+         "site): o pedido é só Parati e Santana, sem reabrir a P12."],
         ["CRU100", "PRODUTOS · APLICACAO", "'Kia Motors' fica como está (não foi pedido); o mês '07/' fica, com '>' "
          "no fim, no formato da casa ('em diante' com '>')."],
         ["CRU100", "VEICULOS", "A HR entra com VERSAO vazia [SUPOSIÇÃO]: o '4x2' não tem lugar na VEICULOS (nenhuma linha "
@@ -238,7 +247,7 @@ def main(base, saida):
          "fixo dos PDFs (dono: catalogo-grafico). Os PDFs leem '1929', '1932', '1934' e '1941' com o padrão "
          "(19|20)AA: aviso ao catalogo-grafico."],
     ]
-    fora += [[c, f"{aba} · {col} (linha {n})", f"'{achado}' não entra (só 'Mbb', 'Vwc' e 'NEW Beetle'): …{trecho}…"]
+    fora += [[c, f"{aba} · {col} (linha {n})", f"'{achado}' não entra (não está na lista aprovada): …{trecho}…"]
              for c, aba, n, col, achado, trecho in parecidos]
 
     # --- a base como ficaria (pasta temporária) e a conferência célula a célula com a v25
@@ -266,25 +275,13 @@ def main(base, saida):
             if a.get(k) != d.get(k):
                 site.append([c, k, json.dumps(a.get(k), ensure_ascii=False), json.dumps(d.get(k), ensure_ascii=False)])
 
-    # --- LOG_CORRECOES previsto: uma linha por código e aba mudados, e uma por linha nova da VEICULOS
-    log = []
-    for x in mud:
-        if x[1] == "PRODUTOS":
-            log.append(["CORRECAO_APLICACAO", "PRODUTOS", x[0], None,
-                        f"APLICACAO: '{x[4]}' -> '{x[5]}' (item {x[6]}). {x[7]} {TAREFA} (v26), {DATA}"])
-    por_linha = collections.defaultdict(list)
-    for x in mud:
-        if x[1] == "VEICULOS":
-            por_linha[(x[0], x[2])].append(f"{x[3]} {x[4]} -> {x[5]}")
-    for (cod, r), partes in por_linha.items():
-        veic = f"{wv.cell(r, iv['FABRICANTE']).value} {wv.cell(r, iv['MODELO']).value}"
-        log.append(["CORRECAO_VEICULO", "VEICULOS", cod, None, f"VEICULOS linha {r} ({veic}): " + "; ".join(partes)
-                    + f". {TAREFA} (v26), {DATA}"])
-    for i, nv in enumerate(NOVAS, 1):
-        log.append(["VEICULO_NOVO", "VEICULOS", nv[0], None,
-                    f"VEICULOS: linha nova no fim da aba (linha {n_veic + i}), {nv[1]} {nv[2]} {nv[3] or ''}".rstrip()
-                    + f", {nv[4] or 'sem ano'}{'–' + str(nv[5]) if nv[5] else ''}, separado, sem MOTIVO e sem "
-                      f"ANO_DUVIDA. {TAREFA} (v26), {DATA}"])
+    # --- LOG_CORRECOES previsto: uma linha por célula e uma por linha nova da VEICULOS (o texto inteiro, com a fonte e
+    # a aprovação, é o que o dados/scripts/base_v26.py escreve)
+    log = [["CORRECAO_APLICACAO" if x[1] == "PRODUTOS" else "CORRECAO_VEICULO", x[1], x[0], None,
+            f"{x[1]} linha {x[2]}, {x[3]}: {antes_log(x[4])} -> '{x[5]}' (item {x[6]})"] for x in mud]
+    log += [["VEICULO_NOVO", "VEICULOS", nv[0], None,
+             f"VEICULOS linha {n_veic + i}: {' | '.join(str(v) for v in nv[1:6] if v is not None)}, separado"]
+            for i, nv in enumerate(NOVAS, 1)]
 
     num = {"base_sha256": sha(base), "pedido": PEDIDO,
            "produtos_linhas": n_prod - 1, "produtos_saem": 0,
@@ -303,14 +300,15 @@ def main(base, saida):
     out = openpyxl.Workbook()
     le = out.active
     le.title = "LEIA"
-    for t in ["T-0017 · v26 da base unificada: SIMULAÇÃO (nada gravado)",
+    for t in ["T-0017 · v26 da base unificada: SIMULAÇÃO aprovada (R-20261121-195140-alexandre, '1 a 2 a 3 a 4 a', "
+              "via po), gravada pelo dados/scripts/base_v26.py",
               f"Base de partida: v25 (sha256 {num['base_sha256'][:8]}…{num['base_sha256'][-4:]}). Pedido: {PEDIDO}; "
               "CV-F35 confirmado no R-20261121-190933-alexandre.",
               f"ANTES_DEPOIS: {len(mud)} células ({len(celulas['PRODUTOS'])} APLICACAO na PRODUTOS e "
               f"{len(celulas['VEICULOS'])} na VEICULOS), lida pelo dados/scripts/base_v26.py na gravação.",
               f"VEICULOS_NOVA: {len(NOVAS)} linhas no fim da aba (LS 1929, 1932 e 1934 do SCE14002; HR do CRU100).",
               "FORA: o que fica como está, e por quê. SITE: o que muda no produtos.json (gerar_site rodado numa cópia).",
-              "Nada novo marcado como duvidoso; nenhum produto sai; mesmas abas e colunas.",
+              "Nenhuma marca nova de ano incerto; nenhum produto sai; mesmas abas e colunas.",
               f"LOG_CORRECOES previsto: {len(log)} linhas. O LEIA-ME da base ganha o bloco da v26 no topo."]:
         le.append([t])
     abas = {"ANTES_DEPOIS": (CAB, [[vz(v) if i in (4, 5) else v for i, v in enumerate(x)] for x in mud]),

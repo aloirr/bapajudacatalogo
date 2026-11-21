@@ -1,20 +1,25 @@
-# T-0017 · v26 da base unificada: SIMULAÇÃO (nada gravado)
+# T-0017 · v26 da base unificada: SIMULAÇÃO aprovada e gravada
 
 Pedido: **R-20261121-190649-alexandre**, item 3. O CV-F35 foi confirmado no **R-20261121-190933-alexandre** ("1 a": 2010–2013).
 - Base de partida: v25 do main 8de7a6d (sha256 `4954ab91…ac93`).
-- Regra fixa (R-20261120-213300): nada novo marcado como duvidoso, e nenhum produto sai.
+- **Aprovada** no **R-20261121-195140-alexandre** ("1 a 2 a 3 a 4 a", recado de 21/11 ~15h45, via po):
+  - a v26 sai como simulada, com "Mbb" virando "MB";
+  - as outras grafias da antiga lista "fica de fora" também entram (seção 3b);
+  - o "MB … MB" do BOL40041 e do TER555249 fica.
+- Gravada pelo `dados/scripts/base_v26.py` sobre a v25, com a cópia em `dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v26.xlsx` (sha256 `8e0c222e…47cc`, o mesmo da base).
+- Regra fixa (R-20261120-213300): nenhuma marca nova de ano incerto, e nenhum produto sai.
 
 ## 1. Contagem
 | O quê | Quantos |
 |---|---|
-| Células da PRODUTOS (todas APLICACAO) | 21, em 21 códigos |
+| Células da PRODUTOS (todas APLICACAO) | 35, em 35 códigos (21 da simulação e 14 das outras grafias aprovadas) |
 | Células da VEICULOS (linhas que já existem) | 10, em 5 linhas de 3 códigos |
 | Linhas novas no fim da VEICULOS | 4 (17.292 → 17.296) |
-| Códigos mudados | 23 |
+| Códigos mudados | 37 |
 | Produtos que saem | 0 (a PRODUTOS continua com 4.695 linhas) |
-| Células com "duvidoso" (PRODUTOS + VEICULOS) | 5.122 → 5.120 (a Parati e o Santana do CIL8546 deixam de ser duvidoso; nada novo marcado) |
-| LOG_CORRECOES previsto | 29 linhas: 21 APLICACAO, 4 VEICULOS mudados (uma por linha) e 4 VEICULO_NOVO |
-| Site (gerar_site numa cópia) | 4.419 produtos nos dois; mudam 22 produtos (21 no "a" e 3 no "ve"); 12.154 → 12.160 veículos no "ve" |
+| Células com a marca de revisão (PRODUTOS + VEICULOS) | 5.122 → 5.120 (a Parati e o Santana do CIL8546 saem da revisão; nada novo marcado) |
+| LOG_CORRECOES | 49 linhas, uma por célula: 35 APLICACAO, 10 VEICULOS e 4 VEICULO_NOVO |
+| Site (gerar_site) | 4.419 produtos nos dois; mudam 34 produtos (33 no "a" e 3 no "ve"); 12.154 → 12.160 veículos no "ve". O 42 e o 116 mudam na base, mas não estão no site (NO_CATALOGO_DIGITAL = NÃO) |
 
 Por item do pedido:
 - 1 (SCE14002): 1 célula, junto com o item 6, e 3 linhas novas.
@@ -22,10 +27,11 @@ Por item do pedido:
 - 3 (VEICULOS): 8 células (Parati e Santana) e 4 linhas novas (3 LS e a HR).
 - 4 (CV-F35): 1 célula.
 - 5 (MF22): nada muda, só foi conferido.
-- 6 (nomes): 19 células, mais a do SCE14002. São 9 células com "Mbb", 2 com "Vwc" e 10 com "NEW Beetle".
+- 6 (nomes): 33 células, mais a do SCE14002. Por grafia: "Mbb" 9, "Vwc" 2, "NEW Beetle" 10, "MBB" 5, "Vw" 3, "NEW BEETLE" 5, "New beetle" 1 e "New Beatle" 1. O CL21 tem duas grafias na mesma célula, por isso as 15 trocas novas dão 14 células novas.
 
 **Conferência:** a base simulada foi comparada célula a célula com a v25 pelo `base_comum.comparar`.
-- Resultado: PRODUTOS 21 mudaram, de 21 esperadas; VEICULOS 10, de 10, mais 4 linhas no fim.
+- Resultado: PRODUTOS 35 mudaram, de 35 esperadas; VEICULOS 10, de 10, mais 4 linhas no fim.
+- Depois da gravação, o `base_v26.py --conferir` deu 0, com o LOG_CORRECOES +49 linhas e o LEIA-ME +8.
 - Diferenças fora do permitido: 0.
 
 ## 2. Nomes de montadora (item 6): o que a base mais usa
@@ -35,7 +41,8 @@ Por item do pedido:
   - **Proposta: "Vwc" → "VW".**
   - [SUPOSIÇÃO] O "c" de caminhões some; o número do modelo (13180, 16210...) já diz que é caminhão.
 - **"NEW Beetle" → "New Beetle"**, como em todas as linhas da VEICULOS e da MODELOS_VEICULO.
-- A troca é só da palavra inteira, com a caixa exata ("Mbb", "Vwc", "NEW Beetle"). Nada muda dentro de outra palavra. As outras grafias estão na seção 6.
+- A troca é só da palavra inteira, com a caixa exata. Nada muda dentro de outra palavra.
+- Aprovado depois ("3 a"): "MBB" → "MB", "Vw" → "VW" e "NEW BEETLE", "New beetle" e "New Beatle" → "New Beetle" (seção 3b).
 
 ## 3. Antes e depois (PRODUTOS · APLICACAO)
 Nas células longas vai só o trecho que muda. A célula inteira está na aba ANTES_DEPOIS da planilha.
@@ -68,6 +75,25 @@ Nas células longas vai só o trecho que muda. A célula inteira está na aba AN
   - O site já descarta ano de 4 dígitos antes de 1950, então a busca não muda.
   - O "LS1941" fica junto, como no exemplo do gerente e no texto de hoje.
 - **CRU100:** "a partir de 07/2017" no formato da casa ("em diante" com ">"), como o "02/2009>" e o "2013>" da base.
+
+## 3b. Antes e depois: as outras grafias aprovadas ("3 a")
+| Código | Linha | Antes | Depois | Troca |
+|---|---|---|---|---|
+| TER555082 | 279 | MBB Ônibus OF 1418 + … | **MB** Ônibus OF 1418 + … | MBB → MB |
+| TER555218 | 286 | MBB Sprinter (95/...) … | **MB** Sprinter (95/...) … | MBB → MB |
+| ROL32011 | 488 | …Caminhões médios MBB, VW Worker… | …Caminhões médios **MB**, VW Worker… | MBB → MB |
+| ROL6204-2RS-C3 | 579 | …(caminhões MBB, Scania, Volvo)… | …(caminhões **MB**, Scania, Volvo)… | MBB → MB |
+| ROL683/672 | 624 | …caminhões Scania, Volvo e MBB. ; VOLVO… | …caminhões Scania, Volvo e **MB**. ; VOLVO… | MBB → MB |
+| CXD13055 | 36 | …/ Vw Touareg 04/... /… | …/ **VW** Touareg 04/... /… | Vw → VW |
+| 116 | 2226 | …Verona 1990/1992; Vw Apollo 1990/1992… | …; **VW** Apollo 1990/1992… | Vw → VW |
+| TAX10007 | 3058 | …Verona 1990/1992; Vw Apollo 1990/1992… | …; **VW** Apollo 1990/1992… | Vw → VW |
+| 42 | 2157 | …VW BORA, NEW BEETLE, GOLF 1999/2002… | …VW BORA, **New Beetle**, GOLF… | NEW BEETLE → New Beetle |
+| FAC6249 | 2635 | …VOLKSWAGEN NEW BEETLE 2.0 L 8V - 1999–2010… | …VOLKSWAGEN **New Beetle** 2.0 L 8V… | NEW BEETLE → New Beetle |
+| FAC6301 | 2637 | …VOLKSWAGEN NEW BEETLE MI MEC. … / VOLKSWAGEN NEW BEETLE MI AUT. … | …VOLKSWAGEN **New Beetle** MI MEC. … / VOLKSWAGEN **New Beetle** MI AUT. … | NEW BEETLE → New Beetle (2 vezes) |
+| FAR6210 | 2694 | …VOLKSWAGEN NEW BEETLE 2.0 L - 1998–2026… | …VOLKSWAGEN **New Beetle** 2.0 L… | NEW BEETLE → New Beetle |
+| CUB60042 | 3347 | VW BORA, NEW BEETLE, GOLF 1999/2002 C/ ABS… | VW BORA, **New Beetle**, GOLF… | NEW BEETLE → New Beetle |
+| ELE1049 | 689 | …1.9 TDi, New beetle 1.6/2.0/1.9 TDi… | …1.9 TDi, **New Beetle** 1.6/2.0/1.9 TDi… | New beetle → New Beetle |
+| CL21 | 1343 | …VW - Bora 2000–2010 · New Beatle 1999–2012… (e o NEW Beetle da seção 3) | …· **New Beetle** 1999–2012… | New Beatle → New Beetle (na mesma célula do NEW Beetle) |
 
 ## 4. Antes e depois (VEICULOS, linhas que já existem)
 | Código | Linha | Veículo | Coluna | Antes | Depois | Item |
@@ -108,39 +134,33 @@ Nas células longas vai só o trecho que muda. A célula inteira está na aba AN
 ## 6. O que fica de fora, e por quê (aba FORA)
 - **DESCRICAO** ("MBB" e "VWC" no SCE14002, SCE14008, SCE14000 e SCE14007): fica.
   - É a 2ª das 5 colunas lidas pelo BAP Ajuda e pela BAP Central, e vem do cadastro.
-  - O pedido é a escrita no catálogo.
 - **DADOS_ADICIONAIS** ("MBB" e "New Beetle"): é a cópia da fonte e fica.
-- **Outras grafias na APLICACAO**, que não são as do pedido. Ficam, com uma **pergunta ao Alexandre** se ele quiser na mesma v26:
-  - "MBB" em maiúsculas, 5 células: TER555082, TER555218, ROL32011, ROL6204-2RS-C3 e ROL683/672.
-    - O ROL6204-2RS-C3 é irmão do ROL6204-2RS e do ROL6204-2Z, que passam a "MB". Sem isso, os três ficam diferentes.
-  - "New beetle", com b minúsculo, no ELE1049.
-  - "New Beatle", escrito errado, no CL21. O "NEW Beetle" da mesma célula muda.
-  - "Vw" no CXD13055, no 116 e no TAX10007 (Vw Touareg, Vw Apollo).
-  - "NEW BEETLE" no FAC6249, FAC6301, FAR6210, 42 e CUB60042: o bloco inteiro está em maiúsculas.
-- **TER555249 e BOL40041:** muda só a palavra, como pede a regra 4. Ficam "MB - Accelo 1016C MB 816 …" e "MB - MB/Diesel".
-  - A marca repetida já estava lá, escrita "Mbb". Tirar a repetição seria outra mudança.
-- **SCE14002:** os VW do texto (16210, 17240 e 1730) não entram na VEICULOS, porque o pedido é só os LS.
-- **CIL8546:** Quantum, Saveiro, Royale, Versailles, Cordoba e Ibiza continuam duvidoso. O pedido não reabre a P12.
+- **"VW BEATLE"** no CUB60039: não estava na lista aprovada.
+- **TER555249 e BOL40041:** só a palavra muda. O "MB - Accelo 1016C MB 816 …" e o "MB - MB/Diesel" ficam ("4 a").
+- **SCE14002:** o "LS1941" fica junto. Os VW do texto (16210, 17240 e 1730) não entram na VEICULOS, porque o pedido é só os LS.
+- **CIL8546:** Quantum, Saveiro, Royale, Versailles, Cordoba e Ibiza ficam como estão (fora do filtro do site), sem reabrir a P12.
 - **CRU100:** "Kia Motors" fica como está, porque não foi pedido.
 - **MF22:** a "AUTOIMPACT: MA21" fica. Conferido na REFERENCIAS_CRUZADAS.
 - **Outras abas** (LOG_CORRECOES, INCLUIDOS_V7, ROLAMENTOS_INTEGRADOS, VELAS_INTEGRADAS, INTEGRADOS_V6 e o MOTIVO da VEICULOS): são histórico e citação do texto antigo. Ficam.
-- **Fora da base:** o `catalogo_grafico/gerador/digital_data.json` ainda tem o texto antigo do SCE14002 ("1929–19321934").
-  - Os PDFs leem 19AA e 20AA como ano (`datas.py`).
-  - Aviso ao `catalogo-grafico`, que é o dono do arquivo.
+- **Fora da base:** o `catalogo_grafico/gerador/digital_data.json` ainda tem o texto antigo do SCE14002 ("1929–19321934"). Os PDFs leem 19AA e 20AA como ano (`datas.py`). Fica com o `catalogo-grafico`, que é o dono do arquivo, como diz o R-20261121-195140-alexandre.
 
-## 7. No site (gerar_site.py rodado numa cópia, com a v25 e com a v26 simulada)
-- Sem `[PARADO]`: 4.419 produtos nos dois, a TRAVA passa e nenhum produto entra ou sai.
+## 7. No site (gerar_site.py rodado com a v26 gravada; o produtos.json voltou ao do main, porque vai em PR do web-site)
+- Sem `[PARADO]`: 4.419 produtos nos dois, a TRAVA passa e nenhum produto entra ou sai. A marca de revisão não aparece no JSON.
 - **"ve" (filtro "Meu veículo"):**
   - SCE14002 ganha MERCEDES-BENZ LS 1929, LS 1932 e LS 1934;
   - CRU100 ganha HYUNDAI HR;
   - CIL8546 ganha VOLKSWAGEN Parati e Santana.
   - O total passa de 12.154 para 12.160 veículos.
-- **"a" (aplicação):** mudam os 21 códigos da seção 3.
+- **"a" (aplicação):** mudam 33 códigos, os das seções 3 e 3b, menos o 42 e o 116, que não estão no site (NO_CATALOGO_DIGITAL = NÃO).
 - **Não muda:**
   - o ano do CV-F35 e o da Bongo na VEICULOS, porque os anos da VEICULOS não vão para o site;
   - as referências, a ficha, a TRAVA e a FICHA.
 
 ## 8. Formato
 - Não há coluna nova nem aba nova, e as 5 primeiras colunas da PRODUTOS ficam iguais. A VEICULOS ganha 4 linhas no fim.
-- Previsto no LOG_CORRECOES: 29 linhas (aba LOG_CORRECOES_PREVISTO). O LEIA-ME ganha o bloco da v26 no topo.
-- Na gravação, depois do "aprovado": `dados/scripts/base_v26.py` lê a ANTES_DEPOIS e a VEICULOS_NOVA desta planilha e grava pelo `base_comum.rodar`, com `novas_no_fim={"VEICULOS": 4}`.
+- LOG_CORRECOES: 49 linhas, uma por célula e uma por linha nova. O texto inteiro está na base; a aba LOG_CORRECOES_PREVISTO da planilha traz o resumo.
+- O LEIA-ME ganha o bloco da v26 no topo (8 linhas).
+- Gravação: o `dados/scripts/base_v26.py` lê a ANTES_DEPOIS e a VEICULOS_NOVA desta planilha e grava pelo `base_comum.rodar`, com `novas_no_fim={"VEICULOS": 4}`.
+  - Ele confere que o SCE14002 e o CRU100 têm o texto aprovado.
+  - Confere que as outras 33 células trocam só as palavras aprovadas.
+  - Confere que as células e as linhas da VEICULOS são as aprovadas.

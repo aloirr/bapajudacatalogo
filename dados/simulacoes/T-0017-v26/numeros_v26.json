@@ -3,18 +3,23 @@
  "pedido": "R-20261121-190649-alexandre, item 3",
  "produtos_linhas": 4695,
  "produtos_saem": 0,
- "celulas_produtos_aplicacao": 21,
+ "celulas_produtos_aplicacao": 35,
  "celulas_por_item": {
-  "6": 19,
+  "6": 33,
   "1 e 6": 1,
   "2": 2,
   "3": 8,
   "4": 1
  },
  "celulas_nomes_por_grafia": {
+  "Vw": 3,
+  "MBB": 5,
   "Mbb": 9,
+  "New beetle": 1,
   "NEW Beetle": 10,
-  "Vwc": 2
+  "Vwc": 2,
+  "New Beatle": 1,
+  "NEW BEETLE": 5
  },
  "celulas_veiculos": 10,
  "veiculos_linhas_antes": 17292,
@@ -28,12 +33,12 @@
   "PRODUTOS": 0,
   "VEICULOS": 5120
  },
- "log_previsto": 29,
- "codigos_mudados": 23,
+ "log_previsto": 49,
+ "codigos_mudados": 37,
  "site_produtos_antes": 4419,
  "site_produtos_depois": 4419,
- "site_produtos_que_mudam": 22,
- "site_chaves_que_mudam": 24,
- "fora": 33,
- "parecidos_que_nao_entram": 16
+ "site_produtos_que_mudam": 34,
+ "site_chaves_que_mudam": 36,
+ "fora": 13,
+ "parecidos_que_nao_entram": 0
 }
