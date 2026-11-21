@@ -44,11 +44,17 @@ def fix_text(t):
 
 
 def em_diante(t):
-    """'2015>' -> '2015–', '03/2015>' -> '03/2015–' e '2008->' (sem ano depois) -> '2008–' ("em diante" = "2015–",
-    igual ao site; R-20261120-175000). Só no desenho do PDF (aplicação, DETALHE e subtítulo), depois do fix_text: a base
-    e o fix_text não mudam."""
-    t = re.sub(r'((?:\d{2}/)?' + Y + r')\s*->(?!\s*\d)', r'\1–', t)
-    return re.sub(r'((?:\d{2}/)?' + Y + r')\s*>', r'\1–', t)
+    """"em diante" = "AAAA+" nos PDFs (R-20261120-194600-alexandre, item 4: "troque por 2015+"; R-20261120-195900 e
+    R-20261120-201100-alexandre), num lugar só: '2015 em Diante', '2015>', '03/2015>', '2008->' e '2025 →' sem ano depois
+    -> '2015+' (antes "2015–", da R-20261120-175000); letra ou "(" logo depois ganha um espaço ("2001+ GM"). É a mesma
+    regra do site (site/app.js, anoMaisHtml): "AAAA+", com o espaço depois do "+" antes de uma letra ou de "(".
+    '1999->2008' e '1999 → 2008' são faixa -> '1999–2008'; '>1994' ("até") fica. Só no desenho do PDF (aplicação,
+    DETALHE e subtítulo), depois do fix_text: a base e o fix_text não mudam."""
+    t = re.sub(r'((?:\d{2}/)?' + Y + r')\s*(?:->|→)\s*((?:\d{2}/)?' + Y + r')', r'\1–\2', t)
+    t = re.sub(r'((?:\d{2}/)?' + Y + r')\s+em\s+diante\b', r'\1+', t, flags=re.I)
+    t = re.sub(r'((?:\d{2}/)?' + Y + r')\s*(?:-?>|→)(?!\s*\d+(?![\dA-Za-z]))', r'\1+', t)
+    t = re.sub(r'(' + Y + r'\+)(?=[^\W\d_]|\()', r'\1 ', t)   # "2001>GM" -> "2001+ GM" (designer-ux)
+    return re.sub(r'((?:\d{2}/)?' + Y + r')\s*>', r'\1–', t)   # número que não é ano depois ("09/1993>1201"): como antes
 
 
 def para_pdf(t):
