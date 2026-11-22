@@ -1,5 +1,5 @@
-Testes T-0002 · 21/11/2026 20:48 (Manaus)
-total do JSON ................ PASSOU (4.419 produtos, gerado em 21/11/2026 20:43; no commit: 4.419)
+Testes T-0002 · 21/11/2026 20:59 (Manaus)
+total do JSON ................ PASSOU (4.419 produtos, gerado em 21/11/2026 20:58; no commit: 4.419)
 código único no site ......... PASSOU
 campos do JSON ............... PASSOU (só os 19 campos conhecidos; "ve" em 3.617 produtos (12.160 veículos) no formato [fabricante, modelo, versão?]; "ss" em 132 produtos)
 palavra interna .............. PASSOU
@@ -17,9 +17,9 @@ meu veículo .................. PASSOU (1366 px: Marca › Modelo › Ano › Mo
 produto sem preço nem estoque  PASSOU (CXD13062, AMT7115, TER556556)
 página do produto ............ PASSOU (CXD13062 (Foto em breve) e AMT7115 (com foto): foto, aplicação, referências, ficha técnica, leve também; página pelo link direto, sem janela)
 acessibilidade básica ........ PASSOU (campos com rótulo, imagens com alt, Tab chega ao campo q e ao da placa (1 e 3 passos), foco visível nos 2)
-tela da busca ................ PASSOU (a nova (sem abas: q e placa lado a lado); filtros: coluna à esquerda (1366) e botão "Filtrar" com painel (390))
-filtros da busca ............. PASSOU (link "amortecedor" com si=SUSPENSÃO = 709, só desse sistema; 1366 px: coluna x=16..226 (210 px), 1º cartão x=240; 1536 px: coluna x=16..226 (210 px), 1º cartão x=240; 390 px: botão "Filtrar"; "CXD13062" (1 opção por grupo): 1366 px: 4 grupos, 1536 px: 4 grupos; "CXD13062" (1 opção por grupo): 390 px: botão "Filtrar"; 390 px: "Leve" (Linha) 710 → 705 e o "x" volta a 710)
+tela da busca ................ PASSOU (a aprovada (sem abas: q e placa lado a lado); filtros: coluna à esquerda (1366) e botão "Filtrar" com painel (390))
 campos da busca .............. PASSOU (q "Código, descrição ou aplicação" e placa "Placa do veículo"; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro da busca (2 na página inicial: o do q e o da placa); q com Enter e botão (busca código e veículo))
+filtros da busca ............. PASSOU (link "amortecedor" com si=SUSPENSÃO = 709, só desse sistema; 1366 px: coluna x=16..226 (210 px), 1º cartão x=240; 1536 px: coluna x=16..226 (210 px), 1º cartão x=240; 390 px: botão "Filtrar"; "CXD13062" (1 opção por grupo): 1366 px: 4 grupos, 1536 px: 4 grupos, 390 px: botão "Filtrar"; 390 px: "Leve" (Linha) 710 → 705 e o "x" volta a 710)
 cartões da lista ............. PASSOU ("amortecedor": 1366 px: 4 na 1ª linha (cartão 266 × 318 px, 8 da 1ª e 2ª linha com a mesma altura, foto 264×150; até 2 ref. à vista, 24 de 24 com "+N"); 1536 px: 4 na 1ª linha (cartão 308 × 318 px, 8 da 1ª e 2ª linha com a mesma altura, foto 306×150; até 2 ref. à vista, 24 de 24 com "+N"); 1920 px: 5 na 1ª linha (cartão 312 × 318 px, 10 da 1ª e 2ª linha com a mesma altura, foto 310×150; até 2 ref. à vista, 24 de 24 com "+N"); 390 px: 2 na 1ª linha (cartão 175 × 224 px, 4 da 1ª e 2ª linha com a mesma altura, foto 173×55; até 2 ref. à vista, 24 de 24 com "+N"); 4 na 1ª linha em 1366 e 1536 (fA2), 5 em 1920 (a partir de 1680), 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes")
 janela do produto ............ PASSOU ("+ Detalhes" e código/nome abrem o dialog com o código; Esc fecha e devolve o foco ao cartão; a foto do cartão só amplia (1366 px e 390 px))
 390 px sem rolar de lado ..... PASSOU (scrollWidth <= 390 em todas as telas abertas)

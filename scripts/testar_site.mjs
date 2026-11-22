@@ -22,9 +22,7 @@
    básica; prints em 1366 × 768 e 390 × 844.
    Saída: 0 se passou (ou se só sobraram os conhecidos, com --conhecidos) e 1 se falhou.
 
-   T-0014 e T-0018 (aperto, 22/11/2026, site no main em 3d6a730): a bateria só aceita a tela aprovada e no ar; as
-   aceitações de transição saíram (a tela de 2 abas, 5 cartões em 1366 e 1536, "Ofereça junto", ".hero-num b",
-   1 botão na página inicial, "0 produtos" na busca vazia, o rótulo "Placa" à vista até 640 px e "df"/"ip" no JSON).
+   T-0014 e T-0018 (22/11/2026, site no main em 3d6a730): a bateria só aceita a tela aprovada e no ar.
      - Página inicial (#/, R-20261120-143900): ".mf-total" com "+" e o total arredondado para baixo à centena; 2 botões
        "Buscar" no quadro (o do q e o da placa).
      - Tela da busca ("campos", modelo B escolhido pelo Alexandre: R-20261120-122100, 122300, 123630 e 123800): sem abas, 2
@@ -43,8 +41,7 @@
      - Página do produto: a seção "Leve também" (R-20261120-141100b); "Ofereça junto" na página = falha.
      - Janela do produto (<dialog>, "+ Detalhes"): conferida só se existir no site. A página do produto é sempre
        conferida pelo link direto #/produto/CODIGO.
-     A tela de 2 abas (até a T-0014) agora é falha ("tela da busca"); o ramo "abas" que sobrou abaixo não roda mais.
-     PENDENTE (tarefa depois): apagar o ramo "abas" e o painel lateral daqui. */
+*/
 
 import { createRequire } from "node:module";
 import { createServer } from "node:http";
@@ -163,8 +160,8 @@ function palavrasSinais(v) {
   return achou;
 }
 // campos que o gerar_site.py grava em cada produto (docs/DADOS_DO_SITE.md); campo novo = conferir antes
-// É a lista do que é PERMITIDO, não do que é obrigatório: produto sem um destes campos não falha. "df" e "ip" saíram
-// do JSON no PR #50 (T-0017) e daqui no aperto (T-0014/T-0018): se voltarem, falha.
+// É a lista do que é PERMITIDO, não do que é obrigatório: produto sem um destes campos não falha ("df" e "ip" saíram no
+// PR #50, T-0017: se voltarem, falha).
 // "ve" (T-0017, v17): veículos da aba VEICULOS, lista de [FABRICANTE, MODELO] ou [FABRICANTE, MODELO, VERSAO], textos não vazios
 // "ss" (T-0018, R-20261121-200058): sistema da peça para o "Leve também", opcional, lista de textos não vazios
 const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "oj", "an", "i", "ve", "ss"]);
@@ -475,7 +472,7 @@ async function testarSite(base, ctxJson, dirPrints) {
       const primeiros = () => page.evaluate(() => [...document.querySelectorAll(".lista .item")].slice(0, 5).map((e) => window.__bapT.codDe(e)));
       // a página inicial é o "#/" (ou sem hash)
       const naHome = () => page.evaluate(() => /^#?\/?$/.test(location.hash));
-      // botões "Buscar" no quadro (T-0018, aperto): na página inicial 2 (o do q e o da placa), na tela de busca 1 só
+      // botões "Buscar" no quadro (T-0018): na página inicial 2 (o do q e o da placa), na tela de busca 1 só
       const conferirBotoes = (n, onde) => {
         const quer = onde === "home" ? 2 : 1;
         if (n !== quer) falha("campos-busca", "campos da busca", "botoes", `${L}: o quadro da busca ${onde === "home" ? "da página inicial " : ""}tem ${n} botão(ões) "Buscar" (pedido: ${onde === "home" ? "2 na página inicial, o do q e o da placa" : "1 só para os 2 campos"})`);
@@ -491,22 +488,21 @@ async function testarSite(base, ctxJson, dirPrints) {
       await abrir("inicio", "#/");
       // a página inicial (T-0018, R-20261120-143900) mostra em ".mf-total" o "+" e o total arredondado para baixo à
       // centena ("+4.400" ou "+4400" para 4.419; os pontos não contam e o resto do texto do elemento é ignorado).
-      // Aperto T-0018: sem ".mf-total" é falha (o ".hero-num b" da home antiga não vale mais)
+      // sem ".mf-total" é falha
       const ini = await page.evaluate(() => { const e = document.querySelector(".mf-total"); return e ? e.textContent.replace(/\s+/g, "") : null; });
       const centena = Math.floor(prods.length / 100) * 100;
       if (ini === null) falha("abrir", "site abre", "inicio-total", `${L}: o início não tem o ".mf-total" (esperado "+${fmt(centena)}")`);
       else if ((ini.match(/\+[\d.]+/) || [""])[0].replace(/\./g, "") !== "+" + centena) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${ini}" (.mf-total), o esperado é "+${fmt(centena)}" (o total ${fmt(prods.length)} do JSON arredondado para baixo à centena, com "+")`);
       conferirConsole("inicio");
       await print("inicio");
-      // qual tela o site mostra (T-0014): só a "campos" (sem abas, q e placa lado a lado) vale; a de 2 abas é falha (aperto)
+      // qual tela o site mostra (T-0014): só a "campos" (sem abas, q e placa lado a lado) vale; com abas, falha
       const N_TELA = "tela da busca";
       const tela = await page.evaluate(() => { const c = window.__bapT.campos(); return c.abas ? "abas" : c.q && c.placa ? "campos" : "?"; });
       if (tela === "?") falha("tela", N_TELA, "?", `${L}: não reconheci a tela da busca (nem 2 abas, nem o campo q com o da placa)`);
       else if (tela === "abas") falha("tela", N_TELA, "abas", `${L}: a tela da busca tem abas (role="tab"); a aprovada (T-0014, modelo B) não tem abas: campo q e campo da placa lado a lado`);
       TELAS.add(tela);
-      // o botão "Buscar" do campo q: o do formulário único (abas) ou o do próprio campo (campos)
+      // o botão "Buscar" do campo q: o do formulário do próprio campo
       const clicarBuscarQ = async () => {
-        if (tela === "abas") return page.click('.form-busca button[type="submit"]');
         // tela nova (T-0014, R-20261120-115432): UM só botão "Buscar" no quadro da busca (na página inicial, 2: T-0018)
         const n = await page.evaluate(() => window.__bapT.botoesBuscar().length);
         conferirBotoes(n, (await naHome()) ? "home" : "busca");
@@ -714,7 +710,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         await abrir("busca-vazia", `#/busca?${k}=${encodeURIComponent(v)}`);
         const r = await listaTodos();
         // T-0018 (R-20261120-161500-alexandre, RD-0169): com 0 resultados fica só "Nenhum produto encontrado" e o total
-        // vazio (aperto: o "0 produtos" de antes é falha)
+        // vazio
         if (r.itens.length || !/Nenhum produto encontrado/.test(r.vazio) || r.total.trim())
           falha("vazia", N_VAZ, `${k}:${v}`, `"${v}": ${r.itens.length} item(ns), total "${r.total}", mensagem "${cortar(r.vazio, 40)}"`);
         if (r.proximos) falha("vazia", N_VAZ, `${k}:${v}:proximos`, `"${v}": aviso dos "mais próximos" sem nenhum produto parecido`);
@@ -793,7 +789,7 @@ async function testarSite(base, ctxJson, dirPrints) {
           if (!m.n) falha("cartoes", N_CART, `vazio:${w}`, `${w} px: "${QF}" sem cartões na lista`);
           else {
             // R-20261120-140900 (fA2): 4 por linha no computador (eram 5), cartão maior; 5 a partir de 1680 px (1920) e 2 no
-            // celular (menos só se a lista tiver menos). Aperto T-0014: 5 em 1366 ou 1536 é falha
+            // celular (menos só se a lista tiver menos); 5 em 1366 ou 1536 é falha
             const quer = w >= 1680 ? 5 : w > 640 ? 4 : 2;
             if (m.linha1 !== Math.min(quer, m.n)) falha("cartoes", N_CART, `linha:${w}`, `${w} px: "${QF}" mostra ${m.linha1} cartão(ões) na 1ª linha (pedido: ${quer}; cartão de ${m.larg} px)`);
             const A = m.altura;
@@ -926,22 +922,20 @@ async function testarSite(base, ctxJson, dirPrints) {
         conferirConsole("meu-veiculo");
       }
 
-      // ---- filtros: o link com si= filtra nas 2 telas; na barra nova (T-0014), Esc, marcar, etiqueta "Tirar" e o "x" ----
+      // ---- filtros: coluna à esquerda (computador) e botão "Filtrar (n)" com painel (celular); "barra" é a de antes e falha ----
       const N_FIL = "filtros da busca";
       await abrir("filtros", "#/busca?q=" + encodeURIComponent(QF));
-      // os filtros: "lateral" (tela de hoje); na tela nova (modelo B, R-20261120-123800), "coluna" fina à esquerda dos
-      // cartões no computador (grupos sempre abertos) e "painel" no celular (botão "Filtrar (n)" que abre por cima).
-      // "barra" (a barra horizontal de antes) não vale mais na tela nova.
+      // modelo B (R-20261120-123800): "coluna" fina à esquerda dos cartões no computador (grupos sempre abertos) e
+      // "painel" no celular (botão "Filtrar (n)" que abre por cima); o link com si=, marcar, etiqueta "Tirar" e o "x"
       const botaoFiltrar = () => page.evaluate(() => { const b = [...document.querySelectorAll("#app button")].find((x) => window.__bapT.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())); return b ? b.textContent.replace(/\s+/g, " ").trim() : ""; });
       const tipoFiltro = await page.evaluate(() => {
         const T = window.__bapT;
-        if (document.querySelector("aside.filtros")) return "lateral";
         const g = T.grupos();
         if (g.length) return g.every((b) => b.getAttribute("aria-expanded") === "true") ? "coluna" : "barra";
         return [...document.querySelectorAll("#app button")].some((x) => T.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())) ? "painel" : "?";
       });
       FILTROS.add(`${tipoFiltro} (${larg})`);
-      if (tipoFiltro === "?") falha("filtros", N_FIL, "?", `${L}: não achei os filtros (nem o painel lateral, nem a coluna com Sistema, Família, Linha ou Categoria, nem o botão "Filtrar")`);
+      if (tipoFiltro === "?") falha("filtros", N_FIL, "?", `${L}: não achei os filtros (nem a coluna com Sistema, Família, Linha ou Categoria, nem o botão "Filtrar")`);
       if (tela === "campos" && tipoFiltro !== "?" && tipoFiltro !== (larg >= 1000 ? "coluna" : "painel"))
         falha("filtros", N_FIL, "tipo", `${L}: os filtros estão em "${tipoFiltro}" (pedido: ${larg >= 1000 ? "coluna fina à esquerda dos cartões, com os grupos abertos" : 'botão "Filtrar (n)" que abre o painel'})`);
       // a coluna à esquerda dos cartões, de cima a baixo (x da coluna < x do 1º cartão; lado a lado), em 1366 e 1536
@@ -993,7 +987,7 @@ async function testarSite(base, ctxJson, dirPrints) {
           }
           if (w !== larg) { await page.setViewportSize({ width: larg, height: alt }); await page.waitForTimeout(300); }
         }
-        FILTRO_SI.sempre = (FILTRO_SI.sempre ? FILTRO_SI.sempre + "; " : "") + `"${COD}" (1 opção por grupo): ` + UM.join(", ");
+        FILTRO_SI.sempre = [FILTRO_SI.sempre, ...UM].filter(Boolean).join(", ");
         conferirConsole("filtros-um");
         await abrir("filtros", "#/busca?q=" + encodeURIComponent(QF)); // volta ao caso dos filtros
       }
@@ -1006,16 +1000,15 @@ async function testarSite(base, ctxJson, dirPrints) {
         if (!r.itens.length) falha("filtros", N_FIL, "si:vazio", `${L}: link "${QF}" com si=${siCaso}: lista vazia`);
         if (fora.length) falha("filtros", N_FIL, "si:fora", `${L}: link "${QF}" com si=${siCaso}: ${fora.length} de outro sistema (ex.: ${fora.slice(0, 5).join(", ")})`);
         if (r.itens.length > total0) falha("filtros", N_FIL, "si:maior", `${L}: link com si=${siCaso} = ${r.itens.length}, mais que "${QF}" sem filtro (${total0})`);
-        if (["barra", "coluna", "painel"].includes(tipoFiltro)) {
+        if (["coluna", "painel"].includes(tipoFiltro)) {
           const etq = await etiquetasTela();
           if (!etq.some((t) => norm(t).includes(norm(siCaso)))) falha("filtros", N_FIL, "si:etiqueta", `${L}: link com si=${siCaso} sem a etiqueta "Tirar ..." do filtro (etiquetas: ${etq.join(" | ") || "nenhuma"})`);
         }
         FILTRO_SI.n = r.itens.length; FILTRO_SI.si = siCaso;
         conferirConsole("filtro-si");
       }
-      if (["barra", "coluna", "painel"].includes(tipoFiltro)) {
+      if (["coluna", "painel"].includes(tipoFiltro)) {
         await abrir("filtros", "#/busca?q=" + encodeURIComponent(QF));
-        const fixo = tipoFiltro !== "barra"; // coluna e painel: os grupos ficam abertos (clicar recolhe)
         const abrirPainel = async () => {
           if (tipoFiltro !== "painel" || (await page.evaluate(() => !!document.querySelector("dialog[open]")))) return;
           const hb = (await page.evaluateHandle(() => [...document.querySelectorAll("#app button")].find((x) => window.__bapT.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())) || null)).asElement();
@@ -1028,7 +1021,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         const grupos = await page.evaluate(() => window.__bapT.grupos().map((b) => b.textContent.replace(/[▾▴▼▲]/g, "").replace(/\s+/g, " ").trim()));
         const pegar = async (fn, i) => (await page.evaluateHandle(fn, i)).asElement();
         const clicarGrupo = async (i) => {
-          if (fixo && (await page.evaluate((j) => (window.__bapT.grupos()[j] || {}).getAttribute?.("aria-expanded") === "true", i))) return; // já aberto
+          if ((await page.evaluate((j) => (window.__bapT.grupos()[j] || {}).getAttribute?.("aria-expanded") === "true", i))) return; // já aberto
           const h = await pegar((j) => window.__bapT.grupos()[j] || null, i); if (h) await h.click({ timeout: 5000 });
         };
         const estado = (i) => page.evaluate((j) => { const b = window.__bapT.grupos()[j]; return { exp: b ? b.getAttribute("aria-expanded") : "", ops: window.__bapT.opcoes(j).map((l) => l.innerText.replace(/\s+/g, " ").trim()) }; }, i);
@@ -1039,20 +1032,10 @@ async function testarSite(base, ctxJson, dirPrints) {
           await page.waitForTimeout(150);
           const e1 = await estado(gi);
           if (e1.exp !== "true" || !e1.ops.length) { falha("filtros", N_FIL, "abrir:" + grupos[gi], `${L}: o botão "${grupos[gi]}" não abriu a lista (aria-expanded="${e1.exp}", ${e1.ops.length} opção(ões) à vista)`); continue; }
-          if (gi === 0 && !fixo) {
-            const sw = await page.evaluate(() => document.documentElement.scrollWidth);
-            if (larg === 390 && sw > 390) falha("largura", "390 px sem rolar de lado", "filtro-aberto", `filtro "${grupos[gi]}" aberto: scrollWidth = ${sw}`);
-            await print("filtro-aberto");
-            await page.keyboard.press("Escape");
-            await page.waitForTimeout(150);
-            const e2 = await estado(gi);
-            if (e2.exp !== "false" || e2.ops.length) falha("filtros", N_FIL, "esc", `${L}: o Esc não fechou "${grupos[gi]}" (aria-expanded="${e2.exp}", ${e2.ops.length} opção(ões) à vista)`);
-            if (e2.exp !== "true") { await clicarGrupo(gi); await page.waitForTimeout(150); }
-          }
           const ops = (await estado(gi)).ops.map((t, i) => { const m = t.match(/^(.*?)\s*\(?(\d[\d.]*)\)?$/); return { i, nome: m ? m[1].trim() : t, n: m ? parseInt(m[2].replace(/\./g, ""), 10) : null }; });
           const op = ops.find((o) => o.n && o.n < total0);
-          if (gi === 0 && fixo) await print("filtro-aberto");
-          if (!op) { if (!fixo) { await page.keyboard.press("Escape"); await page.waitForTimeout(100); } continue; }
+          if (gi === 0) await print("filtro-aberto");
+          if (!op) continue;
           marcou = { grupo: grupos[gi], ...op };
           const hOp = await pegar(([g, j]) => window.__bapT.opcoes(g)[j] || null, [gi, op.i]);
           await hOp.click({ timeout: 5000 });
@@ -1112,7 +1095,7 @@ async function testarSite(base, ctxJson, dirPrints) {
             if ((await etiquetasTela()).some((t) => norm(t).includes(norm(op.nome)))) falha("filtros", N_FIL, "tirar:etiqueta", `${L}: a etiqueta "${etq[minha]}" ficou depois do "x"`);
           }
         }
-        if (!grupos.length) falha("filtros", N_FIL, "grupos", `${L}: a barra não tem os grupos Sistema, Família, Linha ou Categoria`);
+        if (!grupos.length) falha("filtros", N_FIL, "grupos", `${L}: os filtros não têm os grupos Sistema, Família, Linha ou Categoria`);
         else if (!marcou) falha("filtros", N_FIL, "sem-opcao", `${L}: "${QF}" (${total0}): nenhum grupo abriu com uma opção que reduza a lista`);
         else FILTRO_SI.marcou = `${L}: "${marcou.nome}" (${marcou.grupo}) ${total0} → ${marcou.total1} e o "x" volta a ${total0}`;
         conferirConsole("filtros");
@@ -1189,7 +1172,7 @@ async function testarSite(base, ctxJson, dirPrints) {
       if (comFoto) paginas.push([comFoto, "produto-com-foto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Leve também"]]);
       for (const c of ["TER556556", "1"]) if (existe(c)) paginas.push([porCod.get(normCod(c)), "produto-" + c, []]);
       // R-20261120-141100b-alexandre: o bloco "Ofereça junto" passou a "Leve também" (título exato da seção, como as
-      // outras). Aperto T-0014: só "Leve também"; "Ofereça junto" em qualquer lugar da página é falha
+      // outras); "Ofereça junto" em qualquer lugar da página é falha
       // T-0014: é a PÁGINA (link direto #/produto/CODIGO), não a janela. O 1º produto abre com o endereço colado
       // numa carga nova da página; os outros, trocando o endereço (sem clique no cartão). Janela aberta = falha.
       let primeira = true;
@@ -1242,60 +1225,11 @@ async function testarSite(base, ctxJson, dirPrints) {
         for (const s of a.semRotulo) falha("a11y", N_A11Y, `rotulo:${nome}:${s}`, `${L} ${nome}: campo sem rótulo (${s})`);
         conferirConsole(nome);
       }
-      // teclado e campos: na tela de hoje, Tab até as abas, foco visível, Enter abre a aba, setas; na nova, os 2 campos
+      // teclado e campos: os 2 campos (q e placa), cada um com Enter e botão
       await page.goto(base + "#/", { waitUntil: "networkidle" });
       await page.waitForFunction(() => !document.getElementById("carregando"), null, { timeout: 15000 }).catch(() => {});
-      if (tela === "abas") {
-        let passos = 0;
-        for (let i = 1; i <= 30; i++) { await page.keyboard.press("Tab"); if (await page.evaluate(() => document.activeElement.matches(".abas button"))) { passos = i; break; } }
-        if (!passos) falha("a11y", N_A11Y, "tab", `${L}: o Tab não chega às abas da busca em 30 passos`);
-        else {
-          const foco = await page.evaluate(() => { const cs = getComputedStyle(document.activeElement); return { o: cs.outlineStyle, w: parseFloat(cs.outlineWidth) || 0, s: cs.boxShadow }; });
-          if ((foco.o === "none" || foco.w === 0) && (!foco.s || foco.s === "none")) falha("a11y", N_A11Y, "foco", `${L}: foco nas abas sem contorno visível`);
-          if (larg === 1366) await page.screenshot({ path: path.join(dirPrints, `foco-teclado-${larg}.png`) });
-        }
-        // as 2 abas da T-0011 (R-20261120-104703): "Busca por código, descrição ou aplicação" e "Busca por placa" (Em breve)
-        const abasTela = await page.evaluate(() => [...document.querySelectorAll(".abas button")].map((b) => ({ aba: b.dataset.aba, txt: b.textContent.replace(/\s+/g, " ").trim(), role: b.getAttribute("role") })));
-        const nomesAbas = abasTela.map((x) => x.txt);
-        if (abasTela.length !== 2 || !/c[oó]digo, descri[cç][aã]o ou aplica[cç][aã]o/i.test(nomesAbas[0] || "") || !/placa/i.test(nomesAbas[1] || ""))
-          falha("abas", "abas da busca", "nomes", `${L}: abas = ${nomesAbas.map((t) => `"${t}"`).join(", ") || "nenhuma"} (esperado 2: código, descrição ou aplicação; placa)`);
-        if (abasTela.some((x) => x.role !== "tab")) falha("abas", "abas da busca", "role", `${L}: aba sem role="tab"`);
-        const abaAtiva = () => page.evaluate(() => {
-          const sel = [...document.querySelectorAll(".abas button")].filter((b) => b.getAttribute("aria-selected") === "true").map((b) => b.dataset.aba);
-          const vis = [...document.querySelectorAll(".form-busca [data-campos]")].filter((c) => !c.hidden).map((c) => c.dataset.campos);
-          const painel = document.querySelector('.form-busca [data-campos="placa"]');
-          const visivel = (el) => !!el && !el.hidden && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
-          const campo = painel && painel.querySelector("input");
-          const botao = [...document.querySelectorAll(".form-busca button, .cartao-busca button")].filter((b) => !b.closest(".abas")).find((b) => visivel(b) && /buscar/i.test(b.textContent));
-          return { foco: document.activeElement?.dataset?.aba || "", sel: sel.join(","), vis: vis.join(","), campo: visivel(campo), botao: !!botao };
-        });
-        const [aT, aP] = [abasTela[0]?.aba, abasTela[1]?.aba];
-        if (aT && aP) {
-          // Enter na aba Placa abre o painel, com o campo da placa e o botão "Buscar". Não digita placa nem busca:
-          // o serviço de placas não existe no CI nem na sessão (aviso do gerente, 20/11/2026), e placa real não entra em teste.
-          await page.focus(`.abas button[data-aba="${aP}"]`);
-          await page.keyboard.press("Enter");
-          const e = await abaAtiva();
-          if (e.sel !== aP || e.vis !== aP) falha("a11y", N_A11Y, "enter", `${L}: Enter na aba Placa: selecionada "${e.sel}", painel "${e.vis}"`);
-          else {
-            if (!e.campo) falha("abas", "abas da busca", "placa:campo", `${L}: a aba Placa não mostra o campo da placa`);
-            if (!e.botao) falha("abas", "abas da busca", "placa:botao", `${L}: a aba Placa não mostra o botão "Buscar"`);
-          }
-          // setas, Home e End trocam entre as 2 abas (padrão ARIA): a aba com foco é a selecionada e o painel dela aparece.
-          // Começa com o foco na aba Placa (o Enter na aba de texto leva o foco para o campo q, de propósito).
-          await page.focus(`.abas button[data-aba="${aP}"]`);
-          for (const [tecla, esperada] of [["ArrowRight", aT], ["ArrowLeft", aP], ["ArrowLeft", aT], ["ArrowRight", aP], ["Home", aT], ["End", aP], ["Home", aT]]) {
-            await page.keyboard.press(tecla);
-            const r = await abaAtiva();
-            if (r.foco !== esperada || r.sel !== esperada || r.vis !== esperada)
-              falha("a11y", N_A11Y, "tecla:" + tecla + ">" + esperada, `${L}: ${tecla} devia ir para a aba "${esperada}": foco "${r.foco}", selecionada "${r.sel}", painel "${r.vis}"`);
-          }
-        }
-        conferirConsole("teclado");
-        detalhe("abas", "abas da busca", nomesAbas.map((t) => `"${t}"`).join(" e ") + '; a de placa abre com o campo e o botão "Buscar" (sem consultar o serviço)');
-        detalhe("a11y", N_A11Y, `campos com rótulo, imagens com alt, Tab chega às abas${passos ? ` (${passos} passos)` : ""}, foco visível, Enter abre a aba, setas, Home e End trocam entre as 2 abas`);
-      } else if (tela === "campos") {
-        // ---- tela nova (T-0014): sem abas, campo q e campo da placa, cada um com botão e Enter ----
+      if (tela === "campos") {
+        // ---- os 2 campos (T-0014): campo q e campo da placa, cada um com botão e Enter ----
         const N_CB = "campos da busca", N_PL = "campo da placa";
         const focoVisivel = () => page.evaluate(() => { const cs = getComputedStyle(document.activeElement); return (cs.outlineStyle !== "none" && (parseFloat(cs.outlineWidth) || 0) > 0) || (!!cs.boxShadow && cs.boxShadow !== "none"); });
         // teclado: Tab chega ao campo q e depois ao da placa, com foco visível nos 2
@@ -1409,8 +1343,9 @@ async function testarSite(base, ctxJson, dirPrints) {
             const re = etq.getBoundingClientRect();
             const ehRotP = (e) => !e.children.length && /^Placa:?$/i.test(e.textContent.trim());
             const r = [...faixa.querySelectorAll("*")].find((e) => ehRotP(e) && T.visivel(e) && (() => { const x = e.getBoundingClientRect(); return x.width > 2 && x.bottom <= topoP + 2 && x.right > re.left && x.left < re.right; })());
-            // p1 (ver o cabeçalho; aperto): até 640 px, com a faixa fechada, só o rótulo .vh apontado pelo aria-labelledby da
-            // placa (o rótulo à vista ali é o de antes do p1 e falha); acima de 640 px, só o rótulo à vista
+            // p1 (ver o cabeçalho): até 640 px só o rótulo .vh apontado pelo aria-labelledby da placa; acima, só o rótulo à
+            // vista. A conferência em 390 px é feita com a faixa fechada (como ela fica logo depois da busca da placa, sem
+            // clique nela): com a faixa aberta o site mostra o rótulo, e este teste não confere esse estado
             const vh = (e) => { const cs = getComputedStyle(e), x = e.getBoundingClientRect();
               return cs.position === "absolute" && x.width <= 1 && x.height <= 1 && cs.overflow === "hidden" && /^rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)$/.test(cs.clip)
                 && cs.whiteSpace === "nowrap" && T.visivel(e) && !e.closest('[aria-hidden="true"]'); };
@@ -1513,16 +1448,14 @@ async function testarSite(base, ctxJson, dirPrints) {
   } finally {
     await browser.close();
   }
-  const nomeTela = { abas: "a de hoje (2 abas: código, descrição ou aplicação; placa)", campos: "a nova (sem abas: q e placa lado a lado)", "?": "não reconhecida" };
-  detalhe("tela", "tela da busca", [...TELAS].map((t) => nomeTela[t] || t).join(" e ") + "; filtros: " + ([...FILTROS].map((f) => f.replace(/^(\w+|\?)/, (t) => ({ lateral: "painel lateral", barra: "barra horizontal", coluna: "coluna à esquerda", painel: 'botão "Filtrar" com painel', "?": "não achados" })[t] || t)).join(" e ") || "?"));
+  const nomeTela = { abas: "2 abas (falha)", campos: "a aprovada (sem abas: q e placa lado a lado)", "?": "não reconhecida" };
+  detalhe("tela", "tela da busca", [...TELAS].map((t) => nomeTela[t] || t).join(" e ") + "; filtros: " + ([...FILTROS].map((f) => f.replace(/^(\w+|\?)/, (t) => ({ barra: "barra horizontal", coluna: "coluna à esquerda", painel: 'botão "Filtrar" com painel', "?": "não achados" })[t] || t)).join(" e ") || "?"));
   teste("tela", "tela da busca");
-  const siTxt = FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "";
-  detalhe("filtros", "filtros da busca", [siTxt, FILTRO_SI.marcou ? "barra: Esc fecha; " + FILTRO_SI.marcou + "; etiqueta \"Tirar\" criada e tirada" : ""].filter(Boolean).join("; "));
   if (TELAS.has("campos")) {
     detalhe("campos-busca", "campos da busca", `${CAMPOS_TELA.rotulos || "?"}; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro da busca (2 na página inicial: o do q e o da placa); q com Enter e botão (busca código e veículo)`);
     detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} em destaque na faixa, com o rótulo "Placa" em cima (${(CAMPOS_TELA.rotulo || []).join("; ") || "?"}) e antes da Marca, e as listas "${CAMPOS_TELA.veiculo || "?"}"; ${CAMPOS_TELA.trava || ""}; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas`);
     detalhe("meuveiculo", "meu veículo", MV.join("; ") + '; faixa logo abaixo do quadro da busca, 5 listas em cascata (Marca, Modelo, Ano, Motor, Versão); sem "Meu veículo", sem "Trocar veículo", sem chave liga/desliga, sem "Departamentos"');
-    detalhe("filtros", "filtros da busca", [FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "", FILTRO_SI.coluna || "", FILTRO_SI.painel || "", FILTRO_SI.sempre || "", FILTRO_SI.marcou || ""].filter(Boolean).join("; "));
+    detalhe("filtros", "filtros da busca", [FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "", FILTRO_SI.coluna || "", FILTRO_SI.painel || "", FILTRO_SI.sempre ? `"${COD}" (1 opção por grupo): ${FILTRO_SI.sempre}` : "", FILTRO_SI.marcou || ""].filter(Boolean).join("; "));
     detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 4 na 1ª linha em 1366 e 1536 (fA2), 5 em 1920 (a partir de 1680), 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes"`);
   }
   if (JANELAS.size) detalhe("janela", "janela do produto", `"+ Detalhes" e código/nome abrem o dialog com o código; Esc fecha e devolve o foco ao cartão; a foto do cartão só amplia (${[...JANELAS].join(" e ")})`);
