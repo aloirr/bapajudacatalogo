@@ -10,6 +10,7 @@ from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import datas
+import quebra  # noqa: F401  (B8: a palavra longa quebra no espaço inseparável ou no separador, não no meio)
 
 FD = 'fontes/'
 for n, f in [('PR', 'Poppins-Regular'), ('PM', 'Poppins-Medium'), ('PB', 'Poppins-Bold')]:
