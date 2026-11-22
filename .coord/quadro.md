@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 01:59 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 02:15 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -26,12 +26,13 @@ Atualizado em 22/11/2026 01:59 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 | [T-0021](tarefas/T-0021.md) | Governança: .claude/worktrees/ no .gitignore e commit do designer-ux e do design-de-marca nas suas pastas | alexandre | po, gerente-projetos | CONCLUÍDA | #105 |
 | [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | EM ANDAMENTO (código no main) | #108, #110, #111, #114, #117, #118, #119, #120 |
+| [T-0023](tarefas/T-0023.md) | Grafia "BAP AUTOPARTS" no gerador do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | NOVA (depois da fase A da T-0022) | — |
 
 ## Fila
-Main 5b7e0ea (#119).
+Main d900add (#121).
 
 1. **T-0022, governança parte 2 (PO, pelo Alexandre):** fase A no PR #120 (revisor e corretor, R-20261122-055354); depois o teste do Alexandre no ar e a fase B (redirecionamento, placa e CLAUDE.md).
-2. **Grafia "BAP AUTO PARTS" no gerador (catalogo-grafico, com simulação):** proposta ao PO (R-20261122-055343), contra a decisão 10 a.
+2. **T-0023, grafia "BAP AUTOPARTS" no gerador (catalogo-grafico, com simulação):** aprovada como tarefa (R-20261122-061514), depois da fase A da T-0022.
 3. **Fora da fila, para decidir depois:**
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - Portfólio: muda se for gerado de novo, porque agrupa pelo SISTEMA da v27 (catalogo-grafico);
