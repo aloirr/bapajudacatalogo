@@ -14,7 +14,7 @@
 | `p`, `ca`, `si`, `fa`, `li` | PRODUTO, CATEGORIA, SISTEMA, FAMILIA, LINHA |
 | `po`, `la`, `de` | POSICAO, LADO, DETALHE_CATALOGO |
 | `oj` | OFERECA_JUNTO |
-| `ss` | Sistemas do item para o "Leve também" (T-0018, R-20261121-200058-alexandre), só quando diferem do `si`. Hoje, só nos rolamentos (PRODUTO = "Rolamentos", 132 na v25): os que o texto diz (DESCRICAO, DETALHE_CATALOGO e a POSICAO dos DADOS_ADICIONAIS) entre "CÂMBIO E DIFERENCIAL", "TRANSMISSÃO", "RODAGEM" e "MOTOR"; sem nada no texto, fica o SISTEMA. Ex.: ROL32009 → `["CÂMBIO E DIFERENCIAL"]`. Vai só o nome do sistema, nunca o texto da POSICAO. |
+| `ss` | Sistemas do item para o "Leve também" (T-0018, R-20261121-200058-alexandre), só quando diferem do `si`. Hoje, só nos rolamentos (PRODUTO = "Rolamentos", 121 na v27): os que o texto diz (DESCRICAO, DETALHE_CATALOGO e a POSICAO dos DADOS_ADICIONAIS) entre "CÂMBIO E DIFERENCIAL", "TRANSMISSÃO", "RODAGEM" e "MOTOR"; sem nada no texto, fica o SISTEMA. Ex.: ROL32009 → `["CÂMBIO E DIFERENCIAL"]`. Vai só o nome do sistema, nunca o texto da POSICAO. |
 | `sc` | fora dos produtos, uma vez no arquivo (T-0018): a tabela dos sistemas compatíveis do "Leve também", `SIS_COMPAT` do `gerar_site.py` (origem → sistemas aceitos, com o próprio; não é simétrica; sistema fora da tabela aceita só ele mesmo). Os PDFs leem a mesma tabela do `gerar_site.py` (`site_regras`), sem cópia. Ex.: `"RODAGEM": ["RODAGEM", "FREIO"]`. |
 | `i` | foto em `site/img/` |
 | `gerado_em` | data e hora da geração, em hora de Manaus (`America/Manaus`; sem os dados de fuso, UTC−4 fixo). O site mostra "base atualizada em". |

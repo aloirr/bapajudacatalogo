@@ -225,8 +225,8 @@ SIS_COMPAT = {
     "LUBRIFICANTES": ("LUBRIFICANTES", "FILTRAÇÃO", "ELÉTRICA"),
     "QUÍMICOS": ("QUÍMICOS", "ARREFECIMENTO", "FREIO"),
 }
-# A base põe todo rolamento em RODAGEM (ROL32008, ROL32009); os sistemas dele vêm do texto (sistemas_de). Campo ss:
-# docs/DADOS_DO_SITE.md.
+# Desde a v27 a base põe o rolamento em TRANSMISSÃO, MOTOR ou RODAGEM; os sistemas dele para o "Leve também"
+# vêm do texto (sistemas_de). Contagem e exemplo do campo ss: docs/DADOS_DO_SITE.md.
 ROL_SISTEMAS = [
     (re.compile(r"CAMBIO|DIFERENCIAL|COROA|PINHAO|SATELITE|CAIXA DE (?:MUDANCA|MARCHA)|EIXO (?:PILOTO|PRIMARIO|"
                 r"SECUNDARIO|INTERMEDIARIO)|CONTRA ?EIXO|TRANSMISSAO MANUAL|REDUTOR|TOMADA DE FORCA"), "CÂMBIO E DIFERENCIAL"),
