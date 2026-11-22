@@ -1,0 +1,102 @@
+/* Páginas do admin (T-0022): "Criar usuários" e "Catálogos em PDF". Vem depois do /styles.css e do /entrar/entrar.css
+   e usa só as variáveis do :root. */
+
+/* ---------- lista de usuários ---------- */
+.us-barra { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin: 0 0 14px; }
+.us-barra .campo { flex: 1 1 260px; max-width: 420px; }
+.us-barra .bt { margin-left: auto; }
+.us-total { font-size: 14px; color: var(--texto-2); margin: 0 0 10px; }
+table.us { width: 100%; border-collapse: collapse; background: var(--branco); border-radius: var(--raio); overflow: hidden; box-shadow: var(--sombra); }
+/* o rótulo das colunas (computador) e o de cada linha do cartão (celular) */
+table.us th, table.us td[data-rot]::before { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--texto-2); }
+table.us th { text-align: left; background: var(--fundo-filtros); padding: 10px 14px; }
+table.us td { padding: 12px 14px; border-top: 1px solid var(--linha); vertical-align: middle; font-size: 14px; }
+table.us td[data-rot="Último acesso"] { white-space: nowrap; }
+table.us tr.off td { color: var(--texto-2); } /* desativado: o texto apagado; a logo não muda (MC-0003) */
+.us-emp { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.us-emp > div { min-width: 0; overflow-wrap: break-word; }
+.us-emp b { font-weight: 600; color: var(--escuro); display: block; }
+.us-emp small { color: var(--texto-2); font-size: 12px; }
+.us-emp .conta-logo { --conta-logo: 40px; --conta-logo-l: 64px; } /* na lista, a logo é dado da linha: não divide o nível com o logo da BAP */
+.us-login { font-weight: 500; font-size: 13px; overflow-wrap: break-word; min-width: 0; } /* Poppins 500 (MC-0005) */
+.us-acoes { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+.us-acoes .tag { margin-right: 4px; }
+.us-acoes .bt { height: 44px; padding: 0 12px; font-size: 13px; }
+.us-sit { display: flex; flex-wrap: wrap; gap: 4px; }
+@media (max-width: 900px) {
+  /* celular e tablet: cada usuário vira um cartão com rótulos */
+  table.us, table.us tbody, table.us tr, table.us td { display: block; width: 100%; }
+  table.us { background: none; box-shadow: none; border-radius: 0; }
+  table.us thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  table.us tr { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); margin: 0 0 12px; padding: 12px 14px; }
+  table.us td { border: 0; padding: 4px 0; display: flex; gap: 10px; min-width: 0; }
+  table.us td[data-rot]::before { content: attr(data-rot); flex: 0 0 104px; padding-top: 2px; }
+  table.us td.us-td-emp { padding-bottom: 8px; border-bottom: 1px solid var(--linha); margin-bottom: 6px; }
+  .us-acoes { justify-content: flex-start; flex-wrap: wrap; padding-top: 8px; }
+  table.us td.us-td-acoes { display: block; padding: 0; }
+  .us-acoes .bt { flex: 1 1 auto; justify-content: center; }
+  .us-barra .bt { margin-left: 0; width: 100%; justify-content: center; }
+  .us-barra .campo { max-width: none; }
+}
+
+/* ---------- janelas (dialog.janela dlg): criar, editar, trocar a senha e desativar ----------
+   É a janela do produto (styles.css: dialog.janela, .janela-barra, .janela-corpo; tela cheia no celular), mais estreita
+   no computador e com o fundo branco */
+dialog.dlg { background: var(--branco); }
+@media screen and (min-width: 641px) { dialog.dlg { width: min(560px, calc(100vw - 32px)); } }
+.dlg .janela-barra { gap: 8px; }
+.dlg .janela-barra h2 { font-size: 17px; margin: 0; color: var(--escuro); overflow-wrap: anywhere; }
+.dlg form > p { margin: 0 0 12px; font-size: 14px; } /* o texto solto da janela (a dica do campo fica com a dela) */
+#dlg-aviso:empty { display: none; } /* sem aviso, nada de espaço a mais no alto do formulário */
+/* resposta do "Copiar usuário e senha", dentro da janela */
+.dlg .copia-msg { margin: 10px 0 0; font-size: 14px; font-weight: 600; color: var(--verde-txt); }
+.dlg .copia-msg:empty { display: none; }
+.dlg .copia-msg.erro { color: var(--erro); }
+.logo-envio { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.logo-envio [hidden] { display: none; }
+.logo-envio .conta-logo { --conta-logo: 64px; --conta-logo-l: 104px; }
+.form .logo-envio .bt { width: auto; height: 44px; } /* "Enviar logo" e "Trocar logo" do tamanho do texto */
+.logo-envio label.bt { font-size: 14px; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--verde-txt); }
+.logo-envio label.bt:hover { background: var(--verde-claro); color: var(--verde-txt); }
+.logo-envio input[type=file]:focus-visible + label.bt, .logo-envio label.bt:focus-within { outline: 3px solid var(--verde-txt); outline-offset: 2px; }
+.duas { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.bt-perigo { background: var(--erro); border-color: var(--erro); color: var(--branco); }
+.bt-perigo:hover { background: var(--escuro); border-color: var(--escuro); }
+/* depois de criar ou de trocar a senha: o usuário e a senha inicial à vista, uma vez só */
+.entrega { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; margin: 0 0 14px; padding: 12px 14px; border-radius: 8px;
+  background: var(--fundo); font-size: 15px; }
+.entrega dt { color: var(--texto-2); font-size: 13px; font-weight: 600; }
+.entrega dd { margin: 0; font-weight: 600; color: var(--escuro); overflow-wrap: anywhere; letter-spacing: .02em; }
+@media (max-width: 640px) {
+  .duas { grid-template-columns: minmax(0, 1fr); }
+  .dlg .form-acoes .bt { flex: 1 1 100%; justify-content: center; }
+  /* confirmação curta: janela no meio, não tela cheia */
+  dialog.dlg.dlg-curta { width: calc(100vw - 24px); height: fit-content; max-height: calc(100dvh - 24px); margin: auto; border-radius: var(--raio); }
+  .dlg-curta .form-acoes > * { flex: 1 1 100%; justify-content: center; }
+}
+
+/* ---------- catálogos em PDF ---------- */
+.pdfs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.pdfs > .carregando, .pdfs > .caixa { grid-column: 1 / -1; }
+.pdf { display: flex; flex-direction: column; gap: 10px; }
+.pdf-cab { display: flex; gap: 14px; align-items: center; }
+.pdf-ic { width: 52px; height: 64px; flex: none; border-radius: 6px; background: var(--escuro); color: var(--branco); display: grid; place-items: end center;
+  padding-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: .06em; position: relative; }
+.pdf-ic::before { content: ""; position: absolute; left: 10px; right: 10px; top: 12px; height: 4px; border-radius: 2px; background: var(--verde); }
+.pdf h2 { font-size: 19px; margin: 0; color: var(--escuro); }
+.pdf .pdf-uso { margin: 2px 0 0; color: var(--texto-2); font-size: 14px; }
+.pdf dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 6px 0 4px; font-size: 14px; }
+.pdf dt { color: var(--texto-2); }
+.pdf dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
+.pdf .bt { align-self: flex-start; margin-top: auto; }
+.pdf .bt:disabled { cursor: not-allowed; }
+.pdf .pdf-fora { margin: 0; font-size: 14px; color: var(--texto-2); }
+@media (max-width: 640px) {
+  .pdfs { grid-template-columns: minmax(0, 1fr); }
+  .pdf .bt { width: 100%; justify-content: center; }
+}
+
+/* impressão: com uma janela aberta, só ela sai (como a janela do produto); sem janela, a página como está */
+@media print {
+  body:has(dialog.dlg[open]) main > div { display: none; }
+}

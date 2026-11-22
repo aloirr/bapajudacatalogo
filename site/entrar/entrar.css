@@ -1,0 +1,55 @@
+/* Login do catálogo (T-0022): o cartão do login, da sessão expirada e da troca obrigatória, mais os campos, as senhas e
+   as caixas de aviso, que também servem às páginas da conta e do admin. Vem depois do /styles.css e usa só as variáveis
+   do :root de lá (o --erro e o --erro-claro entraram no :root pela 8 a). */
+
+/* ---------- cartão no fundo da faixa do início ---------- */
+.pg-login { min-height: 100vh; display: flex; flex-direction: column; background: var(--escuro); }
+.pg-login .rodape { margin-top: 0; }
+.login-faixa { flex: 1; display: grid; place-items: center; padding: 48px 16px; color: var(--branco);
+  background-color: var(--escuro); background-image: var(--fundo-faixa); position: relative; }
+.login-faixa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--verde); }
+.login-cartao { width: 100%; max-width: 420px; background: var(--branco); color: var(--texto); border-radius: var(--raio);
+  box-shadow: var(--sombra-janela); padding: 28px 28px 24px; position: relative; z-index: 1; }
+.login-cartao.largo { max-width: 480px; }
+.login-marca { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; }
+.login-marca img { height: 56px; width: auto; }
+.login-marca span { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--escuro);
+  border-left: 1px solid var(--borda-campo); padding-left: 12px; }
+.login-cartao h1 { font-size: 24px; line-height: 1.2; margin: 0 0 4px; color: var(--escuro); }
+.login-cartao .sub { margin: 0 0 18px; color: var(--texto-2); font-size: 14px; }
+.login-ajuda { margin: 16px 0 0; font-size: 13px; color: var(--texto-2); text-align: center; }
+@media (max-width: 640px) {
+  .login-faixa { padding: 28px 12px 34px; align-items: start; }
+  .login-cartao { padding: 22px 18px 20px; }
+  .login-cartao h1 { font-size: 21px; }
+  .login-marca img { height: 46px; }
+}
+
+/* ---------- campos (login, senhas e usuários); o rótulo e a caixa do campo são os da busca (styles.css) ---------- */
+.form { display: grid; gap: 14px; }
+.campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.campo input[readonly] { background: var(--fundo); color: var(--texto-2); }
+.campo .dica { margin: 0; font-size: 12px; color: var(--texto-2); }
+.campo .msg-erro { margin: 0; font-size: 13px; font-weight: 500; color: var(--erro); }
+.campo .msg-erro:empty { display: none; }
+.campo input[aria-invalid="true"] { border-color: var(--erro); box-shadow: inset 0 0 0 1px var(--erro); }
+/* "Mostrar"/"Ocultar" (e o "Gerar" do admin) dentro do campo da senha: o texto visível muda; o aria-controls aponta o campo */
+.senha-box { position: relative; }
+.senha-box input { padding-right: 92px !important; }
+.senha-box .ver { position: absolute; right: 2px; top: 0; height: 44px; min-width: 44px; padding: 0 12px; border: 0; background: none;
+  color: var(--verde-txt); font: inherit; font-weight: 600; font-size: 13px; cursor: pointer; border-radius: 8px; }
+.senha-box.com-gerar input { padding-right: 172px !important; }
+.senha-box .gerar { right: 84px; }
+.form .bt { width: 100%; justify-content: center; }
+.bt:disabled { opacity: .6; cursor: progress; }
+.form-acoes { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+.form-acoes .bt { width: auto; }
+.bt-texto { min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; border: 0; background: none; color: var(--verde-txt);
+  font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+
+/* ---------- caixas: erro (role="alert") e aviso (role="status") ---------- */
+.caixa { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 8px; font-size: 14px; line-height: 1.4; margin: 0 0 16px; }
+.caixa svg { flex: none; margin-top: 1px; }
+.caixa-erro { background: var(--erro-claro); color: var(--erro); }
+.caixa-info { background: var(--verde-claro); color: var(--verde-txt); }
+.caixa-info b { color: var(--escuro); }

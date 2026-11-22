@@ -43,7 +43,7 @@
   const semAcento = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "");
   const norm = (s) => semAcento(String(s || "")).toUpperCase().replace(/\s+/g, " ").trim();
   const normCod = (s) => semAcento(String(s || "")).toUpperCase().replace(/[^A-Z0-9]/g, "");
-  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const esc = window.BAP.esc; // /entrar/comum.js (T-0022), que vem antes no index.html
   // Ano sem fim na tela, na aplicação e na descrição (T-0018, R-20261120-195900 e R-20261120-201100-alexandre):
   // "2015>", "2015 →", "2015->", "2015 em Diante" e "2015–" sem o ano final aparecem como "2015+"; o leitor de tela
   // ouve "2015 em diante" (o "+" fica escondido dele e o EM_DIANTE vai na .vh). A faixa com fim não muda. Só o
@@ -68,11 +68,7 @@
   const MINUSC = new Set(["e", "de", "da", "do", "das", "dos", "com", "sem", "para", "p/", "c/", "s/"]);
   const titulo = (s) => bonito(s); // um nome sem caixa alta só (bonito, mais abaixo)
   const fmt = (n) => Number(n).toLocaleString("pt-BR");
-  function toast(msg) {
-    const t = document.createElement("div");
-    t.className = "toast"; t.textContent = msg; document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2200);
-  }
+  const toast = (msg) => window.BAPConta.toast(msg); // o aviso do site todo (conta.js, T-0022)
 
   function lerRota() {
     const h = location.hash.replace(/^#/, "") || "/";
@@ -88,6 +84,8 @@
   // ---------- dados ----------
   async function carregar() {
     const r = await fetch("data/produtos.json", { cache: "no-cache" });
+    // T-0022: com o serviço de login, a sessão vencida responde 401 e leva ao login (conta.js); sem ele, nada muda
+    if (r.status === 401) { window.BAP.expirou(); throw new Error("a sessão terminou"); }
     if (!r.ok) throw new Error("HTTP " + r.status);
     BASE = await r.json();
     // 1ª passada: palavras da aplicação e da descrição (ehVeiculo, derivados), antes de montar os códigos
@@ -1805,11 +1803,7 @@
     CLICOU_CARTAO = !!lk && simples;
     if (CLICOU_CARTAO) LINK_CARTAO = lk;
     CLICOU_LEVE = !!ev.target.closest('a.item-rel[href^="#/produto/"]') && simples;
-    // o botão verde do rodapé (op4e) volta ao topo; o foco vai para o conteúdo
-    if (ev.target.closest(".rodape-topo")) {
-      window.scrollTo({ top: 0 }); // suave ou direto pelo scroll-behavior do CSS (reduce)
-      app.focus({ preventScroll: true });
-    }
+    // o botão verde do rodapé (op4e) fica no conta.js, que serve também às páginas da conta e do admin (T-0022)
   });
   // a tela só é montada depois do produtos.json (~440 KB com gzip): a foto do topo do início e da Sobre começa a
   // baixar já, junto com ele, e não depois dele

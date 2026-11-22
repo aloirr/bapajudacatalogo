@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar · Catálogo online BAP</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/assets/logo_escuro.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/entrar/entrar.css">
+</head>
+<body class="pg-login">
+<main id="app" class="login-faixa" tabindex="-1">
+  <div class="login-cartao">
+    <div class="login-marca"><img src="/assets/logo_escuro.png" alt="bap componentes de qualidade"><span>Catálogo online</span></div>
+    <h1>Entrar no catálogo</h1>
+    <p class="sub">Acesso para clientes cadastrados pela BAP.</p>
+    <div id="aviso"></div>
+    <form class="form" id="form-entrar" method="post" action="/api/entrar" novalidate>
+      <div class="campo"><label for="usuario">Usuário</label><input id="usuario" name="usuario" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="32" required></div>
+      <div class="campo"><label for="senha">Senha</label>
+        <div class="senha-box"><input id="senha" name="senha" type="password" autocomplete="current-password" required><button type="button" class="ver" aria-controls="senha">Mostrar</button></div></div>
+      <button type="submit" class="bt">Entrar</button>
+    </form>
+    <p class="login-ajuda">Esqueceu a senha? Fale com a BAP para receber uma nova senha.</p>
+  </div>
+</main>
+<footer class="rodape">
+  <div class="rodape-in">
+    <div class="rodape-txt">
+      <p class="rodape-copy">© 2026 - BAP AUTOPARTS - Componentes de qualidade - Todos os direitos reservados.</p>
+      <p class="mini">As fotos são ilustrativas.<span class="rodape-confira"> Confira sempre a aplicação antes da compra.</span></p>
+    </div>
+  </div>
+</footer>
+<script src="/entrar/comum.js"></script>
+<script src="/entrar/entrar.js"></script>
+</body>
+</html>
