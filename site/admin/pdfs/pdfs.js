@@ -1,6 +1,6 @@
 /* Catálogos e materiais (T-0022, T-0024): os arquivos lidos de GET /api/pdfs, em 2 grupos, cada um com o botão de
    baixar (GET /admin/pdfs/baixar/:id). Só o admin abre esta página: quem decide é o servidor (os outros recebem 404).
-   Contrato: [{ id, titulo, arquivo, tamanho, data, tipo ('pdf'|'pptx'), grupo ('catalogos'|'materiais'), par? }].
+   Contrato: GET /api/pdfs no servicos/login/LEIA.md.
    Os itens com o mesmo "par" viram um cartão só, na ordem da lista (o 1º é o botão principal). A junção vem só desse
    campo da lista fixa do serviço: o nome do arquivo nunca decide nada aqui. */
 (function () {
@@ -19,16 +19,15 @@
   };
   const NOME_TIPO = { pdf: "PDF", pptx: "PowerPoint" }; // o tipo vem da lista do serviço; sem ele, é PDF
   const IC_BAIXAR = window.BAPConta.IC.pdf;
-  // em bytes: 5917348 → "5,6 MB"; abaixo de 1 MB, 254976 → "249 KB" (um texto pronto passa como veio)
+  // em bytes: 5917348 → "5,6 MB"; abaixo de 1 MB, 254976 → "249 KB"
   const tamanho = (t) => {
-    if (typeof t !== "number" || t <= 0) return String(t || "");
     if (t < 1048576) return Math.max(1, Math.round(t / 1024)) + " KB";
     return (t / 1048576).toLocaleString("pt-BR", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + " MB";
   };
   // o nome do arquivo quebra depois do "_" no celular, nunca no meio da palavra
   const arquivo = (a) => esc(a).replace(/_/g, "_<wbr>");
   const nbsp = (s) => esc(s).replace(/ /g, "&nbsp;");
-  const disponivel = (p) => p.disponivel !== false && !!p.tamanho; // o que falta vem com arquivo, tamanho e data nulos
+  const disponivel = (p) => !!p.tamanho; // o que falta vem com arquivo, tamanho e data nulos
   const nomeTipo = (p) => NOME_TIPO[p.tipo] || NOME_TIPO.pdf;
 
   // os dados do que existe; no par, cada valor leva o tipo na frente ("PDF 6,6 MB · PowerPoint 7,3 MB"), mesmo com 1 só

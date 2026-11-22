@@ -96,14 +96,13 @@ dialog.dlg { background: var(--branco); }
 .pdf .pdf-fora { margin: 0; font-size: 14px; color: var(--texto-2); }
 /* cartão com 2 arquivos (o "par" da lista): "Baixar PDF" (.bt) e "Baixar PowerPoint" (.bt .bt-claro), lado a lado no
    computador. No cartão de 1/3 (330 px por dentro) os 2 não cabem com o padding de 26 px e o texto de 16 px: aqui
-   valem o padding e o texto do .bt-mini (styles.css), com a altura de 48 px do .bt. Onde o cartão é mais estreito,
+   o texto de 14 px do .bt-mini, com o padding de 12 px e a altura de 48 px do .bt. Onde o cartão é mais estreito,
    o flex-wrap põe o 2º embaixo. */
 .pdf-bts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; }
-.pdf .pdf-bts .bt { margin-top: 0; padding: 0 12px; font-size: 14px; }
+.pdf .pdf-bts .bt { padding: 0 12px; font-size: 14px; }
 @media (max-width: 640px) {
   .pdfs { grid-template-columns: minmax(0, 1fr); }
   .pdf .bt { width: 100%; justify-content: center; }
-  .pdf-bts { flex-direction: column; }
   .pdf .pdf-bts .bt { font-size: 16px; }
 }
 
