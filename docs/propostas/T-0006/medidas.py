@@ -54,5 +54,5 @@ saida = {
     "aro": {str(k): v for k, v in sorted(aro.items())},
     "med": {k: med[k] for k in sorted(med, key=ordem_pneu)},
 }
-(Path(__file__).parent / "medidas.json").write_text(json.dumps(saida, ensure_ascii=False, indent=1), encoding="utf-8")
+(Path(__file__).parent / "medidas.json").write_text(json.dumps(saida, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 print({k: {a: len(b) for a, b in v.items()} for k, v in saida.items()})
