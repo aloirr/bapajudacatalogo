@@ -1,6 +1,6 @@
 # Parecer de UX · T-0019 · PR #99 · páginas finais (head e33cfff088065c658ab60ea815b872badd3c7dab)
 
-**Resultado: LIBERADO** (designer-ux, 22/11/2026)
+**Resultado: LIBERADO** (designer-ux, 21/11/2026, Manaus)
 
 Base: R-20261121-200058 (B8, B9, B10, "Leve também" pelo sistema) e R-20261122-010035 ("A": a marca em cima e o código inteiro embaixo quando não cabem juntos). A coluna EQUIVALE A do A4 não foi alargada (REF_MAIS = 0).
 Conferido: pranchas `recados/anexos/T-0019/b8-final-e33cfff/` (A4 p.21, 29, 44; Digital p.83, 147), simulações `sim-b/` e os PDFs do e33cfff (A4 p.20, 21, 43, 44; Digital p.110, 147, CUB60235, ROL32008 e ROL32009).
@@ -16,5 +16,8 @@ Conferido: pranchas `recados/anexos/T-0019/b8-final-e33cfff/` (A4 p.21, 29, 44; 
 - 🟢 **"Leve também" (amostra):** CUB60235 mostra "ABS4517 · ABS4557", e ROL32008 e ROL32009 mostram "—", como na simulação aprovada. No A4 p.44, ROL1000, ROL102949/102910 e ROL104949/104911 mostram "—", como no `sim-b/09`.
 - Sem preço e sem estoque nas páginas vistas.
 
+## Depois do parecer
+- O #99 entrou no main com o head dbbef37 (merge 57bdc2a, 21/11 às 21:32). O dbbef37 só mexe no gerador, não nos PDFs, então o LIBERADO continua valendo.
+
 ## Pendência fora deste PR
-- A [SUPOSIÇÃO] da sim-b continua aberta: uma linha da coluna EQUIVALE A ainda pode começar com "·" (ex.: Digital p.83, CXD13097, "· Ampri 26124"). É menor e já foi registrada.
+- A [SUPOSIÇÃO] da sim-b (`recados/anexos/T-0019/sim-b/README.md:28`) continua aberta: uma linha da coluna EQUIVALE A ainda pode começar com "·" (ex.: Digital p.83, CXD13097, "· Ampri 26124"). É menor e já foi registrada.

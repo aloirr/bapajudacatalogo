@@ -11,6 +11,8 @@
 
 ## Histórico das revisões
 
+O f547010 (correção do `voltaSegura`, a volta sem redirecionamento aberto) foi revisado pelo `revisor-codigo`, não pelo designer-ux.
+
 | Head | Commit (Manaus) | Resultado | Motivo |
 |---|---|---|---|
 | e83f7f7 | 21/11, 23:48 | 🔴 **BLOQUEADO** | R1: a resposta do "Copiar usuário e senha" ficava escondida |
@@ -39,7 +41,7 @@
 
 ## 4. Head final 8e529f5
 
-- 🟢 Só mexe na impressão e tira código sem uso. A largura de 560 px da janela do admin fica só na tela (`@media screen and (min-width: 641px)` em `site/admin/admin.css`). Na impressão, com a janela aberta, sai só ela, como a janela do produto (RD-0362). E sai o `forEach` que movia os avisos ao fechar a janela, porque todo aviso já vem depois do `close` (RD-0363). Nada muda na tela, e o R2 continua corrigido. O LIBERADO do 87ec078 vale para este head.
+- 🟢 Só mexe na impressão e tira código sem uso. A largura de 560 px da janela do admin fica só na tela (`@media screen and (min-width: 641px)` em `site/admin/admin.css`). Na impressão, com a janela aberta, sai só ela, como a janela do produto (RD-0362). E sai o `forEach` que movia os avisos ao fechar a janela, porque todo aviso já vem depois do `close` (RD-0363). Nada muda na tela, e o R2 continua corrigido.
 
 ## 5. 🟡 aceitos ou que ficaram como estão
 
@@ -47,7 +49,4 @@
 - 🟡 **Botão "Baixar PDF" desabilitado quando o PDF não está disponível** (`site/admin/pdfs/pdfs.js:23`; `site/entrar/entrar.css:44`, `opacity: .6`; `site/admin/admin.css:92`, `cursor: not-allowed`). Era o estado pedido no parecer da simulação, e fica. O botão apagado mantém o cartão igual ao vizinho, e a frase acima dele ("Este PDF não está disponível agora. Tente de novo mais tarde.") diz o problema e a ação. A WCAG não exige contraste em controle desabilitado. Se um dia a tela mudar, a alternativa é tirar o botão e deixar só a frase. Não pede mudança agora.
 
 ## Resumo
-- 🔴: R1 (e83f7f7) e R2 (dccaa8c), os dois corrigidos.
-- 🟢: LIBERADO no 87ec078, mantido no 8e529f5.
-- 🟡: "BAP AUTOPARTS" (resposta 10 a) e o botão desabilitado do PDF ficam como estão.
 - Pendências de UX neste PR: nenhuma.

@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Revisor | designer-ux |
-| Data | 22/11/2026 (Manaus) |
+| Data | 21/11/2026 (Manaus) |
 | O que foi revisto | Simulação do web-site (pasta `t0022-sim/` no rascunho da sessão do gerente): `LEIA.md`, 9 páginas HTML, `sim.css`, `sim.js` e os 34 prints (17 telas em 1366 e 390 px) |
 | Pedido | R-20261122-024937-po (pedido literal do Alexandre e respostas 1a a 7a) |
 | Resultado | **LIBERADO** para ir ao Alexandre, com 🟡 a corrigir antes do código (os marcados com ★ mudam o que ele vê: melhor já entrarem nos prints) |
@@ -86,7 +86,7 @@ Sem preço e sem estoque em nenhuma tela: 🟢.
 - 🟡 no código: foco visível no menu; campo "Usuário" sem maiúscula automática; "Mostrar"/"Ocultar" acessível; contraste do cabeçalho das páginas novas; estados de sucesso, erro, vazio e PDF indisponível; senha gerada visível; 401 no meio do uso leva à sessão expirada.
 - Reteste: nos prints de 1366 e 390 px da versão corrigida (simulação ★) e de novo na entrega do código.
 
-## Reteste da simulação (22/11/2026)
+## Reteste da simulação (21/11/2026)
 
 O web-site refez os 34 prints e atualizou o `LEIA.md`. Conferi os prints 03, 06, 07, 09, 10 e 15 nas duas larguras, os textos de todas as páginas HTML, o `sim.css` e o `sim.js`. No Chromium sem tela, em 1366 e 390 px, conferi o foco no menu, a etiqueta "Admin" e o campo "Usuário".
 
@@ -110,4 +110,4 @@ O web-site refez os 34 prints e atualizou o `LEIA.md`. Conferi os prints 03, 06,
 
 A senha mínima passou para 8 caracteres, só com a regra do tamanho (desenho do serviço). As quatro dicas dizem 8, e para a UX isso está ok.
 
-Ficam para o código, no passo 2 (já listados no `LEIA.md`): os estados de sucesso, de erro nos campos, de busca vazia e de PDF indisponível; a senha gerada visível e sem letras que confundem; o 401 no meio do uso levando à sessão expirada; e "continuar de onde parou" só se a volta for feita. O reteste final é na entrega do código, nos prints de 1366 e 390 px.
+Ficam para o código, no passo 2 (já listados no `LEIA.md`), os itens de "🟡 no código" do Resumo, acima, que a tabela não marca como feitos, e o "continuar de onde parou" só se a volta for feita. O reteste final é na entrega do código, nos prints de 1366 e 390 px.
