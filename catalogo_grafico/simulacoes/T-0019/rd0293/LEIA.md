@@ -1,6 +1,8 @@
 # T-0019 · RD-0293 · composição do kit de embreagem uma vez só (simulação)
 
-Só simulação: nada foi para `catalogo_grafico/entregas/`. Gerado com `PYTHONHASHSEED=0`, um processo por PDF, numa pasta temporária. **Antes:** o main `409d137` (base v27). **Depois:** o mesmo main com a correção do `detalhe.essencial` (branch `catalogo-grafico/T-0019-rd0293-sim`).
+**Aprovada (opção "a", R-20261122-030552-alexandre):** o A4 (56 páginas) e o Digital (311) foram regerados em `catalogo_grafico/entregas/`, com a p.20 do A4 e as p.2, 87 e 112 do Digital iguais pixel a pixel ao "depois" das pranchas. O Linha Moto ficou como estava (texto e posição iguais).
+
+Simulação (antes da aprovação): Gerado com `PYTHONHASHSEED=0`, um processo por PDF, numa pasta temporária. **Antes:** o main `409d137` (base v27). **Depois:** o mesmo main com a correção do `detalhe.essencial` (branch `catalogo-grafico/T-0019-rd0293-sim`).
 
 ## O que muda
 Nas embreagens remanufaturadas, o subtítulo do PDF repetia a composição do kit: a sobra da DESCRICAO ("plato/disco/mancal") e o rótulo do `detalhe.essencial` ("c/ platô, disco, rol. e mancal"). Agora o rótulo entra e a sobra sai:
