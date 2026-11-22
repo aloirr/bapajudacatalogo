@@ -1,6 +1,6 @@
 /* Botão do canto (T-0022): a conta de quem entrou no catálogo, lida de GET /api/eu (serviço de login).
    Mostra a logo da empresa (ou a da BAP, sem logo ou com 404), o nome e a empresa; aberto, "Trocar senha" e "Sair" e,
-   para o admin, o grupo Administração ("Criar usuários" e "Catálogos em PDF").
+   para o admin, o grupo Administração ("Criar usuários" e "Catálogos e materiais").
    A segurança é toda do servidor: o navegador não decide acesso e aqui não há segredo. Sem o serviço (site aberto com
    http.server, /api/eu responde 404), o botão não aparece e o catálogo funciona como antes.
    Um 401 (sessão vencida: ela vale 5 h desde o login) leva a /entrar?expirou=1, com a volta para a mesma tela: quem cuida
@@ -68,7 +68,7 @@
         <ul>
           ${eu.admin ? `<li class="rot-grupo" aria-hidden="true">Administração</li>
           ${item("/admin/usuarios", IC.usuarios, "Criar usuários")}
-          ${item("/admin/pdfs", IC.pdf, "Catálogos em PDF")}
+          ${item("/admin/pdfs", IC.pdf, "Catálogos e materiais")}
           <li class="sep" role="separator"></li>` : ""}
           ${item("/trocar-senha", IC.chave, "Trocar senha")}
           <li><button type="button" class="sair">${IC.sair}Sair</button></li>

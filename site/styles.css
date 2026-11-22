@@ -736,7 +736,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .tag-verde { background: var(--verde-claro); color: var(--verde-txt); box-shadow: none; }
 .tag-escura { background: var(--escuro); color: var(--branco); box-shadow: none; }
 
-/* páginas da conta e do admin (Trocar senha, Criar usuários e Catálogos em PDF): faixa escura com a trilha e o título */
+/* páginas da conta e do admin (Trocar senha, Criar usuários e Catálogos e materiais): faixa escura com a trilha e o título */
 body.pg-conta { min-height: 100vh; display: flex; flex-direction: column; } /* página curta: o rodapé fica no pé da tela */
 body.pg-conta main { flex: 1; }
 .pg-cab { background: var(--g-catalogo); color: var(--branco); }
