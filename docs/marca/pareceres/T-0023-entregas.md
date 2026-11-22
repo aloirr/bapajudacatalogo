@@ -7,7 +7,7 @@
 | Data | 22/11/2026 04:05 (Manaus) |
 | O que foi visto | PR #128, branch `catalogo-grafico/T-0023-grafia`, head `1380e9fc8faaf0a7ed7d376fcf9f5482a15f1e9c` (commits `c9fbf3e`, `f0f5ea5` e `1380e9f` depois da simulação); as 6 entregas de `catalogo_grafico/entregas/` contra as anteriores; os 3 pares de conferência do dono (A4 pág. 2, Lubrificantes PDF pág. 7, .pptx slide 2 no LibreOffice); páginas 1, 2, 10 e 11 do PDF de Lubrificantes renderizadas por mim e o cabeçalho da pág. 10 a 300 ppi |
 | Base de comparação | `docs/marca/manual.md` ("Nome da marca"); o resto do levantamento ainda é "a aprovar" |
-| Parecer | **LIBERADO**. MC-0010 fechado. Um achado novo, baixo e anterior à tarefa (MC-0011), que não segura |
+| Parecer | **LIBERADO**. MC-0010 fechado. Dois achados novos, baixos e anteriores à tarefa (MC-0011 e MC-0012), que não seguram |
 
 ## 1. Logo no cabeçalho de Lubrificantes (MC-0010)
 
@@ -15,12 +15,12 @@
 |---|---|---|
 | Págs./slides 2 a 10, fundo branco | `pptimg/logo_escuro.png`, o mesmo arquivo do site (`site/assets/logo_escuro.png`, SHA-256 igual), nas 9 páginas | o mesmo `logo_escuro.png`, no mestre BAP_CONTEUDO |
 | Tamanho | 21,8 × 30 pt, proporção do original (226 × 312 px); não esticado | 24 × 33 pt (diferença de 0,4 % na proporção, invisível) |
-| Posição | x 40, y 26: a mesma caixa do logo de antes; só trocou o arquivo | x 40, y 22, igual à entrega anterior |
+| Posição | x 40, y 26: a mesma caixa do logo de antes; só trocou o arquivo. A altura do PDF (30 pt) e a do .pptx (33 pt) já eram diferentes: fica para o manual "a aprovar", com o tamanho mínimo do logo. | x 40, y 22, igual à entrega anterior |
 | Capa (pág./slide 1) e "Obrigado!" (pág./slide 11), fundo escuro | logo branco (`dimg/capa_0.png`), mesma caixa e mesmos pixels de antes; o `logo_grande` da pág. 11 também igual | logo branco (`pptimg/logo_branco.png`, igual ao `site/assets/logo_branco.png`) e `logo_grande`, como antes |
 
 No cabeçalho, o "bap" e a assinatura "componentes de qualidade" agora aparecem em preto sobre o branco, com o círculo
-verde; antes só o círculo aparecia. Nenhum outro pixel das págs. 2 a 10 mudou fora do logo e da grafia.
-**MC-0010: fechado.**
+verde; antes só o círculo aparecia (a assinatura, nesse tamanho, não se lê: MC-0012). Nenhum outro pixel das págs. 2 a
+10 mudou fora do logo e da grafia.
 
 ## 2. Fotos de Lubrificantes vindas de `pptimg/`
 
@@ -67,11 +67,7 @@ Texto extraído de todas as páginas, metadados e todo o XML do .pptx:
 | Lubrificantes .pptx | mestre, título do slide 2, cartão do slide 11; criador e "modificado por" | nenhuma |
 | Portfólio (não regerado; já estava certo) | capa, pág. 2, cabeçalhos e contato; autor | nenhuma |
 
-- Nos cabeçalhos com espaçamento entre letras, conferi a largura: "BAP AUTOPARTS" ficou 3,4 pt mais curto em
-  Lubrificantes e 2,8 a 3 pt no A4, isto é, sumiu o espaço entre AUTO e PARTS; a fonte, o corpo e a cor são os de antes
-  (Poppins Bold em verde escuro nos sobretítulos; Poppins Medium em cinza claro `#D1D3D4` na barra escura do A4).
-- `www.bapautoparts.com.br`, `@bapautoparts` e o e-mail ficam em minúsculas: é endereço, não é a grafia da marca.
-- No gerador do head, `git grep` só acha "BAP AUTOPARTS", o domínio, o @ e o e-mail.
+- Cabeçalhos, domínio, @ e e-mail: como na simulação (só sumiu o espaço entre AUTO e PARTS; mesma fonte, mesmo corpo e mesma cor); no gerador do head, o `git grep` só acha "BAP AUTOPARTS" e os endereços.
 
 ## Achados
 
@@ -79,11 +75,4 @@ Texto extraído de todas as páginas, metadados e todo o XML do .pptx:
 |---|---|---|---|---|---|---|
 | MC-0010 | Lubrificantes PDF, cabeçalho das págs. 2 a 10 | logo | manual a aprovar (logo certo para cada fundo) | alta | **Fechado** no reteste: `pptimg/logo_escuro.png` nas 9 páginas, mesma caixa; capa e "Obrigado!" com o branco | catalogo-grafico |
 | MC-0011 | Lubrificantes .pptx, todos os slides (`apres_ppt.js:5`, `headFontFace`/`bodyFontFace: 'Arial'`) | tipografia | manual a aprovar (só Poppins) | baixa, **anterior à T-0023** (igual na entrega de outubro) | O .pptx sai em Arial, e o PDF da mesma apresentação em Poppins. Pode ser de propósito (o .pptx abre igual em qualquer computador, sem instalar fonte). Não mexer agora: levar como pergunta no manual "a aprovar" (Poppins no .pptx, com a fonte instalada ou embutida, ou Arial como fonte de reserva aceita só em arquivo editável) | design-de-marca (pergunta ao Alexandre, pelo `po`); depois, catalogo-grafico |
-
-Correção ao parecer da simulação (`T-0023-simulacao.md`, "O que a simulação não mostra"): a fonte diferente do .pptx não
-vem só da falta da Poppins no LibreOffice; o tema e o texto do .pptx são Arial desde o gerador (MC-0011).
-
-## Observação (não é achado)
-
-O logo do cabeçalho tem 30 pt de altura no PDF e 33 pt no .pptx (y 26 e y 22). Já era assim antes e a diferença não se
-nota na tela. Fica para o manual "a aprovar", junto com o tamanho mínimo do logo.
+| MC-0012 | Lubrificantes, cabeçalho das págs./slides 2 a 10 (logo com 30 pt de altura no PDF e 33 pt no .pptx); o mesmo vale para o topo do site (46 px) | logo | manual a aprovar (tamanho mínimo do logo; ainda não definido) | baixa, **anterior à T-0023** (o .pptx já aprovado tem o mesmo logo, no mesmo tamanho) | A assinatura "componentes de qualidade" fica com cerca de 2,5 pt e não se lê (nota do designer-ux). O círculo e o "bap" continuam legíveis, então o reconhecimento da marca não cai. Não mexer agora, nem cortar o PNG para tirar a assinatura. Levar ao manual "a aprovar": o tamanho mínimo do logo com assinatura e o pedido ao Alexandre de uma versão oficial sem a assinatura (de preferência em vetor) para usos pequenos (cabeçalho, favicon) | design-de-marca (pergunta ao Alexandre, pelo `po`); depois, catalogo-grafico e web-site |

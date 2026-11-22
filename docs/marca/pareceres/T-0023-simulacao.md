@@ -32,17 +32,16 @@ Não.
 - **Barra do topo do A4:** fica 3 pt mais curta, alinhada à direita, com o mesmo corpo, peso, espaçamento entre letras e
   cor. O logo, a divisória e o "CATÁLOGO DE PRODUTOS 2027" não se movem.
 - **Sobretítulo verde:** 2,8 pt mais curto, no mesmo verde escuro e com o mesmo espaçamento.
-- **Título de 30 pt de Lubrificantes:** "A BAP AUTOPARTS" fica 20,8 pt mais largo no PDF e 32,2 pt no .pptx. Continua numa
-  linha só, em Poppins Bold, longe da margem, e não encosta em nada. As maiúsculas dão mais peso ao nome que ao "A"; é o
-  efeito esperado da grafia aprovada e não muda a hierarquia da página (o sobretítulo "QUEM SOMOS" continua acima, o
-  título continua o maior texto).
-- **Texto corrido e cartão do contato:** as linhas não quebram de outro jeito e nada sai da coluna ou do cartão.
+- **Título de 30 pt de Lubrificantes:** a mesma Poppins Bold e a mesma cor. As maiúsculas dão mais peso ao nome que ao
+  "A": é o efeito esperado da grafia aprovada. Largura, quebra e hierarquia: ver o parecer de UX
+  (`docs/ux/pareceres/T-0023-simulacao.md`, §3 e §4).
+- **Texto corrido e cartão do contato:** a mesma fonte, o mesmo corpo e a mesma cor.
 - Logo, cores e fontes: iguais no antes e no depois. A capa (c1, c4) não muda nenhum pixel.
 
 ## O que a simulação não mostra (não é da tarefa)
 
-- Os quadros cinza no PDF de Lubrificantes (fotos que não estão na nuvem) e as cores e a fonte do .pptx (sem o
-  `apply_theme.js` e sem a Poppins no LibreOffice) são iguais no antes e no depois.
+- Os quadros cinza no PDF de Lubrificantes (fotos que não estão na nuvem) e as cores e a fonte do .pptx (tema
+  padrão do LibreOffice; a fonte é Arial desde o gerador, MC-0011) são iguais no antes e no depois.
 - As entregas em `catalogo_grafico/entregas/` ainda têm a grafia antiga (A4: 2 no texto e o autor; Lubrificantes PDF:
   2 no texto e o autor; .pptx: o mestre, 2 no texto e o autor; Digital, Linha Moto e Kit Filtros: o autor). É o esperado:
   elas só são geradas de novo depois do "aprovado".
