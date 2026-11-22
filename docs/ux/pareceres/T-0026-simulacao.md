@@ -9,7 +9,7 @@
 | Regra da rodada | O PO decide de forma conservadora: só tirar repetição e corrigir o que está errado, sem mudar a marca nem o texto institucional além disso |
 | Resultado | **LIBERADO**, sem 🔴 e sem 🟡 |
 
-Sem preço e sem estoque: 🟢. Nenhuma das 6 páginas mostra valor ou quantidade em estoque. O "preço acessível" do "Quem somos" é texto institucional, sem valor. Os "N itens" do sumário são o tamanho da linha no catálogo, não estoque.
+Sem preço e sem estoque: 🟢. Nenhuma das 6 páginas mostra valor ou quantidade em estoque. Os "N itens" do sumário são o tamanho da linha no catálogo, não estoque.
 
 A grafia, o sobretítulo "BAP AUTOPARTS" como elemento de marca e o padrão dos títulos ficam com o `design-de-marca` (ver o parecer de marca da T-0026). Aqui só falo de leitura, hierarquia e repetição.
 
@@ -17,7 +17,7 @@ A grafia, o sobretítulo "BAP AUTOPARTS" como elemento de marca e o padrão dos 
 Prints: `A4_pag02_antes_depois.png`, `A4_pag02_opcoes.png` e, avulsos, `A4_pag02_antes.png`, `A4_pag02_depois.png`, `A4_pag02_variante_espacamento.png` e `A4_pag02_variante_texto.png`.
 
 - 🟢 **Hierarquia.** A ordem de leitura não muda: a barra, a faixa ("BAP AUTOPARTS" e "Por que BAP?"), "Quem somos", "Por que vender BAP", "Garantia Expressa BAP" e os números. A faixa e a barra são as mesmas da T-0025.
-- 🟢 **Cada bloco responde a uma pergunta.** "Quem somos" diz quem é a empresa (fundada em 2021, qualidade, segurança e preço acessível), em 2 linhas. "Por que vender BAP" diz o que a empresa vende (as linhas leve, pesada e moto e os sistemas) e o padrão OEM. Antes, as linhas estavam no "Quem somos" e os sistemas no "Por que vender", e a qualidade com preço aparecia nos dois.
+- 🟢 **Cada bloco responde a uma pergunta.** "Quem somos" diz quem é a empresa (fundada em 2021, qualidade, segurança e preço acessível), em 2 linhas. "Por que vender BAP" diz o que a empresa vende (as linhas leve, pesada e moto e os sistemas) e o padrão OEM. Antes, as linhas estavam no "Quem somos" e os sistemas no "Por que vender".
 - 🟢 **Nenhuma informação útil se perde.**
   - "da suspensão à parte elétrica" está coberto pela lista de sistemas, que vai da suspensão aos acessórios.
   - "preço competitivo sem abrir mão da qualidade" diz o mesmo que "qualidade, com segurança e preço acessível", 4 linhas acima.
@@ -36,7 +36,7 @@ Prints: `A4_pag04_antes_depois.png`, `A4_pag04_antes.png`, `A4_pag04_depois.png`
 - 🟢 **O ano fica uma vez por página.** Antes, "2027" aparecia 3 vezes no topo (a esquerda da barra, a direita da barra e o sobretítulo). Agora fica só no "CATÁLOGO DE PRODUTOS 2027", à esquerda da barra.
 - 🟢 **Hierarquia.** O sobretítulo troca só o texto, no mesmo lugar, no mesmo tamanho e com a mesma cor. O título "Sumário" e o subtítulo não se movem, e as 2 colunas do sumário ficam iguais pixel a pixel (a caixa da prova vai só até y 155 a 150 ppi, o topo da faixa).
 - 🟢 **Anotações.** O mesmo, sem subtítulo. As linhas de escrever não mudam. O "57" do rodapé é só de exemplo, porque o A4 de hoje (56 págs.) não usa a página.
-- 🟢 **Agora as págs. 2, 4 e as anotações têm o mesmo topo**: a barra só com o catálogo à esquerda e o sobretítulo "BAP AUTOPARTS". A pág. 3 tem o "GUIA RÁPIDO" porque é um guia. O leitor vê o mesmo padrão nas páginas de abertura.
+- 🟢 **Agora as págs. 2, 4 e as anotações têm o mesmo topo**: a barra só com o catálogo à esquerda e o sobretítulo "BAP AUTOPARTS". O leitor vê o mesmo padrão nas páginas de abertura.
 
 ## 4. Sumário do Completo Digital e da Linha Moto (RD-0499)
 Prints: `Digital_pag02_sumario_antes_depois.png`, `Digital_pag02_sumario_antes.png`, `Digital_pag02_sumario_depois.png`, `Moto_pag02_sumario_antes_depois.png`, `Moto_pag02_sumario_antes.png` e `Moto_pag02_sumario_depois.png`.
@@ -52,18 +52,18 @@ Prints: `Digital_pag02_sumario_antes_depois.png`, `Digital_pag02_sumario_antes.p
 | # | Pergunta | Recomendação de UX | Por quê |
 |---|---|---|---|
 | 1 | RD-0498, texto de "Quem somos" e "Por que vender BAP" | **a) O do corretor** | Cada bloco responde a uma pergunta (§1). Na b), "…com segurança e preço acessível, nas linhas leve, pesada e moto" junta o preço e as linhas na mesma oração, e a vírgula faz parecer que o preço é acessível só nessas linhas. Na a), as linhas abrem a lista de sistemas, que é onde o vendedor procura o que a BAP tem. A c) mantém a repetição |
-| 2 | RD-0498, o vazio maior embaixo da pág. 2 | **a) Deixar como sai** | São 2 linhas a mais (de 38% para 41%). A b) abre 13 pt entre os blocos, mas o vazio continua em 323 pt, cerca de 1/3 da página: não resolve a nota 5.1 da T-0025 e põe uma medida própria nesta página, diferente do espaço entre blocos das outras. Preencher a página fica para a tarefa futura da nota 5.1, com simulação ao Alexandre |
-| 3 | RD-0499, lado direito da barra | **a) Vazio** | É o padrão já aprovado na pág. 2 (RD-0429). Nas páginas de linha, a direita continua com o grupo (A4) ou com o "Voltar ao sumário" (digital). Nas páginas de abertura não há grupo nem para onde voltar. A b) repetiria o título ("Sumário") ou o sobretítulo ("GUIA RÁPIDO") que estão logo abaixo |
-| 4 | RD-0499, sobretítulo do Sumário e das Anotações | **a) "BAP AUTOPARTS"** | Troca só o texto, sem mexer no layout, e deixa as págs. 2, 4 e as anotações com o mesmo topo (§3). A b) muda o layout de 2 faixas, o que sai da regra da rodada. A c) mantém o ano 2 vezes. Se a marca preferir outro sobretítulo, isso é do parecer de marca |
-| 5 | RD-0499, texto do Sumário da Linha Moto | **a) "Todas as linhas BAP para motocicletas…"** | "Linha" é o termo do Sumário do Completo, do Sumário do A4 ("Linhas de produtos BAP…"), do "Encontre a linha" da pág. 3 e da segunda frase ("Toque no nome da linha"). Com a b), a primeira frase diria "famílias" e a segunda continuaria "linha", ou as duas mudariam, e o Sumário da Linha Moto ficaria diferente do Completo, que usa o mesmo gerador. Ver a nota 6.2 |
+| 2 | RD-0498, o vazio maior embaixo da pág. 2 | **a) Deixar como sai** | O vazio cresce 2 linhas (§1). A b) abre 13 pt entre os blocos, mas o vazio continua em 323 pt, cerca de 1/3 da página: não resolve a nota 5.1 da T-0025 e põe uma medida própria nesta página, diferente do espaço entre blocos das outras. Ver a nota 6.1 |
+| 3 | RD-0499, lado direito da barra | **a) Vazio** | É o padrão já aprovado na pág. 2 (RD-0429) e o do digital (§4). A b) repetiria o título ("Sumário") ou o sobretítulo ("GUIA RÁPIDO") que estão logo abaixo |
+| 4 | RD-0499, sobretítulo do Sumário e das Anotações | **a) "BAP AUTOPARTS"** | §3. A b) muda o layout de 2 faixas, o que sai da regra da rodada. A c) mantém o ano 2 vezes. Se a marca preferir outro sobretítulo, isso é do parecer de marca |
+| 5 | RD-0499, texto do Sumário da Linha Moto | **a) "Todas as linhas BAP para motocicletas…"** | O termo "linha": ver o parecer de marca, §3. Com a b), a primeira frase diria "famílias" e a segunda continuaria "linha", ou as duas mudariam, e o Sumário da Linha Moto ficaria diferente do Completo, que usa o mesmo gerador |
 | 6 | "1 itens" | **a) Fora desta rodada, com um RD novo** | Está errado e deve ser corrigido, mas muda 6 páginas em 2 PDFs (sumários, páginas de sistema e capa da família), e isso pede outra prova pixel a pixel. Juntar aqui misturaria a correção com as repetições. Peço que o RD já saia aberto, com as 6 páginas, e que a correção trate o singular num lugar só no gerador ("1 item", "1 ITEM"), valendo para o A4, o Completo e a Linha Moto |
 
 ## 6. Notas (não seguram)
-1. **O vazio da pág. 2 do A4** (nota 5.1 da T-0025). Continua valendo, agora com 41% da altura. Fica para a tarefa futura, com simulação ao Alexandre.
-2. **"Famílias" na capa da Linha Moto e "linhas" no Sumário.** A capa diz "7 famílias", e o Sumário, logo na página seguinte, diz "linhas". É o mesmo conjunto com 2 nomes. Isso já estava no antes e não é repetição. Se o PO quiser um termo só, a troca menor é na capa ("7 linhas"), porque "linha" é o termo dos 3 PDFs. Fica para um RD, fora desta rodada.
+1. **O vazio da pág. 2 do A4** (nota 5.1 da T-0025). Continua valendo (§1). Fica para a tarefa futura, com simulação ao Alexandre.
+2. **"Famílias" na capa da Linha Moto e "linhas" no Sumário:** é o MC-0015 (ver o parecer de marca).
 3. **"Linhas" com 2 sentidos na pág. 2 do A4.** "As linhas leve, pesada e moto" (segmento de veículo) e "+40 linhas de produtos" (família de produto) estão na mesma página. Já estava no antes, com o mesmo texto, e o leitor entende pelo contexto. Não peço mudança agora.
 4. **As mesmas peças em 2 linhas do Completo Digital** (achado novo, fora da T-0026). "Pneus e Câmaras de Ar Moto" (Rodagem, pág. 279, 21 itens) tem os mesmos itens de "Pneus Moto" (pág. 306, 12 itens) mais "Câmaras de Ar Moto" (pág. 307, 9 itens), na Linha Moto: os destaques CAR18, CAR14, CAG17, CAR10 e o pneu 90/90-18 57P V250R aparecem nas duas. No A4, o Sumário também lista as duas (págs. 46, 53 e 54). Conferi com o `pdftotext` no `Catalogo_BAP_2027_Completo_Digital.pdf` do main. Pode ser de propósito (a Linha Moto como seção própria do Completo). Fica para o gerente passar ao `corretor-redundancias`, que decide se abre um RD.
-5. **O diff do gerador não está nos anexos.** O `LEIA.md` cita o `T-0026-simulacao.diff`, mas ele não está em `recados/anexos/T-0026/sim/` (9c7608e). Li a cópia que o `catalogo-grafico` deixou na área de trabalho da sessão. Para o `revisor-codigo` e para o registro, vale anexá-lo junto à simulação.
+5. **O diff do gerador não está nos anexos.** O `LEIA.md` cita o `T-0026-simulacao.diff`, mas ele não está em `recados/anexos/T-0026/sim/` (9c7608e). Li a cópia que o `catalogo-grafico` deixou na área de trabalho da sessão. Depois desta revisão, o diff entrou nos anexos às 06:36 (recados 645d85a).
 
 ## Prints conferidos
 Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0026/sim/` (commit 9c7608e):
@@ -92,7 +92,7 @@ Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0026/sim/`
 Sem preço e sem estoque: 🟢. Fiz a busca por "R$" com número, "estoque" e "saldo" no texto dos 3 PDFs entregues e não achei nada. O texto institucional é o da simulação aprovada.
 
 ### A entrega bate com a simulação aprovada
-- 🟢 **O código é o da simulação.** As linhas que mudam no `print_cat.py`, no `digital2.py` e no `catalogo_moto.py` do PR são as mesmas, linha a linha, do `T-0026-simulacao.diff`. O PR também mexe no `LEIA_GERADOR.md`, onde acrescenta o `SUM_DESC` ao mapa do gerador. Isso não muda nenhuma página.
+- 🟢 **O código é o da simulação.** As linhas que mudam no `print_cat.py`, no `digital2.py` e no `catalogo_moto.py` do PR são as mesmas, linha a linha, do `T-0026-simulacao.diff`. O PR também mexe no `LEIA_GERADOR.md`, onde acrescenta o `SUM_DESC` ao mapa do gerador. Isso não muda nenhuma página e resolve a nota 5 da simulação.
 - 🟢 **As pranchas avulsas são as da simulação.** Comparei os 12 PNGs `*_antes.png` e `*_depois.png` de `final/` com os de `sim/`: são idênticos byte a byte. O `prova_pixel_a_pixel.txt` também é idêntico. As 6 pranchas `*_antes_depois.png` diferem só no rótulo de cima ("entrega do main 2ac3ec2" e "entrega T-0026" no lugar de "main 1255bbe" e "simulação T-0026"), como mostra o `Moto_pag02_sumario_antes_depois.png`.
 - 🟢 **Conferi os PDFs entregues por conta própria.** Renderizei as entregas do main e do PR com o `pdftoppm`, a 150 ppi, página por página:
 
@@ -103,16 +103,11 @@ Sem preço e sem estoque: 🟢. Fiz a busca por "R$" com número, "estoque" e "s
   | Linha Moto | 17 | 2 | só o topo do Sumário (barra, sobretítulo e texto) |
 
   As páginas e as caixas são as mesmas da prova da simulação. A contagem de pixels muda em menos de 0,2%, porque o renderizador é outro. Todas as outras páginas ficam iguais pixel a pixel.
-- 🟢 **O texto das páginas que mudam é o aprovado.**
-  - A4, pág. 2: o "Quem somos" fica só com a primeira frase, e o "Por que vender BAP" começa com "Portfólio robusto para as linhas leve, pesada e moto: …" (1a). O espaçamento não muda (2a).
-  - A4, págs. 3 e 4: a barra só tem "CATÁLOGO DE PRODUTOS 2027" à esquerda (3a). O sobretítulo da pág. 3 é "GUIA RÁPIDO", e o da pág. 4 é "BAP AUTOPARTS" (4a).
-  - Completo e Linha Moto: a barra só tem o nome do catálogo à esquerda, e o sobretítulo é "BAP AUTOPARTS". A Linha Moto diz "Todas as linhas BAP para motocicletas…" (5a), e o Completo continua com "Todas as linhas BAP…".
-  - O "1 itens" continua, como decidido (6a).
-- 🟢 **Anotações.** O A4 de 56 páginas não usa a página de anotações. O código do `anotacoes()` no PR é o da simulação, e a prancha `A4_anotacoes_depois.png` é idêntica à de `sim/`.
+- 🟢 **As opções aprovadas estão nas páginas.** O espaçamento da pág. 2 não muda (2a); a direita da barra fica vazia nas 5 páginas (3a); a pág. 3 mantém o "GUIA RÁPIDO". O texto de 1a, 4a e 5a: ver o parecer de marca, entrega final.
+- 🟢 **Anotações.** O A4 de 56 páginas não usa a página de anotações. O código do `anotacoes()` no PR é o da simulação.
 
 ### Notas
-- A nota 5 da simulação (o diff fora dos anexos) se resolve: o código está no PR #146, igual ao diff.
-- As notas 1 a 4 da simulação continuam valendo e não seguram. Elas falam do vazio da pág. 2 do A4, de "famílias" e "linhas" na Linha Moto, de "linhas" com 2 sentidos e das mesmas peças de pneus e câmaras em 2 linhas do Completo. O RD do "1 item" (6a) também segue pendente, como decidido.
+- As notas 1 a 4 da simulação continuam valendo e não seguram (a 4 virou o RD-0511); o "1 itens" segue no RD-0510 (6a).
 
 ### Prints conferidos
 Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0026/final/` (commit 18412ec):
