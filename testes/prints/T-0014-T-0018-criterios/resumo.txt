@@ -1,0 +1,58 @@
+Testes T-0014 e T-0018 (conferência de critérios) · 21/11/2026 21:25 (Manaus)
+Site: main 590209e4dec98781fb8e9be2cfa21362d7737187 (o que está no ar), servido com python3 -m http.server 8000 -d site
+Playwright (Chromium), 1366 x 768 e 390 x 844. Serviço de placas interceptado (nenhuma chamada saiu para o Render).
+
+gerar_site.py ............ PASSOU (código 0, 4.419 produtos, 0 [ERRO], 0 [PARADO])
+1. cartão/janela ......... FALHOU (código visível não abre a janela; nome e "+ Detalhes" abrem)
+2. filtros f1 ............ PASSOU em 1366; em 390 a ordem e o 0 desabilitado PASSAM, mas não há rolagem só da Família (ver abaixo)
+3. Pesquisas recentes .... PASSOU na regra (20+ troca o bloco); o título na tela é "Mais vistas", não "Pesquisas recentes"
+
+--- 1. T-0014: cartão, foto, código e nome (busca "amortecedor dianteiro onix", cartão AMT7007) ---
+- 1a-cartao-*.png / 1a-lista-*.png: o "+ Detalhes" aparece no cartão (1366 e 390). PASSOU.
+- 1b-foto-ampliada-*.png: o clique na foto abre a foto ampliada (dialog#zoom-foto), sem abrir a janela. PASSOU.
+- 1c-clique-codigo-*.png: o clique no código VISÍVEL (o "AMT7007" sobre a foto, span.foto-cod) abre a FOTO AMPLIADA,
+  não a janela do produto, em 1366 e em 390. FALHOU.
+  Por quê: site/app.js:484 põe o código em <span class="foto-cod" aria-hidden="true"> dentro da .foto, e
+  site/styles.css:171 dá pointer-events: none a ele; o clique cai no botão .foto-zoom que está embaixo.
+  O código que é link (span.cod.vh dentro do a.item-link, site/app.js:486) está escondido (.vh), só para leitor de tela.
+  O comentário de site/app.js:473-474 diz "o código e o nome são o link que abre a janela do produto".
+  Como repetir: #/busca?q=amortecedor dianteiro onix, clicar no selo escuro "AMT7007" no canto da foto.
+- 1d-janela-nome-*.png: o clique no nome (descrição) abre a janela do produto (#/produto/AMT7007). PASSOU.
+- Extra: o "+ Detalhes" também abre a janela (#/produto/AMT7007). PASSOU.
+- Console: 0 erro.
+
+--- 2. T-0014: filtros f1 (busca "dianteiro" com Linha = Leve: #/busca?q=dianteiro&li=LEVE) ---
+- Ordem: Linha > Categoria > Sistema > Família, em 1366 e 390. PASSOU.
+- Opção com 0: "Pneus" (Categoria), "Pneus e Câmaras", "Freio A Ar", "Cardã e Cruzetas" (Família): disabled e
+  aria-disabled="true", classe .off, nome em cinza rgb(91,98,94) (normal: rgb(21,21,21)). PASSOU em 1366 e 390.
+- Só a Família rola:
+  - 1366 (coluna .lado-filtros): Família com overflow auto, 354 px de conteúdo em 260 px (rola); Linha, Categoria
+    e Sistema com overflow visible e inteiras. PASSOU. Prints 2-filtros-coluna-1366.png e 2-filtros-coluna-familia-rolada-1366.png.
+  - 390 (painel "Filtrar", dialog.painel-c): nenhuma lista rola sozinha; a Família fica inteira (528 px, overflow
+    visible) e quem rola é o painel inteiro (.painel-corpo, 1315 px em 718 px). A regra está só em
+    site/styles.css:139 (.lado-filtros .filtro[data-k="fa"] .filtro-lista), que não vale no painel do celular.
+    [SUPOSIÇÃO] Se o critério "só a Família rola" vale também para o celular, FALHOU em 390; se vale só para a coluna
+    do computador, PASSOU. Decisão do PO. Prints 2-filtros-painel-topo-390.png e 2-filtros-painel-familia-390.png.
+- scrollWidth 1366 = 1366; 390 = 390 (sem rolar de lado). Console: 0 erro.
+
+--- 3. T-0018: "Pesquisas recentes" ---
+Regra (site/app.js):
+  site/app.js:779  const CONTADOR_LIGADO = true;
+  site/app.js:781  const RECENTES_MIN = 20, RECENTES_MS = 3000; // menos de 20 aberturas em 7 dias, erro ou mais de 3 s: "Destaques"
+  site/app.js:803  MAIS_VISTOS = fetch(SERVICO + "/mais-vistos?dias=7", { signal: ctl.signal, ...SEM_RASTRO })
+  site/app.js:806  if (!j || !(Number(j.total) >= RECENTES_MIN) || !Array.isArray(j.itens)) return null;
+  site/app.js:807-808  só os códigos que existem no catálogo, até 8; com menos de 4 no catálogo, null ("Destaques")
+  site/app.js:841  <h2>${recentes ? "Mais vistas" : "Destaques"}</h2>
+  site/app.js:842  sub: "Peças mais abertas nos últimos 7 dias" / "Peças com foto e ficha completa"
+  site/app.js:893-894  a home chama maisVistos() e monta o bloco com a lista ou com os Destaques
+Simulação (GET /mais-vistos interceptado):
+  - total 25, 8 códigos reais: o bloco troca, título "Mais vistas", sub "Peças mais abertas nos últimos 7 dias",
+    na ordem enviada (TER551027 ... TER553009). Prints 3-home-mais-vistos-25-{1366,390}[-inteira].png.
+  - total 12: o bloco fica "Destaques" ("Peças com foto e ficha completa"). Prints 3-home-mais-vistos-12-{1366,390}[-inteira].png.
+  Console: 0 erro.
+Observação: a T-0018 (linha 58) e o pedido R-20261120-140100 falam em "Pesquisas recentes"; a tela mostra
+"Mais vistas". O registro da T-0018 (linha 100, #53) diz que "Mais vistas" entrou no squash 750a2c9, aprovado pelos
+prints (R-20261120-174100-alexandre). Não é falha do código; o critério escrito na tarefa ficou com o nome antigo.
+
+Logs brutos: _log.txt (itens 1 e 3; a parte de filtros dele é de uma 1ª rodada com "amortecedor" e Sistema
+marcado, em que a Família não chegava a rolar) e _log_filtros.txt (item 2, a rodada que vale).

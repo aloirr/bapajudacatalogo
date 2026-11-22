@@ -1,0 +1,26 @@
+[1366] busca "amortecedor dianteiro onix" · cartão AMT7007 · "+ Detalhes" visível=true texto="+ Detalhes
+do AMT7007"
+[1366] clique na foto → zoom=true janela=false
+[1366] clique no código visível (AMT7007, .foto-cod; elemento no ponto: IMG. < foto-zoom) → zoom=true janela=false hash=#/busca?q=amortecedor%20dianteiro%20onix
+[1366] clique no nome → zoom=false janela=true hash=#/produto/AMT7007 · "PRODUTO ✕ AMT7007 AMORTECEDOR DE SUSPENSÃO DIANTEIRO DIR Peças Leve Copiar códig"
+[1366] clique no "+ Detalhes" → zoom=false janela=true hash=#/produto/AMT7007
+[1366] erros de console: 0
+[1366] filtros: ordem no DOM antes=li,ca,si,fa · rótulos=LINHA > CATEGORIA > SISTEMA > FAMÍLIA
+[1366] filtros: cor normal=rgb(31, 36, 34); opções com 0: 1 → fa:Caixas de Direção disabled=true aria-disabled=true off=true cor=rgb(91, 98, 94)
+[1366] filtros: listas que rolam=[] · [{"k":"li","ov":"visible","sh":86,"ch":86},{"k":"ca","ov":"visible","sh":30,"ch":30},{"k":"si","ov":"visible","sh":58,"ch":58},{"k":"fa","ov":"auto","sh":58,"ch":58}] · painel=null · scrollWidth=1366
+[1366] filtros: erros de console: 0
+[1366] home com /mais-vistos total=25: título="Mais vistas" sub="Peças mais abertas nos últimos 7 dias" itens=TER551027,TER55127,TER55128,TER552015,TER552120,TER55220,TER55221,TER553009 · erros=0
+[1366] home com /mais-vistos total=12: título="Destaques" sub="Peças com foto e ficha completa" itens=AMT7000,TAX10003,CRU512062,SFR30000,BCE3001,BDA50000,RAD25000,BS10 · erros=0
+[390] busca "amortecedor dianteiro onix" · cartão AMT7007 · "+ Detalhes" visível=true texto="+ Detalhes
+do AMT7007"
+[390] clique na foto → zoom=true janela=false
+[390] clique no código visível (AMT7007, .foto-cod; elemento no ponto: IMG. < foto-zoom) → zoom=true janela=false hash=#/busca?q=amortecedor%20dianteiro%20onix
+[390] clique no nome → zoom=false janela=true hash=#/produto/AMT7007 · "PRODUTO ✕ AMT7007 AMORTECEDOR DE SUSPENSÃO DIANTEIRO DIR Peças Leve Copiar códig"
+[390] clique no "+ Detalhes" → zoom=false janela=true hash=#/produto/AMT7007
+[390] erros de console: 0
+[390] filtros: ordem no DOM antes=li,ca,si,fa · rótulos=LINHA > CATEGORIA > SISTEMA > FAMÍLIA
+[390] filtros: cor normal=rgb(31, 36, 34); opções com 0: 1 → fa:Caixas de Direção disabled=true aria-disabled=true off=true cor=rgb(91, 98, 94)
+[390] filtros: listas que rolam=[] · [{"k":"li","ov":"visible","sh":132,"ch":132},{"k":"ca","ov":"visible","sh":44,"ch":44},{"k":"si","ov":"visible","sh":88,"ch":88},{"k":"fa","ov":"visible","sh":88,"ch":88}] · painel={"ov":"auto","sh":718,"ch":718} · scrollWidth=390
+[390] filtros: erros de console: 0
+[390] home com /mais-vistos total=25: título="Mais vistas" sub="Peças mais abertas nos últimos 7 dias" itens=TER551027,TER55127,TER55128,TER552015,TER552120,TER55220,TER55221,TER553009 · erros=0
+[390] home com /mais-vistos total=12: título="Destaques" sub="Peças com foto e ficha completa" itens=AMT7000,TAX10003,CRU512062,SFR30000,BCE3001,BDA50000,RAD25000,BS10 · erros=0

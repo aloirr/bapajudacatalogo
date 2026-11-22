@@ -1,0 +1,20 @@
+[1366] #/busca?q=dianteiro&li=LEVE
+  ordem: LINHA > CATEGORIA > SISTEMA > FAMÍLIA
+  cor normal: rgb(21, 21, 21)
+  zeros (4): ca:Pneus disabled=true aria=true cor=rgb(91, 98, 94) | fa:Pneus e Câmaras disabled=true aria=true cor=rgb(91, 98, 94) | fa:Freio A Ar disabled=true aria=true cor=rgb(91, 98, 94) | fa:Cardã e Cruzetas disabled=true aria=true cor=rgb(91, 98, 94)
+  li: overflowY=visible scrollH=114 clientH=114 rola=false
+  ca: overflowY=visible scrollH=86 clientH=86 rola=false
+  si: overflowY=visible scrollH=170 clientH=170 rola=false
+  fa: overflowY=auto scrollH=354 clientH=260 rola=true
+  sem painel
+  scrollWidth=1366 erros=0
+[390] #/busca?q=dianteiro&li=LEVE
+  ordem: LINHA > CATEGORIA > SISTEMA > FAMÍLIA
+  cor normal: rgb(21, 21, 21)
+  zeros (4): ca:Pneus disabled=true aria=true cor=rgb(91, 98, 94) | fa:Pneus e Câmaras disabled=true aria=true cor=rgb(91, 98, 94) | fa:Freio A Ar disabled=true aria=true cor=rgb(91, 98, 94) | fa:Cardã e Cruzetas disabled=true aria=true cor=rgb(91, 98, 94)
+  li: overflowY=visible scrollH=176 clientH=176 rola=false
+  ca: overflowY=visible scrollH=132 clientH=132 rola=false
+  si: overflowY=visible scrollH=264 clientH=264 rola=false
+  fa: overflowY=visible scrollH=528 clientH=528 rola=false
+  painel-corpo overflowY=auto scrollH=1315 clientH=718
+  scrollWidth=390 erros=0
