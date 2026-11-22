@@ -30,13 +30,12 @@ Já sabido e fora da revisão (igual no antes e no depois): os quadros cinza no 
 - 🟢 Mesmo número de linhas em todas as páginas (29, 19, 10, 18, 10) e nenhuma sobreposição.
 
 ## 4. Ritmo do texto corrido
-- 🟢 (b) "A BAP AUTOPARTS é uma empresa brasileira…": uma palavra só em maiúsculas, uma vez, no começo do parágrafo, logo depois do título "QUEM SOMOS". No corpo de ~9 pt ela pesa um pouco mais que o resto, mas funciona como a marca escrita, não como grito, e não se repete no parágrafo. O manual da marca não abre exceção para o texto corrido e a decisão 10 a vale para todas as formas.
+- 🟢 (b) "A BAP AUTOPARTS é uma empresa brasileira…": uma palavra só em maiúsculas, uma vez, no começo do parágrafo, logo depois do título "QUEM SOMOS". No corpo de ~9 pt ela pesa um pouco mais que o resto, mas funciona como a marca escrita, não como grito, e não se repete no parágrafo.
 - 🟢 (c2, c5) "A BAP AUTOPARTS" vira título todo em maiúsculas. Continua sendo o maior texto da página e a hierarquia não muda (sobretítulo "QUEM SOMOS" pequeno e espaçado acima, texto corrido abaixo).
 - Nota (não segura): a regra "sem caixa alta feia em nome e texto" desta revisão não vale para a grafia da marca, porque a grafia é decisão do Alexandre (10 a) e está no manual. O que vale daqui para a frente: o nome em maiúsculas uma vez por parágrafo, sem repetir "BAP AUTOPARTS" em frases seguidas (no texto, "a BAP" basta depois da primeira vez, como já está em "Por que vender BAP" e "SAC BAP").
 
 ## 5. Consistência
-- 🟢 Mesma grafia nas três peças (A4, Lubrificantes PDF e .pptx) e no Author dos metadados; o domínio `bapautoparts.com.br` e o `@bapautoparts` ficam como estão (endereço, não grafia).
-- 🟢 Capas (c1, c4): nenhum pixel muda; a capa não tem o nome escrito.
+- 🟢 Grafia, metadados, domínio e capas: ver o parecer de marca (`docs/marca/pareceres/T-0023-simulacao.md`).
 
 ## 6. Fora do escopo da T-0023 (só registro, não segura)
 Já estavam lá antes e a tarefa pede "páginas iguais às de antes, fora a grafia"; se o Alexandre quiser, vira outra tarefa:
