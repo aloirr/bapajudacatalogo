@@ -28,11 +28,8 @@ Recomendo **a) o texto do corretor**, como está na simulação (`A4_pag02_antes
   não perde nem ganha uma palavra: o "Quem somos" só perde a segunda frase, que era a repetida. Na b)
   (`A4_pag02_variante_texto.png`), essa frase ganha "nas linhas leve, pesada e moto" no fim, e é a definição da
   empresa que muda.
-- **Cada argumento no seu bloco.** As linhas leve, pesada e moto são argumento de venda (amplitude do portfólio) e
-  combinam com "Por que vender BAP". A qualidade com preço fica uma vez, na definição.
-- **Nada se perde de marca.** Sai "da suspensão à parte elétrica", que a lista de sistemas já cobre, e "preço
-  competitivo sem abrir mão da qualidade", que o "Quem somos" já diz com "qualidade" e "preço acessível". O
-  posicionamento de preço continua na página, com a palavra da definição.
+- **Nada se perde de marca:** cada fato fica num bloco só (ver o parecer de UX, §1); as linhas leve, pesada e moto são
+  argumento de venda, e o posicionamento de preço continua na página, com a palavra da definição.
 - **Voz da marca:** continua direta e confiante, no tom do vendedor ("Portfólio robusto…", "padrão OEM, testados para
   máxima performance"). Nenhuma palavra nova além do "as linhas leve, pesada e moto", que vem do próprio "antes".
 - **Grafia:** certa. "BAP AUTOPARTS", "OEM", "SAC BAP" e "Garantia Expressa BAP" como antes; acentos e crases certos.
@@ -46,14 +43,11 @@ Recomendo **a) "BAP AUTOPARTS"**, como está na simulação. É uso certo da mar
 
 - **É o padrão que já existe e já foi liberado.** A pág. 2 do A4 tem o sobretítulo "BAP AUTOPARTS" (T-0025). Com a a),
   as páginas institucionais do A4 (pág. 2, Sumário e Anotações) e os sumários do Completo e da Linha Moto ficam com o
-  mesmo sobretítulo, no mesmo estilo. O "GUIA RÁPIDO" da pág. 3 é rótulo de função e fica, como diz a simulação.
+  mesmo sobretítulo, no mesmo estilo.
 - **Não é repetição de texto.** O `topbar` tem o logo (que diz "bap") e o nome do catálogo com o ano; o sobretítulo tem
   o nome da empresa. Logo + nome escrito é a assinatura normal de marca, e é o único lugar legível do "AUTOPARTS" nessas
   páginas, fora do endereço no rodapé (o mesmo raciocínio da etiqueta do MC-0014, na T-0025).
-- **O nome de cada catálogo continua uma vez por página**, à esquerda da barra: "CATÁLOGO DE PRODUTOS 2027",
-  "CATÁLOGO COMPLETO 2027" e "CATÁLOGO LINHA MOTO 2027". O ano fica uma vez.
-- **A b) (sem sobretítulo) muda o layout** em 2 lugares (o `hero` do A4 e o título e o texto do digital), e a c) deixa o
-  ano repetido. As duas ficam fora da regra conservadora.
+- **O nome do catálogo e o ano, a b) e a c):** ver o parecer de UX (§3 e pergunta 4).
 - **Cuidado para depois (não é pedido desta rodada):** o "BAP AUTOPARTS" como sobretítulo serve para as páginas
   institucionais (Por que BAP, Sumário, Anotações). Nas páginas de sistema e de linha, o sobretítulo continua a ser o
   sistema ou a seção, e não deve virar "BAP AUTOPARTS". Vai como proposta no manual "a aprovar".
@@ -65,15 +59,12 @@ direto à página."**
 
 - **"Linha" é o termo da marca para o cliente.** Ele está no Sumário do Completo ("Todas as linhas BAP…"), no do A4
   ("Linhas de produtos BAP…"), no Guia Rápido ("Cada página traz uma linha de produtos BAP") e no cartão "+40 linhas de
-  produtos". "Família" só aparece para o cliente num lugar: a capa da Linha Moto ("7 famílias · 80 itens para
+  produtos". "Família" só aparece para o cliente num lugar: a capa da Linha Moto ("7 famílias · 75 itens para
   motocicletas"). Nos dados, "FAMILIA" é o nome da coluna da base, não termo de venda.
 - **A a) é a menor correção:** só entra "para motocicletas", e o "Toque no nome da linha" fica igual ao do Completo. A
   b) troca 2 palavras e leva o termo da capa para o sumário, quando o certo é o contrário (ver o MC-0015).
-- **O "Todas" fica verdadeiro:** as 7 linhas do sumário somam os itens de moto do Completo (o "Pneus e Câmaras de Ar
-  Moto", 21 itens, da Rodagem do Completo, é o mesmo conjunto que a Linha Moto divide em "Pneus Moto", 12, e "Câmaras de
-  Ar Moto", 9).
-- **Saem os 2 erros de nome:** o "CATÁLOGO COMPLETO" na barra de um catálogo só de moto e o texto que falava de todas
-  as linhas BAP. Isso é correção de nome do catálogo, não mudança de marca.
+- **O "Todas" fica verdadeiro:** as 7 linhas do sumário somam os itens de moto do Completo.
+- **Os 2 erros de nome saem** (ver o parecer de UX, §4): é correção de nome do catálogo, não mudança de marca.
 
 ## 4. Grafia "BAP AUTOPARTS" em tudo o que muda
 
@@ -96,8 +87,8 @@ Certa em tudo (decisão 10 a). Conferi no diff e nos PNGs:
   era navegação, não marca; a assinatura da barra (logo + nome do catálogo) fica igual em todas as páginas. O espaço:
   ver o parecer de UX.
 - **Pergunta 6 ("1 itens"):** concordo com **a) fora desta rodada**, com um achado (RD) próprio para o singular "1 item"
-  nos 3 PDFs. É erro de português visível ao vendedor, mas não é de marca, e corrigir agora muda mais páginas e pede
-  nova simulação.
+  nos 3 PDFs. É erro de português visível ao vendedor, mas não é de marca; o alcance nas páginas: ver o parecer de UX
+  (pergunta 6).
 
 ## Achados
 
@@ -119,7 +110,7 @@ também que nenhuma outra página muda e que o `T-0026-simulacao.diff` (ou o dif
 | Campo | Valor |
 |---|---|
 | Data | 22/11/2026 06:44 (Manaus) |
-| Decisão do PO | R-20261122-103726-po: 1a 2a 3a 4a 5a 6a; o MC-0015 foi para a fila do Alexandre |
+| Decisão do PO | R-20261122-103726-po: 1a 2a 3a 4a 5a 6a |
 | O que foi visto | O PR #146 (branch `catalogo-grafico/T-0026-entregas`, head `09859641823cc6daf50a34eb6de01318d73bc86d`): o diff do gerador (`print_cat.py`, `digital2.py`, `catalogo_moto.py` e `LEIA_GERADOR.md`) e as 3 entregas que mudam (A4, Completo Digital e Linha Moto), comparadas com as do main `2ac3ec2`: as páginas renderizadas, o texto de cada página com `pdftotext` e os metadados com `pdfinfo`. Também vi as pranchas finais e a prova pixel a pixel em `recados/anexos/T-0026/final/` do aloirr/bapajudacatalogo-recados (commit `18412ec`), em especial `A4_pag02_antes_depois.png`, `A4_pag04_antes_depois.png`, `Digital_pag02_sumario_antes_depois.png` e `Moto_pag02_sumario_antes_depois.png` |
 | Parecer | **LIBERADO**. Nenhum achado novo |
 
@@ -129,24 +120,17 @@ também que nenhuma outra página muda e que o `T-0026-simulacao.diff` (ou o dif
   pesada e moto:" e termina em "testados para máxima performance.". "Garantia Expressa BAP" não muda. O vazio maior
   embaixo (2a) é o da simulação; o espaço: ver o parecer de UX.
 - **Sobretítulo "BAP AUTOPARTS" (4a):** está no Sumário do A4 (pág. 4), no do Completo Digital (pág. 2) e no da Linha
-  Moto (pág. 2), no mesmo estilo do de antes (Poppins Bold, 10 pt, `gdark`, espaçamento 1,6). O A4 entregue continua
-  com 56 páginas e sem página de Anotações; no código, a `anotacoes()` usa o mesmo sobretítulo. A pág. 3 continua com
-  "GUIA RÁPIDO". A barra tem só o logo e o nome do catálogo com o ano, uma vez, e o lado direito fica vazio (3a).
+  Moto (pág. 2), no mesmo estilo do de antes (Poppins Bold, 10 pt, `gdark`, espaçamento 1,6). No código, a
+  `anotacoes()` usa o mesmo sobretítulo (o A4 não usa a página).
 - **Sumário da Linha Moto (5a):** "Todas as linhas BAP para motocicletas com as aplicações completas. Toque no nome da
-  linha para ir direto à página." Saiu o "CATÁLOGO COMPLETO" da barra. A capa continua com "7 famílias" (MC-0015, na
-  fila do Alexandre). O "1 itens" fica para um RD próprio (6a).
+  linha para ir direto à página." Saiu o "CATÁLOGO COMPLETO" da barra. O "1 itens" fica para o RD-0510 (6a).
 - **Grafia:** "BAP AUTOPARTS" certa em tudo o que muda. Não há "BAP AUTO PARTS" nem "BAP Autoparts" no diff nem no texto
   dos 3 PDFs entregues.
 - **Metadados iguais:** fora as datas e o tamanho do arquivo, o `pdfinfo` dos 3 PDFs é igual ao do main. Título:
   `Catálogo BAP 2027 — Impressão A4 (uso interno)`, `— Completo (uso interno)` e `— Linha Moto (uso interno)`. Autor
   "BAP AUTOPARTS" nos 3. O número de páginas não muda (56, 311 e 17).
-- **Nada de marca mudou fora do pedido:** comparei as 384 páginas dos 3 PDFs, renderizadas, com as do main. Só mudam a
-  pág. 2 (texto), a pág. 3 (lado direito da barra) e a pág. 4 (barra e sobretítulo) do A4, e a pág. 2 do Completo Digital
-  e da Linha Moto (barra, sobretítulo e, na Linha Moto, o texto). O texto, página a página, muda só nessas mesmas
-  páginas. As caixas da diferença batem com as da prova pixel a pixel do `catalogo-grafico`. O diff dos `.py` é o mesmo
-  que li na simulação. Nenhuma cor, fonte, logo ou tamanho de logo mudou; capas e contracapas iguais. O PR não muda
-  `docs/marca/`.
+- **Nada de marca mudou fora do pedido:** nenhuma cor, fonte, logo ou tamanho de logo mudou; capas e contracapas iguais
+  (as páginas que mudam: ver o parecer de UX, entrega final). O PR não muda `docs/marca/`.
 - **Regras do repositório:** sem preço e sem estoque (busca por "R$" com número, "estoque" e "saldo" nos 3 PDFs: 0); sem
   marca de terceiros.
-- **Achados:** nenhum novo. O MC-0015 segue ABERTO, na fila do Alexandre. O MC-0011 e o MC-0012 seguem abertos, como na
-  T-0023.
+- **Achados:** o MC-0015 segue ABERTO, na fila do Alexandre. O MC-0011 e o MC-0012 seguem abertos, como na T-0023.
