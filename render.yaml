@@ -1,5 +1,4 @@
-# Catálogo BAP online no Render. Desde a T-0022 o site/ é servido só com login pelo bapajudacatalogo-login (abaixo);
-# o serviço estático bapajudacatalogo ficou só para levar o endereço antigo ao novo. A base .xlsx NÃO vai para o ar.
+# Catálogo BAP online no Render: 3 serviços (abaixo). A base .xlsx NÃO vai para o ar.
 # Render → Blueprints → aloirr/bapajudacatalogo → Sync.
 services:
   # Endereço antigo (T-0022, fase B): só redireciona para o catálogo com login. Os links #/produto/... seguem valendo.
@@ -11,6 +10,9 @@ services:
       printf '%s' '<!doctype html><meta charset="utf-8"><title>Catálogo BAP</title><script>location.replace("https://bapajudacatalogo-login.onrender.com/"+location.search+location.hash)</script><a href="https://bapajudacatalogo-login.onrender.com/">Catálogo BAP</a>' > redirecionamento/index.html
     staticPublishPath: ./redirecionamento
     pullRequestPreviewsEnabled: false
+    buildFilter:
+      paths:
+        - render.yaml
     routes:
       - type: redirect
         source: /*

@@ -13,7 +13,7 @@ Você é o dono de `site/`, `scripts/gerar_site.py`, `requirements.txt` e `docs/
 - **Estático**, sem servidor e sem framework: `site/index.html`, `site/app.js`, `site/styles.css`, `site/assets/`.
 - Dados: `site/data/produtos.json`, gerado por `scripts/gerar_site.py` a partir da base unificada. **Não edite o JSON à mão**: mude o script ou peça a mudança de dado ao `catalogo-dados`.
 - Fotos: `site/img/<CODIGO>.jpg`, até 700 px, JPEG 80, feitas pelo script com `--fotos`.
-- Publicado no Render pelo serviço de login (`servicos/login/`, T-0022): o `site/` só abre com login, em bapajudacatalogo-login.onrender.com; o `render.yaml` é do Alexandre.
+- Publicado no Render atrás do login (`servicos/login/`, T-0022; endereço no `CLAUDE.md`); o `render.yaml` é do Alexandre.
 - Busca: geral, por veículo (montadora, modelo, ano, sistema) e por código ou referência cruzada. Rotas com `#/`.
 
 ## Estilo (mantenha o atual)
