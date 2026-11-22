@@ -3,8 +3,8 @@
 | Campo | Valor |
 |---|---|
 | Revisor | designer-ux |
-| Data | v1: 22/11/2026 04:38 (Manaus; o commit f88b952 dizia 04:45 por engano) · reteste da v2: 22/11/2026 04:45 (Manaus) |
-| O que foi revisto | Simulação do `web-site` (pasta `t0024-sim/` no rascunho da sessão do gerente, a partir do main 942cf1c): `LEIA.md`, `admin/pdfs/index.html`, `admin/pdfs/sim.css`, `admin/pdfs/pdfs.js` e os 4 prints de `prints/` |
+| Data | v1: 22/11/2026 04:37 (Manaus, commit f88b952) · reteste da v2: 22/11/2026 04:43 (Manaus, commit 9fea924) |
+| O que foi revisto | Simulação do `web-site`, a partir do main 942cf1c: `LEIA.md`, `admin/pdfs/index.html`, `admin/pdfs/sim.css`, `admin/pdfs/pdfs.js` e os 4 prints. O `LEIA.md` e os prints estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0024/sim/` (commit f32f3f2) |
 | Pedido | T-0024 (R-20261122-075711-alexandre, resposta "1) a") |
 | Resultado | v1: VOLTA PARA AJUSTE (sem 🔴; 4 🟡 e a alternativa B). **Reteste da v2: LIBERADO** para ir ao Alexandre, sem 🔴 e sem 🟡 que segure (ver "Reteste da v2", no fim) |
 
@@ -58,14 +58,13 @@ Como deve ficar (especificação para o `web-site`; a API continua com 7 itens):
   - O nome acessível é "Baixar PDF · Lubrificantes e Químicos" e "Baixar PowerPoint · Lubrificantes e Químicos".
 - **Se faltar um dos arquivos:** só aquele botão fica desabilitado, com a frase "O PowerPoint não está disponível agora." (ou "O PDF …"). O outro continua funcionando.
 - **Como juntar os 2 itens:** a junção deve vir da lista fixa do serviço, por exemplo com um campo de par nos 2 itens. O nome do arquivo não deve ser lido no navegador para isso. O desenho do campo é do `integracao-placas` com o `web-site`.
-- Os prints da B, em 1366 e 390 px, entram na simulação antes de ela ir ao Alexandre.
 
 ## 6. O nome da página
 - 🟡 "Catálogos em PDF" deixa de ser verdade com o .pptx. Recomendo **"Catálogos e materiais"**:
   - é a soma dos 2 grupos ("Catálogos" e "Apresentações e materiais");
   - cabe no menu da conta.
 - O nome novo vale no `h1`, na trilha, no `<title>` e no item do menu (`site/conta.js:71`), e o subtítulo passa a ser "Sempre a versão mais nova de cada arquivo.".
-- A decisão é do Alexandre, pelo PO. A simulação deve mostrar o nome proposto.
+- A decisão é do Alexandre, pelo PO.
 
 ## O que volta ao `web-site`
 1. Tirar a linha "Tipo", o contador e a frase dos grupos.
@@ -77,16 +76,15 @@ Como deve ficar (especificação para o `web-site`; a API continua com 7 itens):
 Ao levar o `sim.css` para o `admin.css`: a regra `.pdf h2` (`site/admin/admin.css:86`) deixa de ser usada e sai junto. O `h3` passa a 18 px.
 
 ## Prints conferidos
-- `prints/antes_1366.png`
-- `prints/antes_390.png`
-- `prints/depois_1366.png`
-- `prints/depois_390.png`
+No aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0024/sim/` (commit f32f3f2):
+- `antes_1366.png` e `antes_390.png`;
+- `depois_v1_1366.png` e `depois_v1_390.png` (na rodada da v1, eram o `depois_1366.png` e o `depois_390.png`).
 
 Também abri `admin/pdfs/index.html`, `sim.css` e `pdfs.js`.
 
-## Reteste da v2 (22/11/2026 04:45, Manaus)
+## Reteste da v2 (22/11/2026 04:43, Manaus)
 
-O que foi revisto: o `LEIA.md` da v2, `admin/pdfs/index.html`, `estados.html` e `sim.css`, e os prints `depois_1366`, `depois_390`, `depois_menu_1366`, `depois_menu_390`, `estados_1366` e `estados_390`. Também abri a tela no Chrome em 1366, 1100 e 800 px, para medir o par de botões e ver o foco.
+O que foi revisto: o `LEIA.md` da v2, `admin/pdfs/index.html`, `estados.html` e `sim.css`, e os prints `depois_1366`, `depois_390`, `depois_menu_1366`, `depois_menu_390`, `estados_1366` e `estados_390` (em `recados/anexos/T-0024/sim/`, commit f32f3f2). Também abri a tela no Chrome em 1366, 1100 e 800 px, para medir o par de botões e ver o foco.
 
 ### Os ajustes da v1
 - 🟢 **UX 1:** a linha "Tipo" saiu. O tipo fica no ícone, na extensão e no botão.
@@ -97,19 +95,17 @@ O que foi revisto: o `LEIA.md` da v2, `admin/pdfs/index.html`, `estados.html` e 
   - são 3 e 3 cartões, sem cartão sozinho na linha em 1366 px;
   - o cartão segue a especificação do item 5;
   - a junção vem do campo `par` da lista fixa, e a API continua com 7 itens.
-- 🟢 **Frase do Completo Digital:** "Todos os itens, para ver na tela." segue o modelo da Linha Moto. A troca vai ao Alexandre como mudança, junto com a pergunta do `design-de-marca`.
+- 🟢 **Frase do Completo Digital:** "Todos os itens, para ver na tela.", a do MC-0013 (ver o parecer de marca).
 
 ### A medida do par de botões (decisão do `web-site`): 🟢 aceita
-- **Medidas:** os 2 botões têm 48 px de altura e 14 px de texto. O "Baixar PDF" tem 130 px de largura e o "Baixar PowerPoint", 184 px.
-  - Em 1366 e em 800 px, ficam lado a lado (`sim.css`, bloco `.pdf-bts`).
-  - Em 1100 px, o segundo desce para baixo do primeiro.
+- **Medidas:** os 2 botões têm 48 px de altura (acima dos 44 px do toque) e 14 px de texto. O "Baixar PDF" tem 130 px de largura e o "Baixar PowerPoint", 184 px.
+  - De 793 a 1023 px e de 1182 px em diante (como 800 e 1366 px), ficam lado a lado (`sim.css`, bloco `.pdf-bts`).
+  - **Onde o par desce** (medido de 1 em 1 px, de 600 a 1400 px, na página final 103cf25 do PR #134, que tem o mesmo CSS da v2): de 641 a 792 px (o tablet em pé, como 768 px) e de 1024 a 1181 px (como 1100 px). Ali, o segundo botão fica embaixo do primeiro, e os 2 ficam alinhados à esquerda, cada um com a sua largura. Isso não segura.
   - Em 390 px, ficam um embaixo do outro, com a largura toda e o texto de 16 px.
-- **O toque** continua com 48 px de altura, acima dos 44 px.
 - **A hierarquia** fica clara: o principal é cheio e o secundário é contornado. O foco visível aparece no secundário (contorno `--verde-txt`).
 - **O texto de 14 px no par** fica um pouco menor que o "Baixar PDF" de 16 px dos cartões vizinhos. Aceito pelos 2 motivos abaixo:
   - com 16 px, o par não cabe no cartão de 1/3 e desceria em todo computador;
   - a diferença só aparece no cartão que tem 2 ações.
-- **Onde o par desce** (de 1024 a 1199 px e no tablet), os 2 botões ficam alinhados à esquerda, cada um com a sua largura. Isso não segura.
 - **Nota para o passo 2** (não segura; é do `web-site`, e o `corretor-redundancias` confere):
   - o `.pdf .pdf-bts .bt` repete à mão a medida do `.bt-mini` (padding de 12 px e texto de 14 px);
   - um comentário apontando para o `.bt-mini` já basta;

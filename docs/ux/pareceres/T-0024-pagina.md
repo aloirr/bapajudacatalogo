@@ -19,13 +19,7 @@ Sem preço e sem estoque: 🟢.
   - o par "Baixar PDF" e "Baixar PowerPoint" lado a lado em 1366 px e um embaixo do outro em 390 px;
   - "824 KB" e "249 KB" abaixo de 1 MB;
   - "PDF 6,6 MB · PowerPoint 7,3 MB".
-- 🟢 **Os estados** (`estado_falta`, `estado_datas`, `estado_vazio` e `estado_erro`, em 1366 e 390 px) usam os textos aprovados:
-  - "O PowerPoint não está disponível agora.", e só o botão dele fica desabilitado; o nome do arquivo fica como "…Comercial (.pdf)";
-  - "Este arquivo não está disponível agora. Tente de novo mais tarde." no cartão de um arquivo só;
-  - "PDF 14/11/2026 15:20 · PowerPoint 10/11/2026 09:00" quando as datas são diferentes;
-  - "Nenhum arquivo por enquanto.";
-  - "Não foi possível carregar os arquivos agora. Atualize a página em instantes.";
-  - "Carregando os arquivos…" no `index.html:37`.
+- 🟢 **Os estados** (`estado_falta`, `estado_datas`, `estado_vazio` e `estado_erro`) usam os textos do parecer da simulação (§3 e item 5), palavra por palavra. No par, só o botão do arquivo que falta fica desabilitado, e o nome do arquivo fica "…Comercial (.pdf)".
 - 🟢 **O nome novo** está no `<title>`, na trilha, no `h1`, no subtítulo ("Sempre a versão mais nova de cada arquivo.") e no item do menu da conta (`conta.js:71`, print `depois_menu_390`).
 - 🟢 **As frases de uso** são as da v2, com a do Completo Digital: "Todos os itens, para ver na tela.".
 
@@ -49,10 +43,10 @@ Conferi com o Chromium (Playwright) na cópia do head 103cf25, em 1366 e em 390 
 - O "Nenhum arquivo por enquanto." e o "Carregando os arquivos…" não têm `role="status"`. É o mesmo da T-0022 e não mudou neste PR.
 
 ## Prints conferidos
-Em `t0024-pag/prints/`, no rascunho da sessão:
+Os 14 prints da página final estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0024/pag/` (commit 1888dd5):
 - `antes_1366`, `antes_390`, `depois_1366`, `depois_390`, `depois_menu_1366` e `depois_menu_390`;
-- `estado_falta_1366`, `estado_falta_390`, `estado_datas_1366`, `estado_datas_390`, `estado_vazio_390` e `estado_erro_390`.
+- `estado_falta_1366`, `estado_falta_390`, `estado_datas_1366`, `estado_datas_390`, `estado_vazio_1366`, `estado_vazio_390`, `estado_erro_1366` e `estado_erro_390`.
 
-Para comparar, abri os prints da v2: `t0024-sim/prints/depois_1366`, `depois_390` e `estados_1366`.
+Para comparar, abri os prints da v2, em `recados/anexos/T-0024/sim/` (commit f32f3f2): `depois_1366`, `depois_390` e `estados_1366`.
 
 **Resultado: LIBERADO** para seguir ao `revisor-codigo`.
