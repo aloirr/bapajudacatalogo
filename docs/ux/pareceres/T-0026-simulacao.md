@@ -83,7 +83,7 @@ Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0026/sim/`
 
 | Campo | Valor |
 |---|---|
-| Data | 22/11/2026 06:47 (Manaus) |
+| Data | 22/11/2026 06:45 (Manaus) |
 | O que foi revisto | O PR #146, branch `catalogo-grafico/T-0026-entregas`, head `09859641823cc6daf50a34eb6de01318d73bc86d`, comparado com o origin/main `2ac3ec2`. Os arquivos conferidos foram as entregas `Catalogo_BAP_2027_A4_grafica.pdf`, `Catalogo_BAP_2027_Completo_Digital.pdf` e `Catalogo_BAP_2027_Linha_Moto.pdf` e, no gerador, `print_cat.py`, `digital2.py`, `catalogo_moto.py` e `LEIA_GERADOR.md` |
 | Decisão do PO | 1a, 2a, 3a, 4a, 5a e 6a (R-20261122-103726-po) |
 | Pranchas | No aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0026/final/` (commit 18412ec) |
