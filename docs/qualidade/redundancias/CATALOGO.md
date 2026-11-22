@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0508**.
+O próximo número livre é o **RD-0510**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -355,10 +355,12 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0505 | baixa | doc | docs/marca/pareceres/T-0025-simulacao.md, "Correção" do MC-0014, §6 e Entrega final | a "Correção" do MC-0014 recontava o §1 e o §5; o §6 repetia o §2; o Portfólio "não muda no PR" 2 vezes na entrega final (passa a "Manter a etiqueta nesta rodada (pergunta 1, opção b); a pergunta vai com o MC-0012 (§5)."; sai o Portfólio repetido; o §6 voltou por extenso no 3cc63c9 e fica, como prova da grafia) | T-0025 | design-de-marca | CORRIGIDO (aab68dd; 1255bbe, #143) |
 | RD-0506 | média | doc | docs/marca/pareceres/T-0025-simulacao.md, perguntas 2 e 3, §5 (MC-0011 e MC-0012) e Entrega final | a barra, o "Quem somos diz o mesmo", o espaço vazio da pág. 2, a quebra do "DOT 4", os 48 e 72 pt e a comparação página a página repetiam o parecer de UX (passam a "ver o parecer de UX"; sai o recado ao `designer-ux` sobre o espaço vazio) | T-0025 | design-de-marca | CORRIGIDO (aab68dd; 1255bbe, #143) |
 | RD-0507 | baixa | doc | docs/marca/pareceres/T-0025-simulacao.md:138, Entrega final | "; muda só o título dos metadados (§4)", 3ª vez do título da Linha Moto na mesma seção (sai; fica "A Linha Moto tem as 17 páginas iguais às do main, pixel a pixel.") | T-0025 | design-de-marca | CORRIGIDO (1e54a78; 1255bbe, #143) |
+| RD-0508 | baixa | tarefa | .coord/tarefas/T-0025.md:36 × :47 (e :22) | o que fica para o Alexandre (a etiqueta, o MC-0011 e o MC-0012) dito 2 vezes no Registro, e o "o topo do site entra junto" repetindo a Especificação (a linha 36 passa a "o resto fica para o Alexandre (ver "Fica para o Alexandre")"; a 47, a "MC-0011, MC-0012 e, junto com ele, a etiqueta do cabeçalho das apresentações (1b)") | T-0025 | gerente-projetos | CORRIGIDO (a34c957; 2ac3ec2, #144) |
+| RD-0509 | baixa | tarefa | .coord/tarefas/T-0025.md:26 × :32 e :36 | os recados da aprovação da simulação ("R-20261122-095019-po; delegação R-20261122-090651") no critério e no Registro (o critério passa a "(ver o Registro)") | T-0025 | gerente-projetos | CORRIGIDO (a34c957; 2ac3ec2, #144) |
 
 ## Notas
 
-### T-0025, manhã de 22/11/2026 (PRs #141, #142 e #143)
+### T-0025, manhã de 22/11/2026 (PRs #141 a #144)
 - RD-0428: MANTIDO pela decisão 1b do PO (R-20261122-095019-po, na delegação do R-20261122-090651-alexandre). A etiqueta "BAP AUTOPARTS" continua no cabeçalho de Lubrificantes (`apres_bemol.py:70` e mestre do .pptx, `apres_ppt.js:21`, lida de `K['marca']`) e vai ao Alexandre com o MC-0012.
 - RD-0429 ao RD-0432 e RD-0494: corrigidos no head `a00b55d` do #141 (o conteúdo é do `33229d7`; o `a00b55d` só traz o main); sem mudança no `59beeb9`. Squash `77697ad`.
 - RD-0495 ao RD-0497 e RD-0500: corrigidos no `59beeb9` (head do #141; squash `77697ad`).
@@ -367,6 +369,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - RD-0504 ao RD-0506: corrigidos no `aab68dd`; RD-0507, no `1e54a78` (head do #143; squash `1255bbe`).
 - Conferido no main `1255bbe`: nenhum trecho corrigido volta; o RD-0498 e o RD-0499 seguem em `print_cat.py:483-484`, `:503`, `:530-531`, `:557-558` e `digital2.py:494-498`.
 - [SUPOSIÇÃO] As linhas citadas são as dos pareceres de 06:08 a 06:15 (Manaus), entregues ao gerente sem relatório no Git; algumas mudaram com a correção.
+- RD-0508 e RD-0509: registro do gerente (PR #144), primeira rodada no `de9a6bd` (06:27); corrigidos no `a34c957` (head do #144; squash `2ac3ec2`).
 - Relatório: `T-0025.md`.
 
 ### T-0024, registro do gerente (PR #139)
