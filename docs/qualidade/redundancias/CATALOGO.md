@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0268**.
+O próximo número livre é o **RD-0294**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -131,8 +131,22 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0265 | média | doc | catalogo_grafico/gerador/LEIA_GERADOR.md, linha do fornecedor e da concorrência | o como funciona da trava (Doc.ref, caixa, TRAVA_PDF_REF, "AUTO IMPACT") repetia o comentário do `digital2.trava_pdf` (fica a regra e onde ela mora) | T-0017 | catalogo-grafico | CORRIGIDO (3aff7e0; 8de7a6d, #90) |
 | RD-0266 | baixa | código | catalogo_grafico/gerador/montar.py, refs_pela_regra e refs_unicas | o `concorrente_por_ultimo` chamado nos 2 (o `refs_unicas` já ordena o que passa pelo `refs_pela_regra`) | T-0017 | catalogo-grafico | MANTIDO (o `site_aplicacoes._refs_antes`, lido pelo `lista_aplicacoes_site.py`, sai do `refs_pela_regra` sem passar pelo `refs_unicas`) |
 | RD-0267 | baixa | código (comentário) | catalogo_grafico/gerador/fraga_complementos.py, fim do aplicar | o comentário repetia a regra da AUTOIMPACT (concorrência, por último), que é do `montar.refs_unicas` | T-0017 | catalogo-grafico | CORRIGIDO (3aff7e0; 8de7a6d, #90) |
+| RD-0285 | — | código | catalogo_grafico/gerador/oferta.py, sistemas | a POSICAO dos DADOS_ADICIONAIS lida por uma cópia (`oferta._posicao`), e não pelo `pares_de` do site | T-0019 | catalogo-grafico | CORRIGIDO (f52e409, com o `pares_de` do #100) |
+| RD-0286 | — | código | catalogo_grafico/gerador/oferta.py e digital2.py | o `oferta._txt` repetia o `G.limpar`; o código da oferta era tirado do parêntese em 2 lugares; o `sem_viuva` partia o texto 2 vezes | T-0019 | catalogo-grafico | CORRIGIDO (f52e409) |
+| RD-0287 | — | código | catalogo_grafico/gerador/detalhe.py, oferta.py e digital2.py | logs mortos (`TAIL_LOG`, `SIS_LOG`) e ramo morto no `refs_juntas` | T-0019 | catalogo-grafico | CORRIGIDO (f52e409) |
+| RD-0288 | — | doc | catalogo_grafico/gerador/LEIA_GERADOR.md | faltavam no LEIA_GERADOR o `digital_data.json`, o B8, o B10 e o "Leve também" pelo site | T-0019 | catalogo-grafico | CORRIGIDO (f52e409) |
+| RD-0289 | média | código | catalogo_grafico/gerador/digital2.py:271, :279 e :286 (com Doc.tag:223 e tags.medir:85) | a largura da tag (`lw(...) + 2 * pad`) reescrita no `novo_desce` e no `novo_na_sobra`; o `NOVO_TAG = 6.2` repete o tamanho padrão do `tags.py` | T-0019 | catalogo-grafico | ABERTO |
+| RD-0290 | média | código | catalogo_grafico/gerador/digital2.py:305-308 e :407; print_cat.py:312-315 e :360 | a cola do B10 (encolher o código, `novo_desce`, `novo_na_sobra`, a tag NOVO na descrição) escrita nos 2 PDFs | T-0019 | catalogo-grafico | ABERTO |
+| RD-0291 | baixa | código | catalogo_grafico/gerador/oferta.py:189 e :206 | o conjunto `cods` montado no `_por_sistema` e de novo no `_so_codigo`, na mesma rodada | T-0019 | catalogo-grafico | ABERTO |
+| RD-0292 | baixa | código (comentário) | catalogo_grafico/gerador/oferta.py:11 e :67-72 | o "Leve também" pelas regras do site dito no import, no bloco de baixo e em mais 3 lugares; o bloco repete o docstring do `sistemas_de` | T-0019 | catalogo-grafico | ABERTO (só comentário: não segura) |
+| RD-0293 | média | texto (PDF) | A4 p. 20 e Digital p. 112-113, embreagem pesada (ex.: EMB3400700639R) | "plato/disco/mancal · c/ platô, disco, rol. e mancal": a composição do kit 2 vezes (anterior ao PR #99, igual no main 3d6a730) | T-0019 | catalogo-grafico | ABERTO (Simule; a dispensa é decisão do po) |
 
 ## Notas
+
+### T-0019, PR #99 (22/11/2026)
+- [SUPOSIÇÃO] O RD-0268 ao RD-0284 são dos pareceres de 21/11/2026, sem relatório no Git, e não estão nesta tabela. O RD-0285 ao RD-0288 entram pela descrição do commit f52e409, sem severidade versionada.
+- O RD-0252 e o RD-0284 ficam ABERTOS, com dispensa de escopo do po (v27), e não seguram o PR #99.
+- Relatório: `T-0019.md`.
 
 ### Registros de 21/11/2026, tarde (PRs #86 a #90)
 - O git confirma o número e a correção de cada achado nos commits do dono (8eaddab, 069a4e6, 9e203da, ab3d6c4, 3aff7e0) e nos squashes do main: 366b55c (#86), be7efe8 (#87), 6819c7b (#88) e 8de7a6d (#90). O #89 (45320cf, produtos.json da v25) não teve achado.
