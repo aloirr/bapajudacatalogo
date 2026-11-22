@@ -20,6 +20,7 @@ pdfmetrics.registerFontFamily('PR', normal='PR', bold='PB', italic='PR', boldIta
 
 W, H, MX = 794, 1123, 36
 ANO = '2027'                               # ano da capa e dos títulos (Alexandre, 29/10: catálogo 2027)
+def plural(n, um='item', varios='itens'): return um if n == 1 else varios   # singular num lugar só (RD-0510)
 MARCA = 'BAP AUTOPARTS'   # nome da marca: sobretítulo das páginas de abertura e autor dos metadados
 DOC_TITULO = f'CATÁLOGO COMPLETO {ANO}'   # o catálogo só de moto troca este título
 DOC_META = f'Catálogo BAP {ANO} — Completo (uso interno)'   # título dos metadados; o da Linha Moto também troca
@@ -386,7 +387,7 @@ def table_page(dc, f, rows, pg, cont, primeira=None):
     else:
         y = TOP + 14
         dc.label(MX, y, f['name'] + ' (continuação)', 15, 'black', 'PB')
-        dc.label(W - MX, y + 3, f"{f['count']} itens", 9.5, 'sec', 'PM', 0, 'right')
+        dc.label(W - MX, y + 3, f"{f['count']} {plural(f['count'])}", 9.5, 'sec', 'PM', 0, 'right')
         y += 26; x = MX + PAD
     aw = app_w(f)
     heads = [('CÓDIGO', CODE_W), ('PRODUTO / ESPECIFICAÇÃO' if f['spec'] else 'APLICAÇÃO', aw)]
@@ -425,47 +426,6 @@ def table_page(dc, f, rows, pg, cont, primeira=None):
         if refs: dc.ref(xr, y + 3.5, REF_W, refs, RF, RL, 'sec')
         y += h
     dc.footer(pg); dc.end()
-
-
-def cover_page(dc, f, key, first, last, pg):
-    dc.bookmark(key, f['name'], 1)
-    dc.rect(0, 0, W, H, fill='black')
-    dc.circle(W + 40, 470, 360, 'green'); dc.circle(W + 10, 470, 268, 'green2'); dc.circle(W + 10, 470, 190, 'black')
-    dc.image(LOGO, MX, 44, 34 * 1420 / 1955, 34)
-    dc.label(MX + 40, 56, DOC_TITULO, 10, 'green2', 'PB', 1.4)
-    dc.back_button(48)
-    g = f.get('eyebrow', f['group']).upper(); gs = 13
-    while gs > 9 and lw(g, gs, 'PB', 2) + (150 if f['lanc'] else 0) > CW: gs -= .5
-    dc.label(MX, 300, g, gs, 'green2', 'PB', 2)
-    if f['lanc']: dc.tag(MX + lw(g, gs, 'PB', 2) + 14, 299, 'LANÇAMENTO 2026', 9, 'orange', 'white', 7)
-    size = 64
-    while size > 34 and lw(f['name'], size, 'PB', -1) > CW - 40: size -= 2
-    dc.label(MX - 2, 326, f['name'], size, 'white', 'PB', -1)
-    dc.text(MX, 326 + size + 18, 430, html.escape(f['desc'], quote=False), 15, 22, 'lgrey')
-    if f['img']:
-        dc.rect(MX, 560, 400, 210, fill='white', r=20)
-        dc.image(f['img'], MX + 20, 575, 360, 180)
-    n = str(f['count'])
-    dc.label(MX, 810, n, 64, 'white', 'PB', -1)
-    dc.label(MX + lw(n, 64, 'PB', -1) + 14, 840, 'ITENS NESTA LINHA', 12, 'white', 'PB', 1.5)
-    rng = f'Tabela completa nas páginas {first:02d} a {last:02d}' if last > first else f'Tabela completa na página {first:02d}'
-    dc.label(MX, 900, rng, 13, 'lgrey', 'PM')
-    if f.get('venda'):
-        tw = CW - 260 - 40
-        th = para_h(html.escape(f['venda'], quote=False), 12.5, 18, tw)
-        bh = 20 + 14 + th + 18
-        dc.rect(MX, 935, CW - 260, bh, fill='card', r=14)
-        dc.rect(MX, 935, 5, bh, fill='green')
-        dc.label(MX + 20, 935 + 16, 'LEVE TAMBÉM', 9, 'green2', 'PB', 1.4)
-        dc.text(MX + 20, 935 + 34, tw, html.escape(f['venda'], quote=False), 12.5, 18, 'white')
-    dc.rect(0, H - 56, W, 56, fill='green')
-    dc.label(MX, H - 56 + 13, SITE_IG, 10.5, 'white', 'PB')
-    dc.label(W / 2, H - 56 + 12, f'{pg:02d}', 13, 'white', 'PB', 0, 'center')
-    dc.label(W - MX, H - 56 + 13 + .5, OBS_DISP, 10.5, 'white', 'PB', 0, 'right')
-    w = lw(LEGAL_B, 8.5, 'PB') + lw(LEGAL_R, 8.5, 'PR'); x = W / 2 - w / 2
-    x += dc.label(x, H - 56 + 34, LEGAL_B, 8.5, 'white', 'PB'); dc.label(x, H - 56 + 34, LEGAL_R, 8.5, 'white', 'PR')
-    dc.url(0, H - 56, W / 3, 56, SITE)
-    dc.end()
 
 
 def capa(dc):
@@ -521,7 +481,7 @@ def sumario(dc, entries, pg):
         y += 30
         for e in es:
             dc.label(x + 12, y, e['name'], 11, 'ink', 'PR')
-            dc.label(x + colw - 50, y + 1, f"{e['count']} itens", 8.5, 'sec', 'PR', 0, 'right')
+            dc.label(x + colw - 50, y + 1, f"{e['count']} {plural(e['count'])}", 8.5, 'sec', 'PR', 0, 'right')
             dc.label(x + colw - 8, y, f"{e['pg']:02d}", 11, 'gdark', 'PB', 0, 'right')
             dc.rect(x + 12, y + RH - 4, colw - 20, 1, fill='line2')
             dc.link(x, y - 3, colw, RH, e['key'])
@@ -565,14 +525,14 @@ def pagina_sistema(dc, grupo, key, itens, pg):
     while size > 34 and lw(titulo, size, 'PB', -1) > CW - 40: size -= 2
     dc.label(MX - 2, 276, titulo, size, 'white', 'PB', -1)
     n = sum(f['count'] for f, p, k in itens)
-    dc.label(MX, 276 + size + 22, f"{len(itens)} {'linha' if len(itens) == 1 else 'linhas'} · {n} itens", 14, 'lgrey', 'PM')
+    dc.label(MX, 276 + size + 22, f"{len(itens)} {plural(len(itens), 'linha', 'linhas')} · {n} {plural(n)}", 14, 'lgrey', 'PM')
     y = 470
     for f, p, k in itens:
         dc.rect(MX, y + 30, 400, 1, fill='divider')
         eb = f.get('eyebrow', '').split(' · ')[-1] if ' · ' in f.get('eyebrow', '') else ''
         if eb: dc.label(MX, y - 2, eb.upper(), 7.5, 'green2', 'PB', 1.2)
         dc.label(MX, y + 9, f['name'], 15, 'white', 'PB')
-        dc.label(MX + 340, y + 12, f"{f['count']} itens", 9.5, 'lgrey', 'PR', 0, 'right')
+        dc.label(MX + 340, y + 12, f"{f['count']} {plural(f['count'])}", 9.5, 'lgrey', 'PR', 0, 'right')
         dc.label(MX + 400, y + 9, f'{p:02d}', 15, 'green2', 'PB', 0, 'right')
         dc.link(MX, y - 4, 400, 34, k)
         y += 44
