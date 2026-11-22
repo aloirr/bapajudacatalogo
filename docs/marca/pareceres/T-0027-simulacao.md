@@ -71,3 +71,24 @@ Nenhum achado novo nesta simulação.
 Depois da decisão do PO e da aplicação: conferir no PR as 7 páginas contra esta simulação ("1 item" e "1 / ITEM", no
 mesmo estilo de antes), o `pdfinfo` dos 3 PDFs (título e autor iguais aos do main; o número de páginas não muda: 56,
 311 e 17), a grafia "BAP AUTOPARTS" e que o diff do PR bate com o `diff-gerador.patch`.
+
+## Entrega final (PR #152)
+
+| Campo | Valor |
+|---|---|
+| Data | 22/11/2026 07:36 (Manaus) |
+| Decisão do PO | R-20261122-112104-po: 1a 2a (o Portfólio fica fora, na fila do Alexandre, com a regeração dele e o `plural` num módulo comum) |
+| O que foi visto | O PR #152 (branch `catalogo-grafico/T-0027-entregas`, head `33678a7`, sobre o `ab9b8f0`): o diff do gerador e as 3 entregas, comparadas com as do `ab9b8f0` pelo texto de cada página (`pdftotext`) e pelos metadados (`pdfinfo`). As pranchas em `recados/anexos/T-0027/final/` do aloirr/bapajudacatalogo-recados (commit `24d8bf3`), em especial `completo-p302-zoom.png` |
+| Parecer | **LIBERADO**. Nenhum achado novo |
+
+- **O diff do gerador é o da simulação:** as linhas mudadas do PR são iguais às do `diff-gerador.patch`. O PR muda só
+  os 3 geradores e as 3 entregas; não muda `docs/marca/`.
+- **Texto:** só as 7 páginas da tabela mudam, cada uma numa palavra ("itens" → "item", "ITENS" → "ITEM"). Não sobra
+  nenhum "1 itens" nem "1 ITENS" nos 3 PDFs.
+- **Metadados iguais:** fora as datas e o tamanho do arquivo, o `pdfinfo` dos 3 PDFs é igual ao de antes. Título:
+  `Catálogo BAP 2027 — Impressão A4 (uso interno)`, `— Completo (uso interno)` e `— Linha Moto (uso interno)`. Autor
+  "BAP AUTOPARTS" nos 3. O número de páginas não muda (56, 311 e 17).
+- **Grafia e regras do repositório:** nenhum "BAP AUTO PARTS" nem "BAP Autoparts"; sem preço e sem estoque (busca por
+  "R$" com número, "estoque" e "saldo" nos 3 PDFs: 0); sem marca de terceiros.
+- **Achados:** o MC-0015, o MC-0011 e o MC-0012 seguem abertos, como acima. O "1 itens" do Portfólio fica com o RD novo
+  (pergunta 2a).
