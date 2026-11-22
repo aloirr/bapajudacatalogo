@@ -1,6 +1,6 @@
 # T-0019 · RD-0293 · composição do kit de embreagem uma vez só (simulação)
 
-**Aprovada (opção "a", R-20261122-030552-alexandre):** o A4 (56 páginas) e o Digital (311) foram regerados em `catalogo_grafico/entregas/`, com a p.20 do A4 e as p.2, 87 e 112 do Digital iguais pixel a pixel ao "depois" das pranchas. O Linha Moto ficou como estava (texto e posição iguais).
+**Aprovada (opção "a", R-20261122-030552-alexandre):** o A4 e o Digital foram regerados em `catalogo_grafico/entregas/`, com a p.20 do A4 e as p.2, 87 e 112 do Digital iguais pixel a pixel ao "depois" das pranchas.
 
 Simulação (antes da aprovação): Gerado com `PYTHONHASHSEED=0`, um processo por PDF, numa pasta temporária. **Antes:** o main `409d137` (base v27). **Depois:** o mesmo main com a correção do `detalhe.essencial` (branch `catalogo-grafico/T-0019-rd0293-sim`).
 
@@ -41,7 +41,7 @@ Não mudam: EMB3400700648R e EMB3400700649R (a descrição não cita a composiç
 | Linha Moto | 17 | 17 | nenhuma (texto e posição iguais) |
 
 - **A4 p.20:** os 15 subtítulos ficam mais curtos e cabe mais uma linha na tabela (EMB6635R entra na página). A chamada passa de "Mais 3 itens desta linha no Catálogo Digital Completo / Aplicações também para Volvo, Volkswagen, Ford e Iveco" para "Mais 2 itens ... / Aplicações também para Volkswagen, Ford e Iveco".
-- **Digital p.112:** os 17 itens da família cabem numa página só. A continuação (antiga p.113, com EMB6343R, EMB6635R, EMB6852R e EMB827483R) deixa de existir, e o digital fica com **uma página a menos**. A outra opção (b, abaixo) dá o mesmo: 311.
+- **Digital p.112:** os 17 itens da família cabem numa página só. A continuação (antiga p.113, com EMB6343R, EMB6635R, EMB6852R e EMB827483R) deixa de existir, e o digital fica com **uma página a menos**.
 - **Digital p.113 em diante:** é a antiga p.114 em diante. Conferidas as 199 páginas: texto e posição de cada palavra iguais, só o número da página muda.
 - **Digital p.2 (sumário) e p.87 (abertura da Transmissão):** os números das páginas, da Servo e Cilindro de Embreagem em diante, diminuem 1 (ex.: Servo 114 → 113).
 - Aviso de uso interno em todas as páginas (56 / 311 / 17). Texto sobreposto: nada novo (só o "17 ITENS" do selo da família, igual ao main). Tamanho: A4 13 MB, Digital 5,7 MB e Moto 0,8 MB.

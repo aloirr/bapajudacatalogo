@@ -1,6 +1,7 @@
 """Teste do bloco B dos PDFs (T-0019; aprovado no R-20261121-200058-alexandre): B9 (subtítulo sem repetir a aplicação,
 detalhe._tail), B10 (tag NOVO que desce, digital2.novo_desce) e o "Leve também" pelo sistema (oferta.sis_ok, com a
-tabela e a regra do site: G.SIS_COMPAT e G.sistemas_de do scripts/gerar_site.py). Como rodar: LEIA_GERADOR.md (tabela
+tabela e a regra do site: G.SIS_COMPAT e G.sistemas_de do scripts/gerar_site.py), e a composição do kit de
+embreagem uma vez só (RD-0293, detalhe.ESS_TROCA). Como rodar: LEIA_GERADOR.md (tabela
 de comandos). Lê a base (montar) e monta as famílias (moto)."""
 import unittest
 from unittest import mock
@@ -64,8 +65,8 @@ class RD0293ComposicaoDoKit(unittest.TestCase):
             self.assertNotIn('plato/', r['sub'].lower(), r['code'])
             self.assertLessEqual(r['sub'].count('platô'), 1, r['code'])
 
-    def test_outra_familia_nao_muda(self):
-        self.assertEqual(set(DT.ESS_TROCA), {l for f, _, l in DT.ESSENCIAL if f == 'Embreagem Remanufaturada'})
+    def test_so_a_embreagem_troca(self):
+        self.assertEqual(set(DT.ESS_TROCA), {'Embreagem Remanufaturada'})
 
 
 class B10TagNovo(unittest.TestCase):
