@@ -302,7 +302,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0452 | baixa | teste | servicos/login/login.test.mjs:308 | o `assert.equal(lista.json.length, 7)` repetia o `deepEqual` com a `SETE` logo abaixo (sai) | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
 | RD-0453 | baixa | teste | servicos/login/login.test.mjs:320 e :426 | o MIME esperado escrito 2 vezes (`tipo === 'pptx' ? PPTX_MIME : 'application/pdf'`) (vira a constante `MIME_ESPERADO[tipo]`) | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
 | RD-0454 | baixa | teste | servicos/login/login.test.mjs:395, :400-401 e :403 | o teste "arquivo em falta" repetia o do contrato (o `titulo`, o `par` e o `tipo` do .pptx e o conteúdo do `lubrificantes-pdf`) (fica um `deepEqual` de tipo, grupo e par contra a `SETE`) | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
-| RD-0455 | baixa | código (comentário) | render.yaml:50 | "lê site/ e os 2 PDFs de catalogo_grafico/entregas/" (passa a "lê site/ e os arquivos do admin de catalogo_grafico/entregas/ (lista PDFS do server.mjs)") | T-0024 | alexandre | CORRIGIDO (238a489, no branch do #135, ainda aberto; o main 00c0c7d fica com o texto antigo até o merge) |
+| RD-0455 | baixa | código (comentário) | render.yaml:50 | "lê site/ e os 2 PDFs de catalogo_grafico/entregas/" (passa a "lê site/ e os arquivos do admin de catalogo_grafico/entregas/ (lista PDFS do server.mjs)") | T-0024 | alexandre | CORRIGIDO (238a489; 5c0ddda, #135) |
 | RD-0456 | baixa | código (comentário) | servicos/login/login.test.mjs:35, :341, :366 e :401; títulos dos testes :277 e :409 | "os 7" que sobraram nos comentários e nos títulos de teste (a `SETE` e o comentário da definição, :38, ficam) | T-0024 | integracao-placas | ABERTO (próximo PR do integracao-placas; não segura: só comentário e título de teste) |
 | RD-0457 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
 | RD-0458 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
@@ -339,7 +339,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 
 ### T-0024, manhã de 22/11/2026 (PRs #133 a #138)
 - RD-0448 ao RD-0454: corrigidos no 4d4ffa8 (head do #133; squash 6533b03). O RD-0456 fica ABERTO sem segurar (só comentário e título de teste) e vai no próximo PR do `integracao-placas`; a constante `SETE` e o comentário da definição ficam (MANTIDO, sem número).
-- RD-0455: corrigido no 238a489, no branch do #135 (governança, `render.yaml`), que ainda está aberto. Até o merge, o main 00c0c7d segue com "os 2 PDFs" na linha 50.
+- RD-0455: corrigido no 238a489, no branch do #135 (governança, `render.yaml`; squash 5c0ddda, autorização R-20261122-093357-po).
 - RD-0457 ao RD-0469: número não usado (reserva de numeração).
 - RD-0470 ao RD-0474: corrigidos no d348fff (head do #136; squash 80e952a).
 - RD-0475 ao RD-0478: corrigidos no e829881 (head do #137; squash 19ad5a2).
