@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 02:15 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 02:41 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -29,7 +29,7 @@ Atualizado em 22/11/2026 02:15 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0023](tarefas/T-0023.md) | Grafia "BAP AUTOPARTS" no gerador do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | NOVA | — |
 
 ## Fila
-Main d900add (#121).
+Main 641b5d9 (#123).
 
 1. **T-0022, governança parte 2 (PO, pelo Alexandre):** fase A no PR #120 (revisor e corretor, R-20261122-055354); depois o teste do Alexandre no ar e a fase B (redirecionamento, placa e CLAUDE.md).
 2. **T-0023, grafia "BAP AUTOPARTS" no gerador (catalogo-grafico, com simulação):** depois da fase A da T-0022 (R-20261122-061514).
