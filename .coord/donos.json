@@ -116,6 +116,10 @@
       "dono": "integracao-placas"
     },
     {
+      "padrao": "servicos/login/**",
+      "dono": "integracao-placas"
+    },
+    {
       "padrao": "docs/placas/**",
       "dono": "integracao-placas"
     },
