@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0448**.
+O próximo número livre é o **RD-0487**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -295,8 +295,58 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0445 | baixa | doc | README.md:65 e .coord/tarefas/T-0022.md:85 | a "decisão do Alexandre" sobre o repositório privado repetia o Registro das 03:36 (o README passa a "o repositório vai ficar **privado**; até a troca, ele está **público** (…)") | T-0022 | gerente-projetos | CORRIGIDO (e66b8db; 942cf1c, #131) |
 | RD-0446 | baixa | doc | README.md:65 | "nada de segredo nem de dado interno novo no Git" repetia a regra da linha 67 e parecia provisória (passa a "nada de dado interno novo no Git") | T-0022 | gerente-projetos | CORRIGIDO (d7c8e82; 942cf1c, #131) |
 | RD-0447 | baixa | tarefa | .coord/tarefas/T-0024.md:13 | o Pedido dizia "~04:00" e o Registro "~03:57" para o mesmo R-20261122-075711 (passa a "~03:57") | T-0024 | gerente-projetos | CORRIGIDO (d7c8e82; 942cf1c, #131) |
+| RD-0448 | média | teste | servicos/login/login.test.mjs:343 | os nomes dos 7 entravam 2 vezes na lista do "só a lista fixa abre", crus e com `encodeURIComponent` (o id é que vale; fica só o nome cru) | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
+| RD-0449 | média | doc | servicos/login/LEIA.md:41-49 e :58 | a tabela dos 7 (id, título, regex, tipo, grupo e par) e os 2 MIME repetiam a `PDFS` e o `TIPO_MIME` do `server.mjs` (passa a "Lista **fixa** `PDFS` no `server.mjs` (id, título, arquivo por regex ancorada, tipo, grupo e par)" e "`Content-Type` pelo `tipo` da lista (`TIPO_MIME` no `server.mjs`)") | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
+| RD-0450 | baixa | doc | servicos/login/LEIA.md:3, :33, :51, :54, :60 e :68 | a contagem "7" ("os 7 arquivos", "Os 3 catálogos […] Os outros 4", "devolve sempre os 7") e o "quem protege é a lista fixa", que repetia o "só sai o da lista" (passam a "os arquivos da lista fixa", "Nome com ano: […] Nome sem ano: o nome exato." e "devolve sempre a lista inteira"; sai o "quem protege") | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
+| RD-0451 | baixa | código (comentário) | servicos/login/server.mjs:3, :5, :86, :88 e :707; login.test.mjs:423 | "os 7 arquivos", a regra do ano e a do arquivo em falta, que o `LEIA.md` já diz; o "HEAD: confere o tipo e o tamanho" (passa a "o tipo e o nome") | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
+| RD-0452 | baixa | teste | servicos/login/login.test.mjs:308 | o `assert.equal(lista.json.length, 7)` repetia o `deepEqual` com a `SETE` logo abaixo (sai) | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
+| RD-0453 | baixa | teste | servicos/login/login.test.mjs:320 e :426 | o MIME esperado escrito 2 vezes (`tipo === 'pptx' ? PPTX_MIME : 'application/pdf'`) (vira a constante `MIME_ESPERADO[tipo]`) | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
+| RD-0454 | baixa | teste | servicos/login/login.test.mjs:395, :400-401 e :403 | o teste "arquivo em falta" repetia o do contrato (o `titulo`, o `par` e o `tipo` do .pptx e o conteúdo do `lubrificantes-pdf`) (fica um `deepEqual` de tipo, grupo e par contra a `SETE`) | T-0024 | integracao-placas | CORRIGIDO (4d4ffa8; 6533b03, #133) |
+| RD-0455 | baixa | código (comentário) | render.yaml:50 | "lê site/ e os 2 PDFs de catalogo_grafico/entregas/" (passa a "lê site/ e os arquivos do admin de catalogo_grafico/entregas/ (lista PDFS do server.mjs)") | T-0024 | alexandre | CORRIGIDO (238a489, no branch do #135, ainda aberto; o main 00c0c7d fica com o texto antigo até o merge) |
+| RD-0456 | baixa | código (comentário) | servicos/login/login.test.mjs:35, :341, :366 e :401; títulos dos testes :277 e :409 | "os 7" que sobraram nos comentários e nos títulos de teste (a `SETE` e o comentário da definição, :38, ficam) | T-0024 | integracao-placas | ABERTO (próximo PR do integracao-placas; não segura: só comentário e título de teste) |
+| RD-0457 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0458 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0459 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0460 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0461 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0462 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0463 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0464 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0465 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0466 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0467 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0468 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0469 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0470 | baixa | doc | docs/ux/pareceres/T-0024-simulacao.md:61 e :68 | "Os prints da B […] entram na simulação" e "A simulação deve mostrar o nome proposto.": pedidos à simulação que a v2 já cumpriu (saem) | T-0024 | designer-ux | CORRIGIDO (d348fff; 80e952a, #136) |
+| RD-0471 | baixa | doc | docs/ux/pareceres/T-0024-simulacao.md:103 e :107 | os 48 px de altura do par nas "Medidas" e de novo em "O toque" (o "acima dos 44 px" vai para as Medidas; sai "O toque") | T-0024 | designer-ux | CORRIGIDO (d348fff; 80e952a, #136) |
+| RD-0472 | baixa | doc | docs/ux/pareceres/T-0024-simulacao.md:105 e :112 | onde o par desce, dito 2 vezes ("Em 1100 px, o segundo desce" e "de 1024 a 1199 px e no tablet") (vira um item só, medido de 1 em 1 px: "de 641 a 792 px […] e de 1024 a 1181 px") | T-0024 | designer-ux | CORRIGIDO (d348fff; 80e952a, #136) |
+| RD-0473 | baixa | doc | docs/ux/pareceres/T-0024-simulacao.md:100 | "segue o modelo da Linha Moto. A troca vai ao Alexandre como mudança, junto com a pergunta do `design-de-marca`" repetia o parecer de marca (passa a "a do MC-0013 (ver o parecer de marca)") | T-0024 | designer-ux | CORRIGIDO (d348fff; 80e952a, #136) |
+| RD-0474 | média | doc | docs/ux/pareceres/T-0024-pagina.md:22-28 | os 6 textos de estado, copiados do parecer da simulação (passa a "usam os textos do parecer da simulação (§3 e item 5), palavra por palavra") | T-0024 | designer-ux | CORRIGIDO (d348fff; 80e952a, #136) |
+| RD-0475 | baixa | doc | docs/marca/pareceres/T-0024-simulacao.md:95-99 | a lista dos ajustes da v2 (nome, cartão do par, sem "Tipo", grupos sem contador) repetia o parecer de UX (passa a "(ver o parecer de UX, "Reteste da v2")") | T-0024 | design-de-marca | CORRIGIDO (e829881; 19ad5a2, #137) |
+| RD-0476 | baixa | doc | docs/marca/pareceres/T-0024-simulacao.md:128-132 | os 3 textos de estado, que são do `designer-ux` (passa a "Os textos de estado são do `designer-ux` (§3 do parecer de UX).") | T-0024 | design-de-marca | CORRIGIDO (e829881; 19ad5a2, #137) |
+| RD-0477 | baixa | doc | docs/marca/pareceres/T-0024-simulacao.md:155-159 | o botão desabilitado, o erro e as medidas da tipografia, já ditos na simulação e no parecer de UX (passa a "**Tipografia:** só Poppins, nas medidas da v2.") | T-0024 | design-de-marca | CORRIGIDO (e829881; 19ad5a2, #137) |
+| RD-0478 | baixa | doc | docs/marca/pareceres/T-0024-simulacao.md:135 e :174 | "o MC-0011 e o MC-0012 continuam na T-0025", 2 vezes, além da seção dos materiais (:87) (fica "Nenhum achado novo.") | T-0024 | design-de-marca | CORRIGIDO (e829881; 19ad5a2, #137) |
+| RD-0479 | baixa | código | site/admin/admin.css:102 e :106 | o `margin-top: 0` do `.pdf .pdf-bts .bt` e o `.pdf-bts { flex-direction: column }` do celular, sem efeito (saem; as caixas dos botões ficam iguais em 1366, 1100, 800 e 390 px) | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
+| RD-0480 | baixa | código | site/admin/pdfs/pdfs.js:24 e :31 | o `disponivel` e o `tamanho()` tratavam um campo `disponivel` e o tamanho em texto, fora do contrato (o `disponivel` olha só o tamanho; sai o texto pronto) | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
+| RD-0481 | baixa | código (comentário) | site/admin/admin.css:97-100 | "valem o padding e o texto do .bt-mini" (passa a "o texto de 14 px do .bt-mini, com o padding de 12 px e a altura de 48 px do .bt") | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
+| RD-0482 | baixa | código (comentário) | site/admin/pdfs/pdfs.js:3 | o contrato da `GET /api/pdfs` copiado do `LEIA.md` (passa a "Contrato: GET /api/pdfs no servicos/login/LEIA.md.") | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
+| RD-0483 | manter? | código | site/admin/pdfs/pdfs.js:12-19 (`USO`) × servicos/login/server.mjs:90 (`PDFS`) | as chaves dos cartões (o id ou o par) nas 2 listas | T-0024 | web-site; integracao-placas | MANTIDO (a frase de uso é texto de tela, do `web-site`; a lista fixa é do serviço; sem a chave, a frase só não aparece) |
+| RD-0484 | manter? | layout | Catálogos e materiais, cartão Lubrificantes (1366 e 390 px) | o tipo em 4 lugares: a frase de uso, a extensão "(.pdf e .pptx)", o tamanho "PDF 6,6 MB · PowerPoint 7,3 MB" e os botões "Baixar PDF" e "Baixar PowerPoint" | T-0024 | web-site | MANTIDO (no par, cada lugar diz de qual arquivo é o dado ou a ação; a linha "Tipo" já saiu na v2) |
+| RD-0485 | média | teste | testes/login.mjs, `ARQS` (:39-50), GET /api/pdfs (:321-328) e HEAD de cada id (:335-345) | a ordem dos ids da API, o Content-Type e o arquivo mais novo de `entregas/` repetiam o `login.test.mjs` ("entregas/ de verdade…" e "arquivo em falta…") (o `ARQS` vira a lista `IDS`; fica só o link de cada id na tela) | T-0024 | testes | CORRIGIDO (4595275; 00c0c7d, #138) |
+| RD-0486 | baixa | teste | testes/login.mjs:155 e :173 | os 7 ids no passe sem cookie, que passam pela mesma trava de sessão (voltam os 2 PDFs de antes) | T-0024 | testes | CORRIGIDO (4595275; 00c0c7d, #138) |
 
 ## Notas
+
+### T-0024, manhã de 22/11/2026 (PRs #133 a #138)
+- RD-0448 ao RD-0454: corrigidos no 4d4ffa8 (head do #133; squash 6533b03). O RD-0456 fica ABERTO sem segurar (só comentário e título de teste) e vai no próximo PR do `integracao-placas`; a constante `SETE` e o comentário da definição ficam (MANTIDO, sem número).
+- RD-0455: corrigido no 238a489, no branch do #135 (governança, `render.yaml`), que ainda está aberto. Até o merge, o main 00c0c7d segue com "os 2 PDFs" na linha 50.
+- RD-0457 ao RD-0469: número não usado (reserva de numeração).
+- RD-0470 ao RD-0474: corrigidos no d348fff (head do #136; squash 80e952a).
+- RD-0475 ao RD-0478: corrigidos no e829881 (head do #137; squash 19ad5a2).
+- RD-0479 ao RD-0482: corrigidos no b3fde04 (head do #134; squash 15ff9df). O RD-0483 e o RD-0484 saíram como `manter?` e ficam MANTIDOS.
+- RD-0485 e RD-0486: corrigidos no 4595275; o head do #138 é o b0f77b6 (o 4595275 mais o merge do main com o #133 e o #134; squash 00c0c7d).
+- [SUPOSIÇÃO] As linhas citadas são as do parecer, conferidas no arquivo anterior ao commit de correção; algumas mudaram com a correção. Os textos de cada linha vêm do diff da correção, e os motivos do RD-0483 e do RD-0484, da decisão passada pelo gerente.
+- Relatório: `T-0024.md`.
 
 ### T-0022 a T-0025, madrugada de 22/11/2026 (PRs #126 a #131)
 - RD-0415 ao RD-0417: corrigidos no acc8432 (head do #126, governança, parte 2, fase B; squash 548ce73).
