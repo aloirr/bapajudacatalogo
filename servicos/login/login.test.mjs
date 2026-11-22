@@ -507,6 +507,7 @@ test('/interno/codigos: só com a chave interna, e só os códigos', async () =>
   assert.equal((await s.pedir('/interno/codigos')).status, 401);
   assert.equal((await s.pedir('/interno/codigos', { headers: { 'X-Chave-Interna': 'errada' } })).status, 401);
   assert.equal((await s.pedir('/interno/codigos', { headers: { 'X-Chave-Interna': '' } })).status, 401);
+  assert.equal((await s.pedir('/interno/codigos', { headers: { 'X-Chave-Interna': CHAVE_INTERNA.slice(0, -1) } })).status, 401, 'chave quase certa');
   const adm = await adminPronto(s);
   assert.equal((await s.pedir('/interno/codigos', { cookie: adm })).status, 401, 'sessão não substitui a chave');
   const r = await s.pedir('/interno/codigos', { headers: { 'X-Chave-Interna': CHAVE_INTERNA } });
@@ -533,6 +534,16 @@ test('sem ADMIN_SENHA_INICIAL e sem usuários (ou sem segredo/pasta): 503, menos
     assert.equal((await s.pedir('/saude')).status, 200, rotulo);
     assert.match(s.logs.join('\n'), /fechado: /, rotulo);
   }
+});
+
+test('serviço fechado com a chave certa: /interno/codigos segue 200; com a chave errada, 401', async () => {
+  // Fechado (sem ADMIN_SENHA_INICIAL e sem usuários): a placa não pode perder a lista do /contar.
+  const s = await subir({ env: { ADMIN_SENHA_INICIAL: undefined } });
+  assert.equal((await s.pedir('/api/eu')).status, 503, 'está fechado');
+  const r = await s.pedir('/interno/codigos', { headers: { 'X-Chave-Interna': CHAVE_INTERNA } });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.json, { total: 3, codigos: ['AMT7183', 'ROL3204-2RS', 'CXD13062'] });
+  assert.equal((await s.pedir('/interno/codigos', { headers: { 'X-Chave-Interna': falsa('chave-errada') } })).status, 401, 'fechado não abre sem a chave certa');
 });
 
 test('usuarios.json: só hash scrypt, arquivo 0600, sobrevive ao reinício; a senha inicial nova é ignorada', async () => {

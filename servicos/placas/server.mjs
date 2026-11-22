@@ -53,8 +53,9 @@ export function fonteDoCatalogo(env = process.env) {
       return { url: u.href, headers: { 'X-Chave-Interna': chaveInterna } };
     } catch { return { url: null }; }
   }
+  // Só nos testes: um catálogo falso (CATALOGO_URL_TESTE).
   if (env.NODE_ENV === 'test' && env.CATALOGO_URL_TESTE) return { url: env.CATALOGO_URL_TESTE };
-  try { return { url: new URL('/data/produtos.json', env.ORIGEM_PERMITIDA).href }; } catch { return { url: null }; }
+  return { url: null };
 }
 const catalogo = criarCatalogo({ ...fonteDoCatalogo(), log });
 

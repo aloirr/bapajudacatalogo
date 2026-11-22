@@ -14,7 +14,7 @@ const RENOVAR_MS = 6 * 60 * 60 * 1000;  // lê a lista de códigos de novo a cad
 const TENTAR_DE_NOVO_MS = 60 * 1000;    // se a leitura falhou, tenta em 1 min
 const ESPERA_GRAVAR_MS = 5000;          // junta as aberturas antes de gravar
 const CODIGO_MAX = 40;
-const CATALOGO_MAX = 32 * 1024 * 1024;  // o produtos.json tem uns 3 MB
+const CATALOGO_MAX = 32 * 1024 * 1024;  // teto do corpo da lista de códigos (/interno/codigos)
 const RE_ARQ = /^(\d{4}-\d{2}-\d{2})\.json$/;
 const RE_TMP = /^\d{4}-\d{2}-\d{2}\.json\.tmp$/;
 
@@ -146,7 +146,7 @@ export function criarContador({ pasta = null, log = () => {} } = {}) {
 }
 
 // ---------- lista de códigos do catálogo ----------
-// Lida do produtos.json PUBLICADO ({produtos:[{c}]}) ou do /interno/codigos do login ({codigos:[...]}, T-0022).
+// Lida do /interno/codigos do login ({codigos:[...]}, T-0022); nos testes, de um catálogo falso no mesmo formato.
 // Motivo: README, "Lista de códigos do catálogo". headers leva a chave interna; nunca vai para o log.
 export function criarCatalogo({ url, headers = {}, log = () => {} }) {
   let codigos = null;
@@ -175,9 +175,7 @@ export function criarCatalogo({ url, headers = {}, log = () => {} }) {
       const t = await lerAte(res);
       if (t === null) return false;
       const j = JSON.parse(t);
-      const lista = !j ? null
-        : Array.isArray(j.codigos) ? j.codigos
-          : Array.isArray(j.produtos) ? j.produtos.map((p) => p && p.c) : null;
+      const lista = j && Array.isArray(j.codigos) ? j.codigos : null;
       if (!lista) return false;
       const s = new Set();
       for (const v of lista) {
