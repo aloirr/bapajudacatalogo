@@ -11,6 +11,14 @@
                              esse arquivo em data/produtos.json). Serve para as provas com cópia temporária.
      --prints <pasta>        onde gravar os prints (padrão: testes/prints/ultima).
      --sem-navegador         só os testes do JSON (palavra interna, AUTOIMPACT, campos, total), sem abrir o Chromium.
+     --login                 (T-0022) o site atrás do login: sobe node servicos/login/server.mjs numa porta livre, com uma
+                             PASTA_DADOS temporária e valores claramente falsos gerados na hora (nunca impressos); roda os
+                             testes do login (testes/login.mjs: sem login fecha tudo, sessão de 5 h com o relógio
+                             adiantado, usuário comum sem as telas do admin, link #/produto/X depois do login, "volta"
+                             segura, etiqueta "Falta trocar a senha inicial", console sem erro e sem 403, prints) e depois
+                             as buscas de sempre, entrando pela tela como o usuário comum criado pelo admin.
+                             Sem --login: o servidor estático de site/ de sempre (é o que o CI usa).
+     --comparar <arquivo>    o produtos.json tem de ser igual a este (ex.: o do main), fora o "gerado_em".
 
    O que testa: palavra interna no JSON (a SUNRISE também); a AUTOIMPACT só na marca da referência cruzada; campos e total do JSON; servidor estático de site/ numa porta livre;
    a busca de um campo só (q) da T-0011, palavra por palavra: código (exato em 1º, com e sem espaço ou hífen),
@@ -48,7 +56,7 @@ import { createServer } from "node:http";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url); // o Playwright do ambiente está no NODE_PATH (só o require o enxerga)
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -58,7 +66,7 @@ const PRINTS_PADRAO = path.join(RAIZ, "testes", "prints", "ultima");
 // ---------- opções ----------
 const erroUso = (msg) => Object.assign(new Error(msg), { uso: true }); // erro de uso: sai sem a pilha
 function lerOpcoes(argv) {
-  const o = { conhecidos: "", json: "", prints: PRINTS_PADRAO, semNavegador: false };
+  const o = { conhecidos: "", json: "", prints: PRINTS_PADRAO, semNavegador: false, login: false, comparar: "" };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const valor = () => {
@@ -70,6 +78,8 @@ function lerOpcoes(argv) {
     else if (a === "--json") o.json = valor();
     else if (a === "--prints") o.prints = valor();
     else if (a === "--sem-navegador") o.semNavegador = true;
+    else if (a === "--login") o.login = true;
+    else if (a === "--comparar") o.comparar = valor();
     else if (a === "-h" || a === "--help") { console.log(fs.readFileSync(fileURLToPath(import.meta.url), "utf8").split("*/")[0]); process.exit(0); }
     else throw erroUso(`opção desconhecida: ${a}`);
   }
@@ -352,12 +362,12 @@ function testarJson(arqJson) {
 }
 
 // ---------- 2. o site no navegador ----------
-async function testarSite(base, ctxJson, dirPrints) {
+// entrar (T-0022, --login): async (page) => void, chamado em cada largura antes da 1ª tela, para o site atrás do login
+async function testarSite(base, ctxJson, dirPrints, entrar = null) {
   const { chromium } = require("playwright");
   const { prods, porCod } = ctxJson;
   const existe = (c) => porCod.has(normCod(c));
-  fs.mkdirSync(dirPrints, { recursive: true });
-  if (path.resolve(dirPrints) === PRINTS_PADRAO) for (const f of fs.readdirSync(dirPrints)) if (f.endsWith(".png")) fs.rmSync(path.join(dirPrints, f));
+  fs.mkdirSync(dirPrints, { recursive: true }); // os *.png antigos de testes/prints/ultima saem no main(), antes do --login
 
   // casos tirados do JSON do dia; se um sumir, o teste diz qual
   const COD = "CXD13062";
@@ -482,6 +492,7 @@ async function testarSite(base, ctxJson, dirPrints) {
       const totalTela = () => page.evaluate(() => parseInt(((document.querySelector(".total") || {}).textContent || "").replace(/\D/g, ""), 10) || 0);
 
       // ---- início ----
+      if (entrar) await entrar(page); // --login: entra pela tela (o cookie da sessão fica no contexto)
       erros = [];
       await page.goto(base + "#/", { waitUntil: "networkidle" });
       await page.waitForFunction(() => !document.getElementById("carregando"), null, { timeout: 15000 }).catch(() => {});
@@ -1468,6 +1479,24 @@ async function testarSite(base, ctxJson, dirPrints) {
   detalhe("rota-antiga", "link antigo redireciona", "#/busca?cod= e #/busca?mo=&modelo=&ano= viram #/busca?q=");
 }
 
+// ---------- igual ao de referência, fora o gerado_em (T-0022: o login não muda o produtos.json) ----------
+function compararJson(arqJson, arqRef) {
+  const N = "JSON igual ao de referência";
+  let a, b;
+  try { a = JSON.parse(fs.readFileSync(arqJson, "utf8")); b = JSON.parse(fs.readFileSync(arqRef, "utf8")); }
+  catch (e) { falha("comparar", N, "leitura", `não li os 2 JSON: ${e.message}`); return; }
+  delete a.gerado_em; delete b.gerado_em;
+  const ka = Object.keys(a).sort().join(","), kb = Object.keys(b).sort().join(",");
+  if (ka !== kb) falha("comparar", N, "chaves", `chaves do JSON diferentes: ${cortar(ka)} × ${cortar(kb)}`);
+  for (const k of Object.keys(b)) if (k !== "produtos" && JSON.stringify(a[k]) !== JSON.stringify(b[k])) falha("comparar", N, "campo:" + k, `"${k}" mudou`);
+  const pa = a.produtos || [], pb = b.produtos || [];
+  if (pa.length !== pb.length) falha("comparar", N, "total", `${fmt(pa.length)} produtos × ${fmt(pb.length)} no de referência`);
+  const dif = [];
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) if (JSON.stringify(pa[i]) !== JSON.stringify(pb[i])) dif.push((pa[i] || pb[i] || {}).c || "#" + i);
+  if (dif.length) falha("comparar", N, "produtos", `${dif.length} produto(s) diferente(s): ${cortar(dif.slice(0, 10).join(", "), 120)}`);
+  detalhe("comparar", N, `igual a ${path.relative(RAIZ, arqRef).startsWith("..") ? arqRef : path.relative(RAIZ, arqRef)}, fora o gerado_em (${fmt(pb.length)} produtos)`);
+}
+
 // ---------- conhecidos ----------
 function lerConhecidos(arq) {
   if (!arq) return [];
@@ -1480,7 +1509,7 @@ function lerConhecidos(arq) {
 
 // ---------- resumo ----------
 function resumo(conhecidos, opcoes) {
-  const linhas = [`Testes T-0002 · ${agoraManaus()} (Manaus)` + (opcoes.json ? ` · JSON: ${opcoes.json}` : "")];
+  const linhas = [`Testes T-0002${opcoes.login ? " e T-0022 (com login)" : ""} · ${agoraManaus()} (Manaus)` + (opcoes.json ? ` · JSON: ${opcoes.json}` : "")];
   let novas = 0, conh = 0;
   const usados = new Set();
   const detalhes = [];
@@ -1543,9 +1572,22 @@ async function main() {
     if (!fs.statSync(opcoes.prints).isDirectory() || fs.readdirSync(opcoes.prints).length)
       throw erroUso(`--prints ${opcoes.prints}: a pasta já existe e não está vazia. Use testes/prints/ultima, uma pasta nova ou uma vazia (o teste não apaga nada fora de testes/prints/ultima).`);
   }
+  if (opcoes.login && opcoes.json) throw erroUso("--login não combina com --json (o serviço de login serve o site/data/produtos.json de verdade)");
+  if (opcoes.login && opcoes.semNavegador) throw erroUso("--login precisa do navegador (sem --sem-navegador)");
   const arqJson = opcoes.json || path.join(SITE, "data", "produtos.json");
   const ctxJson = testarJson(arqJson);
-  if (ctxJson && !opcoes.semNavegador) {
+  if (opcoes.comparar) compararJson(arqJson, opcoes.comparar);
+  if (ctxJson && !opcoes.semNavegador && path.resolve(opcoes.prints) === PRINTS_PADRAO && fs.existsSync(PRINTS_PADRAO))
+    for (const f of fs.readdirSync(PRINTS_PADRAO)) if (f.endsWith(".png")) fs.rmSync(path.join(PRINTS_PADRAO, f));
+  if (ctxJson && !opcoes.semNavegador && opcoes.login) {
+    const { subirLogin, testarLogin, entrarParaBuscas } = await import(pathToFileURL(path.join(RAIZ, "testes", "login.mjs")).href);
+    const srv = await subirLogin(RAIZ);
+    fs.mkdirSync(opcoes.prints, { recursive: true });
+    try {
+      const comum = await testarLogin({ raiz: RAIZ, srv, dirPrints: opcoes.prints, prods: ctxJson.prods, reg: { teste, falha, aviso, detalhe } });
+      await testarSite(srv.base, ctxJson, opcoes.prints, (page) => entrarParaBuscas(page, srv.base, comum.usuario, comum.senha));
+    } finally { await srv.parar(); }
+  } else if (ctxJson && !opcoes.semNavegador) {
     const srv = await subirServidor(opcoes.json);
     const base = `http://127.0.0.1:${srv.address().port}/`;
     try { await testarSite(base, ctxJson, opcoes.prints); }
