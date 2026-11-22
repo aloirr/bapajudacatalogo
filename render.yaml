@@ -63,6 +63,11 @@ services:
         - servicos/login/**
         - catalogo_grafico/entregas/Catalogo_BAP_*_Completo_Digital.pdf
         - catalogo_grafico/entregas/Catalogo_BAP_*_A4_grafica.pdf
+        - catalogo_grafico/entregas/Catalogo_BAP_*_Linha_Moto.pdf
+        - catalogo_grafico/entregas/Portfolio_Produtos_BAP_AUTOPARTS.pdf
+        - catalogo_grafico/entregas/BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pdf
+        - catalogo_grafico/entregas/BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pptx
+        - catalogo_grafico/entregas/Kit_Filtros_BAP.pdf
     disk:
       name: login-usuarios
       mountPath: /var/data
