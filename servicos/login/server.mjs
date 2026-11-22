@@ -754,11 +754,8 @@ export async function criarServico(opcoes = {}) {
       if (rota === '/api/eu') {
         p.nome = 'eu';
         if (req.method !== 'GET') return metodoErrado(res, 'GET');
-        const u = s.u;
-        return json(res, 200, {
-          usuario: s.nome, nome: u.nome, empresa: u.empresa, admin: u.admin === true, temLogo: Boolean(u.logo),
-          trocarSenha: u.trocarSenha === true, expiraEm: new Date(s.e).toISOString(),
-        });
+        const { ativo, ultimoAcesso, ...eu } = publico(s.nome, s.u);
+        return json(res, 200, { ...eu, expiraEm: new Date(s.e).toISOString() });
       }
       if (rota === '/api/trocar-senha') {
         p.nome = 'trocar-senha';
