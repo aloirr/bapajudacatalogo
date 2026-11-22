@@ -303,7 +303,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - RD-0418 ao RD-0421: corrigidos no d3ebb65 (head do #127; squash d49fc95).
 - RD-0422 ao RD-0424: número não usado (reserva de numeração).
 - RD-0425 ao RD-0427 e RD-0433: corrigidos no 4a86467 (head do #128; squash bbf29ad). As entregas não mudam.
-- RD-0428 ao RD-0432: ficam ABERTOS sem segurar o #128 (R-20261122-080833-po, opção a). Vão para uma tarefa própria, com simulação ao Alexandre, depois da T-0024, junto com o MC-0011, o MC-0012 e o título da Linha Moto. O RD-0429 ao RD-0432 já estavam lá antes da T-0023.
+- RD-0428 ao RD-0432: ficam ABERTOS sem segurar o #128 (R-20261122-080833-po, opção a). Vão para a T-0025, com simulação ao Alexandre, depois da T-0024, junto com o MC-0011 e o título da Linha Moto (o MC-0012 só se o PO confirmar; o parecer de marca o leva ao manual "a aprovar"). O RD-0429 ao RD-0432 já estavam lá antes da T-0023.
 - RD-0434 ao RD-0436: corrigidos no 363281d (head do #129; squash d34694f).
 - RD-0437 ao RD-0440: corrigidos no ce29e41; RD-0441, no c09f6e7 (heads do #130; squash d856f9b).
 - RD-0442 ao RD-0447: registro do gerente (PR #131). O RD-0442 ao RD-0445 foram corrigidos no e66b8db e o RD-0446 e o RD-0447, no d7c8e82; o squash entra depois.
