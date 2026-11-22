@@ -1,8 +1,8 @@
-// Serviço de login do catálogo (T-0022). Node 20+, sem dependências.
+// Serviço de login do catálogo (T-0022, T-0024). Node 20+, sem dependências.
 // Serve o site/ inteiro atrás de login (sessão de 5 h a partir do login), mais a
-// API das telas (contrato T-0022), os 7 arquivos do admin (T-0024) e /interno/codigos para a placa.
+// API das telas (contrato T-0022), os arquivos do admin (T-0024) e /interno/codigos para a placa.
 // Regras: senha só com hash scrypt; o log nunca leva senha, hash, cookie, segredo,
-// chave, usuário, caminho pedido nem IP. Fora de site/ só saem os 7 arquivos da lista.
+// chave, usuário, caminho pedido nem IP. Fora de site/ só saem os arquivos da lista.
 import http from 'node:http';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -83,9 +83,8 @@ const TIPOS = {
 const COMPRIMIR = new Set(['.html', '.css', '.js', '.json']);
 const LONGO = new Set(['.png', '.jpg', '.webp']);
 
-// Arquivos do admin (T-0024): lista FIXA de 7, só de catalogo_grafico/entregas/, na ordem da tela.
+// Arquivos do admin (T-0024): lista FIXA, só de catalogo_grafico/entregas/, na ordem da tela.
 // O navegador só manda o id; o nome do arquivo nunca vem do pedido. Regex ancorada, sem "/" nem curinga.
-// Os 3 catálogos têm o ano no nome: vale o de ano mais alto. Os outros 4 têm o nome exato.
 // [SUPOSIÇÃO] O catalogo-grafico mantém esses nomes; se o ano entrar no nome, a regex ganha o (\d{4}).
 // "par": os itens com o mesmo par viram um cartão só na tela (o 1º é o principal).
 const PDFS = [
@@ -704,7 +703,6 @@ export async function criarServico(opcoes = {}) {
     for (const item of PDFS) {
       const a = await acharPdf(item);
       // [SUPOSIÇÃO] "data" é a data do arquivo no disco: no Render, a do deploy.
-      // Arquivo em falta: continua na lista, com arquivo, tamanho e data null.
       lista.push({
         id: item.id, titulo: item.titulo, grupo: item.grupo, tipo: item.tipo, par: item.par ?? null,
         arquivo: a ? a.nome : null, tamanho: a ? a.st.size : null, data: a ? new Date(a.st.mtimeMs).toISOString() : null,

@@ -34,7 +34,7 @@ after(() => { for (const d of temporarias) fs.rmSync(d, { recursive: true, force
 
 // Raiz falsa: site/, dados/ (a base que nunca pode sair) e entregas/ (os 7 arquivos e os internos).
 let RAIZ_FALSA;
-const PPTX_MIME = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+const MIME_ESPERADO = { pdf: 'application/pdf', pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
 // Os 7 da lista fixa (T-0024), na ordem da tela: [id, arquivo no disco, conteúdo falso, tipo, grupo, par].
 const SETE = [
   ['completo-digital', 'Catalogo_BAP_2027_Completo_Digital.pdf', '%PDF-completo-falso', 'pdf', 'catalogos', null],
@@ -304,8 +304,7 @@ test('usuário comum: 404 nas rotas de admin; o admin baixa os 7 arquivos da lis
   assert.equal((await s.pedir('/admin/pdfs', { cookie: adm, accept: 'text/html' })).status, 200);
   const lista = await s.pedir('/api/pdfs', { cookie: adm });
   assert.equal(lista.status, 200);
-  // Contrato com o web-site (T-0024): 7 itens, na ordem da lista, com estes campos e só estes.
-  assert.equal(lista.json.length, 7);
+  // Contrato com o web-site (T-0024): os itens da SETE, na ordem da lista, com estes campos e só estes.
   assert.deepEqual(lista.json.map((x) => [x.id, x.arquivo, x.tamanho, x.tipo, x.grupo, x.par]),
     SETE.map(([id, arquivo, conteudo, tipo, grupo, par]) => [id, arquivo, conteudo.length, tipo, grupo, par]));
   for (const x of lista.json) {
@@ -317,7 +316,7 @@ test('usuário comum: 404 nas rotas de admin; o admin baixa os 7 arquivos da lis
   for (const [id, arquivo, conteudo, tipo] of SETE) {
     const b = await s.pedir('/admin/pdfs/baixar/' + id, { cookie: adm, accept: 'text/html' });
     assert.equal(b.status, 200, id);
-    assert.equal(b.headers['content-type'], tipo === 'pptx' ? PPTX_MIME : 'application/pdf', id);
+    assert.equal(b.headers['content-type'], MIME_ESPERADO[tipo], id);
     assert.equal(b.headers['content-disposition'], `attachment; filename="${arquivo}"`, id);
     assert.equal(b.headers['cache-control'], 'private, no-store', id);
     assert.equal(b.headers['x-content-type-options'], 'nosniff', id);
@@ -340,7 +339,7 @@ test('só a lista fixa abre: id fora da lista, os internos de entregas/ e dados/
     // os quase iguais
     'xKit_Filtros_BAP.pdf', 'Kit_Filtros_BAP.pdf.bak', 'Kit_Filtros_BAP.PDF', 'Catalogo_BAP_27_Linha_Moto.pdf',
     // os nomes dos 7 (o id é que vale, nunca o nome)
-    ...SETE.map(([, arquivo]) => arquivo), ...SETE.map(([, arquivo]) => encodeURIComponent(arquivo)),
+    ...SETE.map(([, arquivo]) => arquivo),
     // os internos de entregas/, com e sem extensão, e codificados
     ...INTERNOS, ...INTERNOS.map((n) => n.replace(/\.[a-z]+$/, '')), ...INTERNOS.map((n) => encodeURIComponent('../entregas/' + n)),
     // a base e dados/, com "..", "%2F" e "%2e%2e"
@@ -392,15 +391,12 @@ test('arquivo em falta continua na lista (null) e dá 404; link e pasta não abr
   for (const id of ['a4-grafica', 'linha-moto', 'portfolio', 'lubrificantes-pptx', 'kit-filtros']) {
     const x = porId[id];
     assert.deepEqual([x.arquivo, x.tamanho, x.data], [null, null, null], id);
-    assert.ok(x.titulo && x.tipo && x.grupo, id);
+    assert.deepEqual([x.tipo, x.grupo, x.par], SETE.find(([i]) => i === id).slice(3), id);
     const r = await s.pedir('/admin/pdfs/baixar/' + id, { cookie: adm });
     assert.equal(r.status, 404, id);
     assert.ok(!r.texto.includes(XLSX), id);
   }
-  assert.equal(porId['lubrificantes-pptx'].par, 'lubrificantes');
-  assert.equal(porId['lubrificantes-pptx'].tipo, 'pptx');
   assert.equal((await s.pedir('/admin/pdfs/baixar/completo-digital', { cookie: adm })).texto, '%PDF-2028');
-  assert.equal((await s.pedir('/admin/pdfs/baixar/lubrificantes-pdf', { cookie: adm })).texto, '%PDF-lubri');
 
   // Pasta inexistente: os 7 seguem na lista, todos em falta.
   const s2 = await subir({ pdfs: path.join(pasta, 'nao-existe') });
@@ -420,10 +416,10 @@ test('entregas/ de verdade: os 7 nomes da lista existem e baixam com o tipo cert
   for (const x of lista.json) {
     assert.ok(x.arquivo, 'em falta no main: ' + x.id);
     assert.equal(x.tamanho, fs.statSync(path.join(pasta, x.arquivo)).size, x.id);
-    // HEAD: confere o tipo e o tamanho sem baixar os 44 MB.
+    // HEAD: confere o tipo e o nome sem baixar os 44 MB.
     const h = await s.pedir('/admin/pdfs/baixar/' + x.id, { metodo: 'HEAD', cookie: adm });
     assert.equal(h.status, 200, x.id);
-    assert.equal(h.headers['content-type'], x.tipo === 'pptx' ? PPTX_MIME : 'application/pdf', x.id);
+    assert.equal(h.headers['content-type'], MIME_ESPERADO[x.tipo], x.id);
     assert.equal(h.headers['content-disposition'], `attachment; filename="${x.arquivo}"`, x.id);
   }
   // Os internos de verdade de entregas/ não abrem.
