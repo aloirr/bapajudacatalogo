@@ -1,23 +1,36 @@
 #!/usr/bin/env node
 /* T-0006 · Simulação da busca por medida (proposta; o site do main não muda).
 
-   Uso, na raiz do repositório, depois de "python3 scripts/gerar_site.py" e "python3 docs/propostas/T-0006/medidas.py":
+   Uso, na raiz do repositório, depois de "py -3 scripts/gerar_site.py" e "py -3 docs/propostas/T-0006/medidas.py" (python3 fora do Windows):
      node docs/propostas/T-0006/simular.mjs [pasta dos prints]      (padrão: testes/prints/T-0006)
-   Abre o site de site/ (servidor estático), faz a busca "bateria" e "pneu moto" e põe na coluna de filtros (no
+   Abre o site de site/ (servidor estático do próprio script), faz a busca "bateria" e "pneu moto" e põe na coluna de filtros (no
    celular, no painel "Filtrar") os grupos propostos, com as contagens de medidas.json. Só desenha a página no
    navegador do teste: nenhum arquivo do site é alterado. Prints em 1366 × 1300 e 390 × 844 (o marcado, 390 × 1500),
    com o selo "SIMULAÇÃO · T-0006". Precisa do Playwright (o mesmo do scripts/testar_site.mjs). */
-import { createRequire } from "module";
-import { spawn } from "child_process";
-import fs from "fs";
-import path from "path";
+import { createRequire } from "node:module";
+import { createServer } from "node:http";
+import { fileURLToPath } from "node:url";
+import fs from "node:fs";
+import path from "node:path";
 const { chromium } = createRequire(import.meta.url)("playwright");
 
-const AQUI = path.dirname(new URL(import.meta.url).pathname);
+const AQUI = path.dirname(fileURLToPath(import.meta.url)); // funciona no Windows e no Linux
+const SITE = path.resolve(AQUI, "../../../site");
 const D = JSON.parse(fs.readFileSync(path.join(AQUI, "medidas.json"), "utf8"));
 const OUT = process.argv[2] || "testes/prints/T-0006";
-const PORTA = 8766;
 fs.mkdirSync(OUT, { recursive: true });
+
+// Servidor estático de site/ numa porta livre (o mesmo jeito do scripts/testar_site.mjs, sem depender do python).
+const TIPOS = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".svg": "image/svg+xml" };
+const srv = createServer((req, res) => {
+  let rel = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  if (rel.endsWith("/")) rel += "index.html";
+  const arq = path.join(SITE, rel);
+  if (!arq.startsWith(SITE + path.sep)) { res.writeHead(403).end(); return; }
+  fs.readFile(arq, (err, buf) => err ? res.writeHead(404).end() : res.writeHead(200, { "Content-Type": TIPOS[path.extname(arq).toLowerCase()] || "application/octet-stream" }).end(buf));
+});
+await new Promise((ok) => srv.listen(0, "127.0.0.1", ok));
+const PORTA = srv.address().port;
 
 const CENARIOS = {
   baterias: {
@@ -73,8 +86,6 @@ async function desenhar(p, cen, marcar) {
   }, { cen, marcar });
 }
 
-const srv = spawn("python3", ["-m", "http.server", String(PORTA), "-d", "site"], { stdio: "ignore" });
-await new Promise((r) => setTimeout(r, 1500));
 const nav = await chromium.launch();
 try {
   for (const [nome, cen] of Object.entries(CENARIOS)) {
@@ -82,7 +93,7 @@ try {
       const ctx = await nav.newContext({ viewport: { width: w, height: w === 390 ? 844 : 1300 }, deviceScaleFactor: 1 });
       const p = await ctx.newPage();
       await p.route(/onrender\.com|googleapis|gstatic/, (r) => r.abort()); // sem rede: placas, contador e fonte de fora
-      const abrir = async () => { await p.goto(`http://localhost:${PORTA}/`); await p.goto(`http://localhost:${PORTA}/${cen.url}`); await p.waitForTimeout(1500); };
+      const abrir = async () => { await p.goto(`http://127.0.0.1:${PORTA}/`); await p.goto(`http://127.0.0.1:${PORTA}/${cen.url}`); await p.waitForTimeout(1500); };
       // 1) os grupos novos (no celular, com o painel "Filtrar" aberto)
       await abrir();
       await desenhar(p, cen, false);
@@ -102,6 +113,6 @@ try {
   }
 } finally {
   await nav.close();
-  srv.kill();
+  srv.close();
 }
 console.log("prints em " + OUT);
