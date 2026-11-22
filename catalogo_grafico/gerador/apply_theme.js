@@ -1,6 +1,5 @@
 // Tema "BAP" no PowerPoint (T-0023): grava o THEME do apres_ppt.js no ppt/theme/theme1.xml do arquivo gerado.
 // O pptxgenjs sai com o tema "Office"; os slides usam as cores do tema (pres.SchemeColor), então sem isto as cores mudam.
-// Troca o nome do tema, do esquema de cores e do esquema de fontes e as 12 cores; o resto do theme1.xml fica como veio.
 // Dependência: jszip, que já vem instalado com o pptxgenjs (npm install pptxgenjs).
 const fs = require('fs');
 const JSZip = require('jszip');

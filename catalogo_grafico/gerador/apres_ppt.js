@@ -1,5 +1,5 @@
 const pptxgen = require('pptxgenjs');
-const { applyTheme } = require('./apply_theme.js');   // grava o THEME no theme1.xml (sem ele as cores dos slides mudam)
+const { applyTheme } = require('./apply_theme.js');
 const SZ = require('./pptimg/sizes.json');
 const I = f => './pptimg/' + f;
 const THEME = { name: 'BAP', headFontFace: 'Arial', bodyFontFace: 'Arial',

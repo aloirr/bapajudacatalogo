@@ -57,8 +57,6 @@ class S:
             im = Image.open(path).convert('RGBA')
             bb = im.getchannel('A').getbbox()
             if bb: im = im.crop(bb)
-            g = im.convert('L').point(lambda v: 255 if v < 238 else 0).getbbox()
-            if g and path.endswith('.jpg'): im = im.crop((max(0, g[0] - 6), max(0, g[1] - 6), min(im.size[0], g[2] + 6), min(im.size[1], g[3] + 6)))
             _ic[path] = im
         im = _ic[path]; iw, ih = im.size; k = min(w / iw, h / ih); dw, dh = iw * k, ih * k
         self.c.drawImage(ImageReader(im), x + (w - dw) / 2, self.Y(y + (h + dh) / 2), dw, dh, mask='auto')
