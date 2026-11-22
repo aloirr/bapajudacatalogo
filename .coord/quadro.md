@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 05:35 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 06:26 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -28,16 +28,18 @@ Atualizado em 22/11/2026 05:35 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | CONCLUÍDA | #108, #110, #111, #114, #117, #118, #119, #120, #121, #123, #124, #125, #126, #127 |
 | [T-0023](tarefas/T-0023.md) | Grafia "BAP AUTOPARTS" no gerador do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | CONCLUÍDA | #122, #128, #129, #130 |
 | [T-0024](tarefas/T-0024.md) | Downloads de todos os materiais na página "Catálogos e materiais" | integracao-placas | web-site, catalogo-grafico, designer-ux, design-de-marca | CONCLUÍDA | #133, #134, #135, #136, #137, #138 |
-| [T-0025](tarefas/T-0025.md) | Repetições e ajustes de marca nos materiais do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | NOVA | — |
+| [T-0025](tarefas/T-0025.md) | Repetições e ajustes de marca nos materiais do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | CONCLUÍDA | #141, #142, #143 |
+| [T-0026](tarefas/T-0026.md) | Repetições nas páginas 2 a 4 do A4 e nos sumários do catálogo gráfico | catalogo-grafico | designer-ux, design-de-marca | NOVA | — |
 
 ## Fila
-Main 5c0ddda (#135).
+Main 1255bbe (#143).
 
-1. **T-0025, repetições e marca nos materiais (simulação antes, decidida pelo PO):** R-20261122-080833, R-20261122-090651.
+1. **T-0026, repetições nas págs. 2 a 4 do A4 e nos sumários (simulação antes, decidida pelo PO):** R-20261122-102147.
 2. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
 3. **Fora da fila, para decidir depois:**
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
-   - Portfólio: muda se for gerado de novo, porque agrupa pelo SISTEMA da v27 (catalogo-grafico);
+   - Portfólio: a entrega tem 82 páginas, mas o gerador dá mais com a base de hoje, porque agrupa pelo SISTEMA da v27; gerar de novo é decisão do Alexandre (catalogo-grafico, R-20261122-100047);
+   - MC-0011 e MC-0012 (fonte do .pptx; tamanho do logo e assinatura, com a etiqueta das apresentações e o topo do site): decisão do Alexandre (T-0025);
    - CIL8546: o "—" no ano do site vem de o site ler o texto (web-site);
    - "(coluna Leve também)" aparece com e sem aspas nos PDFs de pneus;
    - EQUIVALE A ainda pode começar uma linha com "·";
