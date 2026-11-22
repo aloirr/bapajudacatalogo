@@ -140,10 +140,10 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0291 | baixa | código | catalogo_grafico/gerador/oferta.py:189 e :206 | o conjunto `cods` montado no `_por_sistema` e de novo no `_so_codigo`, na mesma rodada | T-0019 | catalogo-grafico | ABERTO |
 | RD-0292 | baixa | código (comentário) | catalogo_grafico/gerador/oferta.py:11 e :67-72 | o "Leve também" pelas regras do site dito no import, no bloco de baixo e em mais 3 lugares; o bloco repete o docstring do `sistemas_de` | T-0019 | catalogo-grafico | ABERTO (só comentário: não segura) |
 | RD-0293 | média | texto (PDF) | A4 p. 20 e Digital p. 112-113, embreagem pesada (ex.: EMB3400700639R) | "plato/disco/mancal · c/ platô, disco, rol. e mancal": a composição do kit 2 vezes (anterior ao PR #99, igual no main 3d6a730) | T-0019 | catalogo-grafico | ABERTO (Simule; a dispensa é decisão do po) |
-| RD-0294 | média | código (teste) | scripts/testar_site.mjs:507-509, :1245-1296 e :1516 | o ramo da tela de 2 abas (cerca de 50 linhas) sobra depois do aperto: a :505 já falha com abas | T-0014 | testes | ABERTO |
-| RD-0295 | média | código (teste) | scripts/testar_site.mjs:929-945, :1009-1055, :1115 e :1517-1520 | filtros "lateral" e "barra" ainda percorridos (já falham na :945); `detalhe("filtros")` gravado 2 vezes, com o texto do `si` repetido | T-0014 | testes | ABERTO |
-| RD-0296 | baixa | código (comentário) | scripts/testar_site.mjs:21-23 e as marcas "Aperto …" | a lista das transições que saíram, no cabeçalho e de novo em cada ponto apertado | T-0014 | testes | ABERTO (só comentário: não segura) |
-| RD-0297 | baixa | texto (saída do teste) | scripts/testar_site.mjs:996 e :1525; resumo.txt, linha "filtros da busca" | `"CXD13062" (1 opção por grupo):` 2 vezes na mesma linha do resumo | T-0014 | testes | ABERTO |
+| RD-0294 | média | código (teste) | scripts/testar_site.mjs:507-509, :1245-1296 e :1516 | o ramo da tela de 2 abas (cerca de 50 linhas) sobra depois do aperto: a :505 já falha com abas | T-0014 | testes | CORRIGIDO (d7fdc20) |
+| RD-0295 | média | código (teste) | scripts/testar_site.mjs:929-945, :1009-1055, :1115 e :1517-1520 | filtros "lateral" e "barra" ainda percorridos (já falham na :945); `detalhe("filtros")` gravado 2 vezes, com o texto do `si` repetido | T-0014 | testes | CORRIGIDO (d7fdc20) |
+| RD-0296 | baixa | código (comentário) | scripts/testar_site.mjs:21-23 e as marcas "Aperto …" | a lista das transições que saíram, no cabeçalho e de novo em cada ponto apertado | T-0014 | testes | CORRIGIDO (d7fdc20) |
+| RD-0297 | baixa | texto (saída do teste) | scripts/testar_site.mjs:996 e :1525; resumo.txt, linha "filtros da busca" | `"CXD13062" (1 opção por grupo):` 2 vezes na mesma linha do resumo | T-0014 | testes | CORRIGIDO (d7fdc20) |
 
 ## Notas
 
