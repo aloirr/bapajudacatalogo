@@ -330,8 +330,8 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0480 | baixa | código | site/admin/pdfs/pdfs.js:24 e :31 | o `disponivel` e o `tamanho()` tratavam um campo `disponivel` e o tamanho em texto, fora do contrato (o `disponivel` olha só o tamanho; sai o texto pronto) | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
 | RD-0481 | baixa | código (comentário) | site/admin/admin.css:97-100 | "valem o padding e o texto do .bt-mini" (passa a "o texto de 14 px do .bt-mini, com o padding de 12 px e a altura de 48 px do .bt") | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
 | RD-0482 | baixa | código (comentário) | site/admin/pdfs/pdfs.js:3 | o contrato da `GET /api/pdfs` copiado do `LEIA.md` (passa a "Contrato: GET /api/pdfs no servicos/login/LEIA.md.") | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
-| RD-0483 | manter? | código | site/admin/pdfs/pdfs.js:12-19 (`USO`) × servicos/login/server.mjs:90 (`PDFS`) | as chaves dos cartões (o id ou o par) nas 2 listas | T-0024 | web-site; integracao-placas | MANTIDO (a frase de uso é texto de tela, do `web-site`; a lista fixa é do serviço; sem a chave, a frase só não aparece) |
-| RD-0484 | manter? | layout | Catálogos e materiais, cartão Lubrificantes (1366 e 390 px) | o tipo em 4 lugares: a frase de uso, a extensão "(.pdf e .pptx)", o tamanho "PDF 6,6 MB · PowerPoint 7,3 MB" e os botões "Baixar PDF" e "Baixar PowerPoint" | T-0024 | web-site | MANTIDO (no par, cada lugar diz de qual arquivo é o dado ou a ação; a linha "Tipo" já saiu na v2) |
+| RD-0483 | manter? | código | site/admin/pdfs/pdfs.js:12-19 (`USO`) × servicos/login/server.mjs:90 (`PDFS`) | as chaves dos cartões (o id ou o par) nas 2 listas | T-0024 | web-site; integracao-placas | MANTIDO (o texto de tela é da tela, do `web-site`; a lista do serviço é a lista branca de arquivos, do `integracao-placas`; um item sem frase continua aparecendo; parecer de 05:12) |
+| RD-0484 | manter? | layout | Catálogos e materiais, cartão Lubrificantes (1366 e 390 px) | o tipo em 4 lugares: a frase de uso, a extensão "(.pdf e .pptx)", o tamanho "PDF 6,6 MB · PowerPoint 7,3 MB" e os botões "Baixar PDF" e "Baixar PowerPoint" | T-0024 | web-site | MANTIDO (cada lugar faz um trabalho diferente: para que serve cada formato, qual tamanho é de qual, a ação; a extensão segue o modelo dos outros cartões; a simulação v2 foi aprovada pelo Alexandre, R-20261122-084553; parecer de 05:12) |
 | RD-0485 | média | teste | testes/login.mjs, `ARQS` (:39-50), GET /api/pdfs (:321-328) e HEAD de cada id (:335-345) | a ordem dos ids da API, o Content-Type e o arquivo mais novo de `entregas/` repetiam o `login.test.mjs` ("entregas/ de verdade…" e "arquivo em falta…") (o `ARQS` vira a lista `IDS`; fica só o link de cada id na tela) | T-0024 | testes | CORRIGIDO (4595275; 00c0c7d, #138) |
 | RD-0486 | baixa | teste | testes/login.mjs:155 e :173 | os 7 ids no passe sem cookie, que passam pela mesma trava de sessão (voltam os 2 PDFs de antes) | T-0024 | testes | CORRIGIDO (4595275; 00c0c7d, #138) |
 
@@ -345,7 +345,8 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - RD-0475 ao RD-0478: corrigidos no e829881 (head do #137; squash 19ad5a2).
 - RD-0479 ao RD-0482: corrigidos no b3fde04 (head do #134; squash 15ff9df). O RD-0483 e o RD-0484 saíram como `manter?` e ficam MANTIDOS.
 - RD-0485 e RD-0486: corrigidos no 4595275; o head do #138 é o b0f77b6 (o 4595275 mais o merge do main com o #133 e o #134; squash 00c0c7d).
-- [SUPOSIÇÃO] As linhas citadas são as do parecer, conferidas no arquivo anterior ao commit de correção; algumas mudaram com a correção. Os textos de cada linha vêm do diff da correção, e os motivos do RD-0483 e do RD-0484, da decisão passada pelo gerente.
+- [SUPOSIÇÃO] As linhas citadas são as do parecer, conferidas no arquivo anterior ao commit de correção; algumas mudaram com a correção. Os textos de cada linha vêm do diff da correção.
+- RD-0483 e RD-0484: os motivos do MANTIDO são os do parecer de 05:12, passados pelo gerente.
 - Relatório: `T-0024.md`.
 
 ### T-0022 a T-0025, madrugada de 22/11/2026 (PRs #126 a #131)
