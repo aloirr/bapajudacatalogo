@@ -90,12 +90,13 @@ Certa em tudo (decisão 10 a). Conferi nos 6 arquivos do gerador envolvidos (`ap
 `print_cat.py`, `digital2.py`, `catalogo_moto.py` e `portfolio.py`): não há "BAP AUTO PARTS" nem "BAP Autoparts". O
 que fica:
 
-- A4 pág. 2: os dois nomes do §2.
+- A4 pág. 2: o sobretítulo "BAP AUTOPARTS" e o "A BAP AUTOPARTS é…" (§2).
 - Lubrificantes pág. 2: o título "A BAP AUTOPARTS"; pág. 11: "Gerente Comercial · BAP AUTOPARTS".
 - Autor dos metadados: "BAP AUTOPARTS" no A4, no Completo Digital, na Linha Moto e em Lubrificantes (PDF e .pptx).
 - Portfólio: a etiqueta do cabeçalho (`NOME`).
 
-O RD-0431 (conteúdo num arquivo só) e o RD-0432 (cópias antigas do gerador) não mudam nenhuma página: sem efeito na marca.
+O RD-0431 (conteúdo num arquivo só), o RD-0432 (cópias antigas do gerador) e a pergunta 10 (`portfolio_v1_por_sistema.py`)
+não mudam nenhuma página: sem efeito na marca.
 
 ## Achados
 
@@ -133,8 +134,9 @@ pergunta 1.
   interno)"). O A4 (`— Impressão A4 (uso interno)`) e Lubrificantes não mudaram. O autor continua "BAP AUTOPARTS" nos 3
   PDFs e no .pptx.
 - **Nada de marca mudou fora do pedido:** só mudam a pág. 2 do A4 e de Lubrificantes (PDF e .pptx) e o título dos
-  metadados da Linha Moto (comparação página a página: ver o parecer de UX). Nenhuma cor, fonte (o .pptx continua em
-  Arial, 6b), logo ou tamanho de logo mudou. O Completo Digital e o Kit Filtros não mudam no PR.
+  metadados da Linha Moto (comparação página a página do A4 e de Lubrificantes: ver o parecer de UX). A Linha Moto tem
+  as 17 páginas iguais às do main, pixel a pixel; muda só o título dos metadados (§4). Nenhuma cor, fonte (o .pptx
+  continua em Arial, 6b), logo ou tamanho de logo mudou. O Completo Digital e o Kit Filtros não mudam no PR.
 - **Regras do repositório:** sem preço e sem estoque; sem marca de terceiros. As frases de Lubrificantes passaram para
   o `apres_conteudo.json` sem mudar uma palavra.
 - **Achados:** o MC-0014 está fechado (a etiqueta ficou). O MC-0011 e o MC-0012 seguem abertos para o Alexandre, pelo
