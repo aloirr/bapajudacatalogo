@@ -27,7 +27,7 @@ Atualizado em 21/11/2026 22:40 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0021](tarefas/T-0021.md) | Governança: .claude/worktrees/ no .gitignore e commit do designer-ux e do design-de-marca nas suas pastas | alexandre | po, gerente-projetos | CONCLUÍDA | #105 |
 
 ## Fila
-Retomada de 21/11 às 20h37 (Manaus), depois da parada das ~18h. Main 409d137 (#105). Os PRs seguem a regra de sempre: testes, revisões LIBERADO, CI verde e a autorização do PO por número e SHA. As simulações vão ao Alexandre antes de qualquer PR (regra 3).
+Main 409d137 (#105).
 
 1. **RD-0293 no PDF (catalogo-grafico):** a composição do kit repetida nas embreagens pesadas vem do `detalhe.essencial` do gerador (A4 p.20, Digital p.112-113, EMB1047071R incluído). Simulação ao Alexandre antes do PR.
 2. **Pareceres a gravar:** o do designer-ux da B8 (branch `designer-ux/T-0019-parecer-b8`) e os do corretor (`corretor-redundancias/T-0019-pr99` e `/T-0014-aperto`, com os RD-0289 a RD-0314).
@@ -40,9 +40,8 @@ Retomada de 21/11 às 20h37 (Manaus), depois da parada das ~18h. Main 409d137 (#
    - o quebra.py usa funções internas do ReportLab (fixar a versão).
 
 ## Regras novas (20 e 21/11)
-- Merge: o PO autoriza todos os merges, inclusive os de governança, conferindo número, head, arquivos, CI verde e revisão LIBERADO; o gerente executa (R-20261120-111133 e R-20261120-111308-alexandre). Nenhum merge vai ao Alexandre (R-20261122-015249-alexandre). As simulações de base, tela e PDF e o "autorizo" da TRAVA e da FICHA continuam com ele.
+- Merge: como no CLAUDE.md (seção Merge). Nenhum merge vai ao Alexandre (R-20261122-015249-alexandre).
 - Perguntas ao Alexandre: todas num bloco só, numeradas, com a recomendação marcada, para ele copiar e colar (R-20261122-015249-alexandre).
-- designer-ux e design-de-marca fazem commit e push só em docs/ux/ e docs/marca/, sem merge (T-0021, #105).
 - Publicação: o Render publica sozinho a cada merge no `main` (regra 5a, R-20261120-100005-alexandre).
 - Horas nas tarefas: no "Pedido (literal)" vai a hora do chat; no Registro, a hora do recado (`criado_em`) e, nos merges, a do `git log origin/main`. Por isso pode haver 1 minuto de diferença.
 - Rondas do PO e do gerente a cada 30 min; graphify antes de explorar código (R-20261120-203700-alexandre, T-0020).
