@@ -78,12 +78,21 @@
   window.BAPForm = { api, erroDe, expirou, esc, IC, MIN_SENHA, FALHA_REDE, frase, caixa, erroCampo, limparErros, mostrar, ligarMostrar, focarErro };
 
   // ---------- volta depois do login ----------
-  // só um caminho deste site: começa com uma única "/" (com "//", "/\" ou sem "/", vira "/"), para não virar
-  // redirecionamento aberto; nunca o próprio login. O #/produto/... vem no hash desta página
+  // Só um caminho deste site, para não virar redirecionamento aberto; em qualquer dúvida, "/".
+  // - sem caractere de controle: o navegador apaga tab, LF e CR da URL ("/\t/evil.com" viraria "//evil.com");
+  // - começa com uma única "/" (nem "//" nem "/\") e, montado com new URL, fica na mesma origem;
+  // - o caminho normalizado ("/./entrar", "/x/../api/eu") também não pode começar com "//" ou "/\" nem ser o login,
+  //   a API ou a troca de senha. O #/produto/... vem no hash desta página, não no volta.
   function voltaSegura(v) {
     v = String(v || "").split("#")[0];
-    if (!/^\/(?![/\\])/.test(v) || /^\/(entrar|api|trocar-senha)(?=[/?]|$)/.test(v)) return "/";
-    return v;
+    if (!v || /[\x00-\x1f\x7f]/.test(v) || !/^\/(?![/\\])/.test(v)) return "/";
+    let u;
+    try { u = new URL(v, location.origin); } catch (e) { return "/"; }
+    if (u.origin !== location.origin || /^\/[/\\]/.test(u.pathname)) return "/";
+    let p;
+    try { p = decodeURIComponent(u.pathname); } catch (e) { return "/"; }
+    if (/[\x00-\x1f\x7f]/.test(p) || /^\/[/\\]/.test(p) || /^\/(entrar|api|trocar-senha)(?=[/\\?]|$)/i.test(p)) return "/";
+    return u.pathname + u.search;
   }
   const PR = new URLSearchParams(location.search);
   const VOLTA = voltaSegura(PR.get("volta"));

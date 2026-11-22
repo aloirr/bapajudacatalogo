@@ -217,7 +217,7 @@
       us.value = us.value.trim().toLowerCase();
       if (!nome.value.trim()) F.erroCampo(nome, "Digite o nome.");
       if (!emp.value.trim()) F.erroCampo(emp, "Digite a empresa.");
-      if (!RX_USUARIO.test(us.value)) F.erroCampo(us, "Use de 3 a 32 caracteres, só letras minúsculas, números e ponto.");
+      if (!RX_USUARIO.test(us.value)) F.erroCampo(us, "Use só letras minúsculas, números, ponto, hífen ou sublinhado (3 a 32).");
       conferirSenha(senha);
       if (F.focarErro(f)) return;
       const bt = $('button[type="submit"]', f);

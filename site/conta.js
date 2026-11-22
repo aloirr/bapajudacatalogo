@@ -50,7 +50,9 @@
 
   function logoHtml(eu, alt) {
     const src = eu.temLogo ? "/api/eu/logo" : LOGO_BAP;
-    return `<span class="conta-logo"><img src="${src}" alt="${esc(alt)}" onerror="this.onerror=null;this.src='${LOGO_BAP}'"></span>`;
+    // com 404, a da BAP; no menu aberto, com o alt do site
+    const troca = alt ? `;this.alt='bap componentes de qualidade'` : "";
+    return `<span class="conta-logo"><img src="${src}" alt="${esc(alt)}" onerror="this.onerror=null;this.src='${LOGO_BAP}'${troca}"></span>`;
   }
 
   function montar(eu) {
@@ -58,7 +60,7 @@
     if (!caixa || eu.trocarSenha) return; // na troca obrigatória não há menu: a página só tem o "Sair"
     const aqui = location.pathname.replace(/\/+$/, "") || "/";
     const item = (href, ic, txt) => `<li><a href="${href}"${aqui === href ? ' aria-current="page"' : ""}>${ic}${txt}</a></li>`;
-    const altLogo = eu.temLogo ? "Logo da " + (eu.empresa || eu.nome) : "Logo da BAP";
+    const altLogo = eu.temLogo ? "Logo da " + (eu.empresa || eu.nome) : "bap componentes de qualidade"; // o logo da BAP com o alt do site (MC-0007)
     caixa.innerHTML = `
       <button type="button" class="conta-bt" aria-expanded="false" aria-controls="conta-menu">
         ${logoHtml(eu, "")}
