@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0294**.
+O próximo número livre é o **RD-0301** (o RD-0294 ao RD-0297 estão no branch `corretor-redundancias/T-0014-aperto`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -135,11 +135,14 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0286 | — | código | catalogo_grafico/gerador/oferta.py e digital2.py | o `oferta._txt` repetia o `G.limpar`; o código da oferta era tirado do parêntese em 2 lugares; o `sem_viuva` partia o texto 2 vezes | T-0019 | catalogo-grafico | CORRIGIDO (f52e409) |
 | RD-0287 | — | código | catalogo_grafico/gerador/detalhe.py, oferta.py e digital2.py | logs mortos (`TAIL_LOG`, `SIS_LOG`) e ramo morto no `refs_juntas` | T-0019 | catalogo-grafico | CORRIGIDO (f52e409) |
 | RD-0288 | — | doc | catalogo_grafico/gerador/LEIA_GERADOR.md | faltavam no LEIA_GERADOR o `digital_data.json`, o B8, o B10 e o "Leve também" pelo site | T-0019 | catalogo-grafico | CORRIGIDO (f52e409) |
-| RD-0289 | média | código | catalogo_grafico/gerador/digital2.py:271, :279 e :286 (com Doc.tag:223 e tags.medir:85) | a largura da tag (`lw(...) + 2 * pad`) reescrita no `novo_desce` e no `novo_na_sobra`; o `NOVO_TAG = 6.2` repete o tamanho padrão do `tags.py` | T-0019 | catalogo-grafico | ABERTO |
-| RD-0290 | média | código | catalogo_grafico/gerador/digital2.py:305-308 e :407; print_cat.py:312-315 e :360 | a cola do B10 (encolher o código, `novo_desce`, `novo_na_sobra`, a tag NOVO na descrição) escrita nos 2 PDFs | T-0019 | catalogo-grafico | ABERTO |
-| RD-0291 | baixa | código | catalogo_grafico/gerador/oferta.py:189 e :206 | o conjunto `cods` montado no `_por_sistema` e de novo no `_so_codigo`, na mesma rodada | T-0019 | catalogo-grafico | ABERTO |
-| RD-0292 | baixa | código (comentário) | catalogo_grafico/gerador/oferta.py:11 e :67-72 | o "Leve também" pelas regras do site dito no import, no bloco de baixo e em mais 3 lugares; o bloco repete o docstring do `sistemas_de` | T-0019 | catalogo-grafico | ABERTO (só comentário: não segura) |
-| RD-0293 | média | texto (PDF) | A4 p. 20 e Digital p. 112-113, embreagem pesada (ex.: EMB3400700639R) | "plato/disco/mancal · c/ platô, disco, rol. e mancal": a composição do kit 2 vezes (anterior ao PR #99, igual no main 3d6a730) | T-0019 | catalogo-grafico | ABERTO (Simule; a dispensa é decisão do po) |
+| RD-0289 | média | código | catalogo_grafico/gerador/digital2.py:271, :279 e :286 (com Doc.tag:223 e tags.medir:85) | a largura da tag (`lw(...) + 2 * pad`) reescrita no `novo_desce` e no `novo_na_sobra`; o `NOVO_TAG = 6.2` repete o tamanho padrão do `tags.py` | T-0019 | catalogo-grafico | CORRIGIDO (b002d22) |
+| RD-0290 | média | código | catalogo_grafico/gerador/digital2.py:305-308 e :407; print_cat.py:312-315 e :360 | a cola do B10 (encolher o código, `novo_desce`, `novo_na_sobra`, a tag NOVO na descrição) escrita nos 2 PDFs | T-0019 | catalogo-grafico | CORRIGIDO (b002d22) |
+| RD-0291 | baixa | código | catalogo_grafico/gerador/oferta.py:189 e :206 | o conjunto `cods` montado no `_por_sistema` e de novo no `_so_codigo`, na mesma rodada | T-0019 | catalogo-grafico | CORRIGIDO (b002d22) |
+| RD-0292 | baixa | código (comentário) | catalogo_grafico/gerador/oferta.py:11 e :67-72 | o "Leve também" pelas regras do site dito no import, no bloco de baixo e em mais 3 lugares; o bloco repete o docstring do `sistemas_de` | T-0019 | catalogo-grafico | CORRIGIDO (b002d22) |
+| RD-0293 | média | texto (PDF) | A4 p. 20 e Digital p. 112-113, embreagem pesada (ex.: EMB3400700639R) | "plato/disco/mancal · c/ platô, disco, rol. e mancal": a composição do kit 2 vezes (anterior ao PR #99, igual no main 3d6a730) | T-0019 | catalogo-grafico | ABERTO (Simule; dispensa do po para a v27, R-20261122-005755-po) |
+| RD-0298 | média | código | catalogo_grafico/gerador/quebra.py:16-17, varredura_quebras.py:13-14 e digital2.py:97 | `NBSP` definido 3 vezes e `SEP` 2 vezes, com listas diferentes (`,/;)·` no quebra, `,/-–);·\|+` na varredura) | T-0019 | catalogo-grafico | ABERTO |
+| RD-0299 | média | código | catalogo_grafico/gerador/print_cat.py:164 e :301; LEIA_GERADOR.md:18 | `REF_MAIS = 0`, sobra do teste com 12, soma 0 à coluna; a história do teste no comentário e no LEIA | T-0019 | catalogo-grafico | ABERTO |
+| RD-0300 | baixa | doc | catalogo_grafico/gerador/LEIA_GERADOR.md:18 e :52 | o comando do `varredura_quebras.py` no item do B8 e na tabela de comandos | T-0019 | catalogo-grafico | ABERTO |
 
 ## Notas
 
