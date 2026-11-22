@@ -1,6 +1,6 @@
 # BAP Ajuda · Catálogo BAP
 
-Repositório **privado** do catálogo da **BAP AUTOPARTS** (Grupo PMZ, Manaus), criado em 20/11/2026.
+Repositório do catálogo da **BAP AUTOPARTS** (Grupo PMZ, Manaus), criado em 20/11/2026.
 
 A partir de 20/11/2026, **tudo de catálogo mora aqui**:
 
@@ -62,7 +62,7 @@ Depois abra http://localhost:8000.
 - A ficha técnica sai de uma **lista branca** (`FICHA` em `scripts/gerar_site.py`). Custo de importação, MOQ, ranking, fornecedor e estoque nunca saem.
 - O script **para** se o JSON tiver palavra de dado interno.
 - A base `.xlsx` tem dado interno. Por isso:
-  - o repositório é **privado** (decisão do Alexandre, R-20261122-075711; o de recados é público);
+  - o repositório vai ficar **privado**; até a troca, ele está **público**: nada de segredo nem de dado interno novo no Git (o de recados é público);
   - no ar só vão o `site/` (atrás do login) e os PDFs da lista fixa do serviço de login.
 - Chave de API (API PLACAS, por exemplo) **nunca** entra no Git. Ela vai em variável de ambiente no Render.
 - Respostas, commits e docs ficam em **português do Brasil**.
