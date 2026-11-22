@@ -158,6 +158,13 @@ test('sem login nada abre: página leva a /entrar, o resto dá 401', async () =>
     assert.deepEqual(r.json, { erro: 'Entre de novo para continuar.' }, caminho);
     assert.ok(!r.texto.includes('AMT7183'), caminho);
   }
+  // "volta" nunca aponta para outro site ("//host" ou "/\\host").
+  for (const caminho of ['//evil.invalid/x', '/\\evil.invalid/x', '//evil.invalid', '/\\/evil.invalid']) {
+    const r = await s.pedir(caminho, { accept: HTML });
+    assert.equal(r.status, 302, caminho);
+    assert.equal(r.headers.location, '/entrar?volta=%2F', caminho);
+  }
+  assert.equal((await s.pedir(`/${'a'.repeat(600)}.html`, { accept: HTML })).headers.location, '/entrar?volta=%2F', 'longo demais');
   const pdf = await s.pedir('/admin/pdfs/baixar/a4-grafica', { accept: HTML });
   assert.equal(pdf.status, 302);
   assert.match(pdf.headers.location, /^\/entrar\?volta=/);

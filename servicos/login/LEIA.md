@@ -27,6 +27,7 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 ## Rotas
 
 - **Abertas:** `/entrar` (e `/entrar/`), `/entrar/entrar.css`, `/entrar/entrar.js`, `/styles.css`, `/assets/logo_escuro.png`, `/assets/logo_branco.png` e `GET /saude` (200 `ok`).
+  - **[SUPOSIÇÃO]** `/styles.css` e as 2 logos da BAP (`/assets/logo_*.png`) abrem sem login para a tela de login usar o visual do site (a simulação usa o `styles.css`). Não têm dado do catálogo. O contrato só listava os arquivos de `/entrar/` e as logos (em outro caminho).
 - **Com sessão:** todo o resto do `site/`. Sem sessão, pedido de página (`Accept: text/html`) → 302 `/entrar?volta=<caminho>` (ou `/entrar?expirou=1` se o cookie venceu); o resto → 401.
 - **Troca pendente:** página → 302 `/trocar-senha`; outros arquivos e API → 403. Só abrem `/trocar-senha/**`, `/api/eu`, `/api/sair` e `/api/trocar-senha`.
 - **Só admin** (os outros recebem 404): `/admin/**`, `/api/usuarios/**`, `/api/pdfs` e `GET /admin/pdfs/baixar/<id>` (`completo-digital` e `a4-grafica`, de `catalogo_grafico/entregas/`, o arquivo de ano mais alto).
@@ -41,5 +42,7 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 - Nos POST/PATCH/PUT/DELETE, o `Origin` precisa ser o do serviço (403 se não for).
 - Arquivos: só de `site/`, sem `..`, sem arquivo oculto, sem link simbólico. Fora de `site/` só saem os 2 PDFs da lista. A base (`dados/*.xlsx`) nunca sai.
 - Logo: PNG, JPG ou WEBP, até 1 MB, com o tipo conferido pelos primeiros bytes (SVG não entra). É guardada como veio (sem redução).
+  - **[SUPOSIÇÃO]** O desenho aprovado falava em até 200 KB, com o serviço reduzindo a imagem. Sem dependências, não há como reduzir; por isso vale o limite de 1 MB do contrato com as telas.
+- `volta` do redirecionamento ao login: caminho que começa com `//` ou `/\` vira `/` (não leva para outro site). O `entrar.js` também confere.
 - `usuarios.json`: gravação segura (`.tmp`, `fsync`, `rename`), arquivo 0600. Arquivo ilegível: o serviço fecha (503) e não sobrescreve.
 - Log: só o tipo da rota, o status e o tempo (`entrar 401 52ms`), mais as linhas de partida (`login ouvindo`, `usuarios ok N`, `fechado: <motivo>`). Nunca senha, hash, cookie, segredo, chave, usuário, caminho ou IP.

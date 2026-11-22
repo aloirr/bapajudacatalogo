@@ -30,7 +30,7 @@ Serviço pequeno, em Node 18+ e **sem dependências**, que recebe a placa do sit
 O serviço baixa a lista ao subir e de novo a cada 6 h (se falhar, tenta a cada 1 min). Fica só o conjunto dos códigos, em memória.
 - **Com `CATALOGO_URL` e `CHAVE_INTERNA`** (T-0022, catálogo atrás do login): `GET CATALOGO_URL/interno/codigos` com o cabeçalho `X-Chave-Interna`, sem cookie. Só `https` (fora dos testes). A chave e o endereço nunca vão para o log.
 - **Sem as duas:** como antes, o `produtos.json` **publicado** (`ORIGEM_PERMITIDA` + `/data/produtos.json`). Assim a troca no Render não derruba o `/contar`.
-Motivo: no Render o serviço tem `rootDir: servicos/placas`, e os arquivos fora dessa pasta **não existem para ele** (nem no build nem rodando). Ler `site/data/produtos.json` do disco não funciona lá, e um arquivo de códigos copiado aqui ficaria velho a cada `gerar_site.py`. Assim a lista é sempre a que está no ar, sem variável nova e sem mexer no `render.yaml`.
+Motivo: no Render o serviço tem `rootDir: servicos/placas`, e os arquivos fora dessa pasta **não existem para ele** (nem no build nem rodando). Ler `site/data/produtos.json` do disco não funciona lá, e um arquivo de códigos copiado aqui ficaria velho a cada `gerar_site.py`. Assim a lista é sempre a que está no ar. No modo sem `CATALOGO_URL` e sem `CHAVE_INTERNA`, isso funciona sem variável nova e sem mexer no `render.yaml`; o modo do login (acima) precisa das duas variáveis no `render.yaml`.
 
 ## Variáveis de ambiente (no painel do Render)
 

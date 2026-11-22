@@ -508,7 +508,8 @@ export async function criarServico(opcoes = {}) {
   function semSessao(req, res, s) {
     const extra = s.estado === 'nenhuma' ? {} : { 'Set-Cookie': COOKIE_APAGA };
     if (querPagina(req) && (req.method === 'GET' || req.method === 'HEAD')) {
-      const volta = req.url.length <= VOLTA_MAX ? req.url : '/';
+      // "//host" e "/\host" viram endereço de outro site no navegador: volta para a raiz.
+      const volta = req.url.length <= VOLTA_MAX && !/^\/[\/\\]/.test(req.url) ? req.url : '/';
       const destino = s.estado === 'vencida' ? '/entrar?expirou=1' : `/entrar?volta=${encodeURIComponent(volta)}`;
       return redirecionar(res, destino, extra);
     }
