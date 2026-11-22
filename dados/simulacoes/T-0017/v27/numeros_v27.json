@@ -3,7 +3,8 @@
  "recomendado": {
   "p1": "b",
   "p2": "a",
-  "p3": "a"
+  "p3": "a",
+  "p6": "a"
  },
  "rolamentos": 194,
  "rolamentos_leitura_do_texto": {
@@ -48,11 +49,12 @@
  },
  "celulas_produtos": {
   "APLICACAO": 3,
-  "SISTEMA": 108
+  "SISTEMA": 108,
+  "DETALHE_CATALOGO": 13
  },
- "celulas_total": 111,
- "codigos_mudados": 111,
- "log_previsto": 111,
+ "celulas_total": 124,
+ "codigos_mudados": 124,
+ "log_previsto": 124,
  "celulas_com_duvidoso_antes": {
   "PRODUTOS": 0,
   "VEICULOS": 5120
@@ -62,11 +64,12 @@
   "VEICULOS": 5120
  },
  "site_produtos": 4419,
- "site_produtos_que_mudam": 111,
+ "site_produtos_que_mudam": 124,
  "site_chaves_que_mudam": {
   "a": 3,
   "si": 108,
-  "ss": 11
+  "ss": 11,
+  "de": 13
  },
  "site_si_antes": {
   "DIREÇÃO": 604,

@@ -11,6 +11,9 @@ numa v27, com simulação). Nada é gravado em dados/BASE_*, em dados/versoes/ n
    Com mais de um, a pergunta 2 do LEIA.md. O nome do sistema de câmbio e diferencial é a pergunta 1.
 3. TER55227 e TER5597056, APLICACAO: o ano junto do veículo e a posição como detalhe dele (o que o "Outros veículos e
    detalhes" do site mostrava torto, recados/anexos/T-0018/sim-b-site/outros-veiculos.csv).
+6. Embreagens pesadas, DETALHE_CATALOGO (RD-0293): a composição do kit dita duas vezes ("plato/disco/mancal · c/
+   platô, disco, rol. e mancal"); fica a forma completa. No PDF, a repetição é montada pelo gerador (detalhe.essencial),
+   corrigida pelo catalogo-grafico; aqui é só o campo da base, que o site mostra na ficha.
 4. CIL8546: só confere (a VEICULOS da v26 está certa; nada muda).
 
 Monta a base como ficaria (pasta temporária), confere com o base_comum.comparar que só mudam as células desta tarefa,
@@ -24,6 +27,7 @@ Uso, na raiz do repositório:
 import collections
 import importlib.util
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -72,12 +76,17 @@ TER056_DEPOIS = {   # pergunta 3: a) o ano em cada veículo (como a VEICULOS); b
 FONTE_TER056 = ("Apontado na simulação do B11 (recados/anexos/T-0018/sim-b-site/LEIA-ME.md): o site lia 'Diant Esq / "
                 "Porsche Cayenne' como detalhe do Q7. Um bloco por veículo (' ; '), com a marca no começo, e a posição "
                 "como detalhe; 'Diant Dir' do Amarok fica como está no texto (pergunta 4).")
+# 6. Embreagens (RD-0293): o pedaço curto antes da forma completa sai; o resto da célula não muda
+EMB_RX = re.compile(r"\s+plato/disco[/ ]mancal(?= · c/ platô, disco, rol\. e mancal)")
+EMB_ESPERADOS = 13
+FONTE_EMB = ("RD-0293 (docs/qualidade/redundancias/T-0019.md, 1fbb29c): a composição do kit estava dita duas vezes; fica "
+             "a forma completa 'c/ platô, disco, rol. e mancal'. O resto da célula não muda.")
 CIL_TEXTO = "VW / Ford / Seat | Parati, Quantum, Santana, Saveiro / Royale, Versailles / Cordoba, Ibiza | 1983 a 2006"
 
 # 2. Rolamentos: pergunta 1 (o nome do sistema de câmbio e diferencial) e pergunta 2 (rolamento com mais de um uso)
 CAMBIO = "CÂMBIO E DIFERENCIAL"
 NOME_CAMBIO = {"a": CAMBIO, "b": "TRANSMISSÃO"}
-RECOMENDADO = {"p1": "b", "p2": "a", "p3": "a"}
+RECOMENDADO = {"p1": "b", "p2": "a", "p3": "a", "p6": "a"}
 FONTE_ROL = ("Pedido: R-20261121-200058-alexandre, item 4 (o SISTEMA dos rolamentos gravado na base). O sistema é o que o "
              "site e o PDF já leem do texto (gerar_site.sistemas_de: DESCRICAO, DETALHE_CATALOGO e a POSICAO dos "
              "DADOS_ADICIONAIS).")
@@ -179,6 +188,16 @@ def main(base, saida):
             mud.append([cod, "PRODUTOS", n, "SISTEMA", hoje, opc[rec], "2",
                         f"Lido do texto: {lidos}. " + FONTE_ROL])
 
+    # --- 6: DETALHE_CATALOGO das embreagens (RD-0293)
+    n_emb = 0
+    for n in range(2, wp.max_row + 1):
+        det = wp.cell(n, col["DETALHE_CATALOGO"]).value
+        if isinstance(det, str) and EMB_RX.search(det):
+            mud.append([limpo(wp.cell(n, 1).value), "PRODUTOS", n, "DETALHE_CATALOGO", det, EMB_RX.sub("", det), "6",
+                        FONTE_EMB])
+            n_emb += 1
+    assert n_emb == EMB_ESPERADOS, n_emb
+
     # --- 4: CIL8546 (só conferir)
     assert CIL_TEXTO in wp.cell(uma("CIL8546"), col["APLICACAO"]).value
     cil = {r[2]: (r[4], r[5], r[7]) for r in wv.iter_rows(min_row=2, values_only=True) if r[0] == "CIL8546"
@@ -250,7 +269,8 @@ def main(base, saida):
     for t in [f"T-0017 · v27 da base unificada: SIMULAÇÃO (nada gravado). Base de partida: v26 (sha256 "
               f"{num['base_sha256'][:8]}…{num['base_sha256'][-4:]}). As perguntas e as contagens estão no LEIA.md.",
               f"ANTES_DEPOIS: {len(mud)} células da PRODUTOS ({num['celulas_produtos']}), com a recomendação "
-              f"(perguntas 1 '{RECOMENDADO['p1']}', 2 '{RECOMENDADO['p2']}' e 3 '{RECOMENDADO['p3']}').",
+              f"(perguntas 1 '{RECOMENDADO['p1']}', 2 '{RECOMENDADO['p2']}', 3 '{RECOMENDADO['p3']}' e 6 "
+              f"'{RECOMENDADO['p6']}').",
               "ROLAMENTOS: os que mudam em alguma resposta das perguntas 1 e 2, com o sistema lido do texto e o SISTEMA "
               "proposto em cada resposta (os outros ficam RODAGEM em todas).",
               "TER5597056_OPCOES: o texto em cada resposta da pergunta 3.",

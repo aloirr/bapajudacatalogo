@@ -1,20 +1,20 @@
 # T-0017 · v27 da base unificada: SIMULAÇÃO (nada gravado)
 
-Pedido: **R-20261121-210229-po** (SCE14002, RD-0284; e, na mesma v27, o SISTEMA dos 194 rolamentos e os textos do TER55227 e do TER5597056) e **R-20261121-200058-alexandre**, item 4 (o SISTEMA dos rolamentos gravado na base, com simulação).
+Pedido: **R-20261121-210229-po** (SCE14002, RD-0284; e, na mesma v27, o SISTEMA dos 194 rolamentos e os textos do TER55227 e do TER5597056) e **R-20261121-200058-alexandre**, item 4 (o SISTEMA dos rolamentos gravado na base, com simulação). O RD-0293 (embreagens pesadas) entrou por decisão do PO, passada pelo gerente.
 - Base de partida: v26 do main 3d6a730 (sha256 `3a9f589d…2f2a`). A base e `dados/versoes/` não mudam até o "aprovado".
 - Regra fixa (R-20261120-213300): nenhuma marca nova de ano incerto, e nenhum produto sai.
 
-## 1. Contagem (com a recomendação: perguntas 1 b, 2 a, 3 a, 4 a)
+## 1. Contagem (com a recomendação: perguntas 1 b, 2 a, 3 a, 4 a, 6 a)
 | O quê | Quantos |
 |---|---|
-| Células da PRODUTOS | 111, em 111 códigos: 108 SISTEMA (rolamentos) e 3 APLICACAO (SCE14002, TER55227, TER5597056) |
+| Células da PRODUTOS | 124, em 124 códigos: 108 SISTEMA (rolamentos), 13 DETALHE_CATALOGO (embreagens) e 3 APLICACAO (SCE14002, TER55227, TER5597056) |
 | VEICULOS | nada muda (nenhuma célula, nenhuma linha nova) |
 | Células com a marca de revisão | 5.120 → 5.120 |
-| LOG_CORRECOES | 111 linhas, uma por célula |
-| Site (gerar_site numa cópia) | 4.419 nos dois; mudam 111 produtos: 108 no `si`, 11 no `ss` (sai, porque fica igual ao `si`) e 3 no `a` |
+| LOG_CORRECOES | 124 linhas, uma por célula |
+| Site (gerar_site numa cópia) | 4.419 nos dois; mudam 124 produtos: 108 no `si`, 11 no `ss` (sai, porque fica igual ao `si`), 13 no `de` e 3 no `a` |
 | "Leve também" | **não muda**, no site (0 produtos) nem no PDF (0 itens, nas 4 combinações das perguntas 1 e 2) |
 
-**Conferência:** a base simulada foi comparada célula a célula com a v26 pelo `base_comum.comparar`: 111 mudaram, de 111 esperadas; diferenças fora do permitido: 0. As abas, as colunas e as 5 primeiras colunas da PRODUTOS (BAP Ajuda e BAP Central) ficam iguais; o formato não muda.
+**Conferência:** a base simulada foi comparada célula a célula com a v26 pelo `base_comum.comparar`: 124 mudaram, de 124 esperadas; diferenças fora do permitido: 0. As abas, as colunas e as 5 primeiras colunas da PRODUTOS (BAP Ajuda e BAP Central) ficam iguais; o formato não muda.
 
 ## 2. SISTEMA dos rolamentos
 O sistema proposto é o que o site e o PDF **já leem do texto** (o `gerar_site.sistemas_de`: DESCRICAO, DETALHE_CATALOGO e a POSICAO dos DADOS_ADICIONAIS), o mesmo que decide o "Leve também" desde o #97.
@@ -53,6 +53,13 @@ Quantos mudam em cada resposta (os outros ficam RODAGEM):
 - **TER5597056** (apontado no LEIA-ME da simulação do B11): hoje o site lê "Diant Esq / Porsche Cayenne" como detalhe do Q7. Na proposta, há um bloco por veículo (" ; "), com a marca no começo, e a posição vai como detalhe ("Diant. Esq.", como no catálogo). Os 4 veículos são os da VEICULOS, que já tem 2010–2019 nos 4. A opção b da pergunta 3 está na aba TER5597056_OPCOES.
 - [SUPOSIÇÃO] A leitura do site depois da mudança ("…B1621 01/1970–06/2012: Tractor · Diant." e "Q7 2010–2019: Diant. Esq.") segue a regra do B11 (`docs/DADOS_DO_SITE.md`). O `testes` confere nos prints depois de gravar.
 
+## 3b. Embreagens pesadas, DETALHE_CATALOGO (RD-0293)
+- Nas 13 embreagens remanufaturadas abaixo, o DETALHE_CATALOGO diz a composição do kit duas vezes. Fica uma vez, na forma completa; o resto da célula não muda.
+  - Exemplo, EMB3400700639R: "395MM 18 estrias plato/disco/mancal · c/ platô, disco, rol. e mancal" → "395MM 18 estrias · c/ platô, disco, rol. e mancal".
+  - Os 13: EMB3400700639R, EMB6085R, EMB6126R, EMB6236R, EMB6261R, EMB6343R, EMB6453R, EMB6535R, EMB6550R, EMB6585R, EMB6635R, EMB6852R (que tem "plato/disco mancal") e EMB827483R.
+- No site, muda a linha "Detalhe" da ficha técnica desses 13.
+- **PDF:** a repetição do A4 (p. 20) e do Digital (p. 112-113) não vem deste campo. Ela é montada pelo gerador: o "plato/disco/mancal" é o fim da DESCRICAO e o "c/ platô, disco, rol. e mancal" é acrescentado pelo `detalhe.essencial`. Essa parte é corrigida pelo `catalogo-grafico`, na mesma rodada de simulação. Lá entra também o EMB1047071R, que repete só no PDF.
+
 ## 4. CIL8546 (só conferido; nada muda)
 - A v26 está certa: na VEICULOS, a Parati e o Santana estão com 1983–2006, "separado", e os dois aparecem no `ve` do site.
 - O "—" na coluna Ano do site vem do site: ele ainda lê o ano do texto da aplicação, e não da VEICULOS. No texto, o ano está num pedaço separado por "|" ("Parati, Quantum, Santana… | 1983 a 2006"), longe do modelo. A correção é do `web-site` (ler o ano da VEICULOS), fora desta v27.
@@ -75,11 +82,14 @@ Quantos mudam em cada resposta (os outros ficam RODAGEM):
 4. TER5597056, o Amarok está "Diant. Dir." e os outros 3 "Diant. Esq." (o DETALHE diz "Direção esq."):
    - a) fica "Diant. Dir.", como no texto de origem (não há outra fonte) — **recomendo a**;
    - b) passa a "Diant. Esq.", como os outros 3.
-5. A v27 como simulada (SCE14002, TER55227 e as respostas de 1 a 4):
+5. A v27 como simulada (SCE14002, TER55227 e as respostas de 1 a 4 e 6):
    - a) aprovar e gravar;
    - b) diga o que muda.
+6. Embreagens pesadas, a composição do kit repetida no DETALHE_CATALOGO (13 códigos, RD-0293):
+   - a) tirar a repetição e ficar só com "c/ platô, disco, rol. e mancal" — **recomendo a**;
+   - b) deixar como está.
 
 ## Arquivos
-- `SIMULACAO_v27_T-0017.xlsx`: LEIA; ANTES_DEPOIS (as 111 células, com a recomendação); ROLAMENTOS (os 108 que mudam em alguma resposta, com o sistema lido e o SISTEMA em cada resposta das perguntas 1 e 2); TER5597056_OPCOES; SITE (cada chave do `produtos.json` que muda); LOG_CORRECOES_PREVISTO.
+- `SIMULACAO_v27_T-0017.xlsx`: LEIA; ANTES_DEPOIS (as 124 células, com a recomendação); ROLAMENTOS (os 108 que mudam em alguma resposta, com o sistema lido e o SISTEMA em cada resposta das perguntas 1 e 2); TER5597056_OPCOES; SITE (cada chave do `produtos.json` que muda); LOG_CORRECOES_PREVISTO.
 - `numeros_v27.json`: as contagens.
 - `simular_v27.py`: o script. Ele só lê, usa o `base_comum` e o `gerar_site.sistemas_de` (sem cópia) e roda o `scripts/gerar_site.py` numa cópia. Uso, na raiz do repositório: `python3 -I dados/simulacoes/T-0017/v27/simular_v27.py dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v26.xlsx dados/simulacoes/T-0017/v27`.
