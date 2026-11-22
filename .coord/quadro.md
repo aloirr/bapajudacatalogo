@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 07:39 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 07:43 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -38,10 +38,11 @@ Main af3bae1 (#152).
 1. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
 2. **Fora da fila, para decidir depois:**
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
-   - Portfólio: a entrega tem 82 páginas, mas o gerador dá mais com a base de hoje, porque agrupa pelo SISTEMA da v27; gerar de novo é decisão do Alexandre (catalogo-grafico, R-20261122-100047); junto entram o "1 itens" das págs. 69 e 76 e o RD-0526, com o `plural()` num módulo comum (T-0027);
+   - Portfólio: a entrega tem 82 páginas, mas o gerador dá mais com a base de hoje, porque agrupa pelo SISTEMA da v27; gerar de novo é decisão do Alexandre (catalogo-grafico, R-20261122-100047); junto entram o RD-0527 (o "1 itens" das págs. 69 e 76) e o RD-0526, com o `plural()` num módulo comum (T-0027);
    - MC-0011 e MC-0012 (fonte do .pptx; tamanho do logo e assinatura, com a etiqueta das apresentações e o topo do site): decisão do Alexandre (T-0025);
    - RD-0511, MC-0015 e o vazio da pág. 2 do A4 (pneus e câmaras de moto em 2 lugares; "7 famílias" na capa da Linha Moto; nota 5.1 do UX): decisão do Alexandre, com simulação (T-0026);
    - a página da Lâmpadas Moto (1 cartão e cerca de 2/3 em branco): layout, decisão do Alexandre, com simulação (T-0027);
+   - RD-0528: os blocos `__main__` de `moto.py` e `pneus_fix.py` ainda procuram o texto do `cover_page`, que saiu; não muda página (catalogo-grafico, T-0027);
    - CIL8546: o "—" no ano do site vem de o site ler o texto (web-site);
    - "(coluna Leve também)" aparece com e sem aspas nos PDFs de pneus;
    - EQUIVALE A ainda pode começar uma linha com "·";
