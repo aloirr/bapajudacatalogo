@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 04:19 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 05:35 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -27,16 +27,15 @@ Atualizado em 22/11/2026 04:19 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0021](tarefas/T-0021.md) | Governança: .claude/worktrees/ no .gitignore e commit do designer-ux e do design-de-marca nas suas pastas | alexandre | po, gerente-projetos | CONCLUÍDA | #105 |
 | [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | CONCLUÍDA | #108, #110, #111, #114, #117, #118, #119, #120, #121, #123, #124, #125, #126, #127 |
 | [T-0023](tarefas/T-0023.md) | Grafia "BAP AUTOPARTS" no gerador do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | CONCLUÍDA | #122, #128, #129, #130 |
-| [T-0024](tarefas/T-0024.md) | Downloads de todos os materiais na página "Catálogos em PDF" | integracao-placas | web-site, catalogo-grafico, designer-ux, design-de-marca | NOVA | — |
+| [T-0024](tarefas/T-0024.md) | Downloads de todos os materiais na página "Catálogos e materiais" | integracao-placas | web-site, catalogo-grafico, designer-ux, design-de-marca | CONCLUÍDA | #133, #134, #135, #136, #137, #138 |
 | [T-0025](tarefas/T-0025.md) | Repetições e ajustes de marca nos materiais do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | NOVA | — |
 
 ## Fila
-Main bbf29ad (#128).
+Main 5c0ddda (#135).
 
-1. **T-0024, downloads de todos os materiais (simulação da tela antes):** R-20261122-075711.
-2. **T-0025, repetições e marca nos materiais (simulação antes), depois da T-0024:** R-20261122-080833.
-3. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
-4. **Fora da fila, para decidir depois:**
+1. **T-0025, repetições e marca nos materiais (simulação antes, decidida pelo PO):** R-20261122-080833, R-20261122-090651.
+2. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
+3. **Fora da fila, para decidir depois:**
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - Portfólio: muda se for gerado de novo, porque agrupa pelo SISTEMA da v27 (catalogo-grafico);
    - CIL8546: o "—" no ano do site vem de o site ler o texto (web-site);
