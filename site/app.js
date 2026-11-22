@@ -470,8 +470,9 @@
   // a foto com o botão de ampliar (no cartão e no produto); sem foto, só o "Foto em breve"
   const fotoZoomHtml = (p, grande, logo) => p.i ? `<button class="foto-zoom" type="button" aria-haspopup="dialog" aria-label="Ampliar a foto do ${esc(p.c)}">${fotoHtml(p, grande, logo)}</button>` : fotoHtml(p, grande);
   // Cartão do resultado (T-0014, R-20261120-112520). O código vai sobre a foto, no canto inferior direito
-  // (R-20261120-122300; não é botão; o código continua no alt da foto e no link do cartão, para leitor de tela). a foto e o código sobre ela só ampliam a
-  // foto (botão; sem foto, nada; R-20261122-013541-alexandre); só o nome e o "+ Detalhes" abrem a janela do produto. Sem botão dentro de link.
+  // (R-20261120-122300; é só texto, sem clique próprio: o toque nele cai na foto; para leitor de tela, o código está no
+  // alt da foto e no link do cartão). A foto só amplia (botão; sem foto, nada; R-20261122-013541-alexandre); só o nome
+  // e o "+ Detalhes" abrem a janela do produto. Sem botão dentro de link.
   const CARTOES_LOGO = 4; // a 1ª linha no computador (4 cartões) e as 2 primeiras no celular: foto sem lazy
   // Tag "Compatível" (T-0018, R-20261120-191700-alexandre): só no cartão da busca, com veículo (placa ou listas); nunca
   // na janela, na página nem no "Leve também". O visual e o porquê do SVG: styles.css (.tag-compat)
