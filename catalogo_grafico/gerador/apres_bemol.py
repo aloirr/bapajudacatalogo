@@ -17,6 +17,7 @@ W, H = 960, 540
 C = dict(black='#141514', ink='#1a1c1a', sec='#4d514d', grey='#7a7f7a', green='#3dae49', green2='#5cb85f', gdark='#1f7a32',
          hero='#eef4ec', line='#dfe2dc', zebra='#f6f8f5', white='#ffffff', card='#242624', orange='#f28c28', lgrey='#cfd3cf')
 LOGO = 'dimg/capa_0.png'; LOGO_G = 'dimg/logo_grande.png'
+LOGO_ESC = 'pptimg/logo_escuro.png'   # cabeçalho em fundo claro: o mesmo logo escuro do apres_ppt.js (MC-0010)
 OIL = 'dimg/cover_26.png'
 P = lambda c: f'entradas/bap/{c}.jpg'
 _ic = {}
@@ -64,7 +65,7 @@ class S:
 
     def header(self, kicker, title):
         self.rect(0, 0, W, 6, fill='green')
-        self.img(LOGO, 40, 26, 22, 30)
+        self.img(LOGO_ESC, 40, 26, 22, 30)
         self.t(72, 34, 'BAP AUTOPARTS', 8.5, 'gdark', 'PB', ls=1.6)
         self.t(40, 66, kicker.upper(), 10, 'green', 'PB', ls=1.6)
         self.t(38, 84, title, 30, 'ink', 'PB', ls=-.5)
