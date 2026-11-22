@@ -62,6 +62,24 @@ before(async () => {
 });
 after(() => catalogoSrv.close());
 
+// ---------- login falso (simula o /interno/codigos do serviço de login, T-0022) ----------
+const CHAVE_INTERNA = 'chave-interna-falsa-de-teste';
+const pedidosInternos = [];
+let loginUrl;
+let loginSrv;
+before(async () => {
+  loginSrv = http.createServer((req, res) => {
+    pedidosInternos.push({ url: req.url, chave: req.headers['x-chave-interna'], cookie: req.headers.cookie });
+    if (req.url !== '/interno/codigos') { res.writeHead(404); return res.end(); }
+    if (req.headers['x-chave-interna'] !== CHAVE_INTERNA) { res.writeHead(401); return res.end(); }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ total: 2, codigos: ['AMT7183', 'ROL3204-2RS'] }));
+  });
+  await new Promise((r) => loginSrv.listen(0, '127.0.0.1', r));
+  loginUrl = `http://127.0.0.1:${loginSrv.address().port}`;
+});
+after(() => loginSrv.close());
+
 const chamadasDe = (placa) => chamadas.filter((c) => c.placa === placa).length;
 
 // Pastas temporárias: todas apagadas no fim.
@@ -79,8 +97,8 @@ after(() => {
   for (const d of temporarias) fs.rmSync(d, { recursive: true, force: true });
 });
 
-function subir({ token = CHAVE, guarda, cwd = AQUI, catalogo = catalogoUrl } = {}) {
-  const env = { PATH: process.env.PATH, NODE_ENV: 'test', PLACAS_API_TESTE: apiUrl, PORT: '0', ORIGEM_PERMITIDA: ORIGEM };
+function subir({ token = CHAVE, guarda, cwd = AQUI, catalogo = catalogoUrl, extra = {} } = {}) {
+  const env = { PATH: process.env.PATH, NODE_ENV: 'test', PLACAS_API_TESTE: apiUrl, PORT: '0', ORIGEM_PERMITIDA: ORIGEM, ...extra };
   if (catalogo) env.CATALOGO_URL_TESTE = catalogo;
   if (token) env.API_PLACAS_TOKEN = token;
   if (guarda) env.PASTA_GUARDA = guarda;
@@ -526,4 +544,50 @@ test('contador: nada de IP, origem, hora ou placa no disco nem no log', async ()
   assert.match(log, /contar 400 \d+ms/);
   assert.match(log, /contar 403 \d+ms/);
   assert.match(log, /mais-vistos 200 \d+ms/);
+});
+
+test('contar (T-0022): com CATALOGO_URL e CHAVE_INTERNA lê os códigos do /interno/codigos do login', async () => {
+  const antes = pedidosInternos.length;
+  // O produtos.json publicado (catalogo) fica de lado: a fonte é o login.
+  const s = await subir({ extra: { CATALOGO_URL: loginUrl, CHAVE_INTERNA } });
+  await esperarLog(s, /catalogo (ok|indisponivel)/);
+  assert.match(s.logs(), /catalogo ok 2\b/);
+  const meus = pedidosInternos.slice(antes);
+  assert.equal(meus.length, 1);
+  assert.equal(meus[0].url, '/interno/codigos');
+  assert.equal(meus[0].chave, CHAVE_INTERNA);
+  assert.equal(meus[0].cookie, undefined, 'sem cookie');
+  assert.equal((await contar(s, 'AMT7183')).status, 204);
+  assert.equal((await contar(s, 'CXD13062')).status, 400, 'fora da lista do login');
+  await s.parar();
+  for (const proibido of [CHAVE_INTERNA, loginUrl]) assert.ok(!s.logs().includes(proibido), 'log vazou: ' + proibido);
+});
+
+test('contar (T-0022): chave interna errada deixa o /contar em 503, sem vazar a chave', async () => {
+  const s = await subir({ extra: { CATALOGO_URL: loginUrl, CHAVE_INTERNA: 'outra-chave-falsa' } });
+  await esperarLog(s, /catalogo (ok|indisponivel)/);
+  assert.match(s.logs(), /catalogo indisponivel/);
+  assert.equal((await contar(s, 'AMT7183')).status, 503);
+  await s.parar();
+  assert.ok(!s.logs().includes('outra-chave-falsa'));
+});
+
+test('contar (T-0022): só uma das duas variáveis continua como antes (produtos.json publicado)', async () => {
+  for (const extra of [{ CATALOGO_URL: loginUrl }, { CHAVE_INTERNA }]) {
+    const antes = pedidosInternos.length;
+    const s = await subir({ extra });
+    await esperarCatalogo(s);
+    assert.equal(pedidosInternos.length, antes, 'não chamou o login');
+    assert.equal((await contar(s, 'CXD13062')).status, 204);
+    await s.parar();
+  }
+});
+
+test('contar (T-0022): fora dos testes, CATALOGO_URL sem https não recebe a chave', async () => {
+  const { fonteDoCatalogo } = await import('./server.mjs');
+  assert.deepEqual(fonteDoCatalogo({ CATALOGO_URL: 'http://login.exemplo.invalid', CHAVE_INTERNA }), { url: null });
+  assert.deepEqual(fonteDoCatalogo({ CATALOGO_URL: 'https://login.exemplo.invalid/', CHAVE_INTERNA }), {
+    url: 'https://login.exemplo.invalid/interno/codigos', headers: { 'X-Chave-Interna': CHAVE_INTERNA },
+  });
+  assert.deepEqual(fonteDoCatalogo({ ORIGEM_PERMITIDA: 'https://site.exemplo.invalid' }), { url: 'https://site.exemplo.invalid/data/produtos.json' });
 });

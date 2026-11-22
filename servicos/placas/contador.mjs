@@ -146,8 +146,9 @@ export function criarContador({ pasta = null, log = () => {} } = {}) {
 }
 
 // ---------- lista de códigos do catálogo ----------
-// Lida do produtos.json PUBLICADO (ORIGEM_PERMITIDA + /data/produtos.json). Motivo: README, "Lista de códigos do catálogo".
-export function criarCatalogo({ url, log = () => {} }) {
+// Lida do produtos.json PUBLICADO ({produtos:[{c}]}) ou do /interno/codigos do login ({codigos:[...]}, T-0022).
+// Motivo: README, "Lista de códigos do catálogo". headers leva a chave interna; nunca vai para o log.
+export function criarCatalogo({ url, headers = {}, log = () => {} }) {
   let codigos = null;
   // Corpo lido em pedaços, contando bytes; passou de CATALOGO_MAX, desiste.
   async function lerAte(res) {
@@ -166,7 +167,7 @@ export function criarCatalogo({ url, log = () => {} }) {
     if (!url) return false;
     try {
       const res = await fetch(url, {
-        headers: { Accept: 'application/json' },
+        headers: { ...headers, Accept: 'application/json' },
         redirect: 'error',
         signal: AbortSignal.timeout(20000),
       });
@@ -174,10 +175,13 @@ export function criarCatalogo({ url, log = () => {} }) {
       const t = await lerAte(res);
       if (t === null) return false;
       const j = JSON.parse(t);
-      if (!j || !Array.isArray(j.produtos)) return false;
+      const lista = !j ? null
+        : Array.isArray(j.codigos) ? j.codigos
+          : Array.isArray(j.produtos) ? j.produtos.map((p) => p && p.c) : null;
+      if (!lista) return false;
       const s = new Set();
-      for (const p of j.produtos) {
-        const c = normalizarCodigo(p && p.c);
+      for (const v of lista) {
+        const c = normalizarCodigo(v);
         if (c) s.add(c);
       }
       if (!s.size) return false;
