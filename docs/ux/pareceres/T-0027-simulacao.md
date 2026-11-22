@@ -71,7 +71,7 @@ Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0027/sim/`
 
 | Campo | Valor |
 |---|---|
-| Data | 22/11/2026 07:31 (Manaus) |
+| Data | 22/11/2026 07:27 (Manaus) |
 | O que foi revisto | O PR #152, branch `catalogo-grafico/T-0027-entregas`, head `33678a7`, comparado com as entregas do origin/main `0fb9453`: os 3 PDFs (`Catalogo_BAP_2027_A4_grafica.pdf`, `Catalogo_BAP_2027_Completo_Digital.pdf` e `Catalogo_BAP_2027_Linha_Moto.pdf`) e o gerador |
 | Decisão do PO | 1a e 2a (R-20261122-112104-po) |
 | Pranchas | No aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0027/final/` (commit 24d8bf3) |
