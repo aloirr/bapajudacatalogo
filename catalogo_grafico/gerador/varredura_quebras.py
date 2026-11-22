@@ -3,15 +3,14 @@
 Gera um dos 3 PDFs (a4, digital ou moto) e lista cada lugar onde o ReportLab teve de partir uma palavra (texto sem
 espaço mais largo que a coluna), com a página. Tipo da quebra:
   meio       a palavra ou o código partiu entre duas letras (o que não pode);
-  separador  partiu logo depois de "," "/" "-" ")" ";" "·" (a palavra fica inteira);
+  separador  partiu logo depois de um separador do quebra.SEP (a palavra fica inteira);
   marca      partiu no espaço inseparável (marca numa linha, código na de baixo; ou a palavra do sem_viuva).
 Uso (dentro de gerador/, com PYTHONHASHSEED=0):  python varredura_quebras.py a4|digital|moto saida.pdf
 """
 import re, sys
 from reportlab.platypus import paragraph as _P
+from quebra import NBSP, SEP
 
-NBSP = '\xa0'
-SEP = set(',/-–);·|+')
 ACHADOS = {}
 
 

@@ -161,7 +161,6 @@ CARD_FS = 8.2
 SB_Y = 7 + 16.5 + 2          # cartão de destaque: tags e subtítulo começam aqui, abaixo do código
 SB_FS, SB_LH = 7.4, 9.6      # subtítulo do cartão (Poppins Medium)
 TAG_LINHAS = 2               # linhas de tags no cartão
-REF_MAIS = 0                 # B8 (T-0019): largura a mais da coluna EQUIVALE A, tirada da APLICAÇÃO (0: com 12, ~3 mm, saíam linhas e trechos de aplicação)
 
 
 import json as _json
@@ -298,7 +297,7 @@ def table_cols(f):
     has_pos = sum(1 for r in f['rows'] if re.match(r'(Dianteiro|Traseiro)', r.get('sub') or '')) >= .6 * len(f['rows'])
     cols = [('CÓDIGO', 128 if f['spec'] else 104, 'code'), ('PRODUTO / ESPECIFICAÇÃO' if f['spec'] else 'APLICAÇÃO', None, 'app')]
     if f.get('extra_col'): cols.append((f['extra_col'], 78, 'extra'))
-    cols.append(('EQUIVALE A', (96 if f.get('extra_col') else 104) + REF_MAIS, 'refs'))
+    cols.append(('EQUIVALE A', 96 if f.get('extra_col') else 104, 'refs'))
     gap, pad = 10, 8
     fixed = sum(c[1] for c in cols if c[1]) + gap * (len(cols) - 1) + 2 * pad
     return cols, [c[1] if c[1] else CW - fixed for c in cols]
