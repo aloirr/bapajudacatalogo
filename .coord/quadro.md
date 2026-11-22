@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 21/11/2026 22:40 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 21/11/2026 23:00 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -25,7 +25,7 @@ Atualizado em 21/11/2026 22:40 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | CONCLUÍDA | #40, #47, #51, #61, #64, #70, #77, #84, #90, #94, #99, #100 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 | [T-0021](tarefas/T-0021.md) | Governança: .claude/worktrees/ no .gitignore e commit do designer-ux e do design-de-marca nas suas pastas | alexandre | po, gerente-projetos | CONCLUÍDA | #105 |
-| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes | PLANEJADA (desenho e simulação das telas em andamento) | — |
+| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | PLANEJADA (desenho e simulação das telas em andamento) | — |
 
 ## Fila
 Main 3dd4850 (#107).
