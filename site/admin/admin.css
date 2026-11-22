@@ -1,4 +1,4 @@
-/* Páginas do admin (T-0022): "Criar usuários" e "Catálogos em PDF". Vem depois do /styles.css e do /entrar/entrar.css
+/* Páginas do admin (T-0022, T-0024): "Criar usuários" e "Catálogos e materiais". Vem depois do /styles.css e do /entrar/entrar.css
    e usa só as variáveis do :root. */
 
 /* ---------- lista de usuários ---------- */
@@ -75,15 +75,18 @@ dialog.dlg { background: var(--branco); }
   .dlg-curta .form-acoes > * { flex: 1 1 100%; justify-content: center; }
 }
 
-/* ---------- catálogos em PDF ---------- */
+/* ---------- catálogos e materiais (T-0024): 2 grupos de cartões ---------- */
+.pdf-grupo + .pdf-grupo { margin-top: 32px; }
+.pdf-grupo-tit { margin: 0 0 14px; font-size: 20px; line-height: 1.25; color: var(--escuro); }
+/* 3 colunas no computador (a .pg tem 1200 px), 2 no tablet, 1 no celular */
 .pdfs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.pdfs > .carregando, .pdfs > .caixa { grid-column: 1 / -1; }
+@media (min-width: 1024px) { .pdfs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .pdf { display: flex; flex-direction: column; gap: 10px; }
 .pdf-cab { display: flex; gap: 14px; align-items: center; }
 .pdf-ic { width: 52px; height: 64px; flex: none; border-radius: 6px; background: var(--escuro); color: var(--branco); display: grid; place-items: end center;
   padding-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: .06em; position: relative; }
 .pdf-ic::before { content: ""; position: absolute; left: 10px; right: 10px; top: 12px; height: 4px; border-radius: 2px; background: var(--verde); }
-.pdf h2 { font-size: 19px; margin: 0; color: var(--escuro); }
+.pdf h3 { font-size: 18px; line-height: 1.3; margin: 0; color: var(--escuro); }
 .pdf .pdf-uso { margin: 2px 0 0; color: var(--texto-2); font-size: 14px; }
 .pdf dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 6px 0 4px; font-size: 14px; }
 .pdf dt { color: var(--texto-2); }
@@ -91,9 +94,17 @@ dialog.dlg { background: var(--branco); }
 .pdf .bt { align-self: flex-start; margin-top: auto; }
 .pdf .bt:disabled { cursor: not-allowed; }
 .pdf .pdf-fora { margin: 0; font-size: 14px; color: var(--texto-2); }
+/* cartão com 2 arquivos (o "par" da lista): "Baixar PDF" (.bt) e "Baixar PowerPoint" (.bt .bt-claro), lado a lado no
+   computador. No cartão de 1/3 (330 px por dentro) os 2 não cabem com o padding de 26 px e o texto de 16 px: aqui
+   valem o padding e o texto do .bt-mini (styles.css), com a altura de 48 px do .bt. Onde o cartão é mais estreito,
+   o flex-wrap põe o 2º embaixo. */
+.pdf-bts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; }
+.pdf .pdf-bts .bt { margin-top: 0; padding: 0 12px; font-size: 14px; }
 @media (max-width: 640px) {
   .pdfs { grid-template-columns: minmax(0, 1fr); }
   .pdf .bt { width: 100%; justify-content: center; }
+  .pdf-bts { flex-direction: column; }
+  .pdf .pdf-bts .bt { font-size: 16px; }
 }
 
 /* impressão: com uma janela aberta, só ela sai (como a janela do produto); sem janela, a página como está */
