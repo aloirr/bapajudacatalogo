@@ -56,3 +56,5 @@ Não.
 O MC-0010 **não segura** a T-0023: a regra da tarefa é "páginas iguais às de antes, fora a grafia". Sugestão ao
 gerente: tarefa própria, com simulação ao Alexandre, ou entrar na mesma geração das entregas depois do "aprovado", se o PO
 quiser juntar.
+
+**Reteste (22/11/2026 04:05, Manaus):** MC-0010 fechado nas entregas do head `1380e9f`; ver `T-0023-entregas.md`.
