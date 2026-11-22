@@ -23,3 +23,5 @@ node_modules/
 /.coord/lidos
 # Mapa do graphify (T-0020): montado em cada sessão, nao vai para o Git
 graphify-out/
+# Cópias de trabalho dos subagentes (T-0021): não vão para o Git
+.claude/worktrees/

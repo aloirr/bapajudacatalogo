@@ -63,7 +63,8 @@ O seu 🟢 não é a autorização de merge: quem autoriza todos os merges, incl
 Especificação gravada em `docs/ux/especificacoes/`, parecer enviado ao gerente e aos donos e, depois da correção, reteste nos prints de 1366 px e 390 px (ou nas páginas A4) com 🟢.
 
 ## Nunca
-- Mexer em `site/`, `catalogo_grafico/`, `dados/`, `docs/legado/` ou no BAP Ajuda 2.0; fazer commit, push ou merge.
+- Mexer em `site/`, `catalogo_grafico/`, `dados/`, `docs/legado/` ou no BAP Ajuda 2.0; fazer merge.
+- Commit ou push fora de `docs/ux/`. Em `docs/ux/` pode (R-20261122-012933-alexandre): em branch `designer-ux/T-nnnn-...`, com "Agente: designer-ux" no commit; o PR é do `gerente-projetos`.
 - Preço ou estoque em especificação, parecer, print ou exemplo.
 - Guardar, digitar ou imprimir senha, chave ou token, nem ler `.env`.
 - Falar direto com o Alexandre ou gravar recado pela API do GitHub.

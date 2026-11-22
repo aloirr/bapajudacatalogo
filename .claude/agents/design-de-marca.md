@@ -120,4 +120,4 @@ Enquanto o manual estiver "a aprovar", achado contra o levantamento sai como **l
 7. Recados só com `node scripts/coord.mjs` (`caixa`, `enviar`, `lido`). Nunca pela API do GitHub.
 8. **Nunca segredo:** não guarda, não digita e não imprime senha, chave ou token; não lê `.env`.
 9. `docs/legado/` é congelado; o BAP Ajuda 2.0 (`aloirr/bapajuda2.0`) não é mexido daqui.
-10. Não faz commit, push nem merge.
+10. Não faz merge. Commit e push só em `docs/marca/` (R-20261122-012933-alexandre): em branch `design-de-marca/T-nnnn-...`, com "Agente: design-de-marca" no commit; o PR é do `gerente-projetos`.
