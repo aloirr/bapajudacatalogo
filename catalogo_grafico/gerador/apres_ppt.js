@@ -9,7 +9,7 @@ const THEME = { name: 'BAP', headFontFace: 'Arial', bodyFontFace: 'Arial',
 const pres = new pptxgen();
 pres.layout = 'LAYOUT_WIDE';            // 13.333 x 7.5 in
 pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
-pres.title = K.doc.titulo; pres.author = K.doc.autor;
+pres.title = K.doc.titulo; pres.author = K.marca;
 const C = pres.SchemeColor;
 const P = v => v / 72;                  // coordenadas em pontos (960 x 540) -> polegadas
 
@@ -51,7 +51,7 @@ function table(s, x, y, header, rows, widths, fs = 11) {
 // 1 ─ capa
 pres.addSection({ title: 'Abertura' });
 let s = pres.addSlide({ masterName: 'BAP_ESCURO', sectionTitle: 'Abertura' });
-s.addShape(pres.shapes.OVAL, { x: P(W_ = 960 - 80 - 330), y: P(300 - 330), w: P(660), h: P(660), fill: { color: C.accent1 }, line: { type: 'none' }, objectName: 'circulo1' });
+s.addShape(pres.shapes.OVAL, { x: P(960 - 80 - 330), y: P(300 - 330), w: P(660), h: P(660), fill: { color: C.accent1 }, line: { type: 'none' }, objectName: 'circulo1' });
 s.addShape(pres.shapes.OVAL, { x: P(960 - 100 - 250), y: P(300 - 250), w: P(500), h: P(500), fill: { color: C.accent2 }, line: { type: 'none' }, objectName: 'circulo2' });
 s.addShape(pres.shapes.OVAL, { x: P(960 - 100 - 185), y: P(300 - 185), w: P(370), h: P(370), fill: { color: C.text1 }, line: { type: 'none' }, objectName: 'circulo3' });
 img(s, 'logo_branco.png', 60, 48, 46, 64, 'logo');

@@ -383,9 +383,7 @@ def build(out, base=BASE):
         x = 40 + i * 222
         s.rect(x, 250, 206, 130, fill='black', r=16)
         s.t(x + 103, 280, a, 32, 'green2', 'PB', 'center'); s.t(x + 103, 334, b, 11, 'white', 'PR', 'center')
-    s.rect(40, 404, 880, 70, fill='hero', r=14); s.rect(40, 404, 5, 70, fill='green')
-    s.t(62, 418, 'GARANTIA EXPRESSA BAP', 9, 'gdark', 'PB', ls=1.4)
-    s.p(62, 438, 820, 'Sem burocracia: o consumidor aciona a garantia direto com a fábrica pelo SAC BAP, sem intermediários, conforme o certificado da embalagem.', 11.5, 16, 'ink')
+    A.garantia(s)
     s.footer()
 
     # como o portfólio está organizado

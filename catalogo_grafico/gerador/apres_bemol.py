@@ -29,7 +29,7 @@ _ic = {}
 class S:
     def __init__(self, path):
         self.c = canvas.Canvas(path, pagesize=(W, H)); self.n = 0
-        self.c.setTitle(K['doc']['titulo']); self.c.setAuthor(K['doc']['autor'])
+        self.c.setTitle(K['doc']['titulo']); self.c.setAuthor(K['marca'])
 
     def Y(self, y): return H - y
 
@@ -79,6 +79,14 @@ class S:
         self.c.showPage()
 
 
+def garantia(s):
+    """Caixa "Garantia Expressa BAP" (rótulo e frase do apres_conteudo.json); também no portfolio.py (RD-0495)."""
+    rotulo, frase = K['quem_somos']['garantia']
+    s.rect(40, 404, 880, 70, fill='hero', r=14); s.rect(40, 404, 5, 70, fill='green')
+    s.t(62, 418, rotulo, 9, 'gdark', 'PB', ls=1.4)
+    s.p(62, 438, 820, frase, 11.5, 16, 'ink')
+
+
 def table(s, x, y, cols, rows, widths, size=10.5, rowh=None, head='black'):
     s.rect(x, y, sum(widths), 26, fill=head, r=6)
     xx = x + 12
@@ -86,9 +94,7 @@ def table(s, x, y, cols, rows, widths, size=10.5, rowh=None, head='black'):
         s.t(xx, y + 8, c_.upper(), 8, 'white', 'PB', ls=1); xx += w
     y += 30
     for i, r in enumerate(rows):
-        hs = [s.p(0, 0, w - 18, html.escape(str(v)), size, size * 1.3) if False else 0 for v, w in zip(r, widths)]
-        from reportlab.platypus import Paragraph as _P
-        h = max(_P(html.escape(str(v)), ParagraphStyle('m', fontName='PR', fontSize=size, leading=size * 1.3)).wrap(w - 18, 1e5)[1] for v, w in zip(r, widths)) + 12
+        h = max(Paragraph(html.escape(str(v)), ParagraphStyle('m', fontName='PR', fontSize=size, leading=size * 1.3)).wrap(w - 18, 1e5)[1] for v, w in zip(r, widths)) + 12
         if rowh: h = max(h, rowh)
         if i % 2 == 0: s.rect(x, y, sum(widths), h, fill='zebra', r=4)
         xx = x + 12
@@ -128,9 +134,7 @@ def build(out):
         x = 40 + i * (tw + 16)
         s.rect(x, 250, tw, 130, fill='black', r=16)
         s.t(x + tw / 2, 280, a, 32, 'green2', 'PB', 'center'); s.t(x + tw / 2, 334, b, 11, 'white', 'PR', 'center')
-    s.rect(40, 404, 880, 70, fill='hero', r=14); s.rect(40, 404, 5, 70, fill='green')
-    s.t(62, 418, k['garantia'][0], 9, 'gdark', 'PB', ls=1.4)
-    s.p(62, 438, 820, k['garantia'][1], 11.5, 16, 'ink')
+    garantia(s)
     s.footer()
 
     # 3 ─ portfólio em números
