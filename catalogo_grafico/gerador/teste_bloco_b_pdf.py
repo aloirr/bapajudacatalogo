@@ -47,6 +47,27 @@ class B9Subtitulo(unittest.TestCase):
         self.assertIn('VW', out)
 
 
+class RD0293ComposicaoDoKit(unittest.TestCase):
+    """a composição do kit de embreagem sai uma vez só (RD-0293): o rótulo troca a sobra crua da DESCRICAO"""
+    def test_kit_pesado_sem_repeticao(self):
+        esperado = {'EMB3400700639R': '395MM 18 estrias · c/ platô, disco, rol. e mancal',
+                    'EMB1047071R': '395MM 10 estrias · c/ platô, disco, rol. e mancal',      # plato/disco/ro/mancal
+                    'EMB6852R': '362MM 10 estrias · c/ platô, disco, rol. e mancal',         # plato/disco mancal
+                    'EMB6146R': '330MM 10 estrias · c/ platô e disco'}                       # plato/disco
+        for code, sub in esperado.items():
+            self.assertEqual(linha(code)[1]['sub'], sub, code)
+
+    def test_sobra_crua_some_em_todas(self):
+        emb = [r for f in moto.FAMS if f['name'] == 'Embreagem Remanufaturada' for r in f['rows']]
+        self.assertTrue(emb)
+        for r in emb:
+            self.assertNotIn('plato/', r['sub'].lower(), r['code'])
+            self.assertLessEqual(r['sub'].count('platô'), 1, r['code'])
+
+    def test_outra_familia_nao_muda(self):
+        self.assertEqual(set(DT.ESS_TROCA), {l for f, _, l in DT.ESSENCIAL if f == 'Embreagem Remanufaturada'})
+
+
 class B10TagNovo(unittest.TestCase):
     def test_codigo_longo_desce_a_tag_no_a4(self):
         f, _ = linha('EMB3400700639R')

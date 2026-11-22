@@ -11,6 +11,7 @@
 - `entradas/complementos_fraga_13112026.json`: no MF21 a referência Bosch veio do Fraga sem o 3 do começo ("397016728"); ficou "3397016728", como na base (T-0019). Conferidas as 57 referências Bosch do arquivo contra a base: só essa tinha perdido o 3.
 - `digital_data.json` é entrada fixa dos itens antigos (a aplicação deles vem de lá, não da base): correção da base em item antigo entra lá também, só no texto antigo, com palavra inteira e caixa exata (a v26 nos 13 itens: PR #99). POL1625, PAF0362 e VEL7544 não têm lá o texto antigo e ficam.
 - Subtítulo (B9, `detalhe._tail`): a grafia antiga da montadora que a v26 trocou só na APLICACAO conta como a mesma palavra (`detalhe.MONT_ANTIGA`: MBB = MB, VWC = VW); a DESCRICAO do SCE14002 ainda diz "MBB ... VWC".
+- Composição do kit de embreagem uma vez só (RD-0293, T-0019; em simulação): no `detalhe.essencial`, quando entra o rótulo "c/ platô, disco, rol. e mancal" ou "c/ platô e disco", sai do subtítulo a sobra crua da DESCRICAO ("plato/disco/mancal", "plato/disco/ro/mancal", "plato/disco mancal", "plato/disco"; `detalhe.ESS_TROCA`). Fica como o DETALHE_CATALOGO da base v27: "395MM 18 estrias · c/ platô, disco, rol. e mancal". Só a Embreagem Remanufaturada muda.
 - "Leve também" por sistema: a regra e a tabela são as do site (`G.sistemas_de` e `G.SIS_COMPAT`; `docs/DADOS_DO_SITE.md`, campos `sc` e `ss`); o `oferta.sis_ok` só aplica, nos 3 PDFs.
 - Digital e Linha Moto: a última página de continuação de uma família com 1 ou 2 linhas recebe as últimas 3 (ou 2) da página anterior (`digital2.paginate`).
 - Tag NOVO e "Leve também" seguem o `STATUS_CADASTRO` da base (ATIVO = NOVO quando o item não estava no catálogo; os demais ficam fora do par do "Leve também").
@@ -48,7 +49,7 @@ Versão de 12/11/2026 (atualizada pelo PC EMPRESA; antes 27/10 pelo PC PESSOAL).
 | Encartelados moto | `python encartelados.py` |
 | Teste do `_norm`/`aplicacao_unica` (Fraga) | `python -m unittest -v teste_fraga_complementos` |
 | Teste da AUTOIMPACT (trava só fora da referência e ordem) | `python -m unittest -v teste_autoimpact_pdf` |
-| Teste do bloco B (B9 subtítulo, B10 tag NOVO, "Leve também" pelo sistema) | `python -m unittest -v teste_bloco_b_pdf` |
+| Teste do bloco B (B9 subtítulo, B10 tag NOVO, "Leve também" pelo sistema, RD-0293 composição do kit) | `python -m unittest -v teste_bloco_b_pdf` |
 | Varredura das quebras de palavra (B8) | `python varredura_quebras.py a4 saidas/A4.pdf` (ou `digital`, `moto`) |
 
 ## Mapa
