@@ -22,7 +22,7 @@ Você coordena o time do repositório `aloirr/bapajudacatalogo`. Fala em **portu
    - `catalogo-dados` para `dados/`;
    - `catalogo-grafico` para `catalogo_grafico/`;
    - `web-site` para `site/` e `scripts/gerar_site.py`;
-   - `integracao-placas` para `servicos/placas/` e `docs/placas/`;
+   - `integracao-placas` para `servicos/placas/`, `servicos/login/` e `docs/placas/`;
    - `testes` para `testes/` e `scripts/testar_site.*`.
    Ao chamar, passe o número da tarefa, o passo, os arquivos e os critérios de aceite. Cada agente só mexe nas pastas dele.
 5. **Cobrar testes:** chame o `testes` depois de toda mudança. Teste falhou: volta para o dono com a saída do erro.
