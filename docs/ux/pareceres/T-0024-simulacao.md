@@ -3,10 +3,10 @@
 | Campo | Valor |
 |---|---|
 | Revisor | designer-ux |
-| Data | 22/11/2026 04:45 (Manaus) |
+| Data | v1: 22/11/2026 04:38 (Manaus; o commit f88b952 dizia 04:45 por engano) · reteste da v2: 22/11/2026 04:45 (Manaus) |
 | O que foi revisto | Simulação do `web-site` (pasta `t0024-sim/` no rascunho da sessão do gerente, a partir do main 942cf1c): `LEIA.md`, `admin/pdfs/index.html`, `admin/pdfs/sim.css`, `admin/pdfs/pdfs.js` e os 4 prints de `prints/` |
 | Pedido | T-0024 (R-20261122-075711-alexandre, resposta "1) a") |
-| Resultado | **VOLTA PARA AJUSTE**: sem 🔴; 4 🟡 a ajustar e novos prints (alternativa B) antes de ir ao Alexandre |
+| Resultado | v1: VOLTA PARA AJUSTE (sem 🔴; 4 🟡 e a alternativa B). **Reteste da v2: LIBERADO** para ir ao Alexandre, sem 🔴 e sem 🟡 que segure (ver "Reteste da v2", no fim) |
 
 Sem preço e sem estoque: 🟢 (nenhum valor nem quantidade na tela; o tamanho do arquivo e a data não são dado interno).
 
@@ -83,3 +83,44 @@ Ao levar o `sim.css` para o `admin.css`: a regra `.pdf h2` (`site/admin/admin.cs
 - `prints/depois_390.png`
 
 Também abri `admin/pdfs/index.html`, `sim.css` e `pdfs.js`.
+
+## Reteste da v2 (22/11/2026 04:45, Manaus)
+
+O que foi revisto: o `LEIA.md` da v2, `admin/pdfs/index.html`, `estados.html` e `sim.css`, e os prints `depois_1366`, `depois_390`, `depois_menu_1366`, `depois_menu_390`, `estados_1366` e `estados_390`. Também abri a tela no Chrome em 1366, 1100 e 800 px, para medir o par de botões e ver o foco.
+
+### Os ajustes da v1
+- 🟢 **UX 1:** a linha "Tipo" saiu. O tipo fica no ícone, na extensão e no botão.
+- 🟢 **UX 2:** o grupo é só o `h2` ("Catálogos" e "Apresentações e materiais"), sem contador e sem frase.
+- 🟢 **UX 3:** os estados estão com os textos do parecer, cada um numa frase. No cartão com 2 arquivos, só o botão do arquivo que falta fica desabilitado, e a frase dele aparece acima dos botões (`estados_1366` e `estados_390`).
+- 🟢 **UX 4:** "Catálogos e materiais" está no `h1`, na trilha, no `<title>` e no menu da conta (`depois_menu_390`). A decisão continua com o Alexandre.
+- 🟢 **UX 5 (alternativa B):**
+  - são 3 e 3 cartões, sem cartão sozinho na linha em 1366 px;
+  - o cartão segue a especificação do item 5;
+  - a junção vem do campo `par` da lista fixa, e a API continua com 7 itens.
+- 🟢 **Frase do Completo Digital:** "Todos os itens, para ver na tela." segue o modelo da Linha Moto. A troca vai ao Alexandre como mudança, junto com a pergunta do `design-de-marca`.
+
+### A medida do par de botões (decisão do `web-site`): 🟢 aceita
+- **Medidas:** os 2 botões têm 48 px de altura e 14 px de texto. O "Baixar PDF" tem 130 px de largura e o "Baixar PowerPoint", 184 px.
+  - Em 1366 e em 800 px, ficam lado a lado (`sim.css`, bloco `.pdf-bts`).
+  - Em 1100 px, o segundo desce para baixo do primeiro.
+  - Em 390 px, ficam um embaixo do outro, com a largura toda e o texto de 16 px.
+- **O toque** continua com 48 px de altura, acima dos 44 px.
+- **A hierarquia** fica clara: o principal é cheio e o secundário é contornado. O foco visível aparece no secundário (contorno `--verde-txt`).
+- **O texto de 14 px no par** fica um pouco menor que o "Baixar PDF" de 16 px dos cartões vizinhos. Aceito pelos 2 motivos abaixo:
+  - com 16 px, o par não cabe no cartão de 1/3 e desceria em todo computador;
+  - a diferença só aparece no cartão que tem 2 ações.
+- **Onde o par desce** (de 1024 a 1199 px e no tablet), os 2 botões ficam alinhados à esquerda, cada um com a sua largura. Isso não segura.
+- **Nota para o passo 2** (não segura; é do `web-site`, e o `corretor-redundancias` confere):
+  - o `.pdf .pdf-bts .bt` repete à mão a medida do `.bt-mini` (padding de 12 px e texto de 14 px);
+  - um comentário apontando para o `.bt-mini` já basta;
+  - criar uma classe nova não é preciso.
+
+### Os critérios de sempre
+- 🟢 **3 toques:** menu da conta, "Catálogos e materiais" e o botão de baixar. Em 390 × 844, o primeiro botão aparece sem rolar.
+- 🟢 **Sem rolagem para o lado:** nem em 1366 px, nem em 390 px.
+- 🟢 **Estrutura da página:** um `h1`, toda imagem com `alt` e os ícones com `aria-hidden`.
+- 🟢 **Nome dos botões para o leitor de tela:** segue o modelo "Baixar PDF · Lubrificantes e Químicos".
+- 🟢 **Sem preço e sem estoque.**
+- A cor do ícone e as frases são da validação do `design-de-marca` (MC-0013).
+
+**Resultado do reteste: LIBERADO** para a simulação ir ao Alexandre, pelo PO.
