@@ -7,7 +7,7 @@
 | Data | 21/11/2026 23:05 (Manaus) |
 | O que foi visto | `LEIA.md`, `login*.html`, `sessao-expirada.html`, `trocar-senha*.html`, `catalogo*.html`, `usuarios.html`, `pdfs.html`, `sim.css` e os 34 prints (17 telas em 1366 e 390 px) da simulação do `web-site` (scratchpad do gerente, `t0022-sim/`) |
 | Base de comparação | `site/styles.css` do `main` (3dd4850). A cópia da simulação é igual, byte a byte. O manual da marca ainda está "a aprovar" |
-| Parecer | **LIBERADO COM AJUSTES**: a simulação pode ir ao Alexandre. Os achados MC-0002 e MC-0003 devem ser corrigidos na simulação antes do envio, porque ele vai julgar o que vê. Os outros podem entrar no código, no passo 2 |
+| Parecer | **LIBERADO** no reteste de 21/11 23:11 (ver o fim). Primeira leitura: **LIBERADO COM AJUSTES**: a simulação pode ir ao Alexandre. Os achados MC-0002 e MC-0003 devem ser corrigidos na simulação antes do envio, porque ele vai julgar o que vê. Os outros podem entrar no código, no passo 2 |
 
 Enquanto o manual estiver "a aprovar", nenhum achado daqui segura a tarefa. Não há nada contra as regras do repositório:
 não aparece preço nem estoque; não há logo, cor nem tipografia de montadora ou de concorrente; as logos de cliente são
@@ -157,9 +157,36 @@ Depois da correção do `web-site`, conferir os prints novos em 1366 e 390 px:
 
 | ID | Situação |
 |---|---|
-| MC-0002 | aberto |
-| MC-0003 | aberto |
-| MC-0004 | aberto |
-| MC-0005 | aberto |
-| MC-0006 | aberto |
-| MC-0007 | aberto |
+| MC-0002 | fechado em 21/11 23:11 |
+| MC-0003 | fechado em 21/11 23:11 |
+| MC-0004 | fechado em 21/11 23:11 |
+| MC-0005 | fechado em 21/11 23:11 |
+| MC-0006 | fechado em 21/11 23:11 |
+| MC-0007 | fechado em 21/11 23:11 |
+
+### Reteste · 21/11/2026 23:11 (Manaus) · **LIBERADO**
+
+Conferido nos 34 prints novos (refeitos às 23:09) e no `sim.css` e nos HTML da simulação:
+
+- **MC-0002:** a moldura ficou com 48 × 30 px no computador e 40 × 26 px no celular, com 3 px de folga (`sim.css`,
+  `:root` e o `@media (max-width: 640px)`). Nos prints `04` a `07` e `10` a `16`, a moldura do cliente ficou menor que
+  o logo da BAP, nas duas larguras. Em 390 px, o logo da BAP voltou a ser o primeiro ponto do cabeçalho. Fechado.
+- **MC-0003:** a regra do `grayscale` saiu. Na "Oficina Teste", o logo da BAP aparece com as cores certas, e a linha
+  se distingue pela etiqueta "Desativado" e pelo texto `--texto-2`. Fechado.
+- **MC-0004:** `.conta-cab span:not(.tag)`. O "Admin" do menu aberto ficou branco no `--escuro` (18,26:1), no `07` e
+  no `16`. Fechado.
+- **MC-0005:** a `.us-login` ficou em Poppins 500, 13 px, sem família monoespaçada. Fechado.
+- **MC-0006:** o `alt="bap componentes de qualidade"` está nas cinco páginas do cartão do login, e não sobrou nenhum
+  "BAP Autoparts" no `alt`. Fechado.
+- **MC-0007:** a ajuda ficou "Esqueceu a senha? Fale com a BAP para receber uma nova senha.". No bloqueio, ficou só
+  "Muitas tentativas seguidas. Aguarde 15 minutos e tente de novo.", porque a ajuda logo abaixo já diz com quem falar.
+  O "administrador" ficou só nas telas do admin. Fechado.
+
+**Pergunta do `web-site`: a regra do MC-0002 vale também para a logo da lista de usuários (64 × 40 px)?** Não. A regra
+vale para o mesmo nível do logo principal da BAP: o cabeçalho. Na lista, a logo é dado da linha (qual empresa é aquele
+usuário), dentro do conteúdo e só para o admin. Ela não divide o nível com o logo da BAP do cabeçalho, como o menu
+aberto (84 × 52 px) e o envio da logo (104 × 64 px). Os 64 × 40 px da lista ficam como estão.
+
+**Observação nova, para o manual (não é achado da T-0022):** o nome da empresa do admin passou de "BAP AUTOPARTS" para
+"BAP Autoparts". Na mesma tela, o rodapé diz "BAP AUTO PARTS". Isso entra na pergunta da grafia oficial, já anotada
+acima. A simulação pode ir assim.
