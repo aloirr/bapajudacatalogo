@@ -281,9 +281,20 @@ function vigiar(page, { base, emErro, id = "console", nome = "console sem erro",
     else emErro(cortar(m.text(), 120));
   });
   page.on("pageerror", (e) => emErro("erro de script: " + cortar(e.message, 120)));
+  // T-0022: o Chrome 153 (o do CI) marca net::ERR_ABORTED o fetch que já recebeu 204 ou 205 (resposta sem corpo) quando a
+  // página não lê o corpo, com ou sem navegação depois (o 157 dá "terminou"). O servidor já respondeu por inteiro: só esse
+  // caso vira aviso. Sem resposta, com outro status (4xx inclusive) ou com outro erro, a requisição continua sendo falha.
+  const recebido = new WeakMap(); // requisição → status da resposta (o "response" chega antes do "requestfailed")
+  page.on("response", (resp) => recebido.set(resp.request(), resp.status()));
   page.on("requestfailed", (r) => {
     if (pausado() || ignorar(r.url())) return;
-    const txt = `requisição falhou: ${cortar(r.url(), 80)} ${(r.failure() || {}).errorText || ""}`;
+    const erro = (r.failure() || {}).errorText || "";
+    const st = recebido.get(r);
+    if (local(r.url()) && erro === "net::ERR_ABORTED" && (st === 204 || st === 205)) {
+      aviso(id, nome, `${rotulo}${new URL(r.url()).pathname}: ${st} recebido e marcado ${erro} pelo navegador (corpo vazio não lido)`);
+      return;
+    }
+    const txt = `requisição falhou: ${cortar(r.url(), 80)} ${erro}`;
     if (local(r.url())) emErro(txt); else aviso(id, nome, rotulo + txt);
   });
 }
