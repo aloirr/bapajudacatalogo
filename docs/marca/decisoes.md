@@ -1,0 +1,19 @@
+# Decisões de marca do Alexandre
+
+Registro datado (hora de Manaus, UTC−4) de cada decisão de marca do Alexandre. Só entra o que ele aprovou, com a
+referência do recado ou da tarefa. As regras que valem estão em `docs/marca/manual.md`.
+
+## 21/11/2026 ~23:23 · T-0022 · R-20261122-032433-alexandre
+
+Resposta no chat do PO às perguntas do R-20261122-031122-gerente-projetos, com os prints das telas do login.
+Texto literal: "1) a  2) a  3) a  4) a  5) a  6) a  7) a  8) a  9) a  10) a". As decisões de marca:
+
+| Nº | Pergunta | Decisão |
+|---|---|---|
+| 6 a | Moldura da logo do cliente: a) retângulo deitado; b) quadrado ou círculo | **Retângulo deitado.** |
+| 7 a | Usuário sem logo: a) logo inteiro da BAP, pequeno; b) só o símbolo "b" no círculo verde | **Logo inteiro da BAP, pequeno.** Não se corta o logo nem se usa o símbolo solto. |
+| 8 a | Cores de erro (vermelho `#B42318` e fundo `#FDECEA`), só no site, para erro e botão de desativar | **Aprovadas**, só no site, para erro e para o botão de desativar. |
+| 10 a | Grafia do nome da empresa (pergunta do design-de-marca, levada junto) | **"BAP AUTOPARTS"**, como no `CLAUDE.md`. |
+
+Também aprovadas na mesma resposta, com efeito na marca: **9 a**, o desenho e as telas do login como simulados
+(parecer `docs/marca/pareceres/T-0022-simulacao.md`). As outras respostas (1 a 5) são de serviço e de UX.
