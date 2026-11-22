@@ -49,8 +49,8 @@ TIPO = {"APLICACAO": "CORRECAO_APLICACAO", "SISTEMA": "CORRECAO_SISTEMA", "DETAL
 
 LEIA_ME = [
     ("BASE BAP UNIFICADA v27 (22/11/2026)", None),
-    ("APLICACAO (SCE14002)", "'LS 1630 · LS 1929 · LS 1932 · LS 1934 · LS 1941 · VW 16210 17240 1730 · 111693': 'LS1941' "
-                             "com espaço, linhas LS em ordem, sem o 'Servo Embreagem MB' do começo (RD-0284) (T-0017)."),
+    ("APLICACAO (SCE14002)", f"'{TEXTO['SCE14002']}': 'LS1941' com espaço, linhas LS em ordem, sem o 'Servo Embreagem "
+                             "MB' do começo (RD-0284) (T-0017)."),
     ("APLICACAO (TER55227 e TER5597056)", "O ano junto do veículo e a posição como detalhe dele. TER5597056: um bloco por "
                                           "veículo, 2010–2019 nos 4, o Amarok 'Diant. Dir.' como no texto (T-0017)."),
     ("SISTEMA (108 rolamentos)", "RODAGEM → o sistema que o site e o PDF leem do texto (gerar_site.sistemas_de): "

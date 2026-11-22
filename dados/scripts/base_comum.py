@@ -7,15 +7,18 @@ do main() (--conferir, "vNN já existe", sha da versão anterior, pasta temporá
 Da v23 em diante, também a leitura da aba ANTES_DEPOIS da simulação, o "(vazio)" e a conferência do valor gravado em
 cada célula (RD-0247; o base_v22.py fica como rodou). Da v24 em diante, as linhas novas no fim de uma aba (ex.: a
 VEICULOS): acrescentar_linhas grava e o comparar confere (novas_no_fim). Da v26 em diante, também antes_log,
-linhas_por_codigo e conferir_cabecalho (RD-0272; os base_v22 a base_v25 ficam como rodaram).
+linhas_por_codigo e conferir_cabecalho (RD-0272; os base_v22 a base_v25 ficam como rodaram). Da v27 em diante, também
+o gerar_site_copia e o contar_duvidoso das simulações (RD-0310; o simular_v26.py fica como rodou).
 """
 from __future__ import annotations
 
 import argparse
 import collections
 import hashlib
+import json
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 from copy import copy
@@ -67,6 +70,30 @@ def parar(erros: list[str]) -> None:
 def vazio(v):
     """O valor da simulação na base: "(vazio)" é a célula vazia."""
     return None if v == VAZIO else v
+
+
+def contar_duvidoso(wb) -> dict:
+    """Células com "duvidoso" na PRODUTOS e na VEICULOS (a regra R-20261120-213300: o número não pode subir)."""
+    return {aba: sum(isinstance(v, str) and "duvidoso" in v.lower()
+                     for r in wb[aba].iter_rows(min_row=2, values_only=True) for v in r)
+            for aba in ("PRODUTOS", "VEICULOS")}
+
+
+def gerar_site_copia(base: Path, pasta: Path) -> dict:
+    """Roda o scripts/gerar_site.py numa cópia (pasta/scripts e pasta/site, com a site/img só lida) e devolve o JSON:
+    total, sc, produtos ({código: produto}) e log. Nada é gravado em site/."""
+    (pasta / "scripts").mkdir(parents=True, exist_ok=True)
+    (pasta / "site" / "data").mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(RAIZ / "scripts" / "gerar_site.py", pasta / "scripts" / "gerar_site.py")
+    if not (pasta / "site" / "img").exists():
+        (pasta / "site" / "img").symlink_to(RAIZ / "site" / "img")
+    r = subprocess.run([sys.executable, "-I", str(pasta / "scripts" / "gerar_site.py"), "--base", str(base)],
+                       capture_output=True, text=True)
+    saida = r.stdout + r.stderr
+    if r.returncode or "[PARADO]" in saida:
+        raise SystemExit(f"[PARADO] gerar_site na cópia: {saida}")
+    j = json.loads((pasta / "site" / "data" / "produtos.json").read_text(encoding="utf-8"))
+    return {"total": j["total"], "sc": j.get("sc"), "produtos": {p["c"]: p for p in j["produtos"]}, "log": saida.strip()}
 
 
 def antes_log(v) -> str:

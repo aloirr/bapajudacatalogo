@@ -28,8 +28,6 @@ import collections
 import importlib.util
 import json
 import re
-import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -39,7 +37,8 @@ from openpyxl.styles import Alignment, Font
 
 RAIZ = Path(__file__).resolve().parents[4]
 sys.path[:0] = [str(RAIZ / "dados" / "scripts")]
-from base_comum import CAB_LOG, CAB_VEICULOS, comparar, conferir_cabecalho, limpo, linhas_por_codigo, sha, versao  # noqa: E402
+from base_comum import (CAB_LOG, CAB_VEICULOS, comparar, conferir_cabecalho, contar_duvidoso,  # noqa: E402
+                        gerar_site_copia, limpo, linhas_por_codigo, sha, versao)
 
 _spec = importlib.util.spec_from_file_location("gerar_site", RAIZ / "scripts" / "gerar_site.py")
 G = importlib.util.module_from_spec(_spec)
@@ -109,31 +108,9 @@ def sistema_proposto(lidos: list[str], texto: str, hoje: str, p1: str, p2: str) 
     return NOME_CAMBIO[p1] if p == CAMBIO else p
 
 
-def gerar_site(base: Path, pasta: Path) -> dict:
-    """Roda o scripts/gerar_site.py numa cópia (pasta/scripts e pasta/site, com a site/img só lida) e devolve o JSON."""
-    (pasta / "scripts").mkdir(parents=True, exist_ok=True)
-    (pasta / "site" / "data").mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(RAIZ / "scripts" / "gerar_site.py", pasta / "scripts" / "gerar_site.py")
-    if not (pasta / "site" / "img").exists():
-        (pasta / "site" / "img").symlink_to(RAIZ / "site" / "img")
-    r = subprocess.run([sys.executable, "-I", str(pasta / "scripts" / "gerar_site.py"), "--base", str(base)],
-                       capture_output=True, text=True)
-    saida = r.stdout + r.stderr
-    if r.returncode or "[PARADO]" in saida:
-        raise SystemExit(f"[PARADO] gerar_site na cópia: {saida}")
-    j = json.loads((pasta / "site" / "data" / "produtos.json").read_text(encoding="utf-8"))
-    return {"total": j["total"], "sc": j.get("sc"), "produtos": {p["c"]: p for p in j["produtos"]}, "log": saida.strip()}
-
-
 def leve_tambem(p: dict) -> list[str]:
     """Os sistemas do produto para o "Leve também" do site (o sistemasDe do site/app.js: ss, senão si)."""
     return p.get("ss") or ([str(p["si"]).upper()] if p.get("si") else [])
-
-
-def contar_duvidoso(wb) -> dict:
-    return {aba: sum(isinstance(v, str) and "duvidoso" in v.lower()
-                     for r in wb[aba].iter_rows(min_row=2, values_only=True) for v in r)
-            for aba in ("PRODUTOS", "VEICULOS")}
 
 
 def main(base, saida):
@@ -215,7 +192,7 @@ def main(base, saida):
         wb.save(sim)
         dif = comparar(sim, versao(26), celulas, ult_log, "v26")
         assert not dif, dif
-        antes, depois = gerar_site(base, tmp / "v26"), gerar_site(sim, tmp / "v27")
+        antes, depois = gerar_site_copia(base, tmp / "v26"), gerar_site_copia(sim, tmp / "v27")
     assert set(antes["produtos"]) == set(depois["produtos"]), "[PARADO] produto entrou ou saiu do site"
     assert antes["sc"] == depois["sc"]
     site, lt_muda = [], []
