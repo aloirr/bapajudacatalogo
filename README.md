@@ -1,6 +1,6 @@
 # BAP Ajuda · Catálogo BAP
 
-Repositório **privado** do catálogo da **BAP AUTOPARTS** (Grupo PMZ, Manaus), criado em 20/11/2026.
+Repositório do catálogo da **BAP AUTOPARTS** (Grupo PMZ, Manaus), criado em 20/11/2026.
 
 A partir de 20/11/2026, **tudo de catálogo mora aqui**:
 
@@ -16,7 +16,7 @@ O BAP Ajuda 2.0 (`aloirr/bapajuda2.0`) continua como está e vai ser reformulado
 
 | Pasta | O que tem |
 |---|---|
-| `site/` | O **catálogo online**. É um site estático: `index.html`, `app.js`, `styles.css` e `assets/`. Também tem `data/produtos.json` e `img/`, gerados pelo script. É a única pasta publicada no Render. |
+| `site/` | O **catálogo online**. É um site estático: `index.html`, `app.js`, `styles.css` e `assets/`. Também tem `data/produtos.json` e `img/`, gerados pelo script. No ar, é servida só com login pelo `servicos/login/` (T-0022). |
 | `scripts/gerar_site.py` | Lê a base unificada e gera `site/data/produtos.json` e as fotos reduzidas de `site/img/`. |
 | `dados/` | `BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx` é a **fonte única** do catálogo. `versoes/` guarda as versões v8 a v14. |
 | `catalogo_grafico/` | O gerador do catálogo impresso e do PDF digital (`gerador/`), as entregas (PDFs 2026/2027, Linha Moto, Portfólio, Kit Filtros, conferências) e o `LEIA-ME.md`. |
@@ -62,7 +62,7 @@ Depois abra http://localhost:8000.
 - A ficha técnica sai de uma **lista branca** (`FICHA` em `scripts/gerar_site.py`). Custo de importação, MOQ, ranking, fornecedor e estoque nunca saem.
 - O script **para** se o JSON tiver palavra de dado interno.
 - A base `.xlsx` tem dado interno. Por isso:
-  - o repositório é **privado**;
-  - só a pasta `site/` vai para o ar.
+  - o repositório vai ficar **privado**; até a troca, ele está **público**: nada de dado interno novo no Git (o de recados é público);
+  - no ar só vão o `site/` (atrás do login) e os PDFs da lista fixa do serviço de login.
 - Chave de API (API PLACAS, por exemplo) **nunca** entra no Git. Ela vai em variável de ambiente no Render.
 - Respostas, commits e docs ficam em **português do Brasil**.
