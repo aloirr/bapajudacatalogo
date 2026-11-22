@@ -8,6 +8,7 @@ a mesma posição (dianteiro/traseiro) e o mesmo lado. Sem par por veículo, ent
 import re, collections
 import cross as X
 import detalhe as DT
+from site_regras import G as _G
 
 ADITIVO, AGUA = 'RAD25005P', 'RAD25009P'
 DOT3, DOT4 = 'FLU15001', 'FLU15002'
@@ -63,6 +64,30 @@ QUIMICO = [(r'AGUA DESMIN', f'{ADITIVO} (aditivo)'), (r'FLUIDO|ADITIVO', f'{AGUA
            (r'DESENGRIPANTE|DESCARBONIZANTE', 'Velas e bomba de comb.')]
 LOG = collections.Counter()
 
+# ---------------------------------------------------------------- "Leve também" por sistema (T-0019)
+# A regra e a tabela são as do site (G.sistemas_de e G.SIS_COMPAT, sem cópia; R-20261121-200058-alexandre); aqui elas
+# só filtram o par calculado por veículo.
+_SIS = {}
+
+
+def sistemas(code):
+    """sistemas do item pela regra do site (G.sistemas_de), com os campos da base unificada"""
+    c = code.strip().upper()
+    if c not in _SIS:
+        import montar as _M, taxo
+        b = _M.BASE_D.get(taxo.norm(c))
+        _SIS[c] = set() if b is None else set(_G.sistemas_de(
+            _G.limpar(b.PRODUTO), _G.limpar(b.SISTEMA), _G.limpar(b.DESCRICAO), _G.limpar(b.DETALHE_CATALOGO),
+            dict(_G.pares_de(_G.limpar(b.DADOS_ADICIONAIS))).get("POSICAO", "")))
+    return _SIS[c]
+
+
+def sis_ok(origem, oferta):
+    """a oferta é do mesmo sistema do item ou de um compatível (SIS_COMPAT); sem sistema na base, fica"""
+    so, sd = sistemas(origem), sistemas(oferta)
+    if not so or not sd: return True
+    return any(d in _G.SIS_COMPAT.get(o, (o,)) for o in so for d in sd)
+
 
 def _pos(code):
     b = DT._base10().get(code.strip().upper(), {})
@@ -83,6 +108,7 @@ def _pares(r, cand, lado=True, maxn=2):
     out = []
     for rb, (mb, eb, vb, yb), bb, (pb, lb, fb) in cand:
         if rb['code'] == r['code']: continue
+        if not sis_ok(r['code'], rb['code']): continue
         mi = m & mb
         if not mi: continue
         if ba and bb and not (ba & bb): continue
@@ -144,18 +170,38 @@ def aplicar(fams):
                 r['extra'] = next((s for p, s in QUIMICO if re.search(p, t)), '—'); LOG[(nome, 'sugestão fixa')] += 1
             else:
                 r['extra'] = fixa or '—'; LOG[(nome, 'sugestão fixa')] += 1
-    _so_codigo(fams)
+    cods = {r['code'].strip().upper() for f in fams for r in f['rows']}
+    _por_sistema(fams, cods)
+    _so_codigo(fams, cods)
     return LOG
+
+
+def _cod(p):
+    """o código de uma oferta, sem o que vem entre parênteses ("RAD25005P (aditivo)")"""
+    return re.sub(r'\s*\(.*?\)', '', p).strip()
+
+
+def _por_sistema(fams, cods):
+    """o par que veio pronto (cross.py, sugestão fixa com código) também segue o sistema: o código de outro sistema
+    sai; sem nenhum, fica o traço (o _so_codigo)"""
+    for f in fams:
+        if f.get('moto'): continue
+        for r in f['rows']:
+            e = r.get('extra')
+            if not e or e == '—': continue
+            ps = e.split(' · ')
+            fica = [p for p in ps if _cod(p).upper() not in cods or sis_ok(r['code'], _cod(p))]
+            if len(fica) != len(ps):
+                r['extra'] = ' · '.join(fica) or '—'; LOG[(f['name'], 'fora do sistema')] += 1
 
 
 TEM_COD = re.compile(r'\b(?=[A-Z0-9./-]*\d)[A-Z][A-Z0-9./-]{3,}|\b\d{1,3}[./]\d{2,3}-\d{2}\b')
 
 
-def _so_codigo(fams):
+def _so_codigo(fams, cods):
     """sem item do portfólio para oferecer, fica só o traço (Alexandre, 23/10)"""
-    cods = {r['code'].strip().upper() for f in fams for r in f['rows']}
     def tem(e):
-        return any(re.sub(r'\s*\(.*?\)', '', p).strip().upper() in cods for p in e.split(' · ')) or bool(TEM_COD.search(e))
+        return any(_cod(p).upper() in cods for p in e.split(' · ')) or bool(TEM_COD.search(e))
     for f in fams:
         for r in f['rows']:
             e = r.get('extra')

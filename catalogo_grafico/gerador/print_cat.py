@@ -68,9 +68,10 @@ class PDoc(D2.Doc):
         t.setTextOrigin(self.X(x), self.Y(y + .95 * size)); t.textLine(s); t.setCharSpace(0); self.c.drawText(t)
         return w
 
-    def text(self, x, y, w, mk, size, lead, color='ink', font='PR'):
+    def text(self, x, y, w, mk, size, lead, color='ink', font='PR', ind=0):
         mk = mk.replace('#5b5f5b', 'cmyk(0,0,0,0.68)')
-        p = Paragraph(mk, ParagraphStyle('t', fontName=font, fontSize=size * S, leading=lead * S, textColor=col(color)))
+        p = Paragraph(mk, ParagraphStyle('t', fontName=font, fontSize=size * S, leading=lead * S, textColor=col(color),
+                                         firstLineIndent=ind * S))
         pw, ph = p.wrap(w * S, 1e6); p.drawOn(self.c, self.X(x), self.Y(y) - ph)
         return ph                                 # o D2.Doc.ref usa a altura
 
@@ -248,7 +249,7 @@ def cards(dc, f, top, y):
     gap = 8; cw = (CW - gap * 4) / 5; tw = cw - 18
     PH = 66
     fixed_code = 7 + 16.5 + 3 + 20.8 + 6
-    refsl = [html.escape(' · '.join(r['refs'].split(' · ')[:2]) if r.get('refs') else '—') for r in top]
+    refsl = [html.escape(D2.refs_juntas(' · '.join(r['refs'].split(' · ')[:2])) if r.get('refs') else '—') for r in top]
     rh = max(para_h(x, 7.8, 10.4, tw) for x in refsl) if refsl else 10.4
     app_max = 236 - (PH + fixed_code + 1 + 6 + 6 + 1 + 5 + rh + 6)
     apps = []
@@ -308,8 +309,9 @@ def row_cells(f, r, cols, widths):
         if k == 'code':
             import tags as TG
             tl, sm = D2.tags_e_sobra(f, r)
+            tl = D2.codigo_e_novo(r, tl, sm, w, 10, 0, 6.4, 3.5, 5)
             th = TG.medir(lw, tl, w0)[1] if tl else 0
-            sh = para_h(sm, 7.2, 9.4, w0, 'PM') if sm else 0
+            sh = para_h(sm, 7.2, 9.4, w0, 'PM', r['_ind']) if sm else 0
             r['_tl'], r['_sm'] = tl, sm
             cells.append(('code', r['code'], 14 + th + (sh + 1 if sm else 0)))
         elif k == 'app':
@@ -327,7 +329,7 @@ def row_cells(f, r, cols, widths):
             s_ = html.escape(r.get('extra') or '—')
             cells.append(('text', s_, para_h(s_, 7.8, 10.4, w, 'PM'), 7.8, 10.4, 'gtext', 'PM'))
         elif k == 'refs':
-            s_ = '<br/>'.join(html.escape(x) for x in (r.get('refs') or '—').split(' · ')[:2])
+            s_ = '<br/>'.join(html.escape(D2.refs_juntas(x)) for x in (r.get('refs') or '—').split(' · ')[:2])
             cells.append(('ref', s_, para_h(s_, 8.4, 11.2, w), 8.4, 11.2, 'sec', 'PR'))
     return cells, max(c[2] for c in cells) + 9
 
@@ -346,14 +348,14 @@ def draw_rows(dc, f, rows, y, cols, widths, ymax):
         x = MX + 8
         for c_, w in zip(cells, widths):
             if c_[0] == 'code':
-                cs = 10
-                while cs > 7.5 and lw(r['code'], cs, 'PB') > w: cs -= .25
+                cs = r.get('_cs', 10)
                 dc.label(x, y + 4.5 + (10 - cs) * .5, r['code'], cs, 'black', 'PB')
-                if r.get('nov'): dc.tag(x + lw(r['code'], cs, 'PB') + 5, y + 4.5, 'NOVO', 6.4, 'otag', 'otext', 3.5)
+                if r.get('nov') and not r.get('_novo_baixo'): dc.tag(x + lw(r['code'], cs, 'PB') + 5, y + 4.5, 'NOVO', 6.4, 'otag', 'otext', 3.5)
                 import tags as TG
                 yy = y + 17
                 if r.get('_tl'): yy += TG.desenhar(dc, lw, x, yy, r['_tl'], w)
-                if r.get('_sm'): dc.text(x, yy + 1, w, r['_sm'], 7.2, 9.4, 'gtext', 'PM')
+                if r.get('_sm') and r.get('_ind'): D2.novo_na_descricao(dc, x, yy + 1.2)
+                if r.get('_sm'): dc.text(x, yy + 1, w, r['_sm'], 7.2, 9.4, 'gtext', 'PM', r.get('_ind', 0))
             else:
                 k_, m, hh, sz, ld, cl, fn = c_
                 (dc.ref if k_ == 'ref' else dc.text)(x, y + 4.5, w, m, sz, ld, cl, fn)
@@ -378,11 +380,12 @@ def cta_box(dc, f, rest, shown, y_bottom):
         t = 'Linha completa nesta página'
         body = 'Todas as aplicações detalhadas também estão no Catálogo Digital Completo.'
     bw = CW - 32 - 190 - 20
-    h = 11 + 17 + 3 + para_h(html.escape(body), 10, 14.5, bw) + 11
+    body = D2.sem_viuva(html.escape(body))      # B8: "Chery." sozinho na última linha (p. 13)
+    h = 11 + 17 + 3 + para_h(body, 10, 14.5, bw) + 11
     y = y_bottom - h
     dc.rect(MX, y, CW, h, fill='cta', r=12)
     dc.label(MX + 16, y + 11, t, 12.5, 'black', 'PB')
-    dc.text(MX + 16, y + 11 + 17 + 3, bw, html.escape(body), 10, 14.5, 'sec')
+    dc.text(MX + 16, y + 11 + 17 + 3, bw, body, 10, 14.5, 'sec')
     pw = lw('Veja o catálogo digital', 10, 'PM') + 32
     dc.rect(W - MX - 16 - pw, y + (h - 30) / 2, pw, 30, fill='black', r=15)
     dc.label(W - MX - 16 - pw / 2, y + (h - 30) / 2 + 9, 'Veja o catálogo digital', 10, 'white', 'PM', 0, 'center')

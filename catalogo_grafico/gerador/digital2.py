@@ -10,6 +10,8 @@ from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import datas
+import tags as TG
+from quebra import NBSP  # B8: o import também instala a quebra (palavra longa no espaço inseparável ou no separador, não no meio)
 
 FD = 'fontes/'
 for n, f in [('PR', 'Poppins-Regular'), ('PM', 'Poppins-Medium'), ('PB', 'Poppins-Bold')]:
@@ -89,7 +91,48 @@ def markup(segs):
                 out.append(f'<font color="{C["grey"]}">' + html.escape(m.group(0), quote=False) + '</font>')
                 last = m.end()
             out.append(html.escape(part[last:], quote=False))
-    return ''.join(out)
+    return sem_viuva(''.join(out))
+
+
+_SEPW = {'·', '/', '-', '–', '|', '+'}
+
+
+def sem_viuva(mk):
+    """B8 (T-0019): a última palavra não fica sozinha na última linha. Troca por espaço inseparável o último espaço do
+    texto (fora das marcas <...>); se a palavra de antes é só um separador ("·", "/", "-"), prende mais um espaço, para a
+    última linha não começar com o separador ("1730 · 111693")."""
+    partes = re.split(r'(<[^>]*>)', mk)
+    txt = [k for k, t in enumerate(partes) if not t.startswith('<')]
+    pos = [(k, j) for k in txt for j in range(len(partes[k]))]        # cada letra do texto, fora das marcas
+    while pos and partes[pos[-1][0]][pos[-1][1]].isspace(): pos.pop()  # sem o espaço do fim
+    s = ''.join(partes[k][j] for k, j in pos)
+    trocar, i = [], len(s)
+    while len(trocar) < 3:
+        i = s.rfind(' ', 0, i)
+        if i <= 0: break
+        trocar.append(i)
+        antes = s[:i].rstrip().rsplit(' ', 1)[-1]
+        if antes not in _SEPW: break
+    if not trocar or (len(trocar) == 1 and s[:trocar[0]].strip() == ''): return mk
+    for i in trocar:
+        k, j = pos[i]; partes[k] = partes[k][:j] + NBSP + partes[k][j + 1:]
+    return ''.join(partes)
+
+
+def refs_juntas(refs):
+    """B8 (T-0019): a marca e o código da referência na mesma linha ("Autoimpact PU14", "Cofap GP32986"): o espaço
+    entre a marca (1 palavra; 2 nas marcas de 2 nomes, como "Magneti Marelli") e o código vira espaço inseparável. O
+    resto continua quebrando como antes (entre as referências e dentro de código com espaço, "3400 700 639")."""
+    if not refs: return refs
+    import fraga_complementos as _FC
+    out = []
+    for x in refs.split(' · '):
+        x = re.sub(r'\s+', ' ', x.strip())
+        n = 2 if any(x.upper().startswith(d + ' ') for d in _FC.DUAS) else 1
+        p = x.split(' ')
+        if len(p) > n: x = ' '.join(p[:n]) + NBSP + ' '.join(p[n:])
+        out.append(x)
+    return ' · '.join(out)
 
 
 datas_re = re.compile(r'(?<![\w/])((?:\d{2}/)?' + datas.Y + r')((?:–(?:\d{2}/)?' + datas.Y + r')|–|\+)?(?![\w/])')
@@ -98,10 +141,10 @@ datas_re = re.compile(r'(?<![\w/])((?:\d{2}/)?' + datas.Y + r')((?:–(?:\d{2}/)
 _pc = {}
 
 
-def para_h(mk, size, lead, width, font='PR'):
-    k = (mk, size, lead, width, font)
+def para_h(mk, size, lead, width, font='PR', ind=0):
+    k = (mk, size, lead, width, font, ind)
     if k not in _pc:
-        p = Paragraph(mk, ParagraphStyle('m', fontName=font, fontSize=size, leading=lead))
+        p = Paragraph(mk, ParagraphStyle('m', fontName=font, fontSize=size, leading=lead, firstLineIndent=ind))
         _pc[k] = p.wrap(width, 1e6)[1]
     return _pc[k]
 
@@ -137,8 +180,9 @@ class Doc:
         t.setTextOrigin(self.X(x), self.Y(y + .95 * size)); t.textLine(s); t.setCharSpace(0); self.c.drawText(t)
         return w
 
-    def text(self, x, y, w, mk, size, lead, color='ink', font='PR'):
-        p = Paragraph(mk, ParagraphStyle('t', fontName=font, fontSize=size * S, leading=lead * S, textColor=HexColor(C[color])))
+    def text(self, x, y, w, mk, size, lead, color='ink', font='PR', ind=0):
+        p = Paragraph(mk, ParagraphStyle('t', fontName=font, fontSize=size * S, leading=lead * S, textColor=HexColor(C[color]),
+                                         firstLineIndent=ind * S))
         pw, ph = p.wrap(w * S, 1e6); p.drawOn(self.c, self.X(x), self.Y(y) - ph)
         return ph
 
@@ -177,7 +221,7 @@ class Doc:
         self.c.drawImage(rd, self.X(x + (w - dw) / 2), self.Y(y + (h + dh) / 2), dw * S, dh * S, mask=mk)
 
     def tag(self, x, y, s, size, bg, fg, pad):
-        w = lw(s, size, 'PB', size * .08) + 2 * pad; h = size * 1.5
+        w = TG.largura(lw, s, size, pad); h = size * 1.5
         self.rect(x, y, w, h, fill=bg, r=h / 2)
         self.label(x + w / 2, y + (h - size * 1.2) / 2 + .2, s, size, fg, 'PB', size * .08, 'center')
         return w
@@ -225,9 +269,35 @@ class Doc:
 
 
 # ---------------------------------------------------------------- linhas da tabela
+def novo_desce(r, cs, largura, size, pad, gap):
+    """B10 (T-0019, proposta do designer-ux): o código e a tag NOVO não cabem juntos antes da coluna de aplicação (A4
+    p. 20: EMB3400700639R, 648R e 649R): a tag desce para a linha de baixo, a das tags e da descrição curta, sem mudar a
+    largura das colunas."""
+    if not r.get('nov'): return False
+    return lw(r['code'], cs, 'PB') + gap + TG.largura(lw, 'NOVO', size, pad) > largura
+
+
+def novo_na_sobra(tl, sm):
+    """tag NOVO que desceu: com tags, vai na frente delas; sem tags e com descrição curta, na 1ª linha da descrição
+    (recuo do tamanho da tag); sem as duas, sozinha. Devolve (tags, recuo da descrição curta)"""
+    if tl or not sm: return ['NOVO'] + list(tl or []), 0
+    return [], TG.largura(lw, 'NOVO') + 3   # o recuo é a tag e um espaço
+
+
+def codigo_e_novo(r, tl, sm, largura, cs, folga, size, pad, gap):
+    """B10, igual no A4 e no Digital: tamanho do código (de cs até 7.5) e lugar da tag NOVO. Devolve as tags."""
+    while cs > 7.5 and lw(r['code'], cs, 'PB') > largura - folga: cs -= .25
+    r['_cs'], r['_novo_baixo'], r['_ind'] = cs, novo_desce(r, cs, largura, size, pad, gap), 0
+    if r['_novo_baixo']: tl, r['_ind'] = novo_na_sobra(tl, sm)
+    return tl
+
+
+def novo_na_descricao(dc, x, y):
+    dc.tag(x, y, 'NOVO', TG.TAM, 'otag', 'otext', 3)   # B10: na 1ª linha da descrição curta
+
+
 def tags_e_sobra(f, r):
     """(tags, texto que sobra já escapado) embaixo do código"""
-    import tags as TG
     tl, sobra = TG.do_item(f['name'], r, f['spec'])
     return tl, html.escape(datas.para_pdf(sobra), quote=False) if sobra else ''
 
@@ -239,11 +309,10 @@ def prep_rows(f, linhas=None):
             mk = markup(r['segs'])
         else:
             mk = f'<font color="{C["grey"]}">Aplicação em cadastro — consulte o vendedor BAP</font>'
-        refs = html.escape(r['refs'] or '—', quote=False)
+        refs = html.escape(refs_juntas(r['refs'] or '—'), quote=False)
         tl, sm = tags_e_sobra(f, r)
-        r['_tl'] = tl
-        ch = 12.5 + (para_h(sm, SF, SL, CODE_W, 'PM') + 1.5 if sm else 0)
-        import tags as TG
+        r['_tl'] = tl = codigo_e_novo(r, tl, sm, CODE_W, 9.5, 40 if r['nov'] else 0, 6.8, 4, 6)
+        ch = 12.5 + (para_h(sm, SF, SL, CODE_W, 'PM', r['_ind']) + 1.5 if sm else 0)
         if tl: ch += TG.medir(lw, tl, CODE_W)[1] + 1
         r['_ch'] = ch + RPAD
         aw = app_w(f)
@@ -329,17 +398,17 @@ def table_page(dc, f, rows, pg, cont, primeira=None):
         if j % 2: dc.rect(MX, y, CW, h, fill='zebra')
         dc.rect(MX, y + h - 1, CW, 1, fill='line2')
         x = MX + PAD
-        cs = 9.5
-        while cs > 7.5 and lw(r['code'], cs, 'PB') > CODE_W - (40 if r['nov'] else 0): cs -= .25
+        cs = r.get('_cs', 9.5)
         dc.label(x, y + 3.5, r['code'], cs, 'grey' if it['cont'] else 'black', 'PB')
         if it['cont']:
             dc.label(x, y + 16, '(continuação)', SF, 'grey', 'PM')
-        elif r['nov']: dc.tag(x + lw(r['code'], cs, 'PB') + 6, y + 3.5, 'NOVO', 6.8, 'otag', 'otext', 4)
+        elif r['nov'] and not r.get('_novo_baixo'): dc.tag(x + lw(r['code'], cs, 'PB') + 6, y + 3.5, 'NOVO', 6.8, 'otag', 'otext', 4)
         ys = y + 16
         if not it['cont'] and r['_tl']:           # tags embaixo do código
-            import tags as TG
             ys += TG.desenhar(dc, lw, x, y + 16, r['_tl'], CODE_W) + 1
-        if sm: dc.text(x, ys, CODE_W, sm, SF, SL, 'gtext', 'PM')
+        ind = r.get('_ind', 0) if sm else 0
+        if ind: novo_na_descricao(dc, x, ys + .2)
+        if sm: dc.text(x, ys, CODE_W, sm, SF, SL, 'gtext', 'PM', ind)
         if it['para'] is not None:
             c = dc.c; c.saveState(); c.scale(S, S)
             ph = it['para'].wrap(aw, 1e6)[1]

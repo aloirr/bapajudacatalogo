@@ -78,25 +78,34 @@ def do_item(fname, r, spec=False):
     return extrair(r.get('sub') or '', fname)
 
 
-def medir(lw, tags, largura, size=6.2, pad=3, gap=2.5, lh=10):
+TAM = 6.2             # tamanho das tags embaixo do código (e da tag NOVO que desce, B10)
+
+
+def largura(lw, t, size=TAM, pad=3):
+    """largura de uma tag (texto em negrito com espaçamento e a folga dos dois lados), a mesma do Doc.tag"""
+    return lw(t, size, 'PB', size * .08) + 2 * pad
+
+
+def medir(lw, tags, largura_max, size=TAM, pad=3, gap=2.5, lh=10):
     """posições (linha, x) de cada tag dentro da largura; devolve lista e altura"""
     pos, x, ln = [], 0, 0
     for t in tags:
-        w = lw(t, size, 'PB', size * .08) + 2 * pad
-        if x and x + w > largura:
+        w = largura(lw, t, size, pad)
+        if x and x + w > largura_max:
             ln += 1; x = 0
         pos.append((t, x, ln, w)); x += w + gap
     return pos, (ln + 1) * lh if tags else 0
 
 
-def altura(lw, tags, largura, size=6.2, pad=3, gap=2.5, lh=10, max_linhas=9):
+def altura(lw, tags, largura_max, size=TAM, pad=3, gap=2.5, lh=10, max_linhas=9):
     """altura que o desenhar ocupa (até max_linhas), sem desenhar"""
-    return min(medir(lw, tags, largura, size, pad, gap, lh)[1], max_linhas * lh)
+    return min(medir(lw, tags, largura_max, size, pad, gap, lh)[1], max_linhas * lh)
 
 
-def desenhar(dc, lw, x, y, tags, largura, size=6.2, pad=3, gap=2.5, lh=10, max_linhas=9):
-    pos, h = medir(lw, tags, largura, size, pad, gap, lh)
+def desenhar(dc, lw, x, y, tags, largura_max, size=TAM, pad=3, gap=2.5, lh=10, max_linhas=9):
+    pos, h = medir(lw, tags, largura_max, size, pad, gap, lh)
     for t, dx, ln, w in pos:
         if ln >= max_linhas: break
-        dc.tag(x + dx, y + ln * lh, t, size, 'hero', 'gtext', pad)
-    return altura(lw, tags, largura, size, pad, gap, lh, max_linhas)
+        cor = ('otag', 'otext') if t == 'NOVO' else ('hero', 'gtext')   # B10: a tag NOVO que desceu fica com a cor dela
+        dc.tag(x + dx, y + ln * lh, t, size, *cor, pad)
+    return altura(lw, tags, largura_max, size, pad, gap, lh, max_linhas)
