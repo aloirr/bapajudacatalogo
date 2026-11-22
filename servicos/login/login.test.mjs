@@ -584,7 +584,7 @@ test('o log não leva senha, hash, cookie, segredo, chave, usuário, caminho nem
   const log = s.logs.join('\n');
   const hash = JSON.parse(fs.readFileSync(path.join(s.dados, 'usuarios.json'), 'utf8')).usuarios[0].hash;
   for (const proibido of [
-    'falsa-', SENHA_INICIAL, SEGREDO, CHAVE_INTERNA,
+    'falsa-', // toda senha, segredo e chave de teste (falsa())
     adm.split('=')[1], cli.split('=')[1], hash.split('$')[5], '192.0.2', '127.0.0.1', 'loja.exemplo', 'BASE.xlsx', 'a4-grafica', 'Maria',
   ]) assert.ok(!log.includes(proibido), 'log vazou: ' + proibido);
   assert.match(log, /entrar 200 \d+ms/);
