@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { criarServico, caminhoLogico, tipoDaImagem, SESSAO_MS, JANELA_ERROS_MS } from './server.mjs';
+import { criarServico, caminhoLogico, tipoDaImagem, voltaSegura, SESSAO_MS, JANELA_ERROS_MS } from './server.mjs';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const ORIGEM = 'https://catalogo.exemplo.invalid';
@@ -159,12 +159,14 @@ test('sem login nada abre: página leva a /entrar, o resto dá 401', async () =>
     assert.ok(!r.texto.includes('AMT7183'), caminho);
   }
   // "volta" nunca aponta para outro site ("//host" ou "/\\host").
-  for (const caminho of ['//evil.invalid/x', '/\\evil.invalid/x', '//evil.invalid', '/\\/evil.invalid']) {
+  for (const caminho of ['//evil.invalid/x', '/\\evil.invalid/x', '//evil.invalid', '/\\/evil.invalid', '/%09/evil.com', '/%0a/evil.com', '/%0d%5Cevil.com', '/%2F%2Fevil.com', '/%5C%5Cevil.com']) {
     const r = await s.pedir(caminho, { accept: HTML });
     assert.equal(r.status, 302, caminho);
     assert.equal(r.headers.location, '/entrar?volta=%2F', caminho);
   }
   assert.equal((await s.pedir(`/${'a'.repeat(600)}.html`, { accept: HTML })).headers.location, '/entrar?volta=%2F', 'longo demais');
+  for (const v of ['/%09/evil.com', '/%0a/evil.com', '/%0d%5Cevil.com', '/%7f/x', '/%E0%A4%A', '/\t/x']) assert.equal(voltaSegura(v), '/', v);
+  for (const v of ['/', '/index.html?x=1', '/admin/usuarios', '/busca/%C3%B3leo']) assert.equal(voltaSegura(v), v, v);
   const pdf = await s.pedir('/admin/pdfs/baixar/a4-grafica', { accept: HTML });
   assert.equal(pdf.status, 302);
   assert.match(pdf.headers.location, /^\/entrar\?volta=/);
@@ -178,7 +180,7 @@ test('sem login nada abre: página leva a /entrar, o resto dá 401', async () =>
   assert.equal((await s.pedir('/entrar/../data/produtos.json')).status, 401, 'o aberto não abre caminho para o resto');
 });
 
-test('login do admin: troca obrigatória no 1º acesso, cookie seguro, sessão de 5 h', async () => {
+test('login do admin: troca obrigatória no 1º acesso, cookie seguro', async () => {
   const s = await subir();
   assert.match(s.logs.join('\n'), /admin inicial criado/);
   const a = await entrar(s, '  ADMIN ', SENHA_INICIAL);

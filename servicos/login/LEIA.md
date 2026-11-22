@@ -9,12 +9,12 @@ Roda da raiz do repositório (sem `rootDir`): `node servicos/login/server.mjs`, 
 |---|---|---|
 | `PASTA_DADOS` | `render.yaml` (disco em `/var/data`) | `usuarios.json` e `logos/`. Sem ela: 503. |
 | `SESSAO_SEGREDO` | `render.yaml` (`generateValue`) | assina o cookie da sessão (HMAC). Sem ela (ou com menos de 16 caracteres): 503. Trocar o valor derruba todas as sessões. |
-| `ADMIN_USUARIO` | `render.yaml` | usuário do 1º admin (padrão `admin`). |
+| `ADMIN_USUARIO` | `render.yaml` | usuário do 1º admin (padrão `admin`). O 1º admin nasce com o nome "Administrador" e a empresa "BAP AUTOPARTS", a grafia oficial aprovada (resposta 10 a, MC-0008). |
 | `ADMIN_SENHA_INICIAL` | **o Alexandre**, no painel (`sync: false`) | senha do 1º admin, só enquanto não há usuários. Troca obrigatória no 1º acesso. Depois do 1º usuário, é ignorada (pode ser apagada do painel). Sem ela e sem usuários: 503. |
 | `CHAVE_INTERNA` | `render.yaml` (`generateValue`; a placa recebe por `fromService`) | libera o `GET /interno/codigos`. Sem ela, essa rota sempre dá 401. |
 | `ORIGEM_SITE` | opcional | origens aceitas nos POST/PATCH/PUT/DELETE, separadas por vírgula (ex.: um domínio próprio). O Render já dá `RENDER_EXTERNAL_URL`, que também vale. Sem nenhuma das duas (local): vale a origem do próprio `Host`. |
 
-Nenhuma senha, chave ou segredo vai para o Git, um doc, um recado ou o log.
+Nenhuma senha, chave ou segredo vai para o Git, um doc ou um recado.
 
 ## Rodar local
 
@@ -43,6 +43,6 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 - Arquivos: só de `site/`, sem `..`, sem arquivo oculto, sem link simbólico. Fora de `site/` só saem os 2 PDFs da lista. A base (`dados/*.xlsx`) nunca sai.
 - Logo: PNG, JPG ou WEBP, até 1 MB, com o tipo conferido pelos primeiros bytes (SVG não entra). É guardada como veio (sem redução).
   - **[SUPOSIÇÃO]** O desenho aprovado falava em até 200 KB, com o serviço reduzindo a imagem. Sem dependências, não há como reduzir; por isso vale o limite de 1 MB do contrato com as telas.
-- `volta` do redirecionamento ao login: caminho que começa com `//` ou `/\` vira `/` (não leva para outro site). O `entrar.js` também confere.
+- `volta` do redirecionamento ao login: vira `/` se o caminho (cru ou decodificado) tiver caractere de controle (o navegador apaga tab, LF e CR: `/%09/x` vira `//x`) ou começar com `//` ou `/\` (não leva para outro site). O `entrar.js` também confere.
 - `usuarios.json`: gravação segura (`.tmp`, `fsync`, `rename`), arquivo 0600. Arquivo ilegível: o serviço fecha (503) e não sobrescreve.
 - Log: só o tipo da rota, o status e o tempo (`entrar 401 52ms`), mais as linhas de partida (`login ouvindo`, `usuarios ok N`, `fechado: <motivo>`). Nunca senha, hash, cookie, segredo, chave, usuário, caminho ou IP.

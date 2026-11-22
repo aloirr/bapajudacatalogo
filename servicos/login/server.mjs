@@ -16,8 +16,8 @@ import { fileURLToPath } from 'node:url';
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const RAIZ = path.resolve(AQUI, '..', '..');
 // Pastas FIXAS. Só os testes trocam, pela chamada de criarServico (nunca por variável).
-export const PASTA_SITE = path.join(RAIZ, 'site');
-export const PASTA_PDFS = path.join(RAIZ, 'catalogo_grafico', 'entregas');
+const PASTA_SITE = path.join(RAIZ, 'site');
+const PASTA_PDFS = path.join(RAIZ, 'catalogo_grafico', 'entregas');
 
 export const SESSAO_MS = 5 * 60 * 60 * 1000;          // 5 h a partir do login, mesmo em uso (resposta 2 a)
 export const JANELA_ERROS_MS = 15 * 60 * 1000;        // limite de tentativas: 15 min
@@ -30,7 +30,7 @@ const SENHA_MAX = 200;
 const TEXTO_MAX = 80;
 const VOLTA_MAX = 512;
 const GZIP_CACHE_MAX = 64 * 1024 * 1024;
-export const RE_USUARIO = /^[a-z0-9._-]{3,32}$/;
+const RE_USUARIO = /^[a-z0-9._-]{3,32}$/;
 const COOKIE = 'bap_sessao';
 const SCRYPT = { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
 const SCRYPT_LEN = 64;
@@ -49,7 +49,12 @@ const MSG = {
   metodo: 'Método não permitido.',
   gravar: 'Não foi possível salvar. Tente de novo.',
   chave: 'Chave interna ausente ou errada.',
+  nomeInvalido: `Informe o nome (até ${TEXTO_MAX} caracteres).`,
+  empresaLonga: `A empresa pode ter até ${TEXTO_MAX} caracteres.`,
+  usuarioExiste: 'Esse usuário já existe.',
+  logoTipo: 'Envie a logo em PNG, JPG ou WEBP.',
 };
+const RETRY = { 'Retry-After': String(JANELA_ERROS_MS / 1000) };
 
 // Abertos sem sessão (caminho lógico, depois de /entrar -> /entrar/index.html).
 // [SUPOSIÇÃO] /styles.css e as 2 logos da BAP entram para a tela de login poder usar o visual do site.
@@ -65,36 +70,26 @@ const PAGINAS = {
   '/admin/usuarios': '/admin/usuarios/index.html',
   '/admin/pdfs': '/admin/pdfs/index.html',
 };
+// Só as extensões que o site/ usa (git ls-files site). Extensão nova no site: entra aqui.
 const TIPOS = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
-  '.webmanifest': 'application/manifest+json',
-  '.txt': 'text/plain; charset=utf-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
-  '.gif': 'image/gif',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
-  '.woff2': 'font/woff2',
-  '.woff': 'font/woff',
-  '.ttf': 'font/ttf',
 };
-const COMPRIMIR = new Set(['.html', '.css', '.js', '.mjs', '.json', '.svg', '.txt', '.webmanifest']);
-const LONGO = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.ico', '.woff2', '.woff', '.ttf']);
+const COMPRIMIR = new Set(['.html', '.css', '.js', '.json']);
+const LONGO = new Set(['.png', '.jpg', '.webp']);
 
 // PDFs do admin: lista FIXA de 2. O arquivo é o de ano mais alto que casa com o padrão.
 // [SUPOSIÇÃO] Os nomes seguem Catalogo_BAP_<ano>_..., como as entregas de hoje.
-export const PDFS = [
+const PDFS = [
   { id: 'completo-digital', titulo: 'Completo Digital', re: /^Catalogo_BAP_(\d{4})_Completo_Digital\.pdf$/ },
   { id: 'a4-grafica', titulo: 'A4 gráfica', re: /^Catalogo_BAP_(\d{4})_A4_grafica\.pdf$/ },
 ];
 
-const LOGO_TIPOS = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' };
 const LOGO_MIME = { png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp' };
 // Tipo pelos primeiros bytes. SVG e o resto: null.
 export function tipoDaImagem(b) {
@@ -106,12 +101,12 @@ export function tipoDaImagem(b) {
 }
 
 // ---------- senha (scrypt, sal de 16 bytes, comparação em tempo constante) ----------
-export async function gerarHash(senha) {
+async function gerarHash(senha) {
   const sal = crypto.randomBytes(16);
   const h = await scrypt(senha.normalize('NFC'), sal, SCRYPT_LEN, SCRYPT);
   return ['scrypt', SCRYPT.N, SCRYPT.r, SCRYPT.p, sal.toString('base64url'), h.toString('base64url')].join('$');
 }
-export async function conferirSenha(senha, guardado) {
+async function conferirSenha(senha, guardado) {
   if (typeof senha !== 'string' || typeof guardado !== 'string') return false;
   const [alg, n, r, p, salB, hB] = guardado.split('$');
   if (alg !== 'scrypt' || !salB || !hB) return false;
@@ -141,11 +136,18 @@ function texto(v, { obrigatorio }) {
   if ([...s].length > TEXTO_MAX) return null;
   return s;
 }
+const normUsuario = (v) => (typeof v === 'string' ? v.trim().toLowerCase() : '');
 const senhaValida = (s) => typeof s === 'string' && [...s].length >= SENHA_MIN && s.length <= SENHA_MAX;
 const MSG_SENHA = `A senha precisa ter pelo menos ${SENHA_MIN} caracteres (e no máximo ${SENHA_MAX}).`;
 
 // ---------- usuarios.json (gravação segura: .tmp + fsync + rename, uma por vez) ----------
 const NADA = Symbol('nada');
+async function gravarSeguro(arq, dados) {
+  const tmp = arq + '.tmp';
+  const fh = await fsp.open(tmp, 'w', 0o600);
+  try { await fh.writeFile(dados); await fh.sync(); } finally { await fh.close(); }
+  await fsp.rename(tmp, arq);
+}
 function criarLoja(pasta) {
   const arq = path.join(pasta, 'usuarios.json');
   const pastaLogos = path.join(pasta, 'logos');
@@ -170,10 +172,7 @@ function criarLoja(pasta) {
   }
   async function gravar(m) {
     const corpo = JSON.stringify({ versao: 1, usuarios: [...m].map(([usuario, u]) => ({ usuario, ...u })) }, null, 1);
-    const tmp = arq + '.tmp';
-    const fh = await fsp.open(tmp, 'w', 0o600);
-    try { await fh.writeFile(corpo); await fh.sync(); } finally { await fh.close(); }
-    await fsp.rename(tmp, arq);
+    await gravarSeguro(arq, corpo);
     try { const d = await fsp.open(pasta, 'r'); try { await d.sync(); } finally { await d.close(); } } catch { /* fsync da pasta: melhor esforço */ }
   }
   // fn recebe uma cópia; devolve NADA para não gravar. Só troca a memória depois de gravar no disco.
@@ -190,12 +189,7 @@ function criarLoja(pasta) {
     return r;
   }
   const arqLogo = (nome, ext) => path.join(pastaLogos, `${nome}.${ext}`);
-  async function gravarLogo(nome, ext, buf) {
-    const tmp = arqLogo(nome, ext) + '.tmp';
-    const fh = await fsp.open(tmp, 'w', 0o600);
-    try { await fh.writeFile(buf); await fh.sync(); } finally { await fh.close(); }
-    await fsp.rename(tmp, arqLogo(nome, ext));
-  }
+  const gravarLogo = (nome, ext, buf) => gravarSeguro(arqLogo(nome, ext), buf);
   async function apagarLogos(nome, menos = null) {
     for (const ext of Object.keys(LOGO_MIME)) if (ext !== menos) await fsp.rm(arqLogo(nome, ext), { force: true });
   }
@@ -250,29 +244,33 @@ const SEGURANCA = {
   'X-Frame-Options': 'DENY',
   'Strict-Transport-Security': 'max-age=31536000',
 };
-function json(res, status, obj, extra = {}) {
-  const corpo = obj === undefined ? '' : JSON.stringify(obj);
+// Resposta curta, sem cache. Corpo vazio vai sem Content-Type; head = true manda só os cabeçalhos.
+function enviar(res, status, corpo, tipo, extra = {}, head = false) {
   res.writeHead(status, {
     ...SEGURANCA,
     'Cache-Control': 'no-store',
-    ...(corpo ? { 'Content-Type': 'application/json; charset=utf-8' } : {}),
+    ...(corpo ? { 'Content-Type': tipo } : {}),
     'Content-Length': Buffer.byteLength(corpo),
     ...extra,
   });
-  res.end(corpo);
+  res.end(head ? undefined : corpo);
 }
+const json = (res, status, obj, extra) => enviar(res, status, obj === undefined ? '' : JSON.stringify(obj), 'application/json; charset=utf-8', extra);
 const HTML_SIMPLES = (titulo) => `<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${titulo}</title><p style="font-family:sans-serif;padding:2rem">${titulo}</p></html>`;
-function html(res, status, titulo, extra = {}) {
-  const corpo = HTML_SIMPLES(titulo);
-  res.writeHead(status, {
-    ...SEGURANCA, 'Cache-Control': 'no-store', 'Content-Type': 'text/html; charset=utf-8',
-    'Content-Length': Buffer.byteLength(corpo), ...extra,
-  });
-  res.end(corpo);
-}
+const html = (res, status, titulo, extra) => enviar(res, status, HTML_SIMPLES(titulo), 'text/html; charset=utf-8', extra);
+const metodoErrado = (res, allow) => json(res, 405, { erro: MSG.metodo }, { Allow: allow });
 function redirecionar(res, destino, extra = {}) {
   res.writeHead(302, { ...SEGURANCA, 'Cache-Control': 'no-store', Location: destino, 'Content-Length': 0, ...extra });
   res.end();
+}
+// "volta" do login. O navegador apaga tab, LF e CR da URL ("/%09/x" vira "//x") e lê "//host" e "/\host"
+// como outro site. Caractere de controle, "//" ou "/\" (cru ou decodificado), longo demais ou quebrado: "/".
+export function voltaSegura(url) {
+  if (typeof url !== 'string' || url.length > VOLTA_MAX) return '/';
+  let dec;
+  try { dec = decodeURIComponent(url); } catch { return '/'; }
+  for (const v of [url, dec]) if (/[\x00-\x1f\x7f]/.test(v) || /^\/[\/\\]/.test(v)) return '/';
+  return url;
 }
 const querPagina = (req) => /\btext\/html\b/i.test(req.headers.accept || '');
 function erro(req, res, status, msg, extra) {
@@ -353,7 +351,7 @@ export async function criarServico(opcoes = {}) {
 
   const segredo = env.SESSAO_SEGREDO || '';
   const chaveInterna = env.CHAVE_INTERNA || '';
-  const adminUsuario = (env.ADMIN_USUARIO || 'admin').trim().toLowerCase();
+  const adminUsuario = normUsuario(env.ADMIN_USUARIO || 'admin');
   const origens = new Set(
     [...String(env.ORIGEM_SITE || '').split(','), env.RENDER_EXTERNAL_URL || '']
       .map((s) => s.trim().replace(/\/+$/, '')).filter(Boolean),
@@ -361,6 +359,10 @@ export async function criarServico(opcoes = {}) {
   const semente = crypto.randomBytes(32);
   const chaveIp = (req) => crypto.createHmac('sha256', semente).update(ipDoPedido(req)).digest('hex');
   const limite = criarLimite(agora);
+  const novoUsuario = ({ nome, empresa, admin, hash }) => ({
+    nome, empresa, admin, ativo: true, hash, trocarSenha: true, geracao: 1, logo: null,
+    criadoEm: new Date(agora()).toISOString(), ultimoAcesso: null,
+  });
   const hashFalso = await gerarHash(crypto.randomBytes(18).toString('base64url'));
 
   // Abre fechado (503) se faltar o que torna o login seguro.
@@ -382,10 +384,8 @@ export async function criarServico(opcoes = {}) {
       const hash = await gerarHash(inicial);
       try {
         await loja.alterar((m) => {
-          m.set(adminUsuario, {
-            nome: 'Administrador', empresa: 'BAP AUTOPARTS', admin: true, ativo: true, hash,
-            trocarSenha: true, geracao: 1, logo: null, criadoEm: new Date(agora()).toISOString(), ultimoAcesso: null,
-          });
+          // Empresa do admin inicial: a grafia oficial "BAP AUTOPARTS" (resposta 10 a, MC-0008).
+          m.set(adminUsuario, novoUsuario({ nome: 'Administrador', empresa: 'BAP AUTOPARTS', admin: true, hash }));
         });
         log('admin inicial criado');
       } catch { fechar('usuarios.json nao gravou'); }
@@ -508,8 +508,7 @@ export async function criarServico(opcoes = {}) {
   function semSessao(req, res, s) {
     const extra = s.estado === 'nenhuma' ? {} : { 'Set-Cookie': COOKIE_APAGA };
     if (querPagina(req) && (req.method === 'GET' || req.method === 'HEAD')) {
-      // "//host" e "/\host" viram endereço de outro site no navegador: volta para a raiz.
-      const volta = req.url.length <= VOLTA_MAX && !/^\/[\/\\]/.test(req.url) ? req.url : '/';
+      const volta = voltaSegura(req.url);
       const destino = s.estado === 'vencida' ? '/entrar?expirou=1' : `/entrar?volta=${encodeURIComponent(volta)}`;
       return redirecionar(res, destino, extra);
     }
@@ -519,11 +518,11 @@ export async function criarServico(opcoes = {}) {
   async function apiEntrar(req, res) {
     const c = await lerJson(req);
     if (!c) return json(res, 400, { erro: MSG.pedido });
-    const usuario = typeof c.usuario === 'string' ? c.usuario.trim().toLowerCase() : '';
+    const usuario = normUsuario(c.usuario);
     const senha = typeof c.senha === 'string' ? c.senha : '';
     const uk = RE_USUARIO.test(usuario) ? usuario : null;
     const ik = chaveIp(req);
-    if (limite.bloqueado(uk, ik)) return json(res, 429, { erro: MSG.limite }, { 'Retry-After': String(JANELA_ERROS_MS / 1000) });
+    if (limite.bloqueado(uk, ik)) return json(res, 429, { erro: MSG.limite }, RETRY);
     const marca = limite.reservar(uk, ik);
     const antes = uk ? loja.get(uk) : null;
     const ok = await conferirSenha(senha, antes ? antes.hash : hashFalso);
@@ -544,7 +543,7 @@ export async function criarServico(opcoes = {}) {
     if (!senhaValida(nova)) return json(res, 400, { erro: MSG_SENHA });
     if (!s.u.trocarSenha) {
       const ik = chaveIp(req);
-      if (limite.bloqueado(s.nome, ik)) return json(res, 429, { erro: MSG.limite }, { 'Retry-After': String(JANELA_ERROS_MS / 1000) });
+      if (limite.bloqueado(s.nome, ik)) return json(res, 429, { erro: MSG.limite }, RETRY);
       const marca = limite.reservar(s.nome, ik);
       if (!(await conferirSenha(c.senhaAtual, s.u.hash))) return json(res, 400, { erro: 'A senha atual está incorreta.' });
       limite.acertou(s.nome, ik, marca, { zerarUsuario: false });
@@ -582,43 +581,40 @@ export async function criarServico(opcoes = {}) {
       if (req.method === 'GET') {
         return json(res, 200, loja.todos().sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([n, u]) => publico(n, u)));
       }
-      if (req.method !== 'POST') return json(res, 405, { erro: MSG.metodo }, { Allow: 'GET, POST' });
+      if (req.method !== 'POST') return metodoErrado(res, 'GET, POST');
       const c = await lerJson(req);
       if (!c) return json(res, 400, { erro: MSG.pedido });
-      const usuario = typeof c.usuario === 'string' ? c.usuario.trim().toLowerCase() : '';
+      const usuario = normUsuario(c.usuario);
       if (!RE_USUARIO.test(usuario)) return json(res, 400, { erro: 'Usuário: de 3 a 32 caracteres, só letras minúsculas, números, ponto, hífen e sublinhado.' });
       const nome = texto(c.nome, { obrigatorio: true });
-      if (nome === null) return json(res, 400, { erro: `Informe o nome (até ${TEXTO_MAX} caracteres).` });
+      if (nome === null) return json(res, 400, { erro: MSG.nomeInvalido });
       const empresa = texto(c.empresa, { obrigatorio: false });
-      if (empresa === null) return json(res, 400, { erro: `A empresa pode ter até ${TEXTO_MAX} caracteres.` });
+      if (empresa === null) return json(res, 400, { erro: MSG.empresaLonga });
       if (!senhaValida(c.senha)) return json(res, 400, { erro: MSG_SENHA });
-      if (loja.get(usuario)) return json(res, 409, { erro: 'Esse usuário já existe.' });
+      if (loja.get(usuario)) return json(res, 409, { erro: MSG.usuarioExiste });
       const hash = await gerarHash(c.senha);
       let r;
       try {
         r = await loja.alterar((m) => {
           if (m.has(usuario)) return NADA;
-          const novo = {
-            nome, empresa, admin: false, ativo: true, hash, trocarSenha: true, geracao: 1, logo: null,
-            criadoEm: new Date(agora()).toISOString(), ultimoAcesso: null,
-          };
+          const novo = novoUsuario({ nome, empresa, admin: false, hash });
           m.set(usuario, novo);
           return publico(usuario, novo);
         });
       } catch { return json(res, 503, { erro: MSG.gravar }); }
-      if (r === NADA) return json(res, 409, { erro: 'Esse usuário já existe.' });
+      if (r === NADA) return json(res, 409, { erro: MSG.usuarioExiste });
       return json(res, 201, r);
     }
 
     if (!RE_USUARIO.test(alvo) || !loja.get(alvo)) { req.resume(); return json(res, 404, { erro: MSG.naoEncontrado }); }
 
     if (sub === null) {
-      if (req.method !== 'PATCH') return json(res, 405, { erro: MSG.metodo }, { Allow: 'PATCH' });
+      if (req.method !== 'PATCH') return metodoErrado(res, 'PATCH');
       const c = await lerJson(req);
       if (!c) return json(res, 400, { erro: MSG.pedido });
       const mud = {};
-      if ('nome' in c) { mud.nome = texto(c.nome, { obrigatorio: true }); if (mud.nome === null) return json(res, 400, { erro: `Informe o nome (até ${TEXTO_MAX} caracteres).` }); }
-      if ('empresa' in c) { mud.empresa = texto(c.empresa, { obrigatorio: false }); if (mud.empresa === null) return json(res, 400, { erro: `A empresa pode ter até ${TEXTO_MAX} caracteres.` }); }
+      if ('nome' in c) { mud.nome = texto(c.nome, { obrigatorio: true }); if (mud.nome === null) return json(res, 400, { erro: MSG.nomeInvalido }); }
+      if ('empresa' in c) { mud.empresa = texto(c.empresa, { obrigatorio: false }); if (mud.empresa === null) return json(res, 400, { erro: MSG.empresaLonga }); }
       if ('ativo' in c) {
         if (typeof c.ativo !== 'boolean') return json(res, 400, { erro: MSG.pedido });
         if (!c.ativo && alvo === s.nome) return json(res, 400, { erro: 'O administrador não pode se desativar.' });
@@ -642,7 +638,7 @@ export async function criarServico(opcoes = {}) {
     }
 
     if (sub === 'senha') {
-      if (req.method !== 'POST') return json(res, 405, { erro: MSG.metodo }, { Allow: 'POST' });
+      if (req.method !== 'POST') return metodoErrado(res, 'POST');
       const c = await lerJson(req);
       if (!c) return json(res, 400, { erro: MSG.pedido });
       if (alvo === s.nome) return json(res, 400, { erro: 'Para a sua própria senha, use "Trocar senha".' });
@@ -671,12 +667,13 @@ export async function criarServico(opcoes = {}) {
         } catch { return json(res, 503, { erro: MSG.gravar }); }
         return json(res, 204);
       }
-      if (req.method !== 'PUT') return json(res, 405, { erro: MSG.metodo }, { Allow: 'GET, PUT, DELETE' });
-      const declarado = LOGO_TIPOS[String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase()];
-      if (!declarado) { req.resume(); return json(res, 400, { erro: 'Envie a logo em PNG, JPG ou WEBP.' }); }
+      if (req.method !== 'PUT') return metodoErrado(res, 'GET, PUT, DELETE');
+      const tipoPedido = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+      const declarado = Object.keys(LOGO_MIME).find((ext) => LOGO_MIME[ext] === tipoPedido);
+      if (!declarado) { req.resume(); return json(res, 400, { erro: MSG.logoTipo }); }
       const r = await lerCorpo(req, LOGO_MAX);
       if (r.grande) return json(res, 413, { erro: 'A logo passa de 1 MB.' }, { Connection: 'close' });
-      if (!r.buf || !r.buf.length) return json(res, 400, { erro: 'Envie a logo em PNG, JPG ou WEBP.' });
+      if (!r.buf || !r.buf.length) return json(res, 400, { erro: MSG.logoTipo });
       if (tipoDaImagem(r.buf) !== declarado) return json(res, 400, { erro: 'O arquivo não é uma imagem PNG, JPG ou WEBP.' });
       try {
         await loja.gravarLogo(alvo, declarado, r.buf);
@@ -689,7 +686,7 @@ export async function criarServico(opcoes = {}) {
   }
 
   async function apiPdfs(req, res) {
-    if (req.method !== 'GET') return json(res, 405, { erro: MSG.metodo }, { Allow: 'GET' });
+    if (req.method !== 'GET') return metodoErrado(res, 'GET');
     const lista = [];
     for (const item of PDFS) {
       const a = await acharPdf(item);
@@ -722,19 +719,17 @@ export async function criarServico(opcoes = {}) {
 
     if (rota === '/saude') {
       p.nome = 'saude';
-      if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { erro: MSG.metodo }, { Allow: 'GET' });
-      res.writeHead(200, { ...SEGURANCA, 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Length': 2 });
-      return res.end(req.method === 'HEAD' ? undefined : 'ok');
+      if (req.method !== 'GET' && req.method !== 'HEAD') return metodoErrado(res, 'GET');
+      return enviar(res, 200, 'ok', 'text/plain; charset=utf-8', {}, req.method === 'HEAD');
     }
     if (rota === '/interno/codigos') {
       p.nome = 'interno';
-      if (req.method !== 'GET') return json(res, 405, { erro: MSG.metodo }, { Allow: 'GET' });
+      if (req.method !== 'GET') return metodoErrado(res, 'GET');
       const dada = req.headers['x-chave-interna'];
       if (!chaveInterna || typeof dada !== 'string' || !igualSeguro(dada, chaveInterna)) return json(res, 401, { erro: MSG.chave });
       let corpo;
       try { corpo = await codigos(); } catch { return json(res, 503, { erro: MSG.indisponivel }); }
-      res.writeHead(200, { ...SEGURANCA, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Length': Buffer.byteLength(corpo) });
-      return res.end(corpo);
+      return enviar(res, 200, corpo, 'application/json; charset=utf-8');
     }
     if (fechado) { p.nome = 'fechado'; req.resume(); return erro(req, res, 503, MSG.indisponivel); }
 
@@ -745,12 +740,12 @@ export async function criarServico(opcoes = {}) {
       if (MUDA.has(req.method) && !origemCerta(req)) { req.resume(); return json(res, 403, { erro: MSG.origem }); }
       if (rota === '/api/entrar') {
         p.nome = 'entrar';
-        if (req.method !== 'POST') return json(res, 405, { erro: MSG.metodo }, { Allow: 'POST' });
+        if (req.method !== 'POST') return metodoErrado(res, 'POST');
         return apiEntrar(req, res);
       }
       if (rota === '/api/sair') {
         p.nome = 'sair';
-        if (req.method !== 'POST') return json(res, 405, { erro: MSG.metodo }, { Allow: 'POST' });
+        if (req.method !== 'POST') return metodoErrado(res, 'POST');
         req.resume();
         return json(res, 204, undefined, { 'Set-Cookie': COOKIE_APAGA });
       }
@@ -758,7 +753,7 @@ export async function criarServico(opcoes = {}) {
       if (s.estado !== 'ok') { req.resume(); return semSessao(req, res, s); }
       if (rota === '/api/eu') {
         p.nome = 'eu';
-        if (req.method !== 'GET') return json(res, 405, { erro: MSG.metodo }, { Allow: 'GET' });
+        if (req.method !== 'GET') return metodoErrado(res, 'GET');
         const u = s.u;
         return json(res, 200, {
           usuario: s.nome, nome: u.nome, empresa: u.empresa, admin: u.admin === true, temLogo: Boolean(u.logo),
@@ -767,13 +762,13 @@ export async function criarServico(opcoes = {}) {
       }
       if (rota === '/api/trocar-senha') {
         p.nome = 'trocar-senha';
-        if (req.method !== 'POST') return json(res, 405, { erro: MSG.metodo }, { Allow: 'POST' });
+        if (req.method !== 'POST') return metodoErrado(res, 'POST');
         return apiTrocarSenha(req, res, s);
       }
       if (s.u.trocarSenha) { req.resume(); return json(res, 403, { erro: MSG.trocar }); }
       if (rota === '/api/eu/logo') {
         p.nome = 'logo';
-        if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { erro: MSG.metodo }, { Allow: 'GET' });
+        if (req.method !== 'GET' && req.method !== 'HEAD') return metodoErrado(res, 'GET');
         return servirLogo(req, res, s.nome);
       }
       const mu = /^\/api\/usuarios(?:\/([^/]+)(?:\/(senha|logo))?)?$/.exec(rota);
@@ -794,7 +789,7 @@ export async function criarServico(opcoes = {}) {
     }
 
     // Daqui para baixo: só GET e HEAD.
-    if (req.method !== 'GET' && req.method !== 'HEAD') { p.nome = 'arquivo'; req.resume(); return json(res, 405, { erro: MSG.metodo }, { Allow: 'GET, HEAD' }); }
+    if (req.method !== 'GET' && req.method !== 'HEAD') { p.nome = 'arquivo'; req.resume(); return metodoErrado(res, 'GET, HEAD'); }
 
     if (baixar) {
       p.nome = 'baixar';
@@ -843,7 +838,6 @@ export async function criarServico(opcoes = {}) {
   srv.on('close', () => clearInterval(faxina));
   srv.requestTimeout = 30000;
   srv.headersTimeout = 10000;
-  srv.fechado = () => fechado;
   return srv;
 }
 

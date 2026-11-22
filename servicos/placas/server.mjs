@@ -42,9 +42,7 @@ let contarTeto = { min: -1, cont: 0 };
 const log = (msg) => console.log(msg);
 
 const contador = criarContador({ pasta: PASTA_GUARDA, log });
-// Lista de códigos do /contar. Com CATALOGO_URL e CHAVE_INTERNA (T-0022, catálogo atrás do login):
-// GET CATALOGO_URL/interno/codigos com o cabeçalho X-Chave-Interna. Sem as duas: como antes,
-// o produtos.json publicado em ORIGEM_PERMITIDA. A chave nunca vai para o log.
+// Lista de códigos do /contar: README, "Lista de códigos do catálogo".
 export function fonteDoCatalogo(env = process.env) {
   const base = env.CATALOGO_URL, chaveInterna = env.CHAVE_INTERNA;
   if (base && chaveInterna) {
