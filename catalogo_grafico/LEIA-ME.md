@@ -64,6 +64,8 @@ Para atualizar o estoque, troque o `ESTOQUE_BAP.xlsx` pelo arquivo do dia, com a
 | Apresentação comercial (PowerPoint) | `node apres_ppt.js` |
 | Encartelados moto | `python encartelados.py` |
 
+Os dois scripts da apresentação leem o texto do `apres_conteudo.json` (RD-0431): mudou um texto, mude só lá e gere o PDF e o .pptx.
+
 **Mapa dos scripts**
 
 - **Classificação:**

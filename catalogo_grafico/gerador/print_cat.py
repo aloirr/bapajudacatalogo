@@ -477,8 +477,8 @@ def capa(dc):
 
 
 def por_que(dc, pg):
-    topbar(dc, 'BAP AUTOPARTS')
-    hero(dc, 'BAP AUTOPARTS', 'Por que BAP?', 'Componentes de qualidade, com segurança e preço acessível.')
+    topbar(dc, '')                                      # a marca fica só no sobretítulo; à esquerda já está o catálogo (RD-0429)
+    hero(dc, 'BAP AUTOPARTS', 'Por que BAP?', '')       # sem subtítulo: o "Quem somos" já diz (RD-0429)
     y = TOP + HERO + 36
     blocos = [('Quem somos', 'A BAP AUTOPARTS é uma empresa brasileira fundada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. O portfólio cobre as linhas leve, pesada e moto, da suspensão à parte elétrica.'),
               ('Por que vender BAP', 'Portfólio robusto para suspensão, direção, freio, arrefecimento, motor, transmissão, elétrica e acessórios. Produtos com padrão OEM, testados para máxima performance, e preço competitivo sem abrir mão da qualidade.'),
@@ -489,14 +489,13 @@ def por_que(dc, pg):
         h = para_h(html.escape(txt), 12.5, 19, CW - 14)
         dc.text(MX + 14, y + 30, CW - 14, html.escape(txt), 12.5, 19, 'sec')
         y += 30 + h + 34
-    nums = [('+40', 'linhas de produtos'), ('+6.500', 'itens e aplicações'), ('Nacional', 'em todos os estados'), ('SAC', 'garantia direto na fábrica')]
-    w = (CW - 36) / 4
+    nums = [('+40', 'linhas de produtos'), ('+6.500', 'itens e aplicações'), ('Nacional', 'em todos os estados')]
+    w = (CW - 12 * (len(nums) - 1)) / len(nums)        # a garantia fica só no bloco "Garantia Expressa BAP" (RD-0429)
     for i, (n, t) in enumerate(nums):
         x = MX + i * (w + 12)
         dc.rect(x, y, w, 110, fill='black', r=14)
         dc.label(x + w / 2, y + 30, n, 28, 'green2', 'PB', 0, 'center')
         dc.label(x + w / 2, y + 72, t, 11, 'white', 'PR', 0, 'center')
-    dc.label(MX, y + 128, 'Prazos de garantia conforme o certificado da embalagem de cada produto.', 10, 'sec', 'PR')
     footer(dc, pg); dc.end()
 
 

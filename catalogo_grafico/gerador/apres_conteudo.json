@@ -1,0 +1,120 @@
+{
+  "_leia": "Conteúdo da apresentação de Lubrificantes e Químicos (RD-0431, T-0025): lido pelo apres_bemol.py (PDF) e pelo apres_ppt.js (.pptx). O desenho fica em cada script; o texto, só aqui. Material para cliente: sem preço e sem estoque.",
+  "doc": {"titulo": "BAP · Lubrificantes e Químicos · Apresentação Comercial"},
+  "marca": "BAP AUTOPARTS",
+  "site": "www.bapautoparts.com.br  ·  @bapautoparts",
+  "capa": {
+    "sobretitulo": "APRESENTAÇÃO COMERCIAL",
+    "titulo": ["Lubrificantes", "e Químicos BAP"],
+    "texto": "Óleos para carro, moto e transmissão, aditivos de radiador, fluido de freio e produtos de manutenção, com qualidade padrão OEM e Garantia Expressa BAP.",
+    "data": "Outubro de 2026",
+    "fotos": ["RAD25005P", "RAD25009P", "AER12000", "SIL3502"]
+  },
+  "quem_somos": {
+    "sobretitulo": "Quem somos", "titulo": "A BAP AUTOPARTS",
+    "texto": "Empresa brasileira criada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. O portfólio vai da suspensão à parte elétrica, passando por lubrificantes e químicos, para as linhas leve, pesada e moto.",
+    "numeros": [["+40", "linhas de produtos"], ["+6.500", "itens e aplicações"], ["Nacional", "presença em todos os estados"]],
+    "garantia": ["GARANTIA EXPRESSA BAP", "Sem burocracia: o consumidor aciona a garantia direto com a fábrica pelo SAC BAP, sem intermediários, conforme o certificado da embalagem."]
+  },
+  "portfolio": {
+    "sobretitulo": "Portfólio", "titulo": "Lubrificantes e químicos em uma só marca",
+    "blocos": [
+      ["Óleos de motor", "8 itens", "Linha ProActive para carros: sintéticos, semissintéticos e mineral, de 0W20 a 20W50."],
+      ["Óleos para moto 4T", "2 itens", "ProActive 110 e 210, API SL e JASO MA, para motos 4 tempos."],
+      ["Transmissão e hidráulico", "8 itens", "Shiftease para câmbio e diferencial (GL-4 e GL-5), ATF Dexron III e Effitech hidráulico."],
+      ["Aditivos de radiador", "do 1 L ao 200 L", "Fluidos orgânicos e anticorrosivos, concentrados e prontos para uso, e água desmineralizada."],
+      ["Fluido de freio", "DOT 3 e DOT 4", "Frasco de 500 ml para a revisão do sistema de freio."],
+      ["Manutenção", "sprays e selantes", "Desengripante, descarbonizante, silicone spray, silicones de alta temperatura e aditivo para diesel."]
+    ]
+  },
+  "oleos_motor": {
+    "sobretitulo": "Óleos de motor · linha ProActive", "titulo": "Do carro novo ao mais rodado",
+    "colunas": ["Código", "Produto", "Base", "Especificação", "Embalagem"],
+    "linhas": [
+      ["0W20 PROACTIVE300", "ProActive 300 0W20", "Sintético", "API SN", "1 L"],
+      ["5W20 PROACTIVE300", "ProActive 300 5W20", "Sintético", "API SN/RC", "1 L"],
+      ["5W30 PROACTIVE300", "ProActive 300 5W30", "Sintético", "API SN", "1 L"],
+      ["5W30 PROACTIVE SM", "ProActive 300 5W30", "Sintético", "API SM / ILSAC GF-4", "1 L"],
+      ["5W40 PROACTIVE300", "ProActive 300 5W40", "Sintético", "API SN", "1 L"],
+      ["10W40 PROACTIVE 200", "ProActive 200 10W40", "Semissintético", "API SM", "1 L"],
+      ["15W40 PROACTIVE100", "ProActive 100 15W40", "Semissintético", "API SL", "1 L"],
+      ["20W50 PROACTIVE100", "ProActive 100 20W50", "Mineral", "API SL", "1 L"]
+    ],
+    "lado": ["Para motores a gasolina, etanol, GNV e flex.", "Linhas 300 (sintético), 200 e 100: uma opção para cada perfil de cliente."]
+  },
+  "moto": {
+    "sobretitulo": "Óleos para moto", "titulo": "ProActive 4T para motos 4 tempos",
+    "colunas": ["Código", "Produto", "Base", "Especificação", "Embalagem"],
+    "linhas": [
+      ["20W50 4T PROACTIVE", "ProActive 110 20W50 4T", "Mineral", "API SL · JASO MA", "1 L"],
+      ["10W30 PROACTIVE210", "ProActive 210 10W30 4T", "Semissintético", "API SL · JASO MA", "1 L"]
+    ],
+    "argumento": ["POR QUE TER NA GÔNDOLA", "A troca de óleo da moto é frequente e de compra rápida. Com o 20W50 mineral e o 10W30 semissintético, a loja atende das motos de entrada às mais exigentes, com a norma JASO MA, própria para embreagem banhada a óleo."]
+  },
+  "transmissao": {
+    "sobretitulo": "Transmissão e hidráulico", "titulo": "Shiftease, ATF e Effitech",
+    "colunas": ["Código", "Produto", "Uso", "Embalagem"],
+    "linhas": [
+      ["80W GL4 SHIFTEASE", "Shiftease 100 80W", "Câmbio manual · API GL-4 · mineral", "1 L e balde 20 L"],
+      ["80W90 GL5 SHIFTEASE", "Shiftease 110 80W90", "Câmbio e diferencial · API GL-5 · mineral", "1 L e balde 20 L"],
+      ["85W140 SHIFTEASE120", "Shiftease 120 85W140", "Diferencial de carga pesada · API GL-5", "1 L e balde 20 L"],
+      ["ATF DEXRON III", "Shiftease 200 ATF Dexron III", "Transmissão automática e direção hidráulica · mineral", "1 L"],
+      ["68 EFFITECH100 BD", "Effitech 100 ISO VG 68", "Sistemas hidráulicos · HL · mineral", "Balde 20 L"]
+    ]
+  },
+  "radiador": {
+    "sobretitulo": "Químicos · radiador", "titulo": "Aditivos e água desmineralizada",
+    "cartoes": [
+      ["RAD25005P", "Anticorrosivo pronto para uso · rosa", "1 L · também 5 L, 20 L e 200 L"],
+      ["RAD25001P", "Orgânico pronto para uso · rosa", "1 L · também 5 L e 20 L"],
+      ["RAD25000P", "Orgânico concentrado · rosa", "1 L · também 20 L"],
+      ["RAD25002P", "Anticorrosivo pronto para uso · verde", "1 L"],
+      ["RAD25009P", "Água desmineralizada", "1 L · também 20 L"]
+    ],
+    "nota": [["Pronto para uso:", "é só completar o reservatório."], ["Concentrado:", "diluir com água desmineralizada conforme a embalagem. Venda junto: aditivo + água desmineralizada."]]
+  },
+  "freio": {
+    "sobretitulo": "Químicos · freio e manutenção", "titulo": "Itens de giro rápido para o balcão",
+    "cartoes": [
+      ["FLU15002", "Fluido de freio DOT 4", "500 ml"],
+      ["FLU15001", "Fluido de freio DOT 3", "500 ml"],
+      ["AER12000", "Desengripante antiferrugem multiuso", "300 ml"],
+      ["AER12001", "Descarbonizante (bico, TBI, carburador)", "300 ml"],
+      ["AER12002", "Silicone spray protetivo", "300 ml"],
+      ["SIL3502", "Silicone selante alta temperatura black HT", "50 g · também cinza e 85 g"],
+      ["DIE5500", "Aditivo estabilizador para diesel", "500 ml · também 100 ml"]
+    ],
+    "selo": {"rotulo": "DOT", "legenda": "FLUIDO DE FREIO", "numero": {"FLU15002": "4", "FLU15001": "3"}}
+  },
+  "mix": {
+    "sobretitulo": "Proposta", "titulo": "Mix de entrada sugerido",
+    "colunas": ["Código", "Produto", "Para quem"],
+    "linhas": [
+      ["5W30 PROACTIVE SM", "Óleo ProActive 300 5W30 sintético 1 L", "Carros flex mais novos"],
+      ["15W40 PROACTIVE100", "Óleo ProActive 100 15W40 semissintético 1 L", "Carros de uso geral"],
+      ["20W50 PROACTIVE100", "Óleo ProActive 100 20W50 mineral 1 L", "Carros mais rodados"],
+      ["20W50 4T PROACTIVE", "Óleo ProActive 110 20W50 4T 1 L", "Motos 4 tempos"],
+      ["10W30 PROACTIVE210", "Óleo ProActive 210 10W30 4T 1 L", "Motos 4 tempos"],
+      ["ATF DEXRON III", "Óleo ATF Dexron III 1 L", "Direção hidráulica e câmbio automático"],
+      ["RAD25005P", "Aditivo radiador pronto para uso rosa 1 L", "Revisão do arrefecimento"],
+      ["RAD25009P", "Água desmineralizada 1 L", "Venda junto com o aditivo"],
+      ["FLU15002", "Fluido de freio DOT 4 500 ml", "Revisão de freio"],
+      ["AER12000", "Desengripante 300 ml", "Uso doméstico e automotivo"],
+      ["SIL3502", "Silicone selante alta temperatura 50 g", "Pequenos reparos"]
+    ]
+  },
+  "apoio": {
+    "sobretitulo": "Parceria", "titulo": "Como a BAP apoia a venda na loja",
+    "itens": [
+      ["Exposição", "Materiais de ponto de venda e encartelados para organizar a gôndola por uso: carro, moto, radiador e freio."],
+      ["Venda casada", "Combinações simples para aumentar o ticket: óleo + aditivo, aditivo + água desmineralizada, fluido de freio na revisão."],
+      ["Equipe treinada", "Apresentação rápida dos produtos para a equipe da loja: qual óleo para qual veículo e como indicar o aditivo certo."],
+      ["Garantia sem burocracia", "O consumidor fala direto com a fábrica pelo SAC BAP. A loja não precisa intermediar."]
+    ]
+  },
+  "obrigado": {
+    "sobretitulo": "APRESENTAÇÃO COMERCIAL", "titulo": "Obrigado!",
+    "texto": "Queremos construir com vocês uma parceria de longo prazo, levando lubrificantes e químicos BAP de qualidade às suas lojas, com apoio próximo do nosso time em cada etapa.",
+    "contato": ["Alexandre Guerreiro", "Gerente Comercial · BAP AUTOPARTS", "alexandre.guerreiro@bapautoparts.com.br", "(92) 99250-8980"]
+  }
+}

@@ -21,6 +21,7 @@ pdfmetrics.registerFontFamily('PR', normal='PR', bold='PB', italic='PR', boldIta
 W, H, MX = 794, 1123, 36
 ANO = '2027'                               # ano da capa e dos títulos (Alexandre, 29/10: catálogo 2027)
 DOC_TITULO = f'CATÁLOGO COMPLETO {ANO}'   # o catálogo só de moto troca este título
+DOC_META = f'Catálogo BAP {ANO} — Completo (uso interno)'   # título dos metadados; o da Linha Moto também troca
 CW = W - 2 * MX
 TOP, FOOT, HERO = 54, 56, 132
 S = 595.2756 / W
@@ -155,7 +156,7 @@ def lw(s, size, font='PB', ls=0): return pdfmetrics.stringWidth(s, font, size) +
 class Doc:
     def __init__(self, path):
         self.c = canvas.Canvas(path, pagesize=(W * S, H * S), initialFontName='PR')
-        self.c.setTitle(f'Catálogo BAP {ANO} — Completo (uso interno)'); self.c.setAuthor('BAP AUTOPARTS')
+        self.c.setTitle(DOC_META); self.c.setAuthor('BAP AUTOPARTS')
         self.c.setPageCompression(1)
         self.areas_ref = []
 
