@@ -64,3 +64,35 @@ Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0027/sim/`
 - **Gerador:** `diff-gerador.patch` e o commit `2164a2d` (branch local `catalogo-grafico/T-0027-entregas`).
 
 **Resultado: LIBERADO.** A simulação pode seguir para a decisão do PO, com as recomendações do §5.
+
+---
+
+## Entrega final (PR #152)
+
+| Campo | Valor |
+|---|---|
+| Data | 22/11/2026 07:31 (Manaus) |
+| O que foi revisto | O PR #152, branch `catalogo-grafico/T-0027-entregas`, head `33678a7`, comparado com as entregas do origin/main `0fb9453`: os 3 PDFs (`Catalogo_BAP_2027_A4_grafica.pdf`, `Catalogo_BAP_2027_Completo_Digital.pdf` e `Catalogo_BAP_2027_Linha_Moto.pdf`) e o gerador |
+| Decisão do PO | 1a e 2a (R-20261122-112104-po) |
+| Pranchas | No aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0027/final/` (commit 24d8bf3) |
+| Resultado | **LIBERADO**, sem 🔴 e sem 🟡 |
+
+### A entrega bate com a simulação aprovada
+- 🟢 **O código é o da simulação.** O diff do gerador no PR é o do commit `2164a2d`, linha a linha igual ao `diff-gerador.patch` da simulação.
+- 🟢 **Conferi os PDFs entregues por conta própria.** Renderizei com o `pdftoppm`, a 150 ppi, as entregas do main e as do PR, página por página:
+
+  | PDF | Páginas (main = PR) | Mudam |
+  |---|---|---|
+  | A4 | 56 | 50 |
+  | Completo Digital | 311 | 2, 300 e 302 |
+  | Linha Moto | 17 | 2, 3 e 5 |
+
+  As caixas que mudam são as do §1, com diferença de até 1 px, que vem do renderizador. Todas as outras páginas ficam iguais pixel a pixel. Os títulos dos metadados e os nomes dos arquivos não mudam.
+- 🟢 **O texto muda só na palavra.** No `pdftotext` das 3 entregas, a única diferença é "1 itens" → "1 item" e "ITENS" → "ITEM", nas 7 páginas. Não sobra nenhum "1 itens" ou "1 ITENS".
+- 🟢 **As pranchas** (`*-prancha.png` e `*-zoom.png`) mostram o mesmo antes e depois da simulação. A decisão 1a ("1 / ITEM") está nas 3 páginas de painel.
+- Sem preço e sem estoque: 🟢. A busca por "R$" com número, "estoque" e "saldo" no texto dos 3 PDFs não acha nada.
+
+### Notas
+- A nota do §6 (a página da Lâmpadas Moto) foi para a fila do Alexandre como layout (R-20261122-112104-po). O Portfólio (pergunta 2) foi para um RD novo, na mesma fila.
+
+**Resultado da entrega final: LIBERADO** para seguir ao `revisor-codigo`.
