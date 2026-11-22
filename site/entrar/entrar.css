@@ -5,7 +5,6 @@
 /* ---------- cartão no fundo da faixa do início ---------- */
 .pg-login { min-height: 100vh; display: flex; flex-direction: column; background: var(--escuro); }
 .pg-login .rodape { margin-top: 0; }
-.pg-login .rodape-topo { display: none; } /* página curta: sem o "voltar ao topo" */
 .login-faixa { flex: 1; display: grid; place-items: center; padding: 48px 16px; color: var(--branco);
   background-color: var(--escuro); background-image: var(--fundo-faixa); position: relative; }
 .login-faixa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--verde); }
@@ -19,7 +18,6 @@
 .login-cartao h1 { font-size: 24px; line-height: 1.2; margin: 0 0 4px; color: var(--escuro); }
 .login-cartao .sub { margin: 0 0 18px; color: var(--texto-2); font-size: 14px; }
 .login-ajuda { margin: 16px 0 0; font-size: 13px; color: var(--texto-2); text-align: center; }
-.login-ajuda form { margin: 0; }
 @media (max-width: 640px) {
   .login-faixa { padding: 28px 12px 34px; align-items: start; }
   .login-cartao { padding: 22px 18px 20px; }
@@ -27,13 +25,9 @@
   .login-marca img { height: 46px; }
 }
 
-/* ---------- campos (login, senhas e usuários) ---------- */
+/* ---------- campos (login, senhas e usuários); o rótulo e a caixa do campo são os da busca (styles.css) ---------- */
 .form { display: grid; gap: 14px; }
-.form[hidden] { display: none; }
 .campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.campo label, .campo .campo-rot { font-size: 12px; font-weight: 600; color: var(--texto-2); text-transform: uppercase; letter-spacing: .04em; }
-.campo input[type=text], .campo input[type=password], .campo input[type=search] { width: 100%; height: 44px; border: 1px solid var(--borda-campo);
-  border-radius: 8px; padding: 0 12px; font-size: 15px; color: var(--texto); background: var(--branco); }
 .campo input[readonly] { background: var(--fundo); color: var(--texto-2); }
 .campo .dica { margin: 0; font-size: 12px; color: var(--texto-2); }
 .campo .msg-erro { margin: 0; font-size: 13px; font-weight: 500; color: var(--erro); }
@@ -55,7 +49,6 @@
 
 /* ---------- caixas: erro (role="alert") e aviso (role="status") ---------- */
 .caixa { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 8px; font-size: 14px; line-height: 1.4; margin: 0 0 16px; }
-.caixa[hidden] { display: none; }
 .caixa svg { flex: none; margin-top: 1px; }
 .caixa-erro { background: var(--erro-claro); color: var(--erro); }
 .caixa-info { background: var(--verde-claro); color: var(--verde-txt); }

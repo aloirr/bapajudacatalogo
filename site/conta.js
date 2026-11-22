@@ -3,11 +3,11 @@
    para o admin, o grupo Administração ("Criar usuários" e "Catálogos em PDF").
    A segurança é toda do servidor: o navegador não decide acesso e aqui não há segredo. Sem o serviço (site aberto com
    http.server, /api/eu responde 404), o botão não aparece e o catálogo funciona como antes.
-   Um 401 (sessão vencida: ela vale 5 h desde o login) leva a /entrar?expirou=1, com a volta para a mesma tela. */
+   Um 401 (sessão vencida: ela vale 5 h desde o login) leva a /entrar?expirou=1, com a volta para a mesma tela: quem cuida
+   dele é o BAP.api (/entrar/comum.js, que vem antes). */
 (function () {
   "use strict";
-  const LOGO_BAP = "/assets/logo_escuro.png"; // sem logo própria: o logo inteiro da BAP, pequeno (7 a)
-  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const { esc, api, LOGO_BAP } = window.BAP;
   const svg = (d) => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const IC = {
     usuarios: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M19 8v6M16 11h6"/>'),
@@ -17,13 +17,9 @@
   };
   const SETA = '<svg class="conta-seta" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 
-  // a sessão terminou: o login avisa e, depois de entrar, volta para esta tela (o #/produto/... vai junto)
-  function expirou() {
-    location.replace("/entrar?expirou=1&volta=" + encodeURIComponent(location.pathname + location.search) + location.hash);
-  }
-
-  // o aviso entra vazio, com role="status", e o texto vem depois (assim o leitor de tela anuncia); com uma janela
-  // aberta (showModal), ele entra nela, senão ficaria escondido atrás
+  // o aviso do site todo (o catálogo também usa): entra vazio, com role="status", e o texto vem depois (assim o leitor
+  // de tela anuncia); com uma janela aberta (showModal), ele entra nela, senão ficaria escondido atrás. Quem fecha a
+  // janela depois de uma ação chama o aviso só depois de fechar
   function toast(msg) {
     const t = document.createElement("div");
     t.className = "toast"; t.setAttribute("role", "status");
@@ -32,14 +28,10 @@
     setTimeout(() => t.remove(), 3200);
   }
 
-  // GET /api/eu: os dados da conta (200), a sessão vencida (401) ou nada (sem o serviço)
+  // GET /api/eu: os dados da conta (200) ou nada (sem o serviço: 404); o 401 o BAP.api leva ao login
   async function lerEu() {
-    let r;
-    try { r = await fetch("/api/eu", { cache: "no-store", credentials: "same-origin", headers: { Accept: "application/json" } }); }
-    catch (e) { return null; }
-    if (r.status === 401) { expirou(); return null; }
-    if (!r.ok) return null;
-    try { const d = await r.json(); return d && typeof d === "object" && d.usuario ? d : null; } catch (e) { return null; }
+    const r = await api("GET", "/api/eu");
+    return r.status === 200 && r.dados && typeof r.dados === "object" && r.dados.usuario ? r.dados : null;
   }
   const EU = lerEu();
 
@@ -49,7 +41,7 @@
     const agora = Date.now();
     if (!forcar && agora - ultima < 15000) return;
     ultima = agora;
-    fetch("/api/eu", { cache: "no-store", credentials: "same-origin" }).then((r) => { if (r.status === 401) expirou(); }, () => {});
+    api("GET", "/api/eu"); // o 401 leva ao login
   }
 
   function logoHtml(eu, alt) {
@@ -95,7 +87,7 @@
     window.addEventListener("hashchange", () => abrir(false));
     caixa.querySelector(".sair").addEventListener("click", async (e) => {
       e.currentTarget.disabled = true;
-      try { await fetch("/api/sair", { method: "POST", credentials: "same-origin" }); } catch (x) { /* o cookie vence sozinho */ }
+      await api("POST", "/api/sair"); // sem rede, o cookie vence sozinho
       location.replace("/entrar");
     });
 
@@ -124,5 +116,5 @@
     if (app) app.focus({ preventScroll: true });
   });
 
-  window.BAPConta = { eu: EU, expirou, toast };
+  window.BAPConta = { eu: EU, toast, IC };
 })();

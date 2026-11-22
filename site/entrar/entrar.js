@@ -2,34 +2,27 @@
    no 1º acesso), mais os ajudantes dos formulários que as páginas do admin também usam (window.BAPForm).
    A segurança é toda do servidor (serviço de login): o navegador só envia o formulário e mostra a resposta. Nada de
    segredo aqui; a senha nunca é guardada nem vai para o console, o endereço ou o storage.
-   Rotas da API: POST /api/entrar, GET /api/eu, POST /api/trocar-senha e POST /api/sair (contrato T-0022). */
+   Rotas da API: POST /api/entrar, GET /api/eu, POST /api/trocar-senha e POST /api/sair (contrato T-0022).
+   O esc, o api (que leva o 401 ao login) e o LOGO_BAP vêm do /entrar/comum.js (window.BAP), que vem antes. */
 (function () {
   "use strict";
   const $ = (s, r) => (r || document).querySelector(s);
-  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const { esc, api, LOGO_BAP } = window.BAP;
   const ic = (d) => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="${d}"/></svg>`;
   const IC = { erro: ic("M12 7v6M12 16.5v.5"), info: ic("M12 7v1M12 11v6"), relogio: ic("M12 7v5l3 2") };
   const MIN_SENHA = 8; // só o tamanho, sem regra de símbolo (desenho do serviço); quem confere de verdade é o servidor
+  const DICA_MIN = `Pelo menos ${MIN_SENHA} caracteres.`;
   const FALHA_REDE = "Não foi possível falar com o catálogo agora. Tente de novo em instantes.";
 
   // ---------- ajudantes (também do admin) ----------
-  // JSON na mesma origem, com o cookie de sessão; um Blob vai cru, com o tipo dele (a logo)
-  async function api(metodo, url, corpo) {
-    const op = { method: metodo, credentials: "same-origin", cache: "no-store", headers: { Accept: "application/json" } };
-    if (corpo instanceof Blob) { op.body = corpo; op.headers["Content-Type"] = corpo.type; }
-    else if (corpo !== undefined) { op.body = JSON.stringify(corpo); op.headers["Content-Type"] = "application/json"; }
-    let r;
-    try { r = await fetch(url, op); } catch (e) { return { status: 0, dados: null }; }
-    let dados = null;
-    if (r.status !== 204) { try { dados = await r.json(); } catch (e) { dados = null; } }
-    return { status: r.status, dados };
-  }
   const erroDe = (res, padrao) => (res.dados && typeof res.dados.erro === "string" && res.dados.erro) || padrao;
-
-  // a sessão terminou no meio do uso: o login avisa e volta para esta tela
-  function expirou() {
-    location.replace("/entrar?expirou=1&volta=" + encodeURIComponent(location.pathname + location.search) + location.hash);
-  }
+  // "dd/mm/aaaa hh:mm", no horário de Manaus; sem data, ""
+  const quando = (d) => {
+    const x = new Date(d);
+    if (!d || isNaN(x)) return "";
+    const o = { timeZone: "America/Manaus" };
+    return x.toLocaleDateString("pt-BR", o) + " " + x.toLocaleTimeString("pt-BR", { ...o, hour: "2-digit", minute: "2-digit" });
+  };
 
   // "Usuário ou senha incorretos." → a 1ª frase em negrito, como nas telas aprovadas
   function frase(t, resto) {
@@ -74,8 +67,12 @@
   }
   // o primeiro campo com erro recebe o foco
   const focarErro = (raiz) => { const i = raiz.querySelector('[aria-invalid="true"]'); if (i) i.focus(); return !!i; };
+  // o mínimo da senha nova (o servidor confere de novo)
+  function conferirSenha(i) {
+    if (i.value.length < MIN_SENHA) erroCampo(i, `Use pelo menos ${MIN_SENHA} caracteres.`);
+  }
 
-  window.BAPForm = { api, erroDe, expirou, esc, IC, MIN_SENHA, FALHA_REDE, frase, caixa, erroCampo, limparErros, mostrar, ligarMostrar, focarErro };
+  window.BAPForm = { erroDe, quando, IC, DICA_MIN, FALHA_REDE, frase, caixa, erroCampo, limparErros, mostrar, ligarMostrar, focarErro, conferirSenha };
 
   // ---------- volta depois do login ----------
   // Só um caminho deste site, para não virar redirecionamento aberto; em qualquer dúvida, "/".
@@ -149,7 +146,7 @@
           <form class="form" id="form-senha" novalidate>
             ${usuarioOculto(eu)}
             ${campoSenha("atual", "Senha atual", "current-password")}
-            ${campoSenha("nova", "Nova senha", "new-password", "Pelo menos 8 caracteres. Não repita a senha atual.")}
+            ${campoSenha("nova", "Nova senha", "new-password", DICA_MIN + " Não repita a senha atual.")}
             ${campoSenha("conf", "Confirmar a nova senha", "new-password")}
             <div class="form-acoes"><button type="submit" class="bt">Salvar nova senha</button><a class="bt-texto" href="${esc(destino())}">Cancelar</a></div>
           </form>
@@ -161,13 +158,13 @@
       pgTroca.className = "login-faixa";
       pgTroca.innerHTML = `
         <div class="login-cartao largo">
-          <div class="login-marca"><img src="/assets/logo_escuro.png" alt="bap componentes de qualidade"><span>Catálogo online</span></div>
+          <div class="login-marca"><img src="${LOGO_BAP}" alt="bap componentes de qualidade"><span>Catálogo online</span></div>
           <h1>Crie a sua senha</h1>
           <p class="sub">Olá, ${esc(eu.nome)}. No primeiro acesso, crie uma senha só sua.</p>
           <div id="aviso"></div>
           <form class="form" id="form-senha" novalidate>
             ${usuarioOculto(eu)}
-            ${campoSenha("nova", "Nova senha", "new-password", "Pelo menos 8 caracteres. Não use a senha inicial.")}
+            ${campoSenha("nova", "Nova senha", "new-password", DICA_MIN + " Não use a senha inicial.")}
             ${campoSenha("conf", "Confirmar a nova senha", "new-password")}
             <button type="submit" class="bt">Salvar e entrar no catálogo</button>
           </form>
@@ -176,8 +173,7 @@
       $("#sair").addEventListener("click", async () => { await api("POST", "/api/sair"); location.replace("/entrar"); });
     }
 
-    api("GET", "/api/eu").then((r) => {
-      if (r.status === 401) { expirou(); return; }
+    api("GET", "/api/eu").then((r) => { // o 401 o api leva ao login
       const eu = r.status === 200 && r.dados && r.dados.usuario ? r.dados : null; // sem o serviço: a tela normal, para conferir
       const forcada = !!(eu && eu.trocarSenha);
       if (forcada) obrigatoria(eu); else normal(eu);
@@ -189,8 +185,8 @@
         limparErros(f);
         caixa(aviso, "", "");
         if (atual && !atual.value) erroCampo(atual, "Digite a senha atual.");
-        if (nova.value.length < MIN_SENHA) erroCampo(nova, "Use pelo menos 8 caracteres.");
-        else if (atual && nova.value === atual.value) erroCampo(nova, "A nova senha não pode ser igual à atual.");
+        conferirSenha(nova);
+        if (!nova.hasAttribute("aria-invalid") && atual && nova.value === atual.value) erroCampo(nova, "A nova senha precisa ser diferente da atual."); // o texto do servidor
         if (conf.value !== nova.value) erroCampo(conf, "As duas senhas novas não são iguais.");
         if (focarErro(f)) return;
         bt.disabled = true;
@@ -201,7 +197,6 @@
           location.replace(destino());
           return;
         }
-        if (res.status === 401) { expirou(); return; }
         const msg = erroDe(res, res.status === 400 ? "Confira as senhas e tente de novo." : "Não foi possível trocar a senha agora. Tente de novo em instantes.");
         // 400 do serviço: "A nova senha precisa ser diferente da atual." e o mínimo de 8 caracteres vão para a nova senha;
         // a senha atual errada, para a senha atual; o resto (429 do limite de tentativas, falha) fica na caixa do alto

@@ -90,8 +90,8 @@ main:focus, main:focus-visible { outline: none; }
    a placa consultada e o veículo ficam embaixo do campo da placa */
 .form-busca { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px) auto; gap: 8px 14px; padding: 12px 16px; align-items: start; }
 .bq-campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.campo-rot { font-size: 12px; font-weight: 600; color: var(--texto-2); text-transform: uppercase; letter-spacing: .04em; }
-.bq-campo input, .mf-geral input { width: 100%; height: 44px; border: 1px solid var(--borda-campo); border-radius: 8px; padding: 0 12px; font: inherit; font-size: 15px; color: var(--texto); background: var(--branco); }
+.campo-rot, .campo label { font-size: 12px; font-weight: 600; color: var(--texto-2); text-transform: uppercase; letter-spacing: .04em; }
+.bq-campo input, .mf-geral input, .campo input[type=text], .campo input[type=password], .campo input[type=search] { width: 100%; height: 44px; border: 1px solid var(--borda-campo); border-radius: 8px; padding: 0 12px; font: inherit; font-size: 15px; color: var(--texto); background: var(--branco); }
 .bq-placa input { text-transform: uppercase; letter-spacing: .06em; }
 .bq-placa input::placeholder { text-transform: none; letter-spacing: 0; }
 .bq-bt { padding-top: 22px; } /* alinha o botão com os campos (altura do rótulo) */
@@ -741,7 +741,7 @@ body.pg-conta { min-height: 100vh; display: flex; flex-direction: column; } /* p
 body.pg-conta main { flex: 1; }
 .pg-cab { background: var(--g-catalogo); color: var(--branco); }
 .pg-cab-in { max-width: 1200px; margin: 0 auto; padding: 18px 16px 26px; }
-.pg-cab .trilha { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: -8px 0 0; color: var(--branco); }
+.pg-cab .trilha { align-items: center; font-size: 13px; margin: -8px 0 0; color: var(--branco); } /* o resto vem da .trilha */
 .pg-cab .trilha a { color: var(--branco); display: inline-flex; align-items: center; min-height: 44px; }
 .pg-cab h1 { margin: 0; font-size: 26px; line-height: 1.2; }
 .pg-cab p { margin: 6px 0 0; color: var(--branco); font-size: 14px; }

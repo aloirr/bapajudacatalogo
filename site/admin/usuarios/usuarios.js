@@ -6,12 +6,12 @@
 (function () {
   "use strict";
   const F = window.BAPForm;
+  const { esc, api, LOGO_BAP } = window.BAP; // o api leva o 401 ao login
   const $ = (s, r) => (r || document).querySelector(s);
-  const esc = F.esc;
-  const LOGO_BAP = "/assets/logo_escuro.png";
   const LOGO_MAX = 1024 * 1024; // até 1 MB (contrato); o servidor confere de novo
   const LOGO_TIPOS = ["image/png", "image/jpeg", "image/webp"];
   const RX_USUARIO = /^[a-z0-9._-]{3,32}$/; // como no contrato; o servidor confere de novo
+  const REGRA_US = "letras minúsculas, números, ponto, hífen ou sublinhado (3 a 32)"; // a mesma regra, em palavras
   const DICA_LOGO = "PNG, JPG ou WEBP, até 1 MB. De preferência deitada, com fundo branco ou transparente. Sem logo, o botão do canto usa a da BAP.";
   const IC_OK = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>';
 
@@ -20,12 +20,6 @@
   const versaoLogo = {}; // muda depois de enviar ou remover a logo, para o navegador não mostrar a antiga
 
   const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-  const quando = (d) => {
-    const x = new Date(d);
-    if (!d || isNaN(x)) return "Ainda não entrou";
-    const o = { timeZone: "America/Manaus" };
-    return x.toLocaleDateString("pt-BR", o) + " " + x.toLocaleTimeString("pt-BR", { ...o, hour: "2-digit", minute: "2-digit" });
-  };
   const urlLogo = (u) => `/api/usuarios/${encodeURIComponent(u.usuario)}/logo` + (versaoLogo[u.usuario] ? "?v=" + versaoLogo[u.usuario] : "");
   // sem logo: a da BAP (para o admin, ela é a logo da empresa dele)
   const semLogo = (u) => (u.admin ? "Logo da BAP" : "Sem logo: logo da BAP");
@@ -56,7 +50,7 @@
       <td data-rot="Nome">${n}</td>
       <td data-rot="Usuário"><span class="us-login">${ua}</span></td>
       <td data-rot="Situação"><div class="us-sit">${u.admin ? '<span class="tag tag-escura">Admin</span>' : ""}${u.ativo ? '<span class="tag tag-verde">Ativo</span>' : '<span class="tag">Desativado</span>'}${u.ativo && u.trocarSenha ? '<span class="tag">Falta trocar a senha inicial</span>' : ""}</div></td>
-      <td data-rot="Último acesso">${esc(quando(u.ultimoAcesso))}</td>
+      <td data-rot="Último acesso">${esc(F.quando(u.ultimoAcesso) || "Ainda não entrou")}</td>
       <td class="us-td-acoes"><div class="us-acoes">${acoes}</div></td>
     </tr>`;
   }
@@ -74,8 +68,7 @@
       <tbody>${achados.map(linha).join("")}</tbody></table>` : "";
   }
   async function carregar() {
-    const r = await F.api("GET", "/api/usuarios");
-    if (r.status === 401) { F.expirou(); return; }
+    const r = await api("GET", "/api/usuarios");
     if (r.status !== 200 || !Array.isArray(r.dados)) {
       total.textContent = "";
       F.caixa(lista, "erro", F.frase("Não foi possível carregar os usuários agora.", "Atualize a página em instantes."));
@@ -88,11 +81,13 @@
 
   // ---------- janela (uma só, com o conteúdo de cada ação) ----------
   const dlg = document.createElement("dialog");
-  dlg.className = "dlg";
+  dlg.className = "janela dlg"; // a janela do produto (styles.css), só com a largura e o fundo trocados (admin.css)
   dlg.setAttribute("aria-labelledby", "dlg-t");
   $("#app").appendChild(dlg);
   let VOLTA_FOCO = null; // { acao, u }: o botão que abriu a janela recebe o foco de volta
   dlg.addEventListener("close", () => {
+    // regra geral: um aviso que entrou na janela continua à vista depois que ela fecha
+    dlg.querySelectorAll(".toast").forEach((t) => document.body.appendChild(t));
     dlg.innerHTML = ""; // a senha inicial não fica na página
     const b = VOLTA_FOCO && (VOLTA_FOCO.u
       ? lista.querySelector(`[data-acao="${VOLTA_FOCO.acao}"][data-u="${CSS.escape(VOLTA_FOCO.u)}"]`) || lista.querySelector(`[data-u="${CSS.escape(VOLTA_FOCO.u)}"]`)
@@ -102,10 +97,10 @@
   dlg.addEventListener("click", (e) => { if (e.target.closest("[data-fecha]")) dlg.close(); });
   function abrirJanela(titulo, corpo, curta) {
     dlg.classList.toggle("dlg-curta", !!curta);
-    dlg.innerHTML = `<div class="dlg-barra"><h2 id="dlg-t">${titulo}</h2><button type="button" class="janela-x" data-fecha aria-label="Fechar">✕</button></div><div class="dlg-corpo">${corpo}</div>`;
+    dlg.innerHTML = `<div class="janela-barra"><h2 id="dlg-t">${titulo}</h2><button type="button" class="janela-x" data-fecha aria-label="Fechar">✕</button></div><div class="janela-corpo">${corpo}</div>`;
     F.ligarMostrar(dlg);
     dlg.showModal();
-    return $(".dlg-corpo", dlg);
+    return $(".janela-corpo", dlg);
   }
   const campoTexto = (id, rot, extra, dica) => `<div class="campo"><label for="${id}">${rot}</label><input id="${id}" type="text" ${extra}${dica ? ` aria-describedby="${id}-dica"` : ""}>${dica ? `<p class="dica" id="${id}-dica">${dica}</p>` : ""}</div>`;
   const campoSenha = (id, rot, dica, foco) => `<div class="campo"><label for="${id}">${rot}</label>
@@ -120,9 +115,6 @@
       F.erroCampo(i, "");
       i.focus();
     }));
-  }
-  function conferirSenha(i) {
-    if (i.value.length < F.MIN_SENHA) F.erroCampo(i, "Use pelo menos 8 caracteres.");
   }
   // depois de criar ou de trocar a senha: o usuário e a senha à vista, com o "Copiar usuário e senha"
   function entrega(corpo, aviso, u, senha, extra) {
@@ -150,10 +142,11 @@
     });
     $("#copiar", corpo).focus();
   }
-  // erro da API: 401 leva ao login; o resto aparece na caixa do alto da janela
+  // erro da API (o 401 já foi para o login): na caixa do alto da janela ou, sem janela, no aviso solto
   function falhou(r, aviso, padrao) {
-    if (r.status === 401) { F.expirou(); return; }
-    F.caixa(aviso, "erro", F.frase(F.erroDe(r, r.status === 0 ? F.FALHA_REDE : padrao)));
+    const msg = F.erroDe(r, r.status === 0 ? F.FALHA_REDE : padrao);
+    if (!aviso) { window.BAPConta.toast(msg); return; }
+    F.caixa(aviso, "erro", F.frase(msg));
     aviso.scrollIntoView({ block: "nearest" });
   }
 
@@ -197,8 +190,8 @@
   async function gravarLogo(usuario, st) {
     const url = `/api/usuarios/${encodeURIComponent(usuario)}/logo`;
     let r = null;
-    if (st.arquivo) r = await F.api("PUT", url, st.arquivo);
-    else if (st.remover && st.tem) r = await F.api("DELETE", url);
+    if (st.arquivo) r = await api("PUT", url, st.arquivo);
+    else if (st.remover && st.tem) r = await api("DELETE", url);
     if (!r) return null;
     versaoLogo[usuario] = Date.now();
     return r.status === 204 || r.status === 200 ? null : r;
@@ -209,8 +202,8 @@
     VOLTA_FOCO = { acao: "criar" };
     const corpo = abrirJanela("Criar usuário", `<form class="form" novalidate><div id="dlg-aviso"></div>
       <div class="duas">${campoTexto("n-nome", "Nome", 'autocomplete="off" maxlength="80" required autofocus')}${campoTexto("n-emp", "Empresa", 'autocomplete="organization" maxlength="80" required')}</div>
-      ${campoTexto("n-us", "Usuário (para entrar)", 'autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="32" required', "Letras minúsculas, números e ponto. Ex.: maria.silva. Não muda depois.")}
-      ${campoSenha("n-senha", "Senha inicial", "Pelo menos 8 caracteres. O usuário troca no 1º acesso.")}
+      ${campoTexto("n-us", "Usuário (para entrar)", 'autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="32" required', `${REGRA_US[0].toUpperCase() + REGRA_US.slice(1)}. Ex.: maria.silva. Não muda depois.`)}
+      ${campoSenha("n-senha", "Senha inicial", F.DICA_MIN + " O usuário troca no 1º acesso.")}
       ${blocoLogo(null)}
       ${ACOES("Criar usuário")}</form>`);
     const f = $("form", corpo), aviso = $("#dlg-aviso", corpo);
@@ -232,12 +225,12 @@
       if (!nome.value.trim()) F.erroCampo(nome, "Digite o nome.");
       if (!emp.value.trim()) F.erroCampo(emp, "Digite a empresa.");
       if (!us.value) F.erroCampo(us, "Digite o usuário.");
-      else if (!RX_USUARIO.test(us.value)) F.erroCampo(us, "Use só letras minúsculas, números, ponto, hífen ou sublinhado (3 a 32).");
-      conferirSenha(senha);
+      else if (!RX_USUARIO.test(us.value)) F.erroCampo(us, "Confira o usuário: ele não segue a regra acima.");
+      F.conferirSenha(senha);
       if (F.focarErro(f)) return;
       const bt = $('button[type="submit"]', f);
       bt.disabled = true;
-      const r = await F.api("POST", "/api/usuarios", { usuario: us.value, nome: nome.value.trim(), empresa: emp.value.trim(), senha: senha.value });
+      const r = await api("POST", "/api/usuarios", { usuario: us.value, nome: nome.value.trim(), empresa: emp.value.trim(), senha: senha.value });
       if (r.status !== 201 && r.status !== 200) {
         bt.disabled = false;
         if (r.status === 409) { F.erroCampo(us, F.erroDe(r, "Este usuário já existe. Escolha outro.")); us.focus(); return; }
@@ -272,14 +265,14 @@
       if (nome.value.trim() !== u.nome) mud.nome = nome.value.trim();
       if (emp.value.trim() !== u.empresa) mud.empresa = emp.value.trim();
       if (Object.keys(mud).length) {
-        const r = await F.api("PATCH", "/api/usuarios/" + encodeURIComponent(u.usuario), mud);
+        const r = await api("PATCH", "/api/usuarios/" + encodeURIComponent(u.usuario), mud);
         if (r.status !== 200 && r.status !== 204) { bt.disabled = false; falhou(r, aviso, "Não foi possível salvar. Confira os campos."); return; }
       }
       const rl = await gravarLogo(u.usuario, logo);
       bt.disabled = false;
       if (rl) { await carregar(); falhou(rl, aviso, "A logo não foi gravada. Tente de novo."); return; }
-      dlg.close();
       await carregar();
+      dlg.close(); // fecha antes do aviso; depois da lista nova, para o foco voltar ao "Editar"
       window.BAPConta.toast("Alterações salvas.");
     });
   }
@@ -288,7 +281,7 @@
   function trocarSenha(u) {
     const corpo = abrirJanela(`Trocar a senha de ${esc(u.nome)}`, `<form class="form" novalidate><div id="dlg-aviso"></div>
       <p>Usuário: <b>${esc(u.usuario)}</b> · ${esc(u.empresa)}</p>
-      ${campoSenha("t-senha", "Nova senha inicial", "Pelo menos 8 caracteres. Passe a senha direto para a pessoa.", true)}
+      ${campoSenha("t-senha", "Nova senha inicial", F.DICA_MIN + " Passe a senha direto para a pessoa.", true)}
       <div class="caixa caixa-info">${F.IC.info}<span>No próximo acesso, ${esc(u.nome)} cria uma senha nova. Se o catálogo estiver aberto, a sessão termina agora.</span></div>
       ${ACOES("Trocar senha")}</form>`);
     const f = $("form", corpo), aviso = $("#dlg-aviso", corpo), senha = $("#t-senha", corpo);
@@ -296,11 +289,11 @@
     f.addEventListener("submit", async (e) => {
       e.preventDefault();
       F.limparErros(f); F.caixa(aviso, "", "");
-      conferirSenha(senha);
+      F.conferirSenha(senha);
       if (F.focarErro(f)) return;
       const bt = $('button[type="submit"]', f);
       bt.disabled = true;
-      const r = await F.api("POST", `/api/usuarios/${encodeURIComponent(u.usuario)}/senha`, { senha: senha.value });
+      const r = await api("POST", `/api/usuarios/${encodeURIComponent(u.usuario)}/senha`, { senha: senha.value });
       if (r.status !== 204 && r.status !== 200) { bt.disabled = false; falhou(r, aviso, "Não foi possível trocar a senha. Tente de novo."); return; }
       entrega(corpo, `<b>Senha trocada.</b> Passe a nova senha inicial para ${esc(u.nome)}.`, u.usuario, senha.value);
       carregar();
@@ -308,10 +301,11 @@
   }
 
   // ---------- desativar (com confirmação) e reativar ----------
-  async function mudarAtivo(u, ativo, aviso) {
-    const r = await F.api("PATCH", "/api/usuarios/" + encodeURIComponent(u.usuario), { ativo });
+  async function mudarAtivo(u, ativo) {
+    const r = await api("PATCH", "/api/usuarios/" + encodeURIComponent(u.usuario), { ativo });
     if (r.status !== 200 && r.status !== 204) return r;
     await carregar();
+    if (dlg.open) dlg.close(); // a janela de desativar fecha antes do aviso (o foco volta à lista nova)
     window.BAPConta.toast(ativo ? "Usuário reativado." : "Usuário desativado.");
     return null;
   }
@@ -325,8 +319,7 @@
       const bt = $('button[type="submit"]', f);
       bt.disabled = true;
       const r = await mudarAtivo(u, false);
-      if (r) { bt.disabled = false; falhou(r, aviso, "Não foi possível desativar. Tente de novo."); return; }
-      dlg.close();
+      if (r) { bt.disabled = false; falhou(r, aviso, "Não foi possível desativar. Tente de novo."); }
     });
   }
 
@@ -342,7 +335,7 @@
     else if (b.dataset.acao === "reativar") {
       b.disabled = true;
       const r = await mudarAtivo(u, true);
-      if (r) { b.disabled = false; if (r.status === 401) F.expirou(); else window.BAPConta.toast(F.erroDe(r, "Não foi possível reativar. Tente de novo.")); }
+      if (r) { b.disabled = false; falhou(r, null, "Não foi possível reativar. Tente de novo."); }
       else { const nb = lista.querySelector(`[data-u="${CSS.escape(u.usuario)}"]`); if (nb) nb.focus(); }
     }
   });
