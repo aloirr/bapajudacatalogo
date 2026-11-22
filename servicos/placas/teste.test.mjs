@@ -47,7 +47,7 @@ before(async () => {
 });
 after(() => api.close());
 
-// ---------- catálogo falso (um produtos.json, só nos testes: CATALOGO_URL_TESTE) ----------
+// ---------- catálogo falso (no formato do /interno/codigos, só nos testes: CATALOGO_URL_TESTE) ----------
 const CODIGOS = ['AMT7183', 'CXD13062', 'CXD13027', 'ROL3204-2RS', 'ROL2780/2720', 'TER5597000', 'PST0001', 'PST0002', 'PST0003', 'PST0004', 'SAIU0001'];
 let catalogoUrl;
 let catalogoSrv;
@@ -55,7 +55,8 @@ before(async () => {
   catalogoSrv = http.createServer((req, res) => {
     if (req.url !== '/data/produtos.json') { res.writeHead(404); return res.end(); }
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ total: CODIGOS.length, produtos: CODIGOS.filter((c) => c !== 'SAIU0001').map((c) => ({ c, d: 'PECA' })) }));
+    const codigos = CODIGOS.filter((c) => c !== 'SAIU0001');
+    res.end(JSON.stringify({ total: codigos.length, codigos }));
   });
   await new Promise((r) => catalogoSrv.listen(0, '127.0.0.1', r));
   catalogoUrl = `http://127.0.0.1:${catalogoSrv.address().port}/data/produtos.json`;
@@ -548,7 +549,7 @@ test('contador: nada de IP, origem, hora ou placa no disco nem no log', async ()
 
 test('contar (T-0022): com CATALOGO_URL e CHAVE_INTERNA lê os códigos do /interno/codigos do login', async () => {
   const antes = pedidosInternos.length;
-  // O produtos.json falso (catalogo) fica de lado: a fonte é o login.
+  // O catálogo falso (catalogo) fica de lado: a fonte é o login.
   const s = await subir({ extra: { CATALOGO_URL: loginUrl, CHAVE_INTERNA } });
   await esperarLog(s, /catalogo (ok|indisponivel)/);
   assert.match(s.logs(), /catalogo ok 2\b/);

@@ -53,7 +53,7 @@ export function fonteDoCatalogo(env = process.env) {
       return { url: u.href, headers: { 'X-Chave-Interna': chaveInterna } };
     } catch { return { url: null }; }
   }
-  // Só nos testes: um produtos.json falso. Sem as duas variáveis, não há lista e o /contar dá 503.
+  // Só nos testes: um catálogo falso (CATALOGO_URL_TESTE).
   if (env.NODE_ENV === 'test' && env.CATALOGO_URL_TESTE) return { url: env.CATALOGO_URL_TESTE };
   return { url: null };
 }
