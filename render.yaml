@@ -39,3 +39,37 @@ services:
         value: https://bapajudacatalogo.onrender.com
       - key: PASTA_GUARDA
         value: /var/data
+  # Login do catálogo (T-0022): serve o site/ inteiro só com login. Sem rootDir: lê site/ e os 2 PDFs de catalogo_grafico/entregas/.
+  # A senha inicial do admin (ADMIN_SENHA_INICIAL) é digitada pelo Alexandre no painel; nunca vai para o Git.
+  # Fase A: sobe ao lado do site atual, que continua aberto até a fase B (redirecionamento).
+  - type: web
+    name: bapajudacatalogo-login
+    runtime: node
+    plan: starter
+    buildCommand: 'echo "sem dependencias"'
+    startCommand: node servicos/login/server.mjs
+    healthCheckPath: /saude
+    pullRequestPreviewsEnabled: false
+    buildFilter:
+      paths:
+        - site/**
+        - servicos/login/**
+        - catalogo_grafico/entregas/Catalogo_BAP_*_Completo_Digital.pdf
+        - catalogo_grafico/entregas/Catalogo_BAP_*_A4_grafica.pdf
+    disk:
+      name: login-usuarios
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: PASTA_DADOS
+        value: /var/data
+      - key: ADMIN_USUARIO
+        value: admin
+      - key: ADMIN_SENHA_INICIAL
+        sync: false
+      - key: SESSAO_SEGREDO
+        generateValue: true
+      - key: CHAVE_INTERNA
+        generateValue: true
