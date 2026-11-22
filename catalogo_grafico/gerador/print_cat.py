@@ -161,7 +161,7 @@ CARD_FS = 8.2
 SB_Y = 7 + 16.5 + 2          # cartão de destaque: tags e subtítulo começam aqui, abaixo do código
 SB_FS, SB_LH = 7.4, 9.6      # subtítulo do cartão (Poppins Medium)
 TAG_LINHAS = 2               # linhas de tags no cartão
-REF_MAIS = 12                # B8 (T-0019): a coluna EQUIVALE A ganha ~3 mm da APLICAÇÃO, para o código longo caber inteiro
+REF_MAIS = 0                 # B8 (T-0019): largura a mais da coluna EQUIVALE A, tirada da APLICAÇÃO (0: com 12, ~3 mm, saíam linhas e trechos de aplicação)
 
 
 import json as _json
