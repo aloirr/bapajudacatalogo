@@ -11,9 +11,11 @@ import { criarServico, caminhoLogico, tipoDaImagem, voltaSegura, SESSAO_MS, JANE
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const ORIGEM = 'https://catalogo.exemplo.invalid';
-const SENHA_INICIAL = 'senha-inicial-falsa-1';
-const SEGREDO = 'segredo-de-sessao-falso-para-teste-0123456789';
-const CHAVE_INTERNA = 'chave-interna-falsa-de-teste';
+// Valores de teste gerados na hora, sem forma de credencial no código (GitGuardian, R-20261122-042649-po).
+const falsa = (rotulo) => `falsa-${rotulo}-${'x'.repeat(8)}`;
+const SENHA_INICIAL = falsa('inicial-1');
+const SEGREDO = falsa('segredo-de-sessao');
+const CHAVE_INTERNA = falsa('chave-interna');
 const XLSX = 'CONTEUDO-DA-BASE-XLSX-NAO-PODE-SAIR';
 
 const PNG = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.from('resto-png-falso')]);
@@ -125,7 +127,7 @@ async function entrar(s, usuario, senha, extra = {}) {
   return { ...r, cookie: cookieDe(r) };
 }
 // Admin já com a senha trocada.
-async function adminPronto(s, nova = 'senha-admin-falsa-2') {
+async function adminPronto(s, nova = falsa('admin-2')) {
   const a = await entrar(s, 'admin', SENHA_INICIAL);
   assert.equal(a.status, 200);
   const t = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: a.cookie, corpo: { senhaNova: nova } });
@@ -133,10 +135,10 @@ async function adminPronto(s, nova = 'senha-admin-falsa-2') {
   return cookieDe(t);
 }
 // Usuário comum criado pelo admin e já com a senha trocada.
-async function clientePronto(s, adm, usuario = 'loja.exemplo', nova = 'senha-cliente-falsa-2') {
-  const c = await s.pedir('/api/usuarios', { metodo: 'POST', cookie: adm, corpo: { usuario, nome: 'Maria Exemplo', empresa: 'Loja Exemplo', senha: 'senha-cliente-falsa-1' } });
+async function clientePronto(s, adm, usuario = 'loja.exemplo', nova = falsa('cliente-2')) {
+  const c = await s.pedir('/api/usuarios', { metodo: 'POST', cookie: adm, corpo: { usuario, nome: 'Maria Exemplo', empresa: 'Loja Exemplo', senha: falsa('cliente-1') } });
   assert.equal(c.status, 201);
-  const e = await entrar(s, usuario, 'senha-cliente-falsa-1');
+  const e = await entrar(s, usuario, falsa('cliente-1'));
   assert.equal(e.status, 200);
   assert.deepEqual(e.json, { trocarSenha: true });
   const t = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: e.cookie, corpo: { senhaNova: nova } });
@@ -171,7 +173,7 @@ test('sem login nada abre: página leva a /entrar, o resto dá 401', async () =>
   const pdf = await s.pedir('/admin/pdfs/baixar/a4-grafica', { accept: HTML });
   assert.equal(pdf.status, 302);
   assert.match(pdf.headers.location, /^\/entrar\?volta=/);
-  // Abertos: só a tela de login, o CSS dela, a logo da BAP e a saúde.
+  // Abertos: a lista ABERTOS do server.mjs e a saúde.
   for (const caminho of ['/entrar', '/entrar/', '/entrar/entrar.css', '/entrar/entrar.js', '/entrar/comum.js', '/styles.css', '/assets/logo_escuro.png']) {
     assert.equal((await s.pedir(caminho, { accept: HTML })).status, 200, caminho);
   }
@@ -208,14 +210,14 @@ test('login do admin: troca obrigatória no 1º acesso, cookie seguro', async ()
   assert.deepEqual(Object.keys(eu.json), ['usuario', 'nome', 'empresa', 'admin', 'temLogo', 'trocarSenha', 'expiraEm']);
 
   // Regras da senha nova.
-  const curta = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: a.cookie, corpo: { senhaNova: '1234567' } });
+  const curta = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: a.cookie, corpo: { senhaNova: 'x'.repeat(7) } });
   assert.equal(curta.status, 400);
   assert.match(curta.json.erro, /pelo menos 8/);
   const igual = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: a.cookie, corpo: { senhaNova: SENHA_INICIAL } });
   assert.equal(igual.status, 400);
 
   s.avancar(60 * 60 * 1000); // 1 h depois do login
-  const t = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: a.cookie, corpo: { senhaNova: 'senha-admin-falsa-2' } });
+  const t = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: a.cookie, corpo: { senhaNova: falsa('admin-2') } });
   assert.equal(t.status, 204);
   const novo = cookieDe(t);
   assert.ok(novo && novo !== a.cookie);
@@ -228,7 +230,7 @@ test('login do admin: troca obrigatória no 1º acesso, cookie seguro', async ()
   assert.equal((await s.pedir('/img/AMT7183.jpg', { cookie: novo })).status, 200);
   // A senha inicial não vale mais; a nova vale e não pede troca.
   assert.equal((await entrar(s, 'admin', SENHA_INICIAL)).status, 401);
-  const de2 = await entrar(s, 'admin', 'senha-admin-falsa-2');
+  const de2 = await entrar(s, 'admin', falsa('admin-2'));
   assert.deepEqual(de2.json, { trocarSenha: false });
 });
 
@@ -261,8 +263,8 @@ test('usuário comum: 404 nas rotas de admin; o admin baixa os 2 PDFs da lista',
     assert.equal((await s.pedir(caminho, { cookie: cli, accept: 'text/html' })).status, 404, caminho);
   }
   for (const [caminho, metodo, corpo] of [
-    ['/api/usuarios', 'GET'], ['/api/usuarios', 'POST', { usuario: 'intruso', nome: 'X', senha: 'senha-falsa-99' }],
-    ['/api/usuarios/admin', 'PATCH', { nome: 'X' }], ['/api/usuarios/admin/senha', 'POST', { senha: 'senha-falsa-99' }],
+    ['/api/usuarios', 'GET'], ['/api/usuarios', 'POST', { usuario: 'intruso', nome: 'X', senha: falsa('99') }],
+    ['/api/usuarios/admin', 'PATCH', { nome: 'X' }], ['/api/usuarios/admin/senha', 'POST', { senha: falsa('99') }],
     ['/api/usuarios/loja.exemplo/logo', 'PUT', PNG], ['/api/usuarios/loja.exemplo/logo', 'GET'], ['/api/pdfs', 'GET'],
   ]) {
     const r = await s.pedir(caminho, { metodo, cookie: cli, corpo, headers: Buffer.isBuffer(corpo) ? { 'Content-Type': 'image/png' } : {} });
@@ -338,45 +340,45 @@ test('limite de tentativas: 5 erros por usuário e 20 por IP em 15 min, sempre a
   const adm = await adminPronto(s);
   await clientePronto(s, adm);
   const ip = { headers: { 'X-Forwarded-For': '192.0.2.10' } };
-  const r1 = await entrar(s, 'loja.exemplo', 'errada-1', ip);
-  const r2 = await entrar(s, 'nao.existe', 'errada-1', ip);
+  const r1 = await entrar(s, 'loja.exemplo', falsa('errada-1'), ip);
+  const r2 = await entrar(s, 'nao.existe', falsa('errada-1'), ip);
   assert.equal(r1.status, 401);
   assert.deepEqual(r1.json, r2.json, 'usuário inexistente e senha errada: mesma resposta');
   assert.deepEqual(r1.json, { erro: 'Usuário ou senha incorretos.' });
-  for (let i = 0; i < 4; i++) assert.equal((await entrar(s, 'loja.exemplo', 'errada-x', ip)).status, 401);
-  const bloq = await entrar(s, 'loja.exemplo', 'senha-cliente-falsa-2', { headers: { 'X-Forwarded-For': '192.0.2.99' } });
+  for (let i = 0; i < 4; i++) assert.equal((await entrar(s, 'loja.exemplo', falsa('errada-x'), ip)).status, 401);
+  const bloq = await entrar(s, 'loja.exemplo', falsa('cliente-2'), { headers: { 'X-Forwarded-For': '192.0.2.99' } });
   assert.equal(bloq.status, 429, 'bloqueado mesmo com a senha certa e outro IP');
   assert.deepEqual(bloq.json, { erro: 'Muitas tentativas seguidas. Aguarde 15 minutos e tente de novo.' });
   assert.equal(bloq.cookie, null);
   s.avancar(JANELA_ERROS_MS);
-  assert.equal((await entrar(s, 'loja.exemplo', 'senha-cliente-falsa-2', ip)).status, 200, 'depois de 15 min, entra');
+  assert.equal((await entrar(s, 'loja.exemplo', falsa('cliente-2'), ip)).status, 200, 'depois de 15 min, entra');
 
   // 20 por IP, espalhados por usuários diferentes.
   const outro = { headers: { 'X-Forwarded-For': '198.51.100.7' } };
-  for (let i = 0; i < 20; i++) assert.equal((await entrar(s, `robo${i}`, 'errada', outro)).status, 401);
-  assert.equal((await entrar(s, 'admin', 'senha-admin-falsa-2', outro)).status, 429);
-  assert.equal((await entrar(s, 'admin', 'senha-admin-falsa-2', ip)).status, 200, 'outro IP segue entrando');
+  for (let i = 0; i < 20; i++) assert.equal((await entrar(s, `robo${i}`, falsa('errada'), outro)).status, 401);
+  assert.equal((await entrar(s, 'admin', falsa('admin-2'), outro)).status, 429);
+  assert.equal((await entrar(s, 'admin', falsa('admin-2'), ip)).status, 200, 'outro IP segue entrando');
 
   // O admin troca a senha do bloqueado: o limite dele zera.
-  for (let i = 0; i < 5; i++) await entrar(s, 'loja.exemplo', 'errada', ip);
-  assert.equal((await entrar(s, 'loja.exemplo', 'senha-cliente-falsa-2', ip)).status, 429);
-  assert.equal((await s.pedir('/api/usuarios/loja.exemplo/senha', { metodo: 'POST', cookie: adm, corpo: { senha: 'senha-nova-falsa-3' } })).status, 204);
-  assert.equal((await entrar(s, 'loja.exemplo', 'senha-nova-falsa-3', { headers: { 'X-Forwarded-For': '203.0.113.5' } })).status, 200);
+  for (let i = 0; i < 5; i++) await entrar(s, 'loja.exemplo', falsa('errada'), ip);
+  assert.equal((await entrar(s, 'loja.exemplo', falsa('cliente-2'), ip)).status, 429);
+  assert.equal((await s.pedir('/api/usuarios/loja.exemplo/senha', { metodo: 'POST', cookie: adm, corpo: { senha: falsa('nova-3') } })).status, 204);
+  assert.equal((await entrar(s, 'loja.exemplo', falsa('nova-3'), { headers: { 'X-Forwarded-For': '203.0.113.5' } })).status, 200);
 });
 
 test('desativar, o admin trocar a senha e o próprio usuário trocar a senha derrubam a sessão', async () => {
   const s = await subir();
   const adm = await adminPronto(s);
   const cli = await clientePronto(s, adm);
-  const outraAba = (await entrar(s, 'loja.exemplo', 'senha-cliente-falsa-2')).cookie;
+  const outraAba = (await entrar(s, 'loja.exemplo', falsa('cliente-2'))).cookie;
 
   // Troca pela própria pessoa: exige a senha atual; a outra sessão cai, esta continua.
-  const semAtual = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: cli, corpo: { senhaNova: 'senha-cliente-falsa-3' } });
+  const semAtual = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: cli, corpo: { senhaNova: falsa('cliente-3') } });
   assert.equal(semAtual.status, 400);
-  const errada = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: cli, corpo: { senhaAtual: 'nao-e-esta', senhaNova: 'senha-cliente-falsa-3' } });
+  const errada = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: cli, corpo: { senhaAtual: falsa('nao-e-esta'), senhaNova: falsa('cliente-3') } });
   assert.equal(errada.status, 400);
   assert.equal(errada.json.erro, 'A senha atual está incorreta.');
-  const t = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: cli, corpo: { senhaAtual: 'senha-cliente-falsa-2', senhaNova: 'senha-cliente-falsa-3' } });
+  const t = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: cli, corpo: { senhaAtual: falsa('cliente-2'), senhaNova: falsa('cliente-3') } });
   assert.equal(t.status, 204);
   const cli2 = cookieDe(t);
   assert.equal((await s.pedir('/api/eu', { cookie: outraAba })).status, 401, 'a outra sessão caiu');
@@ -384,11 +386,11 @@ test('desativar, o admin trocar a senha e o próprio usuário trocar a senha der
   assert.equal((await s.pedir('/api/eu', { cookie: cli2 })).status, 200);
 
   // Admin troca a senha dele: a sessão cai e o próximo acesso pede troca.
-  assert.equal((await s.pedir('/api/usuarios/loja.exemplo/senha', { metodo: 'POST', cookie: adm, corpo: { senha: 'senha-inicial-falsa-9' } })).status, 204);
+  assert.equal((await s.pedir('/api/usuarios/loja.exemplo/senha', { metodo: 'POST', cookie: adm, corpo: { senha: falsa('inicial-9') } })).status, 204);
   assert.equal((await s.pedir('/data/produtos.json', { cookie: cli2 })).status, 401);
-  const e = await entrar(s, 'loja.exemplo', 'senha-inicial-falsa-9');
+  const e = await entrar(s, 'loja.exemplo', falsa('inicial-9'));
   assert.deepEqual(e.json, { trocarSenha: true });
-  const cli3 = cookieDe(await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: e.cookie, corpo: { senhaNova: 'senha-cliente-falsa-4' } }));
+  const cli3 = cookieDe(await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: e.cookie, corpo: { senhaNova: falsa('cliente-4') } }));
   assert.equal((await s.pedir('/api/eu', { cookie: cli3 })).status, 200);
 
   // Desativar: cai na hora e não entra mais (mesma mensagem). Reativar não ressuscita o cookie velho.
@@ -398,26 +400,26 @@ test('desativar, o admin trocar a senha e o próprio usuário trocar a senha der
   const pag = await s.pedir('/', { cookie: cli3, accept: 'text/html' });
   assert.equal(pag.status, 302);
   assert.match(pag.headers.location, /^\/entrar\?volta=/);
-  const neg = await entrar(s, 'loja.exemplo', 'senha-cliente-falsa-4');
+  const neg = await entrar(s, 'loja.exemplo', falsa('cliente-4'));
   assert.equal(neg.status, 401);
   assert.deepEqual(neg.json, { erro: 'Usuário ou senha incorretos.' });
   assert.equal((await s.pedir('/api/usuarios/loja.exemplo', { metodo: 'PATCH', cookie: adm, corpo: { ativo: true } })).status, 200);
   assert.equal((await s.pedir('/api/eu', { cookie: cli3 })).status, 401);
-  assert.equal((await entrar(s, 'loja.exemplo', 'senha-cliente-falsa-4')).status, 200);
+  assert.equal((await entrar(s, 'loja.exemplo', falsa('cliente-4'))).status, 200);
 
   // O admin não se desativa nem troca a própria senha por aqui.
   assert.equal((await s.pedir('/api/usuarios/admin', { metodo: 'PATCH', cookie: adm, corpo: { ativo: false } })).status, 400);
-  assert.equal((await s.pedir('/api/usuarios/admin/senha', { metodo: 'POST', cookie: adm, corpo: { senha: 'senha-falsa-77' } })).status, 400);
+  assert.equal((await s.pedir('/api/usuarios/admin/senha', { metodo: 'POST', cookie: adm, corpo: { senha: falsa('77') } })).status, 400);
 });
 
 test('cadastro: validação, 409 para usuário repetido, lista sem hash', async () => {
   const s = await subir();
   const adm = await adminPronto(s);
   const criar = (corpo) => s.pedir('/api/usuarios', { metodo: 'POST', cookie: adm, corpo });
-  const ok = { usuario: 'oficina_1', nome: 'João Exemplo', empresa: 'Oficina Exemplo', senha: 'senha-falsa-12' };
+  const ok = { usuario: 'oficina_1', nome: 'João Exemplo', empresa: 'Oficina Exemplo', senha: falsa('12') };
   for (const ruim of [
     { ...ok, usuario: 'ab' }, { ...ok, usuario: 'tem espaco' }, { ...ok, usuario: 'barra/x' }, { ...ok, usuario: 'x'.repeat(33) },
-    { ...ok, nome: '' }, { ...ok, nome: 'n'.repeat(81) }, { ...ok, empresa: 'e'.repeat(81) }, { ...ok, senha: 'curta' },
+    { ...ok, nome: '' }, { ...ok, nome: 'n'.repeat(81) }, { ...ok, empresa: 'e'.repeat(81) }, { ...ok, senha: 'x'.repeat(7) }, // curta demais (7 caracteres)
   ]) assert.equal((await criar(ruim)).status, 400, JSON.stringify(ruim).slice(0, 60));
   const c = await criar(ok);
   assert.equal(c.status, 201);
@@ -430,10 +432,10 @@ test('cadastro: validação, 409 para usuário repetido, lista sem hash', async 
   assert.ok(lista.json.find((u) => u.usuario === 'admin').ultimoAcesso);
   // "Falta trocar a senha inicial": trocarSenha (booleano) em cada usuário da lista.
   assert.deepEqual(lista.json.map((u) => [u.usuario, u.trocarSenha]), [['__proto__', true], ['admin', false], ['oficina_1', true]]);
-  const ent = await entrar(s, 'oficina_1', 'senha-falsa-12');
-  assert.equal((await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: ent.cookie, corpo: { senhaNova: 'senha-falsa-13' } })).status, 204);
+  const ent = await entrar(s, 'oficina_1', falsa('12'));
+  assert.equal((await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: ent.cookie, corpo: { senhaNova: falsa('13') } })).status, 204);
   assert.equal((await s.pedir('/api/usuarios', { cookie: adm })).json.find((u) => u.usuario === 'oficina_1').trocarSenha, false, 'trocou: some a etiqueta');
-  assert.equal((await s.pedir('/api/usuarios/oficina_1/senha', { metodo: 'POST', cookie: adm, corpo: { senha: 'senha-falsa-14' } })).status, 204);
+  assert.equal((await s.pedir('/api/usuarios/oficina_1/senha', { metodo: 'POST', cookie: adm, corpo: { senha: falsa('14') } })).status, 204);
   assert.equal((await s.pedir('/api/usuarios', { cookie: adm })).json.find((u) => u.usuario === 'oficina_1').trocarSenha, true, 'o admin trocou: volta a etiqueta');
   const p = await s.pedir('/api/usuarios/oficina_1', { metodo: 'PATCH', cookie: adm, corpo: { nome: 'João E.', empresa: '' } });
   assert.equal(p.status, 200);
@@ -477,11 +479,11 @@ test('Origin errado ou ausente é recusado nos POST/PATCH/PUT/DELETE', async () 
   const s = await subir();
   const adm = await adminPronto(s);
   for (const origem of ['https://malicioso.invalid', null, 'null', ORIGEM + '.malicioso.invalid']) {
-    const e = await s.pedir('/api/entrar', { metodo: 'POST', origem, corpo: { usuario: 'admin', senha: 'senha-admin-falsa-2' } });
+    const e = await s.pedir('/api/entrar', { metodo: 'POST', origem, corpo: { usuario: 'admin', senha: falsa('admin-2') } });
     assert.equal(e.status, 403, String(origem));
     assert.deepEqual(e.json, { erro: 'Origem não permitida.' });
     assert.equal(cookieDe(e), null);
-    const c = await s.pedir('/api/usuarios', { metodo: 'POST', origem, cookie: adm, corpo: { usuario: 'csrf1', nome: 'X', senha: 'senha-falsa-12' } });
+    const c = await s.pedir('/api/usuarios', { metodo: 'POST', origem, cookie: adm, corpo: { usuario: 'csrf1', nome: 'X', senha: falsa('12') } });
     assert.equal(c.status, 403);
     assert.equal((await s.pedir('/api/usuarios/admin', { metodo: 'PATCH', origem, cookie: adm, corpo: { nome: 'Hackeado' } })).status, 403);
     assert.equal((await s.pedir('/api/sair', { metodo: 'POST', origem, cookie: adm })).status, 403);
@@ -517,7 +519,7 @@ test('/interno/codigos: só com a chave interna, e só os códigos', async () =>
 
 test('sem ADMIN_SENHA_INICIAL e sem usuários (ou sem segredo/pasta): 503, menos a saúde', async () => {
   for (const env of [
-    { ADMIN_SENHA_INICIAL: undefined }, { ADMIN_SENHA_INICIAL: '' }, { ADMIN_SENHA_INICIAL: 'curta' },
+    { ADMIN_SENHA_INICIAL: undefined }, { ADMIN_SENHA_INICIAL: '' }, { ADMIN_SENHA_INICIAL: 'x'.repeat(7) }, // curta demais (7 caracteres)
     { SESSAO_SEGREDO: undefined }, { PASTA_DADOS: undefined }, { ADMIN_USUARIO: 'Admin Errado' },
   ]) {
     const s = await subir({ env });
@@ -525,7 +527,7 @@ test('sem ADMIN_SENHA_INICIAL e sem usuários (ou sem segredo/pasta): 503, menos
     assert.equal((await s.pedir('/', { accept: 'text/html' })).status, 503, rotulo);
     assert.equal((await s.pedir('/entrar', { accept: 'text/html' })).status, 503, rotulo);
     assert.equal((await s.pedir('/data/produtos.json')).status, 503, rotulo);
-    const e = await entrar(s, 'admin', 'qualquer-coisa-falsa');
+    const e = await entrar(s, 'admin', falsa('qualquer-coisa'));
     assert.equal(e.status, 503, rotulo);
     assert.equal(e.cookie, null);
     assert.equal((await s.pedir('/saude')).status, 200, rotulo);
@@ -539,14 +541,14 @@ test('usuarios.json: só hash scrypt, arquivo 0600, sobrevive ao reinício; a se
   await adminPronto(s);
   const arq = path.join(dados, 'usuarios.json');
   const txt = fs.readFileSync(arq, 'utf8');
-  assert.ok(!txt.includes(SENHA_INICIAL) && !txt.includes('senha-admin-falsa-2'), 'senha em texto');
+  assert.ok(!txt.includes(SENHA_INICIAL) && !txt.includes(falsa('admin-2')), 'senha em texto');
   assert.match(txt, /"hash": "scrypt\$16384\$8\$1\$[A-Za-z0-9_-]{22}\$[A-Za-z0-9_-]{86}"/);
   assert.equal(fs.statSync(arq).mode & 0o777, 0o600);
   assert.deepEqual(fs.readdirSync(dados).sort(), ['logos', 'usuarios.json']);
   s.srv.close();
-  const s2 = await subir({ dados, env: { ADMIN_SENHA_INICIAL: 'outra-senha-falsa-9' } });
-  assert.equal((await entrar(s2, 'admin', 'outra-senha-falsa-9')).status, 401);
-  assert.equal((await entrar(s2, 'admin', 'senha-admin-falsa-2')).status, 200);
+  const s2 = await subir({ dados, env: { ADMIN_SENHA_INICIAL: falsa('outra-9') } });
+  assert.equal((await entrar(s2, 'admin', falsa('outra-9'))).status, 401);
+  assert.equal((await entrar(s2, 'admin', falsa('admin-2'))).status, 200);
   // Arquivo quebrado: fecha (503) e NÃO sobrescreve.
   fs.writeFileSync(arq, '{quebrado');
   const s3 = await subir({ dados });
@@ -565,7 +567,7 @@ test('cookie adulterado, de outro segredo ou com vencimento esticado não vale',
   for (const ruim of [`${esticado}.${assin}`, `${comoAdmin}.${assin}`, `${corpo}.${assin.slice(0, -2)}AA`, corpo, `${corpo}.${assin}.x`, '']) {
     assert.equal((await s.pedir('/api/eu', { cookie: `${nome}=${ruim}` })).status, 401, ruim.slice(0, 20));
   }
-  const s2 = await subir({ env: { SESSAO_SEGREDO: 'outro-segredo-falso-de-teste-987654321' } });
+  const s2 = await subir({ env: { SESSAO_SEGREDO: falsa('outro-segredo') } });
   assert.equal((await s2.pedir('/api/eu', { cookie: c })).status, 401);
 });
 
@@ -573,16 +575,16 @@ test('o log não leva senha, hash, cookie, segredo, chave, usuário, caminho nem
   const s = await subir();
   const adm = await adminPronto(s);
   const cli = await clientePronto(s, adm);
-  await entrar(s, 'loja.exemplo', 'senha-errada-falsa', { headers: { 'X-Forwarded-For': '192.0.2.123' } });
+  await entrar(s, 'loja.exemplo', falsa('errada'), { headers: { 'X-Forwarded-For': '192.0.2.123' } });
   await s.pedir('/interno/codigos', { headers: { 'X-Chave-Interna': CHAVE_INTERNA } });
-  await s.pedir('/interno/codigos', { headers: { 'X-Chave-Interna': 'chave-errada-falsa' } });
+  await s.pedir('/interno/codigos', { headers: { 'X-Chave-Interna': falsa('chave-errada') } });
   await s.pedir('/../dados/BASE.xlsx', { cookie: cli });
   await s.pedir('/admin/pdfs/baixar/a4-grafica', { cookie: adm });
   await s.pedir('/api/usuarios/loja.exemplo/logo', { metodo: 'PUT', cookie: adm, corpo: PNG, headers: { 'Content-Type': 'image/png' } });
   const log = s.logs.join('\n');
   const hash = JSON.parse(fs.readFileSync(path.join(s.dados, 'usuarios.json'), 'utf8')).usuarios[0].hash;
   for (const proibido of [
-    SENHA_INICIAL, 'senha-admin-falsa-2', 'senha-cliente-falsa', 'senha-errada-falsa', SEGREDO, CHAVE_INTERNA, 'chave-errada-falsa',
+    'falsa-', SENHA_INICIAL, SEGREDO, CHAVE_INTERNA,
     adm.split('=')[1], cli.split('=')[1], hash.split('$')[5], '192.0.2', '127.0.0.1', 'loja.exemplo', 'BASE.xlsx', 'a4-grafica', 'Maria',
   ]) assert.ok(!log.includes(proibido), 'log vazou: ' + proibido);
   assert.match(log, /entrar 200 \d+ms/);
