@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 21/11/2026 15:14 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 21/11/2026 21:20 (Manaus), na retomada depois da parada das ~18h. Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -17,27 +17,28 @@ Atualizado em 21/11/2026 15:14 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0011](tarefas/T-0011.md) | Busca palavra por palavra no catálogo online (só produtos) e aba Placa | web-site | testes | CONCLUÍDA | #26, #27 |
 | [T-0012](tarefas/T-0012.md) | Fim do ATUALIZAR_CATALOGO.bat: o repositório é a base oficial | gerente-projetos | po, web-site | CONCLUÍDA | #16, #17 |
 | [T-0013](tarefas/T-0013.md) | Filtros do resultado abrem todos expandidos | web-site | testes | CONCLUÍDA | #20 |
-| [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | EM ANDAMENTO (filtros f1 no ar pelo #45 da T-0018; falta o aperto do testes) | #29, #35, #36, #39, #41, #45 |
+| [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | EM APROVAÇÃO (ajustes e filtros f1 no ar; aperto do testes no #101) | #29, #35, #36, #39, #41, #45, #101 |
 | [T-0015](tarefas/T-0015.md) | Três agentes novos: corretor-redundancias, design-de-marca e designer-ux | gerente-projetos | po, revisor-codigo | CONCLUÍDA | #30 |
-| [T-0016](tarefas/T-0016.md) | Guardião com a regra de merge do PO, conferência dos merges pelo GitHub e limpeza do CI e do coord.mjs | alexandre | gerente-projetos, testes, revisor-codigo | EM ANDAMENTO (#34 no main; pacote d na sessão filha) | #34, #48 |
-| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v25, a AUTOIMPACT na referência cruzada e os PDFs da v25 no ar; v26 em simulação) | #32, #33, #37, #38, #50, #54, #55, #59, #60, #63, #67, #71, #75, #76, #78, #79, #82, #83, #86, #87, #88, #89, #90 |
-| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | EM ANDAMENTO (home, tag, "Leve também" pelo veículo, "AAAA+", a tarefa C e o RD-0212 no ar; "Leve também" pelo sistema da peça em simulação; falta o aperto do testes) | #42, #43, #45, #46, #49, #50, #52, #53, #56, #57, #58, #62, #65, #66, #74, #81 |
-| [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | EM ANDAMENTO (PDFs 2027 com a v25 e a AUTOIMPACT por último no main; bloco B e "Leve também" pelo sistema da peça em simulação) | #40, #47, #51, #61, #64, #70, #77, #84, #90 |
+| [T-0016](tarefas/T-0016.md) | Guardião com a regra de merge do PO, conferência dos merges pelo GitHub e limpeza do CI e do coord.mjs | alexandre | gerente-projetos, testes, revisor-codigo | CONCLUÍDA (o pacote d, a ponte do po, já está no main) | #34, #48 |
+| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v26 e o JSON da v26 no ar; v27 em simulação, com o Alexandre) | #32, #33, #37, #38, #50, #54, #55, #59, #60, #63, #67, #71, #75, #76, #78, #79, #82, #83, #86, #87, #88, #89, #90, #91, #92, #93, #96, #98 |
+| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | EM APROVAÇÃO (home, tag, "Leve também" pelo veículo e pelo sistema da peça, B11, "AAAA+", a tarefa C e o RD-0212 no ar; aperto do testes no #101) | #42, #43, #45, #46, #49, #50, #52, #53, #56, #57, #58, #62, #65, #66, #74, #81, #95, #97, #101 |
+| [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | EM REVISÃO (#99: PDFs 2027 com a v26, B8 sem corte no meio, B9, B10 e "Leve também" pelo sistema; espera o "aprovado" das pranchas finais) | #40, #47, #51, #61, #64, #70, #77, #84, #90, #94, #100, #99 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 
 ## Fila
-Pendências do R-20261121-190649-alexandre, com o CV-F35 do R-20261121-190933. Main 8de7a6d (#90). Os PRs seguem a regra de sempre (testes, revisões LIBERADO, CI verde e a autorização do PO por número e SHA); as simulações vão ao Alexandre antes de qualquer PR (regra 3).
+Retomada de 21/11 às 20h37 (Manaus). Main 3d6a730 (#100). Os PRs seguem a regra de sempre: testes, revisões LIBERADO, CI verde e a autorização do PO por número e SHA. As simulações vão ao Alexandre antes de qualquer PR (regra 3).
 
-1. Bloco A, limpeza (em andamento):
-   - registros dos PRs #80 a #90 e o quadro (gerente-projetos);
-   - CATALOGO.md, com o RD-0253 a RD-0267 (corretor-redundancias): no main pelo #91;
-   - Bosch do MF21 e o ResourceWarning do gerador dos PDFs (catalogo-grafico);
-   - peso do CL18, os números da ficha sem resto de ponto flutuante (web-site);
-   - README da v25 (catalogo-dados, junto da v26) e os worktrees antigos (gerente-projetos: feito).
-2. Bloco B, layout (em simulação): espaço inseparável e palavra sozinha; o RD-0252 do SCE14002; a tag NOVO na p. 20 do A4; o "s/ ABS" repetido no AMT7500 do site.
-3. v26 (catalogo-dados), T-0017 (em simulação): o SCE14002 com os modelos LS; a Kia Bongo do CRU100 "2017+"; na VEICULOS, como normais, a Hyundai HR do CRU100, os LS do SCE14002 e a Parati e o Santana do CIL8546; o CV-F35 2010–2013; a "AUTOIMPACT MA21" do MF22 fica; "Mbb", "Vwc" e "New Beetle" padronizados.
-4. "Leve também" pelo sistema da peça, no site (T-0018) e nos PDFs (T-0019) (em simulação), com a contagem do que muda.
-5. Home: o BS10 fica como 8º destaque; nada a fazer.
+1. **#99 (T-0019), PDFs com a v26 e o bloco B:** a B8 sem corte no meio entrou pela resposta "A" (R-20261122-010035). Head dbbef37, com testes, designer-ux, design-de-marca, revisor e corretor LIBERADO. Espera o "aprovado" do Alexandre nas pranchas finais (R-20261122-010650) e, depois, a autorização do PO.
+2. **#101 (T-0014 e T-0018), aperto do testes:** head d7fdc20, CI verde, revisor e corretor LIBERADO. Autorização pedida ao PO (R-20261122-010822).
+3. **v27 (T-0017), em simulação:** R-20261122-010316, com 6 perguntas ao Alexandre: SISTEMA dos 194 rolamentos, SCE14002 (RD-0284), TER55227, TER5597056 e a composição do kit repetida no DETALHE_CATALOGO (RD-0293). A mesma repetição no PDF vem do gerador; o catalogo-grafico corrige depois do #99, com simulação.
+4. **Bloco A, limpeza:** feito (#91, #92, #93, #94; READMEs da v25 e da v26 no branch da v27; este PR de registros). A T-0016 foi concluída.
+5. **Fora da fila, para decidir depois:**
+   - CIL8546: o "—" no ano do site vem de o site ler o texto (web-site);
+   - TER55227: está no SISTEMA DIREÇÃO, mas é terminal da alavanca do câmbio;
+   - "(coluna Leve também)" aparece com e sem aspas nos PDFs de pneus;
+   - EQUIVALE A ainda pode começar uma linha com "·";
+   - o quebra.py usa funções internas do ReportLab (fixar a versão).
+6. **Home:** o BS10 fica como 8º destaque; nada a fazer.
 
 ## Regras novas (20 e 21/11)
 - Merge: o PO autoriza todos os merges, inclusive os de governança, conferindo número, head, arquivos, CI verde e revisão LIBERADO; o gerente executa (R-20261120-111133 e R-20261120-111308-alexandre). As simulações de tela e de PDF continuam indo ao Alexandre.
