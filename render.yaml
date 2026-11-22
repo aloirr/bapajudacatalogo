@@ -47,7 +47,7 @@ services:
           envVarKey: CHAVE_INTERNA
       - key: PASTA_GUARDA
         value: /var/data
-  # Login do catálogo (T-0022): serve o site/ inteiro só com login. Sem rootDir: lê site/ e os 2 PDFs de catalogo_grafico/entregas/.
+  # Login do catálogo (T-0022): serve o site/ inteiro só com login. Sem rootDir: lê site/ e os arquivos do admin de catalogo_grafico/entregas/ (lista PDFS do server.mjs).
   # A senha inicial do admin (ADMIN_SENHA_INICIAL) é digitada pelo Alexandre no painel; nunca vai para o Git.
   - type: web
     name: bapajudacatalogo-login
@@ -63,6 +63,11 @@ services:
         - servicos/login/**
         - catalogo_grafico/entregas/Catalogo_BAP_*_Completo_Digital.pdf
         - catalogo_grafico/entregas/Catalogo_BAP_*_A4_grafica.pdf
+        - catalogo_grafico/entregas/Catalogo_BAP_*_Linha_Moto.pdf
+        - catalogo_grafico/entregas/Portfolio_Produtos_BAP_AUTOPARTS.pdf
+        - catalogo_grafico/entregas/BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pdf
+        - catalogo_grafico/entregas/BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pptx
+        - catalogo_grafico/entregas/Kit_Filtros_BAP.pdf
     disk:
       name: login-usuarios
       mountPath: /var/data
