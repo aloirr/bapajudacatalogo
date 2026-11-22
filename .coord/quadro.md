@@ -17,11 +17,11 @@ Atualizado em 21/11/2026 21:20 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0011](tarefas/T-0011.md) | Busca palavra por palavra no catálogo online (só produtos) e aba Placa | web-site | testes | CONCLUÍDA | #26, #27 |
 | [T-0012](tarefas/T-0012.md) | Fim do ATUALIZAR_CATALOGO.bat: o repositório é a base oficial | gerente-projetos | po, web-site | CONCLUÍDA | #16, #17 |
 | [T-0013](tarefas/T-0013.md) | Filtros do resultado abrem todos expandidos | web-site | testes | CONCLUÍDA | #20 |
-| [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | EM APROVAÇÃO (aperto do testes no #101) | #29, #35, #36, #39, #41, #45, #101 |
+| [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | CONCLUÍDA | #29, #35, #36, #39, #41, #45, #101 |
 | [T-0015](tarefas/T-0015.md) | Três agentes novos: corretor-redundancias, design-de-marca e designer-ux | gerente-projetos | po, revisor-codigo | CONCLUÍDA | #30 |
 | [T-0016](tarefas/T-0016.md) | Guardião com a regra de merge do PO, conferência dos merges pelo GitHub e limpeza do CI e do coord.mjs | alexandre | gerente-projetos, testes, revisor-codigo | CONCLUÍDA | #34, #48 |
 | [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v26 e o JSON da v26 no ar; v27 em simulação, com o Alexandre) | #32, #33, #37, #38, #50, #54, #55, #59, #60, #63, #67, #71, #75, #76, #78, #79, #82, #83, #86, #87, #88, #89, #90, #91, #92, #93, #96, #98 |
-| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | EM APROVAÇÃO (aperto do testes no #101) | #42, #43, #45, #46, #49, #50, #52, #53, #56, #57, #58, #62, #65, #66, #74, #81, #95, #97, #101 |
+| [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | CONCLUÍDA | #42, #43, #45, #46, #49, #50, #52, #53, #56, #57, #58, #62, #65, #66, #74, #81, #95, #97, #101 |
 | [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | EM REVISÃO (#99: PDFs com a v26 e o bloco B; espera o "aprovado" das pranchas finais) | #40, #47, #51, #61, #64, #70, #77, #84, #90, #94, #99, #100 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 
@@ -29,10 +29,9 @@ Atualizado em 21/11/2026 21:20 (Manaus). Como usar: `.coord/README.md`. Uma linh
 Retomada de 21/11 às 20h37 (Manaus), depois da parada das ~18h. Main 3d6a730 (#100). Os PRs seguem a regra de sempre: testes, revisões LIBERADO, CI verde e a autorização do PO por número e SHA. As simulações vão ao Alexandre antes de qualquer PR (regra 3).
 
 1. **#99 (T-0019):** espera o "aprovado" do Alexandre nas pranchas finais (R-20261122-010650) e, depois, a autorização do PO.
-2. **#101 (T-0014 e T-0018):** autorização pedida ao PO (R-20261122-010822).
-3. **v27 (T-0017), em simulação:** R-20261122-010316, com 6 perguntas ao Alexandre: SISTEMA dos 194 rolamentos, SCE14002 (RD-0284), TER55227, TER5597056 e a composição do kit repetida no DETALHE_CATALOGO (RD-0293). A mesma repetição no PDF vem do gerador; o catalogo-grafico corrige depois do #99, com simulação.
-4. **Bloco A, limpeza:** feito (#91, #92, #93, #94; READMEs da v25 e da v26 no branch da v27; este PR de registros).
-5. **Fora da fila, para decidir depois:**
+2. **v27 (T-0017), em simulação:** R-20261122-010316, com 6 perguntas ao Alexandre: SISTEMA dos 194 rolamentos, SCE14002 (RD-0284), TER55227, TER5597056 e a composição do kit repetida no DETALHE_CATALOGO (RD-0293). A mesma repetição no PDF vem do gerador; o catalogo-grafico corrige depois do #99, com simulação.
+3. **Bloco A, limpeza:** feito (#91, #92, #93, #94, #101; READMEs da v25 e da v26 no branch da v27; este PR de registros).
+4. **Fora da fila, para decidir depois:**
    - CIL8546: o "—" no ano do site vem de o site ler o texto (web-site);
    - "(coluna Leve também)" aparece com e sem aspas nos PDFs de pneus;
    - EQUIVALE A ainda pode começar uma linha com "·";
