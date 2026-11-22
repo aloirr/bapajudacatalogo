@@ -20,8 +20,10 @@ pdfmetrics.registerFontFamily('PR', normal='PR', bold='PB', italic='PR', boldIta
 
 W, H, MX = 794, 1123, 36
 ANO = '2027'                               # ano da capa e dos títulos (Alexandre, 29/10: catálogo 2027)
+MARCA = 'BAP AUTOPARTS'   # nome da marca: sobretítulo das páginas de abertura e autor dos metadados
 DOC_TITULO = f'CATÁLOGO COMPLETO {ANO}'   # o catálogo só de moto troca este título
 DOC_META = f'Catálogo BAP {ANO} — Completo (uso interno)'   # título dos metadados; o da Linha Moto também troca
+SUM_DESC = 'Todas as linhas BAP com as aplicações completas.'   # texto do sumário; o da Linha Moto também troca (RD-0499)
 CW = W - 2 * MX
 TOP, FOOT, HERO = 54, 56, 132
 S = 595.2756 / W
@@ -156,7 +158,7 @@ def lw(s, size, font='PB', ls=0): return pdfmetrics.stringWidth(s, font, size) +
 class Doc:
     def __init__(self, path):
         self.c = canvas.Canvas(path, pagesize=(W * S, H * S), initialFontName='PR')
-        self.c.setTitle(DOC_META); self.c.setAuthor('BAP AUTOPARTS')
+        self.c.setTitle(DOC_META); self.c.setAuthor(MARCA)
         self.c.setPageCompression(1)
         self.areas_ref = []
 
@@ -491,11 +493,11 @@ def capa(dc):
 
 def sumario(dc, entries, pg):
     dc.bookmark('sumario', 'Sumário', 0)
-    dc.top(back=False, right='Catálogo completo')
+    dc.top(back=False)                           # o título do catálogo fica só à esquerda da barra (RD-0499)
     dc.rect(0, TOP, W, HERO, fill='hero'); dc.rect(0, TOP + HERO - 1, W, 1, fill='heroline')
-    dc.label(MX, TOP + 26, DOC_TITULO, 10, 'gdark', 'PB', 1.6)
+    dc.label(MX, TOP + 26, MARCA, 10, 'gdark', 'PB', 1.6)
     dc.label(MX - 1, TOP + 46, 'Sumário', 40, 'black', 'PB', -.8)
-    dc.text(MX, TOP + 94, 520, 'Todas as linhas BAP com as aplicações completas. Toque no nome da linha para ir direto à página.', 11, 16, 'sec')
+    dc.text(MX, TOP + 94, 520, f'{SUM_DESC} Toque no nome da linha para ir direto à página.', 11, 16, 'sec')
     grupos = []
     for e in entries:
         if e['group'] not in grupos: grupos.append(e['group'])

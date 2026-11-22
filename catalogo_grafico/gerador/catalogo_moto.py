@@ -9,6 +9,7 @@ import moto, digital2 as D2
 
 D2.DOC_TITULO = f'CATÁLOGO LINHA MOTO {D2.ANO}'
 D2.DOC_META = f'Catálogo BAP {D2.ANO} — Linha Moto (uso interno)'
+D2.SUM_DESC = 'Todas as linhas BAP para motocicletas com as aplicações completas.'
 FAMS = []
 for f in moto.MOTO_FAMS:
     g = dict(f)

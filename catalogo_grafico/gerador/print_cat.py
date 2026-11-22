@@ -36,7 +36,7 @@ class PDoc(D2.Doc):
     def __init__(self, path):
         from reportlab.pdfgen import canvas
         self.c = canvas.Canvas(path, pagesize=((W + 2 * BPX) * S, (H + 2 * BPX) * S), initialFontName='PR')
-        self.c.setTitle(f'Catálogo BAP {ANO} — Impressão A4 (uso interno)'); self.c.setAuthor('BAP AUTOPARTS')
+        self.c.setTitle(f'Catálogo BAP {ANO} — Impressão A4 (uso interno)'); self.c.setAuthor(D2.MARCA)
         self.areas_ref = []                       # caixas das referências, para a trava (D2.Doc.ref)
 
     def X(self, x): return (x + BPX) * S
@@ -101,7 +101,7 @@ class PDoc(D2.Doc):
 
 
 # ---------------------------------------------------------------- blocos de página
-def topbar(dc, right):
+def topbar(dc, right=''):   # páginas de abertura sem rótulo à direita: o catálogo e o ano ficam só à esquerda (RD-0429, RD-0499)
     dc.rect(0, 0, W, TOP, fill='black')
     dc.image(D2.LOGO, MX, 10, 24.7, 34)
     dc.rect(MX + 24.7 + 14, 16, 1, 22, fill='divider')
@@ -477,11 +477,12 @@ def capa(dc):
 
 
 def por_que(dc, pg):
-    topbar(dc, '')                                      # a marca fica só no sobretítulo; à esquerda já está o catálogo (RD-0429)
-    hero(dc, 'BAP AUTOPARTS', 'Por que BAP?', '')       # sem subtítulo: o "Quem somos" já diz (RD-0429)
+    topbar(dc)
+    hero(dc, D2.MARCA, 'Por que BAP?', '')       # sem subtítulo: o "Quem somos" já diz (RD-0429)
     y = TOP + HERO + 36
-    blocos = [('Quem somos', 'A BAP AUTOPARTS é uma empresa brasileira fundada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. O portfólio cobre as linhas leve, pesada e moto, da suspensão à parte elétrica.'),
-              ('Por que vender BAP', 'Portfólio robusto para suspensão, direção, freio, arrefecimento, motor, transmissão, elétrica e acessórios. Produtos com padrão OEM, testados para máxima performance, e preço competitivo sem abrir mão da qualidade.'),
+    # as linhas ficam só em "Por que vender BAP" e a qualidade com preço só em "Quem somos" (RD-0498)
+    blocos = [('Quem somos', 'A BAP AUTOPARTS é uma empresa brasileira fundada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível.'),
+              ('Por que vender BAP', 'Portfólio robusto para as linhas leve, pesada e moto: suspensão, direção, freio, arrefecimento, motor, transmissão, elétrica e acessórios. Produtos com padrão OEM, testados para máxima performance.'),
               ('Garantia Expressa BAP', 'Ativação simples e direta, sem burocracia: o cliente aciona a garantia direto com a fábrica pelo SAC BAP. Prazos conforme o certificado da embalagem, sem intermediários.')]
     for t, txt in blocos:
         dc.rect(MX, y + 2, 4, 18, fill='green')
@@ -500,7 +501,7 @@ def por_que(dc, pg):
 
 
 def como(dc, pg):
-    topbar(dc, f'Catálogo {ANO}')
+    topbar(dc)
     hero(dc, 'GUIA RÁPIDO', 'Como consultar', 'Encontre a peça certa e aumente o ticket em poucos passos.')
     passos = [('Encontre a linha', 'O sumário organiza as linhas por sistema do veículo (suspensão, freio, arrefecimento...). Cada página traz uma linha de produtos BAP.'),
               ('Veja os destaques', 'Os cards no topo mostram os itens em destaque da linha, com foto, aplicação e equivalência.'),
@@ -527,8 +528,8 @@ def como(dc, pg):
 
 
 def sumario(dc, entries, pg):
-    topbar(dc, f'Catálogo {ANO}')
-    hero(dc, f'CATÁLOGO {ANO}', 'Sumário', 'Linhas de produtos BAP organizadas por sistema do veículo.')
+    topbar(dc)
+    hero(dc, D2.MARCA, 'Sumário', 'Linhas de produtos BAP organizadas por sistema do veículo.')
     grupos = []
     for e in entries:
         if e['group'] not in grupos: grupos.append(e['group'])
@@ -554,8 +555,8 @@ def sumario(dc, entries, pg):
 
 
 def anotacoes(dc, pg):
-    topbar(dc, f'Catálogo {ANO}')
-    hero(dc, f'CATÁLOGO {ANO}', 'Anotações', '')
+    topbar(dc)
+    hero(dc, D2.MARCA, 'Anotações', '')
     y = TOP + HERO + 50
     while y < H - FOOT - 30:
         dc.rect(MX, y, CW, 1, fill='line'); y += 34
