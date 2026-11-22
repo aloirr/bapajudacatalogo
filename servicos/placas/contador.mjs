@@ -146,7 +146,7 @@ export function criarContador({ pasta = null, log = () => {} } = {}) {
 }
 
 // ---------- lista de códigos do catálogo ----------
-// Lida do produtos.json PUBLICADO ({produtos:[{c}]}) ou do /interno/codigos do login ({codigos:[...]}, T-0022).
+// Lida do /interno/codigos do login ({codigos:[...]}, T-0022); nos testes, de um produtos.json falso ({produtos:[{c}]}).
 // Motivo: README, "Lista de códigos do catálogo". headers leva a chave interna; nunca vai para o log.
 export function criarCatalogo({ url, headers = {}, log = () => {} }) {
   let codigos = null;
