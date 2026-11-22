@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 01:55 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 01:57 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -25,12 +25,12 @@ Atualizado em 22/11/2026 01:55 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | CONCLUÍDA | #40, #47, #51, #61, #64, #70, #77, #84, #90, #94, #99, #100 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 | [T-0021](tarefas/T-0021.md) | Governança: .claude/worktrees/ no .gitignore e commit do designer-ux e do design-de-marca nas suas pastas | alexandre | po, gerente-projetos | CONCLUÍDA | #105 |
-| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | EM ANDAMENTO (código no main; falta a governança parte 2) | #108, #110, #111, #114, #117, #118 |
+| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | EM ANDAMENTO (código no main; falta a governança parte 2 e o teste do Alexandre no ar) | #108, #110, #111, #114, #117, #118, #119, #120 |
 
 ## Fila
-Main 2067077 (#117).
+Main 5b7e0ea (#119).
 
-1. **T-0022, governança parte 2 (PO, pelo Alexandre):** fase A (render.yaml com o serviço de login, placa com CATALOGO_URL e CHAVE_INTERNA, CI com os testes dos serviços e a bateria com login, CLAUDE.md), teste do Alexandre no ar e fase B (o endereço antigo redireciona). Bloco no R-20261122-053256.
+1. **T-0022, governança parte 2 (PO, pelo Alexandre):** fase A no PR #120 (revisor e corretor, R-20261122-055354); depois o teste do Alexandre no ar e a fase B (redirecionamento, placa e CLAUDE.md).
 2. **Grafia "BAP AUTO PARTS" no gerador (catalogo-grafico, com simulação):** proposta ao PO (R-20261122-055343), contra a decisão 10 a.
 3. **Fora da fila, para decidir depois:**
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
