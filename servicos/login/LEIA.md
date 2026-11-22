@@ -31,7 +31,7 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 - **Com sessão:** todo o resto do `site/`. Sem sessão, pedido de página (`Accept: text/html`) → 302 `/entrar?volta=<caminho>` (ou `/entrar?expirou=1` se o cookie venceu); o resto → 401.
 - **Troca pendente:** página → 302 `/trocar-senha`; outros arquivos e API → 403. Só abrem `/trocar-senha/**`, `/api/eu`, `/api/sair` e `/api/trocar-senha`.
 - **Só admin** (os outros recebem 404): `/admin/**`, `/api/usuarios/**`, `/api/pdfs` e `GET /admin/pdfs/baixar/<id>` (`completo-digital` e `a4-grafica`, de `catalogo_grafico/entregas/`, o arquivo de ano mais alto).
-- **API** (JSON; erro sempre `{"erro": "..."}`): `POST /api/entrar`, `POST /api/sair`, `GET /api/eu`, `GET /api/eu/logo`, `POST /api/trocar-senha`, `GET|POST /api/usuarios`, `PATCH /api/usuarios/<u>`, `POST /api/usuarios/<u>/senha`, `GET|PUT|DELETE /api/usuarios/<u>/logo`, `GET /api/pdfs`. Detalhes no contrato da T-0022.
+- **API** (JSON; erro sempre `{"erro": "..."}`): `POST /api/entrar`, `POST /api/sair`, `GET /api/eu`, `GET /api/eu/logo`, `POST /api/trocar-senha`, `GET|POST /api/usuarios`, `PATCH /api/usuarios/<u>`, `POST /api/usuarios/<u>/senha`, `GET|PUT|DELETE /api/usuarios/<u>/logo`, `GET /api/pdfs`. Detalhes no contrato da T-0022. Cada usuário da lista (`GET /api/usuarios`) traz `usuario, nome, empresa, admin, ativo, temLogo, trocarSenha, ultimoAcesso`.
 - **Interna:** `GET /interno/codigos` com o cabeçalho `X-Chave-Interna` → `{"total": n, "codigos": [...]}`; sem a chave certa, 401.
 
 ## Segurança (resumo)

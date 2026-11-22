@@ -427,7 +427,7 @@ export async function criarServico(opcoes = {}) {
 
   const publico = (nome, u) => ({
     usuario: nome, nome: u.nome, empresa: u.empresa, admin: u.admin === true, ativo: u.ativo === true,
-    temLogo: Boolean(u.logo), ultimoAcesso: u.ultimoAcesso || null,
+    temLogo: Boolean(u.logo), trocarSenha: u.trocarSenha === true, ultimoAcesso: u.ultimoAcesso || null,
   });
 
   // ---------- arquivos de site/ ----------

@@ -416,13 +416,20 @@ test('cadastro: validação, 409 para usuário repetido, lista sem hash', async 
   ]) assert.equal((await criar(ruim)).status, 400, JSON.stringify(ruim).slice(0, 60));
   const c = await criar(ok);
   assert.equal(c.status, 201);
-  assert.deepEqual(c.json, { usuario: 'oficina_1', nome: 'João Exemplo', empresa: 'Oficina Exemplo', admin: false, ativo: true, temLogo: false, ultimoAcesso: null });
+  assert.deepEqual(c.json, { usuario: 'oficina_1', nome: 'João Exemplo', empresa: 'Oficina Exemplo', admin: false, ativo: true, temLogo: false, trocarSenha: true, ultimoAcesso: null });
   assert.equal((await criar(ok)).status, 409);
   assert.equal((await criar({ ...ok, usuario: '__proto__' })).status, 201, 'nome estranho não quebra nada');
   const lista = await s.pedir('/api/usuarios', { cookie: adm });
   assert.deepEqual(lista.json.map((u) => u.usuario), ['__proto__', 'admin', 'oficina_1']);
   assert.ok(!lista.texto.includes('scrypt') && !lista.texto.includes('hash'));
   assert.ok(lista.json.find((u) => u.usuario === 'admin').ultimoAcesso);
+  // "Falta trocar a senha inicial": trocarSenha (booleano) em cada usuário da lista.
+  assert.deepEqual(lista.json.map((u) => [u.usuario, u.trocarSenha]), [['__proto__', true], ['admin', false], ['oficina_1', true]]);
+  const ent = await entrar(s, 'oficina_1', 'senha-falsa-12');
+  assert.equal((await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: ent.cookie, corpo: { senhaNova: 'senha-falsa-13' } })).status, 204);
+  assert.equal((await s.pedir('/api/usuarios', { cookie: adm })).json.find((u) => u.usuario === 'oficina_1').trocarSenha, false, 'trocou: some a etiqueta');
+  assert.equal((await s.pedir('/api/usuarios/oficina_1/senha', { metodo: 'POST', cookie: adm, corpo: { senha: 'senha-falsa-14' } })).status, 204);
+  assert.equal((await s.pedir('/api/usuarios', { cookie: adm })).json.find((u) => u.usuario === 'oficina_1').trocarSenha, true, 'o admin trocou: volta a etiqueta');
   const p = await s.pedir('/api/usuarios/oficina_1', { metodo: 'PATCH', cookie: adm, corpo: { nome: 'João E.', empresa: '' } });
   assert.equal(p.status, 200);
   assert.equal(p.json.nome, 'João E.');
