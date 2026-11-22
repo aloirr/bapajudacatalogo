@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0442**.
+O próximo número livre é o **RD-0448**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -289,10 +289,16 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0439 | baixa | doc | docs/marca/pareceres/T-0023-entregas.md, §1 e "Observação" | a altura do logo (30 pt × 33 pt) na "Observação" e a linha repetida "MC-0010: fechado." (a altura vai para a célula "Posição"; sai a "Observação") | T-0023 | design-de-marca | CORRIGIDO (ce29e41; d856f9b, #130) |
 | RD-0440 | baixa | doc | docs/marca/pareceres/T-0023-simulacao.md × T-0023-entregas.md | a causa da fonte do .pptx contada nos 2 (a simulação passa a "a fonte é Arial desde o gerador, MC-0011"; sai a "Correção ao parecer da simulação") | T-0023 | design-de-marca | CORRIGIDO (ce29e41; d856f9b, #130) |
 | RD-0441 | baixa | doc | docs/marca/pareceres/T-0023-entregas.md, §1, célula "Posição" | "fica para o manual "a aprovar", com o tamanho mínimo do logo" repetia o MC-0012 (passa a "(tamanho mínimo: MC-0012)") | T-0023 | design-de-marca | CORRIGIDO (c09f6e7; d856f9b, #130) |
+| RD-0442 | baixa | tarefa | .coord/tarefas/T-0022.md:5 e .coord/quadro.md:28 | a Situação "CONCLUÍDA (falta [só] o previews.generation, governança)" repetia a fila 3 e o Registro, e as 2 divergiam (passa a "CONCLUÍDA") | T-0022 | gerente-projetos | CORRIGIDO (e66b8db, #131) |
+| RD-0443 | baixa | tarefa | .coord/tarefas/T-0025.md:5 | a Situação "NOVA (depois da T-0024)" repetia a fila 2 e o Registro (passa a "NOVA") | T-0025 | gerente-projetos | CORRIGIDO (e66b8db, #131) |
+| RD-0444 | baixa | tarefa | .coord/tarefas/T-0025.md:29 | o Registro repetia o Pedido (passa a "R-20261122-080833 (ver o Pedido)") | T-0025 | gerente-projetos | CORRIGIDO (e66b8db, #131) |
+| RD-0445 | baixa | doc | README.md:65 e .coord/tarefas/T-0022.md:85 | a "decisão do Alexandre" sobre o repositório privado repetia o Registro das 03:36 (o README passa a "o repositório vai ficar **privado**; até a troca, ele está **público** (…)") | T-0022 | gerente-projetos | CORRIGIDO (e66b8db, #131) |
+| RD-0446 | baixa | doc | README.md:65 | "nada de segredo nem de dado interno novo no Git" repetia a regra da linha 67 e parecia provisória (passa a "nada de dado interno novo no Git") | T-0022 | gerente-projetos | CORRIGIDO (d7c8e82, #131) |
+| RD-0447 | baixa | tarefa | .coord/tarefas/T-0024.md:13 | o Pedido dizia "~04:00" e o Registro "~03:57" para o mesmo R-20261122-075711 (passa a "~03:57") | T-0024 | gerente-projetos | CORRIGIDO (d7c8e82, #131) |
 
 ## Notas
 
-### T-0022 e T-0023, madrugada de 22/11/2026 (PRs #126 a #130)
+### T-0022 a T-0025, madrugada de 22/11/2026 (PRs #126 a #131)
 - RD-0415 ao RD-0417: corrigidos no acc8432 (head do #126, governança, parte 2, fase B; squash 548ce73).
 - RD-0418 ao RD-0421: corrigidos no d3ebb65 (head do #127; squash d49fc95).
 - RD-0422 ao RD-0424: número não usado (reserva de numeração).
@@ -300,9 +306,10 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - RD-0428 ao RD-0432: ficam ABERTOS sem segurar o #128 (R-20261122-080833-po, opção a). Vão para uma tarefa própria, com simulação ao Alexandre, depois da T-0024, junto com o MC-0011, o MC-0012 e o título da Linha Moto. O RD-0429 ao RD-0432 já estavam lá antes da T-0023.
 - RD-0434 ao RD-0436: corrigidos no 363281d (head do #129; squash d34694f).
 - RD-0437 ao RD-0440: corrigidos no ce29e41; RD-0441, no c09f6e7 (heads do #130; squash d856f9b).
+- RD-0442 ao RD-0447: registro do gerente (PR #131). O RD-0442 ao RD-0445 foram corrigidos no e66b8db e o RD-0446 e o RD-0447, no d7c8e82; o squash entra depois.
 - O #124 (RD-0412 ao RD-0414) entrou no main com o squash c1898b1.
 - [SUPOSIÇÃO] As linhas citadas são as do parecer, conferidas no diff do commit de correção; algumas mudaram com a correção. Os textos do RD-0428 ao RD-0432 vêm do recado R-20261122-080737-gerente-projetos (ainda não há commit de correção).
-- Relatórios: `T-0022.md`, §16 e §17, e `T-0023.md`, do §3 ao §6.
+- Relatórios: `T-0022.md`, do §16 ao §18, e `T-0023.md`, do §3 ao §6.
 
 ### T-0022 e T-0023, manhã de 22/11/2026 (PRs #120 a #124)
 - RD-0401 ao RD-0403: parecer do #120 (governança, parte 2, fase A; squash 582c38b). Os 3 ficam MANTIDOS; o RD-0402 é revisto na fase B (redirecionamento do site atual).
