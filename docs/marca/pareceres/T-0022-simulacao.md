@@ -11,7 +11,7 @@
 
 Enquanto o manual estiver "a aprovar", nenhum achado daqui segura a tarefa. Não há nada contra as regras do repositório:
 não aparece preço nem estoque; não há logo, cor nem tipografia de montadora ou de concorrente; as logos de cliente são
-fictícias e aparecem só na sessão do próprio cliente e na lista do admin, como o Alexandre pediu (resposta 4 b).
+fictícias e aparecem só na sessão do próprio cliente e na lista do admin, como o Alexandre pediu (resposta 4 b de 21/11 ~22:50).
 
 ## O que está certo (manter)
 
@@ -86,7 +86,7 @@ Correção no `sim.css` (e depois no código):
 Depois da correção, refazer os prints `04` a `07` e `10` a `16`, que mostram o cabeçalho com o botão do canto.
 
 **Pergunta para o Alexandre (pelo `po`), sem segurar a tarefa:** sem logo, o botão do canto mostra o logo inteiro da BAP
-(decisão 4 b). Fica com cerca de 32 px de altura, ou 24 px com a correção acima, e aparece no mesmo cabeçalho do logo
+(resposta 4 b de 21/11 ~22:50). Fica com cerca de 32 px de altura, ou 24 px com a correção acima, e aparece no mesmo cabeçalho do logo
 principal. A assinatura "componentes de qualidade" não dá para ler nesse tamanho. Ele aceita assim, ou prefere, só nesse
 uso pequeno, o símbolo do "b" no círculo verde? [SUPOSIÇÃO] Não há versão só do símbolo no repositório, nem vetor do logo.
 Cortar o PNG seria alterar o logo, então isso precisa do arquivo e do "aprovado" dele.
@@ -146,23 +146,6 @@ Nas telas que só o admin vê, "administrador" pode ficar ("Só o administrador 
   T-0022.
 
 ## Reteste
-
-Depois da correção do `web-site`, conferir os prints novos em 1366 e 390 px:
-- MC-0002: a moldura com 48 × 30 px (computador) e 40 × 26 px (celular), e o toque do botão com 44 px;
-- MC-0003: as logos coloridas na linha desativada;
-- MC-0004: o "Admin" branco no menu aberto;
-- MC-0005: a coluna "Usuário" em Poppins;
-- MC-0006: o `alt` nas cinco páginas;
-- MC-0007: os dois textos novos.
-
-| ID | Situação |
-|---|---|
-| MC-0002 | fechado em 21/11 23:11 |
-| MC-0003 | fechado em 21/11 23:11 |
-| MC-0004 | fechado em 21/11 23:11 |
-| MC-0005 | fechado em 21/11 23:11 |
-| MC-0006 | fechado em 21/11 23:11 |
-| MC-0007 | fechado em 21/11 23:11 |
 
 ### Reteste · 21/11/2026 23:11 (Manaus) · **LIBERADO**
 

@@ -4,8 +4,7 @@ Fonte única das regras da marca no site, nos PDFs e nos materiais. **Só entra 
 referência em `docs/marca/decisoes.md`.
 
 O levantamento completo do estado atual (logo, paleta, tipografia, grafismos, tom de voz e aplicações) ainda vai ao
-Alexandre como manual "a aprovar", com a simulação do verde decidido em R-20261120-115646-alexandre. Até lá, as seções
-abaixo têm só as regras já aprovadas.
+Alexandre como manual "a aprovar", com a simulação do verde decidido em R-20261120-115646-alexandre.
 
 ## Nome da marca
 
@@ -36,13 +35,13 @@ abaixo têm só as regras já aprovadas.
 
 ## Cores de estado (só no site)
 
-Não são cores da marca. Servem para avisar erro e não aparecem como decoração (decisão 8 a, R-20261122-032433-alexandre).
+Só para erro e para o botão de desativar (decisão 8 a, R-20261122-032433-alexandre).
 
 | Nome | Hex | Token | Papel |
 |---|---|---|---|
 | Erro | `#B42318` | `--erro` | Mensagem de erro, campo com erro e botão de desativar |
 | Erro claro | `#FDECEA` | `--erro-claro` | Fundo da caixa de erro |
 
-- Só na interface do site. Não entram nos PDFs, na Linha Moto, no portfólio, no Kit Filtros nem nas apresentações.
+- Não entram nos PDFs, na Linha Moto, no portfólio, no Kit Filtros nem nas apresentações.
 - Contraste medido: `--erro` no branco, 6,57:1; `--erro` no `--erro-claro`, 5,75:1; texto branco no botão vermelho,
   6,57:1.
