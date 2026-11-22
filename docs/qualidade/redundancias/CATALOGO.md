@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0350**.
+O próximo número livre é o **RD-0401**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -173,37 +173,99 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0323 | — | tarefa | .coord/tarefas/T-0022.md | o BAP Ajuda 2.0 repetido no "Não entra" (a regra 5 do CLAUDE.md já diz) [SUPOSIÇÃO: o número de cada corte segue a ordem do R-20261122-025725-gerente-projetos] | T-0022 | gerente-projetos | CORRIGIDO (1b84fbf; 18ad4cd, #108) |
 | RD-0324 | — | tarefa | .coord/tarefas/T-0022.md | a frase dos passos do Alexandre no painel do Render na Especificação e de novo no Passo 3 (fica completa no Passo 3) [SUPOSIÇÃO: o número de cada corte segue a ordem do R-20261122-025725-gerente-projetos] | T-0022 | gerente-projetos | CORRIGIDO (1b84fbf; 18ad4cd, #108) |
 | RD-0325 | — | tarefa | .coord/tarefas/T-0022.md | o Registro copiava as respostas do Alexandre que o Pedido já traz (passa a apontar o Pedido) [SUPOSIÇÃO: o número de cada corte segue a ordem do R-20261122-025725-gerente-projetos] | T-0022 | gerente-projetos | CORRIGIDO (1b84fbf; 18ad4cd, #108) |
-| RD-0326 | média | doc | .claude/agents/gerente-projetos.md:25, CLAUDE.md:33 e .coord/README.md:14 | as pastas do `integracao-placas` sem `servicos/login/` em 3 dos 5 lugares (diverge do `.coord/donos.json:119`) | T-0022 | alexandre (via po); gerente-projetos (README) | ABERTO (corrigido nos PRs #110 e #111, aguardando merge) |
+| RD-0326 | média | doc | .claude/agents/gerente-projetos.md:25, CLAUDE.md:33 e .coord/README.md:14 | as pastas do `integracao-placas` sem `servicos/login/` em 3 dos 5 lugares (diverge do `.coord/donos.json:119`) | T-0022 | alexandre (via po); gerente-projetos (README) | CORRIGIDO (7a6ba83; 8efb879, #110; 5a344ba; f9fcc35, #111) |
 | RD-0327 | média | código | catalogo_grafico/gerador/detalhe.py:311-312 e teste_bloco_b_pdf.py | o `ESS_TROCA` com os 2 rótulos do `ESSENCIAL` como chave, os 2 com o mesmo `_KIT_CRU`; o teste refazia a lista (vira chave pela família) | T-0019 | catalogo-grafico | CORRIGIDO (1953f02; c9975a5, #109) |
 | RD-0328 | média | doc | catalogo_grafico/gerador/LEIA_GERADOR.md:14 | a linha do RD-0293 contava de novo as sobras cruas, o exemplo e as páginas (fica só a regra e o lugar do código) | T-0019 | catalogo-grafico | CORRIGIDO (1953f02; c9975a5, #109) |
 | RD-0329 | média | doc | catalogo_grafico/simulacoes/T-0019/rd0293/LEIA.md:3 e :44 | as contagens de páginas na abertura e a frase da opção b repetiam a tabela e a pergunta | T-0019 | catalogo-grafico | CORRIGIDO (1953f02; c9975a5, #109) |
 | RD-0330 | baixa | código (docstring de teste) | catalogo_grafico/gerador/teste_bloco_b_pdf.py:1-5 | a docstring não citava o teste novo do RD-0293 | T-0019 | catalogo-grafico | CORRIGIDO (1953f02; c9975a5, #109) |
-| RD-0331 | baixa | doc | .coord/tarefas/T-0022.md:62 | o Registro dizia "sem logo, a da BAP", diferente da leitura do PO no R-20261122-032433 ("logo inteiro da BAP, pequeno") | T-0022 | gerente-projetos | ABERTO (corrigido no PR #111, aguardando merge) |
-| RD-0332 | baixa | doc | .coord/tarefas/T-0022.md:62 | o Registro dizia "5 h depois do login", sem o "mesmo em uso" da leitura do PO | T-0022 | gerente-projetos | ABERTO (corrigido no PR #111, aguardando merge) |
-| RD-0333 | baixa | tarefa | .coord/tarefas/T-0022.md:5 e .coord/quadro.md:28 | a Situação repetia "desenho e telas aprovados", que o Registro já diz (fica "EM ANDAMENTO (serviço e telas em código)") | T-0022 | gerente-projetos | ABERTO (corrigido no PR #111, aguardando merge) |
-| RD-0334 | baixa | código | servicos/login/server.mjs:306 × servicos/placas/server.mjs:138 | `ipDoPedido`, `lerCorpo` e `json` repetidos entre os 2 serviços | T-0022 | integracao-placas | MANTIDO (o `rootDir` da placa impede um arquivo comum) |
-| RD-0335 | média | código | servicos/login/server.mjs | 4 mensagens de erro escritas 2 vezes, sem constante (vão para o `MSG`) | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0336 | média | código | servicos/login/server.mjs:356, :522 e :588 | a normalização do usuário 3 vezes (vira `normUsuario`) | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0337 | média | código | servicos/login/server.mjs:385 e :601 | o registro do usuário novo 2 vezes (vira `novoUsuario`) | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0338 | média | código | servicos/login/server.mjs:173 e :193 | a gravação segura 2 vezes (vira `gravarSeguro`) | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0339 | baixa | código | servicos/login/server.mjs | os cabeçalhos de resposta 4 vezes (vira `enviar`) | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0340 | baixa | código | servicos/login/server.mjs | o 405 com o `Allow` 13 vezes (vira `metodoErrado`) | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0341 | baixa | código | servicos/login/server.mjs:526 e :547 | o `Retry-After` 2 vezes (vira `RETRY`) | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0342 | baixa | código | servicos/login/server.mjs:97-98 | o `LOGO_TIPOS` é o `LOGO_MIME` invertido, escrito à mão | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0343 | baixa | código | servicos/login/server.mjs:68-88 | 10 extensões sem nenhum arquivo delas no `site/` | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0344 | baixa | código | servicos/login/server.mjs:846 | `srv.fechado` morto; 6 exports sem uso | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0345 | baixa | doc | servicos/placas/README.md:33 | a regra das 2 variáveis escrita 3 vezes | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0346 | baixa | doc | servicos/login/LEIA.md:14 | a regra do log repetida | T-0022 | integracao-placas | ABERTO (em correção no integracao-placas/T-0022-login) |
-| RD-0347 | baixa | código (comentário) | servicos/placas/server.mjs:45-47 | o comentário repete o README | T-0022 | integracao-placas | ABERTO (só comentário: não segura) |
-| RD-0348 | baixa | teste (título) | servicos/login/login.test.mjs:181 | o título repete o do teste da linha 230 | T-0022 | integracao-placas | ABERTO (só título de teste: não segura) |
-| RD-0349 | baixa | código | servicos/placas/server.mjs:59 | o caminho pelo `produtos.json` publicado | T-0022 | integracao-placas | MANTIDO (fica na transição para o serviço de login) |
+| RD-0331 | baixa | doc | .coord/tarefas/T-0022.md:62 | o Registro dizia "sem logo, a da BAP", diferente da leitura do PO no R-20261122-032433 ("logo inteiro da BAP, pequeno") | T-0022 | gerente-projetos | CORRIGIDO (5a344ba; f9fcc35, #111) |
+| RD-0332 | baixa | doc | .coord/tarefas/T-0022.md:62 | o Registro dizia "5 h depois do login", sem o "mesmo em uso" da leitura do PO | T-0022 | gerente-projetos | CORRIGIDO (5a344ba; f9fcc35, #111) |
+| RD-0333 | baixa | tarefa | .coord/tarefas/T-0022.md:5 e .coord/quadro.md:28 | a Situação repetia "desenho e telas aprovados", que o Registro já diz (fica "EM ANDAMENTO (serviço e telas em código)") | T-0022 | gerente-projetos | CORRIGIDO (5a344ba; f9fcc35, #111) |
+| RD-0334 | baixa | código | servicos/login/server.mjs:306 × servicos/placas/server.mjs:138 | `ipDoPedido`, `lerCorpo` e `json` repetidos entre os 2 serviços | T-0022 | integracao-placas | MANTIDO (o `rootDir` da placa impede um arquivo comum; 008b9d7, #118) |
+| RD-0335 | média | código | servicos/login/server.mjs | 4 mensagens de erro escritas 2 vezes, sem constante (vão para o `MSG`) | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0336 | média | código | servicos/login/server.mjs:356, :522 e :588 | a normalização do usuário 3 vezes (vira `normUsuario`) | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0337 | média | código | servicos/login/server.mjs:385 e :601 | o registro do usuário novo 2 vezes (vira `novoUsuario`) | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0338 | média | código | servicos/login/server.mjs:173 e :193 | a gravação segura 2 vezes (vira `gravarSeguro`) | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0339 | baixa | código | servicos/login/server.mjs | os cabeçalhos de resposta 4 vezes (vira `enviar`) | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0340 | baixa | código | servicos/login/server.mjs | o 405 com o `Allow` 13 vezes (vira `metodoErrado`) | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0341 | baixa | código | servicos/login/server.mjs:526 e :547 | o `Retry-After` 2 vezes (vira `RETRY`) | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0342 | baixa | código | servicos/login/server.mjs:97-98 | o `LOGO_TIPOS` é o `LOGO_MIME` invertido, escrito à mão | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0343 | baixa | código | servicos/login/server.mjs:68-88 | 10 extensões sem nenhum arquivo delas no `site/` | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0344 | baixa | código | servicos/login/server.mjs:846 | `srv.fechado` morto; 6 exports sem uso | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0345 | baixa | doc | servicos/placas/README.md:33 | a regra das 2 variáveis escrita 3 vezes | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0346 | baixa | doc | servicos/login/LEIA.md:14 | a regra do log repetida | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0347 | baixa | código (comentário) | servicos/placas/server.mjs:45-47 | o comentário repete o README | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0348 | baixa | teste (título) | servicos/login/login.test.mjs:181 | o título repete o do teste da linha 230 | T-0022 | integracao-placas | CORRIGIDO (ea90b99; 008b9d7, #118) |
+| RD-0349 | baixa | código | servicos/placas/server.mjs:59 | o caminho pelo `produtos.json` publicado | T-0022 | integracao-placas | MANTIDO (fica na transição para o serviço de login; 008b9d7, #118) |
+| RD-0350 | baixa | teste | servicos/login/login.test.mjs:171 | a checagem direta da `voltaSegura` repetia os casos `%09`, `%0a` e `%0d%5C` que o laço HTTP do mesmo teste já cobre (ficam só `/%7f/x`, `/%E0%A4%A` e `/\t/x`) | T-0022 | integracao-placas | CORRIGIDO (bee1dbe; 008b9d7, #118) |
+| RD-0351 | baixa | código | servicos/login/server.mjs:757, rota `/api/eu` | a resposta do `/api/eu` remontava à mão os campos que o `publico()` já monta (passa a usar o `publico()`, sem `ativo` e `ultimoAcesso`, mais `expiraEm`; o contrato não muda) | T-0022 | integracao-placas | CORRIGIDO (bee1dbe; 008b9d7, #118) |
+| RD-0352 | média | código | site/entrar/entrar.js, site/conta.js, site/admin/usuarios/usuarios.js e site/admin/pdfs/pdfs.js | `esc`, `expirou`, a chamada à API e o `LOGO_BAP` escritos em cada página (vão para `/entrar/comum.js`, `window.BAP`, carregado antes dos outros scripts nas 5 páginas) | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0353 | média | código | site/app.js e site/conta.js | o catálogo com um aviso próprio ao lado do aviso do `conta.js` (fica o do `conta.js`: um tempo só, `role="status"`) | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0354 | média | código | site/entrar/entrar.js, site/admin/usuarios/usuarios.js e site/admin/pdfs/pdfs.js | o tratamento do 401 repetido em cada chamada (o `BAP.api` leva o 401 ao login, fora do `/api/entrar`) | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0355 | média | código | site/entrar/entrar.js | `DICA_MIN` e a conferência da senha nova escritas 2 vezes; a frase da senha igual à atual diferente da do servidor (vão para o `BAPForm`, com "A nova senha precisa ser diferente da atual.") | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0356 | média | texto | site/admin/usuarios/usuarios.js | a regra do usuário escrita na dica e de novo na mensagem de erro (vira `REGRA_US` na dica; erro "Confira o usuário: ele não segue a regra acima.") | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0357 | baixa | código | site/admin/usuarios/usuarios.js e site/admin/pdfs/pdfs.js | a data "dd/mm/aaaa hh:mm" formatada em mais de um lugar (vira `F.quando`) | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0358 | baixa | código | site/conta.js e site/admin/pdfs/pdfs.js | o ícone do PDF desenhado 2 vezes (vira `BAPConta.IC.pdf`) | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0359 | média | código | site/styles.css e site/admin/admin.css | o campo e o rótulo da busca refeitos no login e no admin (o da busca do site serve aos dois) | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0360 | média | código | site/admin/admin.css e site/admin/usuarios/usuarios.js | a janela do admin refeita ao lado da janela do produto (a `dialog.dlg` passa a ser a `dialog.janela` do produto) | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0361 | baixa | código | site/entrar/entrar.css e site/admin/admin.css | CSS morto das telas do login (sai) | T-0022 | web-site | CORRIGIDO (87ec078; c895acc, #114) |
+| RD-0362 | baixa | código | site/admin/admin.css:46 e :102 | a largura da janela do admin escrita para a tela e desfeita de novo no `@media print` (os 560 px ficam só em `@media screen and (min-width: 641px)`; na impressão fica só a regra que esconde o `main > div`) | T-0022 | web-site | CORRIGIDO (8e529f5; c895acc, #114) |
+| RD-0363 | baixa | código | site/admin/usuarios/usuarios.js:89-90 | o `forEach` que movia os avisos da janela para a página ao fechar, sobra depois do R2 (todo aviso já vem depois do `close`) | T-0022 | web-site | CORRIGIDO (8e529f5; c895acc, #114) |
+| RD-0364 | média | teste | testes/login.mjs, sessão de 5 h | o relógio de 5 h por HTTP copiava os testes do serviço (o relógio passa a ser feito pela tela e o cookie é conferido uma vez) | T-0022 | testes | CORRIGIDO (eec6010; 2067077, #117) |
+| RD-0365 | média | teste | testes/login.mjs, passe sem login | o passe com cookie falsificado, o `/interno` com a chave errada e a raiz por HTTP, que os testes do serviço já cobrem (saem) | T-0022 | testes | CORRIGIDO (eec6010; 2067077, #117) |
+| RD-0366 | média | teste | testes/login.mjs, usuário comum | o GET, o POST e o PATCH do usuário comum por `ctx.request`, que os testes do serviço já cobrem (saem) | T-0022 | testes | CORRIGIDO (eec6010; 2067077, #117) |
+| RD-0367 | média | teste | testes/login.mjs, volta | o `//host` e o `/\host` conferidos no servidor, que os testes do serviço já cobrem (saem) | T-0022 | testes | CORRIGIDO (eec6010; 2067077, #117) |
+| RD-0368 | média | código (teste) | testes/login.mjs | o `entrarParaBuscas` refazia a entrada pela tela (passa a usar o `entrarUI`) | T-0022 | testes | CORRIGIDO (eec6010; 2067077, #117) |
+| RD-0369 | — | — | — | número não usado | — | — | número não usado |
+| RD-0370 | baixa | código (comentário de teste) | servicos/login/login.test.mjs:176 | o comentário das rotas abertas repetia a lista `ABERTOS` do `server.mjs` (fica "Abertos: a lista ABERTOS do server.mjs e a saúde.") | T-0022 | integracao-placas | CORRIGIDO (b3e5500; 008b9d7, #118) |
+| RD-0371 | média | código (teste) | scripts/testar_site.mjs e testes/login.mjs | o `vigiar`, o `RX_PLACAS`, o `cortar` e os `CASOS` escritos nos 2 arquivos (ficam num lugar só, no `testar_site.mjs`, e vão ao `login.mjs` pelo `reg`) | T-0022 | testes | CORRIGIDO (eec6010; 2067077, #117) |
+| RD-0372 | baixa | código (teste) | testes/login.mjs | variáveis mortas (saem) | T-0022 | testes | CORRIGIDO (eec6010; 2067077, #117) |
+| RD-0373 | baixa | código (teste) | testes/login.mjs | a conferência de acessibilidade em dobro e a leitura das linhas da lista de usuários em dobro (fica uma de cada; a das linhas vira `linhasUsuarios`) | T-0022 | testes | CORRIGIDO (eec6010; 2067077, #117) |
+| RD-0374 | baixa | doc (ajuda) | scripts/testar_site.mjs, ajuda do `--login` | a ajuda do `--login` repetia o cabeçalho do `testes/login.mjs` (passa a remeter a ele) | T-0022 | testes | CORRIGIDO (eec6010; 2067077, #117) |
+| RD-0375 | baixa | teste | servicos/login/login.test.mjs:587 | `SENHA_INICIAL`, `SEGREDO` e `CHAVE_INTERNA` na lista do que não pode aparecer no log, já cobertos pelo prefixo `falsa-` (saem) | T-0022 | integracao-placas | CORRIGIDO (e5e665b; 008b9d7, #118) |
+| RD-0376 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0377 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0378 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0379 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0380 | média | doc | docs/marca/decisoes.md, decisão 8 a | a decisão repetia "só no site, para erro e para o botão de desativar", que a coluna da pergunta e o `manual.md` já dizem (fica "Aprovadas.") | T-0022 | design-de-marca | CORRIGIDO (8095c87; 188e720, #116) |
+| RD-0381 | média | doc | docs/marca/decisoes.md, decisão 7 a | "Não se corta o logo nem se usa o símbolo solto." repetia a escolha da opção a (fica "Logo inteiro da BAP, pequeno.") | T-0022 | design-de-marca | CORRIGIDO (8095c87; 188e720, #116) |
+| RD-0382 | baixa | doc | docs/marca/manual.md:7-8 | a frase "Até lá, as seções abaixo têm só as regras já aprovadas." repetia a abertura do manual ("Só entra" o aprovado) (sai) | T-0022 | design-de-marca | CORRIGIDO (8095c87; 188e720, #116) |
+| RD-0383 | baixa | doc | docs/marca/manual.md, "Cores de estado (só no site)" | "Só na interface do site." repetia o título da seção (sai) | T-0022 | design-de-marca | CORRIGIDO (8095c87; 188e720, #116) |
+| RD-0384 | média | doc | docs/marca/pareceres/T-0022-simulacao.md, Reteste | a lista do que conferir e a tabela "fechado em 21/11 23:11" repetiam a seção do reteste de 23:11 (fica só ela) | T-0022 | design-de-marca | CORRIGIDO (8095c87; 188e720, #116) |
+| RD-0385 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0386 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0387 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0388 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0389 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0390 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0391 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0392 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0393 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0394 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0395 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0396 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0397 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0398 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0399 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
+| RD-0400 | baixa | doc | docs/marca/pareceres/T-0022-simulacao.md:149 | o título "## Reteste" vazio seguido de "### Reteste · …" (vira uma linha só, "## Reteste · 21/11/2026 23:11 (Manaus) · **LIBERADO**") | T-0022 | design-de-marca | CORRIGIDO (1044dbf; 188e720, #116) |
 
 ## Notas
 
+### T-0022, noite de 21/11 para 22/11/2026 (PRs #110, #111 e #114 a #118)
+- RD-0326 e RD-0331 ao RD-0333: CORRIGIDOS, com o #110 (squash 8efb879) e o #111 (squash f9fcc35) no main.
+- Serviço de login: o PR #118 (squash 008b9d7) substituiu o #113; os commits de correção estão no `T-0022.md`, §7.
+- Telas: o RD-0352 ao RD-0363 entraram no main com o #114 (squash c895acc).
+- Bateria: o RD-0364 ao RD-0368 e o RD-0371 ao RD-0374 entraram no main com o #117 (squash 2067077).
+- Pareceres: o #115 (squash e48a5f5) não teve achado; o RD-0380 ao RD-0384 e o RD-0400 entraram no main com o #116 (squash 188e720).
+- RD-0369: a auditoria da bateria pulou do RD-0368 ao RD-0371, sem achado com esse número.
+- RD-0376 ao RD-0379 e RD-0385 ao RD-0399: número não usado (reserva de numeração).
+- [SUPOSIÇÃO] Do RD-0350 ao RD-0400, os textos do serviço, das telas e do #116 foram montados pela mensagem e pelo diff dos commits de correção; a origem de cada texto e da severidade está no `T-0022.md`, linha 5.
+- Relatório: `T-0022.md`, do §7 ao §11.
+
 ### T-0019 e T-0022, noite de 21/11/2026 (PRs #103 a #111 e o serviço de login)
 - RD-0293: corrigido pelo PR #109 (squash c9975a5, no main), pela opção "a" do Alexandre (R-20261122-030552-alexandre): simulação no 540b1df e PDFs oficiais no f29da61. O RD-0327 ao RD-0330 saíram no parecer do #109 (head f29da61) e foram corrigidos no 1953f02. Relatório: `T-0019.md`, seção "PR #109".
-- RD-0326: corrigido no #110 (7a6ba83) e no #111 (5a344ba); fica ABERTO até os 2 entrarem no main. RD-0331 ao RD-0333: corrigidos só no #111 (5a344ba); ficam ABERTOS até o #111 entrar no main. Relatório: `T-0022.md`.
-- RD-0334 ao RD-0349: auditoria do serviço de login (branch `integracao-placas/T-0022-login`, head 427a73a). O RD-0334 e o RD-0349 ficam MANTIDOS; o RD-0335 ao RD-0346 seguram o PR e estão em correção no mesmo branch; o RD-0347 e o RD-0348 não seguram. Relatório: `T-0022.md`.
+- RD-0326: corrigido no #110 (7a6ba83) e no #111 (5a344ba). RD-0331 ao RD-0333: corrigidos só no #111 (5a344ba). Os 2 já estão no main (ver a nota acima). Relatório: `T-0022.md`.
+- RD-0334 ao RD-0349: auditoria do serviço de login (branch `integracao-placas/T-0022-login`, head 427a73a). O RD-0334 e o RD-0349 ficam MANTIDOS; o RD-0335 ao RD-0348 foram corrigidos no ea90b99 (ver a nota acima). Relatório: `T-0022.md`.
 - RD-0284 e RD-0301 ao RD-0325: os pareceres não deixaram relatório no Git. As linhas vêm dos recados do gerente ao po (R-20261122-013101, R-20261122-014756, R-20261122-015345, R-20261122-024743 e R-20261122-025725) e das mensagens dos commits de correção (1649d37 e cceb0b9 no #103; b8fc1a7 no #104; fce3541 no #106; 9060a5c e 41d4b40 no #107; 1b84fbf no #108). [SUPOSIÇÃO] A severidade não ficou guardada: fica "—". O RD-0301 ao RD-0306, o RD-0308, o RD-0309 e o RD-0315 ao RD-0319 ficam sem o texto do achado (o commit só cita o número).
 - RD-0307: número não usado (pulado). Nenhum recado nem branch o cita.
 

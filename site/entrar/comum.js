@@ -23,6 +23,7 @@
     if (r.status === 401 && url !== "/api/entrar") { expirou(); return new Promise(() => {}); }
     let dados = null;
     if (r.status !== 204) { try { dados = await r.json(); } catch (e) { dados = null; } }
+    else { try { await r.text(); } catch (e) {} } // o 204 também é lido: sem isso, o Chrome 153 marca o pedido como cancelado
     return { status: r.status, dados };
   }
 
