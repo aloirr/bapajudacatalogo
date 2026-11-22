@@ -34,7 +34,7 @@ Exportado em 20/10/2026 da conversa **AGENTE - CATALOGO BAP** (claude.ai).
 **Requisitos**
 
 - Python 3.10+ com `reportlab`, `pandas`, `openpyxl`, `pillow` e `pymupdf`.
-- Node.js com `pptxgenjs`, só para o PowerPoint.
+- Node.js com `pptxgenjs` (traz o `jszip`, que o `apply_theme.js` usa), só para o PowerPoint.
 
 ```
 pip install reportlab pandas openpyxl pillow pymupdf
@@ -88,5 +88,5 @@ Para atualizar o estoque, troque o `ESTOQUE_BAP.xlsx` pelo arquivo do dia, com a
 
 **Observações**
 
-- **Tema de cores do PowerPoint:** o `apres_ppt.js` aplica o tema "BAP" só se existir um `apply_theme.js` na pasta. Sem ele, o arquivo sai igual, mas as cores não ficam editáveis pelo tema.
+- **Tema de cores do PowerPoint:** o `apres_ppt.js` sempre aplica o tema "BAP" com o `apply_theme.js` (na pasta `gerador/`; usa o `jszip`, que vem com o `pptxgenjs`). As cores dos slides vêm do tema: sem ele, sairiam as do tema "Office" (azul, laranja, amarelo). Por isso o `apres_ppt.js` para com erro se o `apply_theme.js` faltar.
 - **Nomes de arquivo:** os scripts usam caminhos relativos à pasta `gerador/`. Não mude os nomes das subpastas.

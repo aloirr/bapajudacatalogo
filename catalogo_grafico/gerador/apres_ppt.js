@@ -1,5 +1,5 @@
 const pptxgen = require('pptxgenjs');
-let applyTheme = null; try { ({ applyTheme } = require('./apply_theme.js')); } catch (e) { /* opcional */ }
+const { applyTheme } = require('./apply_theme.js');   // grava o THEME no theme1.xml (sem ele as cores dos slides mudam)
 const SZ = require('./pptimg/sizes.json');
 const I = f => './pptimg/' + f;
 const THEME = { name: 'BAP', headFontFace: 'Arial', bodyFontFace: 'Arial',
@@ -213,6 +213,6 @@ txt(s, 'www.bapautoparts.com.br  ·  @bapautoparts', 62, 496, 400, 18, { fontSiz
 (async () => {
   const out = 'saidas/BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pptx';
   await pres.writeFile({ fileName: out });
-  if (applyTheme) await applyTheme(out, THEME);
+  await applyTheme(out, THEME);
   console.log('ok');
 })();

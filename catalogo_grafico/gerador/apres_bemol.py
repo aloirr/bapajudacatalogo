@@ -19,7 +19,7 @@ C = dict(black='#141514', ink='#1a1c1a', sec='#4d514d', grey='#7a7f7a', green='#
 LOGO = 'dimg/capa_0.png'; LOGO_G = 'dimg/logo_grande.png'
 LOGO_ESC = 'pptimg/logo_escuro.png'   # cabeçalho em fundo claro: o mesmo logo escuro do apres_ppt.js (MC-0010)
 OIL = 'dimg/cover_26.png'
-P = lambda c: f'entradas/bap/{c}.jpg'
+P = lambda c: f'pptimg/{c}.png'           # fotos já recortadas, as mesmas do apres_ppt.js (T-0023)
 _ic = {}
 
 
