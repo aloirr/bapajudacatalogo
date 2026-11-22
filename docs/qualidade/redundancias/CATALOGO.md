@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0487**.
+O próximo número livre é o **RD-0494**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -330,12 +330,24 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0480 | baixa | código | site/admin/pdfs/pdfs.js:24 e :31 | o `disponivel` e o `tamanho()` tratavam um campo `disponivel` e o tamanho em texto, fora do contrato (o `disponivel` olha só o tamanho; sai o texto pronto) | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
 | RD-0481 | baixa | código (comentário) | site/admin/admin.css:97-100 | "valem o padding e o texto do .bt-mini" (passa a "o texto de 14 px do .bt-mini, com o padding de 12 px e a altura de 48 px do .bt") | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
 | RD-0482 | baixa | código (comentário) | site/admin/pdfs/pdfs.js:3 | o contrato da `GET /api/pdfs` copiado do `LEIA.md` (passa a "Contrato: GET /api/pdfs no servicos/login/LEIA.md.") | T-0024 | web-site | CORRIGIDO (b3fde04; 15ff9df, #134) |
-| RD-0483 | manter? | código | site/admin/pdfs/pdfs.js:12-19 (`USO`) × servicos/login/server.mjs:90 (`PDFS`) | as chaves dos cartões (o id ou o par) nas 2 listas | T-0024 | web-site; integracao-placas | MANTIDO (o texto de tela é da tela, do `web-site`; a lista do serviço é a lista branca de arquivos, do `integracao-placas`; um item sem frase continua aparecendo; parecer de 05:12) |
-| RD-0484 | manter? | layout | Catálogos e materiais, cartão Lubrificantes (1366 e 390 px) | o tipo em 4 lugares: a frase de uso, a extensão "(.pdf e .pptx)", o tamanho "PDF 6,6 MB · PowerPoint 7,3 MB" e os botões "Baixar PDF" e "Baixar PowerPoint" | T-0024 | web-site | MANTIDO (cada lugar faz um trabalho diferente: para que serve cada formato, qual tamanho é de qual, a ação; a extensão segue o modelo dos outros cartões; a simulação v2 foi aprovada pelo Alexandre, R-20261122-084553; parecer de 05:12) |
+| RD-0483 | — | código | site/admin/pdfs/pdfs.js:12-19 (`USO`) × servicos/login/server.mjs:90 (`PDFS`) | as chaves dos cartões (o id ou o par) nas 2 listas | T-0024 | web-site; integracao-placas | MANTIDO (saiu como `manter?`; o texto de tela é da tela, do `web-site`; a lista do serviço é a lista branca de arquivos, do `integracao-placas`; um item sem frase continua aparecendo; parecer de 05:12) |
+| RD-0484 | — | layout | Catálogos e materiais, cartão Lubrificantes (1366 e 390 px) | o tipo em 4 lugares: a frase de uso, a extensão "(.pdf e .pptx)", o tamanho "PDF 6,6 MB · PowerPoint 7,3 MB" e os botões "Baixar PDF" e "Baixar PowerPoint" | T-0024 | web-site | MANTIDO (saiu como `manter?`; cada lugar faz um trabalho diferente: para que serve cada formato, qual tamanho é de qual, a ação; a extensão segue o modelo dos outros cartões; a simulação v2 foi aprovada pelo Alexandre, R-20261122-084553; parecer de 05:12) |
 | RD-0485 | média | teste | testes/login.mjs, `ARQS` (:39-50), GET /api/pdfs (:321-328) e HEAD de cada id (:335-345) | a ordem dos ids da API, o Content-Type e o arquivo mais novo de `entregas/` repetiam o `login.test.mjs` ("entregas/ de verdade…" e "arquivo em falta…") (o `ARQS` vira a lista `IDS`; fica só o link de cada id na tela) | T-0024 | testes | CORRIGIDO (4595275; 00c0c7d, #138) |
 | RD-0486 | baixa | teste | testes/login.mjs:155 e :173 | os 7 ids no passe sem cookie, que passam pela mesma trava de sessão (voltam os 2 PDFs de antes) | T-0024 | testes | CORRIGIDO (4595275; 00c0c7d, #138) |
+| RD-0487 | baixa | tarefa | .coord/tarefas/T-0024.md:32 × :45 | o RD-0456 e a nota do revisor no #133 (o `titulo` dos itens em falta), ditos no Registro do PR #133 e no "Fica para depois" (o Registro passa a "RD-0456 fica ABERTO (ver "Fica para depois")") | T-0024 | gerente-projetos | CORRIGIDO (d80ae36; 0994bab, #139) |
+| RD-0488 | baixa | tarefa | .coord/tarefas/T-0024.md:33 × :45 | o ícone "PDF" fixo, dito no Registro da página final e no "Fica para depois" (o Registro fica com "Nota que não segura: vazio e carregando sem role="status" (como na T-0022).") | T-0024 | gerente-projetos | CORRIGIDO (d80ae36; 0994bab, #139) |
+| RD-0489 | baixa | tarefa | .coord/tarefas/T-0024.md:36 | "decisão do PO pela delegação…" no Registro das 05:08, cuja linha já é do `po` (passa a "pela delegação do R-20261122-090651-alexandre") | T-0024 | gerente-projetos | CORRIGIDO (d80ae36; 0994bab, #139) |
+| RD-0490 | baixa | tarefa | .coord/tarefas/T-0024.md:39 × :26 | o cabeçalho dos Merges "(squash, expectedHeadSha, autorização do PO por número e SHA)" repetia o critério "merge autorizado pelo PO por número e SHA" (passa a "(squash, expectedHeadSha)") | T-0024 | gerente-projetos | CORRIGIDO (d80ae36; 0994bab, #139) |
+| RD-0491 | baixa | tarefa | .coord/tarefas/T-0024.md:9 | "nuvem/T-0024-governanca (governança)": o nome do branch já diz (sai o "(governança)") | T-0024 | gerente-projetos | CORRIGIDO (d80ae36; 0994bab, #139) |
+| RD-0492 | baixa | tarefa | .coord/tarefas/T-0025.md:22 × :31 | a decisão do MC-0012 ("entra, confirmado pelo PO (R-20261122-082826-po), na mesma simulação") na Especificação e no Registro das 04:28 (a Especificação fica só com o que é o MC-0012) | T-0025 | gerente-projetos | CORRIGIDO (d80ae36; 0994bab, #139) |
+| RD-0493 | baixa | tarefa | .coord/quadro.md:36 × .coord/tarefas/T-0025.md:32 | a fila 1 recontava a delegação ao PO ("o PO decide a simulação enquanto o Alexandre dorme"), já no Registro da T-0025, e dizia "simulação" 2 vezes (passa a "(simulação antes, decidida pelo PO):** R-20261122-080833, R-20261122-090651.") | T-0025 | gerente-projetos | CORRIGIDO (d80ae36; 0994bab, #139) |
 
 ## Notas
+
+### T-0024, registro do gerente (PR #139)
+- RD-0487 ao RD-0493: corrigidos no d80ae36 (head do #139, registro da T-0024; squash 0994bab).
+- [SUPOSIÇÃO] As linhas citadas são as do arquivo anterior ao d80ae36; o texto de cada linha vem do diff da correção.
+- Relatório: `T-0024.md`, §7.
 
 ### T-0024, manhã de 22/11/2026 (PRs #133 a #138)
 - RD-0448 ao RD-0454: corrigidos no 4d4ffa8 (head do #133; squash 6533b03). O RD-0456 fica ABERTO sem segurar (só comentário e título de teste) e vai no próximo PR do `integracao-placas`; a constante `SETE` e o comentário da definição ficam (MANTIDO, sem número).
