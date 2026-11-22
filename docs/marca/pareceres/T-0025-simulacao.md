@@ -135,8 +135,8 @@ pergunta 1.
   PDFs e no .pptx.
 - **Nada de marca mudou fora do pedido:** só mudam a pág. 2 do A4 e de Lubrificantes (PDF e .pptx) e o título dos
   metadados da Linha Moto (comparação página a página do A4 e de Lubrificantes: ver o parecer de UX). A Linha Moto tem
-  as 17 páginas iguais às do main, pixel a pixel; muda só o título dos metadados (§4). Nenhuma cor, fonte (o .pptx
-  continua em Arial, 6b), logo ou tamanho de logo mudou. O Completo Digital e o Kit Filtros não mudam no PR.
+  as 17 páginas iguais às do main, pixel a pixel. Nenhuma cor, fonte (o .pptx continua em Arial, 6b), logo ou tamanho
+  de logo mudou. O Completo Digital e o Kit Filtros não mudam no PR.
 - **Regras do repositório:** sem preço e sem estoque; sem marca de terceiros. As frases de Lubrificantes passaram para
   o `apres_conteudo.json` sem mudar uma palavra.
 - **Achados:** o MC-0014 está fechado (a etiqueta ficou). O MC-0011 e o MC-0012 seguem abertos para o Alexandre, pelo
