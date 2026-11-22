@@ -8,7 +8,7 @@ a mesma posição (dianteiro/traseiro) e o mesmo lado. Sem par por veículo, ent
 import re, collections
 import cross as X
 import detalhe as DT
-from site_regras import G as _G      # "Leve também" por sistema: G.SIS_COMPAT e G.sistemas_de (T-0019)
+from site_regras import G as _G
 
 ADITIVO, AGUA = 'RAD25005P', 'RAD25009P'
 DOT3, DOT4 = 'FLU15001', 'FLU15002'
@@ -65,11 +65,8 @@ QUIMICO = [(r'AGUA DESMIN', f'{ADITIVO} (aditivo)'), (r'FLUIDO|ADITIVO', f'{AGUA
 LOG = collections.Counter()
 
 # ---------------------------------------------------------------- "Leve também" por sistema (T-0019)
-# A peça oferecida é do mesmo sistema do item ou de um sistema compatível. A tabela (G.SIS_COMPAT: origem -> sistemas
-# aceitos, não simétrica) e a leitura dos sistemas do item (G.sistemas_de: o SISTEMA da base; no rolamento, o que o texto
-# dele diz, como "CÂMBIO E DIFERENCIAL" no ROL32008 e no ROL32009) são as do site, no scripts/gerar_site.py (dono:
-# web-site), sem cópia (R-20261121-200058-alexandre). Só a regra e a tabela são as mesmas: a lista do site filtra o
-# OFERECA_JUNTO da base; a do PDF é o par calculado por veículo (abaixo), filtrado pela mesma regra.
+# A regra e a tabela são as do site (G.sistemas_de e G.SIS_COMPAT, sem cópia; R-20261121-200058-alexandre); aqui elas
+# só filtram o par calculado por veículo.
 _SIS = {}
 
 
@@ -173,8 +170,9 @@ def aplicar(fams):
                 r['extra'] = next((s for p, s in QUIMICO if re.search(p, t)), '—'); LOG[(nome, 'sugestão fixa')] += 1
             else:
                 r['extra'] = fixa or '—'; LOG[(nome, 'sugestão fixa')] += 1
-    _por_sistema(fams)
-    _so_codigo(fams)
+    cods = {r['code'].strip().upper() for f in fams for r in f['rows']}
+    _por_sistema(fams, cods)
+    _so_codigo(fams, cods)
     return LOG
 
 
@@ -183,10 +181,9 @@ def _cod(p):
     return re.sub(r'\s*\(.*?\)', '', p).strip()
 
 
-def _por_sistema(fams):
+def _por_sistema(fams, cods):
     """o par que veio pronto (cross.py, sugestão fixa com código) também segue o sistema: o código de outro sistema
     sai; sem nenhum, fica o traço (o _so_codigo)"""
-    cods = {r['code'].strip().upper() for f in fams for r in f['rows']}
     for f in fams:
         if f.get('moto'): continue
         for r in f['rows']:
@@ -201,9 +198,8 @@ def _por_sistema(fams):
 TEM_COD = re.compile(r'\b(?=[A-Z0-9./-]*\d)[A-Z][A-Z0-9./-]{3,}|\b\d{1,3}[./]\d{2,3}-\d{2}\b')
 
 
-def _so_codigo(fams):
+def _so_codigo(fams, cods):
     """sem item do portfólio para oferecer, fica só o traço (Alexandre, 23/10)"""
-    cods = {r['code'].strip().upper() for f in fams for r in f['rows']}
     def tem(e):
         return any(_cod(p).upper() in cods for p in e.split(' · ')) or bool(TEM_COD.search(e))
     for f in fams:

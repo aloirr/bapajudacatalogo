@@ -309,10 +309,7 @@ def row_cells(f, r, cols, widths):
         if k == 'code':
             import tags as TG
             tl, sm = D2.tags_e_sobra(f, r)
-            cs = 10
-            while cs > 7.5 and lw(r['code'], cs, 'PB') > w: cs -= .25
-            r['_cs'], r['_novo_baixo'], r['_ind'] = cs, D2.novo_desce(r, cs, w, 6.4, 3.5, 5), 0
-            if r['_novo_baixo']: tl, r['_ind'] = D2.novo_na_sobra(tl, sm)
+            tl = D2.codigo_e_novo(r, tl, sm, w, 10, 0, 6.4, 3.5, 5)
             th = TG.medir(lw, tl, w0)[1] if tl else 0
             sh = para_h(sm, 7.2, 9.4, w0, 'PM', r['_ind']) if sm else 0
             r['_tl'], r['_sm'] = tl, sm
@@ -357,7 +354,7 @@ def draw_rows(dc, f, rows, y, cols, widths, ymax):
                 import tags as TG
                 yy = y + 17
                 if r.get('_tl'): yy += TG.desenhar(dc, lw, x, yy, r['_tl'], w)
-                if r.get('_sm') and r.get('_ind'): dc.tag(x, yy + 1.2, 'NOVO', D2.NOVO_TAG, 'otag', 'otext', 3)   # B10
+                if r.get('_sm') and r.get('_ind'): D2.novo_na_descricao(dc, x, yy + 1.2)
                 if r.get('_sm'): dc.text(x, yy + 1, w, r['_sm'], 7.2, 9.4, 'gtext', 'PM', r.get('_ind', 0))
             else:
                 k_, m, hh, sz, ld, cl, fn = c_
