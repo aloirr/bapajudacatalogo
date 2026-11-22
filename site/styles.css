@@ -43,6 +43,12 @@
   --g-catalogo: linear-gradient(90deg, var(--escuro) 0%, var(--texto) 55%, color-mix(in srgb, var(--verde-esc) 85%, var(--escuro)) 100%);
   /* véu --escuro no alto da faixa do início e do topo da Sobre, por trás do cabeçalho transparente: o branco fica legível */
   --veu-topo: linear-gradient(180deg, color-mix(in srgb, var(--escuro) 55%, transparent) 0, transparent 150px);
+  /* login (T-0022, 8 a, R-20261122-032433): erro do login e dos campos e o botão "Desativar"; só no site */
+  --erro: #B42318;       /* 6,57:1 no branco */
+  --erro-claro: #FDECEA; /* fundo da caixa de erro: o --erro nele dá 5,75:1 */
+  /* moldura deitada da logo da empresa no botão do canto (6 a): não passa da área do logo da BAP (MC-0002) */
+  --conta-logo-l: 48px;
+  --conta-logo: 30px;
 }
 .vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .so-impressao { display: none; }
@@ -674,4 +680,76 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .sistemas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .sistema { padding: 12px; }
   .sistema b { font-size: 14px; }
+}
+
+/* ===== Botão do canto (T-0022): a conta de quem entrou, lida de /api/eu (conta.js). Sem o serviço, não aparece ===== */
+.topo-dir { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.conta { position: relative; }
+.conta[hidden] { display: none; }
+/* fechado: véu --escuro a 30% (o branco dá 7,7:1 até na ponta verde do cabeçalho) */
+.conta-bt { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 2px 10px 2px 2px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--branco) 28%, transparent); background: color-mix(in srgb, var(--escuro) 30%, transparent);
+  color: var(--branco); cursor: pointer; text-align: left; font: inherit; }
+.conta-bt:hover { background: color-mix(in srgb, var(--escuro) 45%, transparent); }
+.conta-bt[aria-expanded="true"] { background: var(--branco); color: var(--escuro); border-color: var(--branco); }
+/* a logo nunca é cortada nem recolorida (MC-0003): contain, com 3 px de folga, no fundo branco */
+.conta-logo { position: relative; width: var(--conta-logo-l); height: var(--conta-logo); flex: none; border-radius: 8px; background: var(--branco);
+  overflow: hidden; box-shadow: inset 0 0 0 1px var(--linha); }
+.conta-logo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 3px; }
+.conta-nome { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; max-width: 190px; }
+.conta-nome b { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conta-nome small { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conta-seta { flex: none; transition: transform .15s; }
+.conta-bt[aria-expanded="true"] .conta-seta { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .conta-seta { transition: none; } }
+/* aberto: "disclosure" (botão com aria-expanded e uma lista de links; o Esc fecha), não role="menu" */
+.conta-menu { position: absolute; right: 0; top: calc(100% + 8px); width: 300px; background: var(--branco); color: var(--texto);
+  border-radius: var(--raio); box-shadow: var(--sombra-janela); padding: 8px; z-index: 40; }
+.conta-menu[hidden] { display: none; }
+.conta-cab { display: flex; gap: 12px; align-items: center; padding: 10px 10px 14px; border-bottom: 1px solid var(--linha); margin-bottom: 6px; min-width: 0; }
+.conta-cab > div { min-width: 0; overflow-wrap: break-word; }
+.conta-cab .conta-logo { --conta-logo: 52px; --conta-logo-l: 84px; }
+.conta-cab b { display: block; font-size: 15px; color: var(--escuro); }
+.conta-cab span:not(.tag) { display: block; font-size: 13px; color: var(--texto-2); }
+.conta-cab .tag { display: inline-block; margin-top: 4px; }
+.conta-menu ul { list-style: none; margin: 0; padding: 0; }
+.conta-menu li.sep { height: 1px; background: var(--linha); margin: 6px 4px; }
+.conta-menu .rot-grupo { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-2); padding: 8px 10px 2px; }
+.conta-menu a, .conta-menu button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0 10px; border: 0;
+  border-radius: 8px; background: none; color: var(--texto); text-decoration: none; font: inherit; font-size: 15px; font-weight: 500; cursor: pointer; text-align: left; }
+.conta-menu a:hover, .conta-menu button:hover { background: var(--verde-claro); color: var(--verde-txt); }
+.conta-menu svg { flex: none; color: var(--verde-txt); }
+.topo .conta-menu :focus-visible { outline-color: var(--verde-txt); } /* no cartão branco, o contorno branco do .topo some */
+@media (max-width: 640px) {
+  /* celular (4 a): o botão é só a logo, com 44 px de toque; o nome e a empresa ficam no nome acessível e no menu aberto */
+  .logado .marca span { display: none; } /* o "Catálogo online" sai para caber sem rolagem para o lado */
+  .topo-dir { gap: 6px; }
+  .conta-bt { padding: 2px; gap: 0; min-height: 44px; min-width: 44px; justify-content: center; border-radius: 10px; }
+  .conta-bt .conta-nome, .conta-bt .conta-seta { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .conta-bt .conta-logo { --conta-logo: 26px; --conta-logo-l: 40px; }
+  .conta-menu { position: fixed; left: 12px; right: 12px; top: 68px; width: auto; }
+}
+
+/* etiquetas (situação do usuário e "Admin") */
+.tag { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--fundo); color: var(--texto-2); box-shadow: var(--contorno-neutro); white-space: nowrap; }
+.tag-verde { background: var(--verde-claro); color: var(--verde-txt); box-shadow: none; }
+.tag-escura { background: var(--escuro); color: var(--branco); box-shadow: none; }
+
+/* páginas da conta e do admin (Trocar senha, Criar usuários e Catálogos em PDF): faixa escura com a trilha e o título */
+body.pg-conta { min-height: 100vh; display: flex; flex-direction: column; } /* página curta: o rodapé fica no pé da tela */
+body.pg-conta main { flex: 1; }
+.pg-cab { background: var(--g-catalogo); color: var(--branco); }
+.pg-cab-in { max-width: 1200px; margin: 0 auto; padding: 18px 16px 26px; }
+.pg-cab .trilha { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: -8px 0 0; color: var(--branco); }
+.pg-cab .trilha a { color: var(--branco); display: inline-flex; align-items: center; min-height: 44px; }
+.pg-cab h1 { margin: 0; font-size: 26px; line-height: 1.2; }
+.pg-cab p { margin: 6px 0 0; color: var(--branco); font-size: 14px; }
+.pg-cab .so-admin { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; font-weight: 600;
+  color: var(--escuro); background: var(--verde); padding: 3px 10px; border-radius: 999px; }
+.pg { max-width: 1200px; margin: 0 auto; padding: 24px 16px 8px; }
+.pg-estreita { max-width: 560px; }
+.painel { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); padding: 24px; }
+@media (max-width: 640px) {
+  .painel { padding: 18px 16px; }
+  .pg-cab h1 { font-size: 22px; }
 }

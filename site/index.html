@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Catálogo online BAP · Componentes de qualidade</title>
-<meta name="description" content="Catálogo online BAP Autoparts: busque peças por código, referência cruzada, veículo e aplicação.">
+<meta name="description" content="Catálogo online BAP AUTOPARTS: busque peças por código, referência cruzada, veículo e aplicação.">
 <link rel="icon" href="assets/logo_escuro.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,11 +15,14 @@
 <header class="topo">
   <div class="topo-in">
     <a href="#/" class="marca" aria-label="Catálogo online BAP: início"><img src="assets/logo_branco.png" alt="bap componentes de qualidade"><span>Catálogo <br class="so-cel">online</span></a>
-    <nav class="menu" aria-label="Menu">
-      <a href="#/">Início</a>
-      <a href="#/busca">Produtos</a>
-      <a href="#/sobre">Sobre a BAP</a>
-    </nav>
+    <div class="topo-dir">
+      <nav class="menu" aria-label="Menu">
+        <a href="#/">Início</a>
+        <a href="#/busca">Produtos</a>
+        <a href="#/sobre">Sobre a BAP</a>
+      </nav>
+      <div class="conta" id="conta" hidden></div>
+    </div>
   </div>
 </header>
 
@@ -30,13 +33,14 @@
 <footer class="rodape">
   <div class="rodape-in">
     <div class="rodape-txt">
-      <p class="rodape-copy">© 2026 - BAP AUTO PARTS - Componentes de qualidade - Todos os direitos reservados.</p>
+      <p class="rodape-copy">© 2026 - BAP AUTOPARTS - Componentes de qualidade - Todos os direitos reservados.</p>
       <p class="mini">As fotos são ilustrativas.<span class="rodape-confira"> Confira sempre a aplicação antes da compra.</span><span id="info-base"></span></p>
     </div>
     <button type="button" class="rodape-topo" aria-label="Voltar ao topo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
   </div>
 </footer>
 
+<script src="conta.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
