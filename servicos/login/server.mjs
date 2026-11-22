@@ -1,8 +1,8 @@
 // Serviço de login do catálogo (T-0022). Node 20+, sem dependências.
 // Serve o site/ inteiro atrás de login (sessão de 5 h a partir do login), mais a
-// API das telas (contrato T-0022), os 2 PDFs do admin e /interno/codigos para a placa.
+// API das telas (contrato T-0022), os 7 arquivos do admin (T-0024) e /interno/codigos para a placa.
 // Regras: senha só com hash scrypt; o log nunca leva senha, hash, cookie, segredo,
-// chave, usuário, caminho pedido nem IP. Fora de site/ só saem os 2 PDFs da lista.
+// chave, usuário, caminho pedido nem IP. Fora de site/ só saem os 7 arquivos da lista.
 import http from 'node:http';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -83,12 +83,25 @@ const TIPOS = {
 const COMPRIMIR = new Set(['.html', '.css', '.js', '.json']);
 const LONGO = new Set(['.png', '.jpg', '.webp']);
 
-// PDFs do admin: lista FIXA de 2. O arquivo é o de ano mais alto que casa com o padrão.
-// [SUPOSIÇÃO] Os nomes seguem Catalogo_BAP_<ano>_..., como as entregas de hoje.
+// Arquivos do admin (T-0024): lista FIXA de 7, só de catalogo_grafico/entregas/, na ordem da tela.
+// O navegador só manda o id; o nome do arquivo nunca vem do pedido. Regex ancorada, sem "/" nem curinga.
+// Os 3 catálogos têm o ano no nome: vale o de ano mais alto. Os outros 4 têm o nome exato.
+// [SUPOSIÇÃO] O catalogo-grafico mantém esses nomes; se o ano entrar no nome, a regex ganha o (\d{4}).
+// "par": os itens com o mesmo par viram um cartão só na tela (o 1º é o principal).
 const PDFS = [
-  { id: 'completo-digital', titulo: 'Completo Digital', re: /^Catalogo_BAP_(\d{4})_Completo_Digital\.pdf$/ },
-  { id: 'a4-grafica', titulo: 'A4 gráfica', re: /^Catalogo_BAP_(\d{4})_A4_grafica\.pdf$/ },
+  { id: 'completo-digital', titulo: 'Completo Digital', grupo: 'catalogos', tipo: 'pdf', re: /^Catalogo_BAP_(\d{4})_Completo_Digital\.pdf$/ },
+  { id: 'a4-grafica', titulo: 'A4 gráfica', grupo: 'catalogos', tipo: 'pdf', re: /^Catalogo_BAP_(\d{4})_A4_grafica\.pdf$/ },
+  { id: 'linha-moto', titulo: 'Linha Moto', grupo: 'catalogos', tipo: 'pdf', re: /^Catalogo_BAP_(\d{4})_Linha_Moto\.pdf$/ },
+  { id: 'portfolio', titulo: 'Portfólio de Produtos', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS\.pdf$/ },
+  { id: 'lubrificantes-pdf', titulo: 'Lubrificantes e Químicos', grupo: 'materiais', tipo: 'pdf', par: 'lubrificantes', re: /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pdf$/ },
+  { id: 'lubrificantes-pptx', titulo: 'Lubrificantes e Químicos', grupo: 'materiais', tipo: 'pptx', par: 'lubrificantes', re: /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pptx$/ },
+  { id: 'kit-filtros', titulo: 'Kit Filtros', grupo: 'materiais', tipo: 'pdf', re: /^Kit_Filtros_BAP\.pdf$/ },
 ];
+// Content-Type do download: pelo tipo da lista, nunca pela extensão do pedido.
+const TIPO_MIME = {
+  pdf: 'application/pdf',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+};
 
 const LOGO_MIME = { png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp' };
 // Tipo pelos primeiros bytes. SVG e o resto: null.
@@ -473,11 +486,11 @@ export async function criarServico(opcoes = {}) {
     pipeline(fs.createReadStream(a.arquivo), res, () => {});
   }
 
-  // ---------- PDFs (lista fixa; fora de site/ só estes) ----------
+  // ---------- arquivos do admin (lista fixa; fora de site/ só estes) ----------
   async function acharPdf(item) {
     let nomes;
     try { nomes = await fsp.readdir(pdfsReal); } catch { return null; }
-    const casados = nomes.map((n) => ({ n, m: item.re.exec(n) })).filter((x) => x.m).sort((a, b) => Number(b.m[1]) - Number(a.m[1]));
+    const casados = nomes.map((n) => ({ n, m: item.re.exec(n) })).filter((x) => x.m).sort((a, b) => Number(b.m[1] || 0) - Number(a.m[1] || 0));
     for (const { n } of casados) {
       const alvo = path.join(pdfsReal, n);
       try {
@@ -691,7 +704,11 @@ export async function criarServico(opcoes = {}) {
     for (const item of PDFS) {
       const a = await acharPdf(item);
       // [SUPOSIÇÃO] "data" é a data do arquivo no disco: no Render, a do deploy.
-      lista.push({ id: item.id, titulo: item.titulo, arquivo: a ? a.nome : null, tamanho: a ? a.st.size : null, data: a ? new Date(a.st.mtimeMs).toISOString() : null });
+      // Arquivo em falta: continua na lista, com arquivo, tamanho e data null.
+      lista.push({
+        id: item.id, titulo: item.titulo, grupo: item.grupo, tipo: item.tipo, par: item.par ?? null,
+        arquivo: a ? a.nome : null, tamanho: a ? a.st.size : null, data: a ? new Date(a.st.mtimeMs).toISOString() : null,
+      });
     }
     return json(res, 200, lista);
   }
@@ -701,7 +718,7 @@ export async function criarServico(opcoes = {}) {
     if (!a) return erro(req, res, 404, MSG.naoEncontrado);
     res.writeHead(200, {
       ...SEGURANCA,
-      'Content-Type': 'application/pdf',
+      'Content-Type': TIPO_MIME[item.tipo],
       'Content-Disposition': `attachment; filename="${a.nome}"`,
       'Content-Length': a.st.size,
       'Cache-Control': 'private, no-store',
