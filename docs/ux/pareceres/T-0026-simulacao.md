@@ -76,3 +76,48 @@ Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0026/sim/`
 - **Prova e textos:** `prova_pixel_a_pixel.txt` (A4: 53 de 56 iguais, mudam 2, 3 e 4; Completo: 310 de 311, muda a 2; Linha Moto: 16 de 17, muda a 2) e `textos_paginas.txt`.
 
 **Resultado: LIBERADO.** A simulação pode seguir para a decisão do PO, com as recomendações do §5.
+
+---
+
+## Entrega final (PR #146)
+
+| Campo | Valor |
+|---|---|
+| Data | 22/11/2026 06:47 (Manaus) |
+| O que foi revisto | O PR #146, branch `catalogo-grafico/T-0026-entregas`, head `09859641823cc6daf50a34eb6de01318d73bc86d`, comparado com o origin/main `2ac3ec2`. Os arquivos conferidos foram as entregas `Catalogo_BAP_2027_A4_grafica.pdf`, `Catalogo_BAP_2027_Completo_Digital.pdf` e `Catalogo_BAP_2027_Linha_Moto.pdf` e, no gerador, `print_cat.py`, `digital2.py`, `catalogo_moto.py` e `LEIA_GERADOR.md` |
+| Decisão do PO | 1a, 2a, 3a, 4a, 5a e 6a (R-20261122-103726-po) |
+| Pranchas | No aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0026/final/` (commit 18412ec) |
+| Resultado | **LIBERADO**, sem 🔴 e sem 🟡 |
+
+Sem preço e sem estoque: 🟢. Fiz a busca por "R$" com número, "estoque" e "saldo" no texto dos 3 PDFs entregues e não achei nada. O texto institucional é o da simulação aprovada.
+
+### A entrega bate com a simulação aprovada
+- 🟢 **O código é o da simulação.** As linhas que mudam no `print_cat.py`, no `digital2.py` e no `catalogo_moto.py` do PR são as mesmas, linha a linha, do `T-0026-simulacao.diff`. O PR também mexe no `LEIA_GERADOR.md`, onde acrescenta o `SUM_DESC` ao mapa do gerador. Isso não muda nenhuma página.
+- 🟢 **As pranchas avulsas são as da simulação.** Comparei os 12 PNGs `*_antes.png` e `*_depois.png` de `final/` com os de `sim/`: são idênticos byte a byte. O `prova_pixel_a_pixel.txt` também é idêntico. As 6 pranchas `*_antes_depois.png` diferem só no rótulo de cima ("entrega do main 2ac3ec2" e "entrega T-0026" no lugar de "main 1255bbe" e "simulação T-0026"), como mostra o `Moto_pag02_sumario_antes_depois.png`.
+- 🟢 **Conferi os PDFs entregues por conta própria.** Renderizei as entregas do main e do PR com o `pdftoppm`, a 150 ppi, página por página:
+
+  | PDF | Páginas (main = PR) | Mudam | Onde |
+  |---|---|---|---|
+  | A4 | 56 | 2, 3 e 4 | pág. 2: os blocos do meio e os números; pág. 3: só a direita da barra; pág. 4: só a barra e o sobretítulo |
+  | Completo Digital | 311 | 2 | só o topo do Sumário |
+  | Linha Moto | 17 | 2 | só o topo do Sumário (barra, sobretítulo e texto) |
+
+  As páginas e as caixas são as mesmas da prova da simulação. A contagem de pixels muda em menos de 0,2%, porque o renderizador é outro. Todas as outras páginas ficam iguais pixel a pixel.
+- 🟢 **O texto das páginas que mudam é o aprovado.**
+  - A4, pág. 2: o "Quem somos" fica só com a primeira frase, e o "Por que vender BAP" começa com "Portfólio robusto para as linhas leve, pesada e moto: …" (1a). O espaçamento não muda (2a).
+  - A4, págs. 3 e 4: a barra só tem "CATÁLOGO DE PRODUTOS 2027" à esquerda (3a). O sobretítulo da pág. 3 é "GUIA RÁPIDO", e o da pág. 4 é "BAP AUTOPARTS" (4a).
+  - Completo e Linha Moto: a barra só tem o nome do catálogo à esquerda, e o sobretítulo é "BAP AUTOPARTS". A Linha Moto diz "Todas as linhas BAP para motocicletas…" (5a), e o Completo continua com "Todas as linhas BAP…".
+  - O "1 itens" continua, como decidido (6a).
+- 🟢 **Anotações.** O A4 de 56 páginas não usa a página de anotações. O código do `anotacoes()` no PR é o da simulação, e a prancha `A4_anotacoes_depois.png` é idêntica à de `sim/`.
+
+### Notas
+- A nota 5 da simulação (o diff fora dos anexos) se resolve: o código está no PR #146, igual ao diff.
+- As notas 1 a 4 da simulação continuam valendo e não seguram. Elas falam do vazio da pág. 2 do A4, de "famílias" e "linhas" na Linha Moto, de "linhas" com 2 sentidos e das mesmas peças de pneus e câmaras em 2 linhas do Completo. O RD do "1 item" (6a) também segue pendente, como decidido.
+
+### Prints conferidos
+Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0026/final/` (commit 18412ec):
+- `A4_pag02_antes_depois.png`, `A4_pag03_antes_depois.png`, `A4_pag04_antes_depois.png` e `A4_anotacoes_antes_depois.png`.
+- `Digital_pag02_sumario_antes_depois.png` e `Moto_pag02_sumario_antes_depois.png`.
+- Os 12 avulsos `*_antes.png` e `*_depois.png`, e o `prova_pixel_a_pixel.txt`.
+
+**Resultado da entrega final: LIBERADO** para seguir ao `revisor-codigo`.
