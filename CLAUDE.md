@@ -3,7 +3,7 @@
 Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, recados, commits e docs. Horário: Manaus (UTC−4). As suposições são marcadas como **[SUPOSIÇÃO]**.
 
 ## O que mora aqui
-- **Catálogo online:** `site/`. É estático e publicado no Render (`render.yaml`, só a pasta `site`).
+- **Catálogo online:** `site/`, servido só com login pelo serviço `servicos/login/` (T-0022) em bapajudacatalogo-login.onrender.com (`render.yaml`); o endereço antigo redireciona para o novo.
   - Dados: `site/data/produtos.json`, gerado por `scripts/gerar_site.py` a partir da base unificada.
 - **Base unificada:** `dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx` é a fonte única.
   - Aba `PRODUTOS`: CODIGO_BAP, DESCRICAO, APLICACAO, REFERENCIAS_CRUZADAS, DADOS_ADICIONAIS, PRODUTO, CATEGORIA, SISTEMA, FAMILIA, LINHA, NO_CATALOGO_DIGITAL, STATUS_CADASTRO, POSICAO, LADO, DETALHE_CATALOGO, DIFERENCIAL, ITEM_PARECIDO, OFERECA_JUNTO.

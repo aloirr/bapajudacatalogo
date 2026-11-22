@@ -1,22 +1,22 @@
-# Catálogo BAP online no Render (site estático, sem servidor).
-# Render → New → Blueprint → aloirr/bapajudacatalogo. Publica só a pasta site/ (a base .xlsx NÃO vai para o ar).
+# Catálogo BAP online no Render: 3 serviços (abaixo). A base .xlsx NÃO vai para o ar.
+# Render → Blueprints → aloirr/bapajudacatalogo → Sync.
 services:
+  # Endereço antigo (T-0022, fase B): só redireciona para o catálogo com login. Os links #/produto/... seguem valendo.
   - type: web
     name: bapajudacatalogo
     runtime: static
-    buildCommand: 'echo "site estatico: os dados vem prontos de scripts/gerar_site.py"'
-    staticPublishPath: ./site
+    buildCommand: |
+      mkdir -p redirecionamento
+      printf '%s' '<!doctype html><meta charset="utf-8"><title>Catálogo BAP</title><script>location.replace("https://bapajudacatalogo-login.onrender.com/"+location.search+location.hash)</script><a href="https://bapajudacatalogo-login.onrender.com/">Catálogo BAP</a>' > redirecionamento/index.html
+    staticPublishPath: ./redirecionamento
     pullRequestPreviewsEnabled: false
-    headers:
-      - path: /data/*
-        name: Cache-Control
-        value: no-cache
-      - path: /img/*
-        name: Cache-Control
-        value: public, max-age=604800
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
+    buildFilter:
+      paths:
+        - render.yaml
+    routes:
+      - type: redirect
+        source: /*
+        destination: https://bapajudacatalogo-login.onrender.com/
   # Busca por placa (T-0005): serviço pequeno que consulta a API PLACAS com a chave só em variável de ambiente.
   # A chave (API_PLACAS_TOKEN) é criada pelo Alexandre no painel do Render; nunca vai para o Git.
   # Plano pago (não dorme) e disco persistente para guardar placa -> veículo (decisão do Alexandre, R-20261120-110140).
@@ -36,12 +36,19 @@ services:
       - key: API_PLACAS_TOKEN
         sync: false
       - key: ORIGEM_PERMITIDA
-        value: https://bapajudacatalogo.onrender.com
+        value: https://bapajudacatalogo-login.onrender.com
+      # T-0022, fase B: o /contar lê os códigos pelo login (rota interna com a chave gerada pelo Render).
+      - key: CATALOGO_URL
+        value: https://bapajudacatalogo-login.onrender.com
+      - key: CHAVE_INTERNA
+        fromService:
+          type: web
+          name: bapajudacatalogo-login
+          envVarKey: CHAVE_INTERNA
       - key: PASTA_GUARDA
         value: /var/data
   # Login do catálogo (T-0022): serve o site/ inteiro só com login. Sem rootDir: lê site/ e os 2 PDFs de catalogo_grafico/entregas/.
   # A senha inicial do admin (ADMIN_SENHA_INICIAL) é digitada pelo Alexandre no painel; nunca vai para o Git.
-  # Fase A: sobe ao lado do site atual, que continua aberto até a fase B (redirecionamento).
   - type: web
     name: bapajudacatalogo-login
     runtime: node
