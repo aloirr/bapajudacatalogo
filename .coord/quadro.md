@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 21/11/2026 23:35 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 01:55 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -25,13 +25,13 @@ Atualizado em 21/11/2026 23:35 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | CONCLUÍDA | #40, #47, #51, #61, #64, #70, #77, #84, #90, #94, #99, #100 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 | [T-0021](tarefas/T-0021.md) | Governança: .claude/worktrees/ no .gitignore e commit do designer-ux e do design-de-marca nas suas pastas | alexandre | po, gerente-projetos | CONCLUÍDA | #105 |
-| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | EM ANDAMENTO (serviço e telas em código) | #108, #110 |
+| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | EM ANDAMENTO (código no main; falta a governança parte 2) | #108, #110, #111, #114, #117, #118 |
 
 ## Fila
-Main 18ad4cd (#108).
+Main 2067077 (#117).
 
-1. **RD-0293 no PDF (catalogo-grafico):** opção "a" aprovada (R-20261122-030552-alexandre); PR #109 em revisão, com os ajustes RD-0327 a RD-0330 do corretor.
-2. **Pareceres a gravar:** o do designer-ux da B8 (branch `designer-ux/T-0019-parecer-b8`) e os do corretor (`corretor-redundancias/T-0019-pr99` e `/T-0014-aperto`, com os RD-0289 a RD-0314).
+1. **T-0022, governança parte 2 (PO, pelo Alexandre):** fase A (render.yaml com o serviço de login, placa com CATALOGO_URL e CHAVE_INTERNA, CI com os testes dos serviços e a bateria com login, CLAUDE.md), teste do Alexandre no ar e fase B (o endereço antigo redireciona). Bloco no R-20261122-053256.
+2. **Grafia "BAP AUTO PARTS" no gerador (catalogo-grafico, com simulação):** proposta ao PO (R-20261122-055343), contra a decisão 10 a.
 3. **Fora da fila, para decidir depois:**
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - Portfólio: muda se for gerado de novo, porque agrupa pelo SISTEMA da v27 (catalogo-grafico);
