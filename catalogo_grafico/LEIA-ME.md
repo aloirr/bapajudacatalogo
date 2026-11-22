@@ -34,7 +34,7 @@ Exportado em 20/10/2026 da conversa **AGENTE - CATALOGO BAP** (claude.ai).
 **Requisitos**
 
 - Python 3.10+ com `reportlab`, `pandas`, `openpyxl`, `pillow` e `pymupdf`.
-- Node.js com `pptxgenjs`, só para o PowerPoint.
+- Node.js com `pptxgenjs` (traz o `jszip`, que o `apply_theme.js` usa), só para o PowerPoint.
 
 ```
 pip install reportlab pandas openpyxl pillow pymupdf
@@ -50,9 +50,6 @@ Já incluídas:
 - `CATALOGO_BAP_INTERRUPTORES.xlsx`
 - `CATALOGO_BAP_CUICA_DE_FREIO.xlsx`
 - `Cata_logo_PIVO_-_2026_.pdf`
-
-Não incluída, porque é grande demais:
-- **Fotos dos produtos:** copie a pasta `1 - PMZ\2025\IM PMZ\Regionais - Leandro\bap` para `gerador\entradas\bap\`. São JPGs com o código no nome. Sem ela, os catálogos usam a imagem da linha nos destaques.
 
 Para atualizar o estoque, troque o `ESTOQUE_BAP.xlsx` pelo arquivo do dia, com as mesmas colunas.
 
@@ -79,7 +76,7 @@ Para atualizar o estoque, troque o `ESTOQUE_BAP.xlsx` pelo arquivo do dia, com a
   - `moto.py`: monta a seção Linha Moto e corrige o fluido de freio.
 - **Geração dos arquivos:**
   - `digital2.py`: desenho e montagem do catálogo digital.
-  - `print_cat.py`: desenho e montagem do catálogo impresso (CMYK, sangria de 3 mm, fotos da pasta `bap`).
+  - `print_cat.py`: desenho e montagem do catálogo impresso (CMYK, sangria de 3 mm).
 - **Dados de apoio:**
   - `digital_data.json`: dados de todos os itens do catálogo (aplicações completas e equivalências), extraídos do catálogo digital de 13/10.
     - É entrada fixa: a aplicação dos itens que já estavam no catálogo vem daqui, não da base. Correção da base em item antigo é feita também aqui (T-0019).
@@ -88,5 +85,5 @@ Para atualizar o estoque, troque o `ESTOQUE_BAP.xlsx` pelo arquivo do dia, com a
 
 **Observações**
 
-- **Tema de cores do PowerPoint:** o `apres_ppt.js` aplica o tema "BAP" só se existir um `apply_theme.js` na pasta. Sem ele, o arquivo sai igual, mas as cores não ficam editáveis pelo tema.
+- **Tema de cores do PowerPoint:** o `apres_ppt.js` grava o tema "BAP" com o `apply_theme.js`. Sem ele, as cores dos slides sairiam as do tema "Office" (azul, laranja, amarelo); por isso o script para com erro se o `apply_theme.js` faltar.
 - **Nomes de arquivo:** os scripts usam caminhos relativos à pasta `gerador/`. Não mude os nomes das subpastas.

@@ -46,7 +46,7 @@ class PDoc(D2.Doc):
     def __init__(self, path):
         from reportlab.pdfgen import canvas
         self.c = canvas.Canvas(path, pagesize=((W + 2 * BPX) * S, (H + 2 * BPX) * S), initialFontName='PR')
-        self.c.setTitle('Catálogo BAP 2026 — Impressão A4 (uso interno)'); self.c.setAuthor('BAP Auto Parts')
+        self.c.setTitle('Catálogo BAP 2026 — Impressão A4 (uso interno)'); self.c.setAuthor('BAP AUTOPARTS')
 
     def X(self, x): return (x + BPX) * S
     def Y(self, y): return (H - y + BPX) * S
@@ -421,10 +421,10 @@ def capa(dc):
 
 
 def por_que(dc, pg):
-    topbar(dc, 'BAP Auto Parts')
-    hero(dc, 'BAP AUTO PARTS', 'Por que BAP?', 'Componentes de qualidade, com segurança e preço acessível.')
+    topbar(dc, 'BAP AUTOPARTS')
+    hero(dc, 'BAP AUTOPARTS', 'Por que BAP?', 'Componentes de qualidade, com segurança e preço acessível.')
     y = TOP + HERO + 36
-    blocos = [('Quem somos', 'A BAP Auto Parts é uma empresa brasileira fundada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. O portfólio cobre as linhas leve, pesada e moto, da suspensão à parte elétrica.'),
+    blocos = [('Quem somos', 'A BAP AUTOPARTS é uma empresa brasileira fundada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. O portfólio cobre as linhas leve, pesada e moto, da suspensão à parte elétrica.'),
               ('Por que vender BAP', 'Portfólio robusto para suspensão, direção, freio, arrefecimento, motor, transmissão, elétrica e acessórios. Produtos com padrão OEM, testados para máxima performance, e preço competitivo sem abrir mão da qualidade.'),
               ('Garantia Expressa BAP', 'Ativação simples e direta, sem burocracia: o cliente aciona a garantia direto com a fábrica pelo SAC BAP. Prazos conforme o certificado da embalagem, sem intermediários.')]
     for t, txt in blocos:
