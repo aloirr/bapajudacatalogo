@@ -11,7 +11,7 @@ O repositório `aloirr/bapajudacatalogo` tem um time de 11 agentes do Claude Cod
 | `catalogo-dados` | Base unificada: versões, `LOG_CORRECOES`, taxonomia, aplicações, referências, fotos que faltam. | `dados/` |
 | `catalogo-grafico` | PDFs: impresso A4, digital, Linha Moto, portfólio, Kit Filtros. Sempre simula antes. | `catalogo_grafico/` |
 | `web-site` | Catálogo online estático e o gerador do JSON. Guarda a `FICHA` e a `TRAVA`. | `site/`, `scripts/gerar_site.py`, `requirements.txt`, `docs/DADOS_DO_SITE.md` |
-| `integracao-placas` | Consulta por placa (fase 3): serviço no Render, chave só em variável de ambiente, LGPD. | `servicos/placas/`, `docs/placas/` |
+| `integracao-placas` | Consulta por placa (fase 3): serviço no Render, chave só em variável de ambiente, LGPD. | `servicos/placas/`, `servicos/login/`, `docs/placas/` |
 | `testes` | `gerar_site.py`, testes de busca, prints 1366 px e 390 px, 0 palavra interna. | `testes/`, `scripts/testar_site.*` |
 | `designer-ux` | Visual e experiência do site e do PDF: tokens, componentes, especificação de tela e página, revisão de UX (🔴/🟡/🟢) de toda mudança de tela, PDF ou marca, antes do `revisor-codigo`. Só especifica e aponta; não edita `site/` nem `catalogo_grafico/`. | `docs/ux/` |
 | `design-de-marca` | Guardião da marca BAP (logo, verde, Poppins, tom de voz) no site e nos PDFs. Em toda mudança de tela, PDF ou marca, junto com o `designer-ux` e antes do `revisor-codigo`. Só lê e aponta; o manual só tem o que o Alexandre aprovou. | `docs/marca/` |

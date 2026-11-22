@@ -25,12 +25,12 @@ Atualizado em 21/11/2026 23:00 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | CONCLUÍDA | #40, #47, #51, #61, #64, #70, #77, #84, #90, #94, #99, #100 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 | [T-0021](tarefas/T-0021.md) | Governança: .claude/worktrees/ no .gitignore e commit do designer-ux e do design-de-marca nas suas pastas | alexandre | po, gerente-projetos | CONCLUÍDA | #105 |
-| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | PLANEJADA (desenho e simulação das telas em andamento) | — |
+| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | EM ANDAMENTO (desenho e telas aprovados; serviço e telas em código) | #108, #110 |
 
 ## Fila
-Main 3dd4850 (#107).
+Main 18ad4cd (#108).
 
-1. **RD-0293 no PDF (catalogo-grafico):** a composição do kit repetida nas embreagens pesadas vem do `detalhe.essencial` do gerador (A4 p.20, Digital p.112-113, EMB1047071R incluído). Simulação ao Alexandre antes do PR.
+1. **RD-0293 no PDF (catalogo-grafico):** opção "a" aprovada (R-20261122-030552-alexandre); PR #109 em revisão, com os ajustes RD-0327 a RD-0330 do corretor.
 2. **Pareceres a gravar:** o do designer-ux da B8 (branch `designer-ux/T-0019-parecer-b8`) e os do corretor (`corretor-redundancias/T-0019-pr99` e `/T-0014-aperto`, com os RD-0289 a RD-0314).
 3. **Fora da fila, para decidir depois:**
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
