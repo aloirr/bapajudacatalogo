@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 07:01 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 07:04 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -39,7 +39,7 @@ Main 50cc2a2 (#146).
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - Portfólio: a entrega tem 82 páginas, mas o gerador dá mais com a base de hoje, porque agrupa pelo SISTEMA da v27; gerar de novo é decisão do Alexandre (catalogo-grafico, R-20261122-100047);
    - MC-0011 e MC-0012 (fonte do .pptx; tamanho do logo e assinatura, com a etiqueta das apresentações e o topo do site): decisão do Alexandre (T-0025);
-   - RD-0510, RD-0511 e MC-0015 ("1 itens"; pneus e câmaras de moto em 2 lugares; "7 famílias" na capa da Linha Moto): decisão do Alexandre, com simulação (T-0026);
+   - RD-0510, RD-0511, MC-0015 e o vazio da pág. 2 do A4 ("1 itens"; pneus e câmaras de moto em 2 lugares; "7 famílias" na capa da Linha Moto; nota 5.1 do UX): decisão do Alexandre, com simulação (T-0026);
    - CIL8546: o "—" no ano do site vem de o site ler o texto (web-site);
    - "(coluna Leve também)" aparece com e sem aspas nos PDFs de pneus;
    - EQUIVALE A ainda pode começar uma linha com "·";
