@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 07:10 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 07:12 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -35,7 +35,7 @@ Atualizado em 22/11/2026 07:10 (Manaus). Como usar: `.coord/README.md`. Uma linh
 ## Fila
 Main ab9b8f0 (#149).
 
-1. **T-0027, "1 itens" (catalogo-grafico): simulação, decidida pelo PO.**
+1. **T-0027, "1 itens" (simulação decidida pelo PO):** R-20261122-110411.
 2. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
 3. **Fora da fila, para decidir depois:**
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
