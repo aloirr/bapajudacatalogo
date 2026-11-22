@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 02:41 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 03:02 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -25,14 +25,14 @@ Atualizado em 22/11/2026 02:41 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | CONCLUÍDA | #40, #47, #51, #61, #64, #70, #77, #84, #90, #94, #99, #100 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 | [T-0021](tarefas/T-0021.md) | Governança: .claude/worktrees/ no .gitignore e commit do designer-ux e do design-de-marca nas suas pastas | alexandre | po, gerente-projetos | CONCLUÍDA | #105 |
-| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | EM ANDAMENTO (código no main) | #108, #110, #111, #114, #117, #118, #119, #120 |
-| [T-0023](tarefas/T-0023.md) | Grafia "BAP AUTOPARTS" no gerador do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | NOVA | — |
+| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | EM ANDAMENTO (código no main) | #108, #110, #111, #114, #117, #118, #119, #120, #121, #123 |
+| [T-0023](tarefas/T-0023.md) | Grafia "BAP AUTOPARTS" no gerador do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | NOVA | #122 |
 
 ## Fila
-Main 641b5d9 (#123).
+Main 582c38b (#120).
 
-1. **T-0022, governança parte 2 (PO, pelo Alexandre):** fase A no PR #120 (revisor e corretor, R-20261122-055354); depois o teste do Alexandre no ar e a fase B (redirecionamento, placa e CLAUDE.md).
-2. **T-0023, grafia "BAP AUTOPARTS" no gerador (catalogo-grafico, com simulação):** depois da fase A da T-0022 (R-20261122-061514).
+1. **T-0022, governança parte 2 (PO, pelo Alexandre):** o teste do Alexandre no ar (passos do painel no R-20261122-070143) e depois a fase B (redirecionamento, placa e CLAUDE.md).
+2. **T-0023, grafia "BAP AUTOPARTS" no gerador (catalogo-grafico, com simulação):** pode começar: a fase A da T-0022 está no main (R-20261122-061514).
 3. **Fora da fila, para decidir depois:**
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - Portfólio: muda se for gerado de novo, porque agrupa pelo SISTEMA da v27 (catalogo-grafico);
