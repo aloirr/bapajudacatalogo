@@ -11,7 +11,8 @@
 
 Enquanto o manual estiver "a aprovar", nenhum achado daqui segura a tarefa. Não há nada contra as regras do repositório:
 não aparece preço nem estoque; não há logo, cor nem tipografia de montadora ou de concorrente; as logos de cliente são
-fictícias e aparecem só na sessão do próprio cliente e na lista do admin, como o Alexandre pediu (resposta 4 b de 21/11 ~22:50).
+fictícias e aparecem só na sessão do próprio cliente e na lista do admin, como o Alexandre pediu
+(resposta 4 b de 21/11 ~22:50).
 
 ## O que está certo (manter)
 
@@ -86,10 +87,10 @@ Correção no `sim.css` (e depois no código):
 Depois da correção, refazer os prints `04` a `07` e `10` a `16`, que mostram o cabeçalho com o botão do canto.
 
 **Pergunta para o Alexandre (pelo `po`), sem segurar a tarefa:** sem logo, o botão do canto mostra o logo inteiro da BAP
-(resposta 4 b de 21/11 ~22:50). Fica com cerca de 32 px de altura, ou 24 px com a correção acima, e aparece no mesmo cabeçalho do logo
-principal. A assinatura "componentes de qualidade" não dá para ler nesse tamanho. Ele aceita assim, ou prefere, só nesse
-uso pequeno, o símbolo do "b" no círculo verde? [SUPOSIÇÃO] Não há versão só do símbolo no repositório, nem vetor do logo.
-Cortar o PNG seria alterar o logo, então isso precisa do arquivo e do "aprovado" dele.
+(resposta 4 b de 21/11 ~22:50). Fica com cerca de 32 px de altura, ou 24 px com a correção acima, e aparece no mesmo
+cabeçalho do logo principal. A assinatura "componentes de qualidade" não dá para ler nesse tamanho. Ele aceita assim, ou
+prefere, só nesse uso pequeno, o símbolo do "b" no círculo verde? [SUPOSIÇÃO] Não há versão só do símbolo no
+repositório, nem vetor do logo. Cortar o PNG seria alterar o logo, então isso precisa do arquivo e do "aprovado" dele.
 
 ### MC-0003 · O logo da BAP fica cinza na linha desativada
 
@@ -145,9 +146,7 @@ Nas telas que só o admin vê, "administrador" pode ficar ("Só o administrador 
   oficial é "BAP AUTOPARTS". Fica como pergunta ao Alexandre no manual "a aprovar". Não mexer no rodapé dentro da
   T-0022.
 
-## Reteste
-
-### Reteste · 21/11/2026 23:11 (Manaus) · **LIBERADO**
+## Reteste · 21/11/2026 23:11 (Manaus) · **LIBERADO**
 
 Conferido nos 34 prints novos (refeitos às 23:09) e no `sim.css` e nos HTML da simulação:
 
