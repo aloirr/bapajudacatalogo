@@ -140,9 +140,9 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0291 | baixa | código | catalogo_grafico/gerador/oferta.py:189 e :206 | o conjunto `cods` montado no `_por_sistema` e de novo no `_so_codigo`, na mesma rodada | T-0019 | catalogo-grafico | CORRIGIDO (b002d22) |
 | RD-0292 | baixa | código (comentário) | catalogo_grafico/gerador/oferta.py:11 e :67-72 | o "Leve também" pelas regras do site dito no import, no bloco de baixo e em mais 3 lugares; o bloco repete o docstring do `sistemas_de` | T-0019 | catalogo-grafico | CORRIGIDO (b002d22) |
 | RD-0293 | média | texto (PDF) | A4 p. 20 e Digital p. 112-113, embreagem pesada (ex.: EMB3400700639R) | "plato/disco/mancal · c/ platô, disco, rol. e mancal": a composição do kit 2 vezes (anterior ao PR #99, igual no main 3d6a730) | T-0019 | catalogo-grafico | ABERTO (Simule; dispensa do po para a v27, R-20261122-005755-po) |
-| RD-0298 | média | código | catalogo_grafico/gerador/quebra.py:16-17, varredura_quebras.py:13-14 e digital2.py:97 | `NBSP` definido 3 vezes e `SEP` 2 vezes, com listas diferentes (`,/;)·` no quebra, `,/-–);·\|+` na varredura) | T-0019 | catalogo-grafico | ABERTO |
-| RD-0299 | média | código | catalogo_grafico/gerador/print_cat.py:164 e :301; LEIA_GERADOR.md:18 | `REF_MAIS = 0`, sobra do teste com 12, soma 0 à coluna; a história do teste no comentário e no LEIA | T-0019 | catalogo-grafico | ABERTO |
-| RD-0300 | baixa | doc | catalogo_grafico/gerador/LEIA_GERADOR.md:18 e :52 | o comando do `varredura_quebras.py` no item do B8 e na tabela de comandos | T-0019 | catalogo-grafico | ABERTO |
+| RD-0298 | média | código | catalogo_grafico/gerador/quebra.py:16-17, varredura_quebras.py:13-14 e digital2.py:97 | `NBSP` definido 3 vezes e `SEP` 2 vezes, com listas diferentes (`,/;)·` no quebra, `,/-–);·\|+` na varredura) | T-0019 | catalogo-grafico | CORRIGIDO (dbbef37) |
+| RD-0299 | média | código | catalogo_grafico/gerador/print_cat.py:164 e :301; LEIA_GERADOR.md:18 | `REF_MAIS = 0`, sobra do teste com 12, soma 0 à coluna; a história do teste no comentário e no LEIA | T-0019 | catalogo-grafico | CORRIGIDO (dbbef37) |
+| RD-0300 | baixa | doc | catalogo_grafico/gerador/LEIA_GERADOR.md:18 e :52 | o comando do `varredura_quebras.py` no item do B8 e na tabela de comandos | T-0019 | catalogo-grafico | CORRIGIDO (dbbef37) |
 
 ## Notas
 
