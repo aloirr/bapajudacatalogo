@@ -11,4 +11,4 @@ Pedido: **R-20261121-112900-alexandre**, item 4 (o Palio no AMT7500; o texto lit
   - VEICULOS_NOVA;
   - BUSCA: cada registro dos catálogos antigos com o AMT7500 ou uma referência dele.
 - `numeros_v25.json`: as contagens, por arquivo procurado.
-- `simular_v25.py`: o script. Ele só lê e usa o `base_comum`. Uso, na raiz do repositório: `python3 -I dados/simulacoes/T-0017-v25/simular_v25.py dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx dados/simulacoes/T-0017-v25`.
+- `simular_v25.py`: o script. Ele só lê e usa o `base_comum`. Rodou na raiz do repositório, com a v24 (hoje, `dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v24.xlsx`): `python3 -I dados/simulacoes/T-0017-v25/simular_v25.py dados/versoes/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v24.xlsx dados/simulacoes/T-0017-v25`. Fica como registro: desde os PDFs 2027 com a v25 (#90), ele para de propósito, porque o Digital e o `digital_data.json` já têm o Palio do AMT7500.
