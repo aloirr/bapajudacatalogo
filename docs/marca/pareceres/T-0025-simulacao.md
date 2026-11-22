@@ -8,7 +8,7 @@
 | O que foi visto | Simulação do `catalogo-grafico`, feita a partir do main `5c0ddda`: o `LEIA.md` (10 perguntas) e os 16 PNGs em `recados/anexos/T-0025/sim/` do aloirr/bapajudacatalogo-recados (commit `5402d30`), e o diff do gerador (5 arquivos, +17 −16). Conferi também, no main `0994bab`, o `portfolio.py`, o `print_cat.py` (capa, contracapa, `topbar`, `hero`) e o `apres_bemol.py`/`apres_ppt.js` (capa, pág. 2 e pág. 11) |
 | Base de comparação | `docs/marca/manual.md`, "Nome da marca" (decisão 10 a, R-20261122-032433-alexandre); o resto do manual ainda está "a aprovar". Meus achados MC-0011 e MC-0012 (`docs/marca/pareceres/T-0023-entregas.md`) |
 | Regra da rodada | R-20261122-090651-alexandre: com o Alexandre dormindo, o PO decide de forma conservadora, só tirar repetição, sem mudar a marca |
-| Parecer | **LIBERADO** para o PO decidir. Uma divergência com a recomendação do `catalogo-grafico`: na pergunta 1 (RD-0428), recomendo **b) fica como está** (MC-0014). Nas perguntas 2 a 7, concordo com as recomendações |
+| Parecer | Entrega final (PR #141, head `a00b55d`): **LIBERADO**, em 22/11 06:00 (seção "Entrega final"). Simulação: **LIBERADO** para o PO decidir. Uma divergência com a recomendação do `catalogo-grafico`: na pergunta 1 (RD-0428), recomendo **b) fica como está** (MC-0014). Nas perguntas 2 a 7, concordo com as recomendações |
 
 Nada contra as regras do repositório: sem preço e sem estoque ("preço acessível" e "preço competitivo" são texto
 institucional, sem valor, e já estavam no "antes"); sem logo, símbolo ou cor de terceiros. Nenhuma cor, fonte ou logo
@@ -104,7 +104,7 @@ O RD-0431 (conteúdo num arquivo só) e o RD-0432 (cópias antigas do gerador) n
 
 | ID | Onde | Tipo | Fere | Gravidade | Correção | Dono | Situação |
 |---|---|---|---|---|---|---|---|
-| MC-0014 | Lubrificantes PDF e .pptx, cabeçalho das págs./slides 2 a 10 (`apres_bemol.py:67`, `apres_ppt.js:20`), comparado com o Portfólio (`portfolio.py:69`) | aplicação | manual a aprovar (mesma identidade em todos os materiais) e a regra da rodada (R-20261122-090651-alexandre) | baixa (a marca continua reconhecível; o nome completo some das págs. 3 a 10) | Nesta rodada: **manter** a etiqueta "BAP AUTOPARTS" (pergunta 1, opção b). O RD-0428 vai ao Alexandre junto com o MC-0012: cabeçalho das duas apresentações com o logo sozinho ou com o símbolo + "BAP AUTOPARTS". Se o PO escolher a), registrar que Lubrificantes e Portfólio ficam diferentes até a decisão | catalogo-grafico (depois da decisão); pergunta pelo `po` | ABERTO |
+| MC-0014 | Lubrificantes PDF e .pptx, cabeçalho das págs./slides 2 a 10 (`apres_bemol.py:67`, `apres_ppt.js:20`), comparado com o Portfólio (`portfolio.py:69`) | aplicação | manual a aprovar (mesma identidade em todos os materiais) e a regra da rodada (R-20261122-090651-alexandre) | baixa (a marca continua reconhecível; o nome completo some das págs. 3 a 10) | Nesta rodada: **manter** a etiqueta "BAP AUTOPARTS" (pergunta 1, opção b). O RD-0428 vai ao Alexandre junto com o MC-0012: cabeçalho das duas apresentações com o logo sozinho ou com o símbolo + "BAP AUTOPARTS". Se o PO escolher a), registrar que Lubrificantes e Portfólio ficam diferentes até a decisão | catalogo-grafico (depois da decisão); pergunta pelo `po` | FECHADO em 22/11 06:00: o PO escolheu 1b (R-20261122-095019-po) e a entrega final mantém a etiqueta; a pergunta do cabeçalho segue com o MC-0012 |
 | MC-0011 | (T-0023) | tipografia | manual a aprovar | baixa | Sem mudança; vai ao Alexandre | design-de-marca, depois catalogo-grafico | ABERTO, como na T-0023 |
 | MC-0012 | (T-0023) | logo | manual a aprovar | baixa | Sem mudança; vai ao Alexandre, com o RD-0428 | design-de-marca, depois catalogo-grafico e web-site | ABERTO, como na T-0023 |
 
@@ -126,3 +126,40 @@ O RD-0431 (conteúdo num arquivo só) e o RD-0432 (cópias antigas do gerador) n
 Depois da decisão do PO e da aplicação: conferir as entregas novas (A4 pág. 2; Lubrificantes PDF págs. 2, 3 e 11 e
 .pptx slides 2, 3 e 11; metadados da Linha Moto) contra esta simulação, com a grafia e o cabeçalho escolhidos na
 pergunta 1.
+
+## Entrega final (PR #141)
+
+| Campo | Valor |
+|---|---|
+| Data | 22/11/2026 06:00 (Manaus) |
+| Decisão do PO | R-20261122-095019-po: 1b 2a 3a 4a 5b 6b 7b 8a 9a 10a |
+| O que foi visto | O PR #141 (branch `catalogo-grafico/T-0025-entregas`, head `a00b55d7cfb5d06017bd155b3eeaabc4a4fb585c`): o diff do gerador e o `apres_conteudo.json`; as 4 entregas que mudam (Lubrificantes PDF e .pptx, A4 e Linha Moto), comparadas com as do main `0994bab` (páginas renderizadas, texto com `pdftotext`, metadados com `pdfinfo` e o XML do .pptx); as pranchas finais em `recados/anexos/T-0025/final/` do aloirr/bapajudacatalogo-recados (commit `13207b0`): `Lubrificantes_pag02_PDF_e_PPTX_antes_depois.png` e `A4_pag02_antes_depois.png` |
+| Parecer | **LIBERADO**. Nenhum achado novo |
+
+- **Etiqueta "BAP AUTOPARTS" (1b):** fica em todo o cabeçalho de Lubrificantes.
+  - PDF: o `header` escreve `K['marca']` (`"BAP AUTOPARTS"` no `apres_conteudo.json`) na mesma posição, no mesmo corpo
+    (8,5 pt) e na mesma cor (`gdark`). O nome aparece nas págs. 2 a 10 (na pág. 2, duas vezes: etiqueta e título) e na
+    pág. 11 (contato), como antes.
+  - .pptx: o mestre `BAP_CONTEUDO` (`slideLayout3.xml`) é igual, byte a byte, ao do main, com a etiqueta, e os slides 2 a
+    10 usam esse layout.
+  - O cabeçalho continua igual ao do Portfólio (`portfolio.py:69`), que não mudou.
+- **Grafia:** "BAP AUTOPARTS" certa em tudo. Não há "BAP AUTO PARTS" nem "BAP Autoparts" no diff nem no texto dos 3
+  PDFs. No .pptx, o nome aparece nos mesmos lugares de antes (mestre, slides 2 e 11, autor).
+- **Metadados:** a Linha Moto tem agora o título `Catálogo BAP 2027 — Linha Moto (uso interno)` (antes, "— Completo (uso
+  interno)"). O A4 (`— Impressão A4 (uso interno)`) e Lubrificantes não mudaram. O autor continua "BAP AUTOPARTS" nos 3
+  PDFs e no .pptx.
+- **Nada de marca mudou fora do pedido:**
+  - Lubrificantes PDF: só a pág. 2 muda, e só o cartão do SAC sai (3 cartões na mesma largura). As págs. 1 e 3 a 11
+    são iguais às do main, pixel a pixel.
+  - Lubrificantes .pptx: só o `slide2.xml` muda (sai o cartão do SAC). Os outros slides, o tema, os mestres, os layouts e
+    as imagens são iguais aos do main. A fonte continua Arial (MC-0011 em aberto, como decidido em 6b).
+  - A4: só a pág. 2 muda, como na simulação (barra da direita vazia, sem subtítulo, sem o cartão do SAC e sem a linha
+    dos prazos). As outras 55 páginas são iguais, pixel a pixel. Na pág. 2, a marca fica no logo da barra, no
+    sobretítulo "BAP AUTOPARTS", no título "Por que BAP?" e no "Quem somos".
+  - Linha Moto: as 17 páginas são iguais, pixel a pixel; só muda o título dos metadados.
+  - Nenhuma cor, fonte, logo ou tamanho de logo mudou. O Portfólio, o Completo Digital e o Kit Filtros não mudam no PR.
+- **Regras do repositório:** sem preço e sem estoque; sem marca de terceiros. As frases de Lubrificantes passaram para
+  o `apres_conteudo.json` sem mudar uma palavra.
+- **Achados:** o MC-0014 está fechado (a etiqueta ficou). O MC-0011 e o MC-0012 seguem abertos para o Alexandre, pelo
+  manual "a aprovar". A pergunta sobre o cabeçalho das apresentações (logo sozinho, ou símbolo + "BAP AUTOPARTS") vai
+  junto com o MC-0012.
