@@ -6,7 +6,7 @@
    O que faz:
      - sobe o serviço de verdade (node servicos/login/server.mjs) numa porta livre, com uma PASTA_DADOS temporária e
        valores claramente falsos, gerados aqui a cada rodada (nunca impressos, nunca gravados);
-     - sem login, num passe só contra o site/ e os arquivos reais: a página, o produtos.json, uma foto, os 7 arquivos, as páginas
+     - sem login, num passe só contra o site/ e os PDFs reais: a página, o produtos.json, uma foto, os PDFs, as páginas
        do admin e a API respondem 401 ou levam ao /entrar; o /entrar abre sem dado do catálogo;
      - entra como admin pela tela, faz a troca obrigatória, cria pela tela "Criar usuários" um usuário comum e confere a
        etiqueta "Falta trocar a senha inicial" (some depois que ele troca);
@@ -36,18 +36,9 @@ const SESSAO_H = 5;
 const falsa = (rot) => `${rot}-falsa-de-teste-${crypto.randomBytes(6).toString("hex")}`;
 const FORA = "example.invalid"; // o "outro site" dos testes da volta (nunca é chamado: o pedido é barrado)
 const ETIQUETA = "Falta trocar a senha inicial";
-// Catálogos e materiais (T-0024): os 7 arquivos da lista fixa do serviço, na ordem do GET /api/pdfs, com o arquivo de
-// catalogo_grafico/entregas/ (o de ano mais alto nos 3 catálogos) e o Content-Type esperado no download
-const PDF = "application/pdf", PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-const ARQS = [
-  ["completo-digital", /^Catalogo_BAP_(\d{4})_Completo_Digital\.pdf$/, PDF],
-  ["a4-grafica", /^Catalogo_BAP_(\d{4})_A4_grafica\.pdf$/, PDF],
-  ["linha-moto", /^Catalogo_BAP_(\d{4})_Linha_Moto\.pdf$/, PDF],
-  ["portfolio", /^Portfolio_Produtos_BAP_AUTOPARTS\.pdf$/, PDF],
-  ["lubrificantes-pdf", /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pdf$/, PDF],
-  ["lubrificantes-pptx", /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pptx$/, PPTX],
-  ["kit-filtros", /^Kit_Filtros_BAP\.pdf$/, PDF],
-];
+// Catálogos e materiais (T-0024): os 7 ids da lista fixa do serviço; aqui, só o link de cada um montado na tela (os ids
+// do GET /api/pdfs, o Content-Type e o arquivo de entregas/ são dos testes do serviço, servicos/login/login.test.mjs)
+const IDS = ["completo-digital", "a4-grafica", "linha-moto", "portfolio", "lubrificantes-pdf", "lubrificantes-pptx", "kit-filtros"];
 // na tela: os 2 dos Lubrificantes (o mesmo "par") viram 1 cartão; 6 cartões em 2 grupos
 const N_CARTOES = 6, N_GRUPOS = 2;
 
@@ -147,12 +138,12 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
   const { COD, FOTO } = casos;
   const foto = (prods.find((p) => p.c === FOTO) || {}).i;
 
-  // ---- 1. sem login: um passe, sem cookie, contra o site/ e os arquivos reais ----
+  // ---- 1. sem login: um passe, sem cookie, contra o site/ e os PDFs reais ----
   const PAG = { Accept: "text/html,application/xhtml+xml,*/*;q=0.8" }, OUTRO = { Accept: "*/*" };
   const semLogin = [
     ["/", PAG], ["/index.html", PAG], ["/app.js", OUTRO], ["/conta.js", OUTRO], ["/data/produtos.json", OUTRO],
     ["/data/produtos.json", PAG], ...(foto ? [["/img/" + encodeURIComponent(foto), OUTRO], ["/img/" + encodeURIComponent(foto), PAG]] : []),
-    ...ARQS.map(([id]) => ["/admin/pdfs/baixar/" + id, OUTRO]), ["/admin/pdfs/baixar/completo-digital", PAG],
+    ["/admin/pdfs/baixar/completo-digital", OUTRO], ["/admin/pdfs/baixar/a4-grafica", OUTRO], ["/admin/pdfs/baixar/completo-digital", PAG],
     ["/admin/usuarios", PAG], ["/admin/pdfs", PAG], ["/admin/usuarios/usuarios.js", OUTRO], ["/trocar-senha", PAG],
     ["/api/eu", OUTRO], ["/api/usuarios", OUTRO], ["/api/pdfs", OUTRO], ["/api/eu/logo", OUTRO], ["/interno/codigos", OUTRO],
   ];
@@ -170,7 +161,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
     if (r.status !== 200 || !r.corpo.includes("form-entrar")) falha("l-sem", N_SEM, "entrar", `/entrar respondeu ${r.status} sem o formulário`);
     if (r.corpo.includes(COD)) falha("l-sem", N_SEM, "entrar-dado", "/entrar tem dado do catálogo");
   }
-  detalhe("l-sem", N_SEM, `${semLogin.length} pedidos sem cookie (página, app.js, produtos.json, foto ${foto || "?"}, 7 arquivos, admin, API): 401 ou 302 /entrar; /entrar abre sem dado do catálogo`);
+  detalhe("l-sem", N_SEM, `${semLogin.length} pedidos sem cookie (página, app.js, produtos.json, foto ${foto || "?"}, 2 PDFs, admin, API): 401 ou 302 /entrar; /entrar abre sem dado do catálogo`);
 
   // ---- navegador ----
   const { createRequire } = await import("node:module");
@@ -307,8 +298,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
       await print(page, "criar-usuarios", 1366);
       c.conferir("Criar usuários");
 
-      // Catálogos e materiais: GET /api/pdfs com os 7 ids, na ordem; na tela, 6 cartões em 2 grupos e os 7 links de baixar;
-      // cada download responde o arquivo mais novo de catalogo_grafico/entregas/, com o Content-Type do tipo
+      // Catálogos e materiais: na tela, 6 cartões em 2 grupos e os 7 links de baixar
       await page.goto(base + "admin/pdfs", { waitUntil: "networkidle" });
       await page.waitForSelector("#pdfs article.pdf", { timeout: 10000 }).catch(() => {});
       const tela = await page.evaluate(() => ({
@@ -318,31 +308,13 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
         cartoes: document.querySelectorAll("#pdfs section.pdf-grupo article.pdf").length,
         soltos: document.querySelectorAll("#pdfs article.pdf").length,
       }));
-      const ids = ARQS.map(([id]) => id);
-      {
-        const r = await c.ctx.request.get(base + "api/pdfs");
-        const lista = r.status() === 200 ? await r.json().catch(() => null) : null;
-        const vieram = Array.isArray(lista) ? lista.map((p) => p && p.id) : null;
-        if (!vieram || vieram.join(",") !== ids.join(","))
-          falha("l-admin", N_ADMIN, "api-pdfs", `GET /api/pdfs: ${r.status()} com os ids ${vieram ? vieram.join(", ") : "?"} (esperados os 7, na ordem: ${ids.join(", ")})`);
-      }
       if (tela.grupos !== N_GRUPOS || tela.h2.length !== N_GRUPOS)
         falha("l-admin", N_ADMIN, "pdf-grupos", `Catálogos e materiais com ${tela.grupos} section.pdf-grupo e ${tela.h2.length} h2 (${tela.h2.join(" | ")}); esperados ${N_GRUPOS}`);
       if (tela.cartoes !== N_CARTOES || tela.soltos !== N_CARTOES)
         falha("l-admin", N_ADMIN, "pdf-cartoes", `Catálogos e materiais com ${tela.cartoes} cartões nos grupos (${tela.soltos} no total); esperados ${N_CARTOES}`);
-      const ent = path.join(raiz, "catalogo_grafico", "entregas");
-      const arqs = fs.existsSync(ent) ? fs.readdirSync(ent) : [];
-      for (const [id, re, mime] of ARQS) {
+      for (const id of IDS) {
         const href = "/admin/pdfs/baixar/" + id;
-        if (!tela.links.includes(href)) { falha("l-admin", N_ADMIN, "pdf-link:" + id, `Catálogos e materiais sem o link ${href}`); continue; }
-        const ano = (f) => Number(f.match(re)[1] || 0);
-        const novo = arqs.filter((f) => re.test(f)).sort((a, b) => ano(b) - ano(a))[0];
-        const r = await c.ctx.request.fetch(base + href.slice(1), { method: "HEAD", maxRedirects: 0 });
-        const cd = r.headers()["content-disposition"] || "", ct = r.headers()["content-type"] || "";
-        if (r.status() !== 200 || ct.split(";")[0].trim() !== mime || !/^attachment/.test(cd))
-          falha("l-admin", N_ADMIN, "pdf:" + id, `${href}: ${r.status()} ${ct} ${cd} (esperado 200, ${mime}, attachment)`);
-        else if (!novo || !cd.includes(novo) || Number(r.headers()["content-length"]) !== fs.statSync(path.join(ent, novo)).size)
-          falha("l-admin", N_ADMIN, "pdf-arq:" + id, `${href}: entrega "${cd}" (${r.headers()["content-length"]} bytes); o mais novo é ${novo || "(nenhum em entregas/)"}`);
+        if (!tela.links.includes(href)) falha("l-admin", N_ADMIN, "pdf-link:" + id, `Catálogos e materiais sem o link ${href}`);
       }
       await a11y(page, "Catálogos e materiais", 1366);
       await print(page, "pdfs", 1366);
@@ -453,7 +425,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
     }
     detalhe("l-link", N_LINK, `#/produto/${COD} antes do login abre o produto depois do login e da troca obrigatória (1366); #/produto/${FOTO} depois do login direto (390)`);
     detalhe("l-comum", N_COMUM, "menu e página sem os itens do admin (1366 e 390); /admin/usuarios e /admin/pdfs 404 sem a tela");
-    detalhe("l-admin", N_ADMIN, "1º acesso → troca obrigatória (sem a senha atual) → catálogo; menu com Criar usuários, Catálogos e materiais, Trocar senha e Sair; usuário criado pela tela; Catálogos e materiais com 7 arquivos (GET /api/pdfs com os 7 ids; 6 cartões em 2 grupos; HEAD 200, application/pdf ou o do PowerPoint, attachment, o arquivo mais novo)");
+    detalhe("l-admin", N_ADMIN, "1º acesso → troca obrigatória (sem a senha atual) → catálogo; menu com Criar usuários, Catálogos e materiais, Trocar senha e Sair; usuário criado pela tela; Catálogos e materiais com os 7 links de baixar, em 6 cartões e 2 grupos");
 
     // ---- 5. volta no navegador: "//", "/\", codificados, outro site, tabulação e quebra de linha não levam para fora ----
     {
