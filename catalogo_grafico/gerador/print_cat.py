@@ -145,7 +145,7 @@ def hero(dc, eyebrow, title, desc, img=None, count=None, lanc=False):
         c.restoreState()
         if count is not None:
             dc.label(x + w - 16, y + h - 12 - 9 - 4 - 26, str(count), 26, 'white', 'PB', 0, 'right')
-            dc.label(x + w - 16, y + h - 12 - 11, 'ITENS', 9, 'white', 'PB', 1.1, 'right')
+            dc.label(x + w - 16, y + h - 12 - 11, D2.plural(count, 'ITEM', 'ITENS'), 9, 'white', 'PB', 1.1, 'right')
 
 
 def section_title(dc, y, s):
@@ -367,7 +367,7 @@ def draw_rows(dc, f, rows, y, cols, widths, ymax):
 def cta_box(dc, f, rest, shown, y_bottom):
     n = len(rest) - shown
     if n > 0:
-        t = f'Mais {n} {"item" if n == 1 else "itens"} desta linha no Catálogo Digital Completo'
+        t = f'Mais {n} {D2.plural(n)} desta linha no Catálogo Digital Completo'
         cnt = collections.Counter()
         for r in rest[shown:]:
             for x, b in r['segs']:
