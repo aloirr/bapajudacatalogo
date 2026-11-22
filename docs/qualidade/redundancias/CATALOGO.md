@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0401**.
+O próximo número livre é o **RD-0412**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -248,8 +248,27 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0398 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
 | RD-0399 | — | — | — | número não usado (reserva de numeração) | — | — | número não usado (reserva de numeração) |
 | RD-0400 | baixa | doc | docs/marca/pareceres/T-0022-simulacao.md:149 | o título "## Reteste" vazio seguido de "### Reteste · …" (vira uma linha só, "## Reteste · 21/11/2026 23:11 (Manaus) · **LIBERADO**") | T-0022 | design-de-marca | CORRIGIDO (1044dbf; 188e720, #116) |
+| RD-0401 | baixa | código (comentário) | render.yaml:42-44 | o comentário do serviço de login repete o `servicos/login/LEIA.md` | T-0022 | alexandre | MANTIDO (explica o "sem rootDir" e o `sync:false` no próprio Blueprint; 582c38b, #120) |
+| RD-0402 | baixa | rotina | .github/workflows/testes.yml:47-48 | o `testar_site.mjs --login` repete o `testarJson` e as buscas do passo sem login | T-0022 | testes; alexandre (`.github`) | MANTIDO (na fase A as duas telas estão no ar; rever na fase B; 582c38b, #120) |
+| RD-0403 | baixa | código | render.yaml:68-69 | `ADMIN_USUARIO=admin` igual ao padrão do `servicos/login/server.mjs:354` | T-0022 | alexandre | MANTIDO (a variável fica visível no painel; 582c38b, #120) |
+| RD-0404 | baixa | tarefa | .coord/tarefas/T-0022.md:9 | o campo Branch repete a Situação | T-0022 | gerente-projetos | CORRIGIDO (b803e58; d900add, #121) |
+| RD-0405 | baixa | tarefa | .coord/tarefas/T-0022.md:5 e .coord/quadro.md:28 | a Situação repete os critérios abertos e a fila | T-0022 | gerente-projetos | CORRIGIDO (b803e58; d900add, #121) |
+| RD-0406 | baixa | tarefa | .coord/quadro.md, linha da T-0023 | "depois da fase A" na Situação e na fila | T-0023 | gerente-projetos | CORRIGIDO (9a65146; 16fbe12, #122) |
+| RD-0407 | baixa | tarefa | .coord/tarefas/T-0023.md, Situação e Registro | "depois da fase A" na Situação e no Registro | T-0023 | gerente-projetos | CORRIGIDO (9a65146; 16fbe12, #122) |
+| RD-0408 | baixa | tarefa | .coord/tarefas/T-0023.md, Registro | o Registro reconta a decisão 10 a | T-0023 | gerente-projetos | CORRIGIDO (9a65146; 16fbe12, #122) |
+| RD-0409 | baixa | código (comentário) | site/app.js:793 e site/entrar/comum.js:26 | o comentário sobre o Chrome 153 nos 2 arquivos | T-0022 | web-site | MANTIDO (641b5d9, #123) |
+| RD-0410 | baixa | código | site/app.js:794-795 e site/entrar/comum.js:26 | a leitura do corpo do 204 em 2 lugares | T-0022 | web-site | MANTIDO (o `BAP.api` não serve ao `/contar`; 641b5d9, #123) |
+| RD-0411 | baixa | tarefa | .coord/tarefas/T-0023.md, Registro | o Registro repete as 3 formas da Especificação | T-0023 | gerente-projetos | CORRIGIDO (a66d915; 16fbe12, #122) |
 
 ## Notas
+
+### T-0022 e T-0023, manhã de 22/11/2026 (PRs #120 a #123)
+- RD-0401 ao RD-0403: parecer do #120 (governança, parte 2, fase A; squash 582c38b). Os 3 ficam MANTIDOS; o RD-0402 é revisto na fase B (redirecionamento do site atual).
+- RD-0404 e RD-0405: corrigidos no b803e58 (head do #121, squash d900add).
+- RD-0406 ao RD-0408 e RD-0411: corrigidos no 9a65146 e no a66d915 (heads do #122, squash 16fbe12).
+- RD-0409 e RD-0410: parecer do #123 (squash 641b5d9). Ficam MANTIDOS.
+- [SUPOSIÇÃO] As linhas citadas são as do parecer; as da `.coord/` mudaram com a correção. Os textos vêm do recado do gerente com os achados já decididos.
+- Relatórios: `T-0022.md`, do §12 ao §14, e `T-0023.md`.
 
 ### T-0022, noite de 21/11 para 22/11/2026 (PRs #110, #111 e #114 a #118)
 - RD-0326 e RD-0331 ao RD-0333: CORRIGIDOS, com o #110 (squash 8efb879) e o #111 (squash f9fcc35) no main.
