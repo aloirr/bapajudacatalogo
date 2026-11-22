@@ -43,7 +43,7 @@ table.us tr.off td { color: var(--texto-2); } /* desativado: o texto apagado; a 
    É a janela do produto (styles.css: dialog.janela, .janela-barra, .janela-corpo; tela cheia no celular), mais estreita
    no computador e com o fundo branco */
 dialog.dlg { background: var(--branco); }
-@media (min-width: 641px) { dialog.dlg { width: min(560px, calc(100vw - 32px)); } }
+@media screen and (min-width: 641px) { dialog.dlg { width: min(560px, calc(100vw - 32px)); } }
 .dlg .janela-barra { gap: 8px; }
 .dlg .janela-barra h2 { font-size: 17px; margin: 0; color: var(--escuro); overflow-wrap: anywhere; }
 .dlg form > p { margin: 0 0 12px; font-size: 14px; } /* o texto solto da janela (a dica do campo fica com a dela) */
@@ -99,5 +99,4 @@ dialog.dlg { background: var(--branco); }
 /* impressão: com uma janela aberta, só ela sai (como a janela do produto); sem janela, a página como está */
 @media print {
   body:has(dialog.dlg[open]) main > div { display: none; }
-  dialog.dlg { width: 100%; max-width: none; }
 }

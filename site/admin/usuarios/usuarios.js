@@ -86,8 +86,6 @@
   $("#app").appendChild(dlg);
   let VOLTA_FOCO = null; // { acao, u }: o botão que abriu a janela recebe o foco de volta
   dlg.addEventListener("close", () => {
-    // regra geral: um aviso que entrou na janela continua à vista depois que ela fecha
-    dlg.querySelectorAll(".toast").forEach((t) => document.body.appendChild(t));
     dlg.innerHTML = ""; // a senha inicial não fica na página
     const b = VOLTA_FOCO && (VOLTA_FOCO.u
       ? lista.querySelector(`[data-acao="${VOLTA_FOCO.acao}"][data-u="${CSS.escape(VOLTA_FOCO.u)}"]`) || lista.querySelector(`[data-u="${CSS.escape(VOLTA_FOCO.u)}"]`)
