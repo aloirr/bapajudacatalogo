@@ -8,7 +8,7 @@
 | O que foi visto | Simulação do `catalogo-grafico`, feita a partir do main `1255bbe`: o `LEIA.md` (6 perguntas), os PNGs e o `textos_paginas.txt` e o `prova_pixel_a_pixel.txt` em `recados/anexos/T-0026/sim/` do aloirr/bapajudacatalogo-recados (commit `9c7608e`). O `T-0026-simulacao.diff` citado no `LEIA.md` não está na pasta; li o diff na worktree do `catalogo-grafico` (base `1255bbe`, sem commit: `print_cat.py`, `digital2.py` e `catalogo_moto.py`). Conferi também, no main `2ac3ec2`, a capa da Linha Moto (`catalogo_moto.py`) e o uso de "linha" e "família" nos 3 geradores |
 | Base de comparação | `docs/marca/manual.md`, "Nome da marca" (decisão 10 a, R-20261122-032433-alexandre); o resto do manual ainda está "a aprovar". Meu parecer da T-0025 (`docs/marca/pareceres/T-0025-simulacao.md`), que liberou o sobretítulo "BAP AUTOPARTS" da pág. 2 do A4 |
 | Regra da rodada | R-20261122-102147-po, pela delegação R-20261122-090651-alexandre: só tirar repetição e corrigir o que está errado, sem mudar a marca nem o texto institucional além disso |
-| Parecer | **LIBERADO** para o PO decidir. Concordo com as recomendações do `catalogo-grafico` nas perguntas 1, 3, 4, 5 e 6; a pergunta 2 é de layout (ver o parecer de UX). Um achado novo, baixo e fora desta rodada (MC-0015) |
+| Parecer | Entrega final (PR #146, head `0985964`): **LIBERADO**, em 22/11 06:44 (seção "Entrega final"). Simulação: **LIBERADO** para o PO decidir. Concordo com as recomendações do `catalogo-grafico` nas perguntas 1, 3, 4, 5 e 6; a pergunta 2 é de layout (ver o parecer de UX). Um achado novo, baixo e fora desta rodada (MC-0015) |
 
 Nada contra as regras do repositório: sem preço e sem estoque (o "preço acessível" do "Quem somos" é texto
 institucional, sem valor, e já estava no "antes"; o "preço competitivo" sai); sem logo, símbolo ou cor de terceiros.
@@ -103,7 +103,7 @@ Certa em tudo (decisão 10 a). Conferi no diff e nos PNGs:
 
 | ID | Onde | Tipo | Fere | Gravidade | Correção | Dono | Situação |
 |---|---|---|---|---|---|---|---|
-| MC-0015 | Linha Moto, capa (`catalogo_moto.py:30`, "7 famílias · 75 itens para motocicletas") comparada com o Sumário da Linha Moto e do Completo, o A4 (Sumário, Guia Rápido e cartão "+40 linhas de produtos") | voz | manual a aprovar (mesmo termo para o cliente em todos os materiais) | baixa (a capa se entende; só o termo difere) | Fora desta rodada: levar ao Alexandre, pelo `po`, a troca de "famílias" por "linhas" na capa da Linha Moto ("7 linhas · 75 itens para motocicletas"), com simulação da capa. Entra no manual "a aprovar" como glossário de voz: "linha" = linha de produtos; "leve, pesada e moto" = segmentos | design-de-marca (proposta), depois catalogo-grafico; pergunta pelo `po` | ABERTO, fora da T-0026 |
+| MC-0015 | Linha Moto, capa (`catalogo_moto.py:30`, "7 famílias · 75 itens para motocicletas") comparada com o Sumário da Linha Moto e do Completo, o A4 (Sumário, Guia Rápido e cartão "+40 linhas de produtos") | voz | manual a aprovar (mesmo termo para o cliente em todos os materiais) | baixa (a capa se entende; só o termo difere) | Fora desta rodada: levar ao Alexandre, pelo `po`, a troca de "famílias" por "linhas" na capa da Linha Moto ("7 linhas · 75 itens para motocicletas"), com simulação da capa. Entra no manual "a aprovar" como glossário de voz: "linha" = linha de produtos; "leve, pesada e moto" = segmentos | design-de-marca (proposta), depois catalogo-grafico; pergunta pelo `po` | ABERTO, fora da T-0026; na fila do Alexandre (R-20261122-103726-po) |
 | MC-0011 | (T-0023) | tipografia | manual a aprovar | baixa | Sem mudança; vai ao Alexandre | design-de-marca, depois catalogo-grafico | ABERTO, como na T-0023 (não é afetado por esta tarefa) |
 | MC-0012 | (T-0023) | logo | manual a aprovar | baixa | Sem mudança; vai ao Alexandre | design-de-marca, depois catalogo-grafico e web-site | ABERTO, como na T-0023 (não é afetado por esta tarefa) |
 
@@ -113,3 +113,40 @@ Depois da decisão do PO e da aplicação: conferir no PR as entregas novas (A4 
 Digital e da Linha Moto; a página de Anotações, se o A4 voltar a usá-la) contra esta simulação: o texto escolhido na
 pergunta 1, o sobretítulo escolhido na pergunta 4, o texto escolhido na pergunta 5 e a grafia "BAP AUTOPARTS". Conferir
 também que nenhuma outra página muda e que o `T-0026-simulacao.diff` (ou o diff do PR) bate com o que li na worktree.
+
+## Entrega final (PR #146)
+
+| Campo | Valor |
+|---|---|
+| Data | 22/11/2026 06:44 (Manaus) |
+| Decisão do PO | R-20261122-103726-po: 1a 2a 3a 4a 5a 6a; o MC-0015 foi para a fila do Alexandre |
+| O que foi visto | O PR #146 (branch `catalogo-grafico/T-0026-entregas`, head `09859641823cc6daf50a34eb6de01318d73bc86d`): o diff do gerador (`print_cat.py`, `digital2.py`, `catalogo_moto.py` e `LEIA_GERADOR.md`) e as 3 entregas que mudam (A4, Completo Digital e Linha Moto), comparadas com as do main `2ac3ec2`: as páginas renderizadas, o texto de cada página com `pdftotext` e os metadados com `pdfinfo`. Também vi as pranchas finais e a prova pixel a pixel em `recados/anexos/T-0026/final/` do aloirr/bapajudacatalogo-recados (commit `18412ec`), em especial `A4_pag02_antes_depois.png`, `A4_pag04_antes_depois.png`, `Digital_pag02_sumario_antes_depois.png` e `Moto_pag02_sumario_antes_depois.png` |
+| Parecer | **LIBERADO**. Nenhum achado novo |
+
+- **Texto da pág. 2 do A4 (1a):** igual ao da simulação. O "Quem somos" fica só com a frase-definição, sem nenhuma
+  palavra mudada ("A BAP AUTOPARTS é uma empresa brasileira fundada em 2021 para oferecer componentes automotivos de
+  qualidade, com segurança e preço acessível."). "Por que vender BAP" começa com "Portfólio robusto para as linhas leve,
+  pesada e moto:" e termina em "testados para máxima performance.". "Garantia Expressa BAP" não muda. O vazio maior
+  embaixo (2a) é o da simulação; o espaço: ver o parecer de UX.
+- **Sobretítulo "BAP AUTOPARTS" (4a):** está no Sumário do A4 (pág. 4), no do Completo Digital (pág. 2) e no da Linha
+  Moto (pág. 2), no mesmo estilo do de antes (Poppins Bold, 10 pt, `gdark`, espaçamento 1,6). O A4 entregue continua
+  com 56 páginas e sem página de Anotações; no código, a `anotacoes()` usa o mesmo sobretítulo. A pág. 3 continua com
+  "GUIA RÁPIDO". A barra tem só o logo e o nome do catálogo com o ano, uma vez, e o lado direito fica vazio (3a).
+- **Sumário da Linha Moto (5a):** "Todas as linhas BAP para motocicletas com as aplicações completas. Toque no nome da
+  linha para ir direto à página." Saiu o "CATÁLOGO COMPLETO" da barra. A capa continua com "7 famílias" (MC-0015, na
+  fila do Alexandre). O "1 itens" fica para um RD próprio (6a).
+- **Grafia:** "BAP AUTOPARTS" certa em tudo o que muda. Não há "BAP AUTO PARTS" nem "BAP Autoparts" no diff nem no texto
+  dos 3 PDFs entregues.
+- **Metadados iguais:** fora as datas e o tamanho do arquivo, o `pdfinfo` dos 3 PDFs é igual ao do main. Título:
+  `Catálogo BAP 2027 — Impressão A4 (uso interno)`, `— Completo (uso interno)` e `— Linha Moto (uso interno)`. Autor
+  "BAP AUTOPARTS" nos 3. O número de páginas não muda (56, 311 e 17).
+- **Nada de marca mudou fora do pedido:** comparei as 384 páginas dos 3 PDFs, renderizadas, com as do main. Só mudam a
+  pág. 2 (texto), a pág. 3 (lado direito da barra) e a pág. 4 (barra e sobretítulo) do A4, e a pág. 2 do Completo Digital
+  e da Linha Moto (barra, sobretítulo e, na Linha Moto, o texto). O texto, página a página, muda só nessas mesmas
+  páginas. As caixas da diferença batem com as da prova pixel a pixel do `catalogo-grafico`. O diff dos `.py` é o mesmo
+  que li na simulação. Nenhuma cor, fonte, logo ou tamanho de logo mudou; capas e contracapas iguais. O PR não muda
+  `docs/marca/`.
+- **Regras do repositório:** sem preço e sem estoque (busca por "R$" com número, "estoque" e "saldo" nos 3 PDFs: 0); sem
+  marca de terceiros.
+- **Achados:** nenhum novo. O MC-0015 segue ABERTO, na fila do Alexandre. O MC-0011 e o MC-0012 seguem abertos, como na
+  T-0023.
