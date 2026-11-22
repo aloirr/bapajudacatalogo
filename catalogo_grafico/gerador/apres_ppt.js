@@ -8,7 +8,7 @@ const THEME = { name: 'BAP', headFontFace: 'Arial', bodyFontFace: 'Arial',
 const pres = new pptxgen();
 pres.layout = 'LAYOUT_WIDE';            // 13.333 x 7.5 in
 pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
-pres.title = 'BAP · Lubrificantes e Químicos · Apresentação Comercial'; pres.author = 'BAP Auto Parts';
+pres.title = 'BAP · Lubrificantes e Químicos · Apresentação Comercial'; pres.author = 'BAP AUTOPARTS';
 const C = pres.SchemeColor;
 const P = v => v / 72;                  // coordenadas em pontos (960 x 540) -> polegadas
 
@@ -17,7 +17,7 @@ pres.defineSlideMaster({
   title: 'BAP_CONTEUDO', background: { color: C.background1 },
   objects: [
     { image: { path: I('logo_escuro.png'), x: P(40), y: P(22), w: P(24), h: P(33) } },
-    { text: { text: 'BAP AUTO PARTS', options: { x: P(70), y: P(27), w: 3, h: P(20), fontSize: 9, bold: true, color: C.text2, charSpacing: 2, margin: 0 } } },
+    { text: { text: 'BAP AUTOPARTS', options: { x: P(70), y: P(27), w: 3, h: P(20), fontSize: 9, bold: true, color: C.text2, charSpacing: 2, margin: 0 } } },
     { text: { text: 'www.bapautoparts.com.br  ·  @bapautoparts', options: { x: P(40), y: P(508), w: 6, h: P(18), fontSize: 10, color: C.accent4, margin: 0 } } },
   ],
   slideNumber: { x: P(880), y: P(506), w: P(40), h: P(20), fontSize: 10, bold: true, color: C.text2, align: 'right' },
@@ -63,7 +63,7 @@ box(s, 560, 150, 300, 230, C.background1, { r: 0.3, name: 'moldura_oleos' }); im
 
 // 2 ─ quem somos
 pres.addSection({ title: 'A BAP' });
-s = content('A BAP', 'Quem somos', 'A BAP Auto Parts');
+s = content('A BAP', 'Quem somos', 'A BAP AUTOPARTS');
 txt(s, 'Empresa brasileira criada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. O portfólio vai da suspensão à parte elétrica, passando por lubrificantes e químicos, para as linhas leve, pesada e moto.', 40, 136, 640, 80, { fontSize: 15, color: C.accent4 });
 [['+40', 'linhas de produtos'], ['+6.500', 'itens e aplicações'], ['Nacional', 'presença em todos os estados'], ['SAC', 'garantia direto com a fábrica']].forEach(([a, b], i) => {
   const x = 40 + i * 222; box(s, x, 246, 206, 130, C.text1, { r: 0.2, name: 'numero_' + i });
@@ -205,7 +205,7 @@ txt(s, 'Obrigado!', 58, 170, 420, 70, { fontSize: 50, bold: true, color: C.backg
 txt(s, 'Queremos construir com vocês uma parceria de longo prazo, levando lubrificantes e químicos BAP de qualidade às suas lojas, com apoio próximo do nosso time em cada etapa.', 62, 248, 420, 90, { fontSize: 15, color: 'CFD3CF' });
 box(s, 62, 360, 420, 116, C.accent6, { r: 0.2, name: 'contato' });
 txt(s, 'Alexandre Guerreiro', 84, 376, 380, 22, { fontSize: 17, bold: true, color: C.background1 });
-txt(s, 'Gerente Comercial · BAP Auto Parts', 84, 400, 380, 18, { fontSize: 12, color: 'CFD3CF' });
+txt(s, 'Gerente Comercial · BAP AUTOPARTS', 84, 400, 380, 18, { fontSize: 12, color: 'CFD3CF' });
 txt(s, 'alexandre.guerreiro@bapautoparts.com.br', 84, 424, 380, 18, { fontSize: 13, color: C.accent2 });
 txt(s, '(92) 99250-8980', 84, 446, 380, 18, { fontSize: 13, color: C.accent2 });
 txt(s, 'www.bapautoparts.com.br  ·  @bapautoparts', 62, 496, 400, 18, { fontSize: 11, color: 'CFD3CF' });

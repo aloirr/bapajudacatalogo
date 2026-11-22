@@ -190,7 +190,7 @@ def secao_titulo(txt, sub):
 def construir(saida):
     f, d, linhas = montar()
     doc = Doc(saida, pagesize=A4, leftMargin=MX, rightMargin=MX, topMargin=22 * mm, bottomMargin=18 * mm,
-              title='Kit Filtros BAP', author='BAP Auto Parts')
+              title='Kit Filtros BAP', author='BAP AUTOPARTS')
     fr = Frame(MX, 13 * mm, W - 2 * MX, H - 29 * mm, id='f', leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
     doc.addPageTemplates([PageTemplate('capa', frames=[Frame(0, 0, W, H, id='c')], onPage=capa),
                           PageTemplate('miolo', frames=[fr], onPage=topo)])

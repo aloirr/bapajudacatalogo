@@ -25,7 +25,7 @@ _ic = {}
 class S:
     def __init__(self, path):
         self.c = canvas.Canvas(path, pagesize=(W, H)); self.n = 0
-        self.c.setTitle('BAP · Lubrificantes e Químicos · Apresentação Comercial'); self.c.setAuthor('BAP Auto Parts')
+        self.c.setTitle('BAP · Lubrificantes e Químicos · Apresentação Comercial'); self.c.setAuthor('BAP AUTOPARTS')
 
     def Y(self, y): return H - y
 
@@ -65,7 +65,7 @@ class S:
     def header(self, kicker, title):
         self.rect(0, 0, W, 6, fill='green')
         self.img(LOGO, 40, 26, 22, 30)
-        self.t(72, 34, 'BAP AUTO PARTS', 8.5, 'gdark', 'PB', ls=1.6)
+        self.t(72, 34, 'BAP AUTOPARTS', 8.5, 'gdark', 'PB', ls=1.6)
         self.t(40, 66, kicker.upper(), 10, 'green', 'PB', ls=1.6)
         self.t(38, 84, title, 30, 'ink', 'PB', ls=-.5)
 
@@ -116,7 +116,7 @@ def build(out):
     s.c.showPage(); s.n += 1
 
     # 2 ─ quem é a BAP
-    s.header('Quem somos', 'A BAP Auto Parts')
+    s.header('Quem somos', 'A BAP AUTOPARTS')
     s.p(40, 132, 560, 'Empresa brasileira criada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. '
         'O portfólio vai da suspensão à parte elétrica, passando por lubrificantes e químicos, para as linhas leve, pesada e moto.', 13, 20, 'sec')
     tiles = [('+40', 'linhas de produtos'), ('+6.500', 'itens e aplicações'), ('Nacional', 'presença em todos os estados'), ('SAC', 'garantia direto com a fábrica')]
@@ -254,7 +254,7 @@ def build(out):
     s.p(62, 252, 430, 'Queremos construir com vocês uma parceria de longo prazo, levando lubrificantes e químicos BAP de qualidade às suas lojas, com apoio próximo do nosso time em cada etapa.', 14, 21, 'lgrey')
     s.rect(62, 366, 420, 112, fill='card', r=16); s.rect(62, 366, 5, 112, fill='green')
     s.t(84, 382, 'Alexandre Guerreiro', 16, 'white', 'PB')
-    s.t(84, 404, 'Gerente Comercial · BAP Auto Parts', 10.5, 'lgrey', 'PR')
+    s.t(84, 404, 'Gerente Comercial · BAP AUTOPARTS', 10.5, 'lgrey', 'PR')
     s.t(84, 428, 'alexandre.guerreiro@bapautoparts.com.br', 11.5, 'green2', 'PM')
     s.t(84, 450, '(92) 99250-8980', 11.5, 'green2', 'PM')
     s.t(62, 500, 'www.bapautoparts.com.br  ·  @bapautoparts', 10, 'lgrey', 'PR')

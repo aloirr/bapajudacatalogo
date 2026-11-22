@@ -155,7 +155,7 @@ def lw(s, size, font='PB', ls=0): return pdfmetrics.stringWidth(s, font, size) +
 class Doc:
     def __init__(self, path):
         self.c = canvas.Canvas(path, pagesize=(W * S, H * S), initialFontName='PR')
-        self.c.setTitle(f'Catálogo BAP {ANO} — Completo (uso interno)'); self.c.setAuthor('BAP Auto Parts')
+        self.c.setTitle(f'Catálogo BAP {ANO} — Completo (uso interno)'); self.c.setAuthor('BAP AUTOPARTS')
         self.c.setPageCompression(1)
         self.areas_ref = []
 
