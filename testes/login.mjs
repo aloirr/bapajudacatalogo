@@ -1,4 +1,4 @@
-/* Testes do login do catálogo (T-0022, 22/11/2026). Dono: agente testes.
+/* Testes do login do catálogo (T-0022 e T-0024, 22/11/2026). Dono: agente testes.
    Usado por scripts/testar_site.mjs --login (não roda sozinho). As regras do serviço por HTTP (sessão, origem, rotas
    do admin, volta no servidor) são dos testes do próprio serviço (servicos/login/*.test.mjs); aqui fica o que só se vê
    com o serviço de verdade, o site/ real e o navegador.
@@ -11,7 +11,7 @@
      - entra como admin pela tela, faz a troca obrigatória, cria pela tela "Criar usuários" um usuário comum e confere a
        etiqueta "Falta trocar a senha inicial" (some depois que ele troca);
      - o usuário comum: o link #/produto/X enviado antes do login abre o produto depois do login (com e sem a troca
-       obrigatória); não vê "Criar usuários" nem "Catálogos em PDF" (menu e página) e as 2 páginas dão 404;
+       obrigatória); não vê "Criar usuários" nem "Catálogos e materiais" (menu e página) e as 2 páginas dão 404;
      - "volta" com "//", "/\", codificados, outro site, tabulação ou quebra de linha não leva para fora (no navegador);
      - sessão de 5 h: o cookie no navegador (HttpOnly, Secure, SameSite=Lax, 5 h) e, com o serviço importado com o
        relógio adiantável (criarServico({ agora })), entrando pela tela: 4 h 59 ainda vale e 5 h 01 leva ao
@@ -19,7 +19,7 @@
      - console sem erro em todas as telas, inclusive na troca obrigatória (nenhum 403 nem 4xx do próprio site);
      - o log do serviço sem senha, segredo nem chave;
      - prints em 1366 × 768 e 390 × 844 (deviceScaleFactor 1): login, troca obrigatória, catálogo com o menu aberto
-       (cliente e admin), Criar usuários e Catálogos em PDF, mais a sessão vencida.
+       (cliente e admin), Criar usuários e Catálogos e materiais, mais a sessão vencida.
 */
 
 import { spawn } from "node:child_process";
@@ -36,6 +36,11 @@ const SESSAO_H = 5;
 const falsa = (rot) => `${rot}-falsa-de-teste-${crypto.randomBytes(6).toString("hex")}`;
 const FORA = "example.invalid"; // o "outro site" dos testes da volta (nunca é chamado: o pedido é barrado)
 const ETIQUETA = "Falta trocar a senha inicial";
+// Catálogos e materiais (T-0024): os 7 ids da lista fixa do serviço; aqui, só o link de cada um montado na tela (os ids
+// do GET /api/pdfs, o Content-Type e o arquivo de entregas/ são dos testes do serviço, servicos/login/login.test.mjs)
+const IDS = ["completo-digital", "a4-grafica", "linha-moto", "portfolio", "lubrificantes-pdf", "lubrificantes-pptx", "kit-filtros"];
+// na tela: os 2 dos Lubrificantes (o mesmo "par") viram 1 cartão; 6 cartões em 2 grupos
+const N_CARTOES = 6, N_GRUPOS = 2;
 
 // ---------- o serviço ----------
 // Sobe node servicos/login/server.mjs (PORT=0: porta livre) e espera o "login ouvindo <porta>".
@@ -232,12 +237,12 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
     return page.evaluate(() => [...document.querySelectorAll("#conta-menu a, #conta-menu button")].map((a) => [a.textContent.trim(), a.getAttribute("href") || ""]));
   }
   const linhasUsuarios = (page) => page.evaluate(() => [...document.querySelectorAll("#us-lista tbody tr")].map((tr) => ({ u: (tr.querySelector(".us-login") || {}).textContent || "", t: tr.innerText })));
-  const ADMIN_TXT = /Criar usu[aá]rios|Cat[aá]logos em PDF/i;
+  const ADMIN_TXT = /Criar usu[aá]rios|Cat[aá]logos e materiais/i;
   const ehAdmin = ([t, h]) => ADMIN_TXT.test(t) || h.startsWith("/admin");
 
   let adminCtx = null;
   try {
-    // ---- 2. admin: login pela tela, troca obrigatória, Criar usuários, Catálogos em PDF (1366) ----
+    // ---- 2. admin: login pela tela, troca obrigatória, Criar usuários, Catálogos e materiais (1366) ----
     {
       const c = await novoCtx(1366, 768, "admin 1366");
       const { page } = c;
@@ -293,26 +298,27 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
       await print(page, "criar-usuarios", 1366);
       c.conferir("Criar usuários");
 
-      // Catálogos em PDF: 2 cartões com o "Baixar PDF"; o download responde o PDF mais novo de catalogo_grafico/entregas/
+      // Catálogos e materiais: na tela, 6 cartões em 2 grupos e os 7 links de baixar
       await page.goto(base + "admin/pdfs", { waitUntil: "networkidle" });
       await page.waitForSelector("#pdfs article.pdf", { timeout: 10000 }).catch(() => {});
-      const pdfs = await page.evaluate(() => [...document.querySelectorAll("#pdfs a[href*='/admin/pdfs/baixar/']")].map((a) => a.getAttribute("href")));
-      const ent = path.join(raiz, "catalogo_grafico", "entregas");
-      const arqs = fs.existsSync(ent) ? fs.readdirSync(ent) : [];
-      for (const [id, re] of [["completo-digital", /^Catalogo_BAP_(\d{4})_Completo_Digital\.pdf$/], ["a4-grafica", /^Catalogo_BAP_(\d{4})_A4_grafica\.pdf$/]]) {
+      const tela = await page.evaluate(() => ({
+        links: [...document.querySelectorAll("#pdfs a[href*='/admin/pdfs/baixar/']")].map((a) => a.getAttribute("href")),
+        grupos: document.querySelectorAll("#pdfs section.pdf-grupo").length,
+        h2: [...document.querySelectorAll("#pdfs h2")].map((h) => h.textContent.trim()),
+        cartoes: document.querySelectorAll("#pdfs section.pdf-grupo article.pdf").length,
+        soltos: document.querySelectorAll("#pdfs article.pdf").length,
+      }));
+      if (tela.grupos !== N_GRUPOS || tela.h2.length !== N_GRUPOS)
+        falha("l-admin", N_ADMIN, "pdf-grupos", `Catálogos e materiais com ${tela.grupos} section.pdf-grupo e ${tela.h2.length} h2 (${tela.h2.join(" | ")}); esperados ${N_GRUPOS}`);
+      if (tela.cartoes !== N_CARTOES || tela.soltos !== N_CARTOES)
+        falha("l-admin", N_ADMIN, "pdf-cartoes", `Catálogos e materiais com ${tela.cartoes} cartões nos grupos (${tela.soltos} no total); esperados ${N_CARTOES}`);
+      for (const id of IDS) {
         const href = "/admin/pdfs/baixar/" + id;
-        if (!pdfs.includes(href)) { falha("l-admin", N_ADMIN, "pdf-link:" + id, `Catálogos em PDF sem o link ${href}`); continue; }
-        const novo = arqs.filter((f) => re.test(f)).sort((a, b) => Number(b.match(re)[1]) - Number(a.match(re)[1]))[0];
-        const r = await c.ctx.request.fetch(base + href.slice(1), { method: "HEAD", maxRedirects: 0 });
-        const cd = r.headers()["content-disposition"] || "";
-        if (r.status() !== 200 || !/application\/pdf/.test(r.headers()["content-type"] || "") || !/^attachment/.test(cd))
-          falha("l-admin", N_ADMIN, "pdf:" + id, `${href}: ${r.status()} ${r.headers()["content-type"] || ""} ${cd} (esperado 200, application/pdf, attachment)`);
-        else if (novo && (!cd.includes(novo) || Number(r.headers()["content-length"]) !== fs.statSync(path.join(ent, novo)).size))
-          falha("l-admin", N_ADMIN, "pdf-arq:" + id, `${href}: entrega "${cd}" (${r.headers()["content-length"]} bytes); o mais novo é ${novo}`);
+        if (!tela.links.includes(href)) falha("l-admin", N_ADMIN, "pdf-link:" + id, `Catálogos e materiais sem o link ${href}`);
       }
-      await a11y(page, "Catálogos em PDF", 1366);
+      await a11y(page, "Catálogos e materiais", 1366);
       await print(page, "pdfs", 1366);
-      c.conferir("Catálogos em PDF");
+      c.conferir("Catálogos e materiais");
       adminCtx = c; // fica aberto para conferir a etiqueta depois da troca do comum
     }
 
@@ -342,7 +348,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
         if (!menu.some(([, h]) => h === "/trocar-senha") || !menu.some(([t]) => t === "Sair")) falha("l-comum", N_COMUM, "menu-conta", "1366 px: o menu do comum sem \"Trocar senha\" ou \"Sair\"");
       }
       const dom = await page.evaluate(() => ({ txt: document.body.innerText, html: document.documentElement.outerHTML }));
-      if (ADMIN_TXT.test(dom.txt) || /href="\/admin/.test(dom.html)) falha("l-comum", N_COMUM, "dom", "1366 px: a página do comum tem \"Criar usuários\", \"Catálogos em PDF\" ou link para /admin");
+      if (ADMIN_TXT.test(dom.txt) || /href="\/admin/.test(dom.html)) falha("l-comum", N_COMUM, "dom", "1366 px: a página do comum tem \"Criar usuários\", \"Catálogos e materiais\" ou link para /admin");
       await page.goto(base + "#/", { waitUntil: "networkidle" });
       await catalogoPronto(page);
       await abrirMenu(page);
@@ -371,7 +377,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
     }
     detalhe("l-etq", N_ETQ, `${COMUM.usuario} com a etiqueta "${ETIQUETA}" logo depois de criado e sem ela depois da troca; admin sem a etiqueta`);
 
-    // ---- 4. 390 px: login, admin (menu, Criar usuários, PDFs) e comum (link direto sem troca, menu) ----
+    // ---- 4. 390 px: login, admin (menu, Criar usuários, Catálogos e materiais) e comum (link direto sem troca, menu) ----
     {
       const c = await novoCtx(390, 844, "admin 390");
       const { page } = c;
@@ -382,7 +388,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
       await entrarUI(page, "admin", seg.senhaAdmin1);
       await catalogoPronto(page);
       const menu = await abrirMenu(page);
-      if (!menu || !menu.some(([, h]) => h === "/admin/usuarios") || !menu.some(([, h]) => h === "/admin/pdfs")) falha("l-admin", N_ADMIN, "menu-390", "390 px: o menu do admin sem \"Criar usuários\" ou \"Catálogos em PDF\"");
+      if (!menu || !menu.some(([, h]) => h === "/admin/usuarios") || !menu.some(([, h]) => h === "/admin/pdfs")) falha("l-admin", N_ADMIN, "menu-390", "390 px: o menu do admin sem \"Criar usuários\" ou \"Catálogos e materiais\"");
       await print(page, "menu-admin", 390);
       c.conferir("catálogo com o menu (admin)");
       for (const [cam, sel, nome] of [["admin/usuarios", "#us-lista table", "criar-usuarios"], ["admin/pdfs", "#pdfs article.pdf", "pdfs"]]) {
@@ -419,7 +425,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
     }
     detalhe("l-link", N_LINK, `#/produto/${COD} antes do login abre o produto depois do login e da troca obrigatória (1366); #/produto/${FOTO} depois do login direto (390)`);
     detalhe("l-comum", N_COMUM, "menu e página sem os itens do admin (1366 e 390); /admin/usuarios e /admin/pdfs 404 sem a tela");
-    detalhe("l-admin", N_ADMIN, "1º acesso → troca obrigatória (sem a senha atual) → catálogo; menu com Criar usuários, Catálogos em PDF, Trocar senha e Sair; usuário criado pela tela; 2 PDFs (HEAD 200, application/pdf, attachment, o arquivo mais novo)");
+    detalhe("l-admin", N_ADMIN, "1º acesso → troca obrigatória (sem a senha atual) → catálogo; menu com Criar usuários, Catálogos e materiais, Trocar senha e Sair; usuário criado pela tela; Catálogos e materiais com os 7 links de baixar, em 6 cartões e 2 grupos");
 
     // ---- 5. volta no navegador: "//", "/\", codificados, outro site, tabulação e quebra de linha não levam para fora ----
     {
@@ -488,8 +494,8 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
         }
       } else if (mod) falha("l-sessao", N_SESSAO, "criarServico", "o server.mjs não exporta criarServico (o teste do relógio precisa dele)");
     }
-    detalhe("l-cons", N_CONS, "0 erro de script, 0 console.error do site, 0 403 e 0 4xx/5xx não esperados em login, troca obrigatória (admin e comum), catálogo, menu, Criar usuários, Catálogos em PDF, volta e sessão");
-    detalhe("l-a11y", N_A11Y, "login, troca obrigatória, janela Criar usuário, Criar usuários e Catálogos em PDF: campos com rótulo e imagens com alt");
+    detalhe("l-cons", N_CONS, "0 erro de script, 0 console.error do site, 0 403 e 0 4xx/5xx não esperados em login, troca obrigatória (admin e comum), catálogo, menu, Criar usuários, Catálogos e materiais, volta e sessão");
+    detalhe("l-a11y", N_A11Y, "login, troca obrigatória, janela Criar usuário, Criar usuários e Catálogos e materiais: campos com rótulo e imagens com alt");
   } finally {
     await browser.close();
   }
