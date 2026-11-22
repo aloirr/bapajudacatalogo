@@ -44,11 +44,16 @@ jobs:
       - name: Testes do site (buscas, página do produto, 390 px, console, palavra interna)
         run: node scripts/testar_site.mjs --conhecidos testes/conhecidos.json
 
+      - name: Testes do site com login (T-0022; serviço local com valores falsos gerados no teste)
+        run: node scripts/testar_site.mjs --login --conhecidos testes/conhecidos.json --prints testes/prints/login
+
       - name: Guardar os prints (1366 e 390 px)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: prints-testes-site
-          path: testes/prints/ultima/
+          path: |
+            testes/prints/ultima/
+            testes/prints/login/
           if-no-files-found: warn
           retention-days: 14
