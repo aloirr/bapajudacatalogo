@@ -26,7 +26,7 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 
 ## Rotas
 
-- **Abertas:** `/entrar` (e `/entrar/`), `/entrar/entrar.css`, `/entrar/entrar.js`, `/styles.css`, `/assets/logo_escuro.png`, `/assets/logo_branco.png` e `GET /saude` (200 `ok`).
+- **Abertas:** `/entrar` (e `/entrar/`), `/entrar/entrar.css`, `/entrar/entrar.js`, `/entrar/comum.js` (o comum da tela de login e da troca de senha), `/styles.css`, `/assets/logo_escuro.png`, `/assets/logo_branco.png` e `GET /saude` (200 `ok`).
   - **[SUPOSIÇÃO]** `/styles.css` e as 2 logos da BAP (`/assets/logo_*.png`) abrem sem login para a tela de login usar o visual do site (a simulação usa o `styles.css`). Não têm dado do catálogo. O contrato só listava os arquivos de `/entrar/` e as logos (em outro caminho).
 - **Com sessão:** todo o resto do `site/`. Sem sessão, pedido de página (`Accept: text/html`) → 302 `/entrar?volta=<caminho>` (ou `/entrar?expirou=1` se o cookie venceu); o resto → 401.
 - **Troca pendente:** página → 302 `/trocar-senha`; outros arquivos e API → 403. Só abrem `/trocar-senha/**`, `/api/eu`, `/api/sair` e `/api/trocar-senha`.

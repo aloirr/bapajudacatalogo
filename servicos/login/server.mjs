@@ -59,7 +59,7 @@ const RETRY = { 'Retry-After': String(JANELA_ERROS_MS / 1000) };
 // Abertos sem sessão (caminho lógico, depois de /entrar -> /entrar/index.html).
 // [SUPOSIÇÃO] /styles.css e as 2 logos da BAP entram para a tela de login poder usar o visual do site.
 const ABERTOS = new Set([
-  '/entrar/index.html', '/entrar/entrar.css', '/entrar/entrar.js',
+  '/entrar/index.html', '/entrar/entrar.css', '/entrar/entrar.js', '/entrar/comum.js',
   '/styles.css', '/assets/logo_escuro.png', '/assets/logo_branco.png',
 ]);
 // Páginas sem a barra no fim.

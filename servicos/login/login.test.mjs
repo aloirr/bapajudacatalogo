@@ -48,6 +48,7 @@ before(() => {
   escrever('site/entrar/index.html', '<!doctype html><title>entrar</title>');
   escrever('site/entrar/entrar.css', 'form{}');
   escrever('site/entrar/entrar.js', 'console.log("entrar")');
+  escrever('site/entrar/comum.js', 'console.log("comum")');
   escrever('site/trocar-senha/index.html', '<!doctype html><title>trocar</title>');
   escrever('site/admin/usuarios/index.html', '<!doctype html><title>usuarios</title>');
   escrever('site/admin/pdfs/index.html', '<!doctype html><title>pdfs</title>');
@@ -171,7 +172,7 @@ test('sem login nada abre: página leva a /entrar, o resto dá 401', async () =>
   assert.equal(pdf.status, 302);
   assert.match(pdf.headers.location, /^\/entrar\?volta=/);
   // Abertos: só a tela de login, o CSS dela, a logo da BAP e a saúde.
-  for (const caminho of ['/entrar', '/entrar/', '/entrar/entrar.css', '/entrar/entrar.js', '/styles.css', '/assets/logo_escuro.png']) {
+  for (const caminho of ['/entrar', '/entrar/', '/entrar/entrar.css', '/entrar/entrar.js', '/entrar/comum.js', '/styles.css', '/assets/logo_escuro.png']) {
     assert.equal((await s.pedir(caminho, { accept: HTML })).status, 200, caminho);
   }
   const saude = await s.pedir('/saude');
@@ -194,6 +195,7 @@ test('login do admin: troca obrigatória no 1º acesso, cookie seguro', async ()
   assert.equal(pag.status, 302);
   assert.equal(pag.headers.location, '/trocar-senha');
   assert.equal((await s.pedir('/trocar-senha', { cookie: a.cookie, accept: 'text/html' })).status, 200);
+  assert.equal((await s.pedir('/entrar/comum.js', { cookie: a.cookie })).status, 200, 'o comum das telas abre na troca pendente');
   assert.equal((await s.pedir('/data/produtos.json', { cookie: a.cookie })).status, 403);
   assert.equal((await s.pedir('/api/usuarios', { cookie: a.cookie })).status, 403);
   assert.equal((await s.pedir('/admin/pdfs/baixar/a4-grafica', { cookie: a.cookie, accept: 'text/html' })).headers.location, '/trocar-senha');
