@@ -16,31 +16,35 @@
    a busca de um campo só (q) da T-0011, palavra por palavra: código (exato em 1º, com e sem espaço ou hífen),
    referência cruzada, veículo (montadora + modelo + ano, sem Golf no Gol), geral (texto livre), os exemplos da
    diretriz (lista estrita, outra ordem, minúsculas, os mais próximos, marca concorrente, código BAP e EAN exatos)
-   e sem resultado; os links antigos (#/busca?cod=, mo=, modelo=, ano=) viram q; as 2 abas (código, descrição ou
-   aplicação; placa com campo e botão, sem consultar o serviço) com setas, Home e End; página do produto (foto, aplicação, referências, ficha
-   técnica, leve também, sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
+   e sem resultado; os links antigos (#/busca?cod=, mo=, modelo=, ano=) viram q; os 2 campos (q e placa com botão,
+   sem consultar o serviço de verdade); página do produto (foto, aplicação, referências, ficha
+   técnica, "Leve também", sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
    básica; prints em 1366 × 768 e 390 × 844.
    Saída: 0 se passou (ou se só sobraram os conhecidos, com --conhecidos) e 1 se falhou.
 
-   T-0014 (20/11/2026): durante a troca de tela, a bateria aceita AS DUAS telas e confere cada uma pelas regras dela.
-     - Tela de hoje ("abas"): 2 abas (código, descrição ou aplicação; placa) e painel lateral de filtros.
-     - Tela nova ("campos", modelo B escolhido pelo Alexandre: R-20261120-122100, 122300, 123630 e 123800): sem abas, 2
+   T-0014 e T-0018 (aperto, 22/11/2026, site no main em 3d6a730): a bateria só aceita a tela aprovada e no ar; as
+   aceitações de transição saíram (a tela de 2 abas, 5 cartões em 1366 e 1536, "Ofereça junto", ".hero-num b",
+   1 botão na página inicial, "0 produtos" na busca vazia, o rótulo "Placa" à vista até 640 px e "df"/"ip" no JSON).
+     - Página inicial (#/, R-20261120-143900): ".mf-total" com "+" e o total arredondado para baixo à centena; 2 botões
+       "Buscar" no quadro (o do q e o da placa).
+     - Tela da busca ("campos", modelo B escolhido pelo Alexandre: R-20261120-122100, 122300, 123630 e 123800): sem abas, 2
        campos lado a lado (q e placa; no celular um embaixo do outro) com UM só botão "Buscar" e Enter nos 2 (os 2
        preenchidos: o veículo da placa filtrado pelo texto); faixa do veículo logo abaixo do quadro da busca na ordem Placa · Marca · Modelo · Ano · Motor · Versão (5 listas
        em cascata; R-20261120-124800: sai o "Meu veículo", que vira o rótulo "Placa" em cima da placa, e sai o "Trocar
-       veículo"; TRANSIÇÃO p1, R-20261120-175400 e R-20261120-181200: até 640 px, com a placa, o rótulo pode sair só da
-       vista, com as declarações da .vh, no DOM e apontado pelo aria-labelledby da placa), sem chave liga/desliga e sem o menu
+       veículo"; p1, R-20261120-175400 e R-20261120-181200: acima de 640 px o rótulo à vista; até 640 px, com a placa e a
+       faixa fechada, só para o leitor de tela, com as declarações da .vh, no DOM e apontado pelo aria-labelledby da placa), sem chave liga/desliga e sem o menu
        "Departamentos"; a placa consultada em destaque (etiqueta com X) na faixa, que preenche as listas; o "Limpar tudo"
        não tira o veículo; filtros numa coluna fina à ESQUERDA dos cartões, de cima a baixo (1366 e 1536 px), e no celular
        no botão "Filtrar (n)" com o painel; cartões (fA2, R-20261120-140900): 4 na 1ª linha em 1366 e 1536 px, 5 em 1920
-       (a partir de 1680 px) e 2 em 390 px (TRANSIÇÃO T-0014: até o PR do site, 4 ou 5 em 1366 e 1536); os da 1ª e 2ª linha com a mesma altura; texto >= 12 px; o código BAP sobre a foto (canto inferior direito, etiqueta que não
+       (a partir de 1680 px) e 2 em 390 px; os da 1ª e 2ª linha com a mesma altura; texto >= 12 px; o código BAP sobre a foto (canto inferior direito, etiqueta que não
        é botão nem link), no rótulo do link do cartão e no alt da foto; no máximo 2 etiquetas de referência à vista
        ("Ref. Cruzada:" e "+N"); "+ Detalhes". A placa só com o serviço interceptado (503 ou veículo falso) e nunca no
-       endereço, título, storage ou console.
+       endereço, título, storage ou console. Busca sem resultado: "Nenhum produto encontrado" e o total vazio (RD-0169).
+     - Página do produto: a seção "Leve também" (R-20261120-141100b); "Ofereça junto" na página = falha.
      - Janela do produto (<dialog>, "+ Detalhes"): conferida só se existir no site. A página do produto é sempre
        conferida pelo link direto #/produto/CODIGO.
-     A tela que o site mostra é detectada sozinha (ver "tela da busca" no resumo).
-     PENDENTE (tarefa depois): quando a tela de hoje sair do site, remover o ramo "abas" e o painel lateral daqui. */
+     A tela de 2 abas (até a T-0014) agora é falha ("tela da busca"); o ramo "abas" que sobrou abaixo não roda mais.
+     PENDENTE (tarefa depois): apagar o ramo "abas" e o painel lateral daqui. */
 
 import { createRequire } from "node:module";
 import { createServer } from "node:http";
@@ -159,11 +163,11 @@ function palavrasSinais(v) {
   return achou;
 }
 // campos que o gerar_site.py grava em cada produto (docs/DADOS_DO_SITE.md); campo novo = conferir antes
-// É a lista do que é PERMITIDO, não do que é obrigatório: produto sem um destes campos não falha. TRANSIÇÃO T-0017:
-// o PR #50 (web-site/T-0017-aplicacao-tela) tira "df" e "ip" do JSON; eles ficam aqui até esse PR entrar no main.
+// É a lista do que é PERMITIDO, não do que é obrigatório: produto sem um destes campos não falha. "df" e "ip" saíram
+// do JSON no PR #50 (T-0017) e daqui no aperto (T-0014/T-0018): se voltarem, falha.
 // "ve" (T-0017, v17): veículos da aba VEICULOS, lista de [FABRICANTE, MODELO] ou [FABRICANTE, MODELO, VERSAO], textos não vazios
 // "ss" (T-0018, R-20261121-200058): sistema da peça para o "Leve também", opcional, lista de textos não vazios
-const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "df", "oj", "ip", "an", "i", "ve", "ss"]);
+const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "oj", "an", "i", "ve", "ss"]);
 // lista não vazia de textos não vazios (formato do "ve" e do "ss")
 const textosOk = (l) => Array.isArray(l) && l.length > 0 && l.every((t) => typeof t === "string" && t.trim());
 const palavraInteira = (texto, palavra) => new RegExp(`(?<![A-Z0-9])${palavra}(?![A-Z0-9])`).test(norm(texto));
@@ -469,14 +473,14 @@ async function testarSite(base, ctxJson, dirPrints) {
         }));
       };
       const primeiros = () => page.evaluate(() => [...document.querySelectorAll(".lista .item")].slice(0, 5).map((e) => window.__bapT.codDe(e)));
-      // TRANSIÇÃO T-0018: a página inicial é o "#/" (ou sem hash)
+      // a página inicial é o "#/" (ou sem hash)
       const naHome = () => page.evaluate(() => /^#?\/?$/.test(location.hash));
-      // TRANSIÇÃO T-0018: botões "Buscar" no quadro: na home 1 ou 2 (a placa com botão próprio), na tela de busca 1 só
+      // botões "Buscar" no quadro (T-0018, aperto): na página inicial 2 (o do q e o da placa), na tela de busca 1 só
       const conferirBotoes = (n, onde) => {
-        const quer = onde === "home" ? [1, 2] : [1];
-        if (!quer.includes(n)) falha("campos-busca", "campos da busca", "botoes", `${L}: o quadro da busca ${onde === "home" ? "da página inicial " : ""}tem ${n} botão(ões) "Buscar" (pedido: ${onde === "home" ? "1 ou 2 na página inicial" : "1 só para os 2 campos"})`);
+        const quer = onde === "home" ? 2 : 1;
+        if (n !== quer) falha("campos-busca", "campos da busca", "botoes", `${L}: o quadro da busca ${onde === "home" ? "da página inicial " : ""}tem ${n} botão(ões) "Buscar" (pedido: ${onde === "home" ? "2 na página inicial, o do q e o da placa" : "1 só para os 2 campos"})`);
       };
-      // o botão "Buscar" da placa: o do mesmo formulário do campo da placa (home nova, com 2) ou o 1º (1 só)
+      // o botão "Buscar" da placa: o do mesmo formulário do campo da placa (página inicial, com 2) ou o 1º (1 só)
       const botaoDaPlaca = async () => (await page.evaluateHandle(() => { const T = window.__bapT, placa = T.campos().placa, bs = T.botoesBuscar(); return bs.find((b) => placa && b.form && b.form === placa.form) || bs[0] || null; })).asElement();
       const totalTela = () => page.evaluate(() => parseInt(((document.querySelector(".total") || {}).textContent || "").replace(/\D/g, ""), 10) || 0);
 
@@ -485,28 +489,28 @@ async function testarSite(base, ctxJson, dirPrints) {
       await page.goto(base + "#/", { waitUntil: "networkidle" });
       await page.waitForFunction(() => !document.getElementById("carregando"), null, { timeout: 15000 }).catch(() => {});
       await abrir("inicio", "#/");
-      // TRANSIÇÃO T-0018: a home nova (R-20261120-143900) mostra em ".mf-total" o "+" e o total arredondado para baixo à
-      // centena ("+4.400" ou "+4400" para 4.419; os pontos não contam e o resto do texto do elemento é ignorado); o
-      // ".hero-num b" da home de hoje vale pelo valor exato e sai depois do PR do site
-      const ini = await page.evaluate(() => { const e = document.querySelector(".mf-total") || document.querySelector(".hero-num b"); return e ? { mf: e.matches(".mf-total"), t: e.textContent.replace(/\s+/g, "") } : { mf: false, t: "" }; });
-      if (ini.mf) {
-        const quer = "+" + Math.floor(prods.length / 100) * 100, achou = (ini.t.match(/\+[\d.]+/) || [""])[0].replace(/\./g, "");
-        if (achou !== quer) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${ini.t}" (.mf-total), o esperado é "+${fmt(Math.floor(prods.length / 100) * 100)}" (o total ${fmt(prods.length)} do JSON arredondado para baixo à centena, com "+")`);
-      } else if (parseInt(ini.t.replace(/\D/g, ""), 10) !== prods.length) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${ini.t}" produtos, o JSON tem ${prods.length}`);
+      // a página inicial (T-0018, R-20261120-143900) mostra em ".mf-total" o "+" e o total arredondado para baixo à
+      // centena ("+4.400" ou "+4400" para 4.419; os pontos não contam e o resto do texto do elemento é ignorado).
+      // Aperto T-0018: sem ".mf-total" é falha (o ".hero-num b" da home antiga não vale mais)
+      const ini = await page.evaluate(() => { const e = document.querySelector(".mf-total"); return e ? e.textContent.replace(/\s+/g, "") : null; });
+      const centena = Math.floor(prods.length / 100) * 100;
+      if (ini === null) falha("abrir", "site abre", "inicio-total", `${L}: o início não tem o ".mf-total" (esperado "+${fmt(centena)}")`);
+      else if ((ini.match(/\+[\d.]+/) || [""])[0].replace(/\./g, "") !== "+" + centena) falha("abrir", "site abre", "inicio-total", `${L}: o início mostra "${ini}" (.mf-total), o esperado é "+${fmt(centena)}" (o total ${fmt(prods.length)} do JSON arredondado para baixo à centena, com "+")`);
       conferirConsole("inicio");
       await print("inicio");
-      // qual tela o site mostra (T-0014): "abas" (hoje) ou "campos" (nova, sem abas, q e placa lado a lado)
+      // qual tela o site mostra (T-0014): só a "campos" (sem abas, q e placa lado a lado) vale; a de 2 abas é falha (aperto)
       const N_TELA = "tela da busca";
       const tela = await page.evaluate(() => { const c = window.__bapT.campos(); return c.abas ? "abas" : c.q && c.placa ? "campos" : "?"; });
       if (tela === "?") falha("tela", N_TELA, "?", `${L}: não reconheci a tela da busca (nem 2 abas, nem o campo q com o da placa)`);
+      else if (tela === "abas") falha("tela", N_TELA, "abas", `${L}: a tela da busca tem abas (role="tab"); a aprovada (T-0014, modelo B) não tem abas: campo q e campo da placa lado a lado`);
       TELAS.add(tela);
       // o botão "Buscar" do campo q: o do formulário único (abas) ou o do próprio campo (campos)
       const clicarBuscarQ = async () => {
         if (tela === "abas") return page.click('.form-busca button[type="submit"]');
-        // tela nova (T-0014, R-20261120-115432): UM só botão "Buscar" no quadro da busca (na home, 1 ou 2: TRANSIÇÃO T-0018)
+        // tela nova (T-0014, R-20261120-115432): UM só botão "Buscar" no quadro da busca (na página inicial, 2: T-0018)
         const n = await page.evaluate(() => window.__bapT.botoesBuscar().length);
         conferirBotoes(n, (await naHome()) ? "home" : "busca");
-        // com 2 (home nova), o do campo q: o do mesmo formulário do q, ou o 1º
+        // com 2 (página inicial), o do campo q: o do mesmo formulário do q, ou o 1º
         const h = n ? (await page.evaluateHandle(() => { const T = window.__bapT, q = T.campos().q, bs = T.botoesBuscar(); return bs.find((b) => q && b.form && b.form === q.form) || bs[0]; })).asElement() : null;
         if (!h) return page.press('input[name="q"]', "Enter");
         return h.click();
@@ -709,10 +713,9 @@ async function testarSite(base, ctxJson, dirPrints) {
       for (const [k, v] of [["q", "xyzqwk nadaexiste"], ["q", "ZZQ999999"], ["cod", "ZZQ999999"]]) {
         await abrir("busca-vazia", `#/busca?${k}=${encodeURIComponent(v)}`);
         const r = await listaTodos();
-        // TRANSIÇÃO T-0018 (R-20261120-161500-alexandre, RD-0169): com 0 resultados o total "0 produtos" sai e fica só
-        // "Nenhum produto encontrado". Até o PR do web-site (T-0018, catálogo escuro) entrar no main, vale o total
-        // "0 produtos" (site no ar hoje) OU o total vazio. Depois desse PR, apertar para só o vazio.
-        if (r.itens.length || !/Nenhum produto encontrado/.test(r.vazio) || !/^(0 produtos?( encontrados?)?)?$/.test(r.total.trim()))
+        // T-0018 (R-20261120-161500-alexandre, RD-0169): com 0 resultados fica só "Nenhum produto encontrado" e o total
+        // vazio (aperto: o "0 produtos" de antes é falha)
+        if (r.itens.length || !/Nenhum produto encontrado/.test(r.vazio) || r.total.trim())
           falha("vazia", N_VAZ, `${k}:${v}`, `"${v}": ${r.itens.length} item(ns), total "${r.total}", mensagem "${cortar(r.vazio, 40)}"`);
         if (r.proximos) falha("vazia", N_VAZ, `${k}:${v}:proximos`, `"${v}": aviso dos "mais próximos" sem nenhum produto parecido`);
         if (v === "xyzqwk nadaexiste") await print("busca-vazia");
@@ -720,7 +723,7 @@ async function testarSite(base, ctxJson, dirPrints) {
       }
       detalhe("vazia", N_VAZ, `"xyzqwk nadaexiste", "ZZQ999999" e o link antigo cod=ZZQ999999 → "Nenhum produto encontrado"`);
 
-      // ---- cartões da lista (T-0014, só na tela nova): 4 (ou 5, na transição) na 1ª linha em 1366 e 1536 px, 5 em 1920, 2 em 390; texto >= 12 px ----
+      // ---- cartões da lista (T-0014, só na tela nova): 4 na 1ª linha em 1366 e 1536 px, 5 em 1920, 2 em 390; texto >= 12 px ----
       const N_CART = "cartões da lista", QF = "amortecedor";
       const medirCartoes = () => page.evaluate(() => {
         const vis = (el) => { const r = el.getBoundingClientRect(); return r.width > 1 && r.height > 1 && getComputedStyle(el).visibility !== "hidden"; };
@@ -790,11 +793,9 @@ async function testarSite(base, ctxJson, dirPrints) {
           if (!m.n) falha("cartoes", N_CART, `vazio:${w}`, `${w} px: "${QF}" sem cartões na lista`);
           else {
             // R-20261120-140900 (fA2): 4 por linha no computador (eram 5), cartão maior; 5 a partir de 1680 px (1920) e 2 no
-            // celular (menos só se a lista tiver menos)
-            // TRANSIÇÃO T-0014: o 5 em 1366 e 1536 sai depois do PR do site (aí fica só o 4 do fA2, ou só o 5 se o fA2 não
-            // for aprovado)
-            const quer = w >= 1680 ? [5] : w > 640 ? [4, 5] : [2];
-            if (!quer.map((q) => Math.min(q, m.n)).includes(m.linha1)) falha("cartoes", N_CART, `linha:${w}`, `${w} px: "${QF}" mostra ${m.linha1} cartão(ões) na 1ª linha (pedido: ${quer.join(" ou ")}; cartão de ${m.larg} px)`);
+            // celular (menos só se a lista tiver menos). Aperto T-0014: 5 em 1366 ou 1536 é falha
+            const quer = w >= 1680 ? 5 : w > 640 ? 4 : 2;
+            if (m.linha1 !== Math.min(quer, m.n)) falha("cartoes", N_CART, `linha:${w}`, `${w} px: "${QF}" mostra ${m.linha1} cartão(ões) na 1ª linha (pedido: ${quer}; cartão de ${m.larg} px)`);
             const A = m.altura;
             if (A.dif > 1) falha("cartoes", N_CART, `altura:${w}`, `${w} px: os ${A.n} cartões da 1ª e 2ª linha não têm a mesma altura: de ${A.min} px (${A.menor}) a ${A.max} px (${A.maior})`);
             if (A.difDet < 0) falha("cartoes", N_CART, `altura:detalhes:${w}`, `${w} px: cartão da 1ª ou 2ª linha sem o "+ Detalhes"`);
@@ -1187,9 +1188,8 @@ async function testarSite(base, ctxJson, dirPrints) {
       if (pCod) paginas.push([pCod, "produto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Leve também"]]);
       if (comFoto) paginas.push([comFoto, "produto-com-foto", ["Aplicação", "Referências cruzadas", "Ficha técnica", "Leve também"]]);
       for (const c of ["TER556556", "1"]) if (existe(c)) paginas.push([porCod.get(normCod(c)), "produto-" + c, []]);
-      // R-20261120-141100b-alexandre: o bloco "Ofereça junto" passou a "Leve também" (título exato da seção, como as outras)
-      // TRANSIÇÃO T-0014: o 'Ofereça junto' sai depois do PR do site (até lá, "Leve também" OU "Ofereça junto")
-      const NOMES_SECAO = { "Leve também": ["Leve também", "Ofereça junto"] };
+      // R-20261120-141100b-alexandre: o bloco "Ofereça junto" passou a "Leve também" (título exato da seção, como as
+      // outras). Aperto T-0014: só "Leve também"; "Ofereça junto" em qualquer lugar da página é falha
       // T-0014: é a PÁGINA (link direto #/produto/CODIGO), não a janela. O 1º produto abre com o endereço colado
       // numa carga nova da página; os outros, trocando o endereço (sem clique no cartão). Janela aberta = falha.
       let primeira = true;
@@ -1217,7 +1217,8 @@ async function testarSite(base, ctxJson, dirPrints) {
         if (info.h1 !== p.c) falha("produto", N_PROD, `${p.c}:h1`, `${L} ${p.c}: título "${info.h1}"`);
         if (p.i) { if (!info.foto || !info.foto.ok) falha("produto", N_PROD, `${p.c}:foto`, `${L} ${p.c}: a foto ${p.i} não carregou`); }
         else if (!/Foto em breve/.test(info.semFoto)) falha("produto", N_PROD, `${p.c}:sem-foto`, `${L} ${p.c}: sem foto e sem "Foto em breve"`);
-        for (const s of secoesEsperadas) if (!(NOMES_SECAO[s] || [s]).some((n) => info.secoes.includes(n))) falha("produto", N_PROD, `${p.c}:${s}`, `${L} ${p.c}: sem a seção "${s}"`);
+        for (const s of secoesEsperadas) if (!info.secoes.includes(s)) falha("produto", N_PROD, `${p.c}:${s}`, `${L} ${p.c}: sem a seção "${s}"`);
+        if (/ofere[cç]a junto/i.test(info.texto)) falha("produto", N_PROD, `${p.c}:ofereca-junto`, `${L} ${p.c}: a página mostra "Ofereça junto" (o nome aprovado é "Leve também")`);
         for (const a of palavrasInternas(info.texto)) falha("tela-preco", N_PRECO, `${a.nome}:${p.c}`, `#/produto/${p.c} mostra "${a.nome}": …${a.trecho}…`);
         if (nome === "produto" || nome === "produto-com-foto") await print(nome);
         conferirConsole(nome);
@@ -1408,13 +1409,16 @@ async function testarSite(base, ctxJson, dirPrints) {
             const re = etq.getBoundingClientRect();
             const ehRotP = (e) => !e.children.length && /^Placa:?$/i.test(e.textContent.trim());
             const r = [...faixa.querySelectorAll("*")].find((e) => ehRotP(e) && T.visivel(e) && (() => { const x = e.getBoundingClientRect(); return x.width > 2 && x.bottom <= topoP + 2 && x.right > re.left && x.left < re.right; })());
-            // transição p1 (ver o cabeçalho): até 640 px vale também o rótulo .vh apontado pelo aria-labelledby da placa; acima, só o rótulo à vista
+            // p1 (ver o cabeçalho; aperto): até 640 px, com a faixa fechada, só o rótulo .vh apontado pelo aria-labelledby da
+            // placa (o rótulo à vista ali é o de antes do p1 e falha); acima de 640 px, só o rótulo à vista
             const vh = (e) => { const cs = getComputedStyle(e), x = e.getBoundingClientRect();
               return cs.position === "absolute" && x.width <= 1 && x.height <= 1 && cs.overflow === "hidden" && /^rect\(0(px)?,? 0(px)?,? 0(px)?,? 0(px)?\)$/.test(cs.clip)
                 && cs.whiteSpace === "nowrap" && T.visivel(e) && !e.closest('[aria-hidden="true"]'); };
             const ids = (etq.getAttribute("aria-labelledby") || "").split(/\s+/).filter(Boolean);
-            const rVh = !r && window.innerWidth <= 640 && [...faixa.querySelectorAll("[id]")].find((e) => ehRotP(e) && ids.includes(e.id) && document.getElementById(e.id) === e && vh(e));
-            rotP = r ? "ok" : rVh ? "ok-vh" : [...faixa.querySelectorAll("*")].filter((e) => !e.children.length && T.visivel(e) && /placa/i.test(e.textContent)).map((e) => e.textContent.trim()).join(" | ") || "nenhum";
+            const celular = window.innerWidth <= 640;
+            const rVh = celular && [...faixa.querySelectorAll("[id]")].find((e) => ehRotP(e) && ids.includes(e.id) && document.getElementById(e.id) === e && vh(e));
+            rotP = celular ? (rVh ? "ok-vh" : r ? "à vista (até 640 px o pedido é só para o leitor de tela)" : "") : r ? "ok" : "";
+            rotP ||= [...faixa.querySelectorAll("*")].filter((e) => !e.children.length && T.visivel(e) && /placa/i.test(e.textContent)).map((e) => e.textContent.trim()).join(" | ") || "nenhum";
           }
           const antesMarca = !!etq && !!listas[0] && !!(etq.compareDocumentPosition(listas[0]) & Node.DOCUMENT_POSITION_FOLLOWING);
           const sel = listas.map((l) => (l && l.value ? (l.selectedOptions[0] || {}).textContent || l.value : ""));
@@ -1431,7 +1435,7 @@ async function testarSite(base, ctxJson, dirPrints) {
         else if (v.etq && !v.naFaixa) falha("placa", N_PL, "etiqueta:faixa", `${L}: a etiqueta da placa ("${cortar(v.etq, 40)}") fica fora da faixa do veículo${v.noQuadro ? " (no quadro da busca)" : ""} (pedido: em destaque na faixa, no lugar da chave)`);
         // [SUPOSIÇÃO] "em destaque": o texto da placa com fonte de 16 px ou mais
         if (v.etq && v.fonteP < 16) falha("placa", N_PL, "etiqueta:destaque", `${L}: a placa na faixa com fonte de ${v.fonteP} px (destaque: 16 px ou mais)`);
-        if (v.etq && v.naFaixa && !/^ok/.test(v.rotP)) falha("placa", N_PL, "etiqueta:rotulo", `${L}: sem o rótulo "Placa" à vista em cima da placa na faixa${larg <= 640 ? " nem só para o leitor de tela (.vh, apontado pelo aria-labelledby da placa)" : ""} (textos com "placa" ali: ${cortar(v.rotP, 80)})`);
+        if (v.etq && v.naFaixa && !/^ok/.test(v.rotP)) falha("placa", N_PL, "etiqueta:rotulo", `${L}: ${larg <= 640 ? 'sem o rótulo "Placa" só para o leitor de tela (.vh, apontado pelo aria-labelledby da placa) na faixa fechada' : 'sem o rótulo "Placa" à vista em cima da placa na faixa'} (achado: ${cortar(v.rotP, 80)})`);
         if (v.etq && v.naFaixa && !v.antesMarca) falha("placa", N_PL, "etiqueta:ordem", `${L}: a placa não vem antes da Marca na faixa (ordem pedida: Placa · Marca · Modelo · Ano · Motor · Versão)`);
         const esperadoSel = [/volkswagen|\bvw\b/i, /\bgol\b/i, /\b2018\b/, /\b1[.,]6\b/], nomesSel = ["Marca", "Modelo", "Ano", "Motor"];
         esperadoSel.forEach((rx, i) => { if (v.temFaixa && !rx.test(v.sel[i] || "")) falha("placa", N_PL, "veiculo:lista:" + nomesSel[i], `${L}: depois da placa (VW GOL 2018 1.6), a lista ${nomesSel[i]} ficou com "${v.sel[i] || "(nada)"}"`); });
@@ -1515,11 +1519,11 @@ async function testarSite(base, ctxJson, dirPrints) {
   const siTxt = FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "";
   detalhe("filtros", "filtros da busca", [siTxt, FILTRO_SI.marcou ? "barra: Esc fecha; " + FILTRO_SI.marcou + "; etiqueta \"Tirar\" criada e tirada" : ""].filter(Boolean).join("; "));
   if (TELAS.has("campos")) {
-    detalhe("campos-busca", "campos da busca", `${CAMPOS_TELA.rotulos || "?"}; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro da busca (1 ou 2 na página inicial, transição T-0018); q com Enter e botão (busca código e veículo)`);
+    detalhe("campos-busca", "campos da busca", `${CAMPOS_TELA.rotulos || "?"}; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro da busca (2 na página inicial: o do q e o da placa); q com Enter e botão (busca código e veículo)`);
     detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} em destaque na faixa, com o rótulo "Placa" em cima (${(CAMPOS_TELA.rotulo || []).join("; ") || "?"}) e antes da Marca, e as listas "${CAMPOS_TELA.veiculo || "?"}"; ${CAMPOS_TELA.trava || ""}; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas`);
     detalhe("meuveiculo", "meu veículo", MV.join("; ") + '; faixa logo abaixo do quadro da busca, 5 listas em cascata (Marca, Modelo, Ano, Motor, Versão); sem "Meu veículo", sem "Trocar veículo", sem chave liga/desliga, sem "Departamentos"');
     detalhe("filtros", "filtros da busca", [FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "", FILTRO_SI.coluna || "", FILTRO_SI.painel || "", FILTRO_SI.sempre || "", FILTRO_SI.marcou || ""].filter(Boolean).join("; "));
-    detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 4 ou 5 na 1ª linha em 1366 e 1536 (transição; o fA2 pede 4), 5 em 1920 (a partir de 1680), 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes"`);
+    detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 4 na 1ª linha em 1366 e 1536 (fA2), 5 em 1920 (a partir de 1680), 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes"`);
   }
   if (JANELAS.size) detalhe("janela", "janela do produto", `"+ Detalhes" e código/nome abrem o dialog com o código; Esc fecha e devolve o foco ao cartão; a foto do cartão só amplia (${[...JANELAS].join(" e ")})`);
   else { teste("janela", "janela do produto"); detalhe("janela", "janela do produto", 'o site não tem a janela (sem "+ Detalhes" no cartão): não conferida'); }
