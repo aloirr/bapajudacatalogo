@@ -18,7 +18,7 @@
 - B8 (`digital2.sem_viuva` e `digital2.refs_juntas`): a última palavra não fica sozinha na última linha; a marca e o código da referência ficam juntos, com espaço inseparável (`_FC.DUAS` para marca de duas palavras). Também no `print_cat.cta_box`.
 - B8 sem corte no meio (`quebra.py`, importado pelo `digital2`): quando o bloco preso (marca + código, ou a palavra do `sem_viuva`) ou uma palavra sem espaço ("Fiesta,KA,Courier,Ecosport,Focus") não cabe na coluna, a quebra vai para o espaço inseparável (a marca numa linha e o código inteiro na de baixo), senão logo depois de um separador (`quebra.SEP`, a mesma lista da varredura), senão a palavra desce inteira; na letra, só sem nenhum deles. O texto não muda. A coluna EQUIVALE A do A4 não é alargada: com 3 mm a mais, saíam linhas da tabela. Conferência: `varredura_quebras.py` (tabela de comandos; "meio" = partiu entre letras).
 - B10 (`digital2.novo_desce` e `digital2.novo_na_sobra`): a tag NOVO desce para a linha de baixo quando o código é longo.
-- As seções abaixo sobre o OneDrive e o estoque valem só para os scripts que ainda leem o estoque (`encartelados.py`, `kitfiltros/parse.py`). A apresentação de Lubrificantes roda só com o Git (T-0023): o `apres_bemol.py` usa as fotos e o logo escuro de `pptimg/`, os mesmos do `apres_ppt.js`; o tema do .pptx está no `LEIA-ME.md`, Observações.
+- As seções abaixo sobre o OneDrive e o estoque valem só para os scripts que ainda leem o estoque (`encartelados.py`, `kitfiltros/parse.py`). A apresentação de Lubrificantes roda só com o Git (T-0023): o `apres_bemol.py` usa as fotos e o logo escuro de `pptimg/`, os mesmos do `apres_ppt.js`; o tema do .pptx está no `LEIA-ME.md`, Observações. O texto dos dois (títulos, tabelas, cartões e contato) fica só no `apres_conteudo.json` (RD-0431, T-0025); cada script guarda só o desenho. O `portfolio.py` importa do `apres_bemol.py` a classe `S`, as cores `C` e os logos.
 - `auditoria_catalogo.py`: não lê mais o estoque (a descrição vem do `detalhe._desc()`, da base unificada). A comparação "base × ESTOQUE_BAP" dele (aba `CONFLITO_BASE_X_ESTOQUE`) ficou sem sentido até ser refeita.
 
 Versão de 12/11/2026 (atualizada pelo PC EMPRESA; antes 27/10 pelo PC PESSOAL). **Os scripts deste pacote do projeto são a versão oficial.** Se o script do OneDrive (`Treinamentos e materiais de trade\catalogo_bap\gerador\`) ou o da nuvem da conversa for diferente, vale o do projeto.
@@ -44,7 +44,7 @@ Versão de 12/11/2026 (atualizada pelo PC EMPRESA; antes 27/10 pelo PC PESSOAL).
 | Auditoria do catálogo | `python auditoria_catalogo.py` |
 | Portfólio (cliente) | `python portfolio.py` |
 | Kit Filtros (cliente) | `python kitfiltros/kit.py saidas/Kit_Filtros_BAP.pdf` (ajustar caminhos `G`/entradas no topo do `kit.py`/`parse.py` para a sua nuvem) |
-| Apresentação lubrificantes | `python apres_bemol.py` / `node apres_ppt.js` |
+| Apresentação lubrificantes | `python apres_bemol.py` / `node apres_ppt.js` (texto em `apres_conteudo.json`) |
 | Encartelados moto | `python encartelados.py` |
 | Teste do `_norm`/`aplicacao_unica` (Fraga) | `python -m unittest -v teste_fraga_complementos` |
 | Teste da AUTOIMPACT (trava só fora da referência e ordem) | `python -m unittest -v teste_autoimpact_pdf` |
