@@ -11,13 +11,8 @@
                              esse arquivo em data/produtos.json). Serve para as provas com cópia temporária.
      --prints <pasta>        onde gravar os prints (padrão: testes/prints/ultima).
      --sem-navegador         só os testes do JSON (palavra interna, AUTOIMPACT, campos, total), sem abrir o Chromium.
-     --login                 (T-0022) o site atrás do login: sobe node servicos/login/server.mjs numa porta livre, com uma
-                             PASTA_DADOS temporária e valores claramente falsos gerados na hora (nunca impressos); roda os
-                             testes do login (testes/login.mjs: sem login fecha tudo, sessão de 5 h com o relógio
-                             adiantado, usuário comum sem as telas do admin, link #/produto/X depois do login, "volta"
-                             segura, etiqueta "Falta trocar a senha inicial", console sem erro e sem 403, prints) e depois
-                             as buscas de sempre, entrando pela tela como o usuário comum criado pelo admin.
-                             Sem --login: o servidor estático de site/ de sempre (é o que o CI usa).
+     --login                 (T-0022) o site atrás do login: os testes do cabeçalho de testes/login.mjs e depois as
+                             buscas de sempre, como o usuário comum. Sem --login: o servidor estático de site/.
      --comparar <arquivo>    o produtos.json tem de ser igual a este (ex.: o do main), fora o "gerado_em".
 
    O que testa: palavra interna no JSON (a SUNRISE também); a AUTOIMPACT só na marca da referência cruzada; campos e total do JSON; servidor estático de site/ numa porta livre;
@@ -255,6 +250,9 @@ function ajudaDaPagina() {
   window.__bapT = { visivel, nome, campos, botaoDe, grupos, opcoes, etiquetas, quadro, botoesBuscar, codDe, linkDe, detalhesDe, veiculo };
 }
 
+// casos tirados do JSON do dia, também usados pelos testes do login (testes/login.mjs)
+const CASOS = { COD: "CXD13062", FOTO: "AMT7115" };
+
 // ---------- resultados ----------
 const TESTES = []; // { id, nome, detalhe, falhas: [{chave, txt}], avisos: [] }
 function teste(id, nome) {
@@ -269,6 +267,26 @@ function falha(id, nome, chave, txt) {
 }
 const aviso = (id, nome, txt) => { const t = teste(id, nome); if (!t.avisos.includes(txt)) t.avisos.push(txt); };
 const detalhe = (id, nome, txt) => { teste(id, nome).detalhe = txt; };
+
+// ---------- vigia do console (as buscas e o login) ----------
+// Erro de script, console.error do site e requisição do site que falhou vão para emErro(texto); os de outro site viram
+// aviso no teste (id, nome). ignorar(url): o que o próprio teste provocou; pausado(): os erros que o teste faz de propósito.
+function vigiar(page, { base, emErro, id = "console", nome = "console sem erro", rotulo = "", ignorar = () => false, pausado = () => false }) {
+  const local = (u) => String(u || "").startsWith(base);
+  page.on("console", (m) => {
+    if (m.type() !== "error" || pausado()) return;
+    const u = (m.location() || {}).url || "";
+    if (ignorar(u)) return;
+    if (u && !local(u)) aviso(id, nome, `${rotulo}erro de recurso de fora (${cortar(u, 60)}): ${cortar(m.text(), 80)}`);
+    else emErro(cortar(m.text(), 120));
+  });
+  page.on("pageerror", (e) => emErro("erro de script: " + cortar(e.message, 120)));
+  page.on("requestfailed", (r) => {
+    if (pausado() || ignorar(r.url())) return;
+    const txt = `requisição falhou: ${cortar(r.url(), 80)} ${(r.failure() || {}).errorText || ""}`;
+    if (local(r.url())) emErro(txt); else aviso(id, nome, rotulo + txt);
+  });
+}
 
 // ---------- servidor estático ----------
 const TIPOS = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".svg": "image/svg+xml", ".ico": "image/x-icon", ".webp": "image/webp" };
@@ -370,11 +388,11 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
   fs.mkdirSync(dirPrints, { recursive: true }); // os *.png antigos de testes/prints/ultima saem no main(), antes do --login
 
   // casos tirados do JSON do dia; se um sumir, o teste diz qual
-  const COD = "CXD13062";
+  const { COD } = CASOS;
   const pCod = porCod.get(normCod(COD));
   const refTrw = pCod && (pCod.r || []).find((r) => norm(r.m) === "TRW");
   const refNak = pCod && (pCod.r || []).find((r) => norm(r.m).startsWith("NAKATA"));
-  const comFoto = porCod.get(normCod("AMT7115"))?.i ? porCod.get(normCod("AMT7115"))
+  const comFoto = porCod.get(normCod(CASOS.FOTO))?.i ? porCod.get(normCod(CASOS.FOTO))
     : prods.find((p) => p.i && p.a && p.r && p.x && p.oj);
   // exemplos da diretriz da T-0011: AMT7005 (Gol 1980 a 2009, KYB 441126) e o EAN do TER551011
   const pAmt = porCod.get(normCod("AMT7005"));
@@ -428,18 +446,8 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
       const page = await ctx.newPage();
       let erros = [];
       const local = (u) => String(u || "").startsWith(base);
-      page.on("console", (m) => {
-        if (m.type() !== "error") return;
-        const u = (m.location() || {}).url || "";
-        if (PL.esperando && RX_PLACAS.test(u)) return; // o 503 que o próprio teste deu ao serviço de placas
-        if (u && !local(u)) aviso("console", "console sem erro", `erro de recurso de fora (${cortar(u, 60)}): ${cortar(m.text(), 80)}`);
-        else erros.push(cortar(m.text(), 120));
-      });
-      page.on("pageerror", (e) => erros.push("erro de script: " + cortar(e.message, 120)));
-      page.on("requestfailed", (r) => {
-        const txt = `requisição falhou: ${cortar(r.url(), 80)} ${(r.failure() || {}).errorText || ""}`;
-        if (local(r.url())) erros.push(txt); else aviso("console", "console sem erro", txt);
-      });
+      // o 503 que o próprio teste deu ao serviço de placas não conta
+      vigiar(page, { base, emErro: (t) => erros.push(t), ignorar: (u) => PL.esperando && RX_PLACAS.test(u) });
 
       const esperarImagens = () => page.evaluate(() => Promise.race([
         Promise.all([...document.images].filter((i) => !i.complete && i.loading !== "lazy").map((i) => new Promise((r) => { i.addEventListener("load", r); i.addEventListener("error", r); }))),
@@ -1494,7 +1502,8 @@ function compararJson(arqJson, arqRef) {
   const dif = [];
   for (let i = 0; i < Math.max(pa.length, pb.length); i++) if (JSON.stringify(pa[i]) !== JSON.stringify(pb[i])) dif.push((pa[i] || pb[i] || {}).c || "#" + i);
   if (dif.length) falha("comparar", N, "produtos", `${dif.length} produto(s) diferente(s): ${cortar(dif.slice(0, 10).join(", "), 120)}`);
-  detalhe("comparar", N, `igual a ${path.relative(RAIZ, arqRef).startsWith("..") ? arqRef : path.relative(RAIZ, arqRef)}, fora o gerado_em (${fmt(pb.length)} produtos)`);
+  // o "igual a" só quando não houve diferença (com diferença, as falhas já dizem o quê)
+  if (!teste("comparar", N).falhas.length) detalhe("comparar", N, `igual a ${path.relative(RAIZ, arqRef).startsWith("..") ? arqRef : path.relative(RAIZ, arqRef)}, fora o gerado_em (${fmt(pb.length)} produtos)`);
 }
 
 // ---------- conhecidos ----------
@@ -1584,7 +1593,7 @@ async function main() {
     const srv = await subirLogin(RAIZ);
     fs.mkdirSync(opcoes.prints, { recursive: true });
     try {
-      const comum = await testarLogin({ raiz: RAIZ, srv, dirPrints: opcoes.prints, prods: ctxJson.prods, reg: { teste, falha, aviso, detalhe } });
+      const comum = await testarLogin({ raiz: RAIZ, srv, dirPrints: opcoes.prints, prods: ctxJson.prods, reg: { teste, falha, aviso, detalhe, cortar, RX_PLACAS, vigiar, casos: CASOS } });
       await testarSite(srv.base, ctxJson, opcoes.prints, (page) => entrarParaBuscas(page, srv.base, comum.usuario, comum.senha));
     } finally { await srv.parar(); }
   } else if (ctxJson && !opcoes.semNavegador) {
