@@ -11,7 +11,7 @@ import { criarServico, caminhoLogico, tipoDaImagem, voltaSegura, SESSAO_MS, JANE
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const ORIGEM = 'https://catalogo.exemplo.invalid';
-// Valores de teste gerados na hora, sem forma de credencial no código (GitGuardian, R-20261122-042649-po).
+// Valores de teste montados por falsa(): claramente falsos e sem forma de credencial.
 const falsa = (rotulo) => `falsa-${rotulo}-${'x'.repeat(8)}`;
 const SENHA_INICIAL = falsa('inicial-1');
 const SEGREDO = falsa('segredo-de-sessao');
