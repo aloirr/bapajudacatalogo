@@ -305,6 +305,10 @@ ESSENCIAL = [
 ]
 ESS_RX = [(l, re.compile(p), r) for l, p, r in ESSENCIAL]
 ESS_LOG = []
+# RD-0293 (T-0019): a composição do kit de embreagem sai uma vez só. A sobra crua da DESCRICAO no subtítulo
+# ("plato/disco/mancal", "plato/disco/ro/mancal", "plato/disco mancal", "plato/disco") sai quando o rótulo entra:
+# fica "395MM 18 estrias · c/ platô, disco, rol. e mancal", como o DETALHE_CATALOGO da base v27.
+ESS_TROCA = {'Embreagem Remanufaturada': re.compile(r'(?i)\s*\bplat[oô]\s*/\s*disco(?:\s*/\s*rol?\b)?(?:\s*[/\s]\s*mancal\b)?')}
 
 
 def essencial(fams):
@@ -328,7 +332,9 @@ def essencial(fams):
                 if k in ns.replace('.', '') or (k == 'gas' and ('gas' in ns or 'oleo' in ns)): continue
                 if lab not in add: add.append(lab)
             if add:
-                novo = (sub + ' · ' if sub else '') + ' · '.join(add)
+                troca = ESS_TROCA.get(f['name'])   # RD-0293: o rótulo troca a sobra crua da mesma composição
+                fica = troca.sub('', sub).strip(' ·') if troca else sub
+                novo = (fica + ' · ' if fica else '') + ' · '.join(add)
                 novo = novo[:1].upper() + novo[1:]
                 ESS_LOG.append((f['name'], r['code'], sub, novo))
                 r['sub'] = novo; n += 1

@@ -1,6 +1,7 @@
 """Teste do bloco B dos PDFs (T-0019; aprovado no R-20261121-200058-alexandre): B9 (subtítulo sem repetir a aplicação,
 detalhe._tail), B10 (tag NOVO que desce, digital2.novo_desce) e o "Leve também" pelo sistema (oferta.sis_ok, com a
-tabela e a regra do site: G.SIS_COMPAT e G.sistemas_de do scripts/gerar_site.py). Como rodar: LEIA_GERADOR.md (tabela
+tabela e a regra do site: G.SIS_COMPAT e G.sistemas_de do scripts/gerar_site.py), e a composição do kit de
+embreagem uma vez só (RD-0293, detalhe.ESS_TROCA). Como rodar: LEIA_GERADOR.md (tabela
 de comandos). Lê a base (montar) e monta as famílias (moto)."""
 import unittest
 from unittest import mock
@@ -45,6 +46,27 @@ class B9Subtitulo(unittest.TestCase):
         out = self.compacto('KIT EMBREAGEM 750MM VW GOL', 'Kit embreagem…', 'VW Gol 1999')
         self.assertIn('750MM', out)
         self.assertIn('VW', out)
+
+
+class RD0293ComposicaoDoKit(unittest.TestCase):
+    """a composição do kit de embreagem sai uma vez só (RD-0293): o rótulo troca a sobra crua da DESCRICAO"""
+    def test_kit_pesado_sem_repeticao(self):
+        esperado = {'EMB3400700639R': '395MM 18 estrias · c/ platô, disco, rol. e mancal',
+                    'EMB1047071R': '395MM 10 estrias · c/ platô, disco, rol. e mancal',      # plato/disco/ro/mancal
+                    'EMB6852R': '362MM 10 estrias · c/ platô, disco, rol. e mancal',         # plato/disco mancal
+                    'EMB6146R': '330MM 10 estrias · c/ platô e disco'}                       # plato/disco
+        for code, sub in esperado.items():
+            self.assertEqual(linha(code)[1]['sub'], sub, code)
+
+    def test_sobra_crua_some_em_todas(self):
+        emb = [r for f in moto.FAMS if f['name'] == 'Embreagem Remanufaturada' for r in f['rows']]
+        self.assertTrue(emb)
+        for r in emb:
+            self.assertNotIn('plato/', r['sub'].lower(), r['code'])
+            self.assertLessEqual(r['sub'].count('platô'), 1, r['code'])
+
+    def test_so_a_embreagem_troca(self):
+        self.assertEqual(set(DT.ESS_TROCA), {'Embreagem Remanufaturada'})
 
 
 class B10TagNovo(unittest.TestCase):
