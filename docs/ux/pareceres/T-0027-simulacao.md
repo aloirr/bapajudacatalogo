@@ -50,8 +50,8 @@ Prints: `moto-p02-zoom-*`, `moto-p03-zoom-*`, `completo-p002-zoom-*`, `completo-
 ## 5. Recomendação por pergunta
 | # | Pergunta | Recomendação de UX | Por quê |
 |---|---|---|---|
-| 1 | Painel do cabeçalho com 1 item | **a) "1 / ITEM"** | O alinhamento à direita e o equilíbrio do painel não mudam (§2), e o painel passa a concordar com o único cartão da página. A b) deixaria o erro em 3 páginas e tiraria o singular de "um lugar só" |
-| 2 | "1 itens" no Portfólio (`portfolio.py:154`, `:180` e `:257`; págs. 69 e 76) | **a) Fora da T-0027, num RD novo** | O Portfólio não está nos 3 PDFs desta tarefa e é material para cliente: mudar ali pede a própria simulação, que vai ao Alexandre. Juntar agora misturaria duas provas pixel a pixel. Peço que o RD já saia com os 3 pontos e as 2 páginas, e com uma observação: o `portfolio.py` não importa o `digital2.py` (importa o `apres_bemol` e o `taxo`). Para o singular continuar num lugar só, a correção do Portfólio deve usar o mesmo `plural()`, num módulo que os dois geradores importem, e não uma segunda cópia |
+| 1 | Painel do cabeçalho com 1 item | **a) "1 / ITEM"** | §2. A b) deixaria o erro em 3 páginas e tiraria o singular de "um lugar só" |
+| 2 | "1 itens" no Portfólio (`portfolio.py:154`, `:180` e `:257`; págs. 69 e 76) | **a) Fora da T-0027, num RD novo** | O Portfólio não está nos 3 PDFs desta tarefa (material para cliente, com simulação própria: ver o parecer de marca, pergunta 2). Juntar agora misturaria duas provas pixel a pixel. Peço que o RD já saia com os 3 pontos e as 2 páginas, e com uma observação: o `portfolio.py` não importa o `digital2.py` (importa o `apres_bemol` e o `taxo`). Para o singular continuar num lugar só, a correção do Portfólio deve usar o mesmo `plural()`, num módulo que os dois geradores importem, e não uma segunda cópia |
 
 ## 6. Nota (não segura)
 1. **A página da Lâmpadas Moto fica quase vazia** nos 3 PDFs (A4 pág. 50, Completo pág. 302, Moto pág. 5): 1 cartão e cerca de 2/3 da página em branco. Já era assim no antes e está fora do escopo da T-0027 (só muda a palavra). Fica registrado para uma tarefa futura de layout, com simulação ao Alexandre, se ele quiser.
@@ -87,12 +87,12 @@ Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0027/sim/`
   | Completo Digital | 311 | 2, 300 e 302 |
   | Linha Moto | 17 | 2, 3 e 5 |
 
-  As caixas que mudam são as do §1, com diferença de até 1 px, que vem do renderizador. Todas as outras páginas ficam iguais pixel a pixel. Os títulos dos metadados e os nomes dos arquivos não mudam.
-- 🟢 **O texto muda só na palavra.** No `pdftotext` das 3 entregas, a única diferença é "1 itens" → "1 item" e "ITENS" → "ITEM", nas 7 páginas. Não sobra nenhum "1 itens" ou "1 ITENS".
+  As caixas que mudam são as do §1, com diferença de até 1 px, que vem do renderizador. Todas as outras páginas ficam iguais pixel a pixel. Os nomes dos arquivos não mudam (metadados: ver o parecer de marca).
+- 🟢 **O texto muda só na palavra:** ver o parecer de marca, entrega final.
 - 🟢 **As pranchas** (`*-prancha.png` e `*-zoom.png`) mostram o mesmo antes e depois da simulação. A decisão 1a ("1 / ITEM") está nas 3 páginas de painel.
 - Sem preço e sem estoque: 🟢. A busca por "R$" com número, "estoque" e "saldo" no texto dos 3 PDFs não acha nada.
 
 ### Notas
-- A nota do §6 (a página da Lâmpadas Moto) foi para a fila do Alexandre como layout (R-20261122-112104-po). O Portfólio (pergunta 2) foi para um RD novo, na mesma fila.
+- A nota do §6 (a página da Lâmpadas Moto) foi para a fila do Alexandre como layout (R-20261122-112104-po).
 
 **Resultado da entrega final: LIBERADO** para seguir ao `revisor-codigo`.
