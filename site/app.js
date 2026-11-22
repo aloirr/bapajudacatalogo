@@ -790,7 +790,9 @@
     CONTADOS.add(p.c);
     try {
       // sem Content-Type (text/plain): sem a pré-checagem do CORS; keepalive: o pedido segue se a página sair
-      fetch(SERVICO + "/contar", { method: "POST", body: JSON.stringify({ codigo: p.c }), keepalive: true, ...SEM_RASTRO }).catch(() => {});
+      // o corpo (vazio, 204) é lido: sem isso, o Chrome 153 marca o pedido como cancelado
+      fetch(SERVICO + "/contar", { method: "POST", body: JSON.stringify({ codigo: p.c }), keepalive: true, ...SEM_RASTRO })
+        .then((r) => r.text()).catch(() => {});
     } catch (e) { /* sem contador */ }
   }
   // os mais vistos que estão no catálogo (até N_LISTA), ou null (desligado, erro, mais de 3 s, total < 20 ou menos de 4 no catálogo)
