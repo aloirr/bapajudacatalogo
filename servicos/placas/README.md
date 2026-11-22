@@ -27,8 +27,10 @@ Serviço pequeno, em Node 18+ e **sem dependências**, que recebe a placa do sit
 
 ## Lista de códigos do catálogo (para o `/contar`)
 
-O serviço baixa o `produtos.json` **publicado** (`ORIGEM_PERMITIDA` + `/data/produtos.json`) ao subir e de novo a cada 6 h (se falhar, tenta a cada 1 min). Fica só o conjunto dos códigos (`c`), em memória.
-Motivo: no Render o serviço tem `rootDir: servicos/placas`, e os arquivos fora dessa pasta **não existem para ele** (nem no build nem rodando). Ler `site/data/produtos.json` do disco não funciona lá, e um arquivo de códigos copiado aqui ficaria velho a cada `gerar_site.py`. Assim a lista é sempre a que está no ar, sem variável nova e sem mexer no `render.yaml`.
+O serviço baixa a lista ao subir e de novo a cada 6 h (se falhar, tenta a cada 1 min). Fica só o conjunto dos códigos, em memória.
+- **Com `CATALOGO_URL` e `CHAVE_INTERNA`** (T-0022, catálogo atrás do login): `GET CATALOGO_URL/interno/codigos` com o cabeçalho `X-Chave-Interna`, sem cookie. Só `https` (fora dos testes). A chave e o endereço nunca vão para o log.
+- **Sem as duas:** como antes, o `produtos.json` **publicado** (`ORIGEM_PERMITIDA` + `/data/produtos.json`). Assim a troca no Render não derruba o `/contar`.
+Motivo: no Render o serviço tem `rootDir: servicos/placas`, e os arquivos fora dessa pasta **não existem para ele** (nem no build nem rodando). Ler `site/data/produtos.json` do disco não funciona lá, e um arquivo de códigos copiado aqui ficaria velho a cada `gerar_site.py`. Assim a lista é sempre a que está no ar.
 
 ## Variáveis de ambiente (no painel do Render)
 
@@ -36,6 +38,8 @@ Motivo: no Render o serviço tem `rootDir: servicos/placas`, e os arquivos fora 
 |---|---|---|
 | `API_PLACAS_TOKEN` | **o Alexandre**, no painel do Render | a chave da API PLACAS. Nunca vai para o Git, um doc, um recado ou o chat. Sem ela, `/veiculo` responde 503. |
 | `ORIGEM_PERMITIDA` | `render.yaml` | o endereço do catálogo (CORS). Outra origem recebe 403. Também dá o endereço do `produtos.json` publicado (lista de códigos do `/contar`). |
+| `CATALOGO_URL` | `render.yaml` | o endereço do serviço de login (T-0022), de onde vem a lista de códigos do `/contar`. Só vale junto com `CHAVE_INTERNA`. |
+| `CHAVE_INTERNA` | `render.yaml` (`fromService`, gerada pelo Render no login) | a chave do `/interno/codigos`. Ninguém digita nem vê. |
 | `PASTA_GUARDA` | `render.yaml` (disco em `/var/data`) | onde ficam a guarda das placas (`veiculos.jsonl`) e as contagens por dia (`AAAA-MM-DD.json`). Sem ela, só memória. |
 
 O endereço da API (`https://wdapi2.com.br/v3/basico/`) é **fixo no código**, não é variável.

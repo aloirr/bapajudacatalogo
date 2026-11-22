@@ -42,11 +42,21 @@ let contarTeto = { min: -1, cont: 0 };
 const log = (msg) => console.log(msg);
 
 const contador = criarContador({ pasta: PASTA_GUARDA, log });
-function urlDoCatalogo() {
-  if (process.env.NODE_ENV === 'test' && process.env.CATALOGO_URL_TESTE) return process.env.CATALOGO_URL_TESTE;
-  try { return new URL('/data/produtos.json', process.env.ORIGEM_PERMITIDA).href; } catch { return null; }
+// Lista de códigos do /contar: README, "Lista de códigos do catálogo".
+export function fonteDoCatalogo(env = process.env) {
+  const base = env.CATALOGO_URL, chaveInterna = env.CHAVE_INTERNA;
+  if (base && chaveInterna) {
+    try {
+      const u = new URL('/interno/codigos', base);
+      // Fora dos testes, só https (a chave não viaja aberta).
+      if (u.protocol !== 'https:' && env.NODE_ENV !== 'test') return { url: null };
+      return { url: u.href, headers: { 'X-Chave-Interna': chaveInterna } };
+    } catch { return { url: null }; }
+  }
+  if (env.NODE_ENV === 'test' && env.CATALOGO_URL_TESTE) return { url: env.CATALOGO_URL_TESTE };
+  try { return { url: new URL('/data/produtos.json', env.ORIGEM_PERMITIDA).href }; } catch { return { url: null }; }
 }
-const catalogo = criarCatalogo({ url: urlDoCatalogo(), log });
+const catalogo = criarCatalogo({ ...fonteDoCatalogo(), log });
 
 // ---------- guarda em disco (opcional) ----------
 let arquivoGuarda = null;
