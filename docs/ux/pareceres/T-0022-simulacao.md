@@ -85,3 +85,29 @@ Sem preço e sem estoque em nenhuma tela: 🟢.
 - 🟡 antes de ir ao Alexandre (★, custo baixo, mudam os prints): bloqueio sem a ajuda repetida; contraste do botão do canto; etiqueta "Admin"; "BAP Autoparts"; troca obrigatória com 2 campos e subtítulo curto; textos sem "Ela"; etiqueta sem caixa alta e subtítulos cortados.
 - 🟡 no código: foco visível no menu; campo "Usuário" sem maiúscula automática; "Mostrar"/"Ocultar" acessível; contraste do cabeçalho das páginas novas; estados de sucesso, erro, vazio e PDF indisponível; senha gerada visível; 401 no meio do uso leva à sessão expirada.
 - Reteste: nos prints de 1366 e 390 px da versão corrigida (simulação ★) e de novo na entrega do código.
+
+## Reteste da simulação (22/11/2026)
+
+O web-site refez os 34 prints e atualizou o `LEIA.md`. Conferi os prints 03, 06, 07, 09, 10 e 15 nas duas larguras, os textos de todas as páginas HTML, o `sim.css` e o `sim.js`. No Chromium sem tela, em 1366 e 390 px, conferi o foco no menu, a etiqueta "Admin" e o campo "Usuário".
+
+**Resultado: LIBERADO** para ir ao Alexandre.
+
+| Item | Situação |
+|---|---|
+| ★1 Bloqueio sem a ajuda repetida | 🟢 "Muitas tentativas seguidas. Aguarde 15 minutos e tente de novo." |
+| ★2 Contraste do botão do canto | 🟢 véu `--escuro` 30% e empresa sem opacidade: ~7,7:1 na ponta verde |
+| ★3 Etiqueta "Admin" no menu | 🟢 branca no `--escuro` (conferido no navegador) |
+| ★4 "BAP Autoparts" | 🟢 no botão, no menu e na lista |
+| ★5 Troca obrigatória | 🟢 só "Nova senha" e "Confirmar"; subtítulo curto |
+| ★6 Textos sem gênero fixo | 🟢 usam o nome; "Passe a senha direto para a pessoa." |
+| ★7 Etiqueta sem caixa alta e sem subtítulo repetido | 🟢 "Só o administrador vê esta página"; em Criar usuários saiu o subtítulo; em Catálogos em PDF ficou só "Sempre a versão mais nova de cada catálogo." |
+| Foco visível no menu | 🟢 contorno `--verde-txt` (conferido no navegador) |
+| Campo "Usuário" | 🟢 `autocapitalize="none"`, `autocorrect="off"`, `spellcheck="false"` e `required` |
+| "Mostrar"/"Ocultar" | 🟢 sem `aria-label` nem `aria-pressed`, com `aria-controls`; "Gerar senha" com nome acessível |
+| Cabeçalho das páginas novas | 🟢 trilha e texto em `--branco` |
+| Nome do PDF em 390 px | 🟢 quebra depois do "_" |
+| "+ Criar usuário" | 🟢 |
+
+A senha mínima passou para 8 caracteres, só com a regra do tamanho (desenho do serviço). As quatro dicas dizem 8, e para a UX isso está ok.
+
+Ficam para o código, no passo 2 (já listados no `LEIA.md`): os estados de sucesso, de erro nos campos, de busca vazia e de PDF indisponível; a senha gerada visível e sem letras que confundem; o 401 no meio do uso levando à sessão expirada; e "continuar de onde parou" só se a volta for feita. O reteste final é na entrega do código, nos prints de 1366 e 390 px.
