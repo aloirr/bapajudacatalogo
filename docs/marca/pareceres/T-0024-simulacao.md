@@ -7,7 +7,7 @@
 | Data | 22/11/2026 04:36 (Manaus) |
 | O que foi visto | Simulação do `web-site` (scratchpad do gerente, `t0024-sim/`, feita a partir do main 942cf1c): `LEIA.md`, `admin/pdfs/index.html`, `admin/pdfs/sim.css`, `admin/pdfs/antes.html` e os 4 prints (antes e depois, em 1366 e 390 px). Também os 7 materiais de `catalogo_grafico/entregas/` no 942cf1c (texto com `pdftotext`, metadados com `pdfinfo` e o XML do .pptx) |
 | Base de comparação | `docs/marca/manual.md` ("Nome da marca", decisão 10 a, R-20261122-032433-alexandre) e o `site/styles.css` e o `site/admin/admin.css` do main. As cópias da simulação são iguais, byte a byte. O resto do manual ainda está "a aprovar" |
-| Parecer | **VOLTA PARA AJUSTE**, só por uma frase (MC-0013). Cor, tipografia, ícones e grafia estão certos. Corrigida a frase, a simulação pode ir ao Alexandre |
+| Parecer | **LIBERADO** no reteste da v2, em 22/11 04:44 (ver o fim). Primeira leitura (v1): **VOLTA PARA AJUSTE**, só por uma frase (MC-0013). Cor, tipografia, ícones e grafia estavam certos |
 
 Não há nada contra as regras do repositório: a tela não mostra preço nem estoque; não há logo, símbolo nem cor de
 terceiros. O "PowerPoint" aparece só como texto (nome do tipo de arquivo), e o ícone não usa o laranja nem o desenho da
@@ -88,3 +88,48 @@ Os materiais vão para a página do jeito que estão. Os ajustes de marca neles 
 Lá estão o .pptx em Arial e o PDF em Poppins (MC-0011), o tamanho do logo no cabeçalho de Lubrificantes (MC-0012,
 [SUPOSIÇÃO] se o PO confirmar) e o título "Completo (uso interno)" nos metadados da Linha Moto. Nenhum desses pontos
 segura a T-0024.
+
+## Reteste da v2 (22/11/2026 04:44, Manaus)
+
+O que foi visto: o `LEIA.md` da v2, os arquivos `admin/pdfs/index.html`, `estados.html` e `sim.css`, o `conta-sim.js`
+e os prints `depois_*`, `depois_menu_*` e `estados_*`, em 1366 e 390 px. A v2 aplica o MC-0013 e os ajustes de UX:
+- o nome "Catálogos e materiais";
+- um cartão só para os Lubrificantes, com 2 botões;
+- os cartões sem a linha "Tipo";
+- os grupos sem o contador e sem a frase.
+
+**Parecer: LIBERADO.** A simulação pode ir ao Alexandre.
+
+- **MC-0013: fechado.** O cartão do Completo Digital diz "Todos os itens, para ver na tela.", em 1366 e 390 px.
+  - O `LEIA.md` leva a troca ao Alexandre como mudança da frase aprovada na T-0022, com os prints de antes.
+  - A pergunta sobre um catálogo para clientes também vai junto.
+- **Cor:**
+  - Só tokens. O `sim.css` da v2 não tem nenhum hex.
+  - O "Baixar PowerPoint" é o `.bt-claro` que o site já usa: fundo `--branco`, borda `--verde` e texto `--verde-txt`
+    (6,48:1). Como botão secundário ao lado do `.bt` verde, fica a hierarquia certa, com as cores da marca.
+  - Botão desabilitado (arquivo em falta): o `opacity: .6` que já existe (`entrar.css:44`). Não é cor nova.
+  - Erro ao carregar: `--erro` no `--erro-claro`, que é o papel aprovado na decisão 8 a. O vermelho não aparece em nenhum
+    outro lugar da tela.
+  - O ícone do PowerPoint saiu. O cartão dos Lubrificantes usa o ícone "PDF", igual aos outros. Para a marca, isso
+    é neutro: o desenho é um só, e o tipo aparece no botão e na extensão do arquivo.
+- **Tipografia:**
+  - Só Poppins.
+  - No par de botões dos Lubrificantes, o texto cai para 14 px no computador, a mesma medida do `.bt-mini` do site, com
+    o mesmo peso. Volta a 16 px no celular.
+  - Os botões dos outros cartões ficam com 16 px. É uma diferença pequena e de uma medida que já existe no site,
+    então não abro achado. Se o `designer-ux` preferir 16 px em todos, também está certo para a marca.
+- **Grafia "BAP AUTOPARTS":** está certa no botão do canto, no menu aberto (empresa do admin), no rodapé e no nome do
+  arquivo do Portfólio. Não aparece grafia errada.
+- **Tom de voz:**
+  - "Catálogos e materiais" e "Sempre a versão mais nova de cada arquivo." são diretos e dizem o que a página tem.
+    O nome fica certo também com o .pptx. Escolher entre ele e "Catálogos em PDF" é decisão do Alexandre: os dois servem
+    para a marca.
+  - "A apresentação comercial: em PDF para ver ou enviar, em PowerPoint para editar." segue o tom das outras frases.
+  - Textos de estado:
+    - "Este arquivo não está disponível agora. Tente de novo mais tarde.";
+    - "Nenhum arquivo por enquanto.";
+    - "Não foi possível carregar os arquivos agora. Atualize a página em instantes.".
+  - Esses textos são do `designer-ux`. Na voz da marca, estão certos: são curtos, calmos e sem culpar quem usa.
+- **Regras do repositório:** sem preço, sem estoque e sem marca de terceiros. O "PowerPoint" aparece só como texto.
+
+Nenhum achado novo. Os pontos dos materiais (MC-0011 e MC-0012) continuam na T-0025.
