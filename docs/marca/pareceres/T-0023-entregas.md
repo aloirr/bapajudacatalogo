@@ -15,7 +15,7 @@
 |---|---|---|
 | Págs./slides 2 a 10, fundo branco | `pptimg/logo_escuro.png`, o mesmo arquivo do site (`site/assets/logo_escuro.png`, SHA-256 igual), nas 9 páginas | o mesmo `logo_escuro.png`, no mestre BAP_CONTEUDO |
 | Tamanho | 21,8 × 30 pt, proporção do original (226 × 312 px); não esticado | 24 × 33 pt (diferença de 0,4 % na proporção, invisível) |
-| Posição | x 40, y 26: a mesma caixa do logo de antes; só trocou o arquivo. A altura do PDF (30 pt) e a do .pptx (33 pt) já eram diferentes: fica para o manual "a aprovar", com o tamanho mínimo do logo. | x 40, y 22, igual à entrega anterior |
+| Posição | x 40, y 26: a mesma caixa do logo de antes; só trocou o arquivo. A altura do PDF (30 pt) e a do .pptx (33 pt) já eram diferentes (tamanho mínimo: MC-0012). | x 40, y 22, igual à entrega anterior |
 | Capa (pág./slide 1) e "Obrigado!" (pág./slide 11), fundo escuro | logo branco (`dimg/capa_0.png`), mesma caixa e mesmos pixels de antes; o `logo_grande` da pág. 11 também igual | logo branco (`pptimg/logo_branco.png`, igual ao `site/assets/logo_branco.png`) e `logo_grande`, como antes |
 
 No cabeçalho, o "bap" e a assinatura "componentes de qualidade" agora aparecem em preto sobre o branco, com o círculo
