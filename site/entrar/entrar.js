@@ -120,7 +120,7 @@
       bt.disabled = false;
       if (r.status === 200) { location.replace(r.dados && r.dados.trocarSenha ? paraTroca() : destino()); return; }
       if (r.status === 401) caixa(aviso, "erro", frase(erroDe(r, "Usuário ou senha incorretos."), "Confira e tente de novo."));
-      else if (r.status === 429 || r.status === 400) caixa(aviso, "erro", frase(erroDe(r, "Muitas tentativas seguidas. Aguarde 15 minutos e tente de novo.")));
+      else if (r.status === 429) caixa(aviso, "erro", frase(erroDe(r, "Muitas tentativas seguidas. Aguarde 15 minutos e tente de novo.")));
       else caixa(aviso, "erro", frase("Não foi possível entrar agora. Tente de novo em instantes."));
       mostrar(s, false);
       s.value = "";

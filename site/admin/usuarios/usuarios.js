@@ -128,11 +128,25 @@
   function entrega(corpo, aviso, u, senha, extra) {
     corpo.innerHTML = `<div class="caixa caixa-info" role="status">${IC_OK}<span>${aviso}</span></div>${extra || ""}
       <dl class="entrega"><dt>Usuário</dt><dd>${esc(u)}</dd><dt>Senha inicial</dt><dd>${esc(senha)}</dd></dl>
-      <div class="form-acoes"><button type="button" class="bt" id="copiar">Copiar usuário e senha</button><button type="button" class="bt-texto" data-fecha>Fechar</button></div>`;
+      <div class="form-acoes"><button type="button" class="bt" id="copiar">Copiar usuário e senha</button><button type="button" class="bt-texto" data-fecha>Fechar</button></div>
+      <p class="copia-msg" id="copia-msg" role="status"></p>`;
     const texto = `Catálogo online BAP\n${location.origin}/entrar\nUsuário: ${u}\nSenha inicial: ${senha}`;
+    // a resposta da cópia fica dentro da janela (o aviso solto ficaria atrás dela); sem a área de transferência
+    // moderna (endereço http), tenta o jeito antigo; se nada der, pede para anotar
+    const msg = $("#copia-msg", corpo);
+    function copiarAntigo() {
+      const ta = Object.assign(document.createElement("textarea"), { value: texto, readOnly: true });
+      ta.className = "vh"; corpo.appendChild(ta); ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      ta.remove();
+      $("#copiar", corpo).focus(); // o select() levou o foco para o campo escondido
+      return ok ? Promise.resolve() : Promise.reject();
+    }
     $("#copiar", corpo).addEventListener("click", () => {
-      (navigator.clipboard ? navigator.clipboard.writeText(texto) : Promise.reject())
-        .then(() => window.BAPConta.toast("Usuário e senha copiados."), () => window.BAPConta.toast("Não foi possível copiar. Anote o usuário e a senha."));
+      msg.className = "copia-msg"; msg.textContent = "";
+      (navigator.clipboard && window.isSecureContext ? navigator.clipboard.writeText(texto).catch(copiarAntigo) : copiarAntigo())
+        .then(() => { msg.textContent = "Usuário e senha copiados."; }, () => { msg.classList.add("erro"); msg.textContent = "Não foi possível copiar. Anote o usuário e a senha acima antes de fechar."; });
     });
     $("#copiar", corpo).focus();
   }
@@ -217,7 +231,8 @@
       us.value = us.value.trim().toLowerCase();
       if (!nome.value.trim()) F.erroCampo(nome, "Digite o nome.");
       if (!emp.value.trim()) F.erroCampo(emp, "Digite a empresa.");
-      if (!RX_USUARIO.test(us.value)) F.erroCampo(us, "Use só letras minúsculas, números, ponto, hífen ou sublinhado (3 a 32).");
+      if (!us.value) F.erroCampo(us, "Digite o usuário.");
+      else if (!RX_USUARIO.test(us.value)) F.erroCampo(us, "Use só letras minúsculas, números, ponto, hífen ou sublinhado (3 a 32).");
       conferirSenha(senha);
       if (F.focarErro(f)) return;
       const bt = $('button[type="submit"]', f);
@@ -231,7 +246,7 @@
       }
       const rl = await gravarLogo(us.value, logo);
       const extra = rl ? `<div class="caixa caixa-erro" role="alert">${F.IC.erro}<span>${F.frase("A logo não foi enviada.", [F.erroDe(rl, ""), "Envie de novo em Editar."].filter(Boolean).join(" "))}</span></div>` : "";
-      entrega(corpo, `<b>Usuário criado.</b> Passe ao cliente o usuário ${esc(us.value)} e a senha inicial.`, us.value, senha.value, extra);
+      entrega(corpo, "<b>Usuário criado.</b> Passe ao cliente o usuário e a senha abaixo.", us.value, senha.value, extra);
       carregar();
     });
   }

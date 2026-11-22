@@ -723,6 +723,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 @media (max-width: 640px) {
   /* celular (4 a): o botão é só a logo, com 44 px de toque; o nome e a empresa ficam no nome acessível e no menu aberto */
   .logado .marca span { display: none; } /* o "Catálogo online" sai para caber sem rolagem para o lado */
+  .logado .marca { min-width: 44px; justify-content: center; } /* sem o texto, o logo continua com 44 px de toque */
   .topo-dir { gap: 6px; }
   .conta-bt { padding: 2px; gap: 0; min-height: 44px; min-width: 44px; justify-content: center; border-radius: 10px; }
   .conta-bt .conta-nome, .conta-bt .conta-seta { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

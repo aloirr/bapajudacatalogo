@@ -22,9 +22,13 @@
     location.replace("/entrar?expirou=1&volta=" + encodeURIComponent(location.pathname + location.search) + location.hash);
   }
 
+  // o aviso entra vazio, com role="status", e o texto vem depois (assim o leitor de tela anuncia); com uma janela
+  // aberta (showModal), ele entra nela, senão ficaria escondido atrás
   function toast(msg) {
     const t = document.createElement("div");
-    t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg; document.body.appendChild(t);
+    t.className = "toast"; t.setAttribute("role", "status");
+    (document.querySelector("dialog[open]") || document.body).appendChild(t);
+    setTimeout(() => { t.textContent = msg; }, 50);
     setTimeout(() => t.remove(), 3200);
   }
 

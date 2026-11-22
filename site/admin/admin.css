@@ -6,7 +6,6 @@
 .us-barra .campo { flex: 1 1 260px; max-width: 420px; }
 .us-barra .bt { margin-left: auto; }
 .us-total { font-size: 14px; color: var(--texto-2); margin: 0 0 10px; }
-.us-vazio { padding: 28px 16px; text-align: center; color: var(--texto-2); }
 table.us { width: 100%; border-collapse: collapse; background: var(--branco); border-radius: var(--raio); overflow: hidden; box-shadow: var(--sombra); }
 table.us th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--texto-2);
   background: var(--fundo-filtros); padding: 10px 14px; }
@@ -48,6 +47,11 @@ dialog.dlg::backdrop { background: var(--veu); }
 .dlg-barra h2 { font-size: 17px; margin: 0; color: var(--escuro); overflow-wrap: anywhere; }
 .dlg-corpo { padding: 18px 20px 20px; overflow: auto; }
 .dlg-corpo p { margin: 0 0 12px; font-size: 14px; }
+#dlg-aviso:empty { display: none; } /* sem aviso, nada de espaço a mais no alto do formulário */
+/* resposta do "Copiar usuário e senha", dentro da janela */
+.dlg-corpo .copia-msg { margin: 10px 0 0; font-size: 14px; font-weight: 600; color: var(--verde-txt); }
+.dlg-corpo .copia-msg:empty { display: none; }
+.dlg-corpo .copia-msg.erro { color: var(--erro); }
 .logo-envio { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
 .logo-envio [hidden] { display: none; }
 .logo-envio .conta-logo { --conta-logo: 64px; --conta-logo-l: 104px; }
