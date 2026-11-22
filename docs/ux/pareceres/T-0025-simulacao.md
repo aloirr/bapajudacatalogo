@@ -72,3 +72,47 @@ Todos estão no aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0025/sim/`
 - **Só mostrar:** `MC0011_pptx_fonte_arial_poppins.png` e `MC0012_cabecalho_logo_30_48_72pt.png`.
 
 **Resultado: LIBERADO.** A simulação pode seguir para a decisão do PO, com as recomendações do §4.
+
+---
+
+## Entrega final (PR #141)
+
+| Campo | Valor |
+|---|---|
+| Data | 22/11/2026 06:00 (Manaus) |
+| O que foi revisto | O PR #141, branch `catalogo-grafico/T-0025-entregas`, head `a00b55d7cfb5d06017bd155b3eeaabc4a4fb585c`, comparado com o origin/main `0994bab`. Os arquivos conferidos foram as entregas `Catalogo_BAP_2027_A4_grafica.pdf`, `Catalogo_BAP_2027_Linha_Moto.pdf`, `BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pdf` e `.pptx`, e no gerador `print_cat.py`, `apres_bemol.py`, `apres_ppt.js`, `apres_conteudo.json`, `digital2.py` e `catalogo_moto.py` |
+| Decisão do PO | 1b, 2a, 3a, 4a, 5b, 6b, 7b, 8a, 9a e 10a. Com o 1b, a etiqueta "BAP AUTOPARTS" do cabeçalho de Lubrificantes fica, inclusive na pág. 2 |
+| Pranchas | No aloirr/bapajudacatalogo-recados, em `recados/anexos/T-0025/final/` (commit 13207b0) |
+| Resultado | **LIBERADO**, sem 🔴 e sem 🟡 |
+
+Sem preço e sem estoque: 🟢. Nenhum valor nem quantidade aparece. O texto institucional é o mesmo do antes.
+
+### A entrega bate com a simulação aprovada, ajustada pelo 1b
+- 🟢 **A4, pág. 2** (`A4_pag02_antes_depois.png`, `a4_antes_p02.png` e `a4_depois_p02.png`)
+  - O `a4_depois_p02.png` é idêntico, byte a byte, ao `RD0429_A4_depois_pag02.png` da simulação (5402d30).
+  - No PR, a mudança do `print_cat.py` é a mesma linha a linha do diff da simulação: a barra com o lado direito vazio (2a), sem o subtítulo, sem o cartão do SAC e sem a linha dos prazos (3a).
+  - Renderizei o PDF entregue com o `pdftoppm` e conferi: a pág. 2 é a da prancha.
+  - Comparei com o main, renderizando as 56 páginas: **só a pág. 2 muda**, e o PDF continua com 56 páginas.
+- 🟢 **Lubrificantes, pág. 2 do PDF e slide 2 do .pptx** (`Lubrificantes_pag02_PDF_e_PPTX_antes_depois.png`, `lpdf_antes_p02.png`, `lpdf_depois_p02.png`, `lppt_antes_p02.png` e `lppt_depois_p02.png`)
+  - Comparei com o "depois" da simulação. A única diferença, no PDF e no .pptx, é a caixa da etiqueta ao lado do logo, com cerca de 1.240 pixels. Ou seja, a etiqueta voltou, como manda o 1b.
+  - Comparei com o "antes". A única diferença é a faixa dos números, de y 512 a 792: os 3 cartões tomam a largura dos 4 (4a). O cabeçalho e a caixa "Garantia Expressa BAP" ficam iguais aos de hoje.
+  - Os "antes" das pranchas são idênticos aos da simulação: 0 pixel diferente.
+- 🟢 **Lubrificantes, as outras páginas.** Comparei com o main.
+  - **PDF:** renderizei as 11 páginas, e só a pág. 2 muda. O texto das págs. 1 e 3 a 11 é igual.
+  - **.pptx:** abri o pacote. Mudam só o `slide2.xml`, a data em `core.xml` e os ids das seções em `presentation.xml`, que o `pptxgenjs` sorteia a cada geração e que não aparecem na tela.
+  - A etiqueta continua no mestre (`slideLayout3.xml`), vinda de `apres_conteudo.json` ("marca"). Isso confirma que o 1b vale nos slides 2 a 10 e nas págs. 2 a 10.
+  - Os metadados do PDF continuam "BAP · Lubrificantes e Químicos · Apresentação Comercial".
+- 🟢 **O SAC continua no lugar.**
+  - Na caixa da garantia da pág. 2 (`apres_conteudo.json:17`).
+  - No item "Garantia sem burocracia" (`apres_conteudo.json:112`).
+  - No bloco "Garantia Expressa BAP" do A4.
+  - Nenhuma informação útil se perdeu.
+- 🟢 **Linha Moto (5b).** O título dos metadados do PDF entregue é "Catálogo BAP 2027 — Linha Moto (uso interno)", conferido com o `pdfinfo`, e o PDF continua com 17 páginas. O A4 mantém "Catálogo BAP 2027 — Impressão A4 (uso interno)".
+- 🟢 **6b e 7b.** Não se aplicam: o .pptx continua em Arial e o logo, no mesmo tamanho.
+
+### Sobre o 1b
+Na §2 e na pergunta 1, eu tinha recomendado tirar a etiqueta. Com o 1b, o cabeçalho fica como já era, e a etiqueta continua competindo com o sobretítulo, que tem o mesmo estilo. Isso já estava no antes e não é defeito da entrega, por isso não segura. Fica a nota para quando o Alexandre decidir o MC-0012: o tamanho do logo e a etiqueta são o mesmo assunto, a assinatura do logo, e é melhor resolvê-los juntos.
+
+As notas 5.1 a 5.3 da simulação continuam valendo e não seguram.
+
+**Resultado da entrega final: LIBERADO** para seguir ao `revisor-codigo`.
