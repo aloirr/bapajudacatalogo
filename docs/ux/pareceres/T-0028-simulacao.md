@@ -87,3 +87,37 @@ As 2 perguntas não dependem do ajuste do §4: podem ir ao Alexandre agora, e o 
 - **Gerador:** o diff do `223ce6b` (`plural.py`, `portfolio.py`, `digital2.py`, `catalogo_moto.py`, `lista_aplicacoes_site.py`, `kitfiltros/kit.py` e `LEIA_GERADOR.md`).
 
 **Resultado: VOLTA PARA AJUSTE** (1 🟡, §4). A capa da Linha Moto e o "1 item" estão 🟢. Depois do ajuste, refaço a conferência das 3 páginas.
+
+---
+
+## Reteste do 🟡 (head `6c035be`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 07:51 (Manaus) |
+| O que foi revisto | O diff `223ce6b..6c035be` (só o `aplicacoes()` do `portfolio.py`), a seção "Ajuste do parecer de UX" do `LEIA.md` e os 24 PNGs `port-aplic-a-*` e `port-aplic-b-*` (recados, commit e1d7b49). Também os PDFs gerados pelo `6c035be` (as 2 variantes do Portfólio, antes e depois do ajuste, e o A4, o Digital, a Linha Moto e a Lista); conferi que o `portfolio.py` usado é o do branch |
+| Resultado | **VOLTA PARA AJUSTE**: o 🟡 da 1ª rodada fica 🟢; sobra 1 🟡 novo e pequeno, no Filtro de Ar Moto |
+
+### O 🟡 da 1ª rodada: 🟢
+- 🟢 **O caractere vazio sumiu das aplicações.** A busca no texto das 2 variantes acha 0 nas aplicações; sobram só os 2 da seta da pág. 3 (nota 1 do §5, com a marca).
+- 🟢 **Mudam só 6 páginas em cada variante**, as do `LEIA.md` (a: 39, 42, 47, 66, 68 e 79; b: 37, 40, 45, 62, 64 e 73). Conferi no texto e no pixel; cada diferença fica na coluna das aplicações.
+- 🟢 **As linhas se leem.** Filtros de Ar da Leve (pág. 37 da b): "FORD ECOSPORT 1.6 L", sem ano e sem cola. Filtros de Cabine da Pesada (62): "MERCEDES-BENZ 1315 ATEGO". Amortecedores da Pesada (45): "MB OF1724", sem o " -" pendurado. Filtros de Óleo da Leve e da Pesada (40 e 64): as aplicações que estavam escondidas pelo "…" viram linhas próprias, na mesma grade de 2 colunas, sem estourar a área.
+- 🟢 **Os outros PDFs não mudam.** No `6c035be`, A4 (56 págs.), Completo Digital (311) e Lista (21) ficam iguais às entregas e ao código do main; na Linha Moto, só a capa, na mesma caixa da 1ª rodada.
+
+### 🟡 novo: o Filtro de Ar Moto mostra 1 aplicação de 27 (pág. 73 da b, 79 da a)
+Print: `port-aplic-b-p73-moto-filtros-de-ar-depois.png`.
+
+- A página mostra só "HONDA CG 125 CARGO ESD". O produto tem 27 aplicações, em 3 modelos: CG 125, CG 150 e CG 160 (conferi no `produtos.json`).
+- **Não é aceitável como está.** "Principais aplicações" serve para o cliente saber se a peça serve. Com 1 linha, o balconista lê que o filtro é da CG 125 Cargo ESD e deixa de oferecer para a CG 150 e a CG 160, as motos que mais rodam na loja. A página é nova e tem espaço para 12 linhas.
+- **A causa** é a regra de "não repetir o mesmo carro" do `aplicacoes()`: nas linhas da v27, a 1ª palavra é a montadora, e as 27 linhas caem como uma só ("HONDA"). A mesma causa repete o carro nos Filtros de Ar da Leve (pág. 37 da b): "Ford Ecosport 1.6 L 16V" e "FORD ECOSPORT 1.6 L", na mesma lista.
+- **Pedido ao `catalogo-grafico` (o resultado; o como é dele):**
+  1. nas linhas da v27, a montadora é a 1ª palavra e o "mesmo carro" é o modelo com o número (CG 125, CG 150, CG 160), como o modelo das linhas com a montadora em negrito;
+  2. o Filtro de Ar Moto passa a mostrar os 3 modelos, e o Ecosport aparece uma vez só na pág. 37;
+  3. nova prova das páginas que mudarem, nas 2 variantes, com a lista delas.
+- A caixa alta dessas linhas ("HONDA CG 125 CARGO ESD") fica com o parecer de marca.
+
+### Notas do reteste (não seguram)
+1. **A repetição do mesmo carro já existia em outras páginas** e vem da mesma regra, com grafias diferentes da base: "Ford Royale" e "FORD Royale…" (pág. 13 da b), "Ford Ranger 2.8…" e "Ford Ranger" (19), "FORD Courier 1.3…" e "Ford Courier 1.6…" (33). Se o ajuste do 🟡 também as resolver, melhor; se não, ficam para o `corretor-redundancias`.
+2. **Os Filtros de Óleo da Linha Leve (pág. 40 da b) abrem com 3 máquinas** ("DYNAPAC CC21 – PERKINS 4236", "MULLER 26 – MB OM321" e "PUTSMEISTER BSA1003 – MWM D229.4"), antes dos carros. A Dynapac já abria a lista na 1ª rodada; o ajuste só separou as outras 2, que estavam coladas. É a ordem e a LINHA da base: para o `catalogo-dados`, junto da nota 2 do §5.
+
+**Resultado do reteste: VOLTA PARA AJUSTE** (1 🟡 novo, no Filtro de Ar Moto). O 🟡 da 1ª rodada está 🟢. As recomendações do §6 não mudam (1b e 2a), e as perguntas podem seguir ao Alexandre.
