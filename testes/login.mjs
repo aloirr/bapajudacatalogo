@@ -37,31 +37,13 @@ const SESSAO_H = 5;
 const falsa = (rot) => `${rot}-falsa-de-teste-${crypto.randomBytes(6).toString("hex")}`;
 const FORA = "example.invalid"; // o "outro site" dos testes da volta (nunca é chamado: o pedido é barrado)
 const ETIQUETA = "Falta trocar a senha inicial";
-// Catálogos, materiais e treinamentos (T-0024, T-0032). As expectativas saem da própria árvore testada, nunca de números
-// fixos: a lista PDFS do servicos/login/server.mjs (id, título, grupo, tipo, par e a regex do arquivo) e o GRUPOS do
-// site/admin/pdfs/pdfs.js (os grupos da tela e a ordem deles). Assim o teste vale antes e depois de cada PR, em qualquer
-// ordem. O Content-Type e o download de cada arquivo são dos testes do serviço (servicos/login/login.test.mjs).
+// Catálogos, materiais e treinamentos (T-0024, T-0032). A expectativa da tela sai do GET /api/pdfs do admin (a lista do
+// serviço, com o arquivo já resolvido) e do GRUPOS do site/admin/pdfs/pdfs.js (os grupos da tela e a ordem deles), nunca de
+// números fixos: o teste vale antes e depois de cada PR, em qualquer ordem. A lista em si (ids, pares, regex do arquivo,
+// Content-Type e download) é dos testes do serviço (servicos/login/login.test.mjs); aqui fica só o que a tela monta.
 const TITULOS_PDFS = ["Catálogos e materiais", "Catálogos, materiais e treinamentos"]; // o nome da T-0024 e o da T-0032
 const NOME_TIPO = { pdf: "PDF", pptx: "PowerPoint" };
 
-// a lista PDFS do server.mjs: [{ id, titulo, grupo, tipo, par, re }], na ordem; erro se não achar ou não entender um item
-function lerListaPdfs(raiz) {
-  const src = fs.readFileSync(path.join(raiz, "servicos", "login", "server.mjs"), "utf8");
-  const ini = src.indexOf("const PDFS = [");
-  const fim = ini < 0 ? -1 : src.indexOf("\n];", ini);
-  if (ini < 0 || fim < 0) throw new Error("não achei a lista PDFS no servicos/login/server.mjs");
-  const lista = [];
-  for (const linha of src.slice(ini, fim).split("\n")) {
-    if (!/^\s*\{\s*id:/.test(linha)) continue;
-    const campo = (k) => { const m = linha.match(new RegExp(`\\b${k}:\\s*'([^']*)'`)); return m ? m[1] : null; };
-    const re = linha.match(/\bre:\s*\/(.+)\/([a-z]*)\s*\}/);
-    const it = { id: campo("id"), titulo: campo("titulo"), grupo: campo("grupo"), tipo: campo("tipo") || "pdf", par: campo("par"), re: re ? new RegExp(re[1], re[2]) : null };
-    if (!it.id || !it.titulo || !it.re) throw new Error(`não entendi o item da lista PDFS: ${linha.trim().slice(0, 90)}`);
-    lista.push(it);
-  }
-  if (!lista.length) throw new Error("a lista PDFS do servicos/login/server.mjs está vazia");
-  return lista;
-}
 // o GRUPOS do pdfs.js: [[chave, título]], na ordem da tela
 function lerGruposTela(raiz) {
   const src = fs.readFileSync(path.join(raiz, "site", "admin", "pdfs", "pdfs.js"), "utf8");
@@ -353,11 +335,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
       await print(page, "criar-usuarios", 1366);
       c.conferir("Criar usuários");
 
-      // Catálogos, materiais e treinamentos: a lista do serviço, o título e, na tela, os cartões e os grupos que a árvore
-      // testada manda (lista PDFS do server.mjs + GRUPOS do pdfs.js)
-      let fonte = null;
-      try { const lista = lerListaPdfs(raiz); fonte = { lista, secoes: telaEsperada(lista, lerGruposTela(raiz)) }; }
-      catch (e) { falha("l-admin", N_ADMIN, "pdf-fonte", `não li as expectativas da árvore: ${cortar(e.message, 120)}`); }
+      // Catálogos, materiais e treinamentos: o título e, na tela, os grupos e os cartões da lista do GET /api/pdfs
       await page.goto(base + "admin/pdfs", { waitUntil: "networkidle" });
       await page.waitForSelector("#pdfs article.pdf", { timeout: 10000 }).catch(() => {});
       const tela = await page.evaluate(async () => {
@@ -385,29 +363,20 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
       const vistos = [...new Set(Object.values(titulos))];
       if (vistos.length !== 1 || !TITULOS_PDFS.includes(vistos[0]))
         falha("l-admin", N_ADMIN, "pdf-titulo", `/admin/pdfs: o nome não bate (${Object.entries(titulos).map(([k, v]) => `${k} "${cortar(v || "", 50)}"`).join(", ")}); esperado o mesmo nos 4, ${TITULOS_PDFS.map((t) => `"${t}"`).join(" ou ")}`);
+      let grupos = null;
+      try { grupos = lerGruposTela(raiz); } catch (e) { falha("l-admin", N_ADMIN, "pdf-grupos-js", `não li o GRUPOS da tela: ${cortar(e.message, 120)}`); }
       const lista = Array.isArray(tela.lista) ? tela.lista : [];
-      const idsApi = lista.map((p) => p.id);
-      if (fonte) {
-        // a lista do serviço: os ids da lista PDFS, na ordem, com o mesmo título
-        const idsFonte = fonte.lista.map((p) => p.id);
-        if (tela.api !== 200 || idsApi.join() !== idsFonte.join())
-          falha("l-admin", N_ADMIN, "pdf-api", `GET /api/pdfs (admin) respondeu ${tela.api} com ${idsApi.length} ids (${cortar(idsApi.join(" "), 160)}); a lista PDFS do server.mjs tem ${idsFonte.length}: ${cortar(idsFonte.join(" "), 160)}`);
-        for (const p of fonte.lista) {
-          const a = lista.find((x) => x.id === p.id);
-          if (a && (a.titulo !== p.titulo || a.grupo !== p.grupo || (a.tipo || "pdf") !== p.tipo || (a.par || null) !== p.par))
-            falha("l-admin", N_ADMIN, "pdf-api:" + p.id, `GET /api/pdfs: o ${p.id} difere da lista PDFS do server.mjs`);
-        }
+      if (tela.api !== 200 || !lista.length) falha("l-admin", N_ADMIN, "pdf-lista", `GET /api/pdfs (admin) respondeu ${tela.api} com ${lista.length} itens: sem a lista, a tela não foi conferida`);
+      else if (grupos) {
         // os grupos e os cartões: as seções na ordem do GRUPOS, cada uma com os cartões na ordem da lista
-        const esp = fonte.secoes;
+        const esp = telaEsperada(lista.map((p) => ({ ...p, tipo: p.tipo || "pdf", par: p.par || null })), grupos);
         const nEsp = esp.reduce((n, x) => n + x.cartoes.length, 0);
         const descrEsp = esp.map((x) => `${x.nome} ${x.cartoes.length}`).join(" | ");
         const descrTela = tela.grupos.map((g) => `${g.h2} ${g.cartoes.length}`).join(" | ") || "nenhum";
         const gruposOk = tela.grupos.length === esp.length && esp.every((x, i) => tela.grupos[i].id === "grupo-" + x.g && tela.grupos[i].h2 === x.nome);
         if (!gruposOk) falha("l-admin", N_ADMIN, "pdf-grupos", `/admin/pdfs com os grupos ${descrTela}; esperados ${descrEsp}`);
         if (tela.soltos !== nEsp) falha("l-admin", N_ADMIN, "pdf-cartoes", `/admin/pdfs com ${tela.soltos} cartões; esperados ${nEsp} (${descrEsp})`);
-        // cada cartão: o título, e os botões na ordem dos itens; com o arquivo em entregas/, o link de baixar; sem, desabilitado
-        const entregas = path.join(raiz, "catalogo_grafico", "entregas");
-        const arquivos = fs.existsSync(entregas) ? fs.readdirSync(entregas, { withFileTypes: true }).filter((d) => d.isFile()).map((d) => d.name) : [];
+        // cada cartão: o título e os botões na ordem dos itens; com arquivo (p.arquivo), o link de baixar; sem, desabilitado
         const faltam = [];
         for (const x of esp) {
           const g = tela.grupos.find((k) => k.id === "grupo-" + x.g);
@@ -428,27 +397,22 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
               const bt = k.bts[i];
               if (!bt) return;
               const href = "/admin/pdfs/baixar/" + p.id;
-              if (arquivos.some((f) => p.re.test(f))) {
-                if (bt.href !== href) falha("l-admin", N_ADMIN, "pdf-link:" + p.id, `/admin/pdfs: o ${p.id} tem o arquivo em entregas/ e está sem o link ${href}${bt.desab ? " (botão desabilitado)" : ""}`);
+              if (p.arquivo) {
+                if (bt.href !== href) falha("l-admin", N_ADMIN, "pdf-link:" + p.id, `/admin/pdfs: o ${p.id} tem o arquivo (${p.arquivo}) e está sem o link ${href}${bt.desab ? " (botão desabilitado)" : ""}`);
               } else {
                 faltam.push(p.id);
-                if (!bt.desab || bt.href) falha("l-admin", N_ADMIN, "pdf-fora:" + p.id, `/admin/pdfs: o ${p.id} sem arquivo em entregas/ e o botão não está desabilitado`);
+                if (!bt.desab || bt.href) falha("l-admin", N_ADMIN, "pdf-fora:" + p.id, `/admin/pdfs: o ${p.id} sem arquivo e o botão não está desabilitado`);
               }
             });
           }
         }
-        if (faltam.length) aviso("l-admin", N_ADMIN, `${faltam.length} arquivo(s) da lista PDFS fora de catalogo_grafico/entregas/ (botão desabilitado na tela, como esperado): ${faltam.join(", ")}`);
-        // os treinamentos (se a lista tiver): cada cartão com 2 botões, PDF e PowerPoint; o grupo na tela com o subtítulo
-        const treinos = esp.flatMap((x) => x.cartoes).filter((c) => c.itens[0].grupo === "treinamentos");
-        for (const c of treinos) {
-          const tipos = c.itens.map((p) => p.tipo).join("|");
-          if (tipos !== "pdf|pptx") falha("l-admin", N_ADMIN, "pdf-treino:" + c.titulo, `o treinamento "${c.titulo}" na lista PDFS com ${tipos} (esperado pdf e pptx, no mesmo par)`);
-        }
+        if (faltam.length) aviso("l-admin", N_ADMIN, `${faltam.length} arquivo(s) da lista sem arquivo em catalogo_grafico/entregas/ (botão desabilitado na tela, como esperado): ${faltam.join(", ")}`);
+        // o grupo dos Treinamentos, se a tela tiver, com o subtítulo
         const gTrein = tela.grupos.find((g) => g.id === "grupo-treinamentos");
         if (gTrein && !gTrein.sub) falha("l-admin", N_ADMIN, "pdf-sub", "o grupo Treinamentos sem o subtítulo (p.pdf-grupo-sub)");
-        resumoPdfs = `${idsFonte.length} ids da lista PDFS no GET /api/pdfs, ${nEsp} cartões em ${esp.length} grupos (${descrEsp})` +
-          (treinos.length ? `, os ${treinos.length} treinamentos com PDF e PowerPoint${gTrein ? " e o subtítulo" : ""}` : "") +
-          `; link de baixar em todo item com o arquivo em entregas/ (${faltam.length} sem arquivo, com o botão desabilitado)`;
+        resumoPdfs = `${lista.length} itens do GET /api/pdfs em ${nEsp} cartões e ${esp.length} grupos (${descrEsp}), botões na ordem dos itens` +
+          (gTrein ? ", Treinamentos com o subtítulo" : "") +
+          `; link de baixar em todo item com arquivo (${faltam.length} sem arquivo, com o botão desabilitado)`;
       }
       await a11y(page, tituloPdfs, 1366);
       await page.screenshot({ path: path.join(dirPrints, "login-pdfs-1366.png"), fullPage: true }); // a página inteira: todos os cartões
