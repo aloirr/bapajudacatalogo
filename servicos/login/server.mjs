@@ -95,6 +95,23 @@ const PDFS = [
   { id: 'lubrificantes-pdf', titulo: 'Lubrificantes e Químicos', grupo: 'materiais', tipo: 'pdf', par: 'lubrificantes', re: /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pdf$/ },
   { id: 'lubrificantes-pptx', titulo: 'Lubrificantes e Químicos', grupo: 'materiais', tipo: 'pptx', par: 'lubrificantes', re: /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pptx$/ },
   { id: 'kit-filtros', titulo: 'Kit Filtros', grupo: 'materiais', tipo: 'pdf', re: /^Kit_Filtros_BAP\.pdf$/ },
+  // T-0032: o portfólio por linha (só PDF), no grupo dos materiais.
+  { id: 'portfolio-leve', titulo: 'Portfólio · Linha Leve', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Leve\.pdf$/ },
+  { id: 'portfolio-pesada', titulo: 'Portfólio · Linha Pesada', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Pesada\.pdf$/ },
+  { id: 'portfolio-moto', titulo: 'Portfólio · Linha Moto', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Moto\.pdf$/ },
+  { id: 'portfolio-lubrificantes', titulo: 'Portfólio · Linha Lubrificantes', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Lubrificantes\.pdf$/ },
+  { id: 'portfolio-acessorios', titulo: 'Portfólio · Linha Acessórios', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Acessorios\.pdf$/ },
+  { id: 'portfolio-baterias', titulo: 'Portfólio · Linha Baterias', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Baterias\.pdf$/ },
+  { id: 'portfolio-autocenter', titulo: 'Portfólio · Linha Autocenter', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Autocenter\.pdf$/ },
+  // T-0032: os treinamentos dos vendedores, cada um em PDF e PowerPoint (o mesmo "par": um cartão só, o PDF é o principal).
+  { id: 'treinamento-mecanica-basica-pdf', titulo: 'Treinamento · Mecânica Básica', grupo: 'treinamentos', tipo: 'pdf', par: 'treinamento-mecanica-basica', re: /^Treinamento_Mecanica_Basica_BAP_Vendedores\.pdf$/ },
+  { id: 'treinamento-mecanica-basica-pptx', titulo: 'Treinamento · Mecânica Básica', grupo: 'treinamentos', tipo: 'pptx', par: 'treinamento-mecanica-basica', re: /^Treinamento_Mecanica_Basica_BAP_Vendedores\.pptx$/ },
+  { id: 'treinamento-baterias-pdf', titulo: 'Treinamento · Baterias', grupo: 'treinamentos', tipo: 'pdf', par: 'treinamento-baterias', re: /^Treinamento_Baterias_BAP_Vendedores\.pdf$/ },
+  { id: 'treinamento-baterias-pptx', titulo: 'Treinamento · Baterias', grupo: 'treinamentos', tipo: 'pptx', par: 'treinamento-baterias', re: /^Treinamento_Baterias_BAP_Vendedores\.pptx$/ },
+  { id: 'treinamento-linha-moto-pdf', titulo: 'Treinamento · Linha Moto', grupo: 'treinamentos', tipo: 'pdf', par: 'treinamento-linha-moto', re: /^Treinamento_Linha_Moto_BAP_Vendedores\.pdf$/ },
+  { id: 'treinamento-linha-moto-pptx', titulo: 'Treinamento · Linha Moto', grupo: 'treinamentos', tipo: 'pptx', par: 'treinamento-linha-moto', re: /^Treinamento_Linha_Moto_BAP_Vendedores\.pptx$/ },
+  { id: 'treinamento-lubrificantes-pdf', titulo: 'Treinamento · Lubrificantes', grupo: 'treinamentos', tipo: 'pdf', par: 'treinamento-lubrificantes', re: /^Treinamento_Lubrificantes_BAP_Vendedores\.pdf$/ },
+  { id: 'treinamento-lubrificantes-pptx', titulo: 'Treinamento · Lubrificantes', grupo: 'treinamentos', tipo: 'pptx', par: 'treinamento-lubrificantes', re: /^Treinamento_Lubrificantes_BAP_Vendedores\.pptx$/ },
 ];
 // Content-Type do download: pelo tipo da lista, nunca pela extensão do pedido.
 const TIPO_MIME = {
