@@ -26,12 +26,6 @@ MINIMO = {'LEVE': 3, 'PESADA': 3, 'MOTO': 1, 'UNIVERSAL': 1}     # nº mínimo d
 TITULO = {'SUSPENSÃO': 'Suspensão', 'DIREÇÃO': 'Direção', 'TRANSMISSÃO': 'Transmissão', 'FREIO': 'Freio',
           'ARREFECIMENTO': 'Arrefecimento', 'MOTOR': 'Motor', 'ELÉTRICA': 'Elétrica', 'FILTRAÇÃO': 'Filtração',
           'LUBRIFICANTES': 'Lubrificantes', 'QUÍMICOS': 'Químicos', 'RODAGEM': 'Rodagem', 'ACESSÓRIOS': 'Acessórios'}
-FRASE = {'SUSPENSÃO': 'Conforto, estabilidade e segurança.', 'DIREÇÃO': 'Precisão e firmeza no controle.',
-         'TRANSMISSÃO': 'Força do motor chegando às rodas.', 'FREIO': 'Frenagem segura.',
-         'ARREFECIMENTO': 'Motor na temperatura certa.', 'MOTOR': 'Lubrificação, alimentação e sincronismo.',
-         'ELÉTRICA': 'Partida, ignição, iluminação e sinalização.', 'FILTRAÇÃO': 'Ar, óleo, combustível e cabine limpos.',
-         'LUBRIFICANTES': 'Óleos para motor, transmissão e hidráulico.', 'QUÍMICOS': 'Manutenção e proteção do veículo.',
-         'RODAGEM': 'Cubos, rolamentos, rodas e pneus.', 'ACESSÓRIOS': 'Visibilidade e transporte de carga.'}
 SEM_IMAGEM = {'Cuíca de Freio'}          # a imagem da linha mostra marca de terceiro
 # produtos com mais de uma família (Filtros, Óleo, Químicos): o card leva o nome da família
 FAM_CARD = {
