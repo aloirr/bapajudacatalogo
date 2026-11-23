@@ -628,6 +628,25 @@ def trocar_rodape(prs, rodape):
         parar('rodapé do layout não encontrado')
 
 
+def tirar_midia_orfa(prs):
+    """Solta as relações de mídia que o XML da parte não cita (imagem trocada ou forma apagada). Sem a relação,
+    o arquivo não vai para o pacote: nenhuma imagem escondida (ex.: logo de terceiro do original)."""
+    ns_r = '{%s}' % NS['r']
+    soltas = 0
+    for part in prs.part.package.iter_parts():
+        el = getattr(part, '_element', None)
+        if el is None:
+            continue
+        citados = {v for no in el.iter() for k, v in no.attrib.items() if k.startswith(ns_r)}
+        for rid, rel in list(part.rels.items()):
+            if rel.is_external or rid in citados:
+                continue
+            if rel.reltype in (RT.IMAGE, RT.MEDIA, RT.VIDEO, 'http://schemas.microsoft.com/office/2007/relationships/media'):
+                part.rels.pop(rid)
+                soltas += 1
+    return soltas
+
+
 def zip_fixo(caminho):
     """Regrava o .pptx com data fixa nas entradas do zip: a mesma entrada dá o mesmo arquivo, byte a byte."""
     import zipfile
@@ -774,13 +793,14 @@ def montar(nome, saida=None):
     trocar_fontes(prs)
     vermelho = ajustar_tema(prs).get('D64545', 0)
     trocar_rodape(prs, cfg['rodape'])
+    orfas = tirar_midia_orfa(prs)
     destino = saida or os.path.join(AQUI, 'saidas', cfg['arquivo'])
     os.makedirs(os.path.dirname(destino), exist_ok=True)
     prs.save(destino)
     zip_fixo(destino)
     shutil.rmtree(tmp, ignore_errors=True)
     print(f'{destino}: {len(cfg["slides"])} slides; códigos conferidos: {len(base.citados)}; base {base.vars["versao_base"]}; '
-          f'vermelho de sinal grave em {vermelho} preenchimento(s)')
+          f'vermelho de sinal grave em {vermelho} preenchimento(s); relações de mídia sem uso tiradas: {orfas}')
     return destino, cfg, base
 
 
