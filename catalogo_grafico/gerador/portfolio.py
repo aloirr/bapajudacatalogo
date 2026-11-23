@@ -260,9 +260,10 @@ def heroi(s, fam, c, top, bot):
     if nota: s.t(x, y + lin * LD + 6, nota, 8, 'grey', 'PR')
 
 
-def pagina_linha(s, cod, nome, desc, arv, pags=None, rotulo='sistemas'):
+def pagina_linha(s, cod, nome, desc, arv, pags=None):
     """divisória da linha: lista sistema → família → produtos, estilo menu (sem fundo, com marcador). Nos portfólios por
-    linha (T-0032), `pags` dá a página de cada produto (id do card → nº) e a lista usa só as colunas que precisa"""
+    linha (T-0032), `pags` dá a página de cada produto (id do card → nº), a lista usa só as colunas que precisa e a
+    contagem fica só na capa"""
     from reportlab.lib.utils import simpleSplit
     sis = arv[cod]
     n_it = sum(c['n'] for f in sis.values() for cs in f.values() for c in cs)
@@ -276,7 +277,7 @@ def pagina_linha(s, cod, nome, desc, arv, pags=None, rotulo='sistemas'):
     fs = next((f for f in (32, 26, 22, 20) if pw(nome, 'PB', f) < PW - (60 if f == 32 else 45)), 18)   # nome longo (Linha Lubrificantes): menor
     s.t(36, 170, nome, fs, 'white', 'PB', ls=-.6)
     s.p(38, 220, PW - 70, html.escape(desc), 11.5, 16, 'lgrey')
-    for i, (a, b) in enumerate([(len(sis), rotulo), (n_fam, 'famílias'), (n_pr, 'produtos'), (fmt(n_it), 'itens')]):
+    for i, (a, b) in enumerate([] if pags else [(len(sis), 'sistemas'), (n_fam, 'famílias'), (n_pr, 'produtos'), (fmt(n_it), 'itens')]):
         yy = 292 + i * 32
         s.t(38, yy, str(a), 19, 'green2', 'PB'); s.t(38 + pw(str(a), 'PB', 19) + 8, yy + 6, b, 10.5, 'white', 'PR')
     # lista em 4 colunas (bloco do sistema vai para a coluna mais curta)
@@ -344,7 +345,7 @@ FILTROS = {
                        frase='Palhetas, cintas de amarração e reboque, e outros acessórios para qualquer veículo.'),
     'baterias': dict(nome='Linha Baterias', secoes=[('Linha Leve', 'LEVE', 'ELÉTRICA', {'Baterias'}), ('Linha Pesada', 'PESADA', 'ELÉTRICA', {'Baterias'})],
                      frase='Baterias para automóveis, utilitários, caminhões e ônibus, com garantia da fábrica.',
-                     divisoria=False),     # 2 produtos só: a divisória ficaria vazia (designer-ux, item 6)
+                     divisoria=False, conta='Linha Leve e Linha Pesada'),     # 2 produtos só: a divisória ficaria vazia (designer-ux, item 6)
     'autocenter': dict(nome='Linha Autocenter',
                        secoes=[('Filtração', 'LEVE', 'FILTRAÇÃO', None), ('Palhetas', 'LEVE', 'ACESSÓRIOS', None),
                                ('Suspensão', 'LEVE', 'SUSPENSÃO', _SUSP_AC), ('Freio', 'LEVE', 'FREIO', _FREIO_AC),
@@ -354,6 +355,7 @@ FILTROS = {
                        so_leve=True),       # cada linha só mostra veículos dela (marca, item 4): aqui, só leve
 }
 ARQUIVO = 'Portfolio_Produtos_BAP_AUTOPARTS_{}.pdf'     # Portfolio_Produtos_BAP_AUTOPARTS_Linha_Autocenter.pdf
+NOME_LINHA = {cod: nome for cod, nome, _ in LINHAS}
 TAB_BAT = 12                                            # mais baterias que isso: página de tabela depois do produto
 
 
@@ -368,8 +370,37 @@ def filtrar(arv, cfg):
                     d = dict(c, spec2=True, desc=DESC_LINHA.get((c['prod'], l), c['desc']), so_leve=cfg.get('so_leve', False))
                     if c['prod'] == 'Baterias':      # a bateria no padrão da marca: "45 Ah LP · 18 meses"
                         d['rows'] = [dict(r, bat=bateria(r), segs=[(bateria(r)[0], False)]) for r in c['rows']]
+                        if c['n'] > TAB_BAT: d['tab'] = d['rows']     # a lista vai para a página de tabela (UX)
+                    elif c['spec']:                  # óleos sem "Litro óleo"; em 2 colunas, corte só em fim de palavra
+                        ts = [oleo(t) if c['prod'] == 'Óleo Lubrificante' else t
+                              for t in (''.join(x for x, _ in r.get('segs') or []).split(' — ')[0].strip() for r in c['rows'])]
+                        larg = (W - 40 - 476 - 18) / 2 - 14 if len({t.upper() for t in ts}) > 6 else W
+                        d['rows'] = [dict(r, segs=[(corta(t, larg), False)]) for r, t in zip(c['rows'], ts)]
                     out.setdefault(titulo or TITULO[sn], collections.OrderedDict()).setdefault(fam, []).append(d)
     return out
+
+
+def oleo(t):
+    """o óleo sem "Litro óleo" / "Óleo lubrificante" / "Balde óleo" no começo, com viscosidade, API e litro num padrão
+    só ("Shiftease 100 80W API GL4 mineral 20 L"; marca, item 7)"""
+    t = re.sub(r'(?i)^(?:litro\s+|balde\s+)?óleo(?:\s+lubrificante)?\s+', '', t)
+    t = re.sub(r'\b(' + '|'.join(LINHA_BAP) + r')\b', lambda w: LINHA_BAP[w.group(1)], t)
+    t = re.sub(r'(?i)\b(\d+)w(\d*)\b', lambda m: m.group(0).upper(), t)
+    t = re.sub(r'(?i)\bsljaso\b', 'SL JASO', t)
+    t = re.sub(r'(?i)\bapi\s+([a-z]{2}(?:/[a-z]{2})?)\b', lambda m: 'API ' + m.group(1).upper(), t)
+    t = re.sub(r'(?i)\s*-\s*tambor\s+(\d+)\s*l\b', r' · \1 L', t)
+    t = re.sub(r'(?i)\bdexron\b', 'Dexron', re.sub(r'\b(\d+)L\b', r'\1 L', t))
+    return t[:1].upper() + t[1:]
+
+
+def corta(t, larg, fs=10.2):
+    """o texto na largura, cortado em fim de palavra e com "…" (designer-ux, item 6). O volume do fim ("20 L",
+    "· 200 L") fica, porque é o que separa o balde do litro"""
+    if pw(t, 'PR', fs) <= larg: return t
+    m = re.search(r'\s(?:·\s)?[\d.,]+ L$', t); fim = m.group(0) if m else ''
+    ws = t[:len(t) - len(fim)].split()
+    while len(ws) > 1 and pw(' '.join(ws) + '…' + fim, 'PR', fs) > larg: ws.pop()
+    return ' '.join(ws).rstrip(' ,/-·') + '…' + fim
 
 
 def bateria(r):
@@ -393,13 +424,13 @@ def indice(arv_f, cfg):
     for sn, fams in arv_f.items():
         for cs in fams.values():
             for c in cs:
-                pags[id(c)] = n; n += 1 + (c['prod'] == 'Baterias' and c['n'] > TAB_BAT)
+                pags[id(c)] = n; n += 1 + ('tab' in c)
     return pags, n           # n = nº da contracapa = total de páginas
 
 
 def tabela_baterias(s, c):
     """todas as baterias do card, em 2 blocos de colunas (designer-ux, item 7)"""
-    rows = [(r['code'].strip(),) + r['bat'][1:] for r in c['rows']]
+    rows = [(r['code'].strip(),) + r['bat'][1:] for r in c['tab']]
     meio = (len(rows) + 1) // 2; LD = 17; bw = (W - 80 - 24) / 2
     cols = [('CÓDIGO', 0), ('CAPACIDADE', 120), ('GARANTIA', 210), ('OBSERVAÇÃO', 290)]
     for b, bloco in enumerate((rows[:meio], rows[meio:])):
@@ -477,17 +508,19 @@ def build_linha(out, chave, arv, total):
     primeiros = [next(iter(f.values()))[0] for f in arv_f.values()]          # capa: a foto do 1º produto de cada seção
     fotos = list(dict.fromkeys(c['img'] for c in primeiros + cards if c['img']))
     capa(s, nome.split(' ', 1)[0], nome.split(' ', 1)[1], html.escape(cfg['frase']), fotos,
-         f"{len(cards)} {plural(len(cards), 'linha de produtos', 'linhas de produtos')} · {fmt(n_it)} {plural(n_it)}")
+         f"{cfg.get('conta') or f'{len(cards)} ' + plural(len(cards), 'produto', 'produtos')} · {fmt(n_it)} {plural(n_it)}")
+    for c in cards:          # com a tabela, a página do produto só aponta para ela (UX)
+        if 'tab' in c: c['rows'] = [dict(code='', segs=[(f"Os {c['n']} itens, com capacidade e garantia, estão na tabela da página {pags[id(c)] + 1}.", False)])]
     quem_somos(s, arv, total)
-    if cfg.get('divisoria', True): pagina_linha(s, 'X', nome, cfg.get('desc', cfg['frase']), {'X': arv_f}, pags, 'grupos')
+    if cfg.get('divisoria', True): pagina_linha(s, 'X', nome, cfg.get('desc', cfg['frase']), {'X': arv_f}, pags)
     for i, (sn, fams) in enumerate(arv_f.items(), 1):
         for fam, cards_ in fams.items():
             for c in cards_:
                 s.header(f'{nome} · {i:02d} · {sn}', sn)
                 heroi(s, fam, c, 128, H - 46)
                 s.footer()
-                if c['prod'] == 'Baterias' and c['n'] > TAB_BAT:
-                    s.header(f'{nome} · {i:02d} · {sn}', f"Todas as baterias · {c['n']} {plural(c['n'])}")
+                if 'tab' in c:
+                    s.header(f'{nome} · {i:02d} · {sn}', f"Baterias da {NOME_LINHA[c['linha']]} · {c['n']} {plural(c['n'])}")
                     tabela_baterias(s, c)
                     s.footer()
     contato(s, cfg.get('fim', 'para a sua loja ou oficina'))
