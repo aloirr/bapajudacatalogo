@@ -72,7 +72,7 @@ def montadora(m):
 
 def tit(s):
     ws = s.split()
-    return ' '.join(w.lower() if (i and w in ('E', 'DE', 'DO', 'DA', 'DOS', 'DAS')) else w.capitalize() for i, w in enumerate(ws))
+    return ' '.join(w.lower() if (i and w in ('A', 'E', 'DE', 'DO', 'DA', 'DOS', 'DAS')) else w.capitalize() for i, w in enumerate(ws))
 
 
 class P(S):
@@ -177,7 +177,7 @@ def carro(mod, m):
     return mt, ws[0]
 
 
-def aplicacoes(rows, n=12, so_pesado=()):
+def aplicacoes(rows, n=12, so_pesado=(), so_leve=False):
     """principais aplicações na ordem do catálogo (ranking): montadora + modelos, sem repetir. Nos códigos de
     `so_pesado`, só a aplicação de veículo pesado (a regra `taxo.HEAVY`, a mesma que dá a LINHA)"""
     out, vistos = [], set()
@@ -197,6 +197,7 @@ def aplicacoes(rows, n=12, so_pesado=()):
                 else: cur[1] += (' ' if k else '') + ln
         for m, t in tr:
             if pesado and not HEAVY.search((m + ' ' + t).upper()): continue   # como no taxo.linha_of
+            if so_leve and HEAVY.search((m + ' ' + t).upper()): continue      # Autocenter: só veículo leve (T-0032)
             mod = re.split(r'\s·\s|;\s|\s\(', t.strip(' ·;'))[0].strip(' ,·/')
             # o ano ("2014–2015") ou o mês/ano da base ("12/97 12/03"), e o " - " antes dele. O mês vai de 01 a 12: o par
             # de anos curto ("Monza 82/96") e a medida ("60/55W", "90/90-19", '13/16"') não são data
@@ -233,12 +234,12 @@ def heroi(s, fam, c, top, bot):
             if len(ap) >= 12: break
         titulo, nota = 'ESPECIFICAÇÕES', ''
     else:
-        ap = aplicacoes(c.get('rows') or [], so_pesado=c.get('so_pesado', ()))
+        ap = aplicacoes(c.get('rows') or [], so_pesado=c.get('so_pesado', ()), so_leve=c.get('so_leve', False))
         titulo, nota = 'PRINCIPAIS APLICAÇÕES', ''
     if not ap: return
     s.t(x, y, titulo, 9.5, 'gdark', 'PB', ls=1.4)
     s.rect(x, y + 16, wr, 1.2, fill='green'); y += 28
-    cols = 1 if (c.get('spec') or len(ap) <= 6) else 2
+    cols = 1 if ((c.get('spec') and not c.get('spec2')) or len(ap) <= 6) else 2   # spec2: 2 colunas nos portfólios por linha (T-0032)
     if cols == 1: ap = ap[:9]
     cw = (wr - 18 * (cols - 1)) / cols
     lin = (len(ap) + cols - 1) // cols
@@ -259,8 +260,9 @@ def heroi(s, fam, c, top, bot):
     if nota: s.t(x, y + lin * LD + 6, nota, 8, 'grey', 'PR')
 
 
-def pagina_linha(s, cod, nome, desc, arv):
-    """divisória da linha: lista sistema → família → produtos, estilo menu (sem fundo, com marcador)"""
+def pagina_linha(s, cod, nome, desc, arv, pags=None, rotulo='sistemas'):
+    """divisória da linha: lista sistema → família → produtos, estilo menu (sem fundo, com marcador). Nos portfólios por
+    linha (T-0032), `pags` dá a página de cada produto (id do card → nº) e a lista usa só as colunas que precisa"""
     from reportlab.lib.utils import simpleSplit
     sis = arv[cod]
     n_it = sum(c['n'] for f in sis.values() for cs in f.values() for c in cs)
@@ -271,13 +273,14 @@ def pagina_linha(s, cod, nome, desc, arv):
     s.circle(30, H + 30, 150, 'green'); s.circle(30, H + 30, 104, 'black')   # enfeite só dentro do painel
     s.img(A.LOGO, 36, 40, 34, 48)
     s.t(38, 150, 'PORTFÓLIO DE PRODUTOS', 9, 'green2', 'PB', ls=1.8)
-    s.t(36, 170, nome, 32 if pw(nome, 'PB', 32) < PW - 60 else 26, 'white', 'PB', ls=-.6)
+    fs = next((f for f in (32, 26, 22, 20) if pw(nome, 'PB', f) < PW - (60 if f == 32 else 45)), 18)   # nome longo (Linha Lubrificantes): menor
+    s.t(36, 170, nome, fs, 'white', 'PB', ls=-.6)
     s.p(38, 220, PW - 70, html.escape(desc), 11.5, 16, 'lgrey')
-    for i, (a, b) in enumerate([(len(sis), 'sistemas'), (n_fam, 'famílias'), (n_pr, 'produtos'), (fmt(n_it), 'itens')]):
+    for i, (a, b) in enumerate([(len(sis), rotulo), (n_fam, 'famílias'), (n_pr, 'produtos'), (fmt(n_it), 'itens')]):
         yy = 292 + i * 32
         s.t(38, yy, str(a), 19, 'green2', 'PB'); s.t(38 + pw(str(a), 'PB', 19) + 8, yy + 6, b, 10.5, 'white', 'PR')
     # lista em 4 colunas (bloco do sistema vai para a coluna mais curta)
-    cols, gap = 4, 18
+    cols, gap = (4 if pags is None else min(4, len(sis))), 18
     x0 = PW + 28; cw = (W - 34 - x0 - gap * (cols - 1)) / cols
     FS, LD, IND = 8.8, 14.5, 11
     def linhas(c): return simpleSplit(c['nome'] + ('    ' if c['lanc'] else ''), 'PM', FS, cw - IND - 2)
@@ -295,14 +298,15 @@ def pagina_linha(s, cod, nome, desc, arv):
     ys = [36] * cols
     for i, (sn, f) in enumerate(itens, 1):
         c_ = col_de[i - 1]; x = x0 + c_ * (cw + gap); y = ys[c_]
-        s.t(x, y, f'{i:02d}', 9.5, 'green', 'PB'); s.t(x + 20, y, TITULO[sn].upper(), 9.5, 'ink', 'PB', ls=1.1)
+        s.t(x, y, f'{i:02d}', 9.5, 'green', 'PB'); s.t(x + 20, y, TITULO.get(sn, sn).upper(), 9.5, 'ink', 'PB', ls=1.1)
         s.rect(x, y + 16, cw, 1.4, fill='green')
         yy = y + 26
         for fam, cs in f.items():
             s.t(x, yy, tit(fam).upper(), 6.9, 'gdark', 'PB', ls=1); yy += 16
             for c in cs:
                 s.circle(x + 3.2, yy + 4.6, 1.9, 'green')            # marcador
-                ls_ = simpleSplit(c['nome'], 'PM', FS, cw - IND - 2 - (30 if c['lanc'] else 0))
+                ls_ = simpleSplit(c['nome'], 'PM', FS, cw - IND - 2 - (30 if c['lanc'] else 0) - (22 if pags else 0))
+                if pags: s.t(x + cw, yy, f"{pags[id(c)]:02d}", FS, 'gdark', 'PB', 'right')   # página do produto
                 for k, ln in enumerate(ls_):
                     s.t(x + IND, yy + k * LD, ln, FS, 'ink', 'PM')
                 if c['lanc']:
@@ -316,29 +320,120 @@ def pagina_linha(s, cod, nome, desc, arv):
     s.c.showPage()
 
 
-def build(out, base=BASE):
-    arv, total = dados(base)
-    produtos = {c['prod'] for l in arv.values() for f in l.values() for cs in f.values() for c in cs}
-    sistemas = {sn for l in arv.values() for sn in l}
-    s = P(out)
-    s.c.setTitle('Portfólio de Produtos BAP AUTOPARTS'); s.c.setAuthor(NOME)
+# ---------------------------------------------------------------- portfólios por linha (T-0032, decisões 2a e 3a)
+# Cada portfólio é um filtro da mesma árvore do Portfólio geral. Seção: (título, linha, sistema, produtos), em ordem;
+# sistema None = todos os sistemas da linha (título = o sistema); produtos None = todos. Seções de mesmo título se juntam.
+_SUSP_AC = {'Amortecedores', 'Kit Batente de Amortecedor', 'Bieletas', 'Bucha da Barra Estabilizadora', 'Bandejas de Suspensão', 'Pivô de Suspensão'}
+_FREIO_AC = {'Pastilha de Freio', 'Sapata de Freio', 'Cilindro de Roda', 'Sensor ABS'}
+DESC_LINHA = {('Baterias', 'LEVE'): 'Baterias para automóveis, picapes e utilitários, e kit de terminais.',   # a descrição segue a linha
+              ('Baterias', 'PESADA'): 'Baterias para caminhões, ônibus e máquinas.'}                         # (marca, item 9)
+FILTROS = {
+    'leve': dict(nome='Linha Leve', secoes=[(None, 'LEVE', None, None)],
+                 frase='Suspensão, direção, freio, motor, elétrica e filtros para automóveis, picapes e utilitários.'),
+    'pesada': dict(nome='Linha Pesada', secoes=[(None, 'PESADA', None, None)], fim='para a sua loja, oficina ou frota',
+                   frase='Peças, filtros e baterias para caminhões, ônibus, implementos e reboques.'),
+    'moto': dict(nome='Linha Moto', secoes=[(None, 'MOTO', None, None)],
+                 frase='Pneus, câmaras, rolamentos, óleo, filtros, velas e lâmpadas para motocicletas.'),
+    'lubrificantes': dict(nome='Linha Lubrificantes',
+                          secoes=[('Lubrificantes', 'UNIVERSAL', 'LUBRIFICANTES', None), ('Lubrificantes', 'MOTO', 'LUBRIFICANTES', None),
+                                  ('Químicos', 'UNIVERSAL', 'QUÍMICOS', None)],
+                          frase='Óleos ProActive, Shiftease e Effitech, e químicos para motor, câmbio, freio e arrefecimento.'),
+    'acessorios': dict(nome='Linha Acessórios',
+                       secoes=[('Palhetas · Linha Leve', 'LEVE', 'ACESSÓRIOS', None), ('Palhetas · Linha Pesada', 'PESADA', 'ACESSÓRIOS', None),
+                               ('Amarração e Reboque', 'UNIVERSAL', 'ACESSÓRIOS', None)],
+                       frase='Palhetas, cintas de amarração e reboque, e outros acessórios para qualquer veículo.'),
+    'baterias': dict(nome='Linha Baterias', secoes=[('Linha Leve', 'LEVE', 'ELÉTRICA', {'Baterias'}), ('Linha Pesada', 'PESADA', 'ELÉTRICA', {'Baterias'})],
+                     frase='Baterias para automóveis, utilitários, caminhões e ônibus, com garantia da fábrica.',
+                     divisoria=False),     # 2 produtos só: a divisória ficaria vazia (designer-ux, item 6)
+    'autocenter': dict(nome='Linha Autocenter',
+                       secoes=[('Filtração', 'LEVE', 'FILTRAÇÃO', None), ('Palhetas', 'LEVE', 'ACESSÓRIOS', None),
+                               ('Suspensão', 'LEVE', 'SUSPENSÃO', _SUSP_AC), ('Freio', 'LEVE', 'FREIO', _FREIO_AC),
+                               ('Lubrificantes', 'UNIVERSAL', 'LUBRIFICANTES', None), ('Baterias', 'LEVE', 'ELÉTRICA', {'Baterias'})],
+                       frase='Os itens de troca rápida do autocenter: filtros, palhetas, suspensão, freio, lubrificantes e baterias.',
+                       desc='Itens de troca rápida para automóveis, picapes e utilitários.', fim='para o seu autocenter',
+                       so_leve=True),       # cada linha só mostra veículos dela (marca, item 4): aqui, só leve
+}
+ARQUIVO = 'Portfolio_Produtos_BAP_AUTOPARTS_{}.pdf'     # Portfolio_Produtos_BAP_AUTOPARTS_Linha_Autocenter.pdf
+TAB_BAT = 12                                            # mais baterias que isso: página de tabela depois do produto
 
-    # capa
+
+def filtrar(arv, cfg):
+    """a árvore de um portfólio por linha: seção → família → cards (cópias, com as especificações em 2 colunas)"""
+    out = collections.OrderedDict()
+    for titulo, l, sis, prods in cfg['secoes']:
+        for sn in ([sis] if sis else list(arv[l])):
+            for fam, cs in arv[l].get(sn, {}).items():
+                for c in cs:
+                    if prods and c['prod'] not in prods: continue
+                    d = dict(c, spec2=True, desc=DESC_LINHA.get((c['prod'], l), c['desc']), so_leve=cfg.get('so_leve', False))
+                    if c['prod'] == 'Baterias':      # a bateria no padrão da marca: "45 Ah LP · 18 meses"
+                        d['rows'] = [dict(r, bat=bateria(r), segs=[(bateria(r)[0], False)]) for r in c['rows']]
+                    out.setdefault(titulo or TITULO[sn], collections.OrderedDict()).setdefault(fam, []).append(d)
+    return out
+
+
+def bateria(r):
+    """(texto, capacidade, garantia, observação) da bateria, com a unidade e a sigla num padrão só (marca, item 7)"""
+    t = ''.join(x for x, _ in r.get('segs') or [])
+    a = re.search(r'(\d+)\s*amperes', t, re.I); g = re.search(r'(\d+)\s*meses', t, re.I)
+    if not a: return t[:1].upper() + t[1:], '—', '—', 'Kit de terminais' if 'positivo' in t.lower() else ''
+    obs = []
+    if re.search(r'start\s*stop|EFB', t, re.I): obs.append('start-stop (EFB)')
+    cx = re.search(r'caixa (alta|baixa)|caixa tamanho (\d+)A', t, re.I)
+    if cx: obs.append(f'caixa {cx.group(1).lower()}' if cx.group(1) else f'caixa de {cx.group(2)} Ah')
+    serie = r['code'].split('-')[1].upper() if r['code'].count('-') >= 2 else ''
+    cap, gar = f'{a.group(1)} Ah', (f'{g.group(1)} meses' if g else '—')
+    obs = ', '.join(obs)
+    return f"{cap} {serie} · {gar}", cap, gar, obs[:1].upper() + obs[1:]
+
+
+def indice(arv_f, cfg):
+    """páginas de cada produto num portfólio por linha: capa, quem somos, divisória (opcional), produtos (+ tabela) e contato"""
+    pags, n = {}, 3 + cfg.get('divisoria', True)
+    for sn, fams in arv_f.items():
+        for cs in fams.values():
+            for c in cs:
+                pags[id(c)] = n; n += 1 + (c['prod'] == 'Baterias' and c['n'] > TAB_BAT)
+    return pags, n           # n = nº da contracapa = total de páginas
+
+
+def tabela_baterias(s, c):
+    """todas as baterias do card, em 2 blocos de colunas (designer-ux, item 7)"""
+    rows = [(r['code'].strip(),) + r['bat'][1:] for r in c['rows']]
+    meio = (len(rows) + 1) // 2; LD = 17; bw = (W - 80 - 24) / 2
+    cols = [('CÓDIGO', 0), ('CAPACIDADE', 120), ('GARANTIA', 210), ('OBSERVAÇÃO', 290)]
+    for b, bloco in enumerate((rows[:meio], rows[meio:])):
+        x = 40 + b * (bw + 24); y = 128
+        for nm, dx in cols: s.t(x + 8 + dx, y, nm, 8, 'gdark', 'PB', ls=1)
+        s.rect(x, y + 14, bw, 1.2, fill='green'); y += 22
+        for k, row in enumerate(bloco):
+            if k % 2: s.rect(x, y - 3, bw, LD, fill='soft')
+            for (nm, dx), v in zip(cols, row): s.t(x + 8 + dx, y, v, 9.5, 'ink', 'PB' if nm == 'CÓDIGO' else 'PR')
+            y += LD
+
+
+def capa(s, l1, l2, frase, fotos, conta=None):
     s.rect(0, 0, W, H, fill='black')
     s.circle(W - 60, 290, 330, 'green'); s.circle(W - 80, 290, 255, 'green2'); s.circle(W - 80, 290, 190, 'black')
     s.img(A.LOGO, 60, 52, 46, 64)
     s.t(62, 150, f'PORTFÓLIO DE PRODUTOS {ANO}', 11, 'green2', 'PB', ls=2)
-    s.t(58, 172, 'Conheça a', 50, 'white', 'PB', ls=-1)
-    s.t(58, 228, NOME, 50, 'white', 'PB', ls=-1)
-    s.p(62, 300, 410, 'Peças, baterias, filtros, lubrificantes, químicos, pneus e acessórios para as linhas leve, pesada e moto, '
-        'organizados por linha, sistema do veículo e família de produto.', 13, 19, 'lgrey')
+    s.t(58, 172, l1, 50, 'white', 'PB', ls=-1)
+    s.t(58, 228, l2, 50, 'white', 'PB', ls=-1)
+    h = s.p(62, 300, 410, frase, 13, 19, 'lgrey')
+    if conta: s.t(62, 300 + h + 18, conta, 12, 'green2', 'PM')
     s.t(62, 470, edicao(), 10, 'lgrey', 'PM')
-    for i, f in enumerate(['dimg/cover_0.png', 'dimg/cover_16.png', 'dimg/cover_34.png', 'dimg/cover_27.png', 'dimg/cover_10.png', 'dimg/cover_36.png']):
-        r_, c_ = divmod(i, 3); x = 560 + c_ * 120; y = 120 + r_ * 150
-        s.rect(x, y, 110, 138, fill='white', r=16); s.img(f, x + 8, y + 10, 94, 118)
+    if len(fotos) >= 6:                       # 6 fotos: grade 3 × 2
+        for i, f in enumerate(fotos[:6]):
+            r_, c_ = divmod(i, 3); x = 560 + c_ * 120; y = 120 + r_ * 150
+            s.rect(x, y, 110, 138, fill='white', r=16); s.img(f, x + 8, y + 10, 94, 118)
+    elif fotos:                               # poucas fotos (Baterias): uma só, grande, no lugar da grade
+        s.rect(560, 120, 350, 288, fill='white', r=16); s.img(fotos[0], 580, 140, 310, 248)
     s.c.showPage(); s.n += 1
 
-    # quem somos
+
+def quem_somos(s, arv, total):
+    produtos = {c['prod'] for l in arv.values() for f in l.values() for cs in f.values() for c in cs}
+    sistemas = {sn for l in arv.values() for sn in l}
     s.header('Quem somos', NOME)
     s.p(40, 132, 600, 'Empresa brasileira criada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. '
         'O portfólio vai da suspensão à parte elétrica, passando por filtros, lubrificantes e químicos, para as linhas leve, pesada e moto.', 13, 20, 'sec')
@@ -351,6 +446,64 @@ def build(out, base=BASE):
     A.garantia(s)
     s.footer()
 
+
+def contato(s, fim='para a sua loja ou oficina'):
+    s.rect(0, 0, W, H, fill='black')
+    s.circle(W - 110, 280, 280, 'green'); s.circle(W - 125, 280, 215, 'green2'); s.circle(W - 125, 280, 160, 'black')
+    s.img(A.LOGO_G, W - 125 - 62, 280 - 85, 124, 170)
+    s.img(A.LOGO, 60, 52, 36, 50)
+    s.t(62, 150, f'PORTFÓLIO DE PRODUTOS {ANO}', 11, 'green2', 'PB', ls=2)
+    s.t(58, 178, 'Vamos conversar?', 50, 'white', 'PB', ls=-1)
+    s.p(62, 252, 430, f'Fale com o nosso time comercial: mostramos as aplicações por veículo e ajudamos a montar o mix certo {fim}.', 14, 21, 'lgrey')
+    s.rect(62, 366, 420, 112, fill='card', r=16); s.rect(62, 366, 5, 112, fill='green')
+    s.t(84, 382, 'Alexandre Guerreiro', 16, 'white', 'PB')
+    s.t(84, 404, f'Gerente Comercial · {NOME}', 10.5, 'lgrey', 'PR')
+    s.t(84, 428, 'alexandre.guerreiro@bapautoparts.com.br', 11.5, 'green2', 'PM')
+    s.t(84, 450, '(92) 99250-8980', 11.5, 'green2', 'PM')
+    s.t(62, 500, SITE, 10, 'lgrey', 'PR')
+    s.c.showPage()
+    s.c.save()
+
+
+def build_linha(out, chave, arv, total):
+    """um portfólio por linha (T-0032): capa da linha → quem somos → divisória única com página → produtos → contato.
+    Sem a p3 (as 4 linhas) do Portfólio geral (designer-ux, item 8)"""
+    cfg = FILTROS[chave]; nome = cfg['nome']
+    arv_f = filtrar(arv, cfg); pags, total_p = indice(arv_f, cfg)
+    cards = [c for f in arv_f.values() for cs in f.values() for c in cs]
+    n_it = sum(c['n'] for c in cards)
+    s = P(out)
+    s.c.setTitle(f'Portfólio de Produtos {NOME} · {nome}'); s.c.setAuthor(NOME)
+    primeiros = [next(iter(f.values()))[0] for f in arv_f.values()]          # capa: a foto do 1º produto de cada seção
+    fotos = list(dict.fromkeys(c['img'] for c in primeiros + cards if c['img']))
+    capa(s, nome.split(' ', 1)[0], nome.split(' ', 1)[1], html.escape(cfg['frase']), fotos,
+         f"{len(cards)} {plural(len(cards), 'linha de produtos', 'linhas de produtos')} · {fmt(n_it)} {plural(n_it)}")
+    quem_somos(s, arv, total)
+    if cfg.get('divisoria', True): pagina_linha(s, 'X', nome, cfg.get('desc', cfg['frase']), {'X': arv_f}, pags, 'grupos')
+    for i, (sn, fams) in enumerate(arv_f.items(), 1):
+        for fam, cards_ in fams.items():
+            for c in cards_:
+                s.header(f'{nome} · {i:02d} · {sn}', sn)
+                heroi(s, fam, c, 128, H - 46)
+                s.footer()
+                if c['prod'] == 'Baterias' and c['n'] > TAB_BAT:
+                    s.header(f'{nome} · {i:02d} · {sn}', f"Todas as baterias · {c['n']} {plural(c['n'])}")
+                    tabela_baterias(s, c)
+                    s.footer()
+    contato(s, cfg.get('fim', 'para a sua loja ou oficina'))
+    assert s.n + 1 == total_p, (s.n + 1, total_p)
+    return arv_f, s.n + 1
+
+
+def build(out, base=BASE, filtro=None):
+    arv, total = dados(base)
+    if filtro: return build_linha(out, filtro, arv, total)
+    s = P(out)
+    s.c.setTitle('Portfólio de Produtos BAP AUTOPARTS'); s.c.setAuthor(NOME)
+    capa(s, 'Conheça a', NOME, 'Peças, baterias, filtros, lubrificantes, químicos, pneus e acessórios para as linhas leve, pesada e moto, '
+         'organizados por linha, sistema do veículo e família de produto.',
+         ['dimg/cover_0.png', 'dimg/cover_16.png', 'dimg/cover_34.png', 'dimg/cover_27.png', 'dimg/cover_10.png', 'dimg/cover_36.png'])
+    quem_somos(s, arv, total)
     # como o portfólio está organizado
     s.header('Nosso portfólio', 'Linha, sistema e família', f'conforme o Catálogo BAP {ANO}')
     w = (W - 80 - 3 * 14) / 4
@@ -380,25 +533,28 @@ def build(out, base=BASE):
                     heroi(s, fam, c, 128, H - 46)
                     s.footer()
 
-    # contato
-    s.rect(0, 0, W, H, fill='black')
-    s.circle(W - 110, 280, 280, 'green'); s.circle(W - 125, 280, 215, 'green2'); s.circle(W - 125, 280, 160, 'black')
-    s.img(A.LOGO_G, W - 125 - 62, 280 - 85, 124, 170)
-    s.img(A.LOGO, 60, 52, 36, 50)
-    s.t(62, 150, f'PORTFÓLIO DE PRODUTOS {ANO}', 11, 'green2', 'PB', ls=2)
-    s.t(58, 178, 'Vamos conversar?', 50, 'white', 'PB', ls=-1)
-    s.p(62, 252, 430, 'Fale com o nosso time comercial: mostramos as aplicações por veículo e ajudamos a montar o mix certo para a sua loja ou oficina.', 14, 21, 'lgrey')
-    s.rect(62, 366, 420, 112, fill='card', r=16); s.rect(62, 366, 5, 112, fill='green')
-    s.t(84, 382, 'Alexandre Guerreiro', 16, 'white', 'PB')
-    s.t(84, 404, f'Gerente Comercial · {NOME}', 10.5, 'lgrey', 'PR')
-    s.t(84, 428, 'alexandre.guerreiro@bapautoparts.com.br', 11.5, 'green2', 'PM')
-    s.t(84, 450, '(92) 99250-8980', 11.5, 'green2', 'PM')
-    s.t(62, 500, SITE, 10, 'lgrey', 'PR')
-    s.c.showPage()
-    s.c.save()
+    contato(s)
     return {l: (len(arv[l]), sum(len(cs) for f in arv[l].values() for cs in f.values())) for l in arv}, total, s.n + 1
 
 
+def imprimir_indice(arv):
+    """o índice de um portfólio por linha sem gerar o PDF: páginas, grupos, famílias e produtos"""
+    for chave, cfg in FILTROS.items():
+        arv_f = filtrar(arv, cfg); pags, total_p = indice(arv_f, cfg)
+        n_it = sum(c['n'] for f in arv_f.values() for cs in f.values() for c in cs)
+        print(f"## {cfg['nome']} ({chave}): {total_p} páginas, {fmt(n_it)} {plural(n_it)}")
+        for i, (sn, fams) in enumerate(arv_f.items(), 1):
+            fams_ = ['{} ({})'.format(tit(fam), ', '.join(f"{c['nome']} p{pags[id(c)]:02d}" for c in cs)) for fam, cs in fams.items()]
+            print(f"{i:02d} {sn}: " + '; '.join(fams_))
+
+
 if __name__ == '__main__':
-    out = sys.argv[1] if len(sys.argv) > 1 else 'saidas/Portfolio_Produtos_BAP_AUTOPARTS.pdf'
-    print(build(out, sys.argv[2] if len(sys.argv) > 2 else BASE))
+    # python portfolio.py [saida.pdf] [base.xlsx] [--linha=autocenter|baterias|leve|pesada|moto|lubrificantes|acessorios] [--indice]
+    opc = {a.split('=')[0]: a.split('=', 1)[-1] for a in sys.argv[1:] if a.startswith('--')}
+    arg = [a for a in sys.argv[1:] if not a.startswith('--')]
+    base = arg[1] if len(arg) > 1 else BASE
+    if '--indice' in opc: imprimir_indice(dados(base)[0]); sys.exit()
+    lin = opc.get('--linha')
+    out = arg[0] if arg else 'saidas/' + (ARQUIVO.format(FILTROS[lin]['nome'].replace(' ', '_').replace('ó', 'o')) if lin else 'Portfolio_Produtos_BAP_AUTOPARTS.pdf')
+    r = build(out, base, lin)
+    print(r if not lin else (out, r[1], 'páginas'))
