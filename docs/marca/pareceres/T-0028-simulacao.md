@@ -42,8 +42,8 @@ as regras do repositório.
   onde ele aparece (ver a pergunta 1, abaixo).
 - **Nenhum texto institucional muda:** a capa ("Conheça a BAP AUTOPARTS"), o "Quem somos", a "Garantia Expressa BAP",
   a contracapa, o rodapé e o título do PDF ("Portfólio de Produtos BAP AUTOPARTS") são iguais aos da entrega. A grafia
-  "BAP AUTOPARTS" está certa em tudo (decisão 10 a), e a etiqueta ao lado do logo no cabeçalho fica, como em
-  Lubrificantes (decisão 6 a).
+  "BAP AUTOPARTS" está certa em tudo (decisão 10 a), e a etiqueta ao lado do logo no cabeçalho fica como está (a
+  6 a é de Lubrificantes).
 - **Cor, fonte e logo:** o diff do Portfólio só troca de onde vem a base e o "itens" fixo pelo `plural()`. Nenhuma cor,
   fonte, logo ou chip novo. As páginas novas usam o mesmo modelo das outras ("NOVIDADE 2026" e "NOVO" já existiam).
 
@@ -130,7 +130,7 @@ da entrega), a busca de preço, estoque e uso interno no texto do PDF e a grafia
 
 | Campo | Valor |
 |---|---|
-| Data | 23/11/2026 08:40 (Manaus) |
+| Data | 23/11/2026 08:34 (Manaus) |
 | Decisão | R-20261123-122814-po: 3 b (Rolamentos em Rodagem, 88 págs.), 4 a (as datas de 2026 ficam; a troca vai para a fila), 5 a (simulação aprovada com os ajustes das aplicações) |
 | O que foi visto | O branch `catalogo-grafico/T-0028-entregas`, head `ac36418`: os 2 PDFs novos de `catalogo_grafico/entregas/` (`pdfinfo` e `pdftotext`), e as pranchas de `recados/anexos/T-0028/final/` (commit `dd43f4a`), em especial `moto-p01-capa.png` e `portfolio-nova-1item-filtro-ar-moto.png` |
 | Parecer | **LIBERADO**. MC-0015 fechado. Nenhum achado novo |
