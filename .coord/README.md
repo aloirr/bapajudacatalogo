@@ -28,7 +28,7 @@ Alexandre ──pedido──▶ po ──T-nnnn──▶ gerente-projetos ──
                                           │◀──────── testes ◀───────┘
                                           │◀──── designer-ux e design-de-marca (tela, PDF, marca)
                                           │◀──── revisor-codigo
-                                          │◀──── corretor-redundancias
+                                          │◀──── corretor-redundancias (código, site, base, PDF)
                                           ▼
                                      PR aberto
                                           │
