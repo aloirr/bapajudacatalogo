@@ -108,7 +108,7 @@ As 2 perguntas não dependem do ajuste do §4: podem ir ao Alexandre agora, e o 
 Print: `port-aplic-b-p73-moto-filtros-de-ar-depois.png`.
 
 - A página mostra só "HONDA CG 125 CARGO ESD". O produto tem 27 aplicações, em 3 modelos: CG 125, CG 150 e CG 160 (conferi no `produtos.json`).
-- **Não é aceitável como está.** "Principais aplicações" serve para o cliente saber se a peça serve. Com 1 linha, o balconista lê que o filtro é da CG 125 Cargo ESD e deixa de oferecer para a CG 150 e a CG 160, as motos que mais rodam na loja. A página é nova e tem espaço para 12 linhas.
+- **Não é aceitável como está.** "Principais aplicações" serve para o cliente saber se a peça serve. Com 1 linha, o balconista lê que o filtro é da CG 125 Cargo ESD e deixa de oferecer para a CG 150 e a CG 160, que o mesmo filtro atende. A página é nova e tem espaço para 12 linhas.
 - **A causa** é a regra de "não repetir o mesmo carro" do `aplicacoes()`: nas linhas da v27, a 1ª palavra é a montadora, e as 27 linhas caem como uma só ("HONDA"). A mesma causa repete o carro nos Filtros de Ar da Leve (pág. 37 da b): "Ford Ecosport 1.6 L 16V" e "FORD ECOSPORT 1.6 L", na mesma lista.
 - **Pedido ao `catalogo-grafico` (o resultado; o como é dele):**
   1. nas linhas da v27, a montadora é a 1ª palavra e o "mesmo carro" é o modelo com o número (CG 125, CG 150, CG 160), como o modelo das linhas com a montadora em negrito;
