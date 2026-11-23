@@ -9,10 +9,10 @@ import sys, os, re, collections, html, datetime
 import pandas as pd
 import apres_bemol as A
 from apres_bemol import S, W, H
-from taxo import ORDER_SIS, META
+from taxo import ORDER_SIS, META, HEAVY
 from plural import plural
 from detalhe import BASE_UNIFICADA as BASE   # a base unificada do Git (dados/), como nos 3 PDFs
-from digital2 import ANO                     # o ano do Catálogo BAP (2027): capa, contracapa, pág. 3 e selo NOVIDADE
+from digital2 import ANO                     # o ano do Catálogo BAP (2027): capa, contracapa e pág. 3
 from montar import KEEPU                     # siglas que ficam em maiúsculas (VW, GM, MB), as mesmas do montar.tcase
 
 NOME = 'BAP AUTOPARTS'
@@ -45,7 +45,8 @@ FAM_CARD = {
     'ÁGUA DESMINERALIZADA': ('Água Desmineralizada', 'Água desmineralizada para o sistema de arrefecimento.', 'pptimg/RAD25009P.png'),
 }
 MESES = ('Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro')
-LINHA_BAP = {'effitech': 'Effitech'}     # nome de linha da BAP com a grafia da apresentação de Lubrificantes (MC-0017 b)
+# nome de linha da BAP com a grafia da apresentação de Lubrificantes (MC-0017 b; T-0029, 10a)
+LINHA_BAP = {'effitech': 'Effitech', 'proactive': 'ProActive', 'shiftease': 'Shiftease'}
 MOTO_CARD = {'Óleo Lubrificante': ('Óleo 4T', 'Óleo para motores de motocicleta 4 tempos.'),
              'Velas de Ignição': ('Velas de Ignição', 'Velas de ignição para motores de motocicleta.'),
              'Rolamentos': ('Rolamentos', 'Rolamentos de roda e de direção para motocicletas.'),
@@ -147,8 +148,10 @@ def dados(base):
             if im is None: im = img.get(prod)
         else:
             nome, desc, im = prod, META.get(prod, {}).get('desc', ''), img.get(prod)
+        # na Linha Pesada, o item LEVE E PESADA mostra só os veículos pesados (T-0029, 16a)
+        so_pesado = {c for c in cs if B[c]['LINHA'] == 'LEVE E PESADA'} if l == 'PESADA' else set()
         card = dict(nome=nome, desc=desc, img=im, n=len(cs), lanc=lanc.get(prod, False), prod=prod,
-                    rows=ordem[(l, sis, fam, prod)], linha=l, spec=spec.get(prod, False))
+                    rows=ordem[(l, sis, fam, prod)], linha=l, spec=spec.get(prod, False), so_pesado=so_pesado)
         arv[l].setdefault(sis, collections.OrderedDict()).setdefault(fam, []).append(card)
     return arv, len(todos)
 
@@ -174,10 +177,12 @@ def carro(mod, m):
     return mt, ws[0]
 
 
-def aplicacoes(rows, n=12):
-    """principais aplicações na ordem do catálogo (ranking): montadora + modelos, sem repetir"""
+def aplicacoes(rows, n=12, so_pesado=()):
+    """principais aplicações na ordem do catálogo (ranking): montadora + modelos, sem repetir. Nos códigos de
+    `so_pesado`, só a aplicação de veículo pesado (a regra `taxo.HEAVY`, a mesma que dá a LINHA)"""
     out, vistos = [], set()
     for r in rows:
+        pesado = r['code'].strip().upper() in so_pesado
         segs = r.get('segs') or []
         tr, cur = [], None
         for t, b in segs:
@@ -191,6 +196,7 @@ def aplicacoes(rows, n=12):
                     cur = ['', ln]; tr.append(cur); vistas.add(p1)
                 else: cur[1] += (' ' if k else '') + ln
         for m, t in tr:
+            if pesado and not HEAVY.search((m + ' ' + t).upper()): continue   # como no taxo.linha_of
             mod = re.split(r'\s·\s|;\s|\s\(', t.strip(' ·;'))[0].strip(' ,·/')
             # o ano ("2014–2015") ou o mês/ano da base ("12/97 12/03"), e o " - " antes dele. O mês vai de 01 a 12: o par
             # de anos curto ("Monza 82/96") e a medida ("60/55W", "90/90-19", '13/16"') não são data
@@ -211,7 +217,7 @@ def aplicacoes(rows, n=12):
 def heroi(s, fam, c, top, bot):
     ih = bot - top - 30
     s.foto(c['img'], 40, top, 400, ih)
-    if c['lanc']: s.chip(56, top + 16, f'NOVIDADE {ANO}', 'white', 'orange', 7.5)
+    if c['lanc']: s.chip(56, top + 16, 'NOVIDADE 2026', 'white', 'orange', 7.5)   # o ano do lançamento, como o LANÇAMENTO 2026 do A4 (T-0029, 9a)
     s.t(40, top + ih + 12, f"{c['n']} {plural(c['n'])}", 11, 'grey', 'PM')          # nº de itens embaixo da imagem
     x = 476; y = top + 6; wr = W - 40 - x
     s.t(x, y, tit(fam).upper(), 9.5, 'gdark', 'PB', ls=1.4); y += 22
@@ -227,7 +233,7 @@ def heroi(s, fam, c, top, bot):
             if len(ap) >= 12: break
         titulo, nota = 'ESPECIFICAÇÕES', ''
     else:
-        ap = aplicacoes(c.get('rows') or [])
+        ap = aplicacoes(c.get('rows') or [], so_pesado=c.get('so_pesado', ()))
         titulo, nota = 'PRINCIPAIS APLICAÇÕES', ''
     if not ap: return
     s.t(x, y, titulo, 9.5, 'gdark', 'PB', ls=1.4)
