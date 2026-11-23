@@ -145,7 +145,9 @@ HEAVY = re.compile(
     r'|\bFIAT\s+(?:FIAT\s+)?(?:1[2-9]0|ALLIS)\b|\bFNM\b|\b(?:VW|VOLKSWAGEN)\s+(?:[5-9]|[1-3]\d)[-.]?\d{3}\b'
     r'|\b(?:GM|GMC|CHEVROLET)\s+(?:[ACD]-?[4-7]0|D-?1[1-4]000|\d-\d{3})\b'
     r'|\b(?:MB|MERCEDES[- ]BENZ)\s+(?:(?:L[ABKOPS]{0,2}|O[FH]?)[-\s]?\d{3,4}|\d{4}|[6-9]\d{2})[A-Z]{0,3}\b'
-    r'|VOLARE|\bDAF\b|EUROTECH|\bVERTIS\b|\bF-?[67]00\b|\bB-?1\d{3,4}\b')
+    r'|VOLARE|\bDAF\b|EUROTECH|\bVERTIS\b|\bF-?[67]00\b|\bB-?1\d{3,4}\b'
+    # T-0032: Volvo VM; GM A/C/D-40 a 70 numa lista de modelos ("D20 / D40 / Bonanza"); VW 6-80 e 7-90; Bobcat e Perkins
+    r'|\bVM\s?\d{3}\b|\bVOLVO\s+VM\b|[/,]\s?[ACD]-?[4-7]0\b|\b[ACD]-?[4-7]0\s?[/,]|\b[5-9]-[89]0\b|BOBCAT|\bPERKINS\b')
 LIGHT_BR = re.compile(r'\b(FIAT|GM|CHEVROLET|RENAULT|TOYOTA|HONDA|HYUNDAI|NISSAN|PEUGEOT|CITRO[ËE]N|JEEP|KIA|MITSUBISHI|AUDI|BMW|CHERY|JAC|SUZUKI|SEAT|DODGE|CHRYSLER|LAND ROVER|TROLLER|LIFAN|DAEWOO|ASIA)\b')
 LIGHT_MODELS = re.compile(r'\b(GOL|SAVEIRO|VOYAGE|FOX|POLO|UP|PARATI|GOLF|JETTA|PASSAT|AMAROK|KOMBI|FUSCA|SPACEFOX|CROSSFOX|VIRTUS|NIVUS|T-CROSS|TIGUAN|FIESTA|KA|ECOSPORT|FOCUS|RANGER|COURIER|ESCORT|FUSION|SPRINTER|CLASSE|A160|A190|C180|DAILY)\b')
 MOTO = re.compile(r'MOTOCICLETA|\bMOTO\b|\b4T\b|JASO MA|\bCG\s?\d{3}|\bTITAN (?:1[2-6]0|125)\b|\bBIZ\b|\bBROS\b|\bYBR\b|\bFAZER\b|\bXRE\b|\bNXR\b|\bPOP \d{3}')

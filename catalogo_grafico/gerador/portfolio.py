@@ -17,7 +17,7 @@ from montar import KEEPU                     # siglas que ficam em maiúsculas (
 
 NOME = 'BAP AUTOPARTS'
 SITE = 'www.bapautoparts.com.br  ·  @bapautoparts'
-A.C.update(dict(gchip='#e3f1e0', soft='#f3f6f2'))
+A.C.update(dict(gchip='#e3f1e0', soft='#f3f6f2', soft2='#dfe3df'))
 pw = A.pdfmetrics.stringWidth
 
 LINHAS = [('LEVE', 'Linha Leve', 'Automóveis, picapes e utilitários.'),
@@ -113,6 +113,16 @@ class P(S):
             self.rect(cx - k * .34, cy - k * .46, k * .68, k * .09, fill='gdark', r=k * .03)
             self.rect(cx - k * .34, cy + k * .37, k * .68, k * .09, fill='gdark', r=k * .03)
             for i in range(1, 8): self.rect(cx - k * .3 + i * k * .075, cy - k * .33, k * .012, k * .66, fill='white')
+        elif path == 'icone:vela':          # vela sem a marca de outro fabricante (MC-0025)
+            k = min(w * .5, h * .7); cx, cy = x + w / 2, y + h / 2
+            self.rect(cx - k * .05, cy - k * .5, k * .1, k * .1, fill='gdark', r=k * .02)           # terminal
+            self.rect(cx - k * .11, cy - k * .41, k * .22, k * .4, fill='soft2', r=k * .06)        # isolador
+            for i in range(3): self.rect(cx - k * .12, cy - k * .37 + i * k * .07, k * .24, k * .02, fill='line')
+            self.rect(cx - k * .17, cy - k * .02, k * .34, k * .14, fill='green', r=k * .02)       # sextavado
+            self.rect(cx - k * .12, cy + k * .12, k * .24, k * .26, fill='gdark', r=k * .02)       # rosca
+            for i in range(5): self.rect(cx - k * .12, cy + k * .15 + i * k * .05, k * .24, k * .012, fill='green')
+            self.rect(cx - k * .02, cy + k * .38, k * .04, k * .08, fill='gdark')                  # eletrodo
+            self.rect(cx - k * .02, cy + k * .46, k * .1, k * .03, fill='gdark')
         elif path and os.path.exists(path):
             self.img(path, x + 8, y + 6, w - 16, h - 12)
         else:
@@ -240,11 +250,10 @@ def aplicacoes(rows, n=12, so_pesado=(), linha=None):
 NAO_VEICULO = re.compile(r'(?i)\buniversa(?:l|is)\b|industria|n[áa]utica|ciclomotor|\buso (?:sem|com) c[âa]mara|\blinha (?:leve|pesada)\b'
                          r'|\b(?:bosch|valeo|delco|eaton)\b|estacion[áa]rio|geradores'
                          r'|^(?:pode ser|em alguns|aplicad[oa]|bloqueio|freio motor|controle de|servo |cilindro |bomba de|l[âa]mpada|lado\b)')
-PESADO_EXTRA = re.compile(r'\bVM\s?\d{3}\b|\bVOLVO\s+VM\b|\bD-?[4-7]0\b|\bA-?40\b|\b[5-9]-[89]0\b')   # o que o taxo.HEAVY ainda não pega
 CODIGO = re.compile(r'(?=[A-Z0-9]{6,}$)[A-Z0-9]*\d[A-Z]+\d[A-Z0-9]*|\d{7,}')                    # código de peça, não modelo ("7S7G8501A2A")
 MARCAS = (r'VOLKSWAGEN|FORD|NISSAN|CHEVROLET|FIAT|RENAULT|TOYOTA|HONDA|HYUNDAI|PEUGEOT|CITRO[EË]N|JEEP|KIA|MITSUBISHI|MERCEDES[ -]BENZ'
           r'|LAND ROVER|AUDI|BMW|VOLVO|SCANIA|IVECO|AGRALE|JAC|CHERY|SUZUKI|DODGE|RAM|TROLLER|INTERNATIONAL|GM|VW|MB|SEAT|CHRYSLER'
-          r'|DAEWOO|ALFA ROMEO|PORSCHE|MAZDA|SUBARU|LIFAN|BYD|GWM|YAMAHA|DAFRA|SHINERAY|KAWASAKI|SUNDOWN|KASINSKI|TRAXX|HAOJUE'
+          r'|DAEWOO|ASIA(?: MOTORS)?|ALFA ROMEO|PORSCHE|MAZDA|SUBARU|LIFAN|BYD|GWM|YAMAHA|DAFRA|SHINERAY|KAWASAKI|SUNDOWN|KASINSKI|TRAXX|HAOJUE'
           r'|TRIUMPH|KTM|ROYAL ENFIELD|VALTRA|MASSEY FERGUSON|NEW HOLLAND|CUMMINS|MWM|PERKINS|RANDON|GUERRA|FACCHINI|DAF|MAN|ZF')
 GENERICO = re.compile(r'(?i)\b(?:automotivo|automotiva|linha|compressores|agr[íi]cola|motos?|tratores|carretas?|pesad[oa]s|m[ée]dios|caminh[õo]es|truck|benz|mercedes|e)\b')
 CARRO_MOTO = re.compile(r'\b(CIVIC|FIT|CITY|ACCORD|HR-?V|CR-?V|WR-?V|JIMNY|VITARA|SWIFT|SX4|S-CROSS)\b')   # carro de marca de moto
@@ -272,7 +281,7 @@ def da_linha(linha, m, mod):
     resto = re.sub(rf'\b(?:{MARCAS})\b', '', mod.upper())
     if not re.search(r'[A-Z0-9]{2}', GENERICO.sub('', resto)): return False     # só montadora ou categoria ("Volvo / Mercedes-Benz")
     moto_ = bool(TX_MOTO.search(a) or re.search(r'\bMOTOS\b', a))
-    if linha == 'LEVE': return not (HEAVY.search(a) or PESADO_EXTRA.search(a) or moto_)
+    if linha == 'LEVE': return not (HEAVY.search(a) or moto_)
     if linha == 'PESADA' and moto_: return False
     if linha == 'PESADA': return not ((LIGHT_BR.search(a) or LIGHT_MODELS.search(a)) and not HEAVY.search(a))   # sai o leve reconhecido
     if linha == 'MOTO':
@@ -316,7 +325,9 @@ def marca_modelo(m, mod, inferir=True):
     from montar import BR_SHORT
     for nm in {b, m.upper().strip(' :')} | {k for k, v in BR_SHORT.items() if v == b}:
         if nm and t.upper().startswith(nm + ' '): t = t[len(nm) + 1:]
-    return b, tcase(t.strip(' :,·/-'))
+    t = re.sub(r'\b[A-Z][a-z]{2}\b', lambda w: w.group().upper() if not re.search('[aeiouáéíóúâêô]', w.group(), re.I) else w.group(),
+               tcase(t.strip(' :,·/-')))                                 # sigla sem vogal fica em maiúsculas: MWM, FZR, NXR
+    return b, re.sub(r'\bI[Xx](\d{2})\b', r'ix\1', t)                    # Hyundai ix35 (marca, MC-0026)
 
 
 def grupos(ap):
@@ -432,7 +443,7 @@ def produto(s, fam, c, x0, w, top, bot, meia=False):
     s.t(x, y, titulo, 9 if meia else 9.5, 'gdark', 'PB', ls=1.4)
     s.rect(x, y + 16, wr, 1.2, fill='green'); y += 28
     if tipo == 'spec':
-        cols = 1 if (meia or len(cont) <= 6) else 2
+        cols = 1 if (meia or len(cont) <= 6 or any(pw(t, 'PR', 10.2) > (wr - 18) / 2 - 14 for t in cont[:12])) else 2   # sem cortar a diferença
         lista_simples(s, x, y, wr, cont[:4 if meia else (9 if cols == 1 else 12)], cols, LD=18 if meia else 23)
     elif not cont:                                                    # item universal: uma frase (marca, item 5)
         s.circle(x + 3.2, y + 5.2, 2.1, 'green'); s.t(x + 12, y, UNIVERSAL_TXT, 10.2, 'ink', 'PR')
@@ -548,6 +559,7 @@ FILTROS = {
 ARQUIVO = 'Portfolio_Produtos_BAP_AUTOPARTS_{}.pdf'     # Portfolio_Produtos_BAP_AUTOPARTS_Linha_Autocenter.pdf
 NOME_LINHA = {cod: nome for cod, nome, _ in LINHAS}
 FILTRO_SEM_CAIXA = {'Filtros de Cabine', 'Filtros de Combustível', 'Filtros de Óleo', 'Outros Filtros'}   # a foto é a caixa do filtro de ar
+ICONE = {'Velas de Ignição': 'icone:vela'}      # a foto mostra o código e a marca de outro fabricante (MC-0025)
 TAB_BAT = 12                                            # mais baterias que isso: página de tabela depois do produto
 
 
@@ -581,15 +593,48 @@ def preparar(c, l=None):
     l = l or c['linha']
     d = dict(c, desc=DESC_LINHA.get((c['prod'], l), c['desc']))
     if c['nome'] in FILTRO_SEM_CAIXA: d['img'] = 'icone:filtro'
+    d['img'] = ICONE.get(c['nome'], d['img'])
     if c['prod'] == 'Baterias':
         d['rows'] = [dict(r, bat=bateria(r), segs=[(bateria(r)[0], False)]) for r in c['rows']]
         if c['n'] > TAB_BAT: d['tab'] = d['rows']
     elif c['spec']:
         ts = [oleo(t) if c['prod'] == 'Óleo Lubrificante' else t
               for t in (''.join(x for x, _ in r.get('segs') or []).split(' — ')[0].strip() for r in c['rows'])]
-        d['rows'] = [dict(r, segs=[(t, False)]) for r, t in zip(c['rows'], ts)]
+        d['rows'] = [dict(r, segs=[(t, False)]) for r, t in zip(c['rows'], diferenca(ts))]
+    else:
+        tipo, cont = conteudo(d)
+        if not cont and l != 'UNIVERSAL':
+            if aplicacoes(c['rows'], n=1): d['fora'] = True             # só veículo de outra linha: sai desta (UX)
+            else:                                                      # sem veículo (lâmpada, catraca): a especificação
+                ts = list(dict.fromkeys(t for t in (diferenca([r.get('sub') or ''.join(x for x, _ in r.get('segs') or []) for r in c['rows']])) if t))
+                d.update(spec=True, rows=[dict(code='', segs=[(t, False)]) for t in ts])
     d['poucos'] = poucos(d)
     return d
+
+
+def diferenca(ts):
+    """a especificação mostra o que diferencia o item (UX): a unidade num padrão só ("3 t · 50 mm · 9 m · gancho J") e sem
+    o começo que se repete em mais da metade dos itens ("Kit cinta amarração carga catraca")"""
+    def un(t):
+        t = re.sub(r'(?i)(\d+(?:,\d+)?)\s*mm\b', r'\1 mm', t)
+        t = re.sub(r'(?i)(\d+),0\s*m\b', r'\1 m', t); t = re.sub(r'(?i)(\d+(?:,\d+)?)\s*m\b(?![lm])', r'\1 m', t)
+        t = re.sub(r'(?i)(\d+)\s*ml\b', r'\1 ml', t); t = re.sub(r'(?<=[a-zA-Z])/(?=\d)', ' · ', t)                  # "50 mm/3T/9 m"
+        t = re.sub(r'\b(\d+)T\b(?=\s*(?:[·/]|\d|$))', r'\1 t', t)     # "3T 50MM" (o "4T" do óleo fica)
+        t = re.sub(r'\b(\d+)\s*G\b', r'\1 g', t)
+        t = re.sub(r'(?i)(\d[\d.]*)\s*(?:L|litros)\b', r'\1 L', t)
+        t = re.sub(r'\s+[-/]\s+', ' · ', t)
+        return re.sub(r'(\d t) (?=\d)', r'\1 · ', t).strip()
+    ts = [un(t) for t in ts]
+    ws = [t.lower().split() for t in ts]
+    pre = 0
+    for k in range(2, 8) if len(ts) >= 3 else ():                               # o maior começo (2+ palavras) comum a mais da metade dos itens
+        cnt = collections.Counter(tuple(w[:k]) for w in ws if len(w) > k)
+        if cnt and cnt.most_common(1)[0][1] * 2 > len(ws): pre = k; comum = cnt.most_common(1)[0][0]
+    out = []
+    for t, w in zip(ts, ws):
+        if pre and tuple(w[:pre]) == comum and len(w) - pre >= 2: t = ' '.join(t.split()[pre:])
+        out.append(t[:1].upper() + t[1:])
+    return out
 
 
 def filtrar(arv, cfg):
@@ -600,7 +645,8 @@ def filtrar(arv, cfg):
             for fam, cs in arv[l].get(sn, {}).items():
                 for c in cs:
                     if prods and c['prod'] not in prods: continue
-                    out.setdefault(titulo or TITULO[sn], collections.OrderedDict()).setdefault(fam, []).append(preparar(c, l))
+                    d = preparar(c, l)
+                    if not d.get('fora'): out.setdefault(titulo or TITULO[sn], collections.OrderedDict()).setdefault(fam, []).append(d)
     return out
 
 
@@ -690,6 +736,9 @@ def capa(s, l1, l2, frase, fotos, conta=None):
         for i, f in enumerate(fotos[:6]):
             r_, c_ = divmod(i, 3); x = 560 + c_ * 120; y = 120 + r_ * 150
             s.rect(x, y, 110, 138, fill='white', r=16); s.img(f, x + 8, y + 10, 94, 118)
+    elif len(fotos) >= 3:                     # 3 a 5 fotos: uma fileira de 3
+        for i, f in enumerate(fotos[:3]):
+            x = 560 + i * 120; s.rect(x, 195, 110, 138, fill='white', r=16); s.img(f, x + 8, 205, 94, 118)
     elif fotos:                               # poucas fotos (Baterias): uma só, grande, no lugar da grade
         s.rect(560, 120, 350, 288, fill='white', r=16); s.img(fotos[0], 580, 140, 310, 248)
     s.c.showPage(); s.n += 1
@@ -755,8 +804,13 @@ def build_linha(out, chave, arv, total):
 def build(out, base=BASE, filtro=None):
     arv, total = dados(base)
     if filtro: return build_linha(out, filtro, arv, total)
-    arv_p = {l: collections.OrderedDict((TITULO[sn], collections.OrderedDict((fam, [preparar(c) for c in cs]) for fam, cs in fams.items()))
-                                        for sn, fams in sis.items()) for l, sis in arv.items()}
+    arv_p = {l: collections.OrderedDict() for l in arv}
+    for l, sis in arv.items():
+        for sn, fams in sis.items():
+            for fam, cs in fams.items():
+                for c in cs:
+                    d = preparar(c)
+                    if not d.get('fora'): arv_p[l].setdefault(TITULO[sn], collections.OrderedDict()).setdefault(fam, []).append(d)
     planos, n = {}, 4                         # capa, quem somos e "nosso portfólio": a 1ª divisória é a p4
     for cod, nome, desc in LINHAS:
         if not arv_p[cod]: continue
@@ -771,7 +825,7 @@ def build(out, base=BASE, filtro=None):
     s.header('Nosso portfólio', 'Linha, sistema e família', f'conforme o Catálogo BAP {ANO}')
     w = (W - 80 - 3 * 14) / 4
     for i, (cod, nome, desc) in enumerate(LINHAS):
-        sis = arv[cod]; x = 40 + i * (w + 14)
+        sis = arv_p[cod]; x = 40 + i * (w + 14)
         n_it = sum(c['n'] for f in sis.values() for cs in f.values() for c in cs)
         n_pr = sum(len(cs) for f in sis.values() for cs in f.values())
         s.rect(x, 128, w, 330, fill='black', r=16)
@@ -781,7 +835,7 @@ def build(out, base=BASE, filtro=None):
         s.t(x + 18, 238, f'{fmt(n_it)} itens', 9.5, 'green2', 'PM')
         yy = 264
         for sn in sis:
-            s.t(x + 18, yy, '•  ' + TITULO[sn], 10, 'white', 'PR'); yy += 16
+            s.t(x + 18, yy, '•  ' + sn, 10, 'white', 'PR'); yy += 16
         if cod in planos:
             s.t(x + w - 18, 434, f'página {planos[cod][0]:02d}', 9.5, 'green2', 'PB', 'right')
             s.link(x, 128, w, 330, planos[cod][0])

@@ -10,8 +10,8 @@ Isto é só simulação: nada foi para `entregas/`.
 
 | Arquivo | Páginas |
 |---|---|
-| `Portfolio_Produtos_BAP_AUTOPARTS.pdf` (geral) | 87 |
-| `Portfolio_Produtos_BAP_AUTOPARTS_Linha_Leve.pdf` | 44 |
+| `Portfolio_Produtos_BAP_AUTOPARTS.pdf` (geral) | 86 |
+| `Portfolio_Produtos_BAP_AUTOPARTS_Linha_Leve.pdf` | 43 |
 | `Portfolio_Produtos_BAP_AUTOPARTS_Linha_Pesada.pdf` | 28 |
 | `Portfolio_Produtos_BAP_AUTOPARTS_Linha_Moto.pdf` | 11 |
 | `Portfolio_Produtos_BAP_AUTOPARTS_Linha_Lubrificantes.pdf` | 10 |
@@ -19,11 +19,9 @@ Isto é só simulação: nada foi para `entregas/`.
 | `Portfolio_Produtos_BAP_AUTOPARTS_Linha_Baterias.pdf` | 6 |
 | `Portfolio_Produtos_BAP_AUTOPARTS_Linha_Autocenter.pdf` | 24 |
 
-O geral continua com 87 páginas, mas a composição mudou:
-- entrou 1 página com a tabela das baterias da Linha Leve;
-- saiu 1 página, porque Fluidos DOT e Água Desmineralizada passaram a dividir a mesma página.
+Depois dos ajustes da 2ª rodada (abaixo), o geral tem 86 páginas: 87 da T-0029, mais a tabela das baterias da Linha Leve, menos 1 porque Fluidos DOT e Água Desmineralizada passaram a dividir uma página, e menos a Embreagem Remanufaturada da Leve.
 
-## Antes e depois (`antes_depois/`): uma página por melhoria
+## Antes e depois (`antes_depois/`): uma página por melhoria (1ª rodada, números de página de então)
 
 | # | Melhoria | Página-exemplo (antes → depois) |
 |---|---|---|
@@ -68,3 +66,15 @@ As pastas `png/<pdf>/` têm todas as páginas, a 100 ppi. Elas ficam só na past
 - **Texto de aplicação da base:** "Caminhões, Ônibus" e "Utilitários leves" continuam como estão. A correção é na base (`catalogo-dados`).
 - **Vela de ignição (`dimg/cover_29.png`):** a foto tem uma gravação pequena no sextavado. Vale o `design-de-marca` conferir se é marca de outro fabricante.
 - **Linha Baterias, capa:** continua "Linha Leve e Linha Pesada · 47 itens" (MC-0021, aprovada no modelo da 9a). Nos outros portfólios, a capa diz "N produtos · N itens" (17a).
+
+## Ajustes do UX e da marca (2ª rodada, pareceres T-0032-onda1-portfolios)
+
+| # | Ajuste | Antes → depois (`antes_depois_ajustes/`) |
+|---|---|---|
+| 1 | Especificações sem cortar a diferença: a unidade num padrão só ("3 t · 50 mm · 9 m · gancho J"), o começo repetido sai quando é comum a mais da metade dos itens, e 1 coluna quando 2 colunas cortariam | Cintas (Acessórios p06 → p06; geral p86 → p85), Selantes (Lubrificantes p09 → p09; geral p84 → p83), Aditivos (Lubrificantes p07 → p07; geral p82 → p81) |
+| 2 | Produto só com veículo de outra linha sai da linha (Embreagem Remanufaturada da Leve), e a contagem acompanha. Produto sem veículo (lâmpadas, catraca) mostra a especificação | Leve p15 → p15 e divisória p03; geral p16 → p16 |
+| 3 e 4 | Máquina e motor fora da Leve: o `taxo.HEAVY` ganhou Volvo VM, GM A/C/D-40 a 70 numa lista de modelos, VW 6-80/7-90, Bobcat e Perkins; não há mais regra local no `portfolio.py`. A Pesada não perdeu nenhuma aplicação (ganhou 3) | Filtros de Combustível: Autocenter p06 → p06, Leve p39 → p38, geral p40 → p39 |
+| 5 | Vela: ícone no lugar da foto com código e marca de outro fabricante (MC-0025) | Leve p34 → p33, Moto p04 → p04, geral p35 → p34 e p71 → p70 |
+| 6 | "FZR", "MWM" (sigla sem vogal) e "ix35"; "Cherry" vem da base (vai para o `catalogo-dados`) | Moto p07, Leve p13 e p19 |
+
+Páginas: geral 87 → 86 e Linha Leve 44 → 43 (sai a Embreagem Remanufaturada); os outros 6 não mudam.
