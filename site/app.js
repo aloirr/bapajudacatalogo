@@ -959,15 +959,15 @@
 
   // ---------- filtros e etiquetas (R-20261120-113148 e R-20261120-123800, Alexandre) ----------
   // Um grupo por filtro, aberto, com caixas de marcar (uma ou mais) e a contagem, na ordem fixa Linha, Categoria,
-  // Sistema, Família (e as medidas da T-0006, abaixo), no computador e no celular (R-20261120-145600-alexandre); o botão do grupo só recolhe. Ficam na
-  // coluna à esquerda dos cartões (no celular, no painel "Filtrar"). A lógica: si=, fa=, li= e ca= no endereço
+  // Sistema, Família, Amperagem e Partida a frio (CCA), no computador e no celular (R-20261120-145600-alexandre); o
+  // botão do grupo só recolhe. Ficam na coluna à esquerda dos cartões (no celular, no painel "Filtrar"). A lógica: li=,
+  // ca=, si=, fa=, ah= e cca= no endereço
   // (repetidos quando há mais de um). As opções de cada grupo e a ordem delas vêm da busca sem nenhum filtro marcado
   // (não somem ao marcar outro); a contagem, da busca com os outros filtros. Com 0, a opção fica cinza e desabilitada
   // (a marcada, nunca). Abaixo, as etiquetas do termo (q) e de cada filtro marcado, com o X, e o "Limpar tudo". A
   // placa e o veículo ficam no quadro da busca (montarBusca).
-  // T-0006, fase 1 (R-20261123-095435 e R-20261123-112006-alexandre): os grupos "Amperagem" (opções em Ah) e "Partida a
-  // frio (CCA)" (5 faixas), depois da Família, só quando a lista tem bateria com a medida. A medida sai da ficha técnica
-  // (x) que o gerar_site.py já grava, "C20(ah)" e "Cca-18°": o produtos.json não muda. Endereço: ah=60 e cca=401-500.
+  // T-0006, fase 1: Amperagem e Partida a frio (CCA) só quando a lista tem bateria com a medida, tirada da ficha técnica
+  // (x): "C20(ah)" e "Cca-18°" (docs/DADOS_DO_SITE.md).
   const FAIXAS_CCA = [[400, "ate-400", "até 400"], [500, "401-500", "401 a 500"], [600, "501-600", "501 a 600"],
     [800, "601-800", "601 a 800"], [Infinity, "acima-800", "acima de 800"]];
   const NOME_CCA = new Map(FAIXAS_CCA.map(([, v, nome]) => [v, nome]));
