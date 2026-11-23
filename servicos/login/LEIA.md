@@ -38,13 +38,11 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 
 Lista **fixa** `PDFS` no `server.mjs` (id, título, arquivo por regex ancorada, tipo, grupo e par), só de `catalogo_grafico/entregas/`, na ordem da tela. O navegador manda só o `id`; o nome do arquivo nunca vem do pedido.
 
-- São 22 itens em 3 grupos (`grupo`), nesta ordem: `catalogos` (3), `materiais` (11: primeiro os 8 portfólios juntos, o geral e os 7 por linha, `portfolio-<linha>`, de Leve a Autocenter; depois os Lubrificantes em par e o Kit Filtros) e `treinamentos` (8: `treinamento-<tema>-pdf` e `-pptx`, em par).
-
 - Nome com ano: vale o de ano mais alto que casa. Nome sem ano: o nome exato.
   - **[SUPOSIÇÃO]** O `catalogo-grafico` mantém esses nomes. Se o ano entrar no nome, a regex ganha o `(\d{4})` e o `buildFilter` do `render.yaml` muda junto.
 - Só abre arquivo comum, com o caminho real igual ao pedido (sem link simbólico).
 - **`GET /api/pdfs`** devolve sempre a lista inteira, na ordem dela: `[{id, titulo, grupo, tipo, par, arquivo, tamanho, data}]`.
-  - `par` é `"lubrificantes"` nos 2 dos Lubrificantes, `"treinamento-<tema>"` nos 2 de cada treinamento (o PDF é o principal) e `null` nos outros. Os itens com o mesmo `par` viram um cartão só na tela (o 1º é o principal) e têm o mesmo título.
+  - `par`: os itens com o mesmo `par` viram um cartão só na tela (o 1º é o principal) e têm o mesmo título; sem par, `null`.
   - Arquivo em falta: o item continua, com `arquivo`, `tamanho` e `data` `null`; o download dele dá 404.
   - `data` é a data do arquivo no disco (ISO 8601). **[SUPOSIÇÃO]** No Render, é a do deploy.
 - **`GET /admin/pdfs/baixar/<id>`:** `Content-Type` pelo `tipo` da lista (`TIPO_MIME` no `server.mjs`), nunca pela extensão do pedido; `Content-Disposition: attachment`, `Cache-Control: private, no-store` e `nosniff`. O arquivo vai em stream.
