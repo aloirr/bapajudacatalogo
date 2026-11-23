@@ -32,19 +32,42 @@ const pastaTemp = (prefixo = 'login-') => {
 };
 after(() => { for (const d of temporarias) fs.rmSync(d, { recursive: true, force: true }); });
 
-// Raiz falsa: site/, dados/ (a base que nunca pode sair) e entregas/ (os 7 arquivos e os internos).
+// Raiz falsa: site/, dados/ (a base que nunca pode sair) e entregas/ (os arquivos da lista e os internos).
 let RAIZ_FALSA;
 const MIME_ESPERADO = { pdf: 'application/pdf', pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
-// Os 7 da lista fixa (T-0024), na ordem da tela: [id, arquivo no disco, conteúdo falso, tipo, grupo, par].
+// A lista fixa: [id, arquivo no disco, conteúdo falso, tipo, grupo, par, título]. No par, o PDF e o PowerPoint têm o mesmo
+// título (um cartão só na tela).
+// Os 7 da T-0024 (já no main).
 const SETE = [
-  ['completo-digital', 'Catalogo_BAP_2027_Completo_Digital.pdf', '%PDF-completo-falso', 'pdf', 'catalogos', null],
-  ['a4-grafica', 'Catalogo_BAP_2027_A4_grafica.pdf', '%PDF-a4-falso', 'pdf', 'catalogos', null],
-  ['linha-moto', 'Catalogo_BAP_2027_Linha_Moto.pdf', '%PDF-moto-falso', 'pdf', 'catalogos', null],
-  ['portfolio', 'Portfolio_Produtos_BAP_AUTOPARTS.pdf', '%PDF-portfolio-falso', 'pdf', 'materiais', null],
-  ['lubrificantes-pdf', 'BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pdf', '%PDF-lubri-falso', 'pdf', 'materiais', 'lubrificantes'],
-  ['lubrificantes-pptx', 'BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pptx', 'PK-pptx-lubri-falso', 'pptx', 'materiais', 'lubrificantes'],
-  ['kit-filtros', 'Kit_Filtros_BAP.pdf', '%PDF-kit-falso', 'pdf', 'materiais', null],
+  ['completo-digital', 'Catalogo_BAP_2027_Completo_Digital.pdf', '%PDF-completo-falso', 'pdf', 'catalogos', null, 'Completo Digital'],
+  ['a4-grafica', 'Catalogo_BAP_2027_A4_grafica.pdf', '%PDF-a4-falso', 'pdf', 'catalogos', null, 'A4 gráfica'],
+  ['linha-moto', 'Catalogo_BAP_2027_Linha_Moto.pdf', '%PDF-moto-falso', 'pdf', 'catalogos', null, 'Linha Moto'],
+  ['portfolio', 'Portfolio_Produtos_BAP_AUTOPARTS.pdf', '%PDF-portfolio-falso', 'pdf', 'materiais', null, 'Portfólio de Produtos'],
+  ['lubrificantes-pdf', 'BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pdf', '%PDF-lubri-falso', 'pdf', 'materiais', 'lubrificantes', 'Lubrificantes e Químicos'],
+  ['lubrificantes-pptx', 'BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pptx', 'PK-pptx-lubri-falso', 'pptx', 'materiais', 'lubrificantes', 'Lubrificantes e Químicos'],
+  ['kit-filtros', 'Kit_Filtros_BAP.pdf', '%PDF-kit-falso', 'pdf', 'materiais', null, 'Kit Filtros'],
 ];
+// Os da T-0032: o portfólio por linha (materiais) e os treinamentos (PDF e PowerPoint, em par).
+const NOVOS = [
+  ['portfolio-leve', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Leve.pdf', '%PDF-port-leve-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Leve'],
+  ['portfolio-pesada', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Pesada.pdf', '%PDF-port-pesada-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Pesada'],
+  ['portfolio-moto', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Moto.pdf', '%PDF-port-moto-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Moto'],
+  ['portfolio-lubrificantes', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Lubrificantes.pdf', '%PDF-port-lubri-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Lubrificantes'],
+  ['portfolio-acessorios', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Acessorios.pdf', '%PDF-port-acess-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Acessórios'],
+  ['portfolio-baterias', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Baterias.pdf', '%PDF-port-bat-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Baterias'],
+  ['portfolio-autocenter', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Autocenter.pdf', '%PDF-port-auto-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Autocenter'],
+  ['treinamento-mecanica-basica-pdf', 'Treinamento_Mecanica_Basica_BAP_Vendedores.pdf', '%PDF-trein-mec-falso', 'pdf', 'treinamentos', 'treinamento-mecanica-basica', 'Treinamento · Mecânica Básica'],
+  ['treinamento-mecanica-basica-pptx', 'Treinamento_Mecanica_Basica_BAP_Vendedores.pptx', 'PK-pptx-trein-mec-falso', 'pptx', 'treinamentos', 'treinamento-mecanica-basica', 'Treinamento · Mecânica Básica'],
+  ['treinamento-baterias-pdf', 'Treinamento_Baterias_BAP_Vendedores.pdf', '%PDF-trein-bat-falso', 'pdf', 'treinamentos', 'treinamento-baterias', 'Treinamento · Baterias'],
+  ['treinamento-baterias-pptx', 'Treinamento_Baterias_BAP_Vendedores.pptx', 'PK-pptx-trein-bat-falso', 'pptx', 'treinamentos', 'treinamento-baterias', 'Treinamento · Baterias'],
+  ['treinamento-linha-moto-pdf', 'Treinamento_Linha_Moto_BAP_Vendedores.pdf', '%PDF-trein-moto-falso', 'pdf', 'treinamentos', 'treinamento-linha-moto', 'Treinamento · Linha Moto'],
+  ['treinamento-linha-moto-pptx', 'Treinamento_Linha_Moto_BAP_Vendedores.pptx', 'PK-pptx-trein-moto-falso', 'pptx', 'treinamentos', 'treinamento-linha-moto', 'Treinamento · Linha Moto'],
+  ['treinamento-lubrificantes-pdf', 'Treinamento_Lubrificantes_BAP_Vendedores.pdf', '%PDF-trein-lubri-falso', 'pdf', 'treinamentos', 'treinamento-lubrificantes', 'Treinamento · Lubrificantes'],
+  ['treinamento-lubrificantes-pptx', 'Treinamento_Lubrificantes_BAP_Vendedores.pptx', 'PK-pptx-trein-lubri-falso', 'pptx', 'treinamentos', 'treinamento-lubrificantes', 'Treinamento · Lubrificantes'],
+];
+// A ordem da tela (revisão de UX da T-0032): os 8 portfólios juntos no começo de 'materiais' (o geral e depois os 7 por
+// linha), então os outros materiais e, no fim, os treinamentos.
+const LISTA = [...SETE.slice(0, 4), ...NOVOS.slice(0, 7), ...SETE.slice(4), ...NOVOS.slice(7)];
 // Os internos de entregas/ (nomes reais de hoje): nunca podem sair.
 const INTERNOS = [
   'Alteracoes_Catalogo_Complementos_Fraga_13112026.xlsx', 'Auditoria_Catalogo_BAP_23102026.xlsx',
@@ -78,7 +101,7 @@ before(() => {
   escrever('dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx', XLSX);
   escrever('entregas/Catalogo_BAP_2026_Completo_Digital.pdf', '%PDF-velho');
   escrever('entregas/Catalogo_BAP_2026_Linha_Moto.pdf', '%PDF-velho');
-  for (const [, arquivo, conteudo] of SETE) escrever('entregas/' + arquivo, conteudo);
+  for (const [, arquivo, conteudo] of LISTA) escrever('entregas/' + arquivo, conteudo);
   for (const n of INTERNOS) escrever('entregas/' + n, INTERNO);
   // Quase iguais aos da lista: a regex ancorada não pode casar.
   for (const n of ['Outro.pdf', 'xKit_Filtros_BAP.pdf', 'Kit_Filtros_BAP.pdf.bak', 'Kit_Filtros_BAP.PDF', 'Catalogo_BAP_27_Linha_Moto.pdf']) escrever('entregas/' + n, INTERNO);
@@ -184,6 +207,15 @@ test('sem login nada abre: página leva a /entrar, o resto dá 401', async () =>
     assert.deepEqual(r.json, { erro: 'Entre de novo para continuar.' }, caminho);
     assert.ok(!r.texto.includes('AMT7183'), caminho);
   }
+  // Os arquivos do admin, um a um: 401, sem download e sem nada do arquivo.
+  for (const [id, arquivo] of LISTA) {
+    for (const metodo of ['GET', 'HEAD']) {
+      const r = await s.pedir('/admin/pdfs/baixar/' + id, { metodo });
+      assert.equal(r.status, 401, `${metodo} ${id}`);
+      assert.equal(r.headers['content-disposition'], undefined, `${metodo} ${id}`);
+      assert.ok(!r.texto.includes('-falso') && !r.texto.includes(arquivo), `${metodo} ${id}`);
+    }
+  }
   // "volta" nunca aponta para outro site ("//host" ou "/\\host").
   for (const caminho of ['//evil.invalid/x', '/\\evil.invalid/x', '//evil.invalid', '/\\/evil.invalid', '/%09/evil.com', '/%0a/evil.com', '/%0d%5Cevil.com', '/%2F%2Fevil.com', '/%5C%5Cevil.com']) {
     const r = await s.pedir(caminho, { accept: HTML });
@@ -274,7 +306,7 @@ test('a sessão vence 5 h depois do login, mesmo em uso', async () => {
   assert.equal((await s.pedir('/api/eu', { cookie: c })).status, 401);
 });
 
-test('usuário comum: 404 nas rotas de admin; o admin baixa os 7 arquivos da lista', async () => {
+test('usuário comum: 404 nas rotas de admin; o admin baixa os arquivos da lista', async () => {
   const s = await subir();
   const adm = await adminPronto(s);
   const cli = await clientePronto(s, adm);
@@ -282,11 +314,12 @@ test('usuário comum: 404 nas rotas de admin; o admin baixa os 7 arquivos da lis
   assert.equal(eu.json.admin, false);
   assert.equal(eu.json.empresa, 'Loja Exemplo');
   assert.equal((await s.pedir('/', { cookie: cli, accept: 'text/html' })).status, 200);
-  for (const caminho of ['/admin/usuarios', '/admin/pdfs', '/admin/pdfs/', '/admin/usuarios/index.html', ...SETE.map(([id]) => '/admin/pdfs/baixar/' + id)]) {
+  for (const caminho of ['/admin/usuarios', '/admin/pdfs', '/admin/pdfs/', '/admin/usuarios/index.html', ...LISTA.map(([id]) => '/admin/pdfs/baixar/' + id)]) {
     for (const metodo of ['GET', 'HEAD']) {
       const r = await s.pedir(caminho, { metodo, cookie: cli, accept: 'text/html' });
       assert.equal(r.status, 404, `${metodo} ${caminho}`);
-      assert.ok(!r.texto.includes('-falso'), 'vazou para o comum: ' + caminho);
+      assert.equal(r.headers['content-disposition'], undefined, `${metodo} ${caminho}`);
+      assert.ok(!r.texto.includes('-falso') && !LISTA.some(([, a]) => r.texto.includes(a)), 'vazou para o comum: ' + caminho);
     }
   }
   for (const [caminho, metodo, corpo] of [
@@ -296,6 +329,7 @@ test('usuário comum: 404 nas rotas de admin; o admin baixa os 7 arquivos da lis
   ]) {
     const r = await s.pedir(caminho, { metodo, cookie: cli, corpo, headers: Buffer.isBuffer(corpo) ? { 'Content-Type': 'image/png' } : {} });
     assert.equal(r.status, 404, `${metodo} ${caminho}`);
+    assert.ok(!LISTA.some(([id, a]) => r.texto.includes(id) || r.texto.includes(a)), 'vazou para o comum: ' + caminho);
   }
   assert.equal((await s.pedir('/api/usuarios', { cookie: adm })).json.length, 2, 'ninguém foi criado pelo comum');
 
@@ -304,16 +338,14 @@ test('usuário comum: 404 nas rotas de admin; o admin baixa os 7 arquivos da lis
   assert.equal((await s.pedir('/admin/pdfs', { cookie: adm, accept: 'text/html' })).status, 200);
   const lista = await s.pedir('/api/pdfs', { cookie: adm });
   assert.equal(lista.status, 200);
-  // Contrato com o web-site (T-0024): os itens da SETE, na ordem da lista, com estes campos e só estes.
-  assert.deepEqual(lista.json.map((x) => [x.id, x.arquivo, x.tamanho, x.tipo, x.grupo, x.par]),
-    SETE.map(([id, arquivo, conteudo, tipo, grupo, par]) => [id, arquivo, conteudo.length, tipo, grupo, par]));
+  // Contrato com o web-site (T-0024, T-0032): os itens da LISTA, na ordem dela, com estes campos e só estes.
+  assert.deepEqual(lista.json.map((x) => [x.id, x.arquivo, x.tamanho, x.tipo, x.grupo, x.par, x.titulo]),
+    LISTA.map(([id, arquivo, conteudo, tipo, grupo, par, titulo]) => [id, arquivo, conteudo.length, tipo, grupo, par, titulo]));
   for (const x of lista.json) {
     assert.deepEqual(Object.keys(x).sort(), ['arquivo', 'data', 'grupo', 'id', 'par', 'tamanho', 'tipo', 'titulo']);
-    assert.ok(x.titulo && !Number.isNaN(Date.parse(x.data)));
+    assert.ok(!Number.isNaN(Date.parse(x.data)));
   }
-  assert.equal(lista.json.find((x) => x.id === 'portfolio').titulo, 'Portfólio de Produtos');
-  assert.equal(lista.json.find((x) => x.id === 'lubrificantes-pdf').titulo, lista.json.find((x) => x.id === 'lubrificantes-pptx').titulo);
-  for (const [id, arquivo, conteudo, tipo] of SETE) {
+  for (const [id, arquivo, conteudo, tipo] of LISTA) {
     const b = await s.pedir('/admin/pdfs/baixar/' + id, { cookie: adm, accept: 'text/html' });
     assert.equal(b.status, 200, id);
     assert.equal(b.headers['content-type'], MIME_ESPERADO[tipo], id);
@@ -325,6 +357,8 @@ test('usuário comum: 404 nas rotas de admin; o admin baixa os 7 arquivos da lis
     assert.equal(h.status, 200, 'HEAD ' + id);
     assert.equal(h.headers['content-type'], b.headers['content-type'], 'HEAD ' + id);
     assert.equal(Number(h.headers['content-length']), conteudo.length, 'HEAD ' + id);
+    assert.equal(h.headers['content-disposition'], b.headers['content-disposition'], 'HEAD ' + id);
+    assert.equal(h.headers['cache-control'], 'private, no-store', 'HEAD ' + id);
   }
 });
 
@@ -338,8 +372,8 @@ test('só a lista fixa abre: id fora da lista, os internos de entregas/ e dados/
     'completo-digital%00', 'kit-filtros%20', 'kit-filtros.pdf', '%6Bit-filtros',
     // os quase iguais
     'xKit_Filtros_BAP.pdf', 'Kit_Filtros_BAP.pdf.bak', 'Kit_Filtros_BAP.PDF', 'Catalogo_BAP_27_Linha_Moto.pdf',
-    // os nomes dos 7 (o id é que vale, nunca o nome)
-    ...SETE.map(([, arquivo]) => arquivo),
+    // os nomes da lista (o id é que vale, nunca o nome)
+    ...LISTA.map(([, arquivo]) => arquivo),
     // os internos de entregas/, com e sem extensão, e codificados
     ...INTERNOS, ...INTERNOS.map((n) => n.replace(/\.[a-z]+$/, '')), ...INTERNOS.map((n) => encodeURIComponent('../entregas/' + n)),
     // a base e dados/, com "..", "%2F" e "%2e%2e"
@@ -363,7 +397,7 @@ test('só a lista fixa abre: id fora da lista, os internos de entregas/ e dados/
       assert.equal(r.headers['content-disposition'], undefined, 'download em ' + c);
     }
   }
-  // A lista da API só traz os 7, nunca um interno nem a base.
+  // A lista da API só traz os da lista fixa, nunca um interno nem a base.
   const lista = await s.pedir('/api/pdfs', { cookie: adm });
   const corpo = JSON.stringify(lista.json);
   for (const n of [...INTERNOS, BASE, 'BASE.xlsx', 'Outro.pdf', 'xKit', '.bak', '.PDF', '_27_', '_2026_']) assert.ok(!corpo.includes(n), 'na lista: ' + n);
@@ -384,36 +418,44 @@ test('arquivo em falta continua na lista (null) e dá 404; link e pasta não abr
   const adm = await adminPronto(s);
   const lista = await s.pedir('/api/pdfs', { cookie: adm });
   assert.equal(lista.status, 200);
-  assert.deepEqual(lista.json.map((x) => x.id), SETE.map(([id]) => id));
+  assert.deepEqual(lista.json.map((x) => x.id), LISTA.map(([id]) => id));
   const porId = Object.fromEntries(lista.json.map((x) => [x.id, x]));
   assert.equal(porId['completo-digital'].arquivo, 'Catalogo_BAP_2028_Completo_Digital.pdf');
   assert.equal(porId['lubrificantes-pdf'].arquivo, 'BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pdf');
-  for (const id of ['a4-grafica', 'linha-moto', 'portfolio', 'lubrificantes-pptx', 'kit-filtros']) {
+  // Os da T-0032 ainda não estão nesta pasta: seguem na lista, em falta, como os outros.
+  for (const id of ['a4-grafica', 'linha-moto', 'portfolio', 'lubrificantes-pptx', 'kit-filtros', ...NOVOS.map(([i]) => i)]) {
     const x = porId[id];
     assert.deepEqual([x.arquivo, x.tamanho, x.data], [null, null, null], id);
-    assert.deepEqual([x.tipo, x.grupo, x.par], SETE.find(([i]) => i === id).slice(3), id);
+    assert.deepEqual([x.tipo, x.grupo, x.par], LISTA.find(([i]) => i === id).slice(3, 6), id);
     const r = await s.pedir('/admin/pdfs/baixar/' + id, { cookie: adm });
     assert.equal(r.status, 404, id);
     assert.ok(!r.texto.includes(XLSX), id);
   }
   assert.equal((await s.pedir('/admin/pdfs/baixar/completo-digital', { cookie: adm })).texto, '%PDF-2028');
 
-  // Pasta inexistente: os 7 seguem na lista, todos em falta.
+  // Pasta inexistente: todos seguem na lista, em falta.
   const s2 = await subir({ pdfs: path.join(pasta, 'nao-existe') });
   const adm2 = await adminPronto(s2);
   const l2 = await s2.pedir('/api/pdfs', { cookie: adm2 });
   assert.equal(l2.status, 200);
-  assert.deepEqual(l2.json.map((x) => [x.id, x.arquivo]), SETE.map(([id]) => [id, null]));
+  assert.deepEqual(l2.json.map((x) => [x.id, x.arquivo]), LISTA.map(([id]) => [id, null]));
 });
 
-test('entregas/ de verdade: os 7 nomes da lista existem e baixam com o tipo certo (T-0024)', async () => {
+test('entregas/ de verdade: os 7 da T-0024 existem; os que existem baixam com o tipo certo (T-0024, T-0032)', async () => {
   const pasta = path.join(AQUI, '..', '..', 'catalogo_grafico', 'entregas');
   const s = await subir({ raiz: 'real' });
   const adm = await adminPronto(s);
   const lista = await s.pedir('/api/pdfs', { cookie: adm });
   assert.equal(lista.status, 200);
-  assert.deepEqual(lista.json.map((x) => x.id), SETE.map(([id]) => id));
+  assert.deepEqual(lista.json.map((x) => x.id), LISTA.map(([id]) => id));
+  const daT24 = new Set(SETE.map(([id]) => id));
   for (const x of lista.json) {
+    // [SUPOSIÇÃO] os da T-0032 chegam ao main num PR à parte do catalogo-grafico: até lá, em falta (null e 404).
+    if (!daT24.has(x.id) && !x.arquivo) {
+      assert.deepEqual([x.tamanho, x.data], [null, null], x.id);
+      assert.equal((await s.pedir('/admin/pdfs/baixar/' + x.id, { metodo: 'HEAD', cookie: adm })).status, 404, x.id);
+      continue;
+    }
     assert.ok(x.arquivo, 'em falta no main: ' + x.id);
     assert.equal(x.tamanho, fs.statSync(path.join(pasta, x.arquivo)).size, x.id);
     // HEAD: confere o tipo e o nome sem baixar os 44 MB.

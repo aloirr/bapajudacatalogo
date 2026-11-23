@@ -34,7 +34,7 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 - **API** (JSON; erro sempre `{"erro": "..."}`): `POST /api/entrar`, `POST /api/sair`, `GET /api/eu`, `GET /api/eu/logo`, `POST /api/trocar-senha`, `GET|POST /api/usuarios`, `PATCH /api/usuarios/<u>`, `POST /api/usuarios/<u>/senha`, `GET|PUT|DELETE /api/usuarios/<u>/logo`, `GET /api/pdfs`. Detalhes no contrato da T-0022. Cada usuário da lista (`GET /api/usuarios`) traz `usuario, nome, empresa, admin, ativo, temLogo, trocarSenha, ultimoAcesso`.
 - **Interna:** `GET /interno/codigos` com o cabeçalho `X-Chave-Interna` → `{"total": n, "codigos": [...]}`; sem a chave certa, 401.
 
-## Arquivos do admin (T-0024)
+## Arquivos do admin (T-0024, T-0032)
 
 Lista **fixa** `PDFS` no `server.mjs` (id, título, arquivo por regex ancorada, tipo, grupo e par), só de `catalogo_grafico/entregas/`, na ordem da tela. O navegador manda só o `id`; o nome do arquivo nunca vem do pedido.
 
@@ -42,7 +42,7 @@ Lista **fixa** `PDFS` no `server.mjs` (id, título, arquivo por regex ancorada, 
   - **[SUPOSIÇÃO]** O `catalogo-grafico` mantém esses nomes. Se o ano entrar no nome, a regex ganha o `(\d{4})` e o `buildFilter` do `render.yaml` muda junto.
 - Só abre arquivo comum, com o caminho real igual ao pedido (sem link simbólico).
 - **`GET /api/pdfs`** devolve sempre a lista inteira, na ordem dela: `[{id, titulo, grupo, tipo, par, arquivo, tamanho, data}]`.
-  - `par` é `"lubrificantes"` nos 2 dos Lubrificantes e `null` nos outros. Os itens com o mesmo `par` viram um cartão só na tela (o 1º é o principal).
+  - `par`: os itens com o mesmo `par` viram um cartão só na tela (o 1º é o principal) e têm o mesmo título; sem par, `null`.
   - Arquivo em falta: o item continua, com `arquivo`, `tamanho` e `data` `null`; o download dele dá 404.
   - `data` é a data do arquivo no disco (ISO 8601). **[SUPOSIÇÃO]** No Render, é a do deploy.
 - **`GET /admin/pdfs/baixar/<id>`:** `Content-Type` pelo `tipo` da lista (`TIPO_MIME` no `server.mjs`), nunca pela extensão do pedido; `Content-Disposition: attachment`, `Cache-Control: private, no-store` e `nosniff`. O arquivo vai em stream.
