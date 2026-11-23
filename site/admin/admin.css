@@ -75,7 +75,7 @@ dialog.dlg { background: var(--branco); }
   .dlg-curta .form-acoes > * { flex: 1 1 100%; justify-content: center; }
 }
 
-/* ---------- catálogos e materiais (T-0024): 2 grupos de cartões ---------- */
+/* ---------- catálogos, materiais e treinamentos (T-0024, T-0032): 3 grupos de cartões ---------- */
 .pdf-grupo + .pdf-grupo { margin-top: 32px; }
 .pdf-grupo-tit { margin: 0 0 14px; font-size: 20px; line-height: 1.25; color: var(--escuro); }
 /* 3 colunas no computador (a .pg tem 1200 px), 2 no tablet, 1 no celular */
