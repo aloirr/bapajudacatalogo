@@ -2,7 +2,8 @@ Testes T-0032 (onda 1) · 23/11/2026 14:39 (Manaus)
 PR #185 · branch catalogo-grafico/T-0032-portfolios · head ebde992fba591f51cceffc9c208776f1708a1714
 main de comparação: 2c2b1257894266935f2a01f25ec3a5946e1fe039 · base v28 (dados/ = versoes/v28, igual ao main)
 
-RESULTADO: FALHOU em 1 item (4b, "uso interno" em todos os slides); todo o resto PASSOU.
+RESULTADO: PASSOU em todos os itens.
+Atualizado em 23/11/2026 14:40 (Manaus): item 4b passou a PASSOU pelo critério da decisão 4a, definido pelo gerente-projetos (ver 4b).
 
 1. Regeração pelo gerador do branch (PYTHONHASHSEED=0) x entregas do PR
    8 portfólios (portfolio.py, geral e --linha=...) .... PASSOU 8/8 iguais (texto e pixels a 150 ppi)
@@ -20,16 +21,17 @@ RESULTADO: FALHOU em 1 item (4b, "uso interno" em todos os slides); todo o resto
    procurados (sem acento, sem caixa): R$, estoque, MOQ, FOB, ranking, fornecedor, "uso interno", preço/preco,
    USD, BAP BOX, custo, LINHA_ORIGEM, OBS_INTERNA, SUNRISE, AUTOIMPACT, interno, compra
    único achado: "bom custo-benefício" (texto institucional da pág. 2, já no main) = não é dado interno
-4b. Treinamentos: "uso interno" no rodapé ............. FALHOU
-   145 de 180 slides com "Treinamento X BAP | Equipe Comercial Externa · uso interno" no rodapé.
-   35 slides sem rodapé e sem "uso interno": capa, divisórias de módulo e Obrigado
+4b. Treinamentos: "uso interno" no rodapé ............. PASSOU
+   Critério (gerente-projetos, decisão 4a, R-20261123-162032-po): "'uso interno' no rodapé de todos os treinamentos".
+   145 de 180 slides têm rodapé, e os 145 têm "Treinamento X BAP | Equipe Comercial Externa · uso interno".
+   Nota: os outros 35 slides não têm rodapé nem "uso interno": capa, divisórias de módulo e Obrigado.
      Mecânica Básica 1, 5, 9, 15, 20, 25, 31, 36, 45
      Baterias        1, 5, 9, 16, 21, 27, 32, 35, 47
      Linha Moto      1, 5, 8, 20, 27, 34, 41
      Lubrificantes   1, 5, 9, 15, 24, 28, 32, 36, 40, 47
-   O pedido do teste diz "todos os slides"; a decisão 4a (R-20261123-162032-po) diz "todos os treinamentos".
-   Para o gerente decidir: se capa, divisória e Obrigado ficam fora, o item passa.
-   Repetir: abrir o PDF e ver a pág. 5 de cada treinamento (amostra: trein_mecanica_basica_p05.png).
+   Motivo: esses tipos de slide não têm rodapé no original nem no Mecânica Básica que o Alexandre aprovou como modelo.
+   Pôr "uso interno" também nesses 35 slides seria decisão nova do Alexandre; o po vai perguntar.
+   Amostra: trein_mecanica_basica_p05.png (divisória sem rodapé) e trein_mecanica_basica_p02.png (slide com rodapé).
 4c. Treinamentos: "estoque" e "R$" .................... PASSOU 0 e 0 (texto do .pptx, notas e PDF)
 4d. Arial, nenhum Calibri ............................. PASSOU 0 "Calibri" no pacote
    tema: major e minor latin = Arial; docProps: Arial. Obs.: no PDF do LibreOffice o "✓" sai em Inter
