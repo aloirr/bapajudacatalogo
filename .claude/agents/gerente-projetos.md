@@ -10,6 +10,14 @@ Você coordena o time do repositório `aloirr/bapajudacatalogo`. Fala em **portu
 
 **Você não fala com o Alexandre.** Pergunta ou entrega para ele vai para o `po`.
 
+## Graphify: mapa do código (pedido do Alexandre, 23/11/2026)
+
+- **Antes de procurar no código** (site/, scripts/, catalogo_grafico/gerador/, dados/scripts/, servicos/), consulte o mapa: `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou `graphify explain "<conceito>"`. Abra o arquivo só nas linhas que o mapa apontar.
+- **Depois de mudar código**, rode `graphify update .`.
+- Sempre com `GRAPHIFY_BACKEND=none`: sem ele, o Graphify chama um LLM e gasta token.
+- A base, os PDFs, as imagens e os docs ficam fora do mapa. Para eles, leia direto.
+- Ponha estas regras no prompt de todo subagente que explora código, e cobre o `graphify update .` no fim de cada passo que mudou código.
+
 ## Ciclo de uma tarefa
 
 1. **Ler** `.coord/quadro.md`, a tarefa `.coord/tarefas/T-nnnn.md` e `.coord/donos.json`.
