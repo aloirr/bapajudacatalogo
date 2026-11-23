@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 23/11/2026 12:43 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 23/11/2026 12:45 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -45,11 +45,11 @@ Main bb8b3cc (#180).
    - T-0006, fases 2 (pneus) e 3 (rolamentos) da busca por medida: só com pedido novo do Alexandre;
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - MC-0012 (tamanho do logo e assinatura): parado (R-20261123-112006-alexandre, 8c);
-   - Portfólio, as 12 melhorias de prioridade média e baixa da T-0032 (MELHORIAS_PORTFOLIO.md; R-20261123-162032-po, 8b), entre elas as divisórias com poucos produtos e o selo com uma palavra só;
+   - Portfólio, as 12 melhorias de prioridade média e baixa da T-0032 (MELHORIAS_PORTFOLIO.md; R-20261123-162032-po, 8b; o RD-0535 virou a melhoria 5, que é alta e vai na T-0032), entre elas as divisórias com poucos produtos e o selo com uma palavra só;
    - RD-0550 e RD-0551 (montadora repetida ou com 2 grafias nas aplicações do Portfólio) e RD-0552 (regra própria de pesado no Kit Filtros): com simulação (catalogo-grafico, T-0029);
    - "preço acessível" → "bom custo-benefício" também no A4 (print_cat.py) e na apresentação de Lubrificantes (15a, catalogo-grafico, com simulação);
    - o mês da capa do Portfólio vem do dia da geração (edicao()): fixar, se o Alexandre quiser (T-0029);
-   - base, catalogo-dados: "Agile" e "GOL G IV de" sem montadora; ônibus e caminhões nas Cruzetas da Leve; o HC26 (Etios) só PESADA; o PAF1582 "LEVE E PESADA" pela "Expert Cargo"; "PUTSMEISTER", "Iveco S-WAY", "Mwm" e "API sljaso MA"; os 2 textos de MOTIVO da mesma causa na VEICULOS; o RD-0546 (T-0028, T-0029, T-0031);
+   - base, catalogo-dados: "Agile" e "GOL G IV de" sem montadora; ônibus e caminhões nas Cruzetas da Leve; o HC26 (Etios) só PESADA; o PAF1582 "LEVE E PESADA" pela "Expert Cargo"; "PUTSMEISTER", "Iveco S-WAY", "Mwm" e "API sljaso MA"; os 2 textos de MOTIVO da mesma causa na VEICULOS; o RD-0546; a posição repetida na ficha do BIE20042 (Posição, Detalhe e Posição e lado) (T-0028, T-0029, T-0031);
    - bateria, catalogo-dados e web-site: "Amperagem" × "Ah" (75AE-LP-18 e 40D-MXWF-15 divergem); "Ca +25c" e "12v" (T-0030);
    - RD-0511 (pneus e câmaras de moto em 2 lugares), o vazio da pág. 2 do A4 e a página da Lâmpadas Moto (1 cartão e cerca de 2/3 em branco): parados (R-20261123-112006-alexandre, 10c e 12c);
    - RD-0528: os blocos `__main__` de `moto.py` e `pneus_fix.py` ainda procuram o texto do `cover_page`, que saiu; não muda página (catalogo-grafico, T-0027);
