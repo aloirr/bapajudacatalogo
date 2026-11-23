@@ -125,3 +125,31 @@ Depois do "aprovado" do Alexandre: conferir no PR a capa da Linha Moto contra `m
 Portfólio contra a variante escolhida (o número de páginas, o "+4.500", as 3 páginas de "1 item", "Cubos e Rolamentos"
 só em Rodagem se for a b), o `pdfinfo` (título "Portfólio de Produtos BAP AUTOPARTS" e autor "BAP AUTOPARTS" iguais aos
 da entrega), a busca de preço, estoque e uso interno no texto do PDF e a grafia "BAP AUTOPARTS". Fechar o MC-0015.
+
+## Entrega final
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 08:40 (Manaus) |
+| Decisão | R-20261123-122814-po: 3 b (Rolamentos em Rodagem, 88 págs.), 4 a (as datas de 2026 ficam; a troca vai para a fila), 5 a (simulação aprovada com os ajustes das aplicações) |
+| O que foi visto | O branch `catalogo-grafico/T-0028-entregas`, head `ac36418`: os 2 PDFs novos de `catalogo_grafico/entregas/` (`pdfinfo` e `pdftotext`), e as pranchas de `recados/anexos/T-0028/final/` (commit `dd43f4a`), em especial `moto-p01-capa.png` e `portfolio-nova-1item-filtro-ar-moto.png` |
+| Parecer | **LIBERADO**. MC-0015 fechado. Nenhum achado novo |
+
+- **Metadados:** o Portfólio tem o título "Portfólio de Produtos BAP AUTOPARTS", o autor "BAP AUTOPARTS" e 88 págs. A
+  Linha Moto tem o título "Catálogo BAP 2027 — Linha Moto (uso interno)", o autor "BAP AUTOPARTS" e 17 págs. Os dois
+  estão iguais aos de antes, fora o número de páginas do Portfólio.
+- **Capa da Linha Moto:** a capa diz "7 linhas · 75 itens para motocicletas", igual à simulação, e só a pág. 1 muda.
+  **MC-0015 fechado.**
+- **Grafia:** "BAP AUTOPARTS" está certo em tudo, sem "BAP AUTO PARTS" nem "BAP Autoparts". Não sobra nenhum "1 itens".
+  As páginas de produto de "Cubos e Rolamentos" saem só em Rodagem (3 b). As aplicações da página nova de Filtros de Ar
+  da Linha Moto saem separadas, uma por linha, e o defeito que eu tinha apontado em "Fora da marca" saiu. As datas de
+  2026 ficam como estão (4 a).
+- **Sem preço e sem estoque:** a busca no texto dos 2 PDFs por "R$" com número, estoque, saldo, custo, margem, MOQ, FOB,
+  ranking e fornecedor não acha nada. O Portfólio não tem aviso de uso interno. A Linha Moto segue "uso interno", como
+  antes.
+- **Continua para a fila:**
+  - o MC-0017, com "Gm" 5 vezes, "Vw" 3 vezes e "effitech" 1 vez no texto do Portfólio;
+  - as datas (4 a);
+  - a seta "→" da pág. 3, que o `catalogo-grafico` passou à marca. Minha recomendação: escrever em palavras, "Dentro
+    da linha: sistema do veículo, família e produto.". Assim não depende de nenhum caractere especial da Poppins.
+    Como muda texto do material para cliente, vai na mesma rodada das datas, com simulação.
