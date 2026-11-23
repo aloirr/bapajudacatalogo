@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 23/11/2026 12:45 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 23/11/2026 15:08 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -35,10 +35,17 @@ Atualizado em 23/11/2026 12:45 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0029](tarefas/T-0029.md) | Portfólio 2027, siglas e Linha Pesada só com veículos pesados | catalogo-grafico | designer-ux, design-de-marca, testes | CONCLUÍDA | #179, #180 |
 | [T-0030](tarefas/T-0030.md) | Rótulos "Ah" e "CCA" na ficha da bateria (MC-0016) | web-site | testes, designer-ux, design-de-marca | CONCLUÍDA | #173, #174 |
 | [T-0031](tarefas/T-0031.md) | Aplicações suspeitas da Linha Pesada (base v28) | catalogo-dados | web-site, testes | CONCLUÍDA | #175, #176, #177 |
-| T-0032 | 7 portfólios por linha, melhorias do Portfólio e treinamentos (Mecânica Básica, 3 atualizados e 10 de sistema) | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes | EM ANDAMENTO (onda 1) | |
+| T-0032 | 7 portfólios por linha, melhorias do Portfólio e treinamentos (Mecânica Básica, 3 atualizados e 10 de sistema) | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes, web-site | ONDA 1 CONCLUÍDA (o #186 entra antes deste registro); ONDA 2 PAUSADA | #185, #186, #187, #188 |
 
 ## Fila
-Main bb8b3cc (#180).
+Main a0dc065 (#188), mais o #186, que entra antes deste registro.
+
+0. **T-0032, onda 2: PAUSADA** a pedido do Alexandre ("Após o termino da Onda 1, pause as atividades. quero economizar token"). Retomar só quando o PO chamar.
+   - Branch catalogo-grafico/T-0032-onda2, head 7e393401168f73092538bc91c56ae26b48040068, sem PR e sem pareceres.
+   - Feito: ajustes nos JSONs e no PADRAO_TREINAMENTO.md (descrições de 1 linha no "Cada peça tem uma função", MC-0028, a regra do ícone laranja), sem regerar.
+   - Falta: as fotos pequenas (Suspensão, slide 21; Freio, slide 26), regerar os 5 decks, conferir que a onda 1 sai idêntica, `graphify update`, testes, pareceres, revisor, corretor e PR.
+   - Também na fila da T-0032: "uso interno" nos 35 slides sem rodapé; RD-0560 a RD-0566 e RD-0574 (com "Simule"); RD-0573 (o título da página nos comentários); Volvo na Linha Pesada (p59 do geral) e FH/Atego no bloco da Volare; 4.419 × "+4.500 itens"; MWM no A4 e no Digital; "Uso interno, não enviar ao cliente." no cartão do catálogo Linha Moto; foto do pneu e do óleo 4T na capa da Moto; "1L" → "1 L".
+   - Pareceres de UX e de marca da T-0032 nos branches designer-ux/T-0032-melhorias e design-de-marca/T-0032-melhorias, e os do corretor em corretor-redundancias/T-0030-catalogo e corretor-redundancias/T-0032-catalogo: ainda sem PR (os dois do corretor conflitam no CATALOGO.md).
 
 1. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
 2. **Fora da fila, para decidir depois** (parada, decisão 3 do R-20261122-223000-alexandre):
