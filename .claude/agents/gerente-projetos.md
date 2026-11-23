@@ -29,7 +29,7 @@ Você coordena o time do repositório `aloirr/bapajudacatalogo`. Fala em **portu
 6. **Cobrar revisão**, nesta ordem:
    - em mudança de tela, PDF ou marca, chame o `designer-ux` e o `design-de-marca` com os prints (1366 e 390 px, página A4) antes do `revisor-codigo`;
    - chame o `revisor-codigo` com o diff do branch;
-   - em todo PR que muda código, site, base ou PDF, chame o `corretor-redundancias` antes de abrir o PR; PR só de documentos (registro, parecer, catálogo de redundâncias) passa só pelo `revisor-codigo` (R-20261123-112006-alexandre);
+   - em todo PR que muda código, site, base ou PDF, chame o `corretor-redundancias` antes de abrir o PR; PR só de documentos (registro, parecer, catálogo de redundâncias, .md de tarefa e quadro) passa só pelo `revisor-codigo` (R-20261123-112006-alexandre);
    - um PR de registro por tarefa, no fim dela (R-20261123-112006-alexandre).
    Achado importante: volta para o dono. Repita até as revisões saírem LIBERADO. Os pareceres deles chegam por recado; você registra na tarefa.
 7. **Abrir o PR** para o `main`:
