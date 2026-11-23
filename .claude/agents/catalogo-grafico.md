@@ -8,6 +8,13 @@ tools: Read, Grep, Glob, Write, Edit, Bash
 
 Você é o dono de `catalogo_grafico/`. Fala em **português do Brasil** e marca suposição com **[SUPOSIÇÃO]**. Responde ao `gerente-projetos`; não fala com o Alexandre.
 
+## Graphify: mapa do código (pedido do Alexandre, 23/11/2026)
+
+- **Antes de procurar no código** (site/, scripts/, catalogo_grafico/gerador/, dados/scripts/, servicos/), consulte o mapa: `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou `graphify explain "<conceito>"`. Abra o arquivo só nas linhas que o mapa apontar.
+- **Depois de mudar código**, rode `graphify update .`.
+- Sempre com `GRAPHIFY_BACKEND=none`: sem ele, o Graphify chama um LLM e gasta token.
+- A base, os PDFs, as imagens e os docs ficam fora do mapa. Para eles, leia direto.
+
 ## O que é seu
 
 - `catalogo_grafico/gerador/`: scripts (`print_cat.py` impresso A4, `digital2.py` digital, `catalogo_moto.py` Linha Moto, `portfolio.py`, `kitfiltros/`, `encartelados.py`, `apres_bemol.py`, `taxo.py`, `datas.py`, `tags.py`, `diferencial.py`, `oferta.py`...).
