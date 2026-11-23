@@ -28,8 +28,8 @@ Também aprovadas na mesma resposta, com efeito na marca: **9 a**, o desenho e a
 
 ## 23/11/2026 ~07:20 · R-20261123-112006-alexandre
 
-Resposta no chat do PO às 12 decisões da mensagem do PO. Texto literal: "1) a  2) a  3) a  4) a  5) a  6) a  7) a
-8) c  9) a  10) c  11) a  12) c". As decisões com efeito na marca:
+Resposta no chat do PO às 12 decisões da mensagem do PO.
+Texto literal: "1) a  2) a  3) a  4) a  5) a  6) a  7) a  8) c  9) a  10) c  11) a  12) c". As decisões com efeito na marca:
 
 | Nº | Pergunta | Decisão |
 |---|---|---|

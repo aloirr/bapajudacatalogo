@@ -34,7 +34,12 @@ repositório.
   promessa da marca de achar a peça rápido. O texto da tela não muda: o "60ah" fica só na etiqueta da busca, entre
   aspas, como o cliente digitou.
 - **Nenhuma palavra nova fora destas:** "Filtrar (1)", "Ver 8 produtos", "Limpar tudo" e o "(1)" no título do grupo são
-  os de hoje. O rodapé continua "© 2026 - BAP AUTOPARTS - Componentes de qualidade", na grafia oficial (decisão 10 a).
+  os de hoje. O rodapé continua "© 2026 - BAP AUTOPARTS - Componentes de qualidade - Todos os direitos reservados.", na grafia
+  oficial (decisão 10 a).
+- **"PARTIDA A FRIO (CCA) (1)"**, com dois parênteses seguidos, no título do grupo marcado (`04-bateria-cca-401-500-1366.png`;
+  nota 2 da seção 7 do parecer de UX). A grafia fica. O "(1)" é o contador de todos os grupos ("FAMÍLIA (1)"), em cinza e
+  mais leve, e se lê separado da sigla. Tirar os parênteses da sigla só neste grupo quebraria o nome aprovado, e mudar o
+  contador mudaria todos os grupos. Não é achado.
 - A descrição das baterias diz "60 AMPERES" e o filtro diz "60 Ah". As duas convivem: a descrição é dado da base, e a
   busca "bateria 60" já acha pela descrição. Não é achado.
 

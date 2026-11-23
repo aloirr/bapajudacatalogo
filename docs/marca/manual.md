@@ -33,16 +33,15 @@ Alexandre como manual "a aprovar", com a simulação do verde decidido em R-2026
 | Menu aberto do botão do canto | 84 × 52 px |
 | Lista de usuários (só o admin vê) | 64 × 40 px |
 
-### Etiqueta "BAP AUTOPARTS" ao lado do logo nas apresentações
+### Etiqueta "BAP AUTOPARTS" ao lado do logo em Lubrificantes
 
 - No cabeçalho das páginas de Lubrificantes, a etiqueta "BAP AUTOPARTS", em texto, fica ao lado do logo (decisão 6 a,
-  R-20261123-112006-alexandre; RD-0428 fechado como mantido). É o mesmo cabeçalho do Portfólio.
+  R-20261123-112006-alexandre; RD-0428 fechado como mantido).
 
 ## Fonte do .pptx
 
 - A apresentação editável (.pptx de Lubrificantes) fica em **Arial** (decisão 7 a, R-20261123-112006-alexandre;
-  MC-0011 fechado como mantido): abre igual em qualquer computador, sem instalar fonte. O PDF da mesma apresentação
-  continua em Poppins.
+  MC-0011 fechado como mantido): abre igual em qualquer computador, sem instalar fonte.
 
 ## Cores de estado (só no site)
 
