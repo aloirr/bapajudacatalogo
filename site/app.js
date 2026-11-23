@@ -138,6 +138,9 @@
       const apelidos = Object.keys(APELIDOS).filter((m) => norm(p.mo).split(/\s*[\/,]\s*/).includes(m)
         || RX_MONTADORA[m].test(e.apl) || RX_MONTADORA[m].test(e.desc)).map((m) => APELIDOS[m]);
       if (apelidos.length) e.outros += " | " + apelidos.join(" ");
+      // T-0006: medida da bateria (filtros Amperagem e CCA); a amperagem entra no texto da busca como "60AH" (casador)
+      const med = medidaDe(p);
+      if (med) { MEDIDA.set(p, med); if (med.ah) e.outros += " | " + med.ah + "AH"; }
       e.tudo = [e.desc, e.apl, e.marcas, e.outros].join(" | ");
       e.codsTxt = e.cods.concat(e.mcods, e.eans).join(" ");
       INDICE.push(e);
@@ -319,7 +322,8 @@
   function casador(texto) {
     // hífen entre letras = espaço, como no modelo da T-0008 ("SPACE-FOX" = "SPACE FOX"); com número, fica junto
     // ("33-000" = "33000", "F-1000", "15W-40")
-    let ps = norm(texto).replace(/([A-Z])-+(?=[A-Z])/g, "$1 ").split(/[\s,;]+/).filter((w) => w.replace(/-/g, ""));
+    // amperagem (T-0006): "60 ah", "60-Ah" e "60ah" viram uma palavra só, "60AH", que casa com a das baterias
+    let ps = norm(texto).replace(/(\d)\s*-?\s*AH\b/g, "$1AH").replace(/([A-Z])-+(?=[A-Z])/g, "$1 ").split(/[\s,;]+/).filter((w) => w.replace(/-/g, ""));
     if (ps.some((w) => !CONECTIVOS.has(w))) ps = ps.filter((w) => !CONECTIVOS.has(w));
     // cada palavra digitada é uma palavra (B1: nada é juntado antes; as peças de palavras vizinhas, abaixo, já
     // cobrem "33 000" e "TRW 16900255S", e a ordem das palavras não muda a lista)
@@ -399,23 +403,20 @@
     return { palavras, total, testar };
   }
 
-  // A busca da tela: as palavras (casador) e os filtros (sistema, família, linha e categoria, que tiram da lista).
+  // A busca da tela: as palavras (casador) e os filtros (linha, categoria, sistema, família e as medidas, que tiram da lista).
   // Se algum produto casa com todas as palavras, só eles; se nenhum, os que casam com mais palavras (os mais
   // próximos). O produto com o código exato (BAP, EAN ou referência) entra sempre e vem em 1º.
   function buscar(pr) {
     const cs = pr.get("q") ? casador(pr.get("q")) : null;
     const total = cs ? cs.total : 0;
     const sel = (k) => { const v = pr.getAll(k).filter(Boolean); return v.length ? new Set(v) : null; };
-    const filtros = { si: sel("si"), fa: sel("fa"), li: sel("li"), ca: sel("ca") };
+    const filtros = Object.keys(FILTROS).map((k) => [k, sel(k)]).filter(([, s]) => s);
     // veículo (faixa abaixo da busca): só o que serve na marca, modelo, ano, motor e versão escolhidos
     const vei = pr.get("vm") ? veiculoDaRota(pr) : null;
     let out = [], maxN = 0;
     for (const e of INDICE) {
       const p = e.p;
-      if (filtros.si && !filtros.si.has(p.si)) continue;
-      if (filtros.fa && !filtros.fa.has(p.fa)) continue;
-      if (filtros.li && !filtros.li.has(p.li)) continue;
-      if (filtros.ca && !filtros.ca.has(p.ca)) continue;
+      if (filtros.some(([k, s]) => !s.has(valorFiltro(p, k)))) continue;
       if (vei && !casaVeiculo(e, vei)) continue;
       const r = cs ? cs.testar(e) : { n: 0, nota: 0, bits: 0, exato: false };
       if (total && !r.n) continue;
@@ -453,7 +454,7 @@
 
   function contar(lista, campo) {
     const c = new Map();
-    for (const p of lista) if (p[campo]) c.set(p[campo], (c.get(p[campo]) || 0) + 1);
+    for (const p of lista) { const v = valorFiltro(p, campo); if (v) c.set(v, (c.get(v) || 0) + 1); }
     return [...c.entries()].sort((a, b) => b[1] - a[1]);
   }
 
@@ -958,31 +959,55 @@
 
   // ---------- filtros e etiquetas (R-20261120-113148 e R-20261120-123800, Alexandre) ----------
   // Um grupo por filtro, aberto, com caixas de marcar (uma ou mais) e a contagem, na ordem fixa Linha, Categoria,
-  // Sistema, Família, no computador e no celular (R-20261120-145600-alexandre); o botão do grupo só recolhe. Ficam na
+  // Sistema, Família (e as medidas da T-0006, abaixo), no computador e no celular (R-20261120-145600-alexandre); o botão do grupo só recolhe. Ficam na
   // coluna à esquerda dos cartões (no celular, no painel "Filtrar"). A lógica: si=, fa=, li= e ca= no endereço
   // (repetidos quando há mais de um). As opções de cada grupo e a ordem delas vêm da busca sem nenhum filtro marcado
   // (não somem ao marcar outro); a contagem, da busca com os outros filtros. Com 0, a opção fica cinza e desabilitada
   // (a marcada, nunca). Abaixo, as etiquetas do termo (q) e de cada filtro marcado, com o X, e o "Limpar tudo". A
   // placa e o veículo ficam no quadro da busca (montarBusca).
-  const ROT_FILTRO = { li: "Linha", ca: "Categoria", si: "Sistema", fa: "Família" };
+  // T-0006, fase 1 (R-20261123-095435 e R-20261123-112006-alexandre): os grupos "Amperagem" (opções em Ah) e "Partida a
+  // frio (CCA)" (5 faixas), depois da Família, só quando a lista tem bateria com a medida. A medida sai da ficha técnica
+  // (x) que o gerar_site.py já grava, "C20(ah)" e "Cca-18°": o produtos.json não muda. Endereço: ah=60 e cca=401-500.
+  const FAIXAS_CCA = [[400, "ate-400", "até 400"], [500, "401-500", "401 a 500"], [600, "501-600", "501 a 600"],
+    [800, "601-800", "601 a 800"], [Infinity, "acima-800", "acima de 800"]];
+  const NOME_CCA = new Map(FAIXAS_CCA.map(([, v, nome]) => [v, nome]));
+  const ORDEM_CCA = new Map(FAIXAS_CCA.map(([, v], i) => [v, i]));
+  const MEDIDA = new Map(); // produto → { ah: "60", cca: "401-500" } (só os que têm a medida; carregar)
+  function medidaDe(p) {
+    const x = new Map((p.x || []).map(([k, v]) => [normCod(k), String(v).trim()]));
+    const m = {};
+    if (/^\d+$/.test(x.get("C20AH") || "")) m.ah = String(+x.get("C20AH"));
+    if (/^\d+$/.test(x.get("CCA18") || "")) { const n = +x.get("CCA18"); m.cca = FAIXAS_CCA.find(([lim]) => n <= lim)[1]; }
+    return m.ah || m.cca ? m : null;
+  }
+  // rot: nome do grupo; nome: a opção e a etiqueta; ordem: a das opções (sem ela, a de mais produtos primeiro)
+  const FILTROS = {
+    li: { rot: "Linha" }, ca: { rot: "Categoria" }, si: { rot: "Sistema" }, fa: { rot: "Família" },
+    ah: { rot: "Amperagem", medida: true, nome: (v) => v + " Ah", ordem: (a, b) => a - b },
+    cca: { rot: "Partida a frio (CCA)", medida: true, nome: (v) => NOME_CCA.get(v) || v, ordem: (a, b) => ORDEM_CCA.get(a) - ORDEM_CCA.get(b) },
+  };
+  const valorFiltro = (p, k) => (FILTROS[k] && FILTROS[k].medida ? (MEDIDA.get(p) || {})[k] : p[k]);
+  const nomeFiltro = (k, v) => (FILTROS[k].nome ? FILTROS[k].nome(v) : titulo(v));
   let FILTRO_FOCO = null; // { k, v, y }: o que reabrir e focar depois de refazer a lista
   function montarFiltros(pr, todos) {
     const barra = app.querySelector(".barra-filtros");
-    const semFiltros = new URLSearchParams(pr); Object.keys(ROT_FILTRO).forEach((k) => semFiltros.delete(k));
+    const semFiltros = new URLSearchParams(pr); Object.keys(FILTROS).forEach((k) => semFiltros.delete(k));
     const universo = semFiltros.toString() === pr.toString() ? todos : buscar(semFiltros);
-    barra.innerHTML = Object.keys(ROT_FILTRO).map((k) => {
+    barra.innerHTML = Object.keys(FILTROS).map((k) => {
       const marcados = pr.getAll(k).filter(Boolean);
       const semEste = new URLSearchParams(pr); semEste.delete(k);
       const base = marcados.length ? buscar(semEste) : todos;
       const qtd = new Map(contar(base, k));
-      const op = contar(universo, k).slice(0, 40).map(([v]) => [v, qtd.get(v) || 0]);
+      const vals = contar(universo, k).map(([v]) => v);
+      if (FILTROS[k].ordem) vals.sort(FILTROS[k].ordem);
+      const op = vals.slice(0, 40).map((v) => [v, qtd.get(v) || 0]);
       for (const v of marcados) if (!op.some(([x]) => x === v)) op.push([v, qtd.get(v) || 0]);
       if (!op.length) return ""; // a coluna aparece sempre, mesmo com uma opção só (R-20261120-130300)
       return `<div class="filtro" data-k="${k}">
-        <button class="filtro-bt" type="button" aria-expanded="true" aria-controls="filtro-${k}"><span>${ROT_FILTRO[k]}${marcados.length ? ` <b>(${marcados.length})</b>` : ""}</span><span class="seta" aria-hidden="true">▾</span></button>
-        <div class="filtro-lista" id="filtro-${k}" role="group" aria-label="${ROT_FILTRO[k]}">${op.map(([v, n]) => {
+        <button class="filtro-bt" type="button" aria-expanded="true" aria-controls="filtro-${k}"><span>${FILTROS[k].rot}${marcados.length ? ` <b>(${marcados.length})</b>` : ""}</span><span class="seta" aria-hidden="true">▾</span></button>
+        <div class="filtro-lista" id="filtro-${k}" role="group" aria-label="${FILTROS[k].rot}">${op.map(([v, n]) => {
           const marc = marcados.includes(v), off = !n && !marc;
-          return `<label${off ? ' class="off"' : ""}><input type="checkbox" value="${esc(v)}"${marc ? " checked" : ""}${off ? ' disabled aria-disabled="true"' : ""}><span>${esc(titulo(v))}</span><em>${fmt(n)}</em></label>`;
+          return `<label${off ? ' class="off"' : ""}><input type="checkbox" value="${esc(v)}"${marc ? " checked" : ""}${off ? ' disabled aria-disabled="true"' : ""}><span>${esc(nomeFiltro(k, v))}</span><em>${fmt(n)}</em></label>`;
         }).join("")}</div></div>`;
     }).join("");
     for (const box of barra.querySelectorAll(".filtro")) {
@@ -1012,8 +1037,8 @@
     const q = pr.get("q");
     // a etiqueta da busca mostra só o termo entre aspas (R-20261120-141300); o ✕ continua dizendo "Busca" ao leitor de tela
     if (q) itens.push({ nome: "“" + q + "”", leitor: "Busca: “" + q + "”", tirar: (n) => n.delete("q") });
-    for (const k of Object.keys(ROT_FILTRO)) for (const v of pr.getAll(k).filter(Boolean))
-      itens.push({ nome: ROT_FILTRO[k] + ": " + titulo(v), tirar: (n) => { const r = n.getAll(k).filter((x) => x !== v); n.delete(k); r.forEach((x) => n.append(k, x)); } });
+    for (const k of Object.keys(FILTROS)) for (const v of pr.getAll(k).filter(Boolean))
+      itens.push({ nome: FILTROS[k].rot + ": " + nomeFiltro(k, v), tirar: (n) => { const r = n.getAll(k).filter((x) => x !== v); n.delete(k); r.forEach((x) => n.append(k, x)); } });
     if (!itens.length) return;
     etq.hidden = false;
     etq.innerHTML = itens.map((it, i) => `<span class="etq"><span>${esc(it.nome)}</span><button type="button" data-i="${i}" aria-label="${esc("Tirar " + (it.leitor || it.nome))}">✕</button></span>`).join("")
@@ -1022,7 +1047,7 @@
       const b = ev.target.closest("button");
       if (!b) return;
       const n = new URLSearchParams(pr);
-      if (b.classList.contains("limpar-tudo")) { n.delete("q"); Object.keys(ROT_FILTRO).forEach((k) => n.delete(k)); } // o veículo sai pelo X dele, no quadro
+      if (b.classList.contains("limpar-tudo")) { n.delete("q"); Object.keys(FILTROS).forEach((k) => n.delete(k)); } // o veículo sai pelo X dele, no quadro
       else itens[+b.dataset.i].tirar(n);
       FILTRO_FOCO = { y: window.scrollY };
       irPara("/busca", n);
@@ -1217,7 +1242,7 @@
     const barra = app.querySelector(".barra-filtros");
     const etqs = app.querySelector(".pagina-busca .etiquetas");
     const topo = app.querySelector(".res-topo");
-    const nMarcados = Object.keys(ROT_FILTRO).reduce((t, k) => t + pr.getAll(k).filter(Boolean).length, 0);
+    const nMarcados = Object.keys(FILTROS).reduce((t, k) => t + pr.getAll(k).filter(Boolean).length, 0);
     pagina.insertAdjacentHTML("afterbegin", meuVeiculoHtml(pr)); // um bloco só (um aria-label), logo abaixo da faixa escura da busca
     ligarMeuVeiculo(app.querySelector(".pagina-busca .meu-veiculo"), pr);
     if (CELULAR.matches) {
