@@ -11,6 +11,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import datas
 import tags as TG
+from plural import plural
 from quebra import NBSP  # B8: o import também instala a quebra (palavra longa no espaço inseparável ou no separador, não no meio)
 
 FD = 'fontes/'
@@ -20,7 +21,6 @@ pdfmetrics.registerFontFamily('PR', normal='PR', bold='PB', italic='PR', boldIta
 
 W, H, MX = 794, 1123, 36
 ANO = '2027'                               # ano da capa e dos títulos (Alexandre, 29/10: catálogo 2027)
-def plural(n, um='item', varios='itens'): return um if n == 1 else varios   # singular num lugar só (RD-0510)
 MARCA = 'BAP AUTOPARTS'   # nome da marca: sobretítulo das páginas de abertura e autor dos metadados
 DOC_TITULO = f'CATÁLOGO COMPLETO {ANO}'   # o catálogo só de moto troca este título
 DOC_META = f'Catálogo BAP {ANO} — Completo (uso interno)'   # título dos metadados; o da Linha Moto também troca

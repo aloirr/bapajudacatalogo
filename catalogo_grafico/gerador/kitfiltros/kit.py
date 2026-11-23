@@ -1,7 +1,9 @@
 import re, collections, sys, os, datetime
 import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(1, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # gerador/: o plural.py
 import parse
+from plural import plural
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -232,7 +234,7 @@ def construir(saida):
                     sty.append(('BACKGROUND', (0, i), (-1, i), ZEBRA))
             t.setStyle(TableStyle(sty))
             nome = MONT.get(mont, mont.title() if len(mont) > 3 else mont)
-            hdr = Table([[Paragraph(nome.upper(), ST['mont']), Paragraph(f'<font color="#6B6F6B">{len(rows)} {"veículo" if len(rows) == 1 else "veículos"}</font>', ParagraphStyle('r', parent=ST['cel'], alignment=2, fontSize=7))]],
+            hdr = Table([[Paragraph(nome.upper(), ST['mont']), Paragraph(f'<font color="#6B6F6B">{len(rows)} {plural(len(rows), "veículo", "veículos")}</font>', ParagraphStyle('r', parent=ST['cel'], alignment=2, fontSize=7))]],
                         colWidths=[(W - 2 * MX) * 0.7, (W - 2 * MX) * 0.3])
             hdr.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, -1), CLARO), ('LINEBEFORE', (0, 0), (0, 0), 3, VERDE),
                                      ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'), ('TOPPADDING', (0, 0), (-1, -1), 2.5), ('BOTTOMPADDING', (0, 0), (-1, -1), 2.5)]))
