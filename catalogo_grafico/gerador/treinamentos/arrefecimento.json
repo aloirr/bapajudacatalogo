@@ -200,7 +200,10 @@
     ]
    ],
    "fonte": "Números pela base unificada {{versao_base}}. Fluido de radiador: ver o treinamento de Lubrificantes.",
-   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e mostre o quadro escuro: os números vêm da base.\n\nINSIGHT PARA O CAMPO\nA linha BAP de arrefecimento é bomba d'água, eletroventilador e fluido; o resto o vendedor orienta."
+   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e mostre o quadro escuro: os números vêm da base.\n\nINSIGHT PARA O CAMPO\nA linha BAP de arrefecimento é bomba d'água, eletroventilador e fluido; o resto o vendedor orienta.",
+   "preencher": {
+    "38": "accent1"
+   }
   },
   {
    "tipo": "numero3",
@@ -955,7 +958,7 @@
     ],
     [
      "Troca de fluido",
-     "Fluido concentrado  +  água desmineralizada",
+     "Fluido de Radiador  +  Água Desmineralizada",
      "{{cod:RAD25000P}} + {{cod:RAD25009P}}"
     ]
    ],

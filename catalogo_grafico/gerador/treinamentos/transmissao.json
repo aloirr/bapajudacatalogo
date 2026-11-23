@@ -2,247 +2,997 @@
  "titulo": "Transmissão",
  "arquivo": "Treinamento_Transmissao_BAP_Vendedores.pptx",
  "rodape": "Treinamento Transmissão BAP  |  Equipe Comercial Externa · uso interno",
- "nao_codigo": ["HB20"],
+ "nao_codigo": [
+  "HB20"
+ ],
  "slides": [
-  {"tipo": "capa", "titulo": "Transmissão BAP", "sub": "Homocinética, kit reparo, trizeta, semieixo, cruzeta, embreagem e rolamentos: do estalo à peça certa",
-   "notas": "MENSAGEM-CHAVE\nA transmissão leva a força do motor até as rodas; quando uma peça falha, o cliente ouve antes de o carro parar.\n\nCOMO CONDUZIR\nDê boas-vindas e diga a duração prevista (cerca de 1h30 com perguntas). Lembre que o Mecânica Básica mostrou o caminho da força; aqui vamos peça a peça.\n\nPERGUNTE AO TIME\nQual peça de transmissão vocês mais vendem? E qual o cliente mais devolve?"},
-  {"tipo": "aprender", "k": "ABERTURA", "t": "O que vamos aprender hoje?",
+  {
+   "tipo": "capa",
+   "titulo": "Transmissão BAP",
+   "sub": "Homocinética, kit reparo, trizeta, semieixo, cruzeta, embreagem e rolamentos: do estalo à peça certa",
+   "notas": "MENSAGEM-CHAVE\nA transmissão leva a força do motor até as rodas; quando uma peça falha, o cliente ouve antes de o carro parar.\n\nCOMO CONDUZIR\nDê boas-vindas e diga a duração prevista (cerca de 1h30 com perguntas). Lembre que o Mecânica Básica mostrou o caminho da força; aqui vamos peça a peça.\n\nPERGUNTE AO TIME\nQual peça de transmissão vocês mais vendem? E qual o cliente mais devolve?"
+  },
+  {
+   "tipo": "aprender",
+   "k": "ABERTURA",
+   "t": "O que vamos aprender hoje?",
    "frase": "Hoje você sai daqui sabendo |explicar, diagnosticar e vender| a transmissão — da junta que estala ao kit que evita o retorno.",
    "apoio": "Na transmissão, a peça certa depende de detalhe: lado, estrias, ABS e comprimento. Quem confere vende sem devolução.",
-   "pilares": [["ENTENDER", "O caminho da força e as peças de cada trecho", "FaGears"],
-               ["DIAGNOSTICAR", "Estalo, vibração, patinação e ronco", "FaStethoscope"],
-               ["VENDER", "Junta + kit reparo, combos e fechamento", "FaHandshake"]],
-   "notas": "MENSAGEM-CHAVE\nO objetivo é sair sabendo ligar o barulho que o cliente conta à peça certa da transmissão.\n\nCOMO CONDUZIR\nApresente os três pilares como jornada.\n\nPERGUNTE AO TIME\nQuantas vezes vocês vendem junta homocinética sem o kit reparo?"},
-  {"tipo": "topicos", "k": "ABERTURA", "t": "Tópicos do treinamento",
-   "itens": [["Como funciona", "Do motor à roda: as peças de cada trecho", "FaGears"],
-             ["Homocinética", "Junta, coifa e kit reparo", "FaCircleNotch"],
-             ["Trizeta e cruzeta", "Semieixo, trizeta e cardã", "FaLink"],
-             ["Embreagem", "Kit, servo, cilindro e remanufaturada", "FaCircleDot"],
-             ["Rolamentos", "Ronco, folga e diagnóstico", "FaRotate"],
-             ["Código e garantia", "Lado, estrias, ABS e causas de falha", "FaBarcode"],
-             ["Vender transmissão", "SPIN, cross-sell, combos e fechamento", "FaHandshake"]],
-   "notas": "MENSAGEM-CHAVE\nSão 7 módulos: do motor à roda, e do sintoma ao pedido.\n\nCOMO CONDUZIR\nPasse rápido pelos tópicos. Diga que o óleo de câmbio está no treinamento de Lubrificantes.\n\nINSIGHT PARA O CAMPO\nO módulo 6 evita a devolução mais comum: junta com estrias ou ABS diferentes do carro."},
-  {"tipo": "preparado", "k": "ABERTURA", "t": "Ao final deste treinamento, você estará preparado para",
-   "itens": [["Explicar", "o caminho da força do motor até a roda", "FaComments"],
-             ["Ler", "o estalo, a vibração e a patinação que o cliente descreve", "FaVolumeHigh"],
-             ["Identificar", "a junta certa: lado, estrias, ABS e aplicação", "FaMagnifyingGlass"],
-             ["Orientar", "a troca com kit reparo, graxa e coifa novas", "FaWrench"],
-             ["Ampliar", "o pedido com o kit reparo e o Ofereça junto", "FaLayerGroup"],
-             ["Defender", "o valor da BAP com argumento técnico", "FaShieldHalved"]],
-   "notas": "MENSAGEM-CHAVE\nEstes são os seis compromissos do treinamento.\n\nCOMO CONDUZIR\nLeia os verbos em voz alta. No fechamento eles voltam como checklist.\n\nPERGUNTE AO TIME\nQual destes seis vocês acham mais difícil hoje?"},
-
-  {"tipo": "secao", "n": "01", "titulo": "Como funciona", "sub": "Do motor à roda: as peças de cada trecho",
-   "notas": "MENSAGEM-CHAVE\nA força nasce no motor e passa por uma corrente de peças até chegar ao chão.\n\nCOMO CONDUZIR\nTransição curta. Este módulo dá o mapa da transmissão."},
-  {"tipo": "desenho", "k": "MÓDULO 01 · FUNCIONAMENTO", "t": "Do motor à roda: a transmissão por dentro", "img": "desenho:transmissao",
-   "legenda": ["Motor", "Embreagem", "Atuador", "Câmbio", "Diferencial", "Trizeta", "Semieixo", "Homocinética", "Coifa", "Roda e cubo"],
+   "pilares": [
+    [
+     "ENTENDER",
+     "O caminho da força e as peças de cada trecho",
+     "FaGears"
+    ],
+    [
+     "DIAGNOSTICAR",
+     "Estalo, vibração, patinação e ronco",
+     "FaStethoscope"
+    ],
+    [
+     "VENDER",
+     "Junta + kit reparo, combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nO objetivo é sair sabendo ligar o barulho que o cliente conta à peça certa da transmissão.\n\nCOMO CONDUZIR\nApresente os três pilares como jornada.\n\nPERGUNTE AO TIME\nQuantas vezes vocês vendem junta homocinética sem o kit reparo?"
+  },
+  {
+   "tipo": "topicos",
+   "k": "ABERTURA",
+   "t": "Tópicos do treinamento",
+   "itens": [
+    [
+     "Como funciona",
+     "Do motor à roda: as peças de cada trecho",
+     "FaGears"
+    ],
+    [
+     "Homocinética",
+     "Junta, coifa e kit reparo",
+     "FaCircleNotch"
+    ],
+    [
+     "Trizeta e cruzeta",
+     "Semieixo, trizeta e cardã",
+     "FaLink"
+    ],
+    [
+     "Embreagem",
+     "Kit, servo, cilindro e remanufaturada",
+     "FaCircleDot"
+    ],
+    [
+     "Rolamentos",
+     "Ronco, folga e diagnóstico",
+     "FaRotate"
+    ],
+    [
+     "Código e garantia",
+     "Lado, estrias, ABS e causas de falha",
+     "FaBarcode"
+    ],
+    [
+     "Vender transmissão",
+     "SPIN, cross-sell, combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nSão 7 módulos: do motor à roda, e do sintoma ao pedido.\n\nCOMO CONDUZIR\nPasse rápido pelos tópicos. Diga que o óleo de câmbio está no treinamento de Lubrificantes.\n\nINSIGHT PARA O CAMPO\nO módulo 6 evita a devolução mais comum: junta com estrias ou ABS diferentes do carro."
+  },
+  {
+   "tipo": "preparado",
+   "k": "ABERTURA",
+   "t": "Ao final deste treinamento, você estará preparado para",
+   "itens": [
+    [
+     "Explicar",
+     "o caminho da força do motor até a roda",
+     "FaComments"
+    ],
+    [
+     "Ler",
+     "o estalo, a vibração e a patinação que o cliente descreve",
+     "FaVolumeHigh"
+    ],
+    [
+     "Identificar",
+     "a junta certa: lado, estrias, ABS e aplicação",
+     "FaMagnifyingGlass"
+    ],
+    [
+     "Orientar",
+     "a troca com kit reparo, graxa e coifa novas",
+     "FaWrench"
+    ],
+    [
+     "Ampliar",
+     "o pedido com o kit reparo e o Ofereça junto",
+     "FaLayerGroup"
+    ],
+    [
+     "Defender",
+     "o valor da BAP com argumento técnico",
+     "FaShieldHalved"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nEstes são os seis compromissos do treinamento.\n\nCOMO CONDUZIR\nLeia os verbos em voz alta. No fechamento eles voltam como checklist.\n\nPERGUNTE AO TIME\nQual destes seis vocês acham mais difícil hoje?"
+  },
+  {
+   "tipo": "secao",
+   "n": "01",
+   "titulo": "Como funciona",
+   "sub": "Do motor à roda: as peças de cada trecho",
+   "notas": "MENSAGEM-CHAVE\nA força nasce no motor e passa por uma corrente de peças até chegar ao chão.\n\nCOMO CONDUZIR\nTransição curta. Este módulo dá o mapa da transmissão."
+  },
+  {
+   "tipo": "desenho",
+   "k": "MÓDULO 01 · FUNCIONAMENTO",
+   "t": "Do motor à roda: a transmissão por dentro",
+   "img": "desenho:transmissao",
+   "legenda": [
+    "Motor",
+    "Embreagem",
+    "Atuador",
+    "Câmbio",
+    "Diferencial",
+    "Trizeta",
+    "Semieixo",
+    "Homocinética",
+    "Coifa",
+    "Roda e cubo"
+   ],
    "dica": "Na tração dianteira, cada roda tem um semieixo com duas juntas: a trizeta do lado do câmbio e a homocinética do lado da roda.",
-   "notas": "MENSAGEM-CHAVE\nNo carro de tração dianteira, motor, embreagem e câmbio ficam na frente, e dois semieixos levam a força às rodas.\n\nCOMO CONDUZIR\nO desenho é visto de cima. Siga a força: motor (1), embreagem (2) acionada pelo atuador (3), câmbio (4) e diferencial (5). Cada semieixo (7) tem a trizeta (6) do lado do câmbio e a homocinética (8) do lado da roda, protegida pela coifa (9).\n\nPERGUNTE AO TIME\nPor que o diferencial é necessário? (Resposta: na curva, a roda de fora anda mais que a de dentro.)"},
-  {"tipo": "cartoes8", "k": "MÓDULO 01 · FUNCIONAMENTO", "t": "Cada peça tem uma função",
-   "cartoes": [["Embreagem", "liga e desliga o motor do câmbio", "FaCircleDot"], ["Câmbio", "escolhe força ou velocidade", "FaGears"],
-               ["Diferencial", "divide o giro entre as rodas", "FaArrowsLeftRight"], ["Semieixo", "leva o giro até a roda", "FaRuler"],
-               ["Homocinética", "deixa a roda esterçar girando", "FaCircleNotch"], ["Trizeta", "deixa o semieixo encolher", "FaLink"],
-               ["Cruzeta", "articula o cardã na tração traseira", "FaGear"], ["Rolamentos", "deixam eixos e cubos girarem", "FaRotate"]],
-   "painel": [["{{n:Junta Homocinética}}", "juntas homocinéticas ATIVAS na base"], ["{{n:Kit Reparo da Junta Homocinética}}", "kits reparo ATIVOS, para vender junto"]],
+   "notas": "MENSAGEM-CHAVE\nNo carro de tração dianteira, motor, embreagem e câmbio ficam na frente, e dois semieixos levam a força às rodas.\n\nCOMO CONDUZIR\nO desenho é visto de cima. Siga a força: motor (1), embreagem (2) acionada pelo atuador (3), câmbio (4) e diferencial (5). Cada semieixo (7) tem a trizeta (6) do lado do câmbio e a homocinética (8) do lado da roda, protegida pela coifa (9).\n\nPERGUNTE AO TIME\nPor que o diferencial é necessário? (Resposta: na curva, a roda de fora anda mais que a de dentro.)"
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 01 · FUNCIONAMENTO",
+   "t": "Cada peça tem uma função",
+   "cartoes": [
+    [
+     "Embreagem",
+     "liga e solta o câmbio",
+     "FaCircleDot"
+    ],
+    [
+     "Câmbio",
+     "escolhe força ou velocidade",
+     "FaGears"
+    ],
+    [
+     "Diferencial",
+     "divide o giro entre as rodas",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Semieixo",
+     "leva o giro até a roda",
+     "FaRuler"
+    ],
+    [
+     "Homocinética",
+     "deixa a roda esterçar girando",
+     "FaCircleNotch"
+    ],
+    [
+     "Trizeta",
+     "deixa o semieixo encolher",
+     "FaLink"
+    ],
+    [
+     "Cruzeta",
+     "articula o cardã",
+     "FaGear"
+    ],
+    [
+     "Rolamentos",
+     "deixam os eixos girarem",
+     "FaRotate"
+    ]
+   ],
+   "painel": [
+    [
+     "{{n:Junta Homocinética}}",
+     "juntas homocinéticas ATIVAS na base"
+    ],
+    [
+     "{{n:Kit Reparo da Junta Homocinética}}",
+     "kits reparo ATIVOS, para vender junto"
+    ]
+   ],
    "fonte": "Números pela base unificada {{versao_base}}. Óleo de câmbio: ver o treinamento de Lubrificantes.",
-   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e peça para o time repetir. Mostre o quadro escuro: há na base mais kits reparo que juntas, porque o kit acompanha várias juntas.\n\nINSIGHT PARA O CAMPO\nO óleo do câmbio e do diferencial está no treinamento de Lubrificantes (linha Shiftease)."},
-  {"tipo": "indicadores", "k": "MÓDULO 01 · TRAÇÃO", "t": "Os tipos de tração e as peças de cada um",
-   "cards": [["FaCarSide", "Dianteira", "Maioria dos carros", "Semieixos com homocinética e trizeta nas rodas da frente.", "= junta e kit reparo"],
-             ["FaTruck", "Traseira", "Picapes e caminhões", "O cardã leva a força ao eixo de trás, com cruzetas.", "= cruzeta e rolamento"],
-             ["FaRoad", "4x4", "Picapes e SUVs", "Força nas quatro rodas: semieixos na frente e cardã.", "= os dois mundos"],
-             ["FaGears", "Automático", "Câmbio sem pedal", "Não tem embreagem de pedal; usa o óleo do manual.", "= sem kit de embreagem"]],
+   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e peça para o time repetir. Mostre o quadro escuro: há na base mais kits reparo que juntas, porque o kit acompanha várias juntas.\n\nINSIGHT PARA O CAMPO\nO óleo do câmbio e do diferencial está no treinamento de Lubrificantes (linha Shiftease).",
+   "preencher": {
+    "38": "accent1"
+   }
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 01 · TRAÇÃO",
+   "t": "Os tipos de tração e as peças de cada um",
+   "cards": [
+    [
+     "FaCarSide",
+     "Dianteira",
+     "Maioria dos carros",
+     "Semieixos com homocinética e trizeta nas rodas da frente.",
+     "= junta e kit reparo"
+    ],
+    [
+     "FaTruck",
+     "Traseira",
+     "Picapes e caminhões",
+     "O cardã leva a força ao eixo de trás, com cruzetas.",
+     "= cruzeta e rolamento"
+    ],
+    [
+     "FaRoad",
+     "4x4",
+     "Picapes e SUVs",
+     "Força nas quatro rodas: semieixos na frente e cardã.",
+     "= os dois mundos"
+    ],
+    [
+     "FaGears",
+     "Automático",
+     "Câmbio sem pedal",
+     "Não tem embreagem de pedal; usa o óleo do manual.",
+     "= sem kit de embreagem"
+    ]
+   ],
    "dica": "Pergunte o tipo de tração e de câmbio antes de abrir o catálogo: a peça muda com eles.",
-   "notas": "MENSAGEM-CHAVE\nO tipo de tração muda as peças que gastam.\n\nCOMO CONDUZIR\nPasse pelos quatro cartões com a frase laranja.\n\nPERGUNTE AO TIME\nQual tipo de tração mais passa pela loja dos seus clientes?"},
-  {"tipo": "paineis", "k": "MÓDULO 01 · TRAÇÃO", "t": "Tração dianteira × tração traseira",
-   "paineis": [["Tração dianteira", "Semieixos com duas juntas\nHomocinética do lado da roda\nTrizeta do lado do câmbio", "foto:JUH70001"],
-               ["Tração traseira (cardã)", "Cardã liga o câmbio ao eixo\nCruzetas nas pontas do cardã\nComum em picapes e caminhões", "foto:CRU5273"]],
+   "notas": "MENSAGEM-CHAVE\nO tipo de tração muda as peças que gastam.\n\nCOMO CONDUZIR\nPasse pelos quatro cartões com a frase laranja.\n\nPERGUNTE AO TIME\nQual tipo de tração mais passa pela loja dos seus clientes?"
+  },
+  {
+   "tipo": "paineis",
+   "k": "MÓDULO 01 · TRAÇÃO",
+   "t": "Tração dianteira × tração traseira",
+   "paineis": [
+    [
+     "Tração dianteira",
+     "Semieixos com duas juntas\nHomocinética do lado da roda\nTrizeta do lado do câmbio",
+     "foto:JUH70001"
+    ],
+    [
+     "Tração traseira (cardã)",
+     "Cardã liga o câmbio ao eixo\nCruzetas nas pontas do cardã\nComum em picapes e caminhões",
+     "foto:CRU5273"
+    ]
+   ],
    "dica": "Cruzeta é da linha picape e pesada: na base, a {{cod:CRU5273}} (F-1000) indica o rolamento {{oj:CRU5273}}.",
-   "notas": "MENSAGEM-CHAVE\nNa dianteira, a junta homocinética; na traseira com cardã, a cruzeta.\n\nCOMO CONDUZIR\nÀ esquerda, a junta {{cod:JUH70001}} (Gol); à direita, a cruzeta {{cod:CRU5273}} (F-1000).\n\nINSIGHT PARA O CAMPO\nNa linha pesada, a cruzeta é a peça de giro: frotista que roda muito troca com frequência."},
-
-  {"tipo": "secao", "n": "02", "titulo": "Homocinética", "sub": "Junta, coifa e kit reparo",
-   "notas": "MENSAGEM-CHAVE\nA junta homocinética morre quase sempre pela coifa.\n\nCOMO CONDUZIR\nTransição curta. O módulo mostra a junta, o kit reparo e o teste de balcão."},
-  {"tipo": "foto2", "k": "MÓDULO 02 · HOMOCINÉTICA", "t": "Junta homocinética e kit reparo", "img": "capa:cover_10",
-   "itens": [["foto:JUH70001", "Junta fixa: a do lado da roda, que deixa a roda esterçar girando.", "Para o cliente: fim do estalo na curva."],
-             ["foto:KHC12569", "Kit reparo: coifa, abraçadeiras e graxa para fechar a junta.", "Para o cliente: a junta nova não volta."]],
+   "notas": "MENSAGEM-CHAVE\nNa dianteira, a junta homocinética; na traseira com cardã, a cruzeta.\n\nCOMO CONDUZIR\nÀ esquerda, a junta {{cod:JUH70001}} (Gol); à direita, a cruzeta {{cod:CRU5273}} (F-1000).\n\nINSIGHT PARA O CAMPO\nNa linha pesada, a cruzeta é a peça de giro: frotista que roda muito troca com frequência."
+  },
+  {
+   "tipo": "secao",
+   "n": "02",
+   "titulo": "Homocinética",
+   "sub": "Junta, coifa e kit reparo",
+   "notas": "MENSAGEM-CHAVE\nA junta homocinética morre quase sempre pela coifa.\n\nCOMO CONDUZIR\nTransição curta. O módulo mostra a junta, o kit reparo e o teste de balcão."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 02 · HOMOCINÉTICA",
+   "t": "Junta homocinética e kit reparo",
+   "img": "capa:cover_10",
+   "itens": [
+    [
+     "foto:JUH70001",
+     "Junta fixa: a do lado da roda, que deixa a roda esterçar girando.",
+     "Para o cliente: fim do estalo na curva."
+    ],
+    [
+     "foto:KHC12569",
+     "Kit reparo: coifa, abraçadeiras e graxa para fechar a junta.",
+     "Para o cliente: a junta nova não volta."
+    ]
+   ],
    "dica": "Junta e kit andam juntos: na base, a junta {{cod:JUH70001}} (Gol) indica o kit {{oj:JUH70001}}.",
-   "notas": "MENSAGEM-CHAVE\nA junta faz o giro chegar à roda mesmo com ela esterçada; o kit reparo protege a junta.\n\nCOMO CONDUZIR\nMostre a junta BAP e o kit. Explique que a coifa rasgada deixa sair a graxa e entrar areia.\n\nINSIGHT PARA O CAMPO\nO Ofereça junto do Catálogo BAP liga a junta ao kit e o kit à junta."},
-  {"tipo": "lista4", "k": "MÓDULO 02 · HOMOCINÉTICA", "t": "O que vem no kit reparo", "img": "montagem:foto:KHC12569+foto:KHC12599",
+   "notas": "MENSAGEM-CHAVE\nA junta faz o giro chegar à roda mesmo com ela esterçada; o kit reparo protege a junta.\n\nCOMO CONDUZIR\nMostre a junta BAP e o kit. Explique que a coifa rasgada deixa sair a graxa e entrar areia.\n\nINSIGHT PARA O CAMPO\nO Ofereça junto do Catálogo BAP liga a junta ao kit e o kit à junta."
+  },
+  {
+   "tipo": "lista4",
+   "k": "MÓDULO 02 · HOMOCINÉTICA",
+   "t": "O que vem no kit reparo",
+   "img": "montagem:foto:KHC12569+foto:KHC12599",
    "legenda": "Kits reparo BAP: tudo o que o mecânico precisa para fechar a junta sem improviso.",
-   "itens": [["Coifa: segura a graxa e barra água e areia", "FaShieldHalved"], ["Abraçadeiras: prendem a coifa nas duas pontas", "FaLink"],
-             ["Graxa própria: a quantidade certa para a junta", "FaDroplet"], ["Anel trava: prende a junta no semieixo", "FaCircleNotch"]],
+   "itens": [
+    [
+     "Coifa: segura a graxa e barra água e areia",
+     "FaShieldHalved"
+    ],
+    [
+     "Abraçadeiras: prendem a coifa nas duas pontas",
+     "FaLink"
+    ],
+    [
+     "Graxa própria: a quantidade certa para a junta",
+     "FaDroplet"
+    ],
+    [
+     "Anel trava: prende a junta no semieixo",
+     "FaCircleNotch"
+    ]
+   ],
    "dica": "Graxa comum no lugar da graxa da junta encurta a vida da peça. O kit já traz a certa.",
-   "notas": "MENSAGEM-CHAVE\nO kit reparo fecha o serviço: coifa, abraçadeiras, graxa e anel trava.\n\nCOMO CONDUZIR\nLeia as quatro peças. Com a coifa nova no início do rasgo, ainda dá para salvar a junta.\n\nPERGUNTE AO TIME\nO que acontece quando a coifa rasga e ninguém troca? (Resposta: a graxa sai, a areia entra e a junta começa a estalar.)"},
-  {"tipo": "sinais", "k": "MÓDULO 02 · HOMOCINÉTICA", "t": "Homocinética: sinais de troca",
+   "notas": "MENSAGEM-CHAVE\nO kit reparo fecha o serviço: coifa, abraçadeiras, graxa e anel trava.\n\nCOMO CONDUZIR\nLeia as quatro peças. Com a coifa nova no início do rasgo, ainda dá para salvar a junta.\n\nPERGUNTE AO TIME\nO que acontece quando a coifa rasga e ninguém troca? (Resposta: a graxa sai, a areia entra e a junta começa a estalar.)"
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 02 · HOMOCINÉTICA",
+   "t": "Homocinética: sinais de troca",
    "t1": "Sinais de junta e coifa gastas",
-   "itens1": [["Estalo ao acelerar em curva fechada", "FaVolumeHigh"], ["Graxa espalhada na roda e na suspensão", "FaDroplet"],
-              ["Coifa rasgada ou abraçadeira solta", "FaLinkSlash"], ["Vibração ao acelerar em reta", "FaWaveSquare"]],
+   "itens1": [
+    [
+     "Estalo ao acelerar em curva fechada",
+     "FaVolumeHigh"
+    ],
+    [
+     "Graxa espalhada na roda e na suspensão",
+     "FaDroplet"
+    ],
+    [
+     "Coifa rasgada ou abraçadeira solta",
+     "FaLinkSlash"
+    ],
+    [
+     "Vibração ao acelerar em reta",
+     "FaWaveSquare"
+    ]
+   ],
    "t2": "Por que oferecer o kit reparo junto",
-   "itens2": ["Coifa rasgada deixa entrar água e areia: a junta nova se gasta em poucos meses.",
-              "O kit traz coifa, abraçadeiras e graxa: o mecânico fecha o serviço sem improviso.",
-              "Na base, a junta {{cod:JUH70006}} (Onix) indica {{oj:JUH70006}} no Ofereça junto."],
+   "itens2": [
+    "Coifa rasgada deixa entrar água e areia: a junta nova se gasta em poucos meses.",
+    "O kit traz coifa, abraçadeiras e graxa: o mecânico fecha o serviço sem improviso.",
+    "Na base, a junta {{cod:JUH70006}} (Onix) indica {{oj:JUH70006}} no Ofereça junto."
+   ],
    "dica": "Estalo só em curva é quase sempre a homocinética do lado da roda; vibração em reta costuma ser a trizeta, do lado do câmbio.",
-   "notas": "MENSAGEM-CHAVE\nA junta homocinética avisa: estalo em curva e graxa espalhada.\n\nCOMO CONDUZIR\nPeça para o time imitar o “tec-tec-tec” em curva fechada. Graxa na roda é o sinal precoce: ainda dá para salvar a junta com o kit.\n\nINSIGHT PARA O CAMPO\nVenda a junta com o kit: é o que garante que o serviço não volte."},
-  {"tipo": "numero", "k": "MÓDULO 02 · HOMOCINÉTICA", "t": "Homocinética: o teste do balcão", "img": "montagem:foto:JUH70006+foto:KHC12581D",
-   "numero": "Curva", "desc": "estalo ao acelerar em curva fechada = junta do lado da roda",
-   "passos": ["Pergunte: o estalo aparece em curva, em reta ou ao trocar marcha?", "Olhe: coifa rasgada e graxa espalhada na roda",
-              "Teste: acelere em curva fechada para os dois lados, em local seguro", "Ofereça a junta com o kit reparo"],
+   "notas": "MENSAGEM-CHAVE\nA junta homocinética avisa: estalo em curva e graxa espalhada.\n\nCOMO CONDUZIR\nPeça para o time imitar o “tec-tec-tec” em curva fechada. Graxa na roda é o sinal precoce: ainda dá para salvar a junta com o kit.\n\nINSIGHT PARA O CAMPO\nVenda a junta com o kit: é o que garante que o serviço não volte."
+  },
+  {
+   "tipo": "numero",
+   "k": "MÓDULO 02 · HOMOCINÉTICA",
+   "t": "Homocinética: o teste do balcão",
+   "img": "montagem:foto:JUH70006+foto:KHC12581D",
+   "numero": "Curva",
+   "desc": "estalo ao acelerar em curva fechada = junta do lado da roda",
+   "passos": [
+    "Pergunte: o estalo aparece em curva, em reta ou ao trocar marcha?",
+    "Olhe: coifa rasgada e graxa espalhada na roda",
+    "Teste: acelere em curva fechada para os dois lados, em local seguro",
+    "Ofereça a junta com o kit reparo"
+   ],
    "exemplo": "Onix: junta {{cod:JUH70006}} com o kit {{oj:JUH70006}}, que é o Ofereça junto da base.",
-   "notas": "MENSAGEM-CHAVE\nO teste em curva fechada mostra qual lado está com a junta gasta.\n\nCOMO CONDUZIR\nExplique o teste: acelerar em curva fechada para um lado e para o outro. O estalo aparece do lado da junta gasta.\n\nINSIGHT PARA O CAMPO\nQuem orienta o teste vende a junta do lado certo e evita a devolução."},
-
-  {"tipo": "secao", "n": "03", "titulo": "Trizeta e cruzeta", "sub": "Semieixo, trizeta e o cardã da tração traseira",
-   "notas": "MENSAGEM-CHAVE\nTrizeta e cruzeta são as articulações que deixam o eixo trabalhar enquanto a suspensão sobe e desce.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "foto2", "k": "MÓDULO 03 · TRIZETA", "t": "Semieixo, trizeta e cruzeta", "img": "capa:cover_14",
-   "itens": [["foto:TRI90024", "Trizeta: a junta do lado do câmbio, que deixa o eixo deslizar.", "Para o cliente: fim da vibração ao acelerar."],
-             ["foto:CRU5273", "Cruzeta: une o cardã na tração traseira e no caminhão.", "Para o cliente: fim da batida ao arrancar."]],
+   "notas": "MENSAGEM-CHAVE\nO teste em curva fechada mostra qual lado está com a junta gasta.\n\nCOMO CONDUZIR\nExplique o teste: acelerar em curva fechada para um lado e para o outro. O estalo aparece do lado da junta gasta.\n\nINSIGHT PARA O CAMPO\nQuem orienta o teste vende a junta do lado certo e evita a devolução."
+  },
+  {
+   "tipo": "secao",
+   "n": "03",
+   "titulo": "Trizeta e cruzeta",
+   "sub": "Semieixo, trizeta e o cardã da tração traseira",
+   "notas": "MENSAGEM-CHAVE\nTrizeta e cruzeta são as articulações que deixam o eixo trabalhar enquanto a suspensão sobe e desce.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 03 · TRIZETA",
+   "t": "Semieixo, trizeta e cruzeta",
+   "img": "capa:cover_14",
+   "itens": [
+    [
+     "foto:TRI90024",
+     "Trizeta: a junta do lado do câmbio, que deixa o eixo deslizar.",
+     "Para o cliente: fim da vibração ao acelerar."
+    ],
+    [
+     "foto:CRU5273",
+     "Cruzeta: une o cardã na tração traseira e no caminhão.",
+     "Para o cliente: fim da batida ao arrancar."
+    ]
+   ],
    "dica": "Semieixo completo chega montado, com as duas juntas: é a troca mais rápida quando as duas estão gastas.",
-   "notas": "MENSAGEM-CHAVE\nSemieixo, trizeta e cruzeta levam o giro até a roda; cada uma tem um sintoma típico.\n\nCOMO CONDUZIR\nMostre o semieixo BAP. A trizeta deixa o semieixo encolher e esticar quando a suspensão trabalha. A cruzeta aparece no cardã.\n\nINSIGHT PARA O CAMPO\nNa base, a trizeta {{cod:TRI90024}} (Onix) indica o kit {{oj:TRI90024}}."},
-  {"tipo": "sinais", "k": "MÓDULO 03 · TRIZETA", "t": "Trizeta e cruzeta: sinais de troca",
+   "notas": "MENSAGEM-CHAVE\nSemieixo, trizeta e cruzeta levam o giro até a roda; cada uma tem um sintoma típico.\n\nCOMO CONDUZIR\nMostre o semieixo BAP. A trizeta deixa o semieixo encolher e esticar quando a suspensão trabalha. A cruzeta aparece no cardã.\n\nINSIGHT PARA O CAMPO\nNa base, a trizeta {{cod:TRI90024}} (Onix) indica o kit {{oj:TRI90024}}."
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 03 · TRIZETA",
+   "t": "Trizeta e cruzeta: sinais de troca",
    "t1": "Sinais de trizeta ou cruzeta gasta",
-   "itens1": [["Vibração ao acelerar em reta (trizeta)", "FaWaveSquare"], ["Batida ao arrancar ou trocar marcha (cruzeta)", "FaVolumeHigh"],
-              ["Folga ao girar o cardã com a mão", "FaArrowsLeftRight"], ["Graxa na coifa do lado do câmbio", "FaDroplet"]],
+   "itens1": [
+    [
+     "Vibração ao acelerar em reta (trizeta)",
+     "FaWaveSquare"
+    ],
+    [
+     "Batida ao arrancar ou trocar marcha (cruzeta)",
+     "FaVolumeHigh"
+    ],
+    [
+     "Folga ao girar o cardã com a mão",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Graxa na coifa do lado do câmbio",
+     "FaDroplet"
+    ]
+   ],
    "t2": "O que oferecer junto",
-   "itens2": ["Trizeta: o kit reparo do lado do câmbio (coifa e graxa).",
-              "Cruzeta: o rolamento do cardã, que o Ofereça junto da base indica.",
-              "As duas juntas gastas? Ofereça o semieixo completo."],
+   "itens2": [
+    "Trizeta: o kit reparo do lado do câmbio (coifa e graxa).",
+    "Cruzeta: o rolamento do cardã, que o Ofereça junto da base indica.",
+    "As duas juntas gastas? Ofereça o semieixo completo."
+   ],
    "dica": "Vibração que some ao tirar o pé do acelerador costuma ser trizeta; vibração constante em velocidade costuma ser roda.",
-   "notas": "MENSAGEM-CHAVE\nTrizeta e cruzeta avisam com vibração e batida.\n\nCOMO CONDUZIR\nLeia os sinais e os três itens de venda junto.\n\nINSIGHT PARA O CAMPO\nNa linha pesada, inspeção de cruzeta é rotina de frota: ofereça a peça para a reposição do frotista."},
-  {"tipo": "numero3", "k": "MÓDULO 03 · SEMIEIXO", "t": "Junta ou semieixo completo?", "icone": "FaRuler",
-   "numero": "2", "desc": "juntas gastas no mesmo eixo: aí o semieixo completo compensa",
-   "cards": [["Uma junta", "Troque a junta com o kit reparo.", "FaCircleNotch"],
-             ["Duas juntas", "Semieixo completo: chega montado e economiza mão de obra.", "FaLayerGroup"],
-             ["Eixo empenado", "Depois de batida forte, o semieixo é a peça.", "FaTriangleExclamation"]],
+   "notas": "MENSAGEM-CHAVE\nTrizeta e cruzeta avisam com vibração e batida.\n\nCOMO CONDUZIR\nLeia os sinais e os três itens de venda junto.\n\nINSIGHT PARA O CAMPO\nNa linha pesada, inspeção de cruzeta é rotina de frota: ofereça a peça para a reposição do frotista."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 03 · SEMIEIXO",
+   "t": "Junta ou semieixo completo?",
+   "icone": "FaRuler",
+   "numero": "2",
+   "desc": "juntas gastas no mesmo eixo: aí o semieixo completo compensa",
+   "cards": [
+    [
+     "Uma junta",
+     "Troque a junta com o kit reparo.",
+     "FaCircleNotch"
+    ],
+    [
+     "Duas juntas",
+     "Semieixo completo: chega montado e economiza mão de obra.",
+     "FaLayerGroup"
+    ],
+    [
+     "Eixo empenado",
+     "Depois de batida forte, o semieixo é a peça.",
+     "FaTriangleExclamation"
+    ]
+   ],
    "dica": "Na base, o semieixo {{cod:SEH80048}} (Onix) indica o cubo {{oj:SEH80048}} no Ofereça junto.",
-   "notas": "MENSAGEM-CHAVE\nJunta ou semieixo completo depende de quantas juntas estão gastas e do estado do eixo.\n\nCOMO CONDUZIR\nPasse pelos três cartões.\n\nPERGUNTE AO TIME\nQual argumento usar com o mecânico para o semieixo completo? (Resposta: tempo de elevador e menos risco de montagem.)"},
-
-  {"tipo": "secao", "n": "04", "titulo": "Embreagem", "sub": "Kit, servo, cilindro e embreagem remanufaturada",
-   "notas": "MENSAGEM-CHAVE\nA embreagem é um conjunto que gasta junto e se troca junto.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "lista4", "k": "MÓDULO 04 · EMBREAGEM", "t": "O conjunto da embreagem", "img": "capa:cover_15",
+   "notas": "MENSAGEM-CHAVE\nJunta ou semieixo completo depende de quantas juntas estão gastas e do estado do eixo.\n\nCOMO CONDUZIR\nPasse pelos três cartões.\n\nPERGUNTE AO TIME\nQual argumento usar com o mecânico para o semieixo completo? (Resposta: tempo de elevador e menos risco de montagem.)"
+  },
+  {
+   "tipo": "secao",
+   "n": "04",
+   "titulo": "Embreagem",
+   "sub": "Kit, servo, cilindro e embreagem remanufaturada",
+   "notas": "MENSAGEM-CHAVE\nA embreagem é um conjunto que gasta junto e se troca junto.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "lista4",
+   "k": "MÓDULO 04 · EMBREAGEM",
+   "t": "O conjunto da embreagem",
+   "img": "capa:cover_15",
    "legenda": "Kit de embreagem: platô, disco e rolamento trabalham juntos e se trocam juntos.",
-   "itens": [["Platô: aperta o disco contra o volante do motor", "FaCircleDot"], ["Disco: o revestimento que agarra e passa a força", "FaLayerGroup"],
-             ["Rolamento: alivia o platô quando se pisa no pedal", "FaRotate"], ["Comando: cabo, cilindro ou servo que leva a força do pé", "FaGaugeHigh"]],
+   "itens": [
+    [
+     "Platô: aperta o disco contra o volante do motor",
+     "FaCircleDot"
+    ],
+    [
+     "Disco: o revestimento que agarra e passa a força",
+     "FaLayerGroup"
+    ],
+    [
+     "Rolamento: alivia o platô quando se pisa no pedal",
+     "FaRotate"
+    ],
+    [
+     "Comando: cabo, cilindro ou servo que leva a força do pé",
+     "FaGaugeHigh"
+    ]
+   ],
    "dica": "Disco novo com platô velho volta a falhar logo: ofereça o conjunto.",
-   "notas": "MENSAGEM-CHAVE\nPlatô, disco e rolamento se gastam juntos e se trocam juntos.\n\nCOMO CONDUZIR\nExplique com as mãos: o platô é a mão que aperta, o disco é a sola que agarra e o rolamento é o dedo que solta.\n\nINSIGHT PARA O CAMPO\nNa linha BAP, a embreagem remanufaturada e o servo atendem principalmente a linha pesada."},
-  {"tipo": "sinais", "k": "MÓDULO 04 · EMBREAGEM", "t": "Embreagem: sinais e o que vai junto",
+   "notas": "MENSAGEM-CHAVE\nPlatô, disco e rolamento se gastam juntos e se trocam juntos.\n\nCOMO CONDUZIR\nExplique com as mãos: o platô é a mão que aperta, o disco é a sola que agarra e o rolamento é o dedo que solta.\n\nINSIGHT PARA O CAMPO\nNa linha BAP, a embreagem remanufaturada e o servo atendem principalmente a linha pesada."
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 04 · EMBREAGEM",
+   "t": "Embreagem: sinais e o que vai junto",
    "t1": "Sinais de embreagem gasta",
-   "itens1": [["Patina: o motor sobe o giro e o veículo não anda", "FaGaugeHigh"], ["Trepida ao sair com o veículo", "FaWaveSquare"],
-              ["Pedal duro, baixo ou que não volta", "FaTriangleExclamation"], ["Ruído ao pisar no pedal", "FaVolumeHigh"]],
+   "itens1": [
+    [
+     "Patina: o motor sobe o giro e o veículo não anda",
+     "FaGaugeHigh"
+    ],
+    [
+     "Trepida ao sair com o veículo",
+     "FaWaveSquare"
+    ],
+    [
+     "Pedal duro, baixo ou que não volta",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Ruído ao pisar no pedal",
+     "FaVolumeHigh"
+    ]
+   ],
    "t2": "O que oferecer junto",
-   "itens2": ["Patina ou trepida: o kit completo (platô, disco e rolamento).",
-              "Pedal duro ou que não volta: o comando (servo ou cilindro).",
-              "Na base, a embreagem {{cod:EMB1047071R}} indica o servo {{oj:EMB1047071R}}."],
+   "itens2": [
+    "Patina ou trepida: o kit completo (platô, disco e rolamento).",
+    "Pedal duro ou que não volta: o comando (servo ou cilindro).",
+    "Na base, a embreagem {{cod:EMB1047071R}} indica o servo {{oj:EMB1047071R}}."
+   ],
    "dica": "Pergunte como o motorista usa o pedal: pé apoiado no pedal e arrancada forte encurtam a vida da embreagem.",
-   "notas": "MENSAGEM-CHAVE\nOs dois primeiros sinais pedem o kit; o pedal duro pede o comando.\n\nCOMO CONDUZIR\nLeia os sinais e ligue cada um à peça.\n\nINSIGHT PARA O CAMPO\nNa linha pesada, o frotista compra embreagem e servo juntos para não parar o caminhão duas vezes."},
-  {"tipo": "foto2", "k": "MÓDULO 04 · COMANDO", "t": "Servo e cilindro de embreagem", "img": "capa:cover_20",
-   "itens": [["foto:SCE14010", "Servo: usa o ar do caminhão para ajudar a acionar a embreagem.", "Para o cliente: pedal leve e embreagem que solta."],
-             ["foto:SCE14008", "Cada servo é de uma aplicação: confira modelo e motor.", "Para o cliente: a peça certa de primeira."]],
+   "notas": "MENSAGEM-CHAVE\nOs dois primeiros sinais pedem o kit; o pedal duro pede o comando.\n\nCOMO CONDUZIR\nLeia os sinais e ligue cada um à peça.\n\nINSIGHT PARA O CAMPO\nNa linha pesada, o frotista compra embreagem e servo juntos para não parar o caminhão duas vezes."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 04 · COMANDO",
+   "t": "Servo e cilindro de embreagem",
+   "img": "capa:cover_20",
+   "itens": [
+    [
+     "foto:SCE14010",
+     "Servo: usa o ar do caminhão para ajudar a acionar a embreagem.",
+     "Para o cliente: pedal leve e embreagem que solta."
+    ],
+    [
+     "foto:SCE14008",
+     "Cada servo é de uma aplicação: confira modelo e motor.",
+     "Para o cliente: a peça certa de primeira."
+    ]
+   ],
    "dica": "Servo com vazamento de ar ou de fluido deixa o pedal pesado e a embreagem sem soltar. Na troca, confira o fluido do comando.",
-   "notas": "MENSAGEM-CHAVE\nNo caminhão, o servo multiplica a força do pé usando o ar do sistema.\n\nCOMO CONDUZIR\nMostre o servo BAP ({{cod:SCE14010}}, Scania) e explique que a aplicação é por modelo.\n\nINSIGHT PARA O CAMPO\nNa base, o servo {{cod:SCE14010}} indica a embreagem {{oj:SCE14010}} no Ofereça junto."},
-  {"tipo": "numero3", "k": "MÓDULO 04 · EMBREAGEM", "t": "Embreagem remanufaturada", "icone": "FaRecycle",
-   "numero": "Reman", "desc": "embreagem recuperada em processo industrial, com as peças de desgaste trocadas",
-   "cards": [["Linha pesada", "Atende caminhões e ônibus: veja a aplicação na base.", "FaTruck"],
-             ["Custo menor", "Alternativa à peça nova para o frotista.", "FaChartLine"],
-             ["Mesma conferência", "Diâmetro e número de estrias do disco.", "FaRuler"]],
+   "notas": "MENSAGEM-CHAVE\nNo caminhão, o servo multiplica a força do pé usando o ar do sistema.\n\nCOMO CONDUZIR\nMostre o servo BAP ({{cod:SCE14010}}, Scania) e explique que a aplicação é por modelo.\n\nINSIGHT PARA O CAMPO\nNa base, o servo {{cod:SCE14010}} indica a embreagem {{oj:SCE14010}} no Ofereça junto."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 04 · EMBREAGEM",
+   "t": "Embreagem remanufaturada",
+   "icone": "FaRecycle",
+   "numero": "Reman",
+   "desc": "embreagem recuperada em processo industrial, com as peças de desgaste trocadas",
+   "cards": [
+    [
+     "Linha pesada",
+     "Atende caminhões e ônibus: veja a aplicação na base.",
+     "FaTruck"
+    ],
+    [
+     "Custo menor",
+     "Alternativa à peça nova para o frotista.",
+     "FaChartLine"
+    ],
+    [
+     "Mesma conferência",
+     "Diâmetro e número de estrias do disco.",
+     "FaRuler"
+    ]
+   ],
    "dica": "Na embreagem pesada, confira o diâmetro e as estrias no código: a {{cod:EMB1047071R}} é de 395 mm e 10 estrias.",
-   "notas": "MENSAGEM-CHAVE\nA remanufaturada é a opção da linha pesada para o frotista que quer custo menor.\n\nCOMO CONDUZIR\nMostre o número e os três cartões. A descrição da base traz o diâmetro e o número de estrias. Para detalhes do processo de remanufatura, consulte a área de produto antes de prometer ao cliente.\n\nPERGUNTE AO TIME\nQuais frotistas da sua carteira poderiam usar embreagem remanufaturada?"},
-
-  {"tipo": "secao", "n": "05", "titulo": "Rolamentos e diagnóstico", "sub": "Ronco, folga e a tabela de bolso da transmissão",
-   "notas": "MENSAGEM-CHAVE\nRolamento gasto ronca; junta gasta estala; embreagem gasta patina.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "lista4", "k": "MÓDULO 05 · ROLAMENTOS", "t": "Rolamentos da transmissão", "img": "capa:cover_37",
+   "notas": "MENSAGEM-CHAVE\nA remanufaturada é a opção da linha pesada para o frotista que quer custo menor.\n\nCOMO CONDUZIR\nMostre o número e os três cartões. A descrição da base traz o diâmetro e o número de estrias. Para detalhes do processo de remanufatura, consulte a área de produto antes de prometer ao cliente.\n\nPERGUNTE AO TIME\nQuais frotistas da sua carteira poderiam usar embreagem remanufaturada?"
+  },
+  {
+   "tipo": "secao",
+   "n": "05",
+   "titulo": "Rolamentos e diagnóstico",
+   "sub": "Ronco, folga e a tabela de bolso da transmissão",
+   "notas": "MENSAGEM-CHAVE\nRolamento gasto ronca; junta gasta estala; embreagem gasta patina.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "lista4",
+   "k": "MÓDULO 05 · ROLAMENTOS",
+   "t": "Rolamentos da transmissão",
+   "img": "capa:cover_37",
    "legenda": "Rolamentos BAP: no câmbio, no cubo e no cardã.",
-   "itens": [["Câmbio: sustentam os eixos e as engrenagens", "FaGears"], ["Cubo de roda: deixam a roda girar livre", "FaCircleNotch"],
-             ["Cardã: o rolamento central e o da cruzeta", "FaTruck"], ["Código: a medida está gravada no rolamento", "FaBarcode"]],
+   "itens": [
+    [
+     "Câmbio: sustentam os eixos e as engrenagens",
+     "FaGears"
+    ],
+    [
+     "Cubo de roda: deixam a roda girar livre",
+     "FaCircleNotch"
+    ],
+    [
+     "Cardã: o rolamento central e o da cruzeta",
+     "FaTruck"
+    ],
+    [
+     "Código: a medida está gravada no rolamento",
+     "FaBarcode"
+    ]
+   ],
    "dica": "Ronco que muda com a marcha costuma ser do câmbio; ronco que muda só com a velocidade costuma ser da roda.",
-   "notas": "MENSAGEM-CHAVE\nRolamento gasto ronca; o tipo de ronco ajuda a achar qual.\n\nCOMO CONDUZIR\nPasse pelos quatro itens e explique a dica.\n\nINSIGHT PARA O CAMPO\nNa base, o {{cod:ROL1000}} é o rolamento duplo do câmbio do Gol G5."},
-  {"tipo": "tabela", "k": "MÓDULO 05 · DIAGNÓSTICO", "t": "Sintoma → peça BAP",
-   "cabecalho": ["Sintoma", "Causa provável", "Peça BAP"],
-   "linhas": [["Estalo em curva", "Junta homocinética gasta, quase sempre com a coifa rasgada", "{{prod:Junta Homocinética}} · {{prod:Kit Reparo da Junta Homocinética}}"],
-              ["Vibração ao acelerar", "Trizeta gasta, do lado do câmbio", "{{prod:Trizetas}} · {{prod:Kit Reparo da Junta Homocinética}}"],
-              ["Batida ao arrancar (cardã)", "Cruzeta com folga", "{{prod:Cruzetas}}"],
-              ["Motor sobe e não anda", "Embreagem patinando", "{{prod:Embreagem Remanufaturada}} (pesada)"],
-              ["Ronco que muda com a marcha", "Rolamento do câmbio", "{{prod:Rolamentos}}"]],
+   "notas": "MENSAGEM-CHAVE\nRolamento gasto ronca; o tipo de ronco ajuda a achar qual.\n\nCOMO CONDUZIR\nPasse pelos quatro itens e explique a dica.\n\nINSIGHT PARA O CAMPO\nNa base, o {{cod:ROL1000}} é o rolamento duplo do câmbio do Gol G5."
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 05 · DIAGNÓSTICO",
+   "t": "Sintoma → peça BAP",
+   "cabecalho": [
+    "Sintoma",
+    "Causa provável",
+    "Peça BAP"
+   ],
+   "linhas": [
+    [
+     "Estalo em curva",
+     "Junta homocinética gasta, quase sempre com a coifa rasgada",
+     "{{prod:Junta Homocinética}} · {{prod:Kit Reparo da Junta Homocinética}}"
+    ],
+    [
+     "Vibração ao acelerar",
+     "Trizeta gasta, do lado do câmbio",
+     "{{prod:Trizetas}} · {{prod:Kit Reparo da Junta Homocinética}}"
+    ],
+    [
+     "Batida ao arrancar (cardã)",
+     "Cruzeta com folga",
+     "{{prod:Cruzetas}}"
+    ],
+    [
+     "Motor sobe e não anda",
+     "Embreagem patinando",
+     "{{prod:Embreagem Remanufaturada}} (pesada)"
+    ],
+    [
+     "Ronco que muda com a marcha",
+     "Rolamento do câmbio",
+     "{{prod:Rolamentos}}"
+    ]
+   ],
    "atencao": "O balcão indica a peça provável; quem confirma o defeito é o mecânico. Não prometa que a peça resolve sem essa confirmação.",
-   "notas": "MENSAGEM-CHAVE\nA tabela de bolso da transmissão: cinco sintomas do dia a dia.\n\nCOMO CONDUZIR\nLeia linha por linha e peça para o time completar de cabeça.\n\nINSIGHT PARA O CAMPO\nImprima esta tabela para o balconista do cliente."},
-  {"tipo": "barulhos", "k": "MÓDULO 05 · DIAGNÓSTICO", "t": "O que o cliente descreve",
+   "notas": "MENSAGEM-CHAVE\nA tabela de bolso da transmissão: cinco sintomas do dia a dia.\n\nCOMO CONDUZIR\nLeia linha por linha e peça para o time completar de cabeça.\n\nINSIGHT PARA O CAMPO\nImprima esta tabela para o balconista do cliente."
+  },
+  {
+   "tipo": "barulhos",
+   "k": "MÓDULO 05 · DIAGNÓSTICO",
+   "t": "O que o cliente descreve",
    "t1": "O que o cliente fala → onde olhar",
-   "itens": [["“Estala na curva”: homocinética do lado da roda", "FaVolumeHigh"], ["“Treme ao acelerar”: trizeta", "FaWaveSquare"],
-             ["“Patina na subida”: embreagem", "FaGaugeHigh"], ["“Ronca e aumenta com a velocidade”: rolamento de roda", "FaRotate"]],
-   "numero": "Quando?", "desc": "a pergunta que separa os sintomas: em curva, ao acelerar, na subida ou em velocidade",
-   "t2": "A ligação com a suspensão e o freio", "texto2": "Batida embaixo pode ser pivô ou bieleta (Suspensão); ronco de roda pode vir do cubo com ABS (Freio e Rodagem).",
+   "itens": [
+    [
+     "“Estala na curva”: homocinética do lado da roda",
+     "FaVolumeHigh"
+    ],
+    [
+     "“Treme ao acelerar”: trizeta",
+     "FaWaveSquare"
+    ],
+    [
+     "“Patina na subida”: embreagem",
+     "FaGaugeHigh"
+    ],
+    [
+     "“Ronca e aumenta com a velocidade”: rolamento de roda",
+     "FaRotate"
+    ]
+   ],
+   "numero": "Quando?",
+   "desc": "a pergunta que separa os sintomas: em curva, ao acelerar, na subida ou em velocidade",
+   "t2": "A ligação com a suspensão e o freio",
+   "texto2": "Batida embaixo pode ser pivô ou bieleta (Suspensão); ronco de roda pode vir do cubo com ABS (Freio e Rodagem).",
    "dica": "Peça para o cliente dizer quando o sintoma aparece: isso já tira metade das peças da lista.",
-   "notas": "MENSAGEM-CHAVE\nCada sintoma tem um momento: curva, aceleração, subida ou velocidade.\n\nCOMO CONDUZIR\nLeia as quatro falas e reforce a pergunta “quando?”.\n\nINSIGHT PARA O CAMPO\nSeparar o sistema certo evita trocar a peça errada."},
-
-  {"tipo": "secao", "n": "06", "titulo": "Código e garantia", "sub": "Lado, estrias, ABS e as causas de falha que não são defeito",
-   "notas": "MENSAGEM-CHAVE\nNa transmissão, a peça certa está nos detalhes: lado, estrias, ABS e comprimento.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "indicadores", "k": "MÓDULO 06 · CÓDIGO", "t": "As 4 conferências da junta certa",
-   "cards": [["FaCarSide", "Aplicação", "Modelo, ano e motor", "A mesma linha de carro muda de junta entre versões.", "= o carro certo"],
-             ["FaGears", "Estrias", "Dentes do eixo", "O número de estrias tem de bater com o semieixo e o cubo.", "= encaixe certo"],
-             ["FaCircleDot", "ABS", "Com ou sem anel", "Carro com ABS usa junta com o anel do sensor.", "= luz do ABS apagada"],
-             ["FaArrowsLeftRight", "Lado", "Roda ou câmbio", "Junta fixa (roda) e trizeta (câmbio) são peças diferentes.", "= a peça do lado certo"]],
+   "notas": "MENSAGEM-CHAVE\nCada sintoma tem um momento: curva, aceleração, subida ou velocidade.\n\nCOMO CONDUZIR\nLeia as quatro falas e reforce a pergunta “quando?”.\n\nINSIGHT PARA O CAMPO\nSeparar o sistema certo evita trocar a peça errada."
+  },
+  {
+   "tipo": "secao",
+   "n": "06",
+   "titulo": "Código e garantia",
+   "sub": "Lado, estrias, ABS e as causas de falha que não são defeito",
+   "notas": "MENSAGEM-CHAVE\nNa transmissão, a peça certa está nos detalhes: lado, estrias, ABS e comprimento.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 06 · CÓDIGO",
+   "t": "As 4 conferências da junta certa",
+   "cards": [
+    [
+     "FaCarSide",
+     "Aplicação",
+     "Modelo, ano e motor",
+     "A mesma linha de carro muda de junta entre versões.",
+     "= o carro certo"
+    ],
+    [
+     "FaGears",
+     "Estrias",
+     "Dentes do eixo",
+     "O número de estrias tem de bater com o semieixo e o cubo.",
+     "= encaixe certo"
+    ],
+    [
+     "FaCircleDot",
+     "ABS",
+     "Com ou sem anel",
+     "Carro com ABS usa junta com o anel do sensor.",
+     "= luz do ABS apagada"
+    ],
+    [
+     "FaArrowsLeftRight",
+     "Lado",
+     "Roda ou câmbio",
+     "Junta fixa (roda) e trizeta (câmbio) são peças diferentes.",
+     "= a peça do lado certo"
+    ]
+   ],
    "dica": "Junta sem o anel do ABS num carro com ABS acende a luz no painel: confira sempre.",
-   "notas": "MENSAGEM-CHAVE\nAplicação, estrias, ABS e lado: as quatro conferências da junta certa.\n\nCOMO CONDUZIR\nMostre os quatro cartões. Todos estão na descrição e na aplicação do Catálogo BAP.\n\nINSIGHT PARA O CAMPO\nNa base, a descrição da junta traz o número de estrias e se tem ABS. Leia antes de fechar."},
-  {"tipo": "tabela", "k": "MÓDULO 06 · CÓDIGO", "t": "Exemplos pela base: junta, kit e trizeta",
-   "cabecalho": ["Peça", "Código BAP", "Ofereça junto (base)"],
-   "linhas": [["{{prod:Junta Homocinética}} · Gol", "{{cod:JUH70001}}", "{{oj:JUH70001}}"],
-              ["{{prod:Junta Homocinética}} · Palio", "{{cod:JUH70002}}", "{{oj:JUH70002}}"],
-              ["{{prod:Kit Reparo da Junta Homocinética}} · Onix", "{{cod:KHC120583}}", "{{oj:KHC120583}}"],
-              ["{{prod:Trizetas}} · Palio", "{{cod:TRI90001}}", "{{oj:TRI90001}}"],
-              ["{{prod:Semi-Eixo Homocinético}} · HB20", "{{cod:SEH80038}}", "{{oj:SEH80038}}"]],
+   "notas": "MENSAGEM-CHAVE\nAplicação, estrias, ABS e lado: as quatro conferências da junta certa.\n\nCOMO CONDUZIR\nMostre os quatro cartões. Todos estão na descrição e na aplicação do Catálogo BAP.\n\nINSIGHT PARA O CAMPO\nNa base, a descrição da junta traz o número de estrias e se tem ABS. Leia antes de fechar."
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 06 · CÓDIGO",
+   "t": "Exemplos pela base: junta, kit e trizeta",
+   "cabecalho": [
+    "Peça",
+    "Código BAP",
+    "Ofereça junto (base)"
+   ],
+   "linhas": [
+    [
+     "{{prod:Junta Homocinética}} · Gol",
+     "{{cod:JUH70001}}",
+     "{{oj:JUH70001}}"
+    ],
+    [
+     "{{prod:Junta Homocinética}} · Palio",
+     "{{cod:JUH70002}}",
+     "{{oj:JUH70002}}"
+    ],
+    [
+     "{{prod:Kit Reparo da Junta Homocinética}} · Onix",
+     "{{cod:KHC120583}}",
+     "{{oj:KHC120583}}"
+    ],
+    [
+     "{{prod:Trizetas}} · Palio",
+     "{{cod:TRI90001}}",
+     "{{oj:TRI90001}}"
+    ],
+    [
+     "{{prod:Semi-Eixo Homocinético}} · HB20",
+     "{{cod:SEH80038}}",
+     "{{oj:SEH80038}}"
+    ]
+   ],
    "atencao": "Confira sempre ano, motor, estrias e ABS no Catálogo BAP: os códigos deste slide são exemplos.",
-   "notas": "MENSAGEM-CHAVE\nCom a base, o vendedor monta o pedido da transmissão numa consulta.\n\nCOMO CONDUZIR\nLeia a tabela e mostre que o Ofereça junto leva da junta ao kit e do semieixo ao cubo.\n\nINSIGHT PARA O CAMPO\nO ATENÇÃO é regra: estrias e ABS antes de fechar."},
-  {"tipo": "cartoes8", "k": "MÓDULO 06 · GARANTIA", "t": "Nem toda falha é defeito de fabricação",
-   "cartoes": [["Coifa velha", "a junta nova recebe areia", "FaLinkSlash"], ["Graxa errada", "ou na quantidade errada", "FaDroplet"],
-               ["Estrias erradas", "aplicação ou versão errada", "FaGears"], ["Sem anel ABS", "luz acesa no painel", "FaCircleExclamation"],
-               ["Batida forte", "eixo empenado", "FaTriangleExclamation"], ["Rebaixamento", "ângulo fora do projeto", "FaRuler"],
-               ["Aperto errado", "porca do cubo sem torque", "FaWrench"], ["Pé na embreagem", "uso que queima o disco", "FaGaugeHigh"]],
-   "painel": [["Com o kit", "junta nova sempre com coifa e graxa novas"], ["No torque", "a porca do cubo no aperto do manual"]],
+   "notas": "MENSAGEM-CHAVE\nCom a base, o vendedor monta o pedido da transmissão numa consulta.\n\nCOMO CONDUZIR\nLeia a tabela e mostre que o Ofereça junto leva da junta ao kit e do semieixo ao cubo.\n\nINSIGHT PARA O CAMPO\nO ATENÇÃO é regra: estrias e ABS antes de fechar."
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 06 · GARANTIA",
+   "t": "Nem toda falha é defeito de fabricação",
+   "cartoes": [
+    [
+     "Coifa velha",
+     "a junta nova recebe areia",
+     "FaLinkSlash"
+    ],
+    [
+     "Graxa errada",
+     "ou na quantidade errada",
+     "FaDroplet"
+    ],
+    [
+     "Estrias erradas",
+     "aplicação ou versão errada",
+     "FaGears"
+    ],
+    [
+     "Sem anel ABS",
+     "luz acesa no painel",
+     "FaCircleExclamation"
+    ],
+    [
+     "Batida forte",
+     "eixo empenado",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Rebaixamento",
+     "ângulo fora do projeto",
+     "FaRuler"
+    ],
+    [
+     "Aperto errado",
+     "porca do cubo sem torque",
+     "FaWrench"
+    ],
+    [
+     "Pé na embreagem",
+     "uso que queima o disco",
+     "FaGaugeHigh"
+    ]
+   ],
+   "painel": [
+    [
+     "Com o kit",
+     "junta nova sempre com coifa e graxa novas"
+    ],
+    [
+     "No torque",
+     "a porca do cubo no aperto do manual"
+    ]
+   ],
    "fonte": "Orientações gerais de instalação; siga sempre o manual do veículo e a orientação do fabricante da peça.",
-   "notas": "MENSAGEM-CHAVE\nA maioria das falhas prematuras vem da instalação e do uso, não da peça.\n\nCOMO CONDUZIR\nPasse pelos oito cartões: cada um é uma pergunta na análise.\n\nINSIGHT PARA O CAMPO\nExplique as regras na hora da venda, não na hora da reclamação."},
-
-  {"tipo": "secao", "n": "07", "titulo": "Vender transmissão", "sub": "Perguntas, cross-sell, combos e fechamento",
-   "notas": "MENSAGEM-CHAVE\nTransmissão se vende com o kit e com a conferência certa. Este módulo transforma o conhecimento em pedido.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "spin", "k": "MÓDULO 07 · VENDA", "t": "Venda consultiva: perguntas que vendem (SPIN)",
-   "spin": [["Entender o cenário", "“Quais carros mais passam pela sua oficina?”\n“Você atende frota pesada?”"],
-            ["Encontrar a dor", "“Tem voltado junta que estala de novo?”\n“Falta kit reparo na hora?”"],
-            ["Mostrar o custo de não resolver", "“Quanto custa desmontar a roda de novo por uma coifa?”"],
-            ["Fazer o cliente dizer o valor", "“Se a junta viesse com o kit, quanto tempo você ganharia?”"]],
+   "notas": "MENSAGEM-CHAVE\nA maioria das falhas prematuras vem da instalação e do uso, não da peça.\n\nCOMO CONDUZIR\nPasse pelos oito cartões: cada um é uma pergunta na análise.\n\nINSIGHT PARA O CAMPO\nExplique as regras na hora da venda, não na hora da reclamação."
+  },
+  {
+   "tipo": "secao",
+   "n": "07",
+   "titulo": "Vender transmissão",
+   "sub": "Perguntas, cross-sell, combos e fechamento",
+   "notas": "MENSAGEM-CHAVE\nTransmissão se vende com o kit e com a conferência certa. Este módulo transforma o conhecimento em pedido.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "spin",
+   "k": "MÓDULO 07 · VENDA",
+   "t": "Venda consultiva: perguntas que vendem (SPIN)",
+   "spin": [
+    [
+     "Entender o cenário",
+     "“Quais carros mais passam pela sua oficina?”\n“Você atende frota pesada?”"
+    ],
+    [
+     "Encontrar a dor",
+     "“Tem voltado junta que estala de novo?”\n“Falta kit reparo na hora?”"
+    ],
+    [
+     "Mostrar o custo de não resolver",
+     "“Quanto custa desmontar a roda de novo por uma coifa?”"
+    ],
+    [
+     "Fazer o cliente dizer o valor",
+     "“Se a junta viesse com o kit, quanto tempo você ganharia?”"
+    ]
+   ],
    "dica": "Com o mecânico, fale de retorno e de tempo de elevador; com o frotista, de veículo parado.",
-   "notas": "MENSAGEM-CHAVE\nQuem pergunta conduz. As perguntas SPIN levam o cliente a pedir o kit.\n\nCOMO CONDUZIR\nExplique as 4 letras com os exemplos e faça um role-play.\n\nPERGUNTE AO TIME\nQual pergunta funciona melhor com o frotista?"},
-  {"tipo": "hub", "k": "MÓDULO 07 · CROSS-SELL", "t": "Cross-sell: a junta puxa o conjunto",
-   "itens": [["Junta homocinética", "o giro na roda esterçada", "FaCircleNotch"], ["Kit reparo", "coifa, abraçadeiras e graxa", "FaLayerGroup"],
-             ["Trizeta ou cubo", "o outro lado do semieixo", "FaLink"]],
-   "cards": [["Mesmo serviço", "A roda já está desmontada: é a hora de trocar o que está em volta.", "FaWrench"],
-             ["Mesmo sintoma", "Estalo e vibração podem vir da junta ou da trizeta.", "FaStethoscope"],
-             ["Pedido maior", "Mais itens por pedido, sem precisar de um cliente novo.", "FaChartLine"]],
+   "notas": "MENSAGEM-CHAVE\nQuem pergunta conduz. As perguntas SPIN levam o cliente a pedir o kit.\n\nCOMO CONDUZIR\nExplique as 4 letras com os exemplos e faça um role-play.\n\nPERGUNTE AO TIME\nQual pergunta funciona melhor com o frotista?"
+  },
+  {
+   "tipo": "hub",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Cross-sell: a junta puxa o conjunto",
+   "itens": [
+    [
+     "Junta homocinética",
+     "o giro na roda esterçada",
+     "FaCircleNotch"
+    ],
+    [
+     "Kit reparo",
+     "coifa, abraçadeiras e graxa",
+     "FaLayerGroup"
+    ],
+    [
+     "Trizeta ou cubo",
+     "o outro lado do semieixo",
+     "FaLink"
+    ]
+   ],
+   "cards": [
+    [
+     "Mesmo serviço",
+     "A roda já está desmontada: é a hora de trocar o que está em volta.",
+     "FaWrench"
+    ],
+    [
+     "Mesmo sintoma",
+     "Estalo e vibração podem vir da junta ou da trizeta.",
+     "FaStethoscope"
+    ],
+    [
+     "Pedido maior",
+     "Mais itens por pedido, sem precisar de um cliente novo.",
+     "FaChartLine"
+    ]
+   ],
    "dica": "Use o Ofereça junto do Catálogo BAP: a junta {{cod:JUH70002}} (Palio) indica {{oj:JUH70002}}.",
-   "notas": "MENSAGEM-CHAVE\nToda peça da transmissão tem vizinhas que gastam junto.\n\nCOMO CONDUZIR\nMostre os três itens e os três argumentos.\n\nINSIGHT PARA O CAMPO\nOutros pares da base: kit {{cod:KHC12599}} → junta {{oj:KHC12599}}; trizeta {{cod:TRI90001}} → kit {{oj:TRI90001}}."},
-  {"tipo": "combos", "k": "MÓDULO 07 · CROSS-SELL", "t": "Combos de transmissão e perguntas-gatilho",
-   "combos": [["Junta fechada", "{{prod:Junta Homocinética}}  +  {{prod:Kit Reparo da Junta Homocinética}}", "Gol: {{cod:JUH70001}} + {{oj:JUH70001}}"],
-              ["Semieixo completo", "{{prod:Semi-Eixo Homocinético}}  +  {{prod:Cubo de Roda}}", "Onix: {{cod:SEH80048}} + {{oj:SEH80048}}"],
-              ["Embreagem pesada", "{{prod:Embreagem Remanufaturada}}  +  servo", "{{cod:EMB1047071R}} + {{oj:EMB1047071R}}"]],
-   "pergunte": ["“Estala nas curvas?”", "“A coifa está rasgada?”", "“A embreagem está patinando?”"],
+   "notas": "MENSAGEM-CHAVE\nToda peça da transmissão tem vizinhas que gastam junto.\n\nCOMO CONDUZIR\nMostre os três itens e os três argumentos.\n\nINSIGHT PARA O CAMPO\nOutros pares da base: kit {{cod:KHC12599}} → junta {{oj:KHC12599}}; trizeta {{cod:TRI90001}} → kit {{oj:TRI90001}}."
+  },
+  {
+   "tipo": "combos",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Combos de transmissão e perguntas-gatilho",
+   "combos": [
+    [
+     "Junta fechada",
+     "{{prod:Junta Homocinética}}  +  {{prod:Kit Reparo da Junta Homocinética}}",
+     "Gol: {{cod:JUH70001}} + {{oj:JUH70001}}"
+    ],
+    [
+     "Semieixo completo",
+     "{{prod:Semi-Eixo Homocinético}}  +  {{prod:Cubo de Roda}}",
+     "Onix: {{cod:SEH80048}} + {{oj:SEH80048}}"
+    ],
+    [
+     "Embreagem pesada",
+     "{{prod:Embreagem Remanufaturada}}  +  {{prod:Servo e Cilindro de Embreagem}}",
+     "{{cod:EMB1047071R}} + {{oj:EMB1047071R}}"
+    ]
+   ],
+   "pergunte": [
+    "“Estala nas curvas?”",
+    "“A coifa está rasgada?”",
+    "“A embreagem está patinando?”"
+   ],
    "dica": "O que é medido melhora: acompanhe a % de juntas que saem com o kit reparo.",
-   "notas": "MENSAGEM-CHAVE\nCombos transformam conhecimento em pedido maior.\n\nCOMO CONDUZIR\nApresente os 3 combos e as perguntas da faixa PERGUNTE. Os códigos vêm do Ofereça junto da base.\n\nINSIGHT PARA O CAMPO\nNo combo da embreagem pesada, o frotista compra para não parar o caminhão duas vezes."},
-  {"tipo": "fechamento", "k": "MÓDULO 07 · FECHAMENTO", "t": "Fechamento em 3 etapas",
-   "dica": "Transmissão fecha quando o cliente confia na aplicação: mostre estrias, ABS e lado no Catálogo BAP antes de pedir o pedido."},
-  {"tipo": "naofechou", "k": "MÓDULO 07 · NÃO FECHOU", "t": "Não fechou? Os 5 motivos na transmissão",
-   "linhas": [["Preço", "Compare com o custo de desmontar a roda de novo: junta com kit evita o retorno.", "“Se eu resolver isso, fechamos?”"],
-              ["Prazo ou limite", "Não prometa prazo nem limite fora da regra. Monte um pedido menor com os kits que mais giram.", "“Se eu ajustar o pedido ao seu limite, fechamos?”"],
-              ["Dúvida na aplicação", "Mostre no Catálogo BAP a aplicação, as estrias, o ABS e as referências cruzadas.", "“Se eu te mostrar que serve, fechamos?”"],
-              ["Já tem fornecedor", "Não peça para trocar tudo. Entre onde ele perde venda: kits reparo e trizetas.", "“Começamos por essa linha que falta?”"],
-              ["Sem necessidade agora", "Mostre o giro: as juntas e kits da frota da região.", "“Que dia eu volto pra fechar?”"]],
-   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 5 motivos.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price."},
-  {"tipo": "checklist", "t": "Checklist do vendedor BAP",
-   "itens": ["Perguntei o veículo, o ano e o motor", "Perguntei quando o sintoma aparece", "Liguei o sintoma à peça certa",
-             "Conferi estrias e ABS no catálogo", "Conferi o lado: roda ou câmbio", "Ofereci a junta com o kit reparo",
-             "Usei o Ofereça junto do Catálogo BAP", "Ofereci o semieixo quando as duas juntas gastaram", "Na embreagem, ofereci o conjunto",
-             "Lembrei do óleo de câmbio do manual", "Pedi o pedido; sem pedido, anotei o motivo", "Deixei o próximo passo combinado"]},
-  {"tipo": "quiz",
-   "perguntas": ["Na tração dianteira, qual junta fica do lado da roda e qual do lado do câmbio?", "O cliente ouve estalo ao acelerar em curva fechada. Qual a peça provável?",
-                 "O que vem no kit reparo da junta e por que vender junto?", "Quais as 4 conferências da junta certa no catálogo?",
-                 "O motor sobe o giro e o veículo não anda. Qual sistema e qual peça?", "Quando o semieixo completo compensa mais que a junta?"],
-   "respostas": ["Homocinética (fixa) do lado da roda; trizeta do lado do câmbio.", "A junta homocinética do lado da roda, quase sempre com a coifa rasgada.",
-                 "Coifa, abraçadeiras, graxa e anel trava: protegem a junta nova e a mão de obra é a mesma.", "Aplicação, estrias, ABS e lado.",
-                 "Embreagem patinando: o kit (platô, disco e rolamento).", "Quando as duas juntas estão gastas ou o eixo está empenado."]},
-  {"tipo": "obrigado", "sobre": "TREINAMENTO TRANSMISSÃO BAP", "titulo": "Obrigado!", "sub": "Dúvidas? Agora é levar para o balcão e para a oficina.",
-   "notas": "MENSAGEM-CHAVE\nO conhecimento só vira resultado no campo.\n\nCOMO CONDUZIR\nAbra para dúvidas. Lembre que o óleo de câmbio está no treinamento de Lubrificantes."}
+   "notas": "MENSAGEM-CHAVE\nCombos transformam conhecimento em pedido maior.\n\nCOMO CONDUZIR\nApresente os 3 combos e as perguntas da faixa PERGUNTE. Os códigos vêm do Ofereça junto da base.\n\nINSIGHT PARA O CAMPO\nNo combo da embreagem pesada, o frotista compra para não parar o caminhão duas vezes."
+  },
+  {
+   "tipo": "fechamento",
+   "k": "MÓDULO 07 · FECHAMENTO",
+   "t": "Fechamento em 3 etapas",
+   "dica": "Transmissão fecha quando o cliente confia na aplicação: mostre estrias, ABS e lado no Catálogo BAP antes de pedir o pedido."
+  },
+  {
+   "tipo": "naofechou",
+   "k": "MÓDULO 07 · NÃO FECHOU",
+   "t": "Não fechou? Os 5 motivos na transmissão",
+   "linhas": [
+    [
+     "Preço",
+     "Compare com o custo de desmontar a roda de novo: junta com kit evita o retorno.",
+     "“Se eu resolver isso, fechamos?”"
+    ],
+    [
+     "Prazo ou limite",
+     "Não prometa prazo nem limite fora da regra. Monte um pedido menor com os kits que mais giram.",
+     "“Se eu ajustar o pedido ao seu limite, fechamos?”"
+    ],
+    [
+     "Dúvida na aplicação",
+     "Mostre no Catálogo BAP a aplicação, as estrias, o ABS e as referências cruzadas.",
+     "“Se eu te mostrar que serve, fechamos?”"
+    ],
+    [
+     "Já tem fornecedor",
+     "Não peça para trocar tudo. Entre onde ele perde venda: kits reparo e trizetas.",
+     "“Começamos por essa linha que falta?”"
+    ],
+    [
+     "Sem necessidade agora",
+     "Mostre o giro: as juntas e kits da frota da região.",
+     "“Que dia eu volto pra fechar?”"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 5 motivos.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price."
+  },
+  {
+   "tipo": "checklist",
+   "t": "Checklist do vendedor BAP",
+   "itens": [
+    "Perguntei o veículo, o ano e o motor",
+    "Perguntei quando o sintoma aparece",
+    "Liguei o sintoma à peça certa",
+    "Conferi estrias e ABS no catálogo",
+    "Conferi o lado: roda ou câmbio",
+    "Ofereci a junta com o kit reparo",
+    "Usei o Ofereça junto do Catálogo BAP",
+    "Ofereci o semieixo quando as duas juntas gastaram",
+    "Na embreagem, ofereci o conjunto",
+    "Lembrei do óleo de câmbio do manual",
+    "Pedi o pedido; sem pedido, anotei o motivo",
+    "Deixei o próximo passo combinado"
+   ]
+  },
+  {
+   "tipo": "quiz",
+   "perguntas": [
+    "Na tração dianteira, qual junta fica do lado da roda e qual do lado do câmbio?",
+    "O cliente ouve estalo ao acelerar em curva fechada. Qual a peça provável?",
+    "O que vem no kit reparo da junta e por que vender junto?",
+    "Quais as 4 conferências da junta certa no catálogo?",
+    "O motor sobe o giro e o veículo não anda. Qual sistema e qual peça?",
+    "Quando o semieixo completo compensa mais que a junta?"
+   ],
+   "respostas": [
+    "Homocinética (fixa) do lado da roda; trizeta do lado do câmbio.",
+    "A junta homocinética do lado da roda, quase sempre com a coifa rasgada.",
+    "Coifa, abraçadeiras, graxa e anel trava: protegem a junta nova e a mão de obra é a mesma.",
+    "Aplicação, estrias, ABS e lado.",
+    "Embreagem patinando: o kit (platô, disco e rolamento).",
+    "Quando as duas juntas estão gastas ou o eixo está empenado."
+   ]
+  },
+  {
+   "tipo": "obrigado",
+   "sobre": "TREINAMENTO TRANSMISSÃO BAP",
+   "titulo": "Obrigado!",
+   "sub": "Dúvidas? Agora é levar para o balcão e para a oficina.",
+   "notas": "MENSAGEM-CHAVE\nO conhecimento só vira resultado no campo.\n\nCOMO CONDUZIR\nAbra para dúvidas. Lembre que o óleo de câmbio está no treinamento de Lubrificantes."
+  }
  ]
 }
