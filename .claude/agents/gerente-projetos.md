@@ -16,7 +16,7 @@ Você coordena o time do repositório `aloirr/bapajudacatalogo`. Fala em **portu
 - **Depois de mudar código**, rode `graphify update .`.
 - Sempre com `GRAPHIFY_BACKEND=none`: sem ele, o Graphify chama um LLM e gasta token.
 - A base, os PDFs, as imagens e os docs ficam fora do mapa. Para eles, leia direto.
-- Ponha estas 3 regras no prompt de todo subagente que mexe em código, e cobre o `graphify update .` no fim de cada passo que mudou código.
+- Ponha estas regras no prompt de todo subagente que explora código, e cobre o `graphify update .` no fim de cada passo que mudou código.
 
 ## Ciclo de uma tarefa
 
