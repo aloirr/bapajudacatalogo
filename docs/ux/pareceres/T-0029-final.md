@@ -64,3 +64,21 @@ Sem preço e sem estoque: 🟢. A grafia ("ProActive", "Shiftease", caixa alta d
 2. **Notas que continuam:** "Toyota Etios 1.3" na p68 (HC26 na base, para o `catalogo-dados`) e o " - DE" em "Iveco STRALIS - DE" (p62, já estava antes; item 4 da lista da T-0032).
 
 **Resultado da rodada 3: LIBERADO.** A T-0029 fica sem 🔴 e sem 🟡, com a variante a.
+
+---
+
+## Entrega final (PR #179, head `0133f6f`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 12:27 (Manaus) |
+| O que foi revisto | O `catalogo_grafico/entregas/Portfolio_Produtos_BAP_AUTOPARTS.pdf`, tirado do próprio commit `0133f6f726084443bbd705deeb0352d2a2737c66`, comparado com o PDF da rodada 3 liberada (`6d8f143`), página a página, no texto e no pixel (50 ppi). Também o diff `6d8f143..0133f6f` do `portfolio.py` e os PNGs de `final-T-0029/` |
+| Decisão do Alexandre | 15a: "bom custo-benefício" no lugar de "preço acessível" |
+| Resultado | **LIBERADO**, sem 🔴 e sem 🟡 |
+
+- 🟢 **A entrega é a simulação liberada.** São 87 páginas nas 2 versões, e só a pág. 2 muda, no texto e no pixel. As outras 86 são iguais às da rodada 3.
+- 🟢 **Pág. 2 ("Quem somos"):** muda só a frase do 15a. "passando" desce para a 3ª linha, e o parágrafo continua com 3 linhas, na mesma caixa. Os 4 cartões e a faixa da garantia não se movem.
+- 🟢 **O diff do gerador** é só essa frase. O resto do diff `6d8f143..0133f6f` é o merge do main (governança), fora do PDF.
+- 🟢 **No PDF entregue não aparece "preço" nem "estoque".** O 15a tirou a única ocorrência (item 21 da lista da T-0032).
+
+**Resultado da entrega final: LIBERADO** para seguir ao `revisor-codigo`.
