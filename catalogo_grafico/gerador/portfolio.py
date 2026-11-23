@@ -10,8 +10,9 @@ import pandas as pd
 import apres_bemol as A
 from apres_bemol import S, W, H
 from taxo import ORDER_SIS, META
+from plural import plural
+from detalhe import BASE_UNIFICADA as BASE   # a base unificada do Git (dados/), como nos 3 PDFs
 
-BASE = 'saidas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v11.xlsx'
 NOME = 'BAP AUTOPARTS'
 SITE = 'www.bapautoparts.com.br  ·  @bapautoparts'
 A.C.update(dict(ochip='#fdeedd', gchip='#e3f1e0', soft='#f3f6f2'))
@@ -151,7 +152,7 @@ def card_v(s, c, x, y, w, h):
     yy = y + 7 + ih + 10
     s.t(x + 13, yy, c['nome'], size, 'ink', 'PB')
     s.p(x + 13, yy + 18, w - 26, html.escape(curto(c['desc'], w - 26, 8.2, 2)), 8.2, 10.6, 'sec')
-    s.t(x + 13, y + h - 20, f"{c['n']} itens", 8, 'grey', 'PM')
+    s.t(x + 13, y + h - 20, f"{c['n']} {plural(c['n'])}", 8, 'grey', 'PM')
 
 
 def curto(t, w, size, n):
@@ -177,7 +178,7 @@ def card_h(s, c, x, y, w, h):
     if c['lanc']:
         s.chip(tx, y + 12 + hn, 'NOVIDADE', 'white', 'orange', 6.2); hn += 16
     s.p(tx, y + 12 + hn, tw, html.escape(c['desc']), 7.6, 9.8, 'sec')
-    s.t(tx, y + h - 17, f"{c['n']} itens", 7.8, 'grey', 'PM')
+    s.t(tx, y + h - 17, f"{c['n']} {plural(c['n'])}", 7.8, 'grey', 'PM')
 
 
 def pacote(fams, cols):
@@ -199,7 +200,7 @@ def pacote(fams, cols):
 def pagina_sistema(s, lin_nome, num, sis, fams):
     n_it = sum(c['n'] for cs in fams.values() for c in cs); n_pr = sum(len(cs) for cs in fams.values())
     s.header(f'{lin_nome} · {num:02d} · {FRASE[sis]}', TITULO[sis],
-             f"{len(fams)} {'família' if len(fams) == 1 else 'famílias'} · {n_pr} {'produto' if n_pr == 1 else 'produtos'} · {fmt(n_it)} itens")
+             f"{len(fams)} {plural(len(fams), 'família', 'famílias')} · {n_pr} {plural(n_pr, 'produto', 'produtos')} · {fmt(n_it)} {plural(n_it)}")
     top, bot = 128, H - 46
     if n_pr == 1:
         fam, cards = next(iter(fams.items())); heroi(s, fam, cards[0], top, bot); s.footer(); return
@@ -254,7 +255,7 @@ def heroi(s, fam, c, top, bot):
     ih = bot - top - 30
     s.foto(c['img'], 40, top, 400, ih)
     if c['lanc']: s.chip(56, top + 16, 'NOVIDADE 2026', 'white', 'orange', 7.5)
-    s.t(40, top + ih + 12, f"{c['n']} itens", 11, 'grey', 'PM')          # nº de itens embaixo da imagem
+    s.t(40, top + ih + 12, f"{c['n']} {plural(c['n'])}", 11, 'grey', 'PM')          # nº de itens embaixo da imagem
     x = 476; y = top + 6; wr = W - 40 - x
     s.t(x, y, tit(fam).upper(), 9.5, 'gdark', 'PB', ls=1.4); y += 22
     s.t(x, y, c['nome'], 28, 'ink', 'PB', ls=-.4); y += 46

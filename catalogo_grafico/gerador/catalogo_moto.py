@@ -28,7 +28,7 @@ def capa_moto(dc):
     dc.label(MX + 16, 350, 'Linha Moto', 76, 'white', 'PB', -1.5)
     n = sum(f['count'] for f in FAMS)
     for i, t in enumerate(['Pneus · Câmaras de ar · Rolamentos', 'Óleo 4T · Filtros · Velas de ignição · Lâmpadas',
-                           f'{len(FAMS)} famílias · {n} {D2.plural(n)} para motocicletas']):
+                           f'{len(FAMS)} {D2.plural(len(FAMS), "linha", "linhas")} · {n} {D2.plural(n)} para motocicletas']):
         dc.label(MX + 20, 470 + i * 24, t, 14, 'white', 'PR')
     dc.tag(MX + 20, 560, 'LINHA MOTO · USO INTERNO', 9, 'orange', 'white', 9)
     imgs = [f['img'] for f in FAMS if f.get('img')][:6]
