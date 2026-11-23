@@ -25,3 +25,16 @@ Texto literal: "1) a  2) a  3) a  4) a  5) a  6) a  7) a  8) a  9) a  10) a". As
 
 Também aprovadas na mesma resposta, com efeito na marca: **9 a**, o desenho e as telas do login como simulados
 (parecer `docs/marca/pareceres/T-0022-simulacao.md`). As outras respostas (1 a 5) são de serviço e de UX.
+
+## 23/11/2026 ~08:28 · T-0028 · R-20261123-122814-po
+
+Resposta do Alexandre na sessão do PO, passada pelo `po` no R-20261123-122814-po. Texto literal:
+"1) a  2) a  3) b  4) a  5) a". As decisões com efeito na marca:
+
+| Nº | Pergunta | Decisão |
+|---|---|---|
+| 5 a | Simulação da T-0028 (Portfólio pela v27 e capa da Linha Moto) | **Aprovada**, com a variante b e o ajuste das aplicações coladas. Com ela, vale a capa da Linha Moto com "linhas" no lugar de "famílias" (decisão 11 a do R-20261123-112006-alexandre; MC-0015 fechado) |
+| 4 a | Datas do Portfólio (2026) | **Ficam nesta tarefa**; a troca para 2027 vai para a fila, com simulação própria |
+
+As outras respostas (1 a e 2 a, a T-0006 fase 1; 3 b, os Rolamentos do Portfólio em Rodagem) são de tela e de
+conteúdo; a simulação aprovada da T-0006 está no parecer `docs/marca/pareceres/T-0006-fase1-simulacao.md`.

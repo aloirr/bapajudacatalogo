@@ -45,3 +45,11 @@ Só para erro e para o botão de desativar (decisão 8 a, R-20261122-032433-alex
 - Não entram nos PDFs, na Linha Moto, no portfólio, no Kit Filtros nem nas apresentações.
 - Contraste medido: `--erro` no branco, 6,57:1; `--erro` no `--erro-claro`, 5,75:1; texto branco no botão vermelho,
   6,57:1.
+
+## Voz
+
+### Capa da Linha Moto: "linhas"
+
+- Na capa da Linha Moto, a contagem diz **"linhas"**, e não "famílias": "7 linhas · 75 itens para motocicletas"
+  (decisão 11 a, R-20261123-112006-alexandre; simulação aprovada na T-0028, decisão 5 a, R-20261123-122814-po;
+  MC-0015 fechado).
