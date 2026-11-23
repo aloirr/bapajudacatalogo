@@ -58,3 +58,23 @@ Voz, texto, grafia e dados ficam com o parecer de marca e com o `catalogo-dados`
 4. **Branco sobre o verde `#59BA61`** ("Aditivos" no Lubrificantes 7, "COMBO 1", pilhas): como nos originais.
 
 **Resultado:** a Linha Moto pode seguir ao Alexandre. Baterias e Lubrificantes voltam para os 3 ajustes (Baterias 22 e 41, Lubrificantes 27). Depois, confiro só esses 3 slides.
+
+---
+
+## Reteste (head `c75390d`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 12:59 (Manaus) |
+| O que foi revisto | Baterias 22 e 41; Lubrificantes 3, 20 a 23 e 27 (PNGs regerados, e a cor de cada texto lida no PDF) |
+| Resultado | **Baterias: LIBERADO. Lubrificantes: LIBERADO.** Os 3 🟡 estão 🟢, sem 🔴 e sem 🟡 |
+
+- 🟢 **Baterias 22 (🟡 1):** o link quebra entre palavras ("…do carro / com multímetro"), e a legenda do QR também ("…câmera do / celular"). O ícone novo (câmera branca no círculo verde) segue o padrão dos outros ícones do deck.
+- 🟢 **Baterias 41 (🟡 2):** "Velas: partida difícil nem sempre é a bateria" cabe em 1 linha, e os cartões ganharam folga abaixo do título.
+- 🟢 **Lubrificantes 27 (🟡 3):** o "DIE5500 · 500 ml" está em verde-escuro, como os outros 5 códigos.
+- 🟢 **Lubrificantes 20 a 23 e 27:** não sobra vermelho. O `#8A3F00` se lê bem no branco e no verde-claro, e o "Fora do portfólio" continua escrito por extenso.
+- 🟢 **Lubrificantes 3 (nota 3):** a grade 5 × 2 traz o "✓ Fechamento" no verde-claro, como nos outros 3 decks. Com o Arial, os títulos de 2 linhas ("Aplicações e portfólio", "Vendendo lubrificantes", "Cross-sell e fechamento") cabem, e as descrições ficam dentro dos cartões.
+
+**Nota (não segura):** no Lubrificantes 22 e 27, o `#8A3F00` serve ao mesmo tempo para "Onde aparece:" e para "Fora do portfólio hoje". O texto desfaz a dúvida.
+
+**Resultado do reteste: LIBERADO.** Com a Linha Moto, os 3 treinamentos da onda 1 podem seguir ao Alexandre (pelo `po`).
