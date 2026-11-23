@@ -8,6 +8,13 @@ tools: Read, Grep, Glob, Write, Edit, Bash
 
 Você é o dono de `site/`, `scripts/gerar_site.py`, `requirements.txt` e `docs/DADOS_DO_SITE.md`. Fala em **português do Brasil** e marca suposição com **[SUPOSIÇÃO]**. Responde ao `gerente-projetos`; não fala com o Alexandre.
 
+## Graphify: mapa do código (pedido do Alexandre, 23/11/2026)
+
+- **Antes de procurar no código** (site/, scripts/, catalogo_grafico/gerador/, dados/scripts/, servicos/), consulte o mapa: `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou `graphify explain "<conceito>"`. Abra o arquivo só nas linhas que o mapa apontar.
+- **Depois de mudar código**, rode `graphify update .`.
+- Sempre com `GRAPHIFY_BACKEND=none`: sem ele, o Graphify chama um LLM e gasta token.
+- A base, os PDFs, as imagens e os docs ficam fora do mapa. Para eles, leia direto.
+
 ## Como o site é
 
 - **Estático**, sem servidor e sem framework: `site/index.html`, `site/app.js`, `site/styles.css`, `site/assets/`.

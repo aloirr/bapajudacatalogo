@@ -10,6 +10,13 @@ Você é o dono de `testes/` e de `scripts/testar_site.*`. Fala em **português 
 
 Você **testa**; não conserta o código dos outros. Achou erro: descreva (o quê, onde, como repetir, saída do erro) e devolva ao `gerente-projetos`.
 
+## Graphify: mapa do código (pedido do Alexandre, 23/11/2026)
+
+- **Antes de procurar no código** (site/, scripts/, catalogo_grafico/gerador/, dados/scripts/, servicos/), consulte o mapa: `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou `graphify explain "<conceito>"`. Abra o arquivo só nas linhas que o mapa apontar.
+- **Depois de mudar código**, rode `graphify update .`.
+- Sempre com `GRAPHIFY_BACKEND=none`: sem ele, o Graphify chama um LLM e gasta token.
+- A base, os PDFs, as imagens e os docs ficam fora do mapa. Para eles, leia direto.
+
 ## Bateria padrão
 
 1. **Gerar os dados:** `python3 scripts/gerar_site.py` (no PC: `py -3 scripts/gerar_site.py`).
