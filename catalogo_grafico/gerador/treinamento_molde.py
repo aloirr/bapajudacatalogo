@@ -48,10 +48,12 @@ from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.util import Inches
 
 import treinamento_desenhos
+from detalhe import BASE_UNIFICADA as BASE      # o caminho da base unificada, o mesmo do Portfólio e dos 3 PDFs
+from plural import fmt
+from taxo import grafia_bap
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.normpath(os.path.join(AQUI, '..', '..'))
-BASE = os.path.join(RAIZ, 'dados', 'BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx')
 VERSOES = os.path.join(RAIZ, 'dados', 'versoes')
 ORIGINAIS = os.path.join(AQUI, '..', 'originais', 'treinamentos')
 MOLDE = os.path.join(ORIGINAIS, 'Treinamento_Baterias_BAP_Vendedores.pptx')
@@ -89,7 +91,7 @@ class Base:
         vs = sorted((f for f in os.listdir(VERSOES) if re.search(r'_v(\d+)\.xlsx$', f)),
                     key=lambda f: int(re.search(r'_v(\d+)\.xlsx$', f).group(1)))
         self.vars = {
-            'n_itens': f'{len(cat):,}'.replace(',', '.'),
+            'n_itens': fmt(len(cat)),
             'n_produtos': str(cat.PRODUTO.nunique()),
             'n_sistemas': str(cat[cat.SISTEMA.ne('OUTROS') & cat.SISTEMA.ne('')].SISTEMA.nunique()),
             'versao_base': re.search(r'_(v\d+)\.xlsx$', vs[-1]).group(1) if vs else '?',
@@ -457,21 +459,18 @@ def kicker(sh):
     return sh.is_placeholder and sh.placeholder_format.idx == 102
 
 
-def aplicar_grafia(slide, grafia):
-    """Grafia dos nomes de linha (ProActive, Shiftease, Effitech): fora do kicker, que é todo em caixa alta."""
-    rx = [(re.compile(r'\b' + re.escape(k) + r'\b'), v) for k, v in grafia.items()]
-    def troca(t):
-        for r, v in rx:
-            t.text = r.sub(v, t.text)
+def aplicar_grafia(slide):
+    """Grafia dos nomes de linha (ProActive, Shiftease, Effitech; taxo.LINHA_BAP): fora do kicker, que é todo em caixa
+    alta."""
     for sh in slide.shapes:
         if not kicker(sh):
             for t in sh._element.iter(A + 't'):
                 if t.text:
-                    troca(t)
+                    t.text = grafia_bap(t.text)
     if slide.has_notes_slide:
         for t in slide.notes_slide._element.iter(A + 't'):
             if t.text:
-                troca(t)
+                t.text = grafia_bap(t.text)
 
 
 def renumerar(slide, mapa):
@@ -774,8 +773,7 @@ def montar(nome, saida=None):
         globais = cfg.get('trocar', [])
         trocar_textos(s._element, globais, onde, contagem)
         trocar_textos(s.notes_slide._element, globais, onde, contagem)
-        if cfg.get('grafia'):
-            aplicar_grafia(s, cfg['grafia'])
+        aplicar_grafia(s)
         for txt in textos_do_slide(s):
             base.conferir_deck(txt, onde, nao_codigo)
         if s.slide_layout.name == 'CONTENT':

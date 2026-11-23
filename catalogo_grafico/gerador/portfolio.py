@@ -9,11 +9,13 @@ import sys, os, re, collections, html, datetime
 import pandas as pd
 import apres_bemol as A
 from apres_bemol import S, W, H
-from taxo import ORDER_SIS, META, HEAVY, LIGHT_BR, LIGHT_MODELS, MOTO as TX_MOTO
-from plural import plural
+import moto
+from taxo import ORDER_SIS, META, HEAVY, LIGHT_BR, LIGHT_MODELS, MOTO as TX_MOTO, grafia_bap
+from plural import plural, fmt
 from detalhe import BASE_UNIFICADA as BASE   # a base unificada do Git (dados/), como nos 3 PDFs
 from digital2 import ANO                     # o ano do Catálogo BAP (2027): capa, contracapa e pág. 3
-from montar import KEEPU                     # siglas que ficam em maiúsculas (VW, GM, MB), as mesmas do montar.tcase
+from montar import KEEPU, BRANDS_RX, BR_SHORT, tcase   # siglas que ficam em maiúsculas (VW, GM, MB), as mesmas do montar.tcase
+from pneus_fix import BR
 
 NOME = 'BAP AUTOPARTS'
 SITE = 'www.bapautoparts.com.br  ·  @bapautoparts'
@@ -45,16 +47,10 @@ FAM_CARD = {
     'ÁGUA DESMINERALIZADA': ('Água Desmineralizada', 'Água desmineralizada para o sistema de arrefecimento.', 'pptimg/RAD25009P.png'),
 }
 MESES = ('Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro')
-# nome de linha da BAP com a grafia da apresentação de Lubrificantes (MC-0017 b; T-0029, 10a)
-LINHA_BAP = {'effitech': 'Effitech', 'proactive': 'ProActive', 'shiftease': 'Shiftease'}
 MOTO_CARD = {'Óleo Lubrificante': ('Óleo 4T', 'Óleo para motores de motocicleta 4 tempos.'),
              'Velas de Ignição': ('Velas de Ignição', 'Velas de ignição para motores de motocicleta.'),
              'Rolamentos': ('Rolamentos', 'Rolamentos de roda e de direção para motocicletas.'),
              'Lâmpadas': ('Lâmpadas', 'Lâmpadas para farol e sinalização de motocicletas.')}
-
-
-def fmt(n):
-    return f'{n:,}'.replace(',', '.')
 
 
 def edicao():
@@ -68,6 +64,17 @@ def montadora(m):
     maiúscula ("Ford/Audi") e a sigla do KEEPU em maiúsculas ("VW/Audi", "Ford/GM", "MB"; MC-0017 a)"""
     if len(m) <= 3: return m
     return re.sub(r'[^\W\d_]+', lambda w: w.group().upper() if w.group().upper() in KEEPU else w.group(), m.title())
+
+
+def texto(r, curto=False):
+    """o texto da linha do catálogo; `curto`: só até o " — " (o resto é a aplicação)"""
+    t = ''.join(x for x, _ in r.get('segs') or [])
+    return t.split(' — ')[0].strip() if curto else t
+
+
+def n_itens(sis):
+    """a soma dos itens de uma árvore seção → família → cards"""
+    return sum(c['n'] for f in sis.values() for cs in f.values() for c in cs)
 
 
 def tit(s):
@@ -132,7 +139,6 @@ class P(S):
 
 # ---------------------------------------------------------------- dados: linha → sistema → família → produto
 def dados(base):
-    import moto
     b = pd.read_excel(base, 'PRODUTOS', dtype=str).fillna('')
     B = {c.strip().upper(): r for c, r in zip(b.CODIGO_BAP, b.to_dict('records'))}
     moto_cod = {r['code'].strip().upper() for f in moto.FAMS if f.get('moto') for r in f['rows']}
@@ -183,11 +189,9 @@ def carro(mod, m):
     """o "mesmo carro" de uma aplicação: a montadora (a 1ª, se forem várias) e o modelo, com o número quando o nome
     é uma sigla (CG 125, G 400). Na linha da base v27 a montadora vem na frente: "FORD ECOSPORT 1.6 L" = "Ford" +
     "Ecosport 1.6 L 16V"."""
-    from montar import BRANDS_RX, BR_SHORT
-    from pneus_fix import BR
     t = mod.upper()
     if not m:
-        pre = re.match(rf'(?:{BRANDS_RX}|{BR}|VW|MB)\b[:\s]*', t)
+        pre = re.match(rf'(?:{MARCAS})\b[:\s]*', t)
         if pre: m, t = pre.group(0), t[pre.end():]
     mt = re.split(r'\s*[/+]\s*', m.upper().strip(' :'))[0]
     mt = BR_SHORT.get(mt.replace('Ë', 'E'), mt)
@@ -251,10 +255,9 @@ NAO_VEICULO = re.compile(r'(?i)\buniversa(?:l|is)\b|industria|n[áa]utica|ciclom
                          r'|\b(?:bosch|valeo|delco|eaton)\b|estacion[áa]rio|geradores'
                          r'|^(?:pode ser|em alguns|aplicad[oa]|bloqueio|freio motor|controle de|servo |cilindro |bomba de|l[âa]mpada|lado\b)')
 CODIGO = re.compile(r'(?=[A-Z0-9]{6,}$)[A-Z0-9]*\d[A-Z]+\d[A-Z0-9]*|\d{7,}')                    # código de peça, não modelo ("7S7G8501A2A")
-MARCAS = (r'VOLKSWAGEN|FORD|NISSAN|CHEVROLET|FIAT|RENAULT|TOYOTA|HONDA|HYUNDAI|PEUGEOT|CITRO[EË]N|JEEP|KIA|MITSUBISHI|MERCEDES[ -]BENZ'
-          r'|LAND ROVER|AUDI|BMW|VOLVO|SCANIA|IVECO|AGRALE|JAC|CHERY|SUZUKI|DODGE|RAM|TROLLER|INTERNATIONAL|GM|VW|MB|SEAT|CHRYSLER'
-          r'|DAEWOO|ASIA(?: MOTORS)?|ALFA ROMEO|PORSCHE|MAZDA|SUBARU|LIFAN|BYD|GWM|YAMAHA|DAFRA|SHINERAY|KAWASAKI|SUNDOWN|KASINSKI|TRAXX|HAOJUE'
-          r'|TRIUMPH|KTM|ROYAL ENFIELD|VALTRA|MASSEY FERGUSON|NEW HOLLAND|CUMMINS|MWM|PERKINS|RANDON|GUERRA|FACCHINI|DAF|MAN|ZF')
+MARCAS = '|'.join((BRANDS_RX[1:-1], BR[1:-1],          # montar.BRANDS_RX e pneus_fix.BR, mais as que não estão neles
+                   r'VW|MB|SEAT|CHRYSLER|DAEWOO|ASIA(?: MOTORS)?|ALFA ROMEO|PORSCHE|MAZDA|SUBARU|LIFAN|BYD|GWM|VALTRA'
+                   r'|MASSEY FERGUSON|NEW HOLLAND|CUMMINS|MWM|PERKINS|RANDON|GUERRA|FACCHINI|DAF|MAN|ZF'))
 GENERICO = re.compile(r'(?i)\b(?:automotivo|automotiva|linha|compressores|agr[íi]cola|motos?|tratores|carretas?|pesad[oa]s|m[ée]dios|caminh[õo]es|truck|benz|mercedes|e)\b')
 CARRO_MOTO = re.compile(r'\b(CIVIC|FIT|CITY|ACCORD|HR-?V|CR-?V|WR-?V|JIMNY|VITARA|SWIFT|SX4|S-CROSS)\b')   # carro de marca de moto
 
@@ -274,8 +277,6 @@ def limpa(mod, linha=None):
 def da_linha(linha, m, mod):
     """a aplicação fica na página? Não fica o que não é veículo; na Linha Leve, o que o taxo.HEAVY reconhece como pesado;
     na Linha Moto, o que não é moto (caminhão, carro). A Linha Pesada segue o 16a da T-0029 (sai_da_pesada)"""
-    import moto
-    from pneus_fix import BR
     a = (m + ' ' + mod).upper()
     if NAO_VEICULO.search(mod) or NAO_VEICULO.search(m) or CODIGO.fullmatch(mod.upper().strip()) or re.search(r'\S{25,}', mod): return False
     resto = re.sub(rf'\b(?:{MARCAS})\b', '', mod.upper())
@@ -298,7 +299,6 @@ def mapa_modelos():
     """1ª palavra do modelo → montadora, tirada das aplicações que trazem a montadora ("UNO" → FIAT), para pôr a
     montadora na aplicação que veio sem ela (marca, item 6). Só fica a palavra com uma montadora clara (80% ou mais)"""
     if not _MAPA:
-        import moto
         cnt = collections.defaultdict(collections.Counter)
         for f in moto.FAMS:
             for m, mod in aplicacoes(f['rows'], n=10 ** 6):
@@ -314,7 +314,6 @@ def mapa_modelos():
 def marca_modelo(m, mod, inferir=True):
     """(montadora, modelo): a montadora curta e em maiúsculas (VW, GM, MB, FORD), uma só, e o modelo com a grafia do
     montar.tcase, sem repetir a montadora ("FIAT" + "Fiat 190" = Fiat · 190)"""
-    from montar import tcase
     t = re.sub(r'(?i)^motos?\s+', '', mod.strip(' |'))
     if not m:
         pre = re.match(rf'(?:{MARCAS})\b[:\s]*', t.upper())
@@ -322,7 +321,6 @@ def marca_modelo(m, mod, inferir=True):
     if m: b = carro(t or m, m)[0]
     elif inferir: b = mapa_modelos().get(re.split(r'[\s,/]+', t.upper())[0], '')
     else: b = ''
-    from montar import BR_SHORT
     for nm in {b, m.upper().strip(' :')} | {k for k, v in BR_SHORT.items() if v == b}:
         if nm and t.upper().startswith(nm + ' '): t = t[len(nm) + 1:]
     t = re.sub(r'\b[A-Z][a-z]{2}\b', lambda w: w.group().upper() if not re.search('[aeiouáéíóúâêô]', w.group(), re.I) else w.group(),
@@ -390,9 +388,8 @@ def lista_montadoras(s, x, y, w, hmax, g, cols, FS=10.2):
 def especificacoes(c, n=12):
     ap, vist = [], set()
     for r in c.get('rows') or []:
-        t = ''.join(x_ for x_, b in r.get('segs') or []).split(' — ')[0].strip()
-        t = t[:1].upper() + t[1:]
-        t = re.sub(r'\b(' + '|'.join(LINHA_BAP) + r')\b', lambda w: LINHA_BAP[w.group(1)], t)
+        t = texto(r, True)
+        t = grafia_bap(t[:1].upper() + t[1:])
         if t and t.upper() not in vist: vist.add(t.upper()); ap.append(t)
         if len(ap) >= n: break
     return ap
@@ -466,7 +463,7 @@ def pagina_linha(s, cod, nome, desc, arv, pags, contagem=True):
     from reportlab.lib.utils import simpleSplit
     sis = arv[cod]
     s.c.bookmarkPage(f'p{s.n + 1}')
-    n_it = sum(c['n'] for f in sis.values() for cs in f.values() for c in cs)
+    n_it = n_itens(sis)
     n_fam = sum(len(f) for f in sis.values()); n_pr = sum(len(cs) for f in sis.values() for cs in f.values())
     PW = 250                                           # painel escuro à esquerda
     s.rect(0, 0, W, H, fill='white')
@@ -567,12 +564,11 @@ def oleo(t):
     """o óleo sem "Litro óleo" / "Óleo lubrificante" / "Balde óleo" no começo, com viscosidade, API e litro num padrão
     só ("Shiftease 100 80W API GL4 mineral 20 L"; marca, item 7)"""
     t = re.sub(r'(?i)^(?:litro\s+|balde\s+)?óleo(?:\s+lubrificante)?\s+', '', t)
-    t = re.sub(r'\b(' + '|'.join(LINHA_BAP) + r')\b', lambda w: LINHA_BAP[w.group(1)], t)
     t = re.sub(r'(?i)\b(\d+)w(\d*)\b', lambda m: m.group(0).upper(), t)
     t = re.sub(r'(?i)\bsljaso\b', 'SL JASO', t)
     t = re.sub(r'(?i)\bapi\s+([a-z]{2}(?:/[a-z]{2})?)\b', lambda m: 'API ' + m.group(1).upper(), t)
     t = re.sub(r'(?i)\s*-\s*tambor\s+(\d+)\s*l\b', r' · \1 L', t)
-    t = re.sub(r'(?i)\bdexron\b', 'Dexron', re.sub(r'\b(\d+)L\b', r'\1 L', t))
+    t = re.sub(r'(?i)\bdexron\b', 'Dexron', t)                   # o litro ("20 L") fica com o diferenca()
     return t[:1].upper() + t[1:]
 
 
@@ -599,14 +595,14 @@ def preparar(c, l=None):
         if c['n'] > TAB_BAT: d['tab'] = d['rows']
     elif c['spec']:
         ts = [oleo(t) if c['prod'] == 'Óleo Lubrificante' else t
-              for t in (''.join(x for x, _ in r.get('segs') or []).split(' — ')[0].strip() for r in c['rows'])]
+              for t in (texto(r, True) for r in c['rows'])]
         d['rows'] = [dict(r, segs=[(t, False)]) for r, t in zip(c['rows'], diferenca(ts))]
     else:
         tipo, cont = conteudo(d)
         if not cont and l != 'UNIVERSAL':
             if aplicacoes(c['rows'], n=1): d['fora'] = True             # só veículo de outra linha: sai desta (UX)
             else:                                                      # sem veículo (lâmpada, catraca): a especificação
-                ts = list(dict.fromkeys(t for t in (diferenca([r.get('sub') or ''.join(x for x, _ in r.get('segs') or []) for r in c['rows']])) if t))
+                ts = list(dict.fromkeys(t for t in (diferenca([r.get('sub') or texto(r) for r in c['rows']])) if t))
                 d.update(spec=True, rows=[dict(code='', segs=[(t, False)]) for t in ts])
     d['poucos'] = poucos(d)
     return d
@@ -694,7 +690,7 @@ def pagina_produto(s, pg):
 
 def bateria(r):
     """(texto, capacidade, garantia, observação) da bateria, com a unidade e a sigla num padrão só (marca, item 7)"""
-    t = ''.join(x for x, _ in r.get('segs') or [])
+    t = texto(r)
     a = re.search(r'(\d+)\s*amperes', t, re.I); g = re.search(r'(\d+)\s*meses', t, re.I)
     if not a: return t[:1].upper() + t[1:], '—', '—', 'Kit de terminais' if 'positivo' in t.lower() else ''
     obs = []
@@ -761,7 +757,10 @@ def quem_somos(s, arv, total):
     s.footer()
 
 
-def contato(s, fim='para a sua loja ou oficina'):
+FIM = 'para a sua loja ou oficina'           # o fim da frase da contracapa, quando a linha não tem outro
+
+
+def contato(s, fim=FIM):
     s.rect(0, 0, W, H, fill='black')
     s.circle(W - 110, 280, 280, 'green'); s.circle(W - 125, 280, 215, 'green2'); s.circle(W - 125, 280, 160, 'black')
     s.img(A.LOGO_G, W - 125 - 62, 280 - 85, 124, 170)
@@ -779,14 +778,22 @@ def contato(s, fim='para a sua loja ou oficina'):
     s.c.save()
 
 
+def plano_linha(arv, cfg):
+    """a árvore e as páginas de um portfólio por linha: capa (p1), quem somos (p2), divisória (p3, opcional), produtos
+    e contracapa. Devolve (árvore, páginas de produto, página de cada card, tem divisória, total de páginas)"""
+    div = cfg.get('divisoria', True)
+    arv_f = filtrar(arv, cfg)
+    pgs, pags = plano(arv_f, cfg['nome'], 3 + div, 3 if div else None)
+    return arv_f, pgs, pags, div, 3 + div + len(pgs)
+
+
 def build_linha(out, chave, arv, total):
     """um portfólio por linha (T-0032): capa da linha → quem somos → divisória única com página → produtos → contato.
     Sem a p3 (as 4 linhas) do Portfólio geral (designer-ux, item 8)"""
-    cfg = FILTROS[chave]; nome = cfg['nome']; div = cfg.get('divisoria', True)
-    arv_f = filtrar(arv, cfg)
-    pgs, pags = plano(arv_f, nome, 3 + div, 3 if div else None)
+    cfg = FILTROS[chave]; nome = cfg['nome']
+    arv_f, pgs, pags, div, total_p = plano_linha(arv, cfg)
     cards = [c for f in arv_f.values() for cs in f.values() for c in cs]
-    n_it = sum(c['n'] for c in cards)
+    n_it = n_itens(arv_f)
     s = P(out)
     s.c.setTitle(f'Portfólio de Produtos {NOME} · {nome}'); s.c.setAuthor(NOME)
     primeiros = [next(iter(f.values()))[0] for f in arv_f.values()]          # capa: a foto do 1º produto de cada seção
@@ -796,8 +803,8 @@ def build_linha(out, chave, arv, total):
     quem_somos(s, arv, total)
     if div: pagina_linha(s, 'X', nome, cfg.get('desc', cfg['frase']), {'X': arv_f}, pags, contagem=False)
     for pg in pgs: pagina_produto(s, pg)
-    contato(s, cfg.get('fim', 'para a sua loja ou oficina'))
-    assert s.n + 1 == 4 + div + len(pgs) - 1, (s.n + 1, len(pgs))
+    contato(s, cfg.get('fim', FIM))
+    assert s.n + 1 == total_p, (s.n + 1, total_p)
     return arv_f, pgs, s.n + 1
 
 
@@ -826,7 +833,7 @@ def build(out, base=BASE, filtro=None):
     w = (W - 80 - 3 * 14) / 4
     for i, (cod, nome, desc) in enumerate(LINHAS):
         sis = arv_p[cod]; x = 40 + i * (w + 14)
-        n_it = sum(c['n'] for f in sis.values() for cs in f.values() for c in cs)
+        n_it = n_itens(sis)
         n_pr = sum(len(cs) for f in sis.values() for cs in f.values())
         s.rect(x, 128, w, 330, fill='black', r=16)
         s.t(x + 18, 148, nome, 20, 'white', 'PB')
@@ -856,10 +863,9 @@ def build(out, base=BASE, filtro=None):
 def imprimir_indice(arv):
     """o índice de um portfólio por linha sem gerar o PDF: páginas, seções, famílias e produtos"""
     for chave, cfg in FILTROS.items():
-        div = cfg.get('divisoria', True)
-        arv_f = filtrar(arv, cfg); pgs, pags = plano(arv_f, cfg['nome'], 3 + div)
-        n_it = sum(c['n'] for f in arv_f.values() for cs in f.values() for c in cs)
-        print(f"## {cfg['nome']} ({chave}): {3 + div + len(pgs)} páginas, {fmt(n_it)} {plural(n_it)}")
+        arv_f, pgs, pags, div, total_p = plano_linha(arv, cfg)
+        n_it = n_itens(arv_f)
+        print(f"## {cfg['nome']} ({chave}): {total_p} páginas, {fmt(n_it)} {plural(n_it)}")
         for i, (sn, fams) in enumerate(arv_f.items(), 1):
             fams_ = ['{} ({})'.format(tit(fam), ', '.join(f"{c['nome']} p{pags[id(c)]:02d}" for c in cs)) for fam, cs in fams.items()]
             print(f"{i:02d} {sn}: " + '; '.join(fams_))

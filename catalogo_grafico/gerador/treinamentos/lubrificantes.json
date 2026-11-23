@@ -4,11 +4,6 @@
  "arquivo": "Treinamento_Lubrificantes_BAP_Vendedores.pptx",
  "rodape": "Treinamento Lubrificantes BAP  |  Equipe Comercial Externa · uso interno",
  "formatar_notas": true,
- "grafia": {
-  "PROACTIVE": "ProActive",
-  "SHIFTEASE": "Shiftease",
-  "EFFITECH": "Effitech"
- },
  "nao_codigo": [
   "HB20"
  ],

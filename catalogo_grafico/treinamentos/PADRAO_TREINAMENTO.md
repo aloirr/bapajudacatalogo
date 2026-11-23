@@ -1,4 +1,6 @@
-# Padrão de treinamento BAP (T-0032): SIMULAÇÃO, a aprovar
+# Padrão de treinamento BAP (T-0032)
+
+Aprovado no R-20261123-162032-po (1a) e no R-20261123-181236-po (2a), com o vermelho e o amarelo de Baterias.
 
 Guia tirado dos 3 treinamentos originais (out/2026), em `catalogo_grafico/originais/treinamentos/`:
 
@@ -9,10 +11,8 @@ Guia tirado dos 3 treinamentos originais (out/2026), em `catalogo_grafico/origin
 | Lubrificantes | 43 | 7 | cerca de 1h45 |
 
 - Referência visual: `referencia/tipos_de_slide_originais.png` (os 13 tipos de slide, no de Lubrificantes).
-- Modelo completo (Mecânica Básica, 45 slides), em simulação: a amostra de 8 slides desenhada do zero foi reprovada (R-20261123-153249-po) e saiu.
 - Gerador: `../gerador/treinamento_molde.py`. Ele **duplica o slide-modelo do original de Baterias** do mesmo tipo (XML e relações de imagem) e troca só o conteúdo, que fica em `../gerador/treinamentos/<nome>.json`. Os esquemas em corte (motor, arrefecimento, transmissão, suspensão, freios, ignição) saem do `../gerador/treinamento_desenhos.py`.
 - Público: vendedor externo BAP. O material fica só no admin (`/admin/pdfs/`). Por isso o conteúdo interno (alçada de desconto, Price) pode ficar.
-- Nenhum treinamento final é gerado antes do "aprovado" deste padrão.
 
 ## 1. Estrutura
 
@@ -179,9 +179,8 @@ cd catalogo_grafico/gerador
 PYTHONHASHSEED=0 python treinamento_molde.py mecanica_basica --sim PASTA
 ```
 
-- Saída: o .pptx em `gerador/saidas/` (ou em PASTA, com `--sim`, junto do PDF, dos PNGs a 100 ppi, do mosaico de 8 slides e do comparativo original × novo dos pares listados no JSON).
-- Depois do aprovado, o .pptx e o PDF vão para `entregas/`.
-- Treinamentos atualizados (Baterias, Linha Moto, Lubrificantes): o JSON aponta o `original` e só lista o que muda (`editar` por nº do slide do original, `inserir_depois`, `remover`); o resto sai igual ao original. Mecânica Básica aprovada como modelo (R-20261123-162032-po, 1a).
-- Um treinamento novo = um JSON novo. Cada slide aponta o `molde` (nº do slide no original de Baterias) e troca textos (`t`), imagens (`img`), ícones (`icone`), tabelas (`tabela`) e notas, pelo índice da forma no slide-modelo.
+As saídas e o formato do JSON estão na docstring do `treinamento_molde.py`. Regras do JSON:
+- Treinamentos atualizados (Baterias, Linha Moto, Lubrificantes): o JSON aponta o `original` e só lista o que muda (`editar`, `inserir_depois`, `remover`); o resto sai igual ao original.
+- Um treinamento novo = um JSON novo, com o `molde` de cada slide.
 - Mitos e verdades e passo a passo numerado (Lubrificantes) ficam fora até ter desenho aprovado.
-- Grafia: os nomes de linha vão como "ProActive", "Shiftease" e "Effitech"; caixa alta só onde todo o texto é caixa alta (kicker). Nome de produto no texto: macro `{{prod:...}}`, conferida na base.
+- Grafia: "ProActive", "Shiftease" e "Effitech" (o `taxo.LINHA_BAP`); caixa alta só no kicker. Nome de produto no texto: macro `{{prod:...}}`, conferida na base.

@@ -171,3 +171,13 @@ def linha_of(line, desc, app, their_cat=''):
     if h and not l: return 'PESADA'
     if h and l: return 'LEVE E PESADA'
     return 'LEVE'
+
+
+# nome de linha da BAP (ProActive, Shiftease, Effitech): a grafia da apresentação de Lubrificantes (MC-0017 b), uma tabela
+# só para o Portfólio e os treinamentos (T-0032, RD-0554)
+LINHA_BAP = {'EFFITECH': 'Effitech', 'PROACTIVE': 'ProActive', 'SHIFTEASE': 'Shiftease'}
+_LINHA_BAP_RX = re.compile(r'\b(' + '|'.join(LINHA_BAP) + r')\b', re.I)
+
+
+def grafia_bap(t):
+    return _LINHA_BAP_RX.sub(lambda w: LINHA_BAP[w.group(1).upper()], t)
