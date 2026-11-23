@@ -11,7 +11,10 @@ O deck novo é montado DUPLICANDO os slides do treinamento original de Baterias 
          "icone": {"6": "FaWrench"},               # ícone branco tirado dos 3 originais
          "tabela": {"2": [["a", "b", "c"], ...]},  # troca o texto das células, linha a linha
          "mover": {"3": [x, y, w, h]},             # polegadas (null mantém)
+         "preencher": {"38": "accent1"},           # cor de tema do preenchimento e do contorno
          "apagar": [9, 10],
+         "copiar": [{"formas": [32, 33], "dy": 1.2}],   # cópias entram no fim (índices seguintes); "molde": N copia
+                                                       # de outro slide do original
          "notas": "MENSAGEM-CHAVE\\n..."}]}
 
 Texto: "\\n" separa parágrafos e "|" separa trechos (runs); o trecho k herda a formatação do trecho k do modelo
@@ -257,6 +260,30 @@ def clonar(prs, src):
     return novo
 
 
+def copiar_formas(s, origem, indices, dx=0.0, dy=0.0):
+    """Copia formas (do mesmo slide ou de outro slide do original) para o fim do slide s, deslocadas de dx, dy pol."""
+    arvore = s.shapes._spTree
+    prox = max(int(n.get('id')) for n in arvore.iter('{%s}cNvPr' % NS['p'])) + 1
+    formas = list(origem.shapes)
+    for k in indices:
+        e = copy.deepcopy(formas[k]._element)
+        if origem.part is not s.part:
+            for no in e.iter():
+                for at in R_ATTRS:
+                    rid = no.get(at)
+                    if rid:
+                        rel = origem.part.rels[rid]
+                        no.set(at, s.part.relate_to(rel.target_part, rel.reltype))
+        for no in e.iter('{%s}cNvPr' % NS['p']):
+            no.set('id', str(prox))
+            prox += 1
+        off = e.find('.//' + A + 'off')
+        if off is not None:
+            off.set('x', str(int(off.get('x')) + int(Inches(dx))))
+            off.set('y', str(int(off.get('y')) + int(Inches(dy))))
+        arvore.append(e)
+
+
 def escrever(txBody, valor):
     """Troca o texto mantendo a formatação: \\n = parágrafo, | = trecho."""
     ps = txBody.findall(A + 'p')
@@ -348,11 +375,44 @@ def trocar_fontes(prs):
                 b'typeface="Calibri Light"', b'typeface="Arial"')
 
 
+def ajustar_tema(prs):
+    """Tema só com as cores do padrão (MC-0020 e MC-0022): accent5 vira a borda e accent6 o laranja-escuro.
+    O vermelho #D64545 (sinal grave) fica fixo só onde o original o usa (ícones) e o amarelo #F2C14E sai."""
+    troca_tema = {'D64545': 'D9E6DA', 'F2C14E': '8A3F00'}
+    fixo = {'accent5': 'D64545', 'accent6': 'F2C14E'}
+    usados = {}
+    for s in prs.slides:
+        for clr in list(s._element.iter(A + 'schemeClr')):
+            v = clr.get('val')
+            if v in fixo:
+                clr.getparent().replace(clr, etree.Element(A + 'srgbClr', val=fixo[v]))
+                usados[fixo[v]] = usados.get(fixo[v], 0) + 1
+    if usados.get('F2C14E'):
+        parar('o amarelo #F2C14E saiu do padrão, mas um slide ainda o usa')
+    for part in prs.part.package.iter_parts():
+        if 'theme' in part.content_type and not hasattr(part, '_element'):
+            b = part.blob
+            for velho, novo in troca_tema.items():
+                b = b.replace(f'<a:srgbClr val="{velho}"/>'.encode(), f'<a:srgbClr val="{novo}"/>'.encode())
+            part._blob = b
+    return usados
+
+
 def trocar_rodape(prs, rodape):
     for lay in prs.slide_layouts:
         for t in lay._element.iter(A + 't'):
             if t.text and t.text.startswith('Treinamento Baterias BAP'):
                 t.text = rodape
+
+
+def zip_fixo(caminho):
+    """Regrava o .pptx com data fixa nas entradas do zip: a mesma entrada dá o mesmo arquivo, byte a byte."""
+    import zipfile
+    with zipfile.ZipFile(caminho) as z:
+        partes = [(i.filename, z.read(i.filename)) for i in z.infolist()]
+    with zipfile.ZipFile(caminho, 'w', zipfile.ZIP_DEFLATED) as z:
+        for nome, dados in partes:
+            z.writestr(zipfile.ZipInfo(nome, date_time=(2026, 1, 1, 0, 0, 0)), dados, zipfile.ZIP_DEFLATED)
 
 
 def montar(nome, saida=None):
@@ -369,6 +429,9 @@ def montar(nome, saida=None):
     for n, spec in enumerate(cfg['slides'], 1):
         src = originais[spec['molde'] - 1]
         s = clonar(prs, src)
+        for c in spec.get('copiar', []):
+            origem = originais[c['molde'] - 1] if 'molde' in c else s
+            copiar_formas(s, origem, c['formas'], c.get('dx', 0), c.get('dy', 0))
         formas = list(s.shapes)
         onde = f'slide {n} (molde {spec["molde"]})'
         for k, v in spec.get('mover', {}).items():
@@ -376,6 +439,14 @@ def montar(nome, saida=None):
             for attr, val in zip(('left', 'top', 'width', 'height'), v):
                 if val is not None:
                     setattr(sh, attr, Inches(val))
+        for k, cor in spec.get('preencher', {}).items():
+            sppr = formas[int(k)]._element.spPr
+            for f in (sppr.find(A + 'solidFill'), sppr.find(A + 'ln/' + A + 'solidFill')):
+                if f is None:
+                    continue
+                for ch in list(f):
+                    f.remove(ch)
+                etree.SubElement(f, A + 'schemeClr', val=cor)
         for k, v in spec.get('t', {}).items():
             v = base.expandir(v)
             base.conferir(v, onde)
@@ -412,12 +483,15 @@ def montar(nome, saida=None):
         prs.part.drop_rel(sid.rId)
         lista.remove(sid)
     trocar_fontes(prs)
+    vermelho = ajustar_tema(prs).get('D64545', 0)
     trocar_rodape(prs, cfg['rodape'])
     destino = saida or os.path.join(AQUI, 'saidas', cfg['arquivo'])
     os.makedirs(os.path.dirname(destino), exist_ok=True)
     prs.save(destino)
+    zip_fixo(destino)
     shutil.rmtree(tmp, ignore_errors=True)
-    print(f'{destino}: {len(cfg["slides"])} slides; códigos conferidos: {len(base.citados)}; base {base.vars["versao_base"]}')
+    print(f'{destino}: {len(cfg["slides"])} slides; códigos conferidos: {len(base.citados)}; base {base.vars["versao_base"]}; '
+          f'vermelho de sinal grave em {vermelho} preenchimento(s)')
     return destino, cfg, base
 
 

@@ -112,8 +112,9 @@ Ordem fixa, igual nos 3 originais:
 | Cinza (texto de apoio, rodapé) | `#6B7570` |
 | Laranja (ícone de alerta, círculo do quiz com o número em escuro) | `#F28C28` |
 | Laranja-escuro (a palavra "ATENÇÃO"; é o `otext` do catálogo digital) | `#8A3F00` |
+| Vermelho de sinal grave (**só em ícone**, nunca em texto ou faixa; está nos originais. A aprovar pelo Alexandre junto com o padrão; sem o aprovado, esses ícones passam ao laranja) | `#D64545` |
 
-**Tema do .pptx:** só cores desta tabela. O vermelho `#D64545` e o amarelo `#F2C14E` do tema dos originais saíram: nenhum slide os usa. No tema, o accent5 é a borda e o accent6 é o laranja-escuro.
+**Tema do .pptx:** só cores desta tabela. O amarelo `#F2C14E` dos originais saiu. No tema, o accent5 é a borda e o accent6 é o laranja-escuro; o vermelho `#D64545` não está no tema e fica gravado direto nos ícones de sinal grave (o gerador faz isso sozinho, para o ícone não mudar de cor junto com o tema).
 
 **Contraste:** o `#59BA61` no branco dá 2,4:1. Por isso nunca é cor de texto sobre fundo claro. O cinza `#6B7570` fica para texto de apoio sobre o branco, nunca no corpo de tabela.
 
