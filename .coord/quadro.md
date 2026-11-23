@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 23/11/2026 07:14 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 23/11/2026 09:11 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -9,7 +9,7 @@ Atualizado em 23/11/2026 07:14 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0003](tarefas/T-0003.md) | Publicar no Render (Blueprint) e checklist do domínio | web-site | gerente-projetos, testes | CONCLUÍDA em parte (Render no ar; doc e domínio a fazer) | #7 |
 | [T-0004](tarefas/T-0004.md) | Relatório de fotos que faltam e de produtos sem aplicação ou referência | catalogo-dados | testes | CONCLUÍDA | #5 |
 | [T-0005](tarefas/T-0005.md) | Consulta por placa (API PLACAS): desenho e serviço no Render | integracao-placas | web-site, revisor-codigo | CONCLUÍDA (em uso desde 11:29) | #22, #23, #24, #25 |
-| [T-0006](tarefas/T-0006.md) | Proposta de busca por medida (pneus, rolamentos, baterias) | web-site | catalogo-dados, testes | APROVADA | #157 |
+| [T-0006](tarefas/T-0006.md) | Proposta de busca por medida (pneus, rolamentos, baterias) | web-site | catalogo-dados, testes | FASE 1 CONCLUÍDA | #157, #162, #163, #167, #168 |
 | [T-0007](tarefas/T-0007.md) | Terminal Axial com "FORNECEDOR AMPRI": simulação da limpeza e "fornecedor" na TRAVA | catalogo-dados | web-site, testes | CONCLUÍDA | #8, #11, #12 |
 | [T-0008](tarefas/T-0008.md) | Busca por veículo ("Gol" × "Golf") e aba Código com a marca na frente | web-site | testes | CONCLUÍDA | #14, #15 |
 | [T-0009](tarefas/T-0009.md) | Preço no site: TER556556 com "R$" na APLICACAO, e "R$" na TRAVA | catalogo-dados | web-site, testes | CONCLUÍDA | #11, #12 |
@@ -33,11 +33,12 @@ Atualizado em 23/11/2026 07:14 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0027](tarefas/T-0027.md) | "1 itens": singular num lugar só no gerador do catálogo gráfico | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #151, #152, #153, #154, #155, #156 |
 
 ## Fila
-Main 064481f (#157).
+Main 05d687b (#168).
 
 1. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
 2. **Fora da fila, para decidir depois** (parada, decisão 3 do R-20261122-223000-alexandre):
-   - T-0006, implementação da busca por medida: só com pedido novo do Alexandre;
+   - T-0006, fases 2 (pneus) e 3 (rolamentos) da busca por medida: só com pedido novo do Alexandre;
+   - MC-0016: os rótulos "C20(ah)" e "Cca-18°" da ficha da bateria, que o filtro mostra como "Ah" e "CCA"; se mudar, o filtro muda no mesmo PR (web-site, T-0006);
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - Portfólio: a entrega tem 82 páginas, mas o gerador dá mais com a base de hoje, porque agrupa pelo SISTEMA da v27; gerar de novo é decisão do Alexandre (catalogo-grafico, R-20261122-100047); junto entram o RD-0527 (o "1 itens" das págs. 69 e 76) e o RD-0526, com o `plural()` num módulo comum (T-0027);
    - MC-0011 e MC-0012 (fonte do .pptx; tamanho do logo e assinatura, com a etiqueta das apresentações e o topo do site): decisão do Alexandre (T-0025);
