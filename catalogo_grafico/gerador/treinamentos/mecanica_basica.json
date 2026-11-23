@@ -1,0 +1,160 @@
+{
+  "_leia": "Conteúdo do treinamento de Mecânica Básica (T-0032, AMOSTRA do padrão). O desenho fica no treinamento_ppt.js; os números e códigos vêm da base unificada pelo treinamento.py. Material interno (só /admin/pdfs/).",
+  "nome": "Mecânica Básica",
+  "arquivo": "Treinamento_Mecanica_Basica_BAP",
+  "rodape": "Treinamento Mecânica Básica BAP  |  Equipe Comercial Externa",
+  "slides": [
+    {
+      "tipo": "capa",
+      "sobretitulo": "TREINAMENTO COMERCIAL",
+      "titulo": "Mecânica Básica BAP",
+      "texto": "Os sistemas do carro, os sinais de desgaste e a peça certa: a base para vender qualquer linha",
+      "rodape": "Equipe Comercial Externa  ·  Novembro 2026",
+      "notas": {
+        "MENSAGEM-CHAVE": "Quem entende como o carro funciona pergunta melhor, indica a peça certa e vende mais de um sistema na mesma visita.",
+        "COMO CONDUZIR": "Dê boas-vindas e diga a duração prevista (cerca de 1h30 com perguntas). Este é o treinamento de base: os de cada sistema aprofundam o que aparece aqui.",
+        "PERGUNTE AO TIME": "Qual foi a última peça que você vendeu sem saber direito para que servia?"
+      }
+    },
+    {
+      "tipo": "topicos",
+      "kicker": "ABERTURA",
+      "titulo": "Tópicos do treinamento",
+      "itens": [
+        ["01", "carro", "O carro em sistemas", "Os sistemas e o que cada um faz"],
+        ["02", "engrenagem", "Motor e arrefecimento", "Combustão, distribuição e temperatura"],
+        ["03", "estrada", "Suspensão, direção e rodagem", "Estabilidade, alinhamento e rodas"],
+        ["04", "escudo", "Freio e transmissão", "Parar e levar a força até a roda"],
+        ["05", "bateria", "Elétrica e filtração", "Ignição, bateria, sensores e filtros"],
+        ["06", "chave", "Sinais de desgaste", "O que o cliente sente e o que verificar"],
+        ["07", "aperto", "Cross-sell e fechamento", "Uma visita, vários sistemas"],
+        ["✓", "lista", "Fechamento", "Checklist do vendedor e teste de conhecimentos"]
+      ],
+      "notas": {
+        "MENSAGEM-CHAVE": "Sete módulos: do carro inteiro aos sinais de desgaste e à venda de vários sistemas juntos.",
+        "COMO CONDUZIR": "Mostre o caminho do treinamento. Diga que cada sistema tem um treinamento próprio, mais fundo, e que aqui o objetivo é a visão do todo.",
+        "PERGUNTE AO TIME": "Qual sistema você tem mais dificuldade de explicar ao cliente?"
+      }
+    },
+    {
+      "tipo": "secao",
+      "numero": "01",
+      "titulo": "O carro em sistemas",
+      "texto": "Cada peça mora num sistema; cada sistema tem a sua pergunta certa",
+      "notas": {
+        "MENSAGEM-CHAVE": "Pensar em sistemas organiza a conversa: do sintoma ao sistema, do sistema à peça.",
+        "COMO CONDUZIR": "Abra o módulo com a pergunta: o que acontece entre o pé no acelerador e a roda girando?"
+      }
+    },
+    {
+      "tipo": "sistemas",
+      "kicker": "MÓDULO 01 · SISTEMAS",
+      "titulo": "Os sistemas do carro e a linha BAP",
+      "funcoes": {
+        "MOTOR": "Transforma combustível em força: distribuição, polias e bomba de óleo",
+        "ARREFECIMENTO": "Segura a temperatura de trabalho: bomba d'água e eletroventilador",
+        "LUBRIFICANTES": "Reduzem atrito e desgaste: motor, câmbio e diferencial",
+        "FILTRAÇÃO": "Seguram a sujeira do ar, do óleo, do combustível e da cabine",
+        "ELÉTRICA": "Partida, ignição, luz e sensores: bateria, vela e lâmpada",
+        "TRANSMISSÃO": "Leva a força às rodas: homocinética, trizeta e embreagem",
+        "SUSPENSÃO": "Mantém o pneu no chão: amortecedor, bandeja, bieleta e pivô",
+        "DIREÇÃO": "Aponta as rodas: caixa de direção, terminal e axial",
+        "FREIO": "Para o carro: pastilha, sapata, cilindro de roda e sensor ABS",
+        "RODAGEM": "Faz a roda girar: cubo, rolamento, pneu e câmara de moto",
+        "ACESSÓRIOS": "Visibilidade e amarração: palheta e cinta com catraca",
+        "QUÍMICOS": "Fluidos e produtos de manutenção: freio, radiador e limpeza"
+      },
+      "rotulo_numero": "itens no catálogo",
+      "dica": "Pergunte pelo sintoma e ache o sistema: barulho na roda pode ser rodagem, suspensão ou freio. O sistema certo leva à peça certa.",
+      "notas": {
+        "MENSAGEM-CHAVE": "A BAP cobre os 12 sistemas da reposição; o número em cada cartão é a quantidade de itens no catálogo, tirada da base atual.",
+        "COMO CONDUZIR": "Passe pelos sistemas em pares: motor e arrefecimento; suspensão, direção e rodagem; freio e transmissão; elétrica e filtração. Lubrificantes e químicos têm treinamento próprio.",
+        "INSIGHT PARA O CAMPO": "Suspensão é o sistema com mais itens no catálogo BAP: é a porta de entrada mais larga na oficina."
+      }
+    },
+    {
+      "tipo": "tabela",
+      "kicker": "MÓDULO 06 · SINAIS DE DESGASTE",
+      "titulo": "O que o cliente sente e o que verificar",
+      "cabecalho": ["O cliente conta", "Sistema", "Verificar", "Na BAP"],
+      "larguras": [4.0, 1.75, 3.0, 3.38],
+      "linhas": [
+        ["Chiado metálico ao frear", "Freio", "Pastilha gasta até o indicador", "Pastilha e sapata de freio"],
+        ["O carro balança depois da lombada", "Suspensão", "Amortecedor e kit batente", "Amortecedor, kit amortecedor"],
+        ["Batida seca (“toc-toc”) em buraco", "Suspensão", "Bieleta, bucha da barra e pivô", "Bieleta, bucha, pivô, bandeja"],
+        ["Estalo ao virar e acelerar na curva", "Transmissão", "Junta homocinética", "Junta e kit reparo da homocinética"],
+        ["Ronco que aumenta com a velocidade", "Rodagem", "Rolamento ou cubo de roda", "Cubo de roda e rolamento"],
+        ["Ponteiro da temperatura subindo", "Arrefecimento", "Bomba d'água, eletroventilador, aditivo", "Bomba d'água, eletroventilador"]
+      ],
+      "atencao": "Sintoma abre a conversa; quem confirma é o mecânico. Não prometa que a peça resolve sem a avaliação na oficina.",
+      "notas": {
+        "MENSAGEM-CHAVE": "O cliente descreve o sintoma, não a peça. Quem traduz o sintoma em sistema faz a pergunta certa.",
+        "COMO CONDUZIR": "Leia cada linha da esquerda para a direita: o que o cliente conta, onde fica, o que o mecânico verifica e o que a BAP tem.",
+        "PERGUNTE AO TIME": "Qual sintoma o seu cliente mais conta no balcão?"
+      }
+    },
+    {
+      "tipo": "hub",
+      "kicker": "MÓDULO 07 · CROSS-SELL",
+      "titulo": "Um carro, vários sistemas: a peça puxa a outra",
+      "veiculo": "ONIX",
+      "centro": ["Onix 1.0 e 1.4 8V", "2013 a 2015 · exemplo do catálogo BAP"],
+      "cartoes": [
+        {"titulo": "Filtro de óleo", "codigos": ["FLU6006"], "junto": "base"},
+        {"titulo": "Kit correia dentada", "codigos": ["KCD2500"], "junto": "base"},
+        {"titulo": "Amortecedor dianteiro", "codigos": ["AMT7507", "AMT7508"], "junto": "base"},
+        {"titulo": "Sapata de freio traseira", "codigos": ["SFR30014"], "junto": "base"},
+        {"titulo": "Cabos de vela", "codigos": ["CV-G101"], "junto": "base"},
+        {"titulo": "Pastilha dianteira", "codigos": ["PAF0094"], "junto": ["FLU15001", "FLU15002"], "obs_junto": "o DOT da tampa"}
+      ],
+      "nomes": {
+        "FAR6019": "filtro de ar", "FAC6016": "filtro de cabine", "BDA50003": "bomba d'água",
+        "KAC11358": "kit completo", "KAP11351": "kit batente", "CIL8519": "cilindro de roda",
+        "VEL7518": "jogo de velas", "FLU15001": "DOT 3", "FLU15002": "DOT 4"
+      },
+      "dica": "Ano, motor e versão mudam a peça: o Onix 1.0 12V de 2019 em diante já usa o filtro de ar FAR6101, não o FAR6019.",
+      "notas": {
+        "MENSAGEM-CHAVE": "Na mesma revisão, o carro passa por vários sistemas. O campo OFEREÇA JUNTO do catálogo já diz qual peça puxa a outra.",
+        "COMO CONDUZIR": "Use o Onix como exemplo: mostre cada peça e o que vai junto. Lembre que ano, motor e versão mudam a peça: o Onix 1.0 12V de 2019 em diante já usa outros filtros.",
+        "INSIGHT PARA O CAMPO": "Os pares deste slide saem do campo OFEREÇA JUNTO da base: atualizou a base, o slide sai atualizado."
+      }
+    },
+    {
+      "tipo": "checklist",
+      "kicker": "FECHAMENTO",
+      "titulo": "Checklist do vendedor BAP",
+      "itens": [
+        "Perguntei modelo, ano, motor e versão",
+        "Perguntei o sintoma e achei o sistema",
+        "Conferi a posição: dianteiro, traseiro e lado",
+        "Busquei o código no catálogo, não na memória",
+        "Indiquei a troca em par no mesmo eixo",
+        "Ofereci os itens do OFEREÇA JUNTO",
+        "Lembrei a troca rápida: filtros, palheta e bateria",
+        "Não prometi diagnóstico: o mecânico confirma",
+        "Indiquei o treinamento do sistema na dúvida",
+        "Pedi o pedido; sem pedido, anotei o motivo"
+      ],
+      "notas": {
+        "MENSAGEM-CHAVE": "Dez hábitos que valem para qualquer linha.",
+        "COMO CONDUZIR": "Peça para cada vendedor marcar o que já faz e escolher um item para melhorar na próxima semana."
+      }
+    },
+    {
+      "tipo": "quiz",
+      "kicker": "FECHAMENTO",
+      "titulo": "Teste seus conhecimentos",
+      "perguntas": [
+        ["Qual sistema leva a força do motor até as rodas?", "Transmissão (junta homocinética, trizeta, semieixo e embreagem)."],
+        ["O cliente ouve um estalo ao virar e acelerar na curva. Qual peça o mecânico deve verificar?", "A junta homocinética (sistema de transmissão)."],
+        ["Um ronco que aumenta com a velocidade aponta para qual sistema?", "Rodagem: rolamento ou cubo de roda."],
+        ["Por que o amortecedor se troca em par no mesmo eixo?", "Para os dois lados trabalharem igual: um novo com um gasto desequilibra o carro."],
+        ["Qual o filtro de ar BAP para o Onix 1.0 8V 2014?", "FAR6019."],
+        ["Na venda do kit de correia dentada KCD2500, o que o catálogo manda oferecer junto?", "A bomba d'água BDA50003."]
+      ],
+      "notas": {
+        "MENSAGEM-CHAVE": "Revisão rápida."
+      }
+    }
+  ]
+}

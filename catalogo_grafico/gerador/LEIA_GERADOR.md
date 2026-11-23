@@ -45,6 +45,7 @@ Versão de 12/11/2026 (atualizada pelo PC EMPRESA; antes 27/10 pelo PC PESSOAL).
 | Portfólio (cliente) | `python portfolio.py` (lê a base unificada de `dados/`, como os 3 PDFs; cada produto no sistema em que o Catálogo BAP o mostra, e os Rolamentos em Rodagem: T-0028, decisão 3b) |
 | Kit Filtros (cliente) | `python kitfiltros/kit.py saidas/Kit_Filtros_BAP.pdf` (ajustar caminhos `G`/entradas no topo do `kit.py`/`parse.py` para a sua nuvem) |
 | Apresentação lubrificantes | `python apres_bemol.py` / `node apres_ppt.js` (texto em `apres_conteudo.json`) |
+| Treinamento no padrão (T-0032, interno: só /admin/pdfs/) | `python treinamento.py mecanica_basica [--png PASTA]`: texto em `treinamentos/<nome>.json`, números e códigos da base (só leitura; código fora da base ou não ATIVO para o script), desenho no `treinamento_ppt.js`, fundo, logo e ícones em `treinamento_img/`. Padrão: `../treinamentos/PADRAO_TREINAMENTO.md` |
 | Encartelados moto | `python encartelados.py` |
 | Teste do `_norm`/`aplicacao_unica` (Fraga) | `python -m unittest -v teste_fraga_complementos` |
 | Teste da AUTOIMPACT (trava só fora da referência e ordem) | `python -m unittest -v teste_autoimpact_pdf` |

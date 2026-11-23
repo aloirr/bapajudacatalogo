@@ -12,6 +12,8 @@ Exportado em 20/10/2026 da conversa **AGENTE - CATALOGO BAP** (claude.ai).
 | `historico/transcricao_parte1_ate_15-10.txt` | Transcrição bruta da primeira parte da conversa (até 15/10). |
 | `entregas/` | Arquivos finais: catálogos impresso e digital, base v9 (e v8), apresentação comercial, encartelados e listas. |
 | `gerador/` | Scripts que geram os catálogos, a base v9 e a apresentação, com imagens, fontes e entradas. |
+| `originais/treinamentos/` | Os 3 treinamentos originais (.pptx de Baterias, Linha Moto e Lubrificantes, out/2026), modelo do padrão (T-0032). Não editar: os novos saem pelo gerador. |
+| `treinamentos/` | `PADRAO_TREINAMENTO.md` (guia do padrão de treinamento, T-0032) e `referencia/` (tipos de slide dos originais). |
 
 ## Como instalar
 
@@ -88,4 +90,5 @@ Os dois scripts da apresentação leem o texto do `apres_conteudo.json` (RD-0431
 **Observações**
 
 - **Tema de cores do PowerPoint:** o `apres_ppt.js` grava o tema "BAP" com o `apply_theme.js`. Sem ele, as cores dos slides sairiam as do tema "Office" (azul, laranja, amarelo); por isso o script para com erro se o `apply_theme.js` faltar.
+- **Treinamentos (T-0032):** o `treinamento_ppt.js` usa o mesmo `apply_theme.js`, com o tema "BAP Treinamento" e Arial; o `treinamento.py` chama o Node e, com `--png`, o LibreOffice (`soffice`) para os PNGs.
 - **Nomes de arquivo:** os scripts usam caminhos relativos à pasta `gerador/`. Não mude os nomes das subpastas.
