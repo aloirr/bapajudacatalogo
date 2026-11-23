@@ -31,13 +31,13 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
   - `po`: o **único** que conversa com o Alexandre. Transforma o pedido em tarefa e colhe o "aprovado".
   - `gerente-projetos`: divide em passos, chama os agentes, cobra testes e revisão, abre o PR.
   - Donos de pasta: `catalogo-dados` (`dados/`), `catalogo-grafico` (`catalogo_grafico/`), `web-site` (`site/` e `scripts/gerar_site.py`), `integracao-placas` (`servicos/placas/` e `servicos/login/`).
-  - Conferência: `testes` (gerar_site, buscas, prints 1366 e 390 px), `designer-ux` (especificação e revisão de UX de tela e PDF; dono de `docs/ux/`), `design-de-marca` (guarda a marca BAP no site e nos PDFs; dono de `docs/marca/`), `revisor-codigo` (revisão independente de cada PR) e `corretor-redundancias` (excesso e repetição em todo PR, antes do fechamento; achados RD-nnnn em `docs/qualidade/redundancias/`).
+  - Conferência: `testes` (gerar_site, buscas, prints 1366 e 390 px), `designer-ux` (especificação e revisão de UX de tela e PDF; dono de `docs/ux/`), `design-de-marca` (guarda a marca BAP no site e nos PDFs; dono de `docs/marca/`), `revisor-codigo` (revisão independente de cada PR) e `corretor-redundancias` (excesso e repetição em todo PR que muda código, site, base ou PDF, antes do fechamento; PR só de documentos passa só pelo `revisor-codigo`, R-20261123-112006-alexandre; achados RD-nnnn em `docs/qualidade/redundancias/`).
   - `designer-ux`, `design-de-marca` e `corretor-redundancias` só leem e apontam: cada um escreve só na sua pasta.
 - **Quadro:** `.coord/quadro.md`, uma tarefa por arquivo em `.coord/tarefas/T-nnnn.md`.
   - Cada tarefa tem o pedido **literal** do Alexandre, a especificação e os critérios de aceite.
 - **Donos:** `.coord/donos.json`. Só o dono mexe na pasta.
   - `.claude/**`, `.coord/donos.json`, `render.yaml`, `.github/**`, `CLAUDE.md` e `.gitignore` são do **Alexandre**.
-- **Caminho:** pedido → `po` → tarefa → `gerente-projetos` → donos → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` → PR → `po`.
+- **Caminho:** pedido → `po` → tarefa → `gerente-projetos` → donos → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` (só em PR que muda código, site, base ou PDF) → PR → `po`.
   - **Merge (R-20261120-111308-alexandre):** o `po` autoriza todos os merges, inclusive os de governança, depois de conferir o número, o SHA do head, os arquivos, o CI verde e as revisões LIBERADO; cada autorização fica em recado, com o número e o SHA. O `gerente-projetos` executa o merge.
   - Todo merge é squash, com expectedHeadSha e, no corpo, 'Agente: <dono>' e a tarefa (R-20261120-131230-alexandre).
   - O guardião confere todo merge (pelo terminal e pela integração do GitHub): o SHA do head (40 caracteres), o CI do PR verde e esse recado do `po` (ou do Alexandre), publicado no `bapajudacatalogo-recados` (T-0016).
