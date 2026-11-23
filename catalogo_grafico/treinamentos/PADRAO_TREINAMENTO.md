@@ -53,9 +53,9 @@ Ordem fixa, igual nos 3 originais:
 | Abertura: preparado para | Grade 3 × 2: ícone, verbo em verde e complemento. | a fazer |
 | Seção do módulo | Mesmo fundo da capa; número "01" grande em verde, título e subtítulo. | `secao` |
 | Conteúdo em cartões | Kicker "MÓDULO 0N · TEMA", título e de 3 a 12 cartões, na grade de 4 colunas. Em cada cartão, o nome vem primeiro e o número é apoio, numa linha menor. | `sistemas` (variação, em 4 × 3) |
-| Tabela | Cabeçalho verde-escuro, linhas alternando branco e verde-claro, todo o corpo em escuro, 1.ª coluna em negrito. Com mais de 6 linhas, vai em 2 slides (S6). | `tabela` |
+| Tabela | Cabeçalho verde-escuro, linhas alternando branco e verde-claro, todo o corpo em escuro, 1.ª coluna em negrito. Com mais de 6 linhas, vai em 2 slides (S6). Coluna de produto ("Na BAP") só com o nome do PRODUTO da base, que o gerador confere. | `tabela` |
 | Dica de campo | Faixa verde-clara no pé do conteúdo, com lâmpada, "DICA DE CAMPO" em negrito e 1 ou 2 linhas. Uma por slide, no máximo. | `dica` em qualquer conteúdo |
-| Atenção | A mesma faixa, em laranja-claro, com o ícone de alerta laranja e a palavra "ATENÇÃO" em laranja-escuro `#A9530A`. Uso: regra que não pode ser quebrada (norma, alçada, segurança). | `atencao` |
+| Atenção | A mesma faixa, em laranja-claro, com o ícone de alerta laranja e a palavra "ATENÇÃO" em laranja-escuro `#8A3F00`. Uso: regra que não pode ser quebrada (norma, alçada, segurança). | `atencao` |
 | Cross-sell | Círculo escuro no centro, com a venda-âncora, e 3 cartões de cada lado com o que vai junto. | `hub` |
 | Fechamento em 3 etapas | 3 cartões (Peça, Não fechou, Você resolve) e faixa escura com os 5 motivos. | a fazer |
 | Não fechou | Tabela com Motivo, Responda com prova e Volte ao pedido, mais a faixa ATENÇÃO da alçada. | `tabela` |
@@ -111,7 +111,9 @@ Ordem fixa, igual nos 3 originais:
 | Borda de cartão | `#D9E6DA` |
 | Cinza (texto de apoio, rodapé) | `#6B7570` |
 | Laranja (ícone de alerta, círculo do quiz com o número em escuro) | `#F28C28` |
-| Laranja-escuro (a palavra "ATENÇÃO") | `#A9530A` |
+| Laranja-escuro (a palavra "ATENÇÃO"; é o `otext` do catálogo digital) | `#8A3F00` |
+
+**Tema do .pptx:** só cores desta tabela. O vermelho `#D64545` e o amarelo `#F2C14E` do tema dos originais saíram: nenhum slide os usa. No tema, o accent5 é a borda e o accent6 é o laranja-escuro.
 
 **Contraste:** o `#59BA61` no branco dá 2,4:1. Por isso nunca é cor de texto sobre fundo claro. O cinza `#6B7570` fica para texto de apoio sobre o branco, nunca no corpo de tabela.
 
@@ -175,7 +177,7 @@ python treinamento.py mecanica_basica --png ../simulacoes/T-0032
 
 - Precisa do Node com `pptxgenjs` e do LibreOffice (`soffice`), este só para os PNGs.
 - A saída vai para `gerador/saidas/` e, depois do aprovado, para `entregas/`.
-- Tipos ainda **a fazer** no gerador: aprender, preparado para e fechamento em 3 etapas.
+- Tipos ainda **a fazer** no gerador: aprender, preparado para e fechamento em 3 etapas. Neles, o texto verde sobre branco (os pilares do "aprender" e os verbos do "preparado para") vai em `#2F7D36`, e não no verde dos originais.
 - Eles seguem o desenho dos originais (`referencia/tipos_de_slide_originais.png`) e entram antes de gerar os treinamentos completos.
 - Mitos e verdades e passo a passo numerado ficam fora do padrão até ter desenho (seção 2).
 - Grafia: os nomes de linha vão como "ProActive", "Shiftease" e "Effitech"; caixa alta só onde todo o texto é caixa alta (kicker). O nome do produto sai do Catálogo BAP (PRODUTO da base), não é digitado.

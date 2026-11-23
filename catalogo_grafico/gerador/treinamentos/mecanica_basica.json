@@ -77,14 +77,15 @@
       "kicker": "MÓDULO 06 · SINAIS DE DESGASTE",
       "titulo": "O que o cliente sente e o que verificar",
       "cabecalho": ["O cliente conta", "Sistema", "Verificar", "Na BAP"],
-      "larguras": [4.0, 1.75, 3.0, 3.38],
+      "larguras": [3.6, 1.6, 3.0, 3.93],
+      "coluna_produtos": 3,
       "linhas": [
-        ["Chiado metálico ao frear", "Freio", "Pastilha gasta até o indicador", "Pastilha e sapata de freio"],
-        ["O carro balança depois da lombada", "Suspensão", "Amortecedor e Kit Batente de Amortecedor", "Amortecedores, Kit Batente de Amortecedor"],
-        ["Batida seca (“toc-toc”) em buraco", "Suspensão", "Bieleta, bucha da barra e pivô", "Bieleta, bucha, pivô, bandeja"],
-        ["Estalo ao virar e acelerar na curva", "Transmissão", "Junta homocinética", "Junta e kit reparo da homocinética"],
-        ["Ronco que aumenta com a velocidade", "Rodagem", "Rolamento ou cubo de roda", "Cubo de roda e rolamento"],
-        ["Ponteiro da temperatura subindo", "Arrefecimento", "Bomba d'água, eletroventilador, aditivo", "Bomba d'água, eletroventilador"]
+        ["Chiado metálico ao frear", "Freio", "Pastilha gasta até o indicador", ["Pastilha de Freio", "Sapata de Freio"]],
+        ["O carro balança depois da lombada", "Suspensão", "Amortecedor e Kit Batente de Amortecedor", ["Amortecedores", "Kit Batente de Amortecedor"]],
+        ["Batida seca (“toc-toc”) em buraco", "Suspensão", "Bieleta, bucha da barra e pivô", ["Bieletas", "Bucha da Barra Estabilizadora", "Pivô de Suspensão"]],
+        ["Estalo ao virar e acelerar na curva", "Transmissão", "Junta homocinética", ["Junta Homocinética", "Kit Reparo da Junta Homocinética"]],
+        ["Ronco que aumenta com a velocidade", "Rodagem", "Rolamento ou cubo de roda", ["Cubo de Roda", "Rolamentos"]],
+        ["Ponteiro da temperatura subindo", "Arrefecimento", "Bomba, ventoinha do radiador e aditivo", ["Bomba D'Água", "Eletroventiladores"]]
       ],
       "atencao": "Sintoma abre a conversa; quem confirma é o mecânico. Não prometa que a peça resolve sem a avaliação na oficina.",
       "notas": {

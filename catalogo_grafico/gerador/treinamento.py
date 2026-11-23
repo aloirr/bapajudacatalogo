@@ -7,6 +7,7 @@ Uso (dentro de catalogo_grafico/gerador/):
 
 O que vem da base:
 - slide "sistemas": a quantidade de itens no catálogo por SISTEMA (NO_CATALOGO_DIGITAL = SIM e fora de INATIVO);
+- slide "tabela" com "coluna_produtos": os nomes dessa coluna são PRODUTO da base (o script confere);
 - slide "hub": os códigos de cada cartão e o OFEREÇA JUNTO, filtrado pelo veículo do slide;
 - todo código citado em qualquer texto é conferido: tem de existir na base e estar ATIVO, senão o script para.
 """
@@ -52,6 +53,19 @@ def sistemas(s, df):
         parar('sistema novo na base sem texto no slide: ' + ', '.join(sorted(faltam)))
     s['cartoes'] = [[nome.capitalize(), txt, f'{int(n.get(nome, 0)):,}'.replace(',', '.')]
                     for nome, txt in s['funcoes'].items()]
+
+
+def tabela(s, df):
+    # coluna de produtos (ex.: "Na BAP"): cada nome tem de ser um PRODUTO da base, como no Catálogo BAP
+    j = s.get('coluna_produtos')
+    if j is None:
+        return
+    nomes = set(df.PRODUTO)
+    for linha in s['linhas']:
+        fora = [n for n in linha[j] if n not in nomes]
+        if fora:
+            parar('produto fora da base no slide "' + s['titulo'] + '": ' + ', '.join(fora))
+        linha[j] = ', '.join(linha[j])
 
 
 def hub(s, idx):
@@ -124,6 +138,8 @@ def main():
     for s in spec['slides']:
         if s['tipo'] == 'sistemas':
             sistemas(s, df)
+        elif s['tipo'] == 'tabela':
+            tabela(s, df)
         elif s['tipo'] == 'hub':
             hub(s, idx)
     conferir_codigos(spec, idx)

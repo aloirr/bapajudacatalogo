@@ -10,14 +10,15 @@ const K = JSON.parse(fs.readFileSync(ENTRADA, 'utf8'));
 const IMG = f => './treinamento_img/' + f;
 const ICO = n => IMG('icones/' + n + '.png');
 
-// Paleta dos 3 originais (tema "BAP Baterias", out/2026), agora com o nome do padrão.
+// Paleta dos 3 originais (tema "BAP Baterias", out/2026), agora com o nome do padrão. O tema só usa cores desta paleta
+// (o vermelho D64545 e o amarelo F2C14E dos originais saíram: nenhum slide os usava).
 const COR = { esc: '1E2B22', verde: '59BA61', verdeEsc: '2F7D36', claro: 'EEF7EF', borda: 'D9E6DA', cinza: '6B7570',
-              laranja: 'F28C28', laranjaEsc: 'A9530A', laranjaClaro: 'FDF1E6', branco: 'FFFFFF', capaTexto: 'D5DED7' };
+              laranja: 'F28C28', laranjaEsc: '8A3F00', laranjaClaro: 'FDF1E6', branco: 'FFFFFF', capaTexto: 'D5DED7' };
 // Contraste (parecer de UX da T-0032): o verde #59BA61 só em fundo, ícone e número sobre o escuro; texto e número
-// sobre fundo claro em verde-escuro #2F7D36 ou escuro; ATENÇÃO em #A9530A; número do quiz escuro sobre o laranja.
+// sobre fundo claro em verde-escuro #2F7D36 ou escuro; ATENÇÃO em #8A3F00 (o otext do digital2.py); número do quiz escuro sobre o laranja.
 const THEME = { name: 'BAP Treinamento', headFontFace: 'Arial', bodyFontFace: 'Arial',
   colors: { dk1: COR.esc, lt1: COR.branco, dk2: COR.verdeEsc, lt2: COR.claro, accent1: COR.verde, accent2: COR.laranja,
-            accent3: COR.esc, accent4: COR.cinza, accent5: 'D64545', accent6: 'F2C14E', hlink: COR.verdeEsc, folHlink: COR.verde } };
+            accent3: COR.esc, accent4: COR.cinza, accent5: COR.borda, accent6: COR.laranjaEsc, hlink: COR.verdeEsc, folHlink: COR.verde } };
 const W = 13.333, M = 0.6, LARG = 12.13;   // margem lateral e largura útil
 
 const pres = new pptxgen();
