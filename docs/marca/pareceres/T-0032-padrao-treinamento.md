@@ -82,3 +82,29 @@ Regra para o gerador e para os 14 treinamentos: o nome do produto e da família 
 Nos treinamentos gerados depois do "aprovado": o verde escolhido (`#59BA61` e `#2F7D36`, se for a recomendação), Arial
 em todos os textos, o logo, sem coluna nem número de estoque, "ProActive", "Shiftease" e "Effitech", os nomes de
 produto do catálogo e o rodapé (com "uso interno", se aprovado). Fechar o MC-0018 e o MC-0019.
+
+## Reteste (head `6ab490c328a494fcd037344629195666fa9c7828`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 (Manaus) |
+| O que foi visto | O diff de `fb29bbd` a `6ab490c` (`PADRAO_TREINAMENTO.md`, `mecanica_basica.json`, `treinamento_ppt.js`) e os 8 PNGs novos |
+| Parecer | **LIBERADO COM AJUSTES**: MC-0018 e MC-0019 fechados; um achado novo, baixo (MC-0020) |
+
+- **MC-0018, FECHADO:** o guia escreve "ProActive, Shiftease e Effitech" e traz a regra (caixa alta só no kicker).
+- **MC-0019, FECHADO:** "Kit de Distribuição", "Kit Batente de Amortecedor KAC11358 · KAP11351", "Bomba D'Água",
+  "Cilindro de Roda", "Velas de Ignição" e "Cabo de Vela" saem do PRODUTO da base; "Catálogo BAP" com maiúscula nos
+  slides e nas notas; "Novembro de 2026" na capa; a S11 vai para as notas, com a versão da base do dia.
+  - Resto, para a geração final, sem achado: os rótulos que ainda são digitados ("Filtro de cabine", "Filtro de ar" e
+    "Fluido de freio" no slide 6; "Bomba d'água" e "Cubo de roda" no slide 5) também devem sair do PRODUTO da base, como
+    manda a S3. Hoje o slide 6 tem "Bomba D'Água" e o slide 5 tem "Bomba d'água". A grafia do nome na base é o item 23 da
+    lista de melhorias do Portfólio.
+- **S10 e S12:** registradas como recomendação e sugestão da marca, com a escolha final do Alexandre. Certo.
+- **Cor:** o verde-escuro `#2F7D36` virou a cor de todo texto e número verde sobre fundo claro, e o número do quiz ficou
+  escuro sobre o laranja (6,0:1). Isso resolve a observação de contraste da primeira rodada.
+
+| ID | Onde | Tipo | Fere | Gravidade | Correção | Dono |
+|---|---|---|---|---|---|---|
+| MC-0020 | `treinamento_ppt.js:15` (`laranjaEsc: 'A9530A'`) e `PADRAO_TREINAMENTO.md`, seção 3 (a palavra "ATENÇÃO") | cor | regra "nenhuma cor nova nem quase igual sem aprovação" (manual a aprovar) | baixa | `#A9530A` → **`#8A3F00`**, o texto laranja que o PDF já usa (`otext` do dicionário `C` em `digital2.py`). Dá 6,8:1 no fundo `#FDF1E6`, contra 4,8:1 do `#A9530A`. Na mesma linha, as cores do tema `accent5 'D64545'` e `accent6 'F2C14E'` (linha 20) não estão em paleta nenhuma: trocar por cores da paleta ou registrar no guia que não se usam | catalogo-grafico |
+
+O MC-0020 não segura: o padrão pode ir ao Alexandre com a troca feita ou com a nota de que ela entra antes de gerar.
