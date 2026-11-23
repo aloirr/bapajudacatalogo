@@ -1,0 +1,53 @@
+Testes T-0032 (onda 1) · 23/11/2026 14:39 (Manaus)
+PR #185 · branch catalogo-grafico/T-0032-portfolios · head ebde992fba591f51cceffc9c208776f1708a1714
+main de comparação: 2c2b1257894266935f2a01f25ec3a5946e1fe039 · base v28 (dados/ = versoes/v28, igual ao main)
+
+RESULTADO: PASSOU em todos os itens.
+Atualizado em 23/11/2026 14:40 (Manaus): item 4b passou a PASSOU pelo critério da decisão 4a, definido pelo gerente-projetos (ver 4b).
+
+1. Regeração pelo gerador do branch (PYTHONHASHSEED=0) x entregas do PR
+   8 portfólios (portfolio.py, geral e --linha=...) .... PASSOU 8/8 iguais (texto e pixels a 150 ppi)
+      geral 86 · Leve 43 · Pesada 28 · Moto 11 · Lubrificantes 10 · Acessórios 7 · Baterias 6 · Autocenter 24 págs.
+      geral: 4.573 itens; 0 [PARADO], 0 [ERRO], código 0 nos 8
+   4 treinamentos (treinamento_molde.py --sim) ........ PASSOU
+      .pptx byte a byte 4/4; .pdf 4/4 iguais (texto e 150 ppi)
+      Mecânica Básica 45 · Baterias 47 · Linha Moto 41 · Lubrificantes 47 slides
+2. A4, Completo Digital e Linha Moto .................. PASSOU
+   branch = main = entregas (texto e 150 ppi): A4 56, Digital 311, Linha Moto 17 págs.; entregas do branch = main (bytes)
+   (a mudança do taxo.HEAVY não mexe nos 3)
+3. Testes do gerador .................................. PASSOU 23/23
+   (teste_fraga_complementos, teste_autoimpact_pdf, teste_bloco_b_pdf)
+4a. Portfólios: palavra interna ....................... PASSOU 0
+   procurados (sem acento, sem caixa): R$, estoque, MOQ, FOB, ranking, fornecedor, "uso interno", preço/preco,
+   USD, BAP BOX, custo, LINHA_ORIGEM, OBS_INTERNA, SUNRISE, AUTOIMPACT, interno, compra
+   único achado: "bom custo-benefício" (texto institucional da pág. 2, já no main) = não é dado interno
+4b. Treinamentos: "uso interno" no rodapé ............. PASSOU
+   Critério (gerente-projetos, decisão 4a, R-20261123-162032-po): "'uso interno' no rodapé de todos os treinamentos".
+   145 de 180 slides têm rodapé, e os 145 têm "Treinamento X BAP | Equipe Comercial Externa · uso interno".
+   Nota: os outros 35 slides não têm rodapé nem "uso interno": capa, divisórias de módulo e Obrigado.
+     Mecânica Básica 1, 5, 9, 15, 20, 25, 31, 36, 45
+     Baterias        1, 5, 9, 16, 21, 27, 32, 35, 47
+     Linha Moto      1, 5, 8, 20, 27, 34, 41
+     Lubrificantes   1, 5, 9, 15, 24, 28, 32, 36, 40, 47
+   Motivo: esses tipos de slide não têm rodapé no original nem no Mecânica Básica que o Alexandre aprovou como modelo.
+   Pôr "uso interno" também nesses 35 slides seria decisão nova do Alexandre; o po vai perguntar.
+   Amostra: trein_mecanica_basica_p05.png (divisória sem rodapé) e trein_mecanica_basica_p02.png (slide com rodapé).
+4c. Treinamentos: "estoque" e "R$" .................... PASSOU 0 e 0 (texto do .pptx, notas e PDF)
+4d. Arial, nenhum Calibri ............................. PASSOU 0 "Calibri" no pacote
+   tema: major e minor latin = Arial; docProps: Arial. Obs.: no PDF do LibreOffice o "✓" sai em Inter
+   (fonte de reserva do glifo, Arial não tem); não está no .pptx.
+4e. Mídia órfã (treinamento_orfas.py) ................. PASSOU 0 órfãs, 0 relações sem uso
+   mídias: Baterias 157, Linha Moto 96, Lubrificantes 120, Mecânica Básica 102
+5. Códigos BAP dos treinamentos na base v28 ........... PASSOU 0 fora da base, 0 não ATIVO
+   únicos no texto final (slides, tabelas e notas): Mecânica Básica 24, Baterias 4, Linha Moto 36 + 10 rolamentos
+   pela designação (6201-2RS = ROL6201-2RS, todos ATIVO), Lubrificantes 15; "HB20" é veículo
+   os que o gerador conferiu e não ficaram no texto final também são ATIVO (o gerador para se não forem)
+6. gerar_site.py ...................................... PASSOU código 0, 0 [PARADO], 0 [ERRO]
+   4.419 produtos (igual ao main); produtos.json igual ao main, fora o "gerado_em"
+7. Nomes x buildFilter do render.yaml do main ......... PASSOU 16/16 casam e existem
+   Obs.: o branch do PR está atrás do main só no render.yaml (#184); o PR não mexe nele.
+   Obs. fora do escopo: a lista PDFS do servicos/login/server.mjs (main) só tem o Portfólio geral;
+   os 7 por linha e os 4 treinamentos ainda não aparecem no /admin/pdfs/ (dono: integracao-placas).
+
+Amostras (PNG): portfolio_geral_p01/p03, portfolio_leve_p03/p10, portfolio_baterias_p04, portfolio_moto_p05,
+trein_mecanica_basica_p01/p02/p05, trein_linha_moto_p41.
