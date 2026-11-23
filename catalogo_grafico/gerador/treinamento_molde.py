@@ -65,6 +65,8 @@ A = '{%s}' % NS['a']
 R_ATTRS = ('{%s}embed' % NS['r'], '{%s}id' % NS['r'], '{%s}link' % NS['r'])
 RE_COD = re.compile(r'\b(?:[A-Z]{2,4}\d{3,8}[A-Z]?|CV-[A-Z]\d{2,3})\b')
 PROIBIDO = re.compile(r'estoque|R\$', re.I)
+# o que tem cara de código: varrido no deck inteiro (textos, tabelas e notas); fora da base, para
+RE_PARECE = re.compile(r'\b(?:[A-Z]{2,4}\d{2,8}[A-Z]?|\d{2,3}A?[DE]-[A-Z]{1,5}-\d{2}|\d{4}-2(?:RS|Z)|CV-[A-Z]\d{2,3})\b')
 
 # cores fechadas pela marca (PADRAO_TREINAMENTO.md, seção 3)
 VERDE_TEXTO = 'tx2'        # #2F7D36: texto verde sobre fundo claro
@@ -93,6 +95,40 @@ class Base:
             'versao_base': re.search(r'_(v\d+)\.xlsx$', vs[-1]).group(1) if vs else '?',
         }
         self.citados = set()
+        cods = sorted((c for c in self.idx if len(c) >= 4), key=len, reverse=True)
+        self.rx_base = re.compile('|'.join(r'(?<![\w-])' + re.escape(c) + r'(?![\w-])' for c in cods))
+
+    def campo(self, cod, nome):
+        m = re.search(re.escape(nome) + r'\s*:\s*([^|]+)', self.ativo(cod).DADOS_ADICIONAIS)
+        if not m:
+            parar(f'campo "{nome}" não está nos DADOS_ADICIONAIS de {cod}')
+        return m.group(1).strip()
+
+    def faixa_ah(self, padrao, linha=None):
+        b = self.df[(self.df.PRODUTO == 'Baterias') & (self.df.STATUS_CADASTRO == 'ATIVO')
+                    & self.df.CODIGO_BAP.str.contains(padrao, regex=True)]
+        if linha:
+            b = b[b.LINHA == linha]
+        if b.empty:
+            parar(f'nenhuma bateria ATIVA casa com {padrao} {linha or ""}')
+        ah = sorted(int(re.match(r'\d+', c).group(0)) for c in b.CODIGO_BAP)
+        return f'{ah[0]} Ah' if ah[0] == ah[-1] else f'{ah[0]} a {ah[-1]} Ah'
+
+    def conferir_deck(self, txt, onde, nao_codigo=()):
+        """Varredura final: todo código citado existe e está ATIVO; o que parece código e não está na base para."""
+        if PROIBIDO.search(txt):
+            parar(f'palavra proibida ("estoque" ou "R$") em {onde}: ...{txt[max(0, PROIBIDO.search(txt).start() - 40):][:90]!r}')
+        for m in self.rx_base.finditer(txt):
+            self.ativo(m.group(0))
+        resto = self.rx_base.sub(' ', txt)
+        for m in RE_PARECE.finditer(resto):
+            t = m.group(0)
+            if t in nao_codigo:
+                continue
+            if 'ROL' + t in self.idx:          # rolamento citado pela designação (6201-2RS = ROL6201-2RS)
+                self.ativo('ROL' + t)
+                continue
+            parar(f'"{t}" parece código, mas não está na base ({onde}); se não for código, ponha em "nao_codigo"')
 
     def ativo(self, cod):
         r = self.idx.get(cod)
@@ -114,6 +150,32 @@ class Base:
                 for c in cods:
                     self.ativo(c)
                 return ' · '.join(cods) if cods else '—'
+            if tipo == 'dado':
+                cod, nome = arg.split(';', 1)
+                return self.campo(cod, nome)
+            if tipo == 'metade':
+                cod, nome = arg.split(';', 1)
+                v = float(self.campo(cod, nome).replace(',', '.'))
+                return str(int(v / 2 + 0.5))
+            if tipo == 'ah':
+                padrao, _, linha = arg.partition(';')
+                return self.faixa_ah(padrao, linha or None)
+            if tipo == 'api':          # norma API da DESCRICAO (ex.: "API SN")
+                m = re.search(r'API ([A-Z]{2}(?:/[A-Z]{2})?|GL-\d)', self.ativo(arg).DESCRICAO)
+                if not m:
+                    parar(f'{arg}: a DESCRICAO não tem a norma API')
+                return 'API ' + m.group(1)
+            if tipo == 'oleo_base':    # Mineral, Semissintético ou Sintético, pela DESCRICAO
+                d = self.ativo(arg).DESCRICAO
+                for k, v in (('SEMISSINT', 'Semissintético'), ('SINT', 'Sintético'), ('MINERAL', 'Mineral')):
+                    if k in d:
+                        return v
+                parar(f'{arg}: a DESCRICAO não diz a base do óleo')
+            if tipo == 'n':            # quantos itens ATIVOS há no PRODUTO
+                n = int(((self.df.PRODUTO == arg) & (self.df.STATUS_CADASTRO == 'ATIVO')).sum())
+                if not n:
+                    parar(f'nenhum item ATIVO no produto "{arg}"')
+                return str(n)
             if tipo == 'prod':
                 if arg not in set(self.df.PRODUTO):
                     parar(f'produto "{arg}" não é um PRODUTO da base')
@@ -234,8 +296,24 @@ def trocar_imagem(slide, pic, arquivo, conter=True):
 
 # ---------------------------------------------------------------- slides
 
+def relacionar(destino, rel, mesmo_pacote):
+    """Relação no slide novo para o alvo da relação do slide de origem (imagem de outro arquivo vira parte nova)."""
+    if rel.is_external:
+        return destino.relate_to(rel.target_ref, rel.reltype, is_external=True)
+    if mesmo_pacote:
+        return destino.relate_to(rel.target_part, rel.reltype)
+    if rel.reltype != RT.IMAGE:
+        parar(f'o slide de outro arquivo tem uma relação que não é imagem ({rel.reltype})')
+    return destino.get_or_add_image_part(io.BytesIO(rel.target_part.blob))[1]
+
+
 def clonar(prs, src):
-    novo = prs.slides.add_slide(src.slide_layout)
+    mesmo = src.part.package is prs.part.package
+    layout = src.slide_layout if mesmo else next(
+        (l for l in prs.slide_layouts if l.name == src.slide_layout.name), None)
+    if layout is None:
+        parar(f'o layout {src.slide_layout.name} não existe no original')
+    novo = prs.slides.add_slide(layout)
     arvore = novo.shapes._spTree
     for el in list(arvore)[2:]:
         arvore.remove(el)
@@ -243,10 +321,7 @@ def clonar(prs, src):
     for rid, rel in src.part.rels.items():
         if rel.reltype in (RT.SLIDE_LAYOUT, RT.NOTES_SLIDE):
             continue
-        if rel.is_external:
-            mapa[rid] = novo.part.relate_to(rel.target_ref, rel.reltype, is_external=True)
-        else:
-            mapa[rid] = novo.part.relate_to(rel.target_part, rel.reltype)
+        mapa[rid] = relacionar(novo.part, rel, mesmo)
     for el in list(src.shapes._spTree)[2:]:
         e = copy.deepcopy(el)
         for no in e.iter():
@@ -272,8 +347,8 @@ def copiar_formas(s, origem, indices, dx=0.0, dy=0.0):
                 for at in R_ATTRS:
                     rid = no.get(at)
                     if rid:
-                        rel = origem.part.rels[rid]
-                        no.set(at, s.part.relate_to(rel.target_part, rel.reltype))
+                        no.set(at, relacionar(s.part, origem.part.rels[rid],
+                                              origem.part.package is s.part.package))
         for no in e.iter('{%s}cNvPr' % NS['p']):
             no.set('id', str(prox))
             prox += 1
@@ -313,6 +388,113 @@ def escrever(txBody, valor):
         if fim is not None:
             mp.append(fim)
         txBody.append(mp)
+
+
+def tirar_coluna(forma, j):
+    """Tira a coluna j da tabela e reparte a largura dela entre as outras (a tabela fica com a mesma largura)."""
+    tbl = forma._element.find('.//' + A + 'tbl')
+    grade = tbl.find(A + 'tblGrid')
+    cols = grade.findall(A + 'gridCol')
+    w = int(cols[j].get('w'))
+    grade.remove(cols[j])
+    resto = [c for k, c in enumerate(cols) if k != j]
+    tot = sum(int(c.get('w')) for c in resto)
+    for c in resto:
+        c.set('w', str(int(c.get('w')) + int(w * int(c.get('w')) / tot)))
+    for tr in tbl.findall(A + 'tr'):
+        tr.remove(tr.findall(A + 'tc')[j])
+
+
+def trocar_textos(elemento, pares, onde, contagem):
+    """Troca trechos de texto (dentro de um mesmo trecho de formatação) em todos os a:t do elemento."""
+    for t in elemento.iter(A + 't'):
+        if not t.text:
+            continue
+        for velho, novo in pares:
+            if velho in t.text:
+                t.text = t.text.replace(velho, novo)
+                contagem[velho] = contagem.get(velho, 0) + 1
+
+
+def formatar_notas(texto):
+    """Nota solta (sem os blocos) vira MENSAGEM-CHAVE + COMO CONDUZIR (+ RESPOSTAS ou FONTES), sem mudar o conteúdo."""
+    if texto.startswith('MENSAGEM-CHAVE'):
+        return texto
+    texto = re.sub(r'(?<!\.)\.\.(?!\.)', '.', texto.strip())
+    if texto.startswith('Respostas:'):
+        return ('MENSAGEM-CHAVE\nO teste fixa os pontos principais do treinamento.\n\nCOMO CONDUZIR\n'
+                'Leia uma pergunta por vez e peça a resposta a alguém diferente.\n\nRESPOSTAS\n' + texto[10:].strip())
+    frases = re.split(r'(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÂÊÔÃÕÇ0-9“"])', texto)
+    fontes = [f for f in frases if f.startswith(('Fonte', 'Fontes'))]
+    frases = [f for f in frases if f not in fontes]
+    out = 'MENSAGEM-CHAVE\n' + frases[0]
+    if len(frases) > 1:
+        out += '\n\nCOMO CONDUZIR\n' + ' '.join(frases[1:])
+    if fontes:
+        out += '\n\nFONTES\n' + ' '.join(fontes)
+    return out
+
+
+def expandir_slides(cfg, n_original):
+    """Treinamento atualizado: todos os slides do original, na ordem, com "editar" e "inserir_depois" (nº do original)."""
+    if 'slides' in cfg:
+        return cfg
+    editar, inserir = cfg.get('editar', {}), cfg.get('inserir_depois', {})
+    tirar = set(cfg.get('remover', []))
+    slides, nova = [], {}
+    for i in range(1, n_original + 1):
+        if i not in tirar:
+            slides.append(dict({'molde': i}, **editar.get(str(i), {})))
+            nova[i] = len(slides)
+        slides += inserir.get(str(i), [])
+    cfg['slides'] = slides
+    cfg['pares'] = [nova[i] for i in cfg.get('pares_original', [])]
+    cfg['mosaico'] = [nova[i] for i in cfg.get('mosaico_original', [])] + cfg.get('mosaico_novos', [])
+    return cfg
+
+
+def kicker(sh):
+    return sh.is_placeholder and sh.placeholder_format.idx == 102
+
+
+def aplicar_grafia(slide, grafia):
+    """Grafia dos nomes de linha (ProActive, Shiftease, Effitech): fora do kicker, que é todo em caixa alta."""
+    rx = [(re.compile(r'\b' + re.escape(k) + r'\b'), v) for k, v in grafia.items()]
+    def troca(t):
+        for r, v in rx:
+            t.text = r.sub(v, t.text)
+    for sh in slide.shapes:
+        if not kicker(sh):
+            for t in sh._element.iter(A + 't'):
+                if t.text:
+                    troca(t)
+    if slide.has_notes_slide:
+        for t in slide.notes_slide._element.iter(A + 't'):
+            if t.text:
+                troca(t)
+
+
+def renumerar(slide, mapa):
+    """Renumera os módulos (kicker "MÓDULO 04 ·" e o número da divisória) quando entra um módulo novo."""
+    for t in slide._element.iter(A + 't'):
+        if t.text:
+            t.text = re.sub(r'MÓDULO (\d\d)', lambda m: 'MÓDULO ' + mapa.get(m.group(1), m.group(1)), t.text)
+    if slide.slide_layout.name == 'SECTION':
+        sh = list(slide.shapes)[0]
+        if sh.has_text_frame and sh.text_frame.text.strip() in mapa:
+            for t in sh._element.iter(A + 't'):
+                if t.text and t.text.strip() in mapa:
+                    t.text = mapa[t.text.strip()]
+
+
+def textos_do_slide(slide):
+    """Todos os textos do slide (formas, grupos, tabelas) e das notas, lidos do XML sem alterá-lo."""
+    def texto(el):
+        return '\n'.join(''.join(t.text or '' for t in p.iter(A + 't')) for p in el.iter(A + 'p'))
+    out = [texto(tb) for tb in slide._element.iter('{%s}txBody' % NS['p'], A + 'txBody')]
+    if slide.has_notes_slide:
+        out.append(slide.notes_slide.notes_text_frame.text)
+    return out
 
 
 def caixa(sh):
@@ -370,14 +552,15 @@ def trocar_fontes(prs):
             for no in part._element.iter(A + 'latin', A + 'ea', A + 'cs'):
                 if no.get('typeface') in ('Calibri', 'Calibri Light'):
                     no.set('typeface', FONTE)
-        elif 'theme' in ct:
+        elif 'theme' in ct or 'extended-properties' in ct:   # tema e a lista de fontes do docProps/app.xml
             part._blob = part.blob.replace(b'typeface="Calibri"', b'typeface="Arial"').replace(
-                b'typeface="Calibri Light"', b'typeface="Arial"')
+                b'typeface="Calibri Light"', b'typeface="Arial"').replace(b'>Calibri<', b'>Arial<')
 
 
 def ajustar_tema(prs):
     """Tema só com as cores do padrão (MC-0020 e MC-0022): accent5 vira a borda e accent6 o laranja-escuro.
-    O vermelho #D64545 (sinal grave) fica fixo só onde o original o usa (ícones) e o amarelo #F2C14E sai."""
+    O vermelho #D64545 (sinal grave) e o amarelo #F2C14E saem do tema e ficam gravados direto só onde o original
+    os usa (os ícones de sinal grave; nos atualizados, as faixas de leitura de tensão), para não mudarem de cor."""
     troca_tema = {'D64545': 'D9E6DA', 'F2C14E': '8A3F00'}
     fixo = {'accent5': 'D64545', 'accent6': 'F2C14E'}
     usados = {}
@@ -387,8 +570,6 @@ def ajustar_tema(prs):
             if v in fixo:
                 clr.getparent().replace(clr, etree.Element(A + 'srgbClr', val=fixo[v]))
                 usados[fixo[v]] = usados.get(fixo[v], 0) + 1
-    if usados.get('F2C14E'):
-        parar('o amarelo #F2C14E saiu do padrão, mas um slide ainda o usa')
     for part in prs.part.package.iter_parts():
         if 'theme' in part.content_type and not hasattr(part, '_element'):
             b = part.blob
@@ -399,10 +580,14 @@ def ajustar_tema(prs):
 
 
 def trocar_rodape(prs, rodape):
+    achou = 0
     for lay in prs.slide_layouts:
         for t in lay._element.iter(A + 't'):
-            if t.text and t.text.startswith('Treinamento Baterias BAP'):
+            if t.text and t.text.startswith('Treinamento ') and 'Equipe Comercial' in t.text:
                 t.text = rodape
+                achou += 1
+    if not achou:
+        parar('rodapé do layout não encontrado')
 
 
 def zip_fixo(caminho):
@@ -419,16 +604,28 @@ def montar(nome, saida=None):
     with open(os.path.join(AQUI, 'treinamentos', nome + '.json'), encoding='utf-8') as f:
         cfg = json.load(f)
     base = Base()
-    prs = Presentation(MOLDE)
-    molde_ref = Presentation(MOLDE)
+    arq_original = os.path.join(ORIGINAIS, cfg.get('original', os.path.basename(MOLDE)))
+    prs = Presentation(arq_original)
+    molde_ref = Presentation(arq_original)
     originais = list(prs.slides)
+    cfg = expandir_slides(cfg, len(originais))
+    outros = {}
+    contagem = {}
+    nao_codigo = set(cfg.get('nao_codigo', []))
     icones = indice_icones()
     tmp = tempfile.mkdtemp(prefix='trein_')
     imgs = Imagens(base, molde_ref, tmp)
 
     for n, spec in enumerate(cfg['slides'], 1):
-        src = originais[spec['molde'] - 1]
+        if 'de' in spec:
+            if spec['de'] not in outros:
+                outros[spec['de']] = Presentation(os.path.join(ORIGINAIS, spec['de']))
+            src = list(outros[spec['de']].slides)[spec['molde'] - 1]
+        else:
+            src = originais[spec['molde'] - 1]
         s = clonar(prs, src)
+        if cfg.get('renumerar') and 'de' not in spec and not spec.get('nao_renumerar'):
+            renumerar(s, cfg['renumerar'])
         for c in spec.get('copiar', []):
             origem = originais[c['molde'] - 1] if 'molde' in c else s
             copiar_formas(s, origem, c['formas'], c.get('dx', 0), c.get('dy', 0))
@@ -451,6 +648,27 @@ def montar(nome, saida=None):
             v = base.expandir(v)
             base.conferir(v, onde)
             escrever(formas[int(k)].text_frame._txBody, v)
+        for k, cols in spec.get('tirar_coluna', {}).items():
+            # "*" = todas as tabelas do slide (há slides com uma tabela por linha)
+            alvos = [f for f in formas if getattr(f, 'has_table', False) and f.has_table] if k == '*' else [formas[int(k)]]
+            for f in alvos:
+                for j in sorted(cols, reverse=True):
+                    tirar_coluna(f, j)
+        for k, larg in spec.get('larguras', {}).items():   # largura das colunas, em polegadas
+            cols = formas[int(k)]._element.find('.//' + A + 'tblGrid').findall(A + 'gridCol')
+            if len(cols) != len(larg):
+                parar(f'{onde}: a tabela {k} tem {len(cols)} colunas')
+            for c, w in zip(cols, larg):
+                c.set('w', str(int(Inches(w))))
+        for k, cels in spec.get('cor_celulas', {}).items():
+            tab = formas[int(k)].table
+            for rc, cor in cels.items():
+                i, j = (int(x) for x in rc.split(','))
+                for rpr in tab.cell(i, j).text_frame._txBody.iter(A + 'rPr'):
+                    for f in rpr.findall(A + 'solidFill'):
+                        rpr.remove(f)
+                    rpr.insert(0, etree.Element(A + 'solidFill'))
+                    etree.SubElement(rpr[0], A + 'schemeClr', val=cor)
         for k, linhas in spec.get('tabela', {}).items():
             tab = formas[int(k)].table
             for i, linha in enumerate(linhas):
@@ -458,6 +676,13 @@ def montar(nome, saida=None):
                     v = base.expandir(v)
                     base.conferir(v, onde)
                     escrever(tab.cell(i, j).text_frame._txBody, v)
+        for k, cels in spec.get('celulas', {}).items():
+            tab = formas[int(k)].table
+            for rc, v in cels.items():
+                i, j = (int(x) for x in rc.split(','))
+                v = base.expandir(v)
+                base.conferir(v, onde)
+                escrever(tab.cell(i, j).text_frame._txBody, v)
         for k, ref in spec.get('img', {}).items():
             trocar_imagem(s, formas[int(k)], imgs.caminho(ref))
         for k, nome_ic in spec.get('icone', {}).items():
@@ -467,15 +692,37 @@ def montar(nome, saida=None):
         for k in sorted((int(x) for x in spec.get('apagar', [])), reverse=True):
             el = formas[k]._element
             el.getparent().remove(el)
-        notas = base.expandir(spec.get('notas', '')).strip()
+        if 'notas' in spec:
+            notas = base.expandir(spec['notas']).strip()
+        else:   # atualizado: as notas do original ficam (com as trocas abaixo), no formato do original
+            notas = src.notes_slide.notes_text_frame.text.strip() if src.has_notes_slide else ''
+            if notas and cfg.get('formatar_notas'):
+                notas = formatar_notas(notas)
         if not notas:
             parar(f'{onde} sem notas')
-        base.conferir(notas, onde + ' (notas)')
         if n == 1:
+            notas = re.sub(r'\n*BASE\n.*$', '', notas, flags=re.S)
             notas += f'\n\nBASE\nCódigos e "Ofereça junto" conferidos na base unificada {base.vars["versao_base"]}.'
         s.notes_slide.notes_text_frame.text = notas
+        pares = [(base.expandir(a), base.expandir(b)) for a, b in spec.get('trocar', [])]
+        trocar_textos(s._element, pares, onde, contagem)
+        trocar_textos(s.notes_slide._element, pares, onde, contagem)
+        for a, _ in spec.get('trocar', []):
+            if not contagem.get(base.expandir(a)):
+                parar(f'{onde}: o trecho a trocar não foi achado: {a!r}')
+        globais = cfg.get('trocar', [])
+        trocar_textos(s._element, globais, onde, contagem)
+        trocar_textos(s.notes_slide._element, globais, onde, contagem)
+        if cfg.get('grafia'):
+            aplicar_grafia(s, cfg['grafia'])
+        for txt in textos_do_slide(s):
+            base.conferir_deck(txt, onde, nao_codigo)
         if s.slide_layout.name == 'CONTENT':
             corrigir_cores(s)
+
+    for a, _ in cfg.get('trocar', []):
+        if not contagem.get(a):
+            parar(f'troca global sem efeito: {a!r}')
 
     # tira os slides do original
     lista = prs.slides._sldIdLst
@@ -537,22 +784,35 @@ def mosaico(arquivos, destino, colunas, larg=667, rotulos=None):
 
 
 def simular(nome, pasta):
+    """PDF de apoio (S9), PNG a 100 ppi, mosaico de 8 slides e comparativo original × novo (pares do JSON)."""
     os.makedirs(pasta, exist_ok=True)
-    pptx, cfg, base = montar(nome, os.path.join(pasta, json.load(open(os.path.join(AQUI, 'treinamentos', nome + '.json'),
-                                                                        encoding='utf-8'))['arquivo']))
+    with open(os.path.join(AQUI, 'treinamentos', nome + '.json'), encoding='utf-8') as f:
+        arquivo = json.load(f)['arquivo']
+    pptx, cfg, base = montar(nome, os.path.join(pasta, arquivo))
     pdf = pdf_de(pptx, pasta)
+    shutil.rmtree(os.path.join(pasta, 'slides'), ignore_errors=True)
     novos = pngs_de(pdf, os.path.join(pasta, 'slides'), 'slide')
     tmp = tempfile.mkdtemp(prefix='orig_')
-    orig = pngs_de(pdf_de(MOLDE, tmp), tmp, 'orig')
+    origens = {}
+
+    def png_original(arq, k):
+        if arq not in origens:
+            pasta_o = os.path.join(tmp, str(len(origens)))
+            os.makedirs(pasta_o)
+            origens[arq] = pngs_de(pdf_de(os.path.join(ORIGINAIS, arq), pasta_o), pasta_o, 'orig')
+        return origens[arq][k - 1]
+
     rep = cfg.get('mosaico', [1, 2, 6, 10, 21, 28, 39, 43])
     mosaico([novos[i - 1] for i in rep], os.path.join(pasta, 'mosaico_8_slides.png'), 2, larg=900,
             rotulos=[f'Slide {i}' for i in rep])
-    pares = cfg.get('pares', [])
+    titulo = cfg.get('titulo', nome)
     arqs, rot = [], []
-    for i in pares:
-        mo = cfg['slides'][i - 1]['molde']
-        arqs += [orig[mo - 1], novos[i - 1]]
-        rot += [f'ORIGINAL Baterias · slide {mo}', f'NOVO Mecânica Básica · slide {i}']
+    for i in cfg.get('pares', []):
+        spec = cfg['slides'][i - 1]
+        arq = spec.get('de', cfg.get('original', os.path.basename(MOLDE)))
+        nome_o = re.sub(r'^Treinamento_|_BAP.*$', '', arq).replace('_', ' ')
+        arqs += [png_original(arq, spec['molde']), novos[i - 1]]
+        rot += [f'ORIGINAL {nome_o} · slide {spec["molde"]}', f'NOVO {titulo} · slide {i}']
     if arqs:
         mosaico(arqs, os.path.join(pasta, 'comparativo_original_x_novo.png'), 2, larg=800, rotulos=rot)
     shutil.rmtree(tmp, ignore_errors=True)

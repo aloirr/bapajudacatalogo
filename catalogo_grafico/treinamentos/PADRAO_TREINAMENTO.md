@@ -180,6 +180,7 @@ PYTHONHASHSEED=0 python treinamento_molde.py mecanica_basica --sim PASTA
 
 - Saída: o .pptx em `gerador/saidas/` (ou em PASTA, com `--sim`, junto do PDF, dos PNGs a 100 ppi, do mosaico de 8 slides e do comparativo original × novo dos pares listados no JSON).
 - Depois do aprovado, o .pptx e o PDF vão para `entregas/`.
+- Treinamentos atualizados (Baterias, Linha Moto, Lubrificantes): o JSON aponta o `original` e só lista o que muda (`editar` por nº do slide do original, `inserir_depois`, `remover`); o resto sai igual ao original. Mecânica Básica aprovada como modelo (R-20261123-162032-po, 1a).
 - Um treinamento novo = um JSON novo. Cada slide aponta o `molde` (nº do slide no original de Baterias) e troca textos (`t`), imagens (`img`), ícones (`icone`), tabelas (`tabela`) e notas, pelo índice da forma no slide-modelo.
 - Mitos e verdades e passo a passo numerado (Lubrificantes) ficam fora até ter desenho aprovado.
 - Grafia: os nomes de linha vão como "ProActive", "Shiftease" e "Effitech"; caixa alta só onde todo o texto é caixa alta (kicker). Nome de produto no texto: macro `{{prod:...}}`, conferida na base.
