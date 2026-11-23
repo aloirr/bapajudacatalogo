@@ -1,0 +1,56 @@
+Testes T-0002 e T-0022 (com login) · 23/11/2026 14:32 (Manaus)
+total do JSON ................ PASSOU (4.419 produtos, gerado em 23/11/2026 14:31; no commit: 4.419)
+código único no site ......... PASSOU
+campos do JSON ............... PASSOU (só os 19 campos conhecidos; "ve" em 3.617 produtos (12.158 veículos) no formato [fabricante, modelo, versão?]; "ss" em 121 produtos)
+palavra interna .............. PASSOU
+AUTOIMPACT só na ref. cruzada  PASSOU (113 referência(s) com a AUTOIMPACT na marca (r[].m, nome inteiro), o único lugar permitido)
+login: sem login fecha ....... PASSOU (20 pedidos sem cookie (página, app.js, produtos.json, foto AMT7115.jpg, 2 PDFs, admin, API): 401 ou 302 /entrar; /entrar abre sem dado do catálogo)
+login: sessão de 5 h ......... PASSOU (cookie no navegador HttpOnly, Secure, SameSite=Lax e 5 h; relógio adiantado, pela tela: 4 h 59 o catálogo abre; 5 h 01 leva a /entrar?expirou=1 com o aviso)
+login: comum sem admin ....... PASSOU (menu e página sem os itens do admin (1366 e 390); /admin/usuarios e /admin/pdfs 404 sem a tela)
+login: link do produto ....... PASSOU (#/produto/CXD13062 antes do login abre o produto depois do login e da troca obrigatória (1366); #/produto/AMT7115 depois do login direto (390))
+login: volta segura .......... PASSOU (8 volta(s) no navegador ("//example.invalid/x", "/\\example.invalid/x", "%2F%2Fexample.invalid%2Fx", "%2F%5Cexample.invalid", "/%5Cexample.invalid", "https://example.invalid/", "/%09/example.invalid", "/%0A/example.invalid") ficam em http://localhost:45517)
+login: etiqueta da troca ..... PASSOU (cliente.teste com a etiqueta "Falta trocar a senha inicial" logo depois de criado e sem ela depois da troca; admin sem a etiqueta)
+login: telas do admin ........ PASSOU (1º acesso → troca obrigatória (sem a senha atual) → catálogo; menu com Criar usuários, Catálogos, materiais e treinamentos, Trocar senha e Sair; usuário criado pela tela; Catálogos, materiais e treinamentos (title, trilha e h1): GET /api/pdfs com os 22 ids, 17 cartões em 3 grupos (Catálogos 3, Apresentações e materiais 10, Treinamentos 4), os 4 treinamentos com PDF e PowerPoint; link de baixar em todo id com o arquivo em entregas/)
+login: console sem erro ...... PASSOU (0 erro de script, 0 console.error do site, 0 403 e 0 4xx/5xx não esperados em login, troca obrigatória (admin e comum), catálogo, menu, Criar usuários, Catálogos, materiais e treinamentos, volta e sessão)
+login: acessibilidade ........ PASSOU (login, troca obrigatória, janela Criar usuário, Criar usuários e Catálogos, materiais e treinamentos: campos com rótulo e imagens com alt)
+login: log sem segredo ....... PASSOU (100 linhas de log, sem as 4 senhas, o segredo da sessão e a chave interna)
+casos do JSON ................ PASSOU (código CXD13062; referência TRW 16900255S e NAKATA NCDH50002; veículo VOLKSWAGEN/Gol/2018; diretriz AMT7005 (KYB 441126), CL14 e EAN 7908680404220 (TER551011); geral "amortecedor dianteiro Onix" e "15W40"; produto com foto AMT7115; amostra TER555053, AMT7098, KD20, KHC121482, FAC6217, JUH70175, POL1655, BAN14510D)
+campo da placa ............... PASSOU (Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → etiqueta "ZZZ9Z99✕" em destaque na faixa, com o rótulo "Placa" em cima (1366 px: à vista; 390 px: só para o leitor de tela (.vh, aria-labelledby)) e antes da Marca, e as listas "Volkswagen › Gol › 2018 › 1.6"; com a placa, as 5 listas travadas (5 de 5) e em cinza; o X volta a "Todos" com a Marca editável; placa + "amortecedor" = 5 de 78 do veículo (Enter no campo geral = 5; Enter no campo da placa = 5; botão = 5); placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas)
+console sem erro ............. PASSOU (0 erro do site nas telas abertas, nas 2 larguras)
+busca código ................. PASSOU (CXD13062, "CXD 13062", "CXD-13062", minúsculo, link antigo cod=, formulário e 8 de 8 da amostra em 1º)
+busca referência ............. PASSOU ("16900255S"; "TRW 16900255S"; "16900255S TRW"; cod="16900255S"; "NCDH50002" → CXD13062)
+busca veículo ................ PASSOU (link antigo VOLKSWAGEN/Gol/2018 = 56; "Volkswagen Gol 2018" = 56; "gol 2018 volkswagen" = 56; "vw gol 2018" = 100; sem Golf sozinho)
+busca palavra por palavra .... PASSOU ("AMORTECEDOR GOL 2007 KYB 441126" → AMT7005 em 1º, lista estrita; outra ordem e minúsculas iguais; 2015 → AMT7005 como o mais próximo; "KYB 441126" → AMT7005; Mahle 33000 literal não vazio; "CL14" → CL14; EAN 7908680404220 → TER551011)
+busca geral .................. PASSOU ("amortecedor dianteiro Onix" = 10; "15W40" = 2)
+busca sem resultado .......... PASSOU ("xyzqwk nadaexiste", "ZZQ999999" e o link antigo cod=ZZQ999999 → "Nenhum produto encontrado")
+meu veículo .................. PASSOU (1366 px: Marca › Modelo › Ano › Motor › Versão; todos os produtos 4419 → VOLKSWAGEN › GOL › 2018 › 1.6 › G2 = 69; 1366 px: "Limpar tudo" tirou o termo e o filtro e ficou VOLKSWAGEN › GOL › 2018 › 1.6 › G2; 1366 px: "amortecedor" → VOLKSWAGEN › GOL › 2026 › 1.0 = 2; 390 px: Marca › Modelo › Ano › Motor › Versão; todos os produtos 4419 → VOLKSWAGEN › GOL › 2018 › 1.6 › G2 = 69; 390 px: "Limpar tudo" tirou o termo e o filtro e ficou VOLKSWAGEN › GOL › 2018 › 1.6 › G2; 390 px: "amortecedor" → VOLKSWAGEN › GOL › 2026 › 1.0 = 2; faixa logo abaixo do quadro da busca, 5 listas em cascata (Marca, Modelo, Ano, Motor, Versão); sem "Meu veículo", sem "Trocar veículo", sem chave liga/desliga, sem "Departamentos")
+produto sem preço nem estoque  PASSOU (CXD13062, AMT7115, TER556556)
+página do produto ............ PASSOU (CXD13062 (Foto em breve) e AMT7115 (com foto): foto, aplicação, referências, ficha técnica, leve também; página pelo link direto, sem janela)
+acessibilidade básica ........ PASSOU (campos com rótulo, imagens com alt, Tab chega ao campo q e ao da placa (1 e 3 passos), foco visível nos 2)
+tela da busca ................ PASSOU (a aprovada (sem abas: q e placa lado a lado); filtros: coluna à esquerda (1366) e botão "Filtrar" com painel (390))
+campos da busca .............. PASSOU (q "Código, descrição ou aplicação" e placa "Placa do veículo"; lado a lado em 1366 e 1536 px (placa à direita e menor), um embaixo do outro em 390 px; 1 só botão "Buscar" no quadro da busca (2 na página inicial: o do q e o da placa); q com Enter e botão (busca código e veículo))
+filtros da busca ............. PASSOU (link "amortecedor" com si=SUSPENSÃO = 709, só desse sistema; 1366 px: coluna x=16..226 (210 px), 1º cartão x=240; 1536 px: coluna x=16..226 (210 px), 1º cartão x=240; 390 px: botão "Filtrar"; "CXD13062" (1 opção por grupo): 1366 px: 4 grupos, 1536 px: 4 grupos, 390 px: botão "Filtrar"; 390 px: "Leve" (Linha) 710 → 707 e o "x" volta a 710)
+medida da bateria (T-0006) ... PASSOU (do JSON: 8 de 60 Ah e 6 com CCA 401 a 500; 1366 px: "Amperagem" 13 opções; "Partida a frio (CCA)" 5 opções; ah=60 = 8; q=bateria&ah=60 = 8; cca=401-500 = 6; q=bateria&cca=401-500 = 6; "60ah" = 8; "60 ah" = 8; "60Ah" = 8; "60-Ah" = 8; "bateria 60ah" = 8; "amortecedor" sem grupo de medida (grupos: Linha, Categoria, Sistema, Família) | 390 px: "Amperagem" 13 opções; "Partida a frio (CCA)" 5 opções; ah=60 = 8; q=bateria&ah=60 = 8; cca=401-500 = 6; q=bateria&cca=401-500 = 6; "60ah" = 8; "60 ah" = 8; "60Ah" = 8; "60-Ah" = 8; "bateria 60ah" = 8; "amortecedor" sem grupo de medida (grupos: Linha, Categoria, Sistema, Família))
+cartões da lista ............. PASSOU ("amortecedor": 1366 px: 4 na 1ª linha (cartão 266 × 318 px, 8 da 1ª e 2ª linha com a mesma altura, foto 264×150; até 2 ref. à vista, 24 de 24 com "+N"); 1536 px: 4 na 1ª linha (cartão 308 × 318 px, 8 da 1ª e 2ª linha com a mesma altura, foto 306×150; até 2 ref. à vista, 24 de 24 com "+N"); 1920 px: 5 na 1ª linha (cartão 312 × 318 px, 10 da 1ª e 2ª linha com a mesma altura, foto 310×150; até 2 ref. à vista, 24 de 24 com "+N"); 390 px: 2 na 1ª linha (cartão 175 × 224 px, 4 da 1ª e 2ª linha com a mesma altura, foto 173×55; até 2 ref. à vista, 24 de 24 com "+N"); 4 na 1ª linha em 1366 e 1536 (fA2), 5 em 1920 (a partir de 1680), 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes")
+janela do produto ............ PASSOU ("+ Detalhes" e código/nome abrem o dialog com o código; Esc fecha e devolve o foco ao cartão; a foto do cartão só amplia (1366 px e 390 px))
+390 px sem rolar de lado ..... PASSOU (scrollWidth <= 390 em todas as telas abertas)
+link antigo redireciona ...... PASSOU (#/busca?cod= e #/busca?mo=&modelo=&ano= viram #/busca?q=)
+prints ....................... <rascunho>/prints-junto/
+
+Resultado: PASSOU (0 falha(s) nova(s), 0 CONHECIDO(S) ignorado(s) por testes/conhecidos.json)
+
+Detalhe:
+[login: telas do admin]
+  AVISO      15 arquivo(s) da T-0032 ainda fora de catalogo_grafico/entregas/ (botão desabilitado na tela, como esperado): portfolio-leve, portfolio-pesada, portfolio-moto, portfolio-lubrificantes, portfolio-acessorios, portfolio-baterias, portfolio-autocenter, treinamento-mecanica-basica-pdf, treinamento-mecanica-basica-pptx, treinamento-baterias-pdf, treinamento-baterias-pptx, treinamento-linha-moto-pdf, treinamento-linha-moto-pptx, treinamento-lubrificantes-pdf, treinamento-lubrificantes-pptx
+
+[campo da placa]
+  AVISO      o site chamou o serviço de placas sem busca de placa: https://bapajudacatalogo-placas.onrender.com/mais-vistos (respondido 503 no teste, sem rede)
+  AVISO      o site chamou o serviço de placas sem busca de placa: https://bapajudacatalogo-placas.onrender.com/contar (respondido 503 no teste, sem rede)
+
+[console sem erro]
+  AVISO      erro de recurso de fora (https://bapajudacatalogo-placas.onrender.com/mais-vistos?di…): Failed to load resource: the server responded with a status of 503 (Service Una…
+  AVISO      erro de recurso de fora (https://bapajudacatalogo-placas.onrender.com/contar): Failed to load resource: the server responded with a status of 503 (Service Una…
+
+[meu veículo]
+  AVISO      1366 px: "amortecedor" com VOLKSWAGEN › GOL › 2026 › 1.0: a lista Versão não tem opção
+  AVISO      390 px: "amortecedor" com VOLKSWAGEN › GOL › 2026 › 1.0: a lista Versão não tem opção
