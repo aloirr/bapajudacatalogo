@@ -9,7 +9,7 @@ import sys, os, re, collections, html, datetime
 import pandas as pd
 import apres_bemol as A
 from apres_bemol import S, W, H
-from taxo import ORDER_SIS, META, HEAVY
+from taxo import ORDER_SIS, META, HEAVY, LIGHT_BR, LIGHT_MODELS
 from plural import plural
 from detalhe import BASE_UNIFICADA as BASE   # a base unificada do Git (dados/), como nos 3 PDFs
 from digital2 import ANO                     # o ano do Catálogo BAP (2027): capa, contracapa e pág. 3
@@ -177,9 +177,23 @@ def carro(mod, m):
     return mt, ws[0]
 
 
+# Linha Pesada, item LEVE E PESADA (T-0029, 16a): qual aplicação sai. As regras do taxo.linha_of (HEAVY, LIGHT_BR e
+# LIGHT_MODELS), sem cópia. 'a' (padrão): fica só a que o HEAVY reconhece como pesada. 'b': sai só a que o linha_of
+# daria LEVE por reconhecer o veículo leve (leve e não pesado); a que ele não reconhece fica (trator, motor, mas também
+# carro de marca fora do LIGHT_BR, como Volvo V40, Lexus ou Mini). Uso da 'b': P.REGRA_16A = 'b' antes do P.build.
+REGRA_16A = 'a'
+
+
+def sai_da_pesada(m, t, regra=None):
+    a = (m + ' ' + t).upper()                       # como no taxo.linha_of
+    h = bool(HEAVY.search(a))
+    if (regra or REGRA_16A) == 'a': return not h
+    return bool(LIGHT_BR.search(a) or LIGHT_MODELS.search(a)) and not h
+
+
 def aplicacoes(rows, n=12, so_pesado=()):
     """principais aplicações na ordem do catálogo (ranking): montadora + modelos, sem repetir. Nos códigos de
-    `so_pesado`, só a aplicação de veículo pesado (a regra `taxo.HEAVY`, a mesma que dá a LINHA)"""
+    `so_pesado`, sai a aplicação de veículo leve (`sai_da_pesada`)"""
     out, vistos = [], set()
     for r in rows:
         pesado = r['code'].strip().upper() in so_pesado
@@ -196,7 +210,7 @@ def aplicacoes(rows, n=12, so_pesado=()):
                     cur = ['', ln]; tr.append(cur); vistas.add(p1)
                 else: cur[1] += (' ' if k else '') + ln
         for m, t in tr:
-            if pesado and not HEAVY.search((m + ' ' + t).upper()): continue   # como no taxo.linha_of
+            if pesado and sai_da_pesada(m, t): continue
             mod = re.split(r'\s·\s|;\s|\s\(', t.strip(' ·;'))[0].strip(' ,·/')
             # o ano ("2014–2015") ou o mês/ano da base ("12/97 12/03"), e o " - " antes dele. O mês vai de 01 a 12: o par
             # de anos curto ("Monza 82/96") e a medida ("60/55W", "90/90-19", '13/16"') não são data
