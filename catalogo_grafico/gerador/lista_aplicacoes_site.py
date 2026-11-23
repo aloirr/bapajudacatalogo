@@ -13,6 +13,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import moto
 import site_aplicacoes as S
+from plural import plural
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'saidas/Aplicacoes_Catalogo_Online_Antes_Depois_12112026.pdf'
 for n, f in [('PR', 'Poppins-Regular'), ('PM', 'Poppins-Medium'), ('PB', 'Poppins-Bold')]:
@@ -123,7 +124,7 @@ story += [t, Spacer(0, 5 * mm),
 HEAD = [Paragraph(h, P_H) for h in ('CÓDIGO', 'PRODUTO (SITE)', 'ANTES', 'DEPOIS — APLICAÇÃO E EQUIVALÊNCIA')]
 for linha, itens in grupos.items():
     if not itens: continue
-    story += [Paragraph(f'{linha} — {len(itens)} {"item" if len(itens) == 1 else "itens"}', P_T2), Spacer(0, 2 * mm)]
+    story += [Paragraph(f'{linha} — {len(itens)} {plural(len(itens))}', P_T2), Spacer(0, 2 * mm)]
     rows = [HEAD]
     for c, r in itens:
         b11 = B11.get(c) or [None] * 18
