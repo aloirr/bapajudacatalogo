@@ -1,4 +1,4 @@
-/* Catálogos e materiais (T-0022, T-0024): os arquivos lidos de GET /api/pdfs, em 2 grupos, cada um com o botão de
+/* Catálogos, materiais e treinamentos (T-0022, T-0024, T-0032): os arquivos lidos de GET /api/pdfs, em 3 grupos, cada um com o botão de
    baixar (GET /admin/pdfs/baixar/:id). Só o admin abre esta página: quem decide é o servidor (os outros recebem 404).
    Contrato: GET /api/pdfs no servicos/login/LEIA.md.
    Os itens com o mesmo "par" viram um cartão só, na ordem da lista (o 1º é o botão principal). A junção vem só desse
@@ -8,7 +8,9 @@
   const F = window.BAPForm;
   const { esc, api } = window.BAP;
   const lugar = document.getElementById("pdfs");
-  const GRUPOS = [["catalogos", "Catálogos"], ["materiais", "Apresentações e materiais"]];
+  // [chave, título, subtítulo (opcional): o que vale para todos os cartões do grupo]
+  const GRUPOS = [["catalogos", "Catálogos"], ["materiais", "Apresentações e materiais"],
+    ["treinamentos", "Treinamentos", "Para os vendedores: em PDF para ler, em PowerPoint para apresentar."]];
   const USO = { // o uso de cada cartão, em uma frase (a chave é o "par" ou o id; a lista é fixa no serviço)
     "completo-digital": "Todos os itens, para ver na tela.",
     "a4-grafica": "Para mandar imprimir na gráfica.",
@@ -16,6 +18,13 @@
     portfolio: "A BAP e todas as linhas, por sistema e família.",
     lubrificantes: "A apresentação comercial: em PDF para ver ou enviar, em PowerPoint para editar.",
     "kit-filtros": "Os kits de filtros de cada veículo.",
+    "portfolio-lubrificantes": "Lubrificantes e químicos.",
+    "portfolio-baterias": "Linha Leve e Linha Pesada, com a tabela dos códigos.",
+    "portfolio-autocenter": "Os itens de troca rápida.",
+    "treinamento-mecanica-basica": "Os sistemas do carro e a peça certa para cada sintoma.",
+    "treinamento-baterias": "Tecnologias, teste, garantia e venda.",
+    "treinamento-linha-moto": "Pneus, câmaras, óleo, velas e rolamentos.",
+    "treinamento-lubrificantes": "Óleos ProActive, Shiftease e Effitech e os químicos.",
   };
   const NOME_TIPO = { pdf: "PDF", pptx: "PowerPoint" }; // o tipo vem da lista do serviço; sem ele, é PDF
   const IC_BAIXAR = window.BAPConta.IC.pdf;
@@ -76,17 +85,17 @@
     const porPar = new Map();
     for (const p of lista) {
       if (p.par && porPar.has(p.par)) { porPar.get(p.par).itens.push(p); continue; }
-      // [SUPOSIÇÃO] um grupo fora dos 2 conhecidos (ou sem grupo) vai para o 1º: o arquivo aparece, em vez de sumir
+      // [SUPOSIÇÃO] um grupo fora dos conhecidos (ou sem grupo) vai para o 1º: o arquivo aparece, em vez de sumir
       const grupo = GRUPOS.some(([g]) => g === p.grupo) ? p.grupo : GRUPOS[0][0];
       const c = { chave: p.par || p.id, grupo, itens: [p] };
       if (p.par) porPar.set(p.par, c);
       cartoes.push(c);
     }
-    return GRUPOS.map(([g, nome]) => {
+    return GRUPOS.map(([g, nome, sub]) => {
       const doGrupo = cartoes.filter((c) => c.grupo === g);
       if (!doGrupo.length) return "";
       return `<section class="pdf-grupo" aria-labelledby="grupo-${g}">
-        <h2 class="pdf-grupo-tit" id="grupo-${g}">${nome}</h2>
+        <h2 class="pdf-grupo-tit" id="grupo-${g}">${nome}</h2>${sub ? `<p class="pdf-grupo-sub">${sub}</p>` : ""}
         <div class="pdfs">${doGrupo.map(cartao).join("")}</div>
       </section>`;
     }).join("");

@@ -1,0 +1,218 @@
+{
+ "titulo": "Baterias",
+ "original": "Treinamento_Baterias_BAP_Vendedores.pptx",
+ "arquivo": "Treinamento_Baterias_BAP_Vendedores.pptx",
+ "rodape": "Treinamento Baterias BAP  |  Equipe Comercial Externa · uso interno",
+ "formatar_notas": true,
+ "mosaico_original": [
+  1,
+  6,
+  14,
+  15,
+  18,
+  24,
+  33,
+  44
+ ],
+ "pares_original": [
+  1,
+  14,
+  15,
+  18,
+  24,
+  33,
+  43,
+  44
+ ],
+ "editar": {
+  "1": {
+   "t": {
+    "3": "Equipe Comercial Externa  ·  Novembro de 2026"
+   }
+  },
+  "14": {
+   "copiar": [
+    {
+     "formas": [
+      6
+     ],
+     "dy": 0.56
+    }
+   ],
+   "mover": {
+    "7": [
+     null,
+     5.62,
+     null,
+     null
+    ]
+   },
+   "tabela": {
+    "2": [
+     [
+      "Linha",
+      "Garantia",
+      "Amperagem",
+      "Aplicação",
+      "Manutenção"
+     ],
+     [
+      "TF",
+      "24 meses",
+      "{{ah:-TF-24$}}",
+      "Linha leve · convencional premium",
+      "Livre"
+     ]
+    ],
+    "3": [
+     [
+      "EFB",
+      "24 meses",
+      "{{ah:-EFB-24$}}",
+      "Linha leve · start-stop",
+      "Livre"
+     ]
+    ],
+    "4": [
+     [
+      "LP",
+      "18 meses",
+      "{{ah:-LP-18$}}",
+      "Linha leve",
+      "Livre"
+     ]
+    ],
+    "5": [
+     [
+      "MX (leve)",
+      "12 meses",
+      "{{ah:-MX[A-Z]*-12$;LEVE}}",
+      "Linha leve · entrada",
+      "Livre ou baixa"
+     ]
+    ],
+    "6": [
+     [
+      "MX…F",
+      "15 meses",
+      "{{ah:-MX[A-Z]*F-15$}}",
+      "Linha leve e pesada · Frota + Free",
+      "Livre"
+     ]
+    ],
+    "13": [
+     [
+      "MX (pesada)",
+      "12 meses",
+      "{{ah:-MX[A-Z]*-12$;PESADA}}",
+      "Linha pesada · Frota",
+      "Baixa ou livre"
+     ]
+    ]
+   },
+   "t": {
+    "7": "Amperagem: códigos ATIVOS de cada linha na base unificada {{versao_base}}. Manutenção: tabelas técnicas BAP."
+   },
+   "notas": "MENSAGEM-CHAVE\nO portfólio cobre linha leve e pesada, com garantias de 12 a 24 meses — uma escada natural de valor.\n\nCOMO CONDUZIR\nA garantia está no próprio código (os dois últimos números). Linha leve: TF e EFB (24 meses; a EFB é a de start-stop), LP (18 meses) e MX leve (12 meses, entrada). As MX…F têm 15 meses, na leve e na pesada (Frota + Free), e a MX pesada tem 12 meses. As faixas de amperagem saem dos códigos ATIVOS da base unificada. Comente que a manutenção varia (livre ou baixa) conforme o código.\n\nINSIGHT PARA O CAMPO\nTécnica de ancoragem: apresente sempre primeiro a opção de maior garantia. O cliente que ia comprar a de 12 meses passa a comparar com a de 24 e, muitas vezes, sobe para a de 18. Isso aumenta o ticket e a margem sem “empurrar” produto.\n\nPERGUNTE AO TIME\nQual linha cada um mais vende hoje? E qual quase nunca oferece?"
+  },
+  "15": {
+   "t": {
+    "20": "60 Ah · CCA {{dado:60D-LP-18;CCA-18°}} A\nReserva de {{dado:60D-LP-18;RESERVA DE CAPACIDADE}} min\nPolaridade direita\n18 meses de garantia"
+   },
+   "trocar": [
+    [
+     "mesmo CCA (430 A), mesma reserva (90 min)",
+     "mesmo CCA ({{dado:60D-LP-18;CCA-18°}} A, o da {{cod:60D-LP-18}} na base), mesma reserva ({{dado:60D-LP-18;RESERVA DE CAPACIDADE}} min)"
+    ]
+   ]
+  },
+  "24": {
+   "t": {
+    "19": "Exemplo:  |{{cod:60D-LP-18}} com CCA de {{dado:60D-LP-18;CCA-18°}} A → descarregar com {{metade:60D-LP-18;CCA-18°}} A por 15 s. Se terminar com 9,6 V ou mais, a bateria está “ok” para uso."
+   },
+   "trocar": [
+    [
+     "LP60 tem CCA 430 A → metade = 215 A",
+     "a {{cod:60D-LP-18}} tem CCA {{dado:60D-LP-18;CCA-18°}} A → metade = {{metade:60D-LP-18;CCA-18°}} A"
+    ],
+    [
+     "uma LP70 (CCA 560 A → 280 A)",
+     "uma {{cod:70D-MXP-12}} (CCA {{dado:70D-MXP-12;CCA-18°}} A → {{metade:70D-MXP-12;CCA-18°}} A)"
+    ]
+   ]
+  },
+  "25": {
+   "trocar": [
+    [
+     "esquecida no estoque",
+     "esquecida na prateleira"
+    ]
+   ]
+  },
+  "32": {
+   "t": {
+    "2": "Guardar bem a bateria e fechar o ciclo"
+   },
+   "trocar": [
+    [
+     "cuidados de estoque",
+     "cuidados de armazenagem"
+    ]
+   ]
+  },
+  "33": {
+   "t": {
+    "1": "Armazenagem correta: a prateleira também é garantia"
+   },
+   "trocar": [
+    [
+     "estoque mal armazenado",
+     "produto mal armazenado"
+    ]
+   ]
+  },
+  "43": {
+   "trocar": [
+    [
+     "prazo ou limite, estoque, fornecedor",
+     "prazo ou limite, falta do modelo, fornecedor"
+    ],
+    [
+     "prazo · estoque · fornecedor",
+     "prazo · falta do modelo · fornecedor"
+    ],
+    [
+     "prazo ou limite, estoque, já tem fornecedor",
+     "prazo ou limite, falta do modelo, já tem fornecedor"
+    ]
+   ]
+  },
+  "44": {
+   "celulas": {
+    "4": {
+     "0,0": "Falta do modelo"
+    }
+   }
+  },
+  "31": {
+   "t": {
+    "30": "Terminais oxidados",
+    "31": "ou soltos: aquecimento e mau contato"
+   }
+  },
+  "22": {
+   "img": {
+    "3": "desenho:icone_video"
+   },
+   "link_por_palavra": [
+    5,
+    8
+   ]
+  },
+  "41": {
+   "t": {
+    "1": "Velas: partida difícil nem sempre é a bateria"
+   }
+  }
+ }
+}

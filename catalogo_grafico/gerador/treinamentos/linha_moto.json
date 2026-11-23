@@ -1,0 +1,240 @@
+{
+ "titulo": "Linha Moto",
+ "original": "Treinamento_Linha_Moto_BAP_27-10.pptx",
+ "arquivo": "Treinamento_Linha_Moto_BAP_Vendedores.pptx",
+ "rodape": "Treinamento Linha Moto BAP  |  Equipe Comercial Externa · uso interno",
+ "formatar_notas": true,
+ "mosaico_original": [
+  1,
+  8,
+  15,
+  17,
+  23,
+  30,
+  32
+ ],
+ "mosaico_novos": [
+  4
+ ],
+ "pares_original": [
+  1,
+  15,
+  17,
+  23,
+  25,
+  30,
+  32,
+  37
+ ],
+ "editar": {
+  "1": {
+   "t": {
+    "3": "Equipe Comercial Externa  ·  Novembro de 2026"
+   },
+   "notas": "MENSAGEM-CHAVE\nA linha moto vende pouco por vez, mas vende toda semana: quem lê o pneu, não erra o óleo e vende junto vira o fornecedor da loja de moto.\n\nCOMO CONDUZIR\nTreinamento para vendedores e supervisores. Diga a duração prevista (cerca de 1h45 com perguntas) e os cinco módulos: mercado, pneus e câmaras, lubrificantes e químicos, peças e filtros, e venda. As aplicações por modelo (medida de fábrica e viscosidade) são referência de mercado: confirme sempre pela medida do pneu atual ou pelo manual do veículo.\n\nFONTES\nMercado: Abraciclo e Fenabrave. Códigos e aplicações: base unificada BAP."
+  },
+  "3": {
+   "notas": "MENSAGEM-CHAVE\nTrês segmentos de produto, com o mercado na abertura e as técnicas de venda no fim.\n\nCOMO CONDUZIR\nPasse pelos cinco tópicos: mercado de motos, pneus e câmaras, lubrificantes e químicos, peças e filtros, e como vender. Diga que cada módulo termina com uma dica de campo.\n\nPERGUNTE AO TIME\nQual destes produtos de moto vocês mais vendem hoje? E qual quase nunca oferecem?"
+  },
+  "4": {
+   "notas": "MENSAGEM-CHAVE\nAntes do produto, o mercado: moto é a venda de reposição que mais cresce.\n\nCOMO CONDUZIR\nTransição curta. Diga que os números do módulo mostram o tamanho da frota e quais motos mais rodam, e que é daí que sai o mix da loja."
+  },
+  "7": {
+   "notas": "MENSAGEM-CHAVE\nPneu e câmara são a porta de entrada da linha moto: quem lê a lateral do pneu não erra a medida.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo ensina a ler o pneu, escolher a câmara certa e montar a venda casada pneu + câmara."
+  },
+  "14": {
+   "trocar": [
+    [
+     "argumento para girar o estoque com a BAP",
+     "argumento para renovar a prateleira com a BAP"
+    ],
+    [
+     "gire o estoque pelo mais antigo primeiro",
+     "venda primeiro o pneu de DOT mais antigo"
+    ]
+   ]
+  },
+  "15": {
+   "tirar_coluna": {
+    "*": [
+     5
+    ]
+   },
+   "trocar": [
+    [
+     "Estoque somado das filiais em 13/10/2026. ",
+     ""
+    ]
+   ]
+  },
+  "17": {
+   "tirar_coluna": {
+    "*": [
+     3
+    ]
+   },
+   "trocar": [
+    [
+     " Estoque somado em 13/10/2026.",
+     ""
+    ]
+   ]
+  },
+  "19": {
+   "notas": "MENSAGEM-CHAVE\nÓleo de moto não é óleo de carro, e o freio pede o fluido certo.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo cobre a leitura do frasco (SAE, API e JASO), os dois óleos 4T da BAP, o fluido de freio e os químicos que a oficina de moto usa toda semana."
+  },
+  "23": {
+   "apagar": [
+    7,
+    8,
+    15,
+    16
+   ],
+   "trocar": [
+    [
+     " Estoque somado em 13/10/2026.",
+     ""
+    ]
+   ]
+  },
+  "24": {
+   "tirar_coluna": {
+    "*": [
+     4
+    ]
+   }
+  },
+  "25": {
+   "tirar_coluna": {
+    "*": [
+     3
+    ]
+   },
+   "trocar": [
+    [
+     " Estoque somado em 13/10/2026.",
+     ""
+    ]
+   ]
+  },
+  "26": {
+   "notas": "MENSAGEM-CHAVE\nVela, rolamento, lâmpada, filtro e relação: a reposição que gira em toda revisão de moto.\n\nCOMO CONDUZIR\nTransição curta. Diga que aqui a venda é pela referência: a vela pela tabela de equivalência e o rolamento pelo código gravado nele."
+  },
+  "27": {
+   "tirar_coluna": {
+    "*": [
+     3
+    ]
+   },
+   "trocar": [
+    [
+     "VEL7500 tem o maior estoque: motos 2T clássicas e náutica. Estoque somado em 13/10/2026.",
+     "VEL7500: motos 2T clássicas e náutica."
+    ]
+   ]
+  },
+  "29": {
+   "tirar_coluna": {
+    "*": [
+     2
+    ]
+   },
+   "trocar": [
+    [
+     " Estoque somado em 13/10/2026.",
+     ""
+    ]
+   ]
+  },
+  "30": {
+   "tirar_coluna": {
+    "*": [
+     4
+    ]
+   },
+   "trocar": [
+    [
+     "Estoque somado das filiais em 13/10/2026, juntando as versões 2RS e 2Z quando existem as duas. ",
+     ""
+    ]
+   ]
+  },
+  "32": {
+   "t": {
+    "6": "Super Pingão 16 W · 12 V\nVenda o par: pisca queima em dupla\nJunto com o pneu: revisão completa",
+    "10": "Filtro de ar",
+    "11": "Filtro sujo: mais consumo, menos força\nTroca na revisão, junto com o óleo\nConfira a aplicação no Catálogo BAP"
+   },
+   "notas": "MENSAGEM-CHAVE\nLâmpada, filtro de ar e kit relação completam a revisão de moto.\n\nCOMO CONDUZIR\n{{cod:LAM2020}}: lâmpada de pisca de moto, Super Pingão 16 W 12 V; venda o par. Filtro de ar: troca na revisão, junto com o óleo; confira a aplicação no Catálogo BAP antes de oferecer. Kit relação (coroa, pinhão e corrente) está entre os lançamentos chegando: a regra é trocar o kit completo, porque corrente nova em coroa gasta (e o contrário) desgasta rápido.\n\nPERGUNTE AO TIME\nNa última revisão de moto que vocês viram, quais destes itens saíram junto com o óleo?"
+  },
+  "33": {
+   "notas": "MENSAGEM-CHAVE\nA linha moto vende em combo: pergunte, prove e ofereça junto.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo junta tudo: combos para a loja e a oficina, as seis perguntas do balcão, o fechamento em 3 etapas e os motivos de não fechar."
+  },
+  "36": {
+   "trocar": [
+    [
+     "prazo ou limite, estoque, fornecedor",
+     "prazo ou limite, falta do modelo, fornecedor"
+    ],
+    [
+     "prazo · estoque · fornecedor",
+     "prazo · falta do modelo · fornecedor"
+    ],
+    [
+     "prazo ou limite, estoque, já tem fornecedor",
+     "prazo ou limite, falta do modelo, já tem fornecedor"
+    ]
+   ]
+  },
+  "37": {
+   "celulas": {
+    "4": {
+     "0,0": "Falta do modelo"
+    }
+   },
+   "trocar": [
+    [
+     "câmara (maior estoque BAP)",
+     "câmara (a que mais gira)"
+    ]
+   ]
+  },
+  "38": {
+   "notas": "MENSAGEM-CHAVE\nO checklist resume o treinamento em dez atitudes na loja de moto.\n\nCOMO CONDUZIR\nUse como roteiro de visita na terça, Dia Foco moto. Peça para cada um marcar o que já faz e escolher um item para começar na próxima visita.\n\nPERGUNTE AO TIME\nQual item do checklist faria mais diferença no seu resultado do mês?"
+  },
+  "40": {
+   "notas": "MENSAGEM-CHAVE\nQuem lê o pneu acerta a medida; quem pergunta da roda vende a câmara.\n\nCOMO CONDUZIR\nAbra para dúvidas e lembre que terça é o Dia Foco moto.\n\nFONTES\nAbraciclo (2025 e jan-set/2026), Fenabrave (ranking set/2025), Hankook (índices de carga e velocidade), AMSOIL/JASO (JASO T 904), Webmotors e Canaltech (leitura do pneu e DOT), FMVSS 116 (fluido de freio). Códigos e aplicações: base unificada BAP."
+  }
+ },
+ "inserir_depois": {
+  "3": [
+   {
+    "de": "Treinamento_Baterias_BAP_Vendedores.pptx",
+    "molde": 4,
+    "t": {
+     "5": "Ler",
+     "6": "a medida, a carga e a velocidade escritas na lateral do pneu",
+     "10": "Indicar",
+     "11": "a câmara certa e o óleo JASO MA na viscosidade do manual",
+     "15": "Explicar",
+     "16": "por que óleo de carro não serve na moto e o DOT do freio",
+     "20": "Cruzar",
+     "21": "vela e rolamento pela referência, sem chute",
+     "25": "Montar",
+     "26": "combos de roda, revisão, freio e oficina",
+     "30": "Fechar",
+     "31": "o pedido com as perguntas certas, dentro da regra"
+    },
+    "icone": {
+     "4": "FaMagnifyingGlass",
+     "9": "FaBullseye",
+     "14": "FaComments",
+     "19": "FaLink",
+     "24": "FaLayerGroup",
+     "29": "FaHandshake"
+    },
+    "notas": "MENSAGEM-CHAVE\nEstes são os seis compromissos do treinamento: ao final, cada um deve conseguir fazer essas coisas sozinho na loja de moto.\n\nCOMO CONDUZIR\nLeia os verbos em voz alta (Ler, Indicar, Explicar, Cruzar, Montar e Fechar). Diga que no fechamento eles voltam como checklist.\n\nPERGUNTE AO TIME\nQual destes seis vocês acham mais difícil hoje no balcão de moto?"
+   }
+  ]
+ }
+}
