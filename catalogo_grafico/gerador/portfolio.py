@@ -264,7 +264,9 @@ def aplicacoes(rows, n=12):
                 else: cur[1] += (' ' if k else '') + ln
         for m, t in tr:
             mod = re.split(r'\s·\s|;\s|\s\(', t.strip(' ·;'))[0].strip(' ,·/')
-            ano = re.search(r'(?:\s+[-–])?\s*(?:\d{2}/)?(?:19|20)\d{2}.*$', mod)            # o ano (e o " - " antes dele)
+            # o ano ("2014–2015") ou o mês/ano da base ("12/97 12/03"), e o " - " antes dele. O mês vai de 01 a 12: o par
+            # de anos curto ("Monza 82/96") e a medida ("60/55W", "90/90-19", '13/16"') não são data
+            ano = re.search(r'(?:\s+[-–])?\s*(?:(?:\d{2}/)?(?:19|20)\d{2}|(?<![\w/.,])(?:0[1-9]|1[0-2])/\d{2}(?![\d/"\'”%A-Za-z])).*$', mod)
             if ano and re.search(r'(?:^|\s)(?<!\d\s)[A-Za-z]-?$', mod[:ano.start()]): continue   # "FORD F 2000": não é ano, o corte partiria o modelo
             if ano: mod = mod[:ano.start()].strip(' ,·/')                                       # tira anos
             if not mod and not m: continue
