@@ -1,0 +1,806 @@
+{
+ "titulo": "Lubrificantes",
+ "original": "Treinamento_Lubrificantes_BAP_Vendedores.pptx",
+ "arquivo": "Treinamento_Lubrificantes_BAP_Vendedores.pptx",
+ "rodape": "Treinamento Lubrificantes BAP  |  Equipe Comercial Externa · uso interno",
+ "formatar_notas": true,
+ "grafia": {
+  "PROACTIVE": "ProActive",
+  "SHIFTEASE": "Shiftease",
+  "EFFITECH": "Effitech"
+ },
+ "nao_codigo": [
+  "HB20"
+ ],
+ "renumerar": {
+  "04": "05",
+  "05": "06",
+  "06": "07",
+  "07": "08"
+ },
+ "mosaico_original": [
+  1,
+  3,
+  12,
+  18,
+  19,
+  29
+ ],
+ "mosaico_novos": [
+  25,
+  26
+ ],
+ "pares_original": [
+  3,
+  12,
+  17,
+  18,
+  19,
+  29,
+  39,
+  40
+ ],
+ "editar": {
+  "1": {
+   "t": {
+    "3": "Equipe Comercial Externa  ·  Novembro de 2026"
+   }
+  },
+  "3": {
+   "t": {
+    "24": "Químicos",
+    "25": "Sprays, silicones e fluidos de freio e de radiador",
+    "27": "05",
+    "30": "Troca de óleo",
+    "31": "Intervalo, uso severo, nível e mitos",
+    "33": "06",
+    "36": "Armazenagem",
+    "37": "Armazenagem, óleo usado e meio ambiente",
+    "39": "07",
+    "42": "Vendendo lubrificantes",
+    "43": "Segmentos, SPIN e mix inteligente",
+    "45": "08",
+    "48": "Cross-sell e fechamento",
+    "49": "Filtros, fluidos, bateria e fechamento"
+   },
+   "icone": {
+    "23": "FaSprayCan",
+    "29": "FaWrench",
+    "35": "FaRecycle",
+    "41": "FaStore",
+    "47": "FaHandshake"
+   },
+   "preencher": {
+    "44": "bg1",
+    "46": "accent1"
+   },
+   "notas": "MENSAGEM-CHAVE\nSão 8 módulos: do que o óleo faz até a venda completa da troca.\n\nCOMO CONDUZIR\nPasse rápido pelos tópicos: fundamentos, leitura do rótulo, aplicações e portfólio, químicos, troca de óleo, armazenagem e meio ambiente, venda e, por fim, cross-sell e fechamento. O módulo de químicos é novo: sprays, silicones e fluidos de freio e de radiador. No fim, checklist e teste de conhecimentos.\n\nPERGUNTE AO TIME\nQual destes temas vocês mais usam hoje na visita? E qual quase nunca?",
+   "mover": {
+    "2": [
+     0.6,
+     1.7,
+     2.306,
+     2.35
+    ],
+    "3": [
+     0.82,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "4": [
+     2.186,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "5": [
+     2.306,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "6": [
+     0.82,
+     2.65,
+     1.906,
+     0.6
+    ],
+    "7": [
+     0.82,
+     3.25,
+     1.906,
+     0.7
+    ],
+    "8": [
+     3.056,
+     1.7,
+     2.306,
+     2.35
+    ],
+    "9": [
+     3.276,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "10": [
+     4.642,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "11": [
+     4.762,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "12": [
+     3.276,
+     2.65,
+     1.906,
+     0.6
+    ],
+    "13": [
+     3.276,
+     3.25,
+     1.906,
+     0.7
+    ],
+    "14": [
+     5.512,
+     1.7,
+     2.306,
+     2.35
+    ],
+    "15": [
+     5.732,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "16": [
+     7.098,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "17": [
+     7.218,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "18": [
+     5.732,
+     2.65,
+     1.906,
+     0.6
+    ],
+    "19": [
+     5.732,
+     3.25,
+     1.906,
+     0.7
+    ],
+    "20": [
+     7.968,
+     1.7,
+     2.306,
+     2.35
+    ],
+    "21": [
+     8.188,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "22": [
+     9.554,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "23": [
+     9.674,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "24": [
+     8.188,
+     2.65,
+     1.906,
+     0.6
+    ],
+    "25": [
+     8.188,
+     3.25,
+     1.906,
+     0.7
+    ],
+    "26": [
+     10.424,
+     1.7,
+     2.306,
+     2.35
+    ],
+    "27": [
+     10.644,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "28": [
+     12.01,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "29": [
+     12.13,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "30": [
+     10.644,
+     2.65,
+     1.906,
+     0.6
+    ],
+    "31": [
+     10.644,
+     3.25,
+     1.906,
+     0.7
+    ],
+    "32": [
+     0.6,
+     4.3,
+     2.306,
+     2.35
+    ],
+    "33": [
+     0.82,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "34": [
+     2.186,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "35": [
+     2.306,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "36": [
+     0.82,
+     5.25,
+     1.906,
+     0.6
+    ],
+    "37": [
+     0.82,
+     5.85,
+     1.906,
+     0.7
+    ],
+    "38": [
+     3.056,
+     4.3,
+     2.306,
+     2.35
+    ],
+    "39": [
+     3.276,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "40": [
+     4.642,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "41": [
+     4.762,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "42": [
+     3.276,
+     5.25,
+     1.906,
+     0.6
+    ],
+    "43": [
+     3.276,
+     5.85,
+     1.906,
+     0.7
+    ],
+    "44": [
+     5.512,
+     4.3,
+     2.306,
+     2.35
+    ],
+    "45": [
+     5.732,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "46": [
+     7.098,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "47": [
+     7.218,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "48": [
+     5.732,
+     5.25,
+     1.906,
+     0.6
+    ],
+    "49": [
+     5.732,
+     5.85,
+     1.906,
+     0.7
+    ],
+    "51": [
+     7.968,
+     4.3,
+     4.762,
+     2.35
+    ],
+    "52": [
+     8.188,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "53": [
+     12.01,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "54": [
+     12.13,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "55": [
+     8.188,
+     5.25,
+     4.362,
+     0.6
+    ],
+    "56": [
+     8.188,
+     5.85,
+     4.362,
+     0.7
+    ]
+   },
+   "copiar": [
+    {
+     "formas": [
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+     ]
+    }
+   ]
+  },
+  "4": {
+   "t": {
+    "26": "a venda com filtros, fluidos, químicos e teste de bateria a cada troca"
+   }
+  },
+  "12": {
+   "t": {
+    "37": "PC-12",
+    "38": "PC-12: nova categoria diesel, com licenças previstas para 2027",
+    "1": "Normas API: quanto mais à frente, mais recente"
+   },
+   "trocar": [
+    [
+     "e, a partir de 2027, a CL-4 (categoria PC-12, primeiras licenças previstas para 01/01/2027)",
+     "e a nova categoria diesel PC-12, prevista para 2027"
+    ]
+   ]
+  },
+  "14": {
+   "trocar": [
+    [
+     "Use para o FIFO no estoque",
+     "Use para o FIFO na prateleira"
+    ],
+    [
+     "FIFO no estoque do cliente",
+     "FIFO na prateleira do cliente"
+    ]
+   ]
+  },
+  "17": {
+   "t": {
+    "29": "DICA DE CAMPO  |Apresente as quatro famílias na ordem do giro da loja: ProActive primeiro, depois Shiftease, fluidos e Effitech."
+   },
+   "trocar": [
+    [
+     "Toda a linha ativa tem estoque nas 7 filiais BAP (ESTOQUE_BAP de 14/09/2026). Os itens “LUB115xx” constam como INATIVO e não entram no treinamento.",
+     "Comece pela família que mais gira na loja do cliente. Os químicos BAP (sprays, silicones, fluidos e aditivos) têm módulo próprio, o 04."
+    ]
+   ]
+  },
+  "18": {
+   "celulas": {
+    "2": {
+     "6,3": "{{api:10W40 PROACTIVE 200}}",
+     "6,4": "10W-40 com {{api:10W40 PROACTIVE 200}} ou anterior"
+    }
+   }
+  },
+  "19": {
+   "celulas": {
+    "2": {
+     "4,1": "10W-40 · {{api:10W40 PROACTIVE 200}}",
+     "10,2": "{{oleo_base:85W140 SHIFTEASE120}}"
+    }
+   },
+   "trocar": [
+    [
+     "Os óleos de câmbio (SHIFTEASE) são todos minerais e mais grossos;",
+     "Os óleos de câmbio (SHIFTEASE) são mais grossos; na base, o 80W e o 80W-90 são minerais e o 85W-140 ({{cod:85W140 SHIFTEASE120}}) é sintético;"
+    ]
+   ]
+  },
+  "28": {
+   "t": {
+    "2": "Produto bem guardado e óleo usado no destino certo"
+   },
+   "trocar": [
+    [
+     "Estoque bem cuidado",
+     "Produto bem guardado"
+    ]
+   ]
+  },
+  "29": {
+   "t": {
+    "1": "Armazenagem na loja do cliente"
+   }
+  },
+  "35": {
+   "trocar": [
+    [
+     "A divisão usa o volume em estoque das filiais como referência de giro.",
+     "A divisão segue o giro de vendas da região."
+    ]
+   ]
+  },
+  "39": {
+   "trocar": [
+    [
+     "prazo ou limite, estoque, fornecedor",
+     "prazo ou limite, falta do produto, fornecedor"
+    ],
+    [
+     "prazo · estoque · fornecedor",
+     "prazo · falta do produto · fornecedor"
+    ],
+    [
+     "prazo ou limite, estoque, já tem fornecedor",
+     "prazo ou limite, falta do produto, já tem fornecedor"
+    ]
+   ]
+  },
+  "40": {
+   "celulas": {
+    "4": {
+     "0,0": "Falta do produto"
+    }
+   }
+  },
+  "22": {
+   "mover": {
+    "7": [
+     null,
+     2.68,
+     null,
+     null
+    ],
+    "14": [
+     null,
+     2.68,
+     null,
+     null
+    ],
+    "21": [
+     null,
+     2.68,
+     null,
+     null
+    ],
+    "8": [
+     null,
+     3.34,
+     null,
+     0.3
+    ],
+    "15": [
+     null,
+     3.34,
+     null,
+     0.3
+    ],
+    "22": [
+     null,
+     3.34,
+     null,
+     0.3
+    ],
+    "28": [
+     null,
+     5.0,
+     null,
+     null
+    ],
+    "35": [
+     null,
+     5.0,
+     null,
+     null
+    ],
+    "42": [
+     null,
+     5.0,
+     null,
+     null
+    ],
+    "29": [
+     null,
+     5.66,
+     null,
+     0.3
+    ],
+    "36": [
+     null,
+     5.66,
+     null,
+     0.3
+    ],
+    "43": [
+     null,
+     5.66,
+     null,
+     0.3
+    ]
+   },
+   "t": {
+    "36": "Fluidos de radiador, de 1 L a 20 L"
+   },
+   "trocar": [
+    [
+     "e 120 85W-140 GL-5, todos minerais",
+     "e 120 85W-140 GL-5 (os dois primeiros minerais; o 85W-140, {{cod:85W140 SHIFTEASE120}}, sintético)"
+    ]
+   ]
+  }
+ },
+ "inserir_depois": {
+  "23": [
+   {
+    "molde": 15,
+    "nao_renumerar": true,
+    "t": {
+     "0": "04",
+     "1": "Químicos",
+     "2": "Sprays, silicones e fluidos: a venda que completa a manutenção"
+    },
+    "notas": "MENSAGEM-CHAVE\nQuímico é a venda que completa a troca de óleo e a revisão: giro rápido e pouca disputa de preço.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo apresenta as quatro famílias de químicos BAP, o código de cada item e onde cada um aparece na oficina."
+   },
+   {
+    "molde": 17,
+    "nao_renumerar": true,
+    "t": {
+     "0": "MÓDULO 04 · QUÍMICOS",
+     "1": "Químicos BAP: quatro famílias",
+     "5": "Sprays",
+     "6": "Aerossol de 300 ml",
+     "7": "Desengripante · {{cod:AER12000}}\nDescarbonizante · {{cod:AER12001}}\nSilicone · {{cod:AER12002}}",
+     "11": "Silicones",
+     "12": "Adesivo de vedação",
+     "13": "85 g, oxímico/neutro · {{cod:SIL3500}} e {{cod:SIL3501}}\n50 g, alta temperatura · {{cod:SIL3502}} e {{cod:SIL3503}}",
+     "17": "Freio",
+     "18": "Fluido DOT 3 e DOT 4",
+     "19": "DOT 3, 500 ml · {{cod:FLU15001}}\nDOT 4, 500 ml · {{cod:FLU15002}}",
+     "23": "Fluidos",
+     "24": "Radiador e diesel",
+     "25": "Fluido orgânico e anticorrosivo, de 1 L a 20 L\nÁgua desmineralizada · {{cod:RAD25009P}}\nAditivo diesel · {{cod:DIE5500}}",
+     "29": "DICA DE CAMPO  |São {{n:Fluidos e Químicos}} químicos ATIVOS na base: itens de giro rápido, que entram em qualquer pedido de troca de óleo e de revisão."
+    },
+    "icone": {
+     "4": "FaSprayCan",
+     "10": "FaLayerGroup",
+     "16": "FaDroplet",
+     "22": "FaTemperatureHigh"
+    },
+    "notas": "MENSAGEM-CHAVE\nOs químicos BAP se dividem em quatro famílias: sprays, silicones, fluido de freio e radiador/diesel.\n\nCOMO CONDUZIR\nApresente uma família por vez e mostre o código. Os sprays e o silicone são venda de balcão; o fluido de freio e o de radiador entram na revisão; o aditivo diesel é do frotista. Os números e os códigos saem da base unificada.\n\nPERGUNTE AO TIME\nQual destes químicos os seus clientes mais pedem? E qual vocês nunca ofereceram?"
+   },
+   {
+    "molde": 18,
+    "nao_renumerar": true,
+    "t": {
+     "0": "MÓDULO 04 · QUÍMICOS",
+     "1": "Químicos BAP: o código e quando oferecer",
+     "6": "ATENÇÃO  |Fluido de freio: use o DOT escrito na tampa. DOT 5 (silicone) não se mistura com DOT 3 e DOT 4."
+    },
+    "tabela": {
+     "2": [
+      [
+       "Código",
+       "Produto",
+       "Embalagem",
+       "Tipo",
+       "Quando oferecer"
+      ],
+      [
+       "{{cod:AER12000}}",
+       "Desengripante",
+       "300 ml",
+       "Spray",
+       "Parafuso preso e umidade em conector"
+      ],
+      [
+       "{{cod:AER12001}}",
+       "Descarbonizante",
+       "300 ml",
+       "Spray",
+       "Borboleta, carburador e bicos sujos"
+      ],
+      [
+       "{{cod:AER12002}}",
+       "Silicone spray",
+       "300 ml",
+       "Spray",
+       "Plásticos, borrachas e acabamento"
+      ],
+      [
+       "{{cod:SIL3500}}",
+       "Adesivo de silicone",
+       "85 g",
+       "Oxímico/neutro",
+       "Vedação geral de tampas e juntas"
+      ],
+      [
+       "{{cod:SIL3502}}",
+       "Adesivo de silicone HT",
+       "50 g",
+       "Alta temperatura",
+       "Junta que esquenta (cárter, tampa de válvulas)"
+      ],
+      [
+       "{{cod:FLU15001}}",
+       "Fluido de freio DOT 3",
+       "500 ml",
+       "Base glicol",
+       "Quando a tampa pede DOT 3"
+      ],
+      [
+       "{{cod:FLU15002}}",
+       "Fluido de freio DOT 4",
+       "500 ml",
+       "Base glicol",
+       "Tampa pede DOT 4; serve onde pede DOT 3"
+      ],
+      [
+       "{{cod:RAD25001P}}",
+       "Fluido de radiador orgânico",
+       "1 L",
+       "Pronto para uso",
+       "Completar ou trocar, sem diluir"
+      ],
+      [
+       "{{cod:RAD25009P}}",
+       "Água desmineralizada",
+       "1 L",
+       "—",
+       "Diluir o fluido concentrado"
+      ],
+      [
+       "{{cod:DIE5500}}",
+       "Aditivo para diesel",
+       "500 ml",
+       "Estabilizador",
+       "Diesel parado: frota, máquina e gerador"
+      ]
+     ]
+    },
+    "notas": "MENSAGEM-CHAVE\nCada químico tem um código e um momento certo de oferecer.\n\nCOMO CONDUZIR\nLeia a tabela linha a linha, ligando cada item a um serviço da oficina. Fluido de freio é o DOT da tampa (DOT 4 serve onde pede DOT 3; DOT 5, de silicone, não se mistura). Fluido de radiador concentrado se dilui com água desmineralizada ({{cod:RAD25009P}}), nunca com água da torneira; o pronto para uso entra direto. Há também fluido de 5 L e 20 L, água de 20 L ({{cod:RAD25019P}}), aditivo diesel de 100 ml ({{cod:DIE5501}}) e silicones na cor cinza ({{cod:SIL3501}} e {{cod:SIL3503}}).\n\nINSIGHT PARA O CAMPO\nMonte com o cliente o Kit Oficina: desengripante, descarbonizante, silicone spray e adesivo HT. São quatro itens que saem toda semana.",
+    "larguras": {
+     "2": [
+      1.35,
+      2.5,
+      1.35,
+      1.75,
+      5.18
+     ]
+    },
+    "cor_celulas": {
+     "2": {
+      "9,0": "tx2",
+      "10,0": "tx2"
+     }
+    }
+   },
+   {
+    "molde": 22,
+    "nao_renumerar": true,
+    "t": {
+     "0": "MÓDULO 04 · QUÍMICOS",
+     "1": "Onde oferecer químicos",
+     "5": "Desengripante",
+     "6": "Solta parafuso preso e expulsa umidade. Não substitui o lubrificante.",
+     "7": "Onde aparece: |oficina mecânica, borracharia, elétrica e motos.",
+     "8": "{{cod:AER12000}} · 300 ml",
+     "12": "Descarbonizante",
+     "13": "Limpa corpo de borboleta, carburador e bicos sem desmontar.",
+     "14": "Onde aparece: |troca do filtro de ar e revisão.",
+     "15": "{{cod:AER12001}} · 300 ml",
+     "19": "Silicone spray",
+     "20": "Protege e dá acabamento em plásticos e borrachas.",
+     "21": "Onde aparece: |lava-jato, estética automotiva e balcão.",
+     "22": "{{cod:AER12002}} · 300 ml",
+     "26": "Adesivo de silicone",
+     "27": "Veda tampas e juntas. O HT é para o que esquenta: cárter e tampa de válvulas.",
+     "28": "Onde aparece: |retífica, oficina e troca de junta.",
+     "29": "{{cod:SIL3500}} · {{cod:SIL3502}} (HT)",
+     "33": "Fluido de freio",
+     "34": "Use o DOT da tampa. A troca é periódica: o fluido absorve umidade.",
+     "35": "Onde aparece: |troca de pastilha, de cilindro de roda e revisão.",
+     "36": "{{cod:FLU15001}} · {{cod:FLU15002}}",
+     "40": "Aditivo diesel",
+     "41": "Estabiliza o diesel parado e protege o sistema de injeção.",
+     "42": "Onde aparece: |frotista, caminhão, máquina e gerador.",
+     "43": "{{cod:DIE5500}} · 500 ml",
+     "47": "DICA DE CAMPO  |Químico também é venda de impulso: sugira ao cliente expor os sprays e o silicone no balcão, perto do caixa."
+    },
+    "icone": {
+     "4": "FaSprayCan",
+     "11": "FaWind",
+     "18": "FaHandsBubbles",
+     "25": "FaLayerGroup",
+     "32": "FaDroplet",
+     "39": "FaGasPump"
+    },
+    "notas": "MENSAGEM-CHAVE\nQuímico vende quando o vendedor sabe onde ele aparece no dia a dia da oficina.\n\nCOMO CONDUZIR\nPasse pelos seis cartões e peça um exemplo real para cada um. O adesivo HT é para junta que esquenta; o comum, para vedação geral. Fluido de freio: sempre o DOT da tampa.\n\nPERGUNTE AO TIME\nEm qual cliente da sua carteira o aditivo diesel faria sentido?",
+    "cor_texto": {
+     "43": "tx2"
+    }
+   }
+  ]
+ }
+}
