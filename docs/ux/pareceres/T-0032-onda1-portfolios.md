@@ -72,3 +72,33 @@ Isso também faz parte da melhoria 13 (média). Depois, a prova dessas 5 página
 5. **Quem somos** nos 7 portfólios mostra "44 produtos", ao lado de uma capa com "7 produtos" (Moto). É a empresa, e o cartão diz isso, mas é a mesma palavra com 2 números. Vai para a marca.
 
 **Resultado:** Pesada, Moto e Baterias podem seguir ao Alexandre. Geral, Leve, Lubrificantes, Acessórios e Autocenter voltam para os 3 ajustes. Depois, confiro só as páginas citadas.
+
+---
+
+## Reteste (head `79fb910`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 13:13 (Manaus) |
+| O que foi revisto | As 19 imagens de `antes_depois_ajustes/` e a capa da Moto (`png/moto/moto_p01.png`). Nos 8 PDFs, de novo por script: numeração, destino dos links, sobreposição e a contagem da capa |
+| Resultado | **Os 8 PDFs: LIBERADO.** Os 3 🟡 estão 🟢, sem 🔴 e sem 🟡 |
+
+- 🟢 **🟡 1, especificações:**
+  - Cintas e Catracas (Acessórios p6, geral p85): a lista está em 1 coluna e mostra o que diferencia o item ("3 t · 50 mm · 9 m · gancho J"; "5 t…"; "10 t · 100 mm…");
+  - Aditivos (Lubrificantes p7, geral p81): cada linha se lê inteira, com a cor e o uso;
+  - Selantes (Lubrificantes p9, geral p83): cada linha se lê inteira, com o peso.
+  Não sobra linha igual, e a lista cabe acima do rodapé.
+- 🟢 **🟡 2, Embreagem Remanufaturada:** saiu da Leve (43 págs.) e do geral (86). Ficou na Pesada (p8), com as aplicações.
+  - A divisória da Leve se renumera sem buraco.
+  - A contagem acompanha: "38 produtos · 4.046 itens" na capa da Leve e "38 produtos" no cartão da pág. 3 do geral.
+  - Lâmpadas (Leve, Pesada e Moto) e Catraca de Freio (Pesada) mostram as especificações, sem página vazia.
+- 🟢 **🟡 3, Bobcat e Asia Motors:** saíram do Autocenter p6, da Leve p38 e do geral p39. As outras linhas não se movem.
+- 🟢 **A vela vira ícone** (Leve p33, Moto p4, geral p34 e p70): o ícone fica centrado na caixa, como o do filtro, e o selo NOVIDADE continua no lugar.
+- 🟢 **Grafias:** "FZR 1000" (Moto p4 e p7), MWM e ix35 (Leve p13 e p19). Muda só a palavra, sem mexer na linha.
+- 🟢 **Os 8 PDFs:** a numeração bate em todas as páginas, todos os links levam ao produto certo, e nenhum texto se sobrepõe.
+
+### Notas do reteste (não seguram)
+1. **Capa da Moto:** a fileira de 3 fotos (filtro de ar, óleos e rolamento) fica alinhada e no mesmo raio das outras capas. Mas o subtítulo começa por "Pneus, câmaras…", e a fileira não tem pneu. Se der, o pneu entra no lugar de uma das 3, porque é o produto que a linha mais vende.
+2. **Formato da especificação que vem da base** (para o `catalogo-dados`): na Catraca de Freio (Pesada p10), "Manual/ 28e/ 3f/ ch14/ carreta" e "Diant. · Manual · 24 estrias · 1F · CH19" na mesma lista; nas Cintas, "800KG 25 mm · 4,6 m jogo 02 peca", ao lado de "3 t · 50 mm".
+
+**Resultado do reteste: LIBERADO.** Os 8 portfólios da onda 1 podem seguir ao Alexandre (pelo `po`).
