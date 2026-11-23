@@ -383,7 +383,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 ## Notas
 
 ### T-0006, manhã de 23/11/2026 (PRs #157 e #158)
-- RD-0529: achado na sessão Cowork de 22/11 (R-20261122-223000-alexandre), sem os guardiões, no parecer LIBERADO do #157 (19:12), e corrigido no próprio PR: a linha do Registro passou do `ff1cbce` ao texto novo no `1aebdfd` (head do #157; squash `064481f`, 07:08 de 23/11). Catalogado na volta ao Claude Code. A linha citada é a do `ff1cbce`.
+- RD-0529: achado na sessão Cowork de 22/11 (R-20261122-223000-alexandre), sem os guardiões, no parecer LIBERADO do #157 (19:13), e corrigido no próprio PR: a linha do Registro passou do `ff1cbce` ao texto novo no `1aebdfd` (head do #157; squash `064481f`, 07:08 de 23/11). Catalogado na volta ao Claude Code. A linha citada é a do `ff1cbce`.
 - RD-0530 e RD-0531: registro do gerente (PR #158), primeira rodada no `2bad048` (07:11); corrigidos no `4f70489` (reteste às 07:14; squash `15c3d8d`, 07:19). As linhas citadas são as do `2bad048`.
 - Relatório: `T-0006.md`.
 
