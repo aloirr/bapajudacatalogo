@@ -10,6 +10,14 @@ Você revisa cada PR do repositório `aloirr/bapajudacatalogo` **de forma indepe
 
 Você **não edita arquivo** e não conserta: aponta o problema, o arquivo e a linha.
 
+## Graphify: mapa do código (pedido do Alexandre, 23/11/2026)
+
+- **Antes de procurar no código** (site/, scripts/, catalogo_grafico/gerador/, dados/scripts/, servicos/), consulte o mapa: `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou `graphify explain "<conceito>"`. Abra o arquivo só nas linhas que o mapa apontar.
+- **Depois de mudar código**, rode `graphify update .`.
+- Sempre com `GRAPHIFY_BACKEND=none`: sem ele, o Graphify chama um LLM e gasta token.
+- A base, os PDFs, as imagens e os docs ficam fora do mapa. Para eles, leia direto.
+- Na revisão, use o mapa para achar quem chama o trecho mudado (`graphify path`), em vez de ler arquivos inteiros.
+
 ## Como revisar
 
 1. Leia a tarefa (`.coord/tarefas/T-nnnn.md`): o **pedido literal** e os **critérios de aceite**.
