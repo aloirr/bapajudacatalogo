@@ -1,0 +1,28 @@
+Testes T-0029 · 23/11/2026 12:30 (Manaus) · PR #179, head 0133f6f726084443bbd705deeb0352d2a2737c66 (main 823578c7d9b7)
+Resultado geral ........ PASSOU
+
+1. Portfólio regerado (PYTHONHASHSEED=0, base do branch) x entrega
+   87/87 páginas; texto igual (0 págs diferentes); pixel igual a 150 ppi (0 págs) ... PASSOU
+   sha256 da entrega 14d24e81701acb8c23ae7c1894d8e61485b86f8cec29d8790fe866f0efeab410 (confere com o pedido)
+   sha256 regerado   195e60ba4cd4ab4d41eba8d048e8f09b7a3d161737d3ac028626d5251c0e0dfe: difere SÓ no metadado (creationDate/modDate)
+   log: 4573 itens, 87 págs; LEVE 10 sist./39 fam., PESADA 9/24, MOTO 4/7, UNIVERSAL 4/9
+   Portfólio do main x do branch: 32 páginas mudam (esperado na T-0029; pág. 2 = "bom custo-benefício")
+2. A4 / Completo Digital / Linha Moto, branch x main x entrega
+   A4 ............. 56 págs: branch=main e branch=entrega, texto e pixel 150 ppi iguais ... PASSOU
+   Digital ........ 311 págs: idem ................................................... PASSOU
+   Linha Moto ..... 17 págs: idem ................................................... PASSOU
+   (sha256 diferem só pela data no metadado; branch x main A4 e Digital: metadado igual)
+   Os 3 arquivos de entrega não mudam no PR (sha256 iguais no branch e no main).
+3. Testes do gerador (teste_fraga_complementos, teste_autoimpact_pdf, teste_bloco_b_pdf): 23/23 OK ... PASSOU
+4. Texto do Portfólio (sem acento, sem caixa): R$ 0, estoque 0, preço 0, MOQ 0, FOB 0, USD 0,
+   ranking 0, fornecedor 0, BAP BOX 0, LINHA_ORIGEM 0, OBS_INTERNA 0, SUNRISE 0, AUTOIMPACT 0,
+   "uso interno" 0, compra 0, margem 0 ................................................ PASSOU
+   Observação: "custo" aparece 1 vez, pág. 2, em "bom custo-benefício" (texto pedido na 15a,
+   no lugar de "preço acessível"); não é dado interno.
+5. Nome e download: catalogo_grafico/entregas/Portfolio_Produtos_BAP_AUTOPARTS.pdf (mesmo nome);
+   servicos/login/server.mjs, lista PDFS, id 'portfolio', re /^Portfolio_Produtos_BAP_AUTOPARTS\.pdf$/,
+   pasta catalogo_grafico/entregas; o PR não mexe em servicos/, site/, scripts/ nem dados/ ... PASSOU
+6. gerar_site.py ......... PASSOU (rc 0, 4.419 produtos, 0 [PARADO], 0 [ERRO])
+   produtos.json branch = main, byte a byte (sha256 04af607e...0510449); contra o versionado só muda "gerado_em"
+   palavra interna no JSON: 0
+prints ................ testes/prints/T-0029/ (págs. 1, 2, 45 e 64 do Portfólio, 100 ppi)
