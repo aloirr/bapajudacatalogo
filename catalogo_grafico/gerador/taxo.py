@@ -130,7 +130,22 @@ def familia_of(line, desc):
     return 'OUTROS'
 
 
-HEAVY = re.compile(r'CAMINH|ÔNIBUS|ONIBUS|REBOQUE|CARRETA|IMPLEMENTO|SCANIA|CONSTELLATION|WORKER|DELIVERY|\bTITAN\b|ATEGO|AXOR|ACTROS|ACCELO|AROCS|\bCARGO\b|STRALIS|TECTOR|CURSOR|EUROCARGO|AGRALE|INTERNATIONAL|F-?12000|F-?14000|F-?4000|\bC-?1[0-9]{3}\b|\bOF-?\d{4}\b|\bOH-?\d{4}\b|\bLS-?\d{4}\b|\bLO-?\d{3,4}\b|\bL-?\d{4}\b|\bFH\d*\b|\bFM\d+\b|\bNL\d+\b|\bNH\d+\b|\bB\d{1,2}[MR]\b|\bB58\b|LINHA PESADA|\b(?:[5-9]|[1-3]\d)\.\d{3}\b')
+HEAVY = re.compile(
+    r'CAMINH|ÔNIBUS|ONIBUS|REBOQUE|CARRETA|IMPLEMENTO|SCANIA|CONSTELLATION|WORKER|DELIVERY|\bTITAN\b|ATEGO|AXOR|ACTROS|ACCELO|AROCS|STRALIS|TECTOR|CURSOR|EUROCARGO|AGRALE|INTERNATIONAL|\bF-?(?:4|1[1-9]|2\d)000\b|\bC-?1[0-9]{3}\b|\bOF-?\d{4}\b|\bOH-?\d{4}\b|\bLS-?\d{4}\b|\bLO-?\d{3,4}\b|\bL-?\d{4}\b|\bFH\d*\b|\bFM\d+\b|\bNL\d+\b|\bNH\d+\b|\bB\d{1,2}[MR]\b|\bB58\b|LINHA PESADA|\b(?:[5-9]|[1-3]\d)\.\d{3}\b'
+    # T-0029: o Cargo só é o caminhão Ford (com FORD ou com o número do modelo); "Ducato Cargo", "Scudo Cargo",
+    # "Expert Cargo" e "Doblò (exc. Cargo)" são vans e utilitários
+    r'|\bFORD\s+(?:\d{3,4}\s+)?CARGO\b|\b\d{3,4}[A-Z]?\s?CARGO\b|\bCARGO\s*[:,]?\s*(?!(?:19|20)\d\d\b)\d{3,4}\b'
+    # máquinas agrícolas e de obra
+    r'|TRATOR|COLHE(?:ITA)?DEIRA|COLHEDORA|ESCAVADEIRA|CARREGADEIRA|MOTONIVELADORA|\bPATROL\b|COMPACTADOR|EMPILHADEIRA|FORWARDER'
+    r'|CATERPILLAR|CLAAS|JOHN DEERE|MASSEY FERGUSON|NEW HOLLAND|\bCASE\b|VALTRA|VALMET|\bCBT\b|DYNAPAC|MULLER'
+    r'|PUTZMEISTER|PUTSMEISTER|ATLAS COPCO|TEREX|KOMATSU|\bJCB\b|JACTO|SANTA MATILDE|\bSLC\b|RANDON|INGERSOLL|WORTHINGTON'
+    # motores diesel pesados (pelo modelo do motor: o Troller "MWM Sprint" e "Cummins ISF" fica leve)
+    r'|MOTORES?\s+(?:CUMMINS|ISBE|MWM|PERKINS|DEUTZ)|\bISBE\b|\bN?T?A?855|\bOM-?\s?(?:3\d\d|4\d\d|9\d\d)|PERKINS\s+\d{4}|MWM\s?D-?229|DEUTZ'
+    # caminhões Fiat, VW, GM e MB pelo número; Volare, DAF e Iveco
+    r'|\bFIAT\s+(?:FIAT\s+)?(?:1[2-9]0|ALLIS)\b|\bFNM\b|\b(?:VW|VOLKSWAGEN)\s+(?:[5-9]|[1-3]\d)[-.]?\d{3}\b'
+    r'|\b(?:GM|GMC|CHEVROLET)\s+(?:[ACD]-?[4-7]0|D-?1[1-4]000|\d-\d{3})\b'
+    r'|\b(?:MB|MERCEDES[- ]BENZ)\s+(?:(?:L[ABKOPS]{0,2}|O[FH]?)[-\s]?\d{3,4}|\d{4}|[6-9]\d{2})[A-Z]{0,3}\b'
+    r'|VOLARE|\bDAF\b|EUROTECH|\bVERTIS\b|\bF-?[67]00\b|\bB-?1\d{3,4}\b')
 LIGHT_BR = re.compile(r'\b(FIAT|GM|CHEVROLET|RENAULT|TOYOTA|HONDA|HYUNDAI|NISSAN|PEUGEOT|CITRO[ËE]N|JEEP|KIA|MITSUBISHI|AUDI|BMW|CHERY|JAC|SUZUKI|SEAT|DODGE|CHRYSLER|LAND ROVER|TROLLER|LIFAN|DAEWOO|ASIA)\b')
 LIGHT_MODELS = re.compile(r'\b(GOL|SAVEIRO|VOYAGE|FOX|POLO|UP|PARATI|GOLF|JETTA|PASSAT|AMAROK|KOMBI|FUSCA|SPACEFOX|CROSSFOX|VIRTUS|NIVUS|T-CROSS|TIGUAN|FIESTA|KA|ECOSPORT|FOCUS|RANGER|COURIER|ESCORT|FUSION|SPRINTER|CLASSE|A160|A190|C180|DAILY)\b')
 MOTO = re.compile(r'MOTOCICLETA|\bMOTO\b|\b4T\b|JASO MA|\bCG\s?\d{3}|\bTITAN (?:1[2-6]0|125)\b|\bBIZ\b|\bBROS\b|\bYBR\b|\bFAZER\b|\bXRE\b|\bNXR\b|\bPOP \d{3}')

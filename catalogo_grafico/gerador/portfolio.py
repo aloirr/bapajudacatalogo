@@ -9,7 +9,7 @@ import sys, os, re, collections, html, datetime
 import pandas as pd
 import apres_bemol as A
 from apres_bemol import S, W, H
-from taxo import ORDER_SIS, META, HEAVY
+from taxo import ORDER_SIS, META, HEAVY, LIGHT_BR, LIGHT_MODELS
 from plural import plural
 from detalhe import BASE_UNIFICADA as BASE   # a base unificada do Git (dados/), como nos 3 PDFs
 from digital2 import ANO                     # o ano do Catálogo BAP (2027): capa, contracapa e pág. 3
@@ -177,9 +177,23 @@ def carro(mod, m):
     return mt, ws[0]
 
 
+# Linha Pesada, item LEVE E PESADA (T-0029, 16a): qual aplicação sai. As regras do taxo.linha_of (HEAVY, LIGHT_BR e
+# LIGHT_MODELS), sem cópia. 'a' (padrão): fica só a que o HEAVY reconhece como pesada. 'b': sai só a que o linha_of
+# daria LEVE por reconhecer o veículo leve (leve e não pesado); a que ele não reconhece fica (trator, motor, mas também
+# carro de marca fora do LIGHT_BR, como Volvo V40, Lexus ou Mini). Uso da 'b': P.REGRA_16A = 'b' antes do P.build.
+REGRA_16A = 'a'
+
+
+def sai_da_pesada(m, t, regra=None):
+    a = (m + ' ' + t).upper()                       # como no taxo.linha_of
+    h = bool(HEAVY.search(a))
+    if (regra or REGRA_16A) == 'a': return not h
+    return bool(LIGHT_BR.search(a) or LIGHT_MODELS.search(a)) and not h
+
+
 def aplicacoes(rows, n=12, so_pesado=(), so_leve=False):
     """principais aplicações na ordem do catálogo (ranking): montadora + modelos, sem repetir. Nos códigos de
-    `so_pesado`, só a aplicação de veículo pesado (a regra `taxo.HEAVY`, a mesma que dá a LINHA)"""
+    `so_pesado`, sai a aplicação de veículo leve (`sai_da_pesada`, no veículo que a linha mostra)"""
     out, vistos = [], set()
     for r in rows:
         pesado = r['code'].strip().upper() in so_pesado
@@ -196,16 +210,18 @@ def aplicacoes(rows, n=12, so_pesado=(), so_leve=False):
                     cur = ['', ln]; tr.append(cur); vistas.add(p1)
                 else: cur[1] += (' ' if k else '') + ln
         for m, t in tr:
-            if pesado and not HEAVY.search((m + ' ' + t).upper()): continue   # como no taxo.linha_of
-            if so_leve and HEAVY.search((m + ' ' + t).upper()): continue      # Autocenter: só veículo leve (T-0032)
             mod = re.split(r'\s·\s|;\s|\s\(', t.strip(' ·;'))[0].strip(' ,·/')
             # o ano ("2014–2015") ou o mês/ano da base ("12/97 12/03"), e o " - " antes dele. O mês vai de 01 a 12: o par
             # de anos curto ("Monza 82/96") e a medida ("60/55W", "90/90-19", '13/16"') não são data
-            ano = re.search(r'(?:\s+[-–])?\s*(?:(?:\d{2}/)?(?:19|20)\d{2}|(?<![\w/.,])(?:0[1-9]|1[0-2])/\d{2}(?![\d/"\'”%A-Za-z])).*$', mod)
+            ano = re.search(r'(?:\s+[-–])?\s*(?:(?<!\d)(?:\d{2}/)?(?:19|20)\d{2}|(?<![\w/.,])(?:0[1-9]|1[0-2])/\d{2}(?![\d/"\'”%A-Za-z])).*$', mod)
             if ano and re.search(r'(?:^|\s)(?<!\d\s)[A-Za-z]-?$', mod[:ano.start()]): continue   # "FORD F 2000": não é ano, o corte partiria o modelo
             if ano: mod = mod[:ano.start()].strip(' ,·/')                                       # tira anos
             if not mod and not m: continue
-            if len(mod) > 46: mod = mod[:46].rsplit('/', 1)[0].rsplit(',', 1)[0].strip(' ,/') + '…'
+            if pesado and sai_da_pesada(m, mod): continue        # o veículo que a linha mostra, não a linha inteira
+            if so_leve and not sai_da_pesada(m, mod, 'a'): continue   # Autocenter: sai o veículo pesado (T-0032)
+            if len(mod) > 46:                                                # corta no separador; sem ele, na palavra inteira
+                c = mod[:46] if re.search(r'[/,]', mod[:46]) else mod[:46].rsplit(' ', 1)[0]
+                mod = c.rsplit('/', 1)[0].rsplit(',', 1)[0].strip(' ,/') + '…'
             mod = re.sub(r'(?i)\s*\b(?:diant|tras|dir|esq|sup|inf)(?:eir[oa]|eit[oa]|uerd[oa]|erior)?\.?(?=\s|$)', '', mod).strip(' ,·/+')
             if not mod: continue
             k = carro(mod, m)                                                # não repetir o mesmo carro
@@ -252,9 +268,12 @@ def heroi(s, fam, c, top, bot):
         t = mod
         while pw(t, 'PR', FS) > livre and re.search(r'\s[/,]\s?', t):    # tira o último modelo inteiro
             t = re.split(r'\s*[/,]\s*(?=[^/,]*$)', t)[0].strip()
-        while t and pw(t, 'PR', FS) > livre:                              # ainda grande: corta com …
-            t = t[:-2].rstrip(' ,/-')
-            if pw(t + '…', 'PR', FS) <= livre: t += '…'; break
+        if pw(t, 'PR', FS) > livre:                                       # ainda grande: tira a última palavra inteira e põe …
+            ws = t.rstrip('…').split(' ')                                 # (o modelo nunca fica partido: T-0028, T-0029)
+            while len(ws) > 1 and pw(' '.join(ws).rstrip(' ,/+-') + '…', 'PR', FS) > livre: ws.pop()
+            while pw(ws[0] + '…', 'PR', FS) > livre and re.search(r'[/,]', ws[0]):   # palavra só ("Gol,Kombi,..."): no separador
+                ws[0] = re.split(r'[/,](?=[^/,]*$)', ws[0])[0]
+            t = ' '.join(ws).rstrip(' ,/+-') + '…'
         if mm: s.t(cx + 12, cy, mm, FS, 'ink', 'PB')
         s.t(cx + 12 + (pw(mm + ' ', 'PB', FS) if mm else 0), cy, t, FS, 'ink', 'PR')
     if nota: s.t(x, y + lin * LD + 6, nota, 8, 'grey', 'PR')
