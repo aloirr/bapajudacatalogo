@@ -164,3 +164,26 @@ Eu devia ter apontado isto na 1ª rodada: já estava no `223ce6b`, e o ajuste do
 2. **Vêm da base, para o `catalogo-dados`:** aplicação sem montadora ("Agile", pág. 12 da b; "GOL G IV de", pág. 13); modelo de outra linha ("Ford Focus" e "Volvo V40" nos Filtros de Cabine da Pesada, pág. 62; caminhão e ônibus nas Cruzetas da Linha Leve, pág. 15). Vão junto com a nota 2 do §5.
 
 **Resultado do 2º reteste: VOLTA PARA AJUSTE** (1 🟡, as datas "MM/AA"). O Filtro de Ar Moto e o "mesmo carro" estão 🟢, e a regra da aplicação que sai é aceitável. As recomendações do §6 não mudam (1b e 2a).
+
+---
+
+## 3º reteste: a data "mês/ano" (head `fe47d1f`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 08:17 (Manaus) |
+| O que foi revisto | O diff `e2cded4..fe47d1f` (só o corte do ano no `aplicacoes()`), a seção "2º reteste do UX: a data 'mês/ano'" do `LEIA.md`, o `mesano-aplicacoes-antes-depois.txt` e os 16 PNGs `port-mesano-*` (recados, commit 3597bc4). Também os PDFs gerados pelo `fe47d1f`, comparados com os do `e2cded4` e com as entregas |
+| Resultado | **LIBERADO**, sem 🔴 e sem 🟡 |
+
+- 🟢 **As datas saem das aplicações.** As 12 linhas apontadas (6 por variante) passam a "VW Gol Mec.", "VW Fusca", "VW Passat", "VW Kombi Carat Central" (pág. 13), "MB 1621 4x2" (pág. 15) e "Scania R113 s/ ABS DS 10.6 L SOHV" (pág. 49 da b, 51 da a). Também sai o "01…" de "CARGO 1217 - CARGO 1417 5.9" (pág. 55 da b, 58 da a). Nenhuma linha fica cortada no meio.
+- 🟢 **Mudam só essas 4 páginas em cada variante** (a: 13, 15, 51 e 58; b: 13, 15, 49 e 55), só na lista de aplicações (conferi no texto e no pixel, contra o `e2cded4`). Nenhuma lista fica vazia, e nenhuma passa de 12 linhas.
+- 🟢 **Ficam o par de anos curto e a medida**, que se leem inteiros: "Monza 82/96", "Kadett / Ipanema 89/98" e "Chevette / Chevy / Marajó 73/93" (pág. 12), "Elba 92/96…" e "Escort 84/92…" (pág. 6), "LO914 00/04 OM904LA" (pág. 55 da b, que já estava na entrega).
+- 🟢 **O caractere vazio continua em 0 nas aplicações**; sobram só os 2 da seta da pág. 3 (nota 1 do §5).
+- 🟢 **Os outros PDFs não mudam.** No `fe47d1f`, A4 (56 págs.), Completo Digital (311) e Lista (21) ficam iguais às entregas e ao código do main; na Linha Moto, só a capa.
+
+### A pergunta da pág. 15: prefiro o corte, "MB 1621 4x2"
+- É a regra do ano: a aplicação termina onde começa a data. Uma regra só, a mesma nas 2 variantes e em todas as páginas.
+- A outra forma tiraria a data do meio e juntaria o que vem depois. Na pág. 13, daria "VW Gol Mec. + VW Gol Mi Plus + VW…", mais longa e cortada de novo pelo "…".
+- O "+ MB 1622 4x2" do meu exemplo era ilustrativo. A lista é das "principais" aplicações: o MB 1622 é a versão vizinha do mesmo caminhão, e perder a linha não engana o leitor.
+
+**Resultado do 3º reteste: LIBERADO.** Com isso, a T-0028 fica sem 🔴 e sem 🟡: a capa da Linha Moto, o "1 item" e as aplicações do Portfólio estão 🟢. As recomendações do §6 não mudam (1b e 2a). As notas do §5 e dos retestes seguem para a marca, o `catalogo-dados` e a fila, e não seguram a entrega.
