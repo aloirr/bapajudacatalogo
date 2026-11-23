@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0541**.
+O próximo número livre é o **RD-0544**.
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -388,8 +388,17 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0538 | baixa | teste | scripts/testar_site.mjs:1151-1158 × :1054-1059 (no 369f3ae) | `painelAberto`, `abrirFiltros` e `fecharFiltros` refaziam o `abrirPainel` do bloco dos filtros (o mesmo `dialog[open]`, o mesmo botão `/^Filtrar\b/` e a mesma espera) (o `abrirPainel(id, nome)` e o `painelAberto` vão para junto do `botaoFiltrar` e servem aos 2 blocos) | T-0006 | testes | CORRIGIDO (2840bda; 05d687b, #168) |
 | RD-0539 | baixa | teste | scripts/testar_site.mjs:1160-1167 × :220-229 (no 369f3ae) | o `gruposTela` refazia o caminho do botão `aria-expanded` até as caixas de marcar do `__bapT.grupos()` e do `opcoes(j)`, com outra expressão para os grupos (`Amperagem\|Partida a frio` entra no `grupos()`; o `gruposTela` lê o `grupos()` e o `opcoes(j)`; o bloco dos filtros de antes não muda) | T-0006 | testes | CORRIGIDO (2840bda; 05d687b, #168) |
 | RD-0540 | baixa | teste | scripts/testar_site.mjs:1223 × :1117; :53 e :433 (no 369f3ae) | o "Filtrar (1)" com `ah` repetia o do bloco dos filtros e o que a etiqueta já prova (os 2 leem `Object.keys(FILTROS)`); a 2ª coluna do `FAIXAS_CCA` do teste não era lida (sai a checagem e o trecho do comentário; a tabela fica com o limite e o nome) | T-0006 | testes | CORRIGIDO (2840bda; 05d687b, #168) |
+| RD-0541 | média | código | site/app.js:985 e :1578 × scripts/gerar_site.py:151-170 (FICHA) (no 3da35c1) | o rótulo da ficha técnica decidido em 2 lugares: a `FICHA` já dá o rótulo de tela de cada chave, e o PR põe um 2º mapa no site (`ROTULO_FICHA`, "C20AH" → "Ah" e "CCA18" → "CCA"), que reescreve 2 rótulos da `FICHA` na tela; cada chave sem sinais passa a 3 vezes no `app.js` (o rótulo na `FICHA`, sem mudar padrão: `(r"^C20\(AH\)$", "Ah")` e `(r"^CCA-18°$", "CCA")`; sai o `ROTULO_FICHA`; o `medidaDe` lê "AH" e "CCA"; mexe na `FICHA`: decisão do `po`) | T-0030 | web-site | ABERTO (decisão do po) |
+| RD-0542 | baixa | doc | docs/DADOS_DO_SITE.md:46 × :45 e :49 (no 3da35c1) | a linha nova repete "pela mesma chave sem sinais" (a :45) e "O valor, a `FICHA` e o JSON não mudam" (a :49, "É só a tela: o JSON não muda."); "troca só o rótulo" repete "aparecem como" (o padrão do RD-0536) (:46 → "- Na ficha técnica da tela (página, janela e ficha impressa), esses dois aparecem como "Ah" e "CCA", o mesmo texto do filtro (T-0030, MC-0016), pelo mapa `ROTULO_FICHA` do `site/app.js`."; com o RD-0541 corrigido, vale o texto dele) | T-0030 | web-site | ABERTO |
+| RD-0543 | baixa | código (comentário) | site/app.js:983-984 × :969-970 (no 3da35c1) | o comentário novo repete "C20(ah)" e "Cca-18°" do comentário da T-0006, o "Só a tela: o JSON continua…" do doc e os valores do próprio mapa (o padrão do RD-0537) (→ `// Rótulo da bateria na ficha técnica: o mesmo texto do filtro (T-0030, MC-0016; docs/DADOS_DO_SITE.md).`; com o RD-0541 corrigido, sai) | T-0030 | web-site | ABERTO |
 
 ## Notas
+
+### T-0030, manhã de 23/11/2026 (PRs #173 e #174)
+- RD-0541 ao RD-0543: PR #173 (`web-site/T-0030-rotulos-bateria`), primeira rodada no `3da35c1` (10:26). O RD-0541 pede mexer na `FICHA` (só o rótulo, sem padrão novo); pela regra do pedido (R-20261123-135656-po), o `po` decide: corrigir ou MANTIDO com o motivo. O RD-0543 não segura o PR sozinho (só comentário).
+- PR #174 (`testes/T-0030-rotulos`, `01fc11d`): sem achado.
+- Sem número: "Amperagem" e "Ah" na mesma ficha, e a amperagem também no nome e no Detalhe, vêm da base e vão para a fila do `catalogo-dados`.
+- Relatório: `T-0030.md`.
 
 ### T-0006 fase 1 e T-0028, manhã de 23/11/2026 (PRs #164, #167 e #168)
 - RD-0526 e RD-0527 (T-0027): corrigidos no #164 da T-0028 (squash `bb3c1a7`), com o `plural()` no `plural.py`, importado pelo `digital2.py`, `portfolio.py`, `lista_aplicacoes_site.py` e `kitfiltros/kit.py`. Os pontos `:154`, `:180` e `:202` do RD-0527 eram código morto (o `pagina_sistema` e os cartões, que o `build()` não usa): saíram no RD-0532. O "1 itens" das págs. 69 e 76 foi corrigido no `heroi`.
