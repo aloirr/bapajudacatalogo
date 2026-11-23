@@ -403,6 +403,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - Sem número (fora do diff): na VEICULOS, a mesma causa com 2 textos de MOTIVO (AMT7084, AMT7115, BAN9513 e BAN9516 × BIE20042 e BOR11030); na ficha do BIE20042, Posição, Detalhe e Posição e lado dizem a mesma posição. Vão para a fila do `catalogo-dados` e do `web-site`, pelo `gerente-projetos`.
 - Reteste no `ccbcbc5` (10:46): RD-0544 e RD-0545 corrigidos. A planilha refeita da v27 é igual à aprovada; o `--conferir` não acha diferença fora do permitido; o LEIA-ME da base ganhou o bloco da v28. RD-0546 (só docstring) fica ABERTO, sem segurar o PR. #175 LIBERADO.
 - PR #176 (`testes/T-0031-v28`, `681a12f`): sem achado.
+- PR #177 (`web-site/T-0031-json-v28`, `5b73188`): sem achado. O `produtos.json` só muda no `li` dos 6 códigos, no FORD Cargo que sai do `ve` de 2 e no `gerado_em`.
 - Relatório: `T-0031.md`.
 
 ### T-0030, manhã de 23/11/2026 (PRs #173 e #174)
