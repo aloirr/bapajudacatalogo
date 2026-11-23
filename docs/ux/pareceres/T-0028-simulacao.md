@@ -187,3 +187,23 @@ Eu devia ter apontado isto na 1ª rodada: já estava no `223ce6b`, e o ajuste do
 - O "+ MB 1622 4x2" do meu exemplo era ilustrativo. A lista é das "principais" aplicações: o MB 1622 é a versão vizinha do mesmo caminhão, e perder a linha não engana o leitor.
 
 **Resultado do 3º reteste: LIBERADO.** Com isso, a T-0028 fica sem 🔴 e sem 🟡: a capa da Linha Moto, o "1 item" e as aplicações do Portfólio estão 🟢. As recomendações do §6 não mudam (1b e 2a). As notas do §5 e dos retestes seguem para a marca, o `catalogo-dados` e a fila, e não seguram a entrega.
+
+---
+
+## Entrega final
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 08:33 (Manaus) |
+| O que foi revisto | As entregas do branch `catalogo-grafico/T-0028-entregas`, head `ac36418` (Portfólio de 88 págs. e Linha Moto), tiradas do próprio commit; o diff `fe47d1f..ac36418`; as pranchas e o `LEIA.md` de `recados/anexos/T-0028/final/` (commit dd43f4a) |
+| Decisão do Alexandre | 3b, 4a e 5a (R-20261123-122814-po) |
+| Resultado | **LIBERADO**, sem 🔴 e sem 🟡 |
+
+- 🟢 **A entrega é a simulação aprovada.** Comparei, no texto e no pixel, os PDFs do commit com os da última rodada: o Portfólio (88 = 88 págs.) é igual à variante b do `fe47d1f`, e a Linha Moto (17 = 17) é igual à da simulação. Os sha256 batem com os do `LEIA.md`.
+- 🟢 **A variante b entrou como foi simulada.** O diff do `portfolio.py` no `79bcd59` é o do `diff-variante-b.patch`, linha a linha. O A4 e o Completo Digital não foram regravados: os sha256 são os das entregas do main.
+- 🟢 **As pranchas** mostram o mesmo antes e depois da simulação (a divisória da Linha Leve, por exemplo, só muda nos totais).
+- 🟢 **No PDF entregue:** nenhum "1 itens"; caractere vazio só nos 2 da seta da pág. 3; nada de preço nem de estoque.
+
+**Fila (4a):** as datas de 2026 do Portfólio ("PORTFÓLIO DE PRODUTOS 2026", "Outubro de 2026", "conforme o Catálogo BAP 2026" e a contracapa) ficam como estão nesta tarefa. A troca para 2027 vai para a fila do Alexandre, com simulação própria, junto da nota do §6 (pergunta 2): a referência e os números devem falar do mesmo catálogo.
+
+**Resultado da entrega final: LIBERADO** para seguir ao `revisor-codigo`.
