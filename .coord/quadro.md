@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 23/11/2026 12:45 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 23/11/2026 15:10 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -35,10 +35,10 @@ Atualizado em 23/11/2026 12:45 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0029](tarefas/T-0029.md) | Portfólio 2027, siglas e Linha Pesada só com veículos pesados | catalogo-grafico | designer-ux, design-de-marca, testes | CONCLUÍDA | #179, #180 |
 | [T-0030](tarefas/T-0030.md) | Rótulos "Ah" e "CCA" na ficha da bateria (MC-0016) | web-site | testes, designer-ux, design-de-marca | CONCLUÍDA | #173, #174 |
 | [T-0031](tarefas/T-0031.md) | Aplicações suspeitas da Linha Pesada (base v28) | catalogo-dados | web-site, testes | CONCLUÍDA | #175, #176, #177 |
-| T-0032 | 7 portfólios por linha, melhorias do Portfólio e treinamentos (Mecânica Básica, 3 atualizados e 10 de sistema) | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes, web-site | ONDA 1 CONCLUÍDA; ONDA 2 PAUSADA | #185, #186, #187, #188 |
+| T-0032 | 7 portfólios por linha, melhorias do Portfólio e treinamentos (Mecânica Básica, 3 atualizados e 10 de sistema) | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes, web-site | ONDA 1 CONCLUÍDA (o #186 entra antes deste registro); ONDA 2 PAUSADA | #185, #186, #187, #188 |
 
 ## Fila
-Main a0dc065 (#188).
+Main a0dc065 (#188), mais o #186, que entra antes deste registro.
 
 0. **T-0032, onda 2: PAUSADA** a pedido do Alexandre ("Após o termino da Onda 1, pause as atividades. quero economizar token"). Retomar só quando o PO chamar.
    - Branch catalogo-grafico/T-0032-onda2, head 7e393401168f73092538bc91c56ae26b48040068, sem PR e sem pareceres.
