@@ -1,7 +1,7 @@
 """Portfólio de Produtos BAP AUTOPARTS — catálogo de apresentação (16:9) para quem quer conhecer a BAP.
 
 Organização (Alexandre, 23/10): LINHA (Leve, Pesada, Moto, Universal) → SISTEMA → FAMÍLIA → produto,
-conforme a classificação da base unificada / Catálogo BAP 2026.
+conforme a classificação da base unificada e do Catálogo BAP.
 Material para cliente/prospect: sem estoque, sem preço, sem aviso de uso interno, sem nome de cliente.
 Uso (dentro de gerador/):  python portfolio.py [saida.pdf] [base.xlsx]
 """
@@ -9,7 +9,7 @@ import sys, os, re, collections, html, datetime
 import pandas as pd
 import apres_bemol as A
 from apres_bemol import S, W, H
-from taxo import ORDER_SIS, META, HEAVY, LIGHT_BR, LIGHT_MODELS
+from taxo import ORDER_SIS, META, HEAVY
 from plural import plural
 from detalhe import BASE_UNIFICADA as BASE   # a base unificada do Git (dados/), como nos 3 PDFs
 from digital2 import ANO                     # o ano do Catálogo BAP (2027): capa, contracapa e pág. 3
@@ -177,23 +177,15 @@ def carro(mod, m):
     return mt, ws[0]
 
 
-# Linha Pesada, item LEVE E PESADA (T-0029, 16a): qual aplicação sai. As regras do taxo.linha_of (HEAVY, LIGHT_BR e
-# LIGHT_MODELS), sem cópia. 'a' (padrão): fica só a que o HEAVY reconhece como pesada. 'b': sai só a que o linha_of
-# daria LEVE por reconhecer o veículo leve (leve e não pesado); a que ele não reconhece fica (trator, motor, mas também
-# carro de marca fora do LIGHT_BR, como Volvo V40, Lexus ou Mini). Uso da 'b': P.REGRA_16A = 'b' antes do P.build.
-REGRA_16A = 'a'
-
-
-def sai_da_pesada(m, t, regra=None):
-    a = (m + ' ' + t).upper()                       # como no taxo.linha_of
-    h = bool(HEAVY.search(a))
-    if (regra or REGRA_16A) == 'a': return not h
-    return bool(LIGHT_BR.search(a) or LIGHT_MODELS.search(a)) and not h
+def sai_da_pesada(m, t):
+    """16a: na Linha Pesada, o item LEVE E PESADA fica só com a aplicação que o `taxo.HEAVY` reconhece como pesada"""
+    return not HEAVY.search((m + ' ' + t).upper())          # em maiúsculas, como no taxo.linha_of
 
 
 def aplicacoes(rows, n=12, so_pesado=(), so_leve=False):
     """principais aplicações na ordem do catálogo (ranking): montadora + modelos, sem repetir. Nos códigos de
-    `so_pesado`, sai a aplicação de veículo leve (`sai_da_pesada`, no veículo que a linha mostra)"""
+    `so_pesado`, fica só a aplicação que o `taxo.HEAVY` reconhece como pesada (`sai_da_pesada`, no veículo que a linha
+    mostra)"""
     out, vistos = [], set()
     for r in rows:
         pesado = r['code'].strip().upper() in so_pesado
@@ -218,7 +210,7 @@ def aplicacoes(rows, n=12, so_pesado=(), so_leve=False):
             if ano: mod = mod[:ano.start()].strip(' ,·/')                                       # tira anos
             if not mod and not m: continue
             if pesado and sai_da_pesada(m, mod): continue        # o veículo que a linha mostra, não a linha inteira
-            if so_leve and not sai_da_pesada(m, mod, 'a'): continue   # Autocenter: sai o veículo pesado (T-0032)
+            if so_leve and not sai_da_pesada(m, mod): continue        # Autocenter: sai o veículo pesado (T-0032)
             if len(mod) > 46:                                                # corta no separador; sem ele, na palavra inteira
                 c = mod[:46] if re.search(r'[/,]', mod[:46]) else mod[:46].rsplit(' ', 1)[0]
                 mod = c.rsplit('/', 1)[0].rsplit(',', 1)[0].strip(' ,/') + '…'
@@ -485,7 +477,7 @@ def quem_somos(s, arv, total):
     produtos = {c['prod'] for l in arv.values() for f in l.values() for cs in f.values() for c in cs}
     sistemas = {sn for l in arv.values() for sn in l}
     s.header('Quem somos', NOME)
-    s.p(40, 132, 600, 'Empresa brasileira criada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. '
+    s.p(40, 132, 600, 'Empresa brasileira criada em 2021 para oferecer componentes automotivos de qualidade, com segurança e bom custo-benefício. '
         'O portfólio vai da suspensão à parte elétrica, passando por filtros, lubrificantes e químicos, para as linhas leve, pesada e moto.', 13, 20, 'sec')
     tiles = [(str(len(produtos)), 'linhas de produtos'), (f'+{fmt(total // 100 * 100)}', 'itens no catálogo'),
              (str(len(sistemas)), 'sistemas do veículo'), ('3', 'linhas: leve, pesada e moto')]
