@@ -224,6 +224,22 @@ def pagina_sistema(s, lin_nome, num, sis, fams):
     s.footer()
 
 
+def carro(mod, m):
+    """o "mesmo carro" de uma aplicação: o modelo, com o número quando o nome é uma sigla (CG 125, G 400),
+    sem a montadora (na linha da base v27 ela vem na frente: "FORD ECOSPORT 1.6 L" = "Ford" + "Ecosport 1.6 L 16V")"""
+    import re
+    from montar import BRANDS_RX
+    from pneus_fix import BR
+    t = mod.upper()
+    if not m: t = re.sub(rf'^(?:{BRANDS_RX}|{BR}|VW|MB)\b[:\s]*', '', t)
+    ws = [w for w in re.split(r'[\s/,]+', t) if w] or ['']
+    if re.fullmatch(r'\d+', ws[0]) and len(ws) > 1 and re.fullmatch(r'[A-ZÀ-Ý]{3,}', ws[1]):
+        return ws[1]                                                    # MB 1315 ATEGO: o modelo é o Atego
+    if re.fullmatch(r'[A-Z]{1,3}', ws[0]) and len(ws) > 1 and re.fullmatch(r'\d{2,4}', ws[1]):
+        return ws[0] + ' ' + ws[1]                                      # sigla + número: CG 125 ≠ CG 150 (o Atego 1315 é Atego)
+    return ws[0]
+
+
 def aplicacoes(rows, n=12):
     """principais aplicações na ordem do catálogo (ranking): montadora + modelos, sem repetir"""
     import re
@@ -243,13 +259,14 @@ def aplicacoes(rows, n=12):
                 else: cur[1] += (' ' if k else '') + ln
         for m, t in tr:
             mod = re.split(r'\s·\s|;\s|\s\(', t.strip(' ·;'))[0].strip(' ,·/')
-            mod = re.sub(r'(?:\s+[-–])?\s*(?:\d{2}/)?(?:19|20)\d{2}.*$', '', mod).strip(' ,·/')     # tira anos (e o " - " antes deles)
+            ano = re.search(r'(?:\s+[-–])?\s*(?:\d{2}/)?(?:19|20)\d{2}.*$', mod)            # o ano (e o " - " antes dele)
+            if ano and re.search(r'(?:^|\s)(?<!\d\s)[A-Za-z]-?$', mod[:ano.start()]): continue   # "FORD F 2000": não é ano, o corte partiria o modelo
+            if ano: mod = mod[:ano.start()].strip(' ,·/')                                       # tira anos
             if not mod and not m: continue
             if len(mod) > 46: mod = mod[:46].rsplit('/', 1)[0].rsplit(',', 1)[0].strip(' ,/') + '…'
             mod = re.sub(r'(?i)\s*\b(?:diant|tras|dir|esq|sup|inf)(?:eir[oa]|eit[oa]|uerd[oa]|erior)?\.?(?=\s|$)', '', mod).strip(' ,·/+')
             if not mod: continue
-            w1 = re.split(r'[\s/,]+', mod.upper())[0]                       # 1º modelo: não repetir o mesmo carro
-            k = (m.upper(), w1)
+            k = carro(mod, m)                                                # não repetir o mesmo carro
             if k in vistos: continue
             vistos.add(k); out.append((m, mod))
             if len(out) >= n: return out
