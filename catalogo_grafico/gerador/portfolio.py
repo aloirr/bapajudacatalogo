@@ -5,13 +5,15 @@ conforme a classificação da base unificada / Catálogo BAP 2026.
 Material para cliente/prospect: sem estoque, sem preço, sem aviso de uso interno, sem nome de cliente.
 Uso (dentro de gerador/):  python portfolio.py [saida.pdf] [base.xlsx]
 """
-import sys, os, re, collections, html
+import sys, os, re, collections, html, datetime
 import pandas as pd
 import apres_bemol as A
 from apres_bemol import S, W, H
 from taxo import ORDER_SIS, META
 from plural import plural
 from detalhe import BASE_UNIFICADA as BASE   # a base unificada do Git (dados/), como nos 3 PDFs
+from digital2 import ANO                     # o ano do Catálogo BAP (2027): capa, contracapa, pág. 3 e selo NOVIDADE
+from montar import KEEPU                     # siglas que ficam em maiúsculas (VW, GM, MB), as mesmas do montar.tcase
 
 NOME = 'BAP AUTOPARTS'
 SITE = 'www.bapautoparts.com.br  ·  @bapautoparts'
@@ -42,6 +44,8 @@ FAM_CARD = {
     'SELANTES E SPRAYS': ('Selantes e Sprays', 'Adesivos de silicone, desengripante, descarbonizante e silicone spray.', 'pptimg/SIL3502.png'),
     'ÁGUA DESMINERALIZADA': ('Água Desmineralizada', 'Água desmineralizada para o sistema de arrefecimento.', 'pptimg/RAD25009P.png'),
 }
+MESES = ('Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro')
+LINHA_BAP = {'effitech': 'Effitech'}     # nome de linha da BAP com a grafia da apresentação de Lubrificantes (MC-0017 b)
 MOTO_CARD = {'Óleo Lubrificante': ('Óleo 4T', 'Óleo para motores de motocicleta 4 tempos.'),
              'Velas de Ignição': ('Velas de Ignição', 'Velas de ignição para motores de motocicleta.'),
              'Rolamentos': ('Rolamentos', 'Rolamentos de roda e de direção para motocicletas.'),
@@ -50,6 +54,19 @@ MOTO_CARD = {'Óleo Lubrificante': ('Óleo 4T', 'Óleo para motores de motocicle
 
 def fmt(n):
     return f'{n:,}'.replace(',', '.')
+
+
+def edicao():
+    """mês e ano da capa: o mês em que o PDF é gerado, por extenso, no horário de Manaus (T-0029)"""
+    d = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-4)))
+    return f'{MESES[d.month - 1]} de {d.year}'
+
+
+def montadora(m):
+    """grafia da montadora nas aplicações: até 3 letras fica como veio ("VW", "KIA"); maior, cada nome com a inicial
+    maiúscula ("Ford/Audi") e a sigla do KEEPU em maiúsculas ("VW/Audi", "Ford/GM", "MB"; MC-0017 a)"""
+    if len(m) <= 3: return m
+    return re.sub(r'[^\W\d_]+', lambda w: w.group().upper() if w.group().upper() in KEEPU else w.group(), m.title())
 
 
 def tit(s):
@@ -194,7 +211,7 @@ def aplicacoes(rows, n=12):
 def heroi(s, fam, c, top, bot):
     ih = bot - top - 30
     s.foto(c['img'], 40, top, 400, ih)
-    if c['lanc']: s.chip(56, top + 16, 'NOVIDADE 2026', 'white', 'orange', 7.5)
+    if c['lanc']: s.chip(56, top + 16, f'NOVIDADE {ANO}', 'white', 'orange', 7.5)
     s.t(40, top + ih + 12, f"{c['n']} {plural(c['n'])}", 11, 'grey', 'PM')          # nº de itens embaixo da imagem
     x = 476; y = top + 6; wr = W - 40 - x
     s.t(x, y, tit(fam).upper(), 9.5, 'gdark', 'PB', ls=1.4); y += 22
@@ -205,6 +222,7 @@ def heroi(s, fam, c, top, bot):
         for r in c.get('rows') or []:
             t = ''.join(x_ for x_, b in r.get('segs') or []).split(' — ')[0].strip()
             t = t[:1].upper() + t[1:]
+            t = re.sub(r'\b(' + '|'.join(LINHA_BAP) + r')\b', lambda w: LINHA_BAP[w.group(1)], t)
             if t and t.upper() not in vist: vist.add(t.upper()); ap.append(('', t))
             if len(ap) >= 12: break
         titulo, nota = 'ESPECIFICAÇÕES', ''
@@ -222,7 +240,7 @@ def heroi(s, fam, c, top, bot):
     for k, (m, mod) in enumerate(ap):
         cx = x + (k // lin) * (cw + 18); cy = y + (k % lin) * LD
         s.circle(cx + 3.2, cy + 5.2, 2.1, 'green')
-        mm = (m.title() if len(m) > 3 else m) if m else ''
+        mm = montadora(m) if m else ''
         livre = cw - 14 - (pw(mm + ' ', 'PB', FS) if mm else 0)
         t = mod
         while pw(t, 'PR', FS) > livre and re.search(r'\s[/,]\s?', t):    # tira o último modelo inteiro
@@ -303,12 +321,12 @@ def build(out, base=BASE):
     s.rect(0, 0, W, H, fill='black')
     s.circle(W - 60, 290, 330, 'green'); s.circle(W - 80, 290, 255, 'green2'); s.circle(W - 80, 290, 190, 'black')
     s.img(A.LOGO, 60, 52, 46, 64)
-    s.t(62, 150, 'PORTFÓLIO DE PRODUTOS 2026', 11, 'green2', 'PB', ls=2)
+    s.t(62, 150, f'PORTFÓLIO DE PRODUTOS {ANO}', 11, 'green2', 'PB', ls=2)
     s.t(58, 172, 'Conheça a', 50, 'white', 'PB', ls=-1)
     s.t(58, 228, NOME, 50, 'white', 'PB', ls=-1)
     s.p(62, 300, 410, 'Peças, baterias, filtros, lubrificantes, químicos, pneus e acessórios para as linhas leve, pesada e moto, '
         'organizados por linha, sistema do veículo e família de produto.', 13, 19, 'lgrey')
-    s.t(62, 470, 'Outubro de 2026', 10, 'lgrey', 'PM')
+    s.t(62, 470, edicao(), 10, 'lgrey', 'PM')
     for i, f in enumerate(['dimg/cover_0.png', 'dimg/cover_16.png', 'dimg/cover_34.png', 'dimg/cover_27.png', 'dimg/cover_10.png', 'dimg/cover_36.png']):
         r_, c_ = divmod(i, 3); x = 560 + c_ * 120; y = 120 + r_ * 150
         s.rect(x, y, 110, 138, fill='white', r=16); s.img(f, x + 8, y + 10, 94, 118)
@@ -328,7 +346,7 @@ def build(out, base=BASE):
     s.footer()
 
     # como o portfólio está organizado
-    s.header('Nosso portfólio', 'Linha, sistema e família', 'conforme o Catálogo BAP 2026')
+    s.header('Nosso portfólio', 'Linha, sistema e família', f'conforme o Catálogo BAP {ANO}')
     w = (W - 80 - 3 * 14) / 4
     for i, (cod, nome, desc) in enumerate(LINHAS):
         sis = arv[cod]; x = 40 + i * (w + 14)
@@ -343,7 +361,7 @@ def build(out, base=BASE):
         for sn in sis:
             s.t(x + 18, yy, '•  ' + TITULO[sn], 10, 'white', 'PR'); yy += 16
     s.rect(40, 470, 880, 1, fill='line')
-    s.t(40, 478, 'Cada produto aparece na linha (leve, pesada, moto ou universal) em que tem aplicação. Dentro da linha: sistema do veículo → família → produto.', 9, 'grey', 'PR')
+    s.t(40, 478, 'Cada produto aparece na linha (leve, pesada, moto ou universal) em que tem aplicação. Dentro da linha: sistema do veículo, família e produto.', 9, 'grey', 'PR')
     s.footer()
 
     for cod, nome, desc in LINHAS:
@@ -361,7 +379,7 @@ def build(out, base=BASE):
     s.circle(W - 110, 280, 280, 'green'); s.circle(W - 125, 280, 215, 'green2'); s.circle(W - 125, 280, 160, 'black')
     s.img(A.LOGO_G, W - 125 - 62, 280 - 85, 124, 170)
     s.img(A.LOGO, 60, 52, 36, 50)
-    s.t(62, 150, 'PORTFÓLIO DE PRODUTOS 2026', 11, 'green2', 'PB', ls=2)
+    s.t(62, 150, f'PORTFÓLIO DE PRODUTOS {ANO}', 11, 'green2', 'PB', ls=2)
     s.t(58, 178, 'Vamos conversar?', 50, 'white', 'PB', ls=-1)
     s.p(62, 252, 430, 'Fale com o nosso time comercial: mostramos as aplicações por veículo e ajudamos a montar o mix certo para a sua loja ou oficina.', 14, 21, 'lgrey')
     s.rect(62, 366, 420, 112, fill='card', r=16); s.rect(62, 366, 5, 112, fill='green')
