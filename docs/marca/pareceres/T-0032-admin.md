@@ -70,3 +70,18 @@ Uso interno, não enviar ao cliente.", para o vendedor não mandar o PDF errado.
 
 No print novo (1366 e 390 px): o título, a trilha e o `<h1>`, as 5 frases de portfólio e as 4 de treinamento.
 Fechar o MC-0027.
+
+## Reteste do MC-0027 (head `09016a62ca4cacf56b6f5f26455edebf89a20075`)
+
+**LIBERADO. MC-0027 FECHADO.**
+
+- **Título:** "Catálogos, materiais e treinamentos" aparece no `<title>`, na trilha, no `<h1>` e no menu da conta
+  (`site/conta.js:71`).
+- **Portfólios:** as 7 frases estão iguais às desta tabela ("Só a Linha Leve…", "Só as baterias da Linha Leve e da
+  Linha Pesada, com a tabela dos códigos.", "Os itens de troca rápida do autocenter…").
+- **Treinamentos:** a parte comum virou o subtítulo da seção ("Para os vendedores: em PDF para ler, em PowerPoint para
+  apresentar."). É a saída que eu tinha deixado ao `designer-ux`, e a voz é a mesma. Os 4 cartões têm a sua frase:
+  "Os sistemas do carro e a peça certa para cada sintoma.", "Tecnologias, teste, garantia e venda de baterias.",
+  "Pneus, câmaras, óleo, velas e rolamentos de moto." e "Óleos ProActive, Shiftease e Effitech e os químicos.". A
+  grafia dos nomes de linha está certa.
+- No print de 390 px, as frases cabem no cartão.
