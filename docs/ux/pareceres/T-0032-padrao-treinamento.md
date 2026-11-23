@@ -62,3 +62,24 @@ No projetor o contraste cai ainda mais. Pedido (o resultado; a cor final passa p
 2. Mudam 2 coisas em relação aos originais: o corpo das tabelas (cinza na amostra, escuro nos originais) e o hub (código no lugar do ícone). O 🟡 1 devolve o escuro à tabela. O hub novo fica.
 
 **Resultado: VOLTA PARA AJUSTE** (3 🟡). Depois do ajuste, refaço a conferência dos slides 2, 4, 5 e 8 e do guia (S6 e §2).
+
+---
+
+## Reteste (head `6ab490c`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 10:55 (Manaus) |
+| O que foi revisto | O diff `fb29bbd..6ab490c` do `PADRAO_TREINAMENTO.md`; os slides 2, 4, 5 e 8 (PNGs novos) e o XML do .pptx (tamanho e cor de cada texto) |
+| Resultado | **LIBERADO**: os 3 🟡 estão 🟢, sem 🔴 e sem 🟡 |
+
+- 🟢 **Contraste (🟡 1).** No .pptx, o `#59BA61` não sai mais como texto sobre fundo claro. Os números dos tópicos (slide 2) e de itens (slide 4) estão em `#2F7D36` (5,11:1). O corpo da tabela (slide 5) está em `#1E2B22`, inclusive na linha verde-clara, e a coluna "Na BAP" tem o mesmo peso das outras. O número do quiz (slide 8) está em escuro sobre laranja (6,01:1). A palavra "ATENÇÃO" está em `#A9530A` (4,81:1). O guia registra a regra nas cores (§3).
+- 🟢 **Slide 4 (🟡 2).** A grade é 4 × 3, com o nome do sistema em cima (16 pt), "287 itens no catálogo" numa linha menor e o corpo com 12 pt. Nenhum texto fica abaixo de 12 pt, menos o rótulo "itens no catálogo" (10 pt, dentro da S6). A folga dos 4 lados é igual, e a faixa DICA DE CAMPO cabe abaixo da grade, antes do rodapé.
+- 🟢 **Guia (🟡 3).** A S6 separa corpo (12 pt ou mais) e rótulo (10 pt ou mais) e diz como dividir a tabela longa. A grade de 6 colunas sai do padrão. "Mitos e verdades" e "passo a passo" ficam "a desenhar depois", fora do padrão até terem simulação. A S11 vai para as notas da capa.
+
+### Notas do reteste (não seguram)
+1. **Os tipos "a fazer" seguem a regra da §3.** No guia, "Abertura: aprender" (destaque em verde) e "preparado para" (verbo em verde) ainda dizem "verde". Ao desenhar, o texto verde sobre branco é o `#2F7D36`.
+2. **Ícone branco no círculo `#59BA61`** (2,44:1), nos tópicos e no checklist: o ícone acompanha um texto que diz o mesmo e fica como nos originais.
+3. **S12 ("uso interno" no rodapé)** é sugestão da marca e não está na amostra: decisão do Alexandre.
+
+**Resultado do reteste: LIBERADO** para seguir ao Alexandre (pelo `po`).
