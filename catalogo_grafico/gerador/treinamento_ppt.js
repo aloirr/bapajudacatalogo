@@ -12,7 +12,9 @@ const ICO = n => IMG('icones/' + n + '.png');
 
 // Paleta dos 3 originais (tema "BAP Baterias", out/2026), agora com o nome do padrão.
 const COR = { esc: '1E2B22', verde: '59BA61', verdeEsc: '2F7D36', claro: 'EEF7EF', borda: 'D9E6DA', cinza: '6B7570',
-              laranja: 'F28C28', laranjaClaro: 'FDF1E6', branco: 'FFFFFF', capaTexto: 'D5DED7' };
+              laranja: 'F28C28', laranjaEsc: 'A9530A', laranjaClaro: 'FDF1E6', branco: 'FFFFFF', capaTexto: 'D5DED7' };
+// Contraste (parecer de UX da T-0032): o verde #59BA61 só em fundo, ícone e número sobre o escuro; texto e número
+// sobre fundo claro em verde-escuro #2F7D36 ou escuro; ATENÇÃO em #A9530A; número do quiz escuro sobre o laranja.
 const THEME = { name: 'BAP Treinamento', headFontFace: 'Arial', bodyFontFace: 'Arial',
   colors: { dk1: COR.esc, lt1: COR.branco, dk2: COR.verdeEsc, lt2: COR.claro, accent1: COR.verde, accent2: COR.laranja,
             accent3: COR.esc, accent4: COR.cinza, accent5: 'D64545', accent6: 'F2C14E', hlink: COR.verdeEsc, folHlink: COR.verde } };
@@ -59,7 +61,7 @@ function faixa(s, texto, tipo = 'dica', y = 5.8, h = 0.8) {
   const at = tipo === 'atencao';
   s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: M, y, w: LARG, h, rectRadius: 0.08, fill: { color: at ? COR.laranjaClaro : COR.claro }, line: { type: 'none' } });
   icone(s, at ? 'alerta' : 'lampada', M + 0.22, y + (h - 0.42) / 2, 0.42, at ? COR.laranja : COR.verde);
-  txt(s, [{ text: (at ? 'ATENÇÃO' : 'DICA DE CAMPO') + '  ', options: { bold: true, color: at ? COR.laranja : COR.verdeEsc } },
+  txt(s, [{ text: (at ? 'ATENÇÃO' : 'DICA DE CAMPO') + '  ', options: { bold: true, color: at ? COR.laranjaEsc : COR.verdeEsc } },
           { text: texto }], 1.45, y, 11.08, h, { valign: 'middle' });
 }
 
@@ -84,7 +86,7 @@ const DESENHO = {
     sl.itens.forEach(([n, ic, tit, desc], k) => {
       const x = M + (k % 4) * (w + 0.15), y = 1.65 + Math.floor(k / 4) * 2.3, fim = n === '✓';
       card(s, x, y, w, 2.1, fim ? COR.claro : COR.branco);
-      txt(s, n, x + 0.25, y + 0.22, 1.2, 0.6, { fontSize: 28, bold: true, color: COR.verde });
+      txt(s, n, x + 0.25, y + 0.22, 1.2, 0.6, { fontSize: 28, bold: true, color: COR.verdeEsc });
       icone(s, ic, x + w - 0.7, y + 0.25, 0.45, fim ? COR.verdeEsc : COR.verde);
       txt(s, tit, x + 0.25, y + 0.85, w - 0.4, 0.6, { fontSize: 16, bold: true, valign: 'bottom' });   // até 2 linhas
       txt(s, desc, x + 0.25, y + 1.5, w - 0.4, 0.5, { fontSize: 12, color: COR.cinza });
@@ -92,22 +94,22 @@ const DESENHO = {
     return s;
   },
   sistemas(sl) {
-    const s = conteudo(sl), w = (LARG - 5 * 0.15) / 6;
+    const s = conteudo(sl), w = (LARG - 3 * 0.15) / 4, h = 1.36, p = 0.18;   // grade 4 x 3: nome primeiro, quantidade de apoio
     sl.cartoes.forEach(([nome, func, n], k) => {
-      const x = M + (k % 6) * (w + 0.15), y = 1.55 + Math.floor(k / 6) * 2.1;
-      card(s, x, y, w, 1.95);
-      txt(s, n, x + 0.15, y + 0.12, w - 0.3, 0.45, { fontSize: 24, bold: true, color: COR.verde });
-      txt(s, sl.rotulo_numero, x + 0.15, y + 0.55, w - 0.3, 0.25, { fontSize: 10, color: COR.cinza });
-      txt(s, nome, x + 0.15, y + 0.82, w - 0.3, 0.32, { fontSize: 15, bold: true });
-      txt(s, func, x + 0.15, y + 1.13, w - 0.3, 0.8, { fontSize: 11, color: COR.cinza });
+      const x = M + (k % 4) * (w + 0.15), y = 1.55 + Math.floor(k / 4) * (h + 0.12);
+      card(s, x, y, w, h);
+      txt(s, nome, x + p, y + p - 0.04, w - 2 * p, 0.3, { fontSize: 16, bold: true });
+      txt(s, [{ text: n + ' ', options: { bold: true, color: COR.verdeEsc, fontSize: 12 } }, { text: sl.rotulo_numero, options: { fontSize: 10 } }],
+        x + p, y + 0.44, w - 2 * p, 0.24, { color: COR.cinza });
+      txt(s, func, x + p, y + 0.7, w - 2 * p, h - 0.7 - p + 0.04, { fontSize: 12, color: COR.cinza });   // até 2 linhas
     });
-    faixa(s, sl.dica, 'dica', 5.85, 0.75);
+    faixa(s, sl.dica, 'dica', 6.0, 0.7);
     return s;
   },
   tabela(sl) {
     const s = conteudo(sl);
     const cab = sl.cabecalho.map(t => ({ text: t, options: { bold: true, color: COR.branco, fill: { color: COR.verdeEsc }, fontSize: 12 } }));
-    const corpo = sl.linhas.map((l, i) => l.map((v, j) => ({ text: v, options: { bold: j === 0, color: j === 0 ? COR.esc : COR.cinza,
+    const corpo = sl.linhas.map((l, i) => l.map((v, j) => ({ text: v, options: { bold: j === 0, color: COR.esc,
       fontSize: 13, fill: { color: i % 2 ? COR.claro : COR.branco } } })));
     s.addTable([cab, ...corpo], { x: M, y: 1.55, w: LARG, colW: sl.larguras, rowH: 0.56, fontFace: 'Arial', valign: 'middle',
       margin: [0.04, 0.12, 0.04, 0.12], border: { type: 'solid', pt: 0.5, color: COR.borda } });
@@ -147,14 +149,23 @@ const DESENHO = {
       const y = 1.55 + k * 0.85;
       card(s, M, y, LARG, 0.7);
       s.addShape(pres.shapes.OVAL, { x: M + 0.2, y: y + 0.12, w: 0.46, h: 0.46, fill: { color: COR.laranja }, line: { type: 'none' } });
-      txt(s, String(k + 1), M + 0.2, y + 0.12, 0.46, 0.46, { fontSize: 14, bold: true, color: COR.branco, align: 'center', valign: 'middle' });
+      txt(s, String(k + 1), M + 0.2, y + 0.12, 0.46, 0.46, { fontSize: 14, bold: true, color: COR.esc, align: 'center', valign: 'middle' });
       txt(s, p, 1.55, y, 10.93, 0.7, { fontSize: 17, valign: 'middle' });
     });
     return s;
   },
 };
 
-for (const sl of K.slides) {
+// Tabela com mais de 6 linhas vai em mais de um slide: mesmo título com "(1 de 2)" e o cabeçalho repetido (S6).
+const MAX_LINHAS = 6;
+const SLIDES = K.slides.flatMap(sl => {
+  if (sl.tipo !== 'tabela' || sl.linhas.length <= MAX_LINHAS) return [sl];
+  const n = Math.ceil(sl.linhas.length / MAX_LINHAS);
+  return Array.from({ length: n }, (_, i) => Object.assign({}, sl,
+    { titulo: `${sl.titulo} (${i + 1} de ${n})`, linhas: sl.linhas.slice(i * MAX_LINHAS, (i + 1) * MAX_LINHAS) }));
+});
+
+for (const sl of SLIDES) {
   const desenhar = DESENHO[sl.tipo];
   if (!desenhar) throw new Error('tipo de slide sem desenho: ' + sl.tipo);
   const s = desenhar(sl);

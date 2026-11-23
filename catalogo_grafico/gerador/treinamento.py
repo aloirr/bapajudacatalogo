@@ -70,11 +70,18 @@ def hub(s, idx):
             oj = [ativo(x, idx).CODIGO_BAP for x in c['junto']]
         if not oj:
             parar(f'cartão {c["titulo"]}: sem OFEREÇA JUNTO real para {vei} (regra: sem item, não entra)')
-        sem_nome = [x for x in oj if x not in s['nomes']]
-        if sem_nome:
-            parar('OFEREÇA JUNTO sem nome curto no JSON: ' + ', '.join(sem_nome))
+        # nome do produto do Catálogo BAP (PRODUTO da base); o JSON só detalha o que o PRODUTO não diz (ex.: Filtros)
+        grupos = {}
+        for x in oj:
+            grupos.setdefault(s.get('nomes', {}).get(x) or idx[x].PRODUTO, []).append(x)
         c['linha_codigo'] = ' · '.join(c['codigos'])
-        c['linha_junto'] = ' · '.join(f'{x} {s["nomes"][x]}' for x in oj) + (f' ({c["obs_junto"]})' if c.get('obs_junto') else '')
+        c['linha_junto'] = '; '.join(f'{nome} {" · ".join(cs)}' for nome, cs in grupos.items()) + (f' ({c["obs_junto"]})' if c.get('obs_junto') else '')
+
+
+def versao_base():
+    vs = [int(m.group(1)) for f in os.listdir(os.path.join(os.path.dirname(BASE), 'versoes'))
+          if (m := re.search(r'_v(\d+)\.xlsx$', f))]
+    return f'v{max(vs)}' if vs else 'sem versão em dados/versoes'
 
 
 def textos(o):
@@ -120,6 +127,9 @@ def main():
         elif s['tipo'] == 'hub':
             hub(s, idx)
     conferir_codigos(spec, idx)
+    # S11: a versão da base vai nas notas da capa, não no slide
+    capa = next(s for s in spec['slides'] if s['tipo'] == 'capa')
+    capa.setdefault('notas', {})['BASE'] = f'Números e códigos da base unificada {versao_base()}, lida na geração.'
     os.makedirs(os.path.join(AQUI, 'saidas'), exist_ok=True)
     resolvido = os.path.join(AQUI, 'saidas', f'treinamento_{nome}.json')
     json.dump(spec, open(resolvido, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)

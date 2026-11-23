@@ -40,27 +40,30 @@ Ordem fixa, igual nos 3 originais:
 - MENSAGEM-CHAVE;
 - COMO CONDUZIR;
 - PERGUNTE AO TIME ou INSIGHT PARA O CAMPO;
-- no quiz, RESPOSTAS.
+- no quiz, RESPOSTAS;
+- na capa, BASE: a versão da base unificada lida na geração. O gerador escreve sozinho (S11).
 
 ## 2. Tipos de slide
 
 | Tipo | Desenho | No gerador (`tipo`) |
 |---|---|---|
-| Capa | Fundo de padrão verde com ícones de peças, faixa escura de 8,3" à esquerda e logo num quadro branco à direita. Sobretítulo "TREINAMENTO COMERCIAL", título, subtítulo e "Equipe Comercial Externa · mês ano". | `capa` |
+| Capa | Fundo de padrão verde com ícones de peças, faixa escura de 8,3" à esquerda e logo num quadro branco à direita. Sobretítulo "TREINAMENTO COMERCIAL", título, subtítulo e "Equipe Comercial Externa · Novembro de 2026". | `capa` |
 | Abertura: aprender | Frase grande à esquerda, com destaque em verde; 3 cartões de pilar à direita, com ícone. | a fazer |
-| Abertura: tópicos | Grade 4 × 2 de cartões: número grande, ícone no círculo verde, título e descrição. O cartão "✓ Fechamento" tem fundo verde-claro. | `topicos` |
+| Abertura: tópicos | Grade 4 × 2 de cartões: número grande em verde-escuro, ícone no círculo verde, título e descrição. O cartão "✓ Fechamento" tem fundo verde-claro. | `topicos` |
 | Abertura: preparado para | Grade 3 × 2: ícone, verbo em verde e complemento. | a fazer |
 | Seção do módulo | Mesmo fundo da capa; número "01" grande em verde, título e subtítulo. | `secao` |
-| Conteúdo em cartões | Kicker "MÓDULO 0N · TEMA", título e de 3 a 6 cartões com ícone ou número. | `sistemas` (variação) |
-| Tabela | Cabeçalho verde-escuro, linhas alternando branco e verde-claro, 1.ª coluna em negrito. | `tabela` |
+| Conteúdo em cartões | Kicker "MÓDULO 0N · TEMA", título e de 3 a 12 cartões, na grade de 4 colunas. Em cada cartão, o nome vem primeiro e o número é apoio, numa linha menor. | `sistemas` (variação, em 4 × 3) |
+| Tabela | Cabeçalho verde-escuro, linhas alternando branco e verde-claro, todo o corpo em escuro, 1.ª coluna em negrito. Com mais de 6 linhas, vai em 2 slides (S6). | `tabela` |
 | Dica de campo | Faixa verde-clara no pé do conteúdo, com lâmpada, "DICA DE CAMPO" em negrito e 1 ou 2 linhas. Uma por slide, no máximo. | `dica` em qualquer conteúdo |
-| Atenção | A mesma faixa, em laranja, com o ícone de alerta. Uso: regra que não pode ser quebrada (norma, alçada, segurança). | `atencao` |
+| Atenção | A mesma faixa, em laranja-claro, com o ícone de alerta laranja e a palavra "ATENÇÃO" em laranja-escuro `#A9530A`. Uso: regra que não pode ser quebrada (norma, alçada, segurança). | `atencao` |
 | Cross-sell | Círculo escuro no centro, com a venda-âncora, e 3 cartões de cada lado com o que vai junto. | `hub` |
 | Fechamento em 3 etapas | 3 cartões (Peça, Não fechou, Você resolve) e faixa escura com os 5 motivos. | a fazer |
 | Não fechou | Tabela com Motivo, Responda com prova e Volte ao pedido, mais a faixa ATENÇÃO da alçada. | `tabela` |
 | Checklist | 2 colunas de 5 cartões, cada um com um "✓" no círculo verde. | `checklist` |
-| Quiz | 6 faixas, cada uma com o número num círculo laranja e a pergunta. As respostas ficam só nas notas. | `quiz` |
+| Quiz | 6 faixas, cada uma com o número em escuro num círculo laranja e a pergunta. As respostas ficam só nas notas. | `quiz` |
 | Obrigado | Desenho da capa: "TREINAMENTO X BAP", "Obrigado!", frase e site. | `capa` |
+| Mitos e verdades | Está no original de Lubrificantes (slide 27). **A desenhar depois:** fica fora do padrão, sem slide, até ter desenho e simulação aprovados. | — |
+| Passo a passo numerado | Está no original de Lubrificantes (slide 26). **A desenhar depois:** fica fora do padrão, sem slide, até ter desenho e simulação aprovados. | — |
 
 ## 3. Grade, cores e fonte
 
@@ -70,7 +73,7 @@ Ordem fixa, igual nos 3 originais:
 
 - margem lateral de 0,6" e largura útil de 12,13";
 - vão de 0,15" entre cartões;
-- 4 colunas de 2,92" ou 6 colunas de 1,9".
+- 4 colunas de 2,92". A grade de 6 colunas sai do padrão, porque o corpo ficaria abaixo de 12 pt.
 
 **Posições fixas (em polegadas):**
 
@@ -91,6 +94,7 @@ Ordem fixa, igual nos 3 originais:
 | Capa | sobretítulo 16, título 48, subtítulo 20, rodapé 14 |
 | Seção | número 96, título 40, subtítulo 20 |
 | Cartão | título de 15 a 19; texto de 12 a 14 |
+| Rótulo (itens no catálogo, OFEREÇA JUNTO, legenda do hub, rodapé) | 10 ou mais |
 | Tabela | de 12 a 13 |
 | Dica | 14 |
 | Checklist | 16 |
@@ -101,12 +105,15 @@ Ordem fixa, igual nos 3 originais:
 | Papel | Hex |
 |---|---|
 | Escuro (títulos, faixa da capa, centro do hub) | `#1E2B22` |
-| Verde (ícones, números, sobretítulo) | `#59BA61` |
-| Verde-escuro (kicker, cabeçalho de tabela, rótulos) | `#2F7D36` |
+| Verde, o do logo (fundo, círculo de ícone, faixa; texto e número só sobre o escuro, como na capa) | `#59BA61` |
+| Verde-escuro (todo texto e número verde sobre fundo claro: kicker, número, cabeçalho de tabela, rótulos; 5,1:1 no branco) | `#2F7D36` |
 | Verde-claro (faixa de dica, linhas alternadas) | `#EEF7EF` |
 | Borda de cartão | `#D9E6DA` |
 | Cinza (texto de apoio, rodapé) | `#6B7570` |
-| Laranja (atenção, número do quiz) | `#F28C28` |
+| Laranja (ícone de alerta, círculo do quiz com o número em escuro) | `#F28C28` |
+| Laranja-escuro (a palavra "ATENÇÃO") | `#A9530A` |
+
+**Contraste:** o `#59BA61` no branco dá 2,4:1. Por isso nunca é cor de texto sobre fundo claro. O cinza `#6B7570` fica para texto de apoio sobre o branco, nunca no corpo de tabela.
 
 **Fonte:** **Arial** em tudo (decisão 7 a, `docs/marca/manual.md`). Os originais estão em Calibri.
 
@@ -121,12 +128,13 @@ Ordem fixa, igual nos 3 originais:
 | S3 | **Códigos e números pela base unificada**, gerados por script: quantidade de itens, códigos BAP e OFEREÇA JUNTO. | Hoje estão digitados à mão. Com o script, a base mudou e o slide muda junto. Código fora da base ou não ATIVO trava a geração. |
 | S4 | **Todos com as 3 aberturas.** | A Linha Moto não tem o "Ao final… você estará preparado para". |
 | S5 | **Notas sempre no mesmo formato** (MENSAGEM-CHAVE, COMO CONDUZIR, PERGUNTE AO TIME ou INSIGHT, e RESPOSTAS no quiz) **e com a duração na capa.** | As notas da capa da Linha Moto são um parágrafo solto e não dizem a duração. |
-| S6 | **Corpo de texto com no mínimo 12 pt**, e no máximo 6 linhas de tabela por slide. | Há tabelas com 7 a 11 linhas (PROACTIVE, ficha técnica) que ficam pequenas no projetor. Exceção: rótulos de 10 a 11 pt nos cartões de 6 colunas. |
+| S6 | **Corpo com 12 pt ou mais; rótulo** (itens no catálogo, OFEREÇA JUNTO, legenda do hub, rodapé) **com 10 pt ou mais.** Tabela com mais de 6 linhas vai em 2 slides, com o mesmo título, "(1 de 2)" e o cabeçalho repetido. O gerador já faz a divisão. | Há tabelas com 7 a 11 linhas (ProActive, ficha técnica) que ficam pequenas no projetor. |
 | S7 | **Conferir as datas de norma antes de gerar.** | "API SQ desde 31/03/2025" e "CL-4 (PC-12), licenças a partir de 01/01/2027" precisam ser checadas com a fonte da API. [SUPOSIÇÃO: podem ter mudado.] |
 | S8 | **Remissão entre treinamentos.** | Elétrica remete a Baterias; Freio e Arrefecimento remetem a Lubrificantes (fluido e aditivo); Rodagem remete à Linha Moto (pneus e câmaras). Evita repetir conteúdo. |
 | S9 | **PDF de apoio saindo do mesmo .pptx** (LibreOffice), para o `/admin/pdfs/`. | As notas de Lubrificantes prometem o "Material de Apoio em PDF". |
-| S10 | **Verde do padrão.** Manter o `#59BA61` dos originais ou passar ao verde BAP `#62BB47` do catálogo. | Os dois são quase iguais. [SUPOSIÇÃO: o `design-de-marca` decide qual é o oficial para apresentação.] |
-| S11 | **Mês e versão da base no rodapé da capa** (ex.: "Novembro 2026 · base v15"). | Mostra de que base vieram os códigos. |
+| S10 | **Verde do padrão.** A recomendação da marca é **manter o `#59BA61`**, que é o verde do logo (medido nos 4 arquivos de logo), com o `#2F7D36` para o texto. A outra opção é o `#62BB47` do catálogo. A escolha final é do Alexandre. | Pela decisão de 20/11, o verde oficial é o do logo. Com qualquer dos dois, o texto verde sobre fundo claro usa o `#2F7D36`. |
+| S11 | **Versão da base nas notas da capa** (bloco BASE, com a versão da base do dia, escrita pelo gerador) ou no rodapé do Obrigado. Não vai na capa. | Mostra de que base vieram os códigos. O vendedor não precisa dela para agir. |
+| S12 | **"uso interno" no rodapé** de todos os treinamentos: "Treinamento X BAP \| Equipe Comercial Externa · uso interno". | Sugestão da marca. Mesmo só no admin, o slide pode ser mostrado ao cliente. A capa da Linha Moto já faz assim. |
 
 ## 5. Estrutura proposta dos treinamentos
 
@@ -156,7 +164,7 @@ Em todos: estrutura mantida, Arial, números e códigos pela base atual, notas n
 |---|---|
 | **Baterias** (7 módulos) | Linhas e códigos pela base: 25 ativos (EFB, TF, LP, MXW, MXP...). Conferir a garantia por linha com a descrição da base. Remeter a Elétrica no cross-sell de velas. |
 | **Linha Moto** (5 módulos) | Tirar a coluna "Estoque" e os números de estoque (S2). Pneus e câmaras pela base: 12 pneus e 9 câmaras ativos. Incluir o "preparado para" (S4). |
-| **Lubrificantes** (7 módulos + Químicos) | Tirar a frase das 7 filiais (S2). Conferir as datas API (S7). PROACTIVE, SHIFTEASE e EFFITECH pela base: 24 itens, 18 ativos. Incluir o **módulo Químicos**: fluido de freio, aditivos, desengripante e silicone; 38 itens na base. |
+| **Lubrificantes** (7 módulos + Químicos) | Tirar a frase das 7 filiais (S2). Conferir as datas API (S7). ProActive, Shiftease e Effitech pela base: 24 itens, 18 ativos. Incluir o **módulo Químicos**: fluido de freio, aditivos, desengripante e silicone; 38 itens na base. |
 
 ## 6. Como gerar (depois do aprovado)
 
@@ -167,5 +175,7 @@ python treinamento.py mecanica_basica --png ../simulacoes/T-0032
 
 - Precisa do Node com `pptxgenjs` e do LibreOffice (`soffice`), este só para os PNGs.
 - A saída vai para `gerador/saidas/` e, depois do aprovado, para `entregas/`.
-- Tipos ainda **a fazer** no gerador: aprender, preparado para, fechamento em 3 etapas, mitos e verdades, e o passo a passo numerado.
+- Tipos ainda **a fazer** no gerador: aprender, preparado para e fechamento em 3 etapas.
 - Eles seguem o desenho dos originais (`referencia/tipos_de_slide_originais.png`) e entram antes de gerar os treinamentos completos.
+- Mitos e verdades e passo a passo numerado ficam fora do padrão até ter desenho (seção 2).
+- Grafia: os nomes de linha vão como "ProActive", "Shiftease" e "Effitech"; caixa alta só onde todo o texto é caixa alta (kicker). O nome do produto sai do Catálogo BAP (PRODUTO da base), não é digitado.
