@@ -38,7 +38,7 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 
 Lista **fixa** `PDFS` no `server.mjs` (id, título, arquivo por regex ancorada, tipo, grupo e par), só de `catalogo_grafico/entregas/`, na ordem da tela. O navegador manda só o `id`; o nome do arquivo nunca vem do pedido.
 
-- São 22 itens em 3 grupos (`grupo`), nesta ordem: `catalogos` (3), `materiais` (11: o portfólio geral, os Lubrificantes em par, o Kit Filtros e o portfólio de cada linha, `portfolio-<linha>`) e `treinamentos` (8: `treinamento-<tema>-pdf` e `-pptx`, em par).
+- São 22 itens em 3 grupos (`grupo`), nesta ordem: `catalogos` (3), `materiais` (11: primeiro os 8 portfólios juntos, o geral e os 7 por linha, `portfolio-<linha>`, de Leve a Autocenter; depois os Lubrificantes em par e o Kit Filtros) e `treinamentos` (8: `treinamento-<tema>-pdf` e `-pptx`, em par).
 
 - Nome com ano: vale o de ano mais alto que casa. Nome sem ano: o nome exato.
   - **[SUPOSIÇÃO]** O `catalogo-grafico` mantém esses nomes. Se o ano entrar no nome, a regex ganha o `(\d{4})` e o `buildFilter` do `render.yaml` muda junto.

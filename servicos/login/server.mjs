@@ -92,10 +92,7 @@ const PDFS = [
   { id: 'a4-grafica', titulo: 'A4 gráfica', grupo: 'catalogos', tipo: 'pdf', re: /^Catalogo_BAP_(\d{4})_A4_grafica\.pdf$/ },
   { id: 'linha-moto', titulo: 'Linha Moto', grupo: 'catalogos', tipo: 'pdf', re: /^Catalogo_BAP_(\d{4})_Linha_Moto\.pdf$/ },
   { id: 'portfolio', titulo: 'Portfólio de Produtos', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS\.pdf$/ },
-  { id: 'lubrificantes-pdf', titulo: 'Lubrificantes e Químicos', grupo: 'materiais', tipo: 'pdf', par: 'lubrificantes', re: /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pdf$/ },
-  { id: 'lubrificantes-pptx', titulo: 'Lubrificantes e Químicos', grupo: 'materiais', tipo: 'pptx', par: 'lubrificantes', re: /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pptx$/ },
-  { id: 'kit-filtros', titulo: 'Kit Filtros', grupo: 'materiais', tipo: 'pdf', re: /^Kit_Filtros_BAP\.pdf$/ },
-  // T-0032: o portfólio por linha (só PDF), no grupo dos materiais.
+  // T-0032: o portfólio de cada linha (só PDF), logo depois do geral: os 8 portfólios juntos, no começo dos materiais.
   { id: 'portfolio-leve', titulo: 'Portfólio · Linha Leve', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Leve\.pdf$/ },
   { id: 'portfolio-pesada', titulo: 'Portfólio · Linha Pesada', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Pesada\.pdf$/ },
   { id: 'portfolio-moto', titulo: 'Portfólio · Linha Moto', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Moto\.pdf$/ },
@@ -103,6 +100,9 @@ const PDFS = [
   { id: 'portfolio-acessorios', titulo: 'Portfólio · Linha Acessórios', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Acessorios\.pdf$/ },
   { id: 'portfolio-baterias', titulo: 'Portfólio · Linha Baterias', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Baterias\.pdf$/ },
   { id: 'portfolio-autocenter', titulo: 'Portfólio · Linha Autocenter', grupo: 'materiais', tipo: 'pdf', re: /^Portfolio_Produtos_BAP_AUTOPARTS_Linha_Autocenter\.pdf$/ },
+  { id: 'lubrificantes-pdf', titulo: 'Lubrificantes e Químicos', grupo: 'materiais', tipo: 'pdf', par: 'lubrificantes', re: /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pdf$/ },
+  { id: 'lubrificantes-pptx', titulo: 'Lubrificantes e Químicos', grupo: 'materiais', tipo: 'pptx', par: 'lubrificantes', re: /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pptx$/ },
+  { id: 'kit-filtros', titulo: 'Kit Filtros', grupo: 'materiais', tipo: 'pdf', re: /^Kit_Filtros_BAP\.pdf$/ },
   // T-0032: os treinamentos dos vendedores, cada um em PDF e PowerPoint (o mesmo "par": um cartão só, o PDF é o principal).
   { id: 'treinamento-mecanica-basica-pdf', titulo: 'Treinamento · Mecânica Básica', grupo: 'treinamentos', tipo: 'pdf', par: 'treinamento-mecanica-basica', re: /^Treinamento_Mecanica_Basica_BAP_Vendedores\.pdf$/ },
   { id: 'treinamento-mecanica-basica-pptx', titulo: 'Treinamento · Mecânica Básica', grupo: 'treinamentos', tipo: 'pptx', par: 'treinamento-mecanica-basica', re: /^Treinamento_Mecanica_Basica_BAP_Vendedores\.pptx$/ },

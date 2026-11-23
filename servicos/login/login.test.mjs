@@ -74,7 +74,9 @@ const TITULOS_NOVOS = {
   'treinamento-linha-moto-pdf': 'Treinamento · Linha Moto', 'treinamento-linha-moto-pptx': 'Treinamento · Linha Moto',
   'treinamento-lubrificantes-pdf': 'Treinamento · Lubrificantes', 'treinamento-lubrificantes-pptx': 'Treinamento · Lubrificantes',
 };
-const LISTA = [...SETE, ...NOVOS];
+// A ordem da tela (revisão de UX da T-0032): os 8 portfólios juntos no começo de 'materiais' (o geral e depois os 7 por
+// linha), então os outros materiais e, no fim, os treinamentos.
+const LISTA = [...SETE.slice(0, 4), ...NOVOS.slice(0, 7), ...SETE.slice(4), ...NOVOS.slice(7)];
 // Os internos de entregas/ (nomes reais de hoje): nunca podem sair.
 const INTERNOS = [
   'Alteracoes_Catalogo_Complementos_Fraga_13112026.xlsx', 'Auditoria_Catalogo_BAP_23102026.xlsx',
@@ -387,6 +389,10 @@ test('T-0032: os 15 materiais novos só para o admin, com título, grupo e par; 
     assert.deepEqual(itens.map((x) => x.tipo), ['pdf', 'pptx'], par);
     assert.equal(itens[0].titulo, itens[1].titulo, par);
   }
+  // Os 8 portfólios abrem 'materiais', juntos e seguidos: o geral e os 7 por linha (Leve ... Autocenter); depois, o resto.
+  const mat = lista.json.filter((x) => x.grupo === 'materiais').map((x) => x.id);
+  assert.deepEqual(mat, ['portfolio', 'portfolio-leve', 'portfolio-pesada', 'portfolio-moto', 'portfolio-lubrificantes',
+    'portfolio-acessorios', 'portfolio-baterias', 'portfolio-autocenter', 'lubrificantes-pdf', 'lubrificantes-pptx', 'kit-filtros']);
   // Os 7 do portfólio por linha ficam em 'materiais', sem par (um cartão cada).
   for (const [id] of NOVOS.slice(0, 7)) assert.deepEqual([porId[id].grupo, porId[id].par], ['materiais', null], id);
   // O PowerPoint: Content-Type do pptx e download (attachment), no GET e no HEAD.
