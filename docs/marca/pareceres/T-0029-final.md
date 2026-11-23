@@ -75,3 +75,37 @@ No PR: o `pdftotext` do PDF de `entregas/` igual ao desta pasta (87 págs., 19 "
   - "MB Pode ser aplicado na ré, neutro…" (p59) não é veículo (item 4).
 - **Fora da marca (para o `gerente-projetos`):** a p68 da Pesada ainda mostra "Toyota Etios 1.3 L 16V", que é carro. A
   regra nova tirou a Topic e a Daily, mas não o Etios.
+
+## Entrega final (PR #179, head `0133f6f726084443bbd705deeb0352d2a2737c66`)
+
+| Campo | Valor |
+|---|---|
+| O que foi visto | O `catalogo_grafico/entregas/Portfolio_Produtos_BAP_AUTOPARTS.pdf` do head (`pdfinfo` e `pdftotext`, comparado com o PDF da rodada 3) e os PNGs da pág. 2, antes e depois, da pasta `final-T-0029` |
+| Parecer | **LIBERADO** (final). **MC-0017 FECHADO** |
+
+- **Única diferença para a rodada 3:** a pág. 2, pelo 15 a: "…componentes automotivos de qualidade, com segurança e
+  **bom custo-benefício**." A voz está certa. Diz o mesmo que "preço acessível", sem a palavra "preço" num material para
+  cliente, e segue o tom institucional do "Quem somos". O parágrafo ficou 1 linha mais curto, e o resto da página não
+  muda.
+- **Metadados:** título "Portfólio de Produtos BAP AUTOPARTS", autor "BAP AUTOPARTS" e 87 págs.
+- **Grafia:** 2 vezes "PORTFÓLIO DE PRODUTOS 2027", 19 vezes "NOVIDADE 2026", 7 "ProActive", 7 "Shiftease" e
+  1 "Effitech". Nenhum "Vw", "Gm" nem "Mb".
+- **Sem preço e sem estoque:** o texto não tem "preço", "R$" nem "estoque".
+- **Fila (15 a nos outros materiais; não segura):** a frase "preço acessível" continua no "Quem somos" do A4
+  (`print_cat.py:484`) e na apresentação de Lubrificantes (`apres_conteudo.json`). A troca é a mesma ("bom
+  custo-benefício"), pelo `catalogo-grafico`, na próxima entrega de cada material.
+
+### Controle dos achados de marca (23/11/2026)
+
+| ID | Situação |
+|---|---|
+| MC-0011 | FECHADO como MANTIDO (R-20261123-112006-alexandre, 7 a) |
+| MC-0012 | PARADO (R-20261123-112006-alexandre, 8 c) |
+| MC-0015 | FECHADO (T-0028) |
+| MC-0016 | Corrigido na simulação da T-0030 ("Ah" e "CCA"); fecha com a entrega. Na fila: "Ca +25c" e "12v" |
+| MC-0017 | **FECHADO** com esta entrega (PR #179). Na fila, sem achado: as aplicações da base em caixa alta, "Mwm", "PUTSMEISTER" (item 8 da lista de melhorias) |
+| MC-0018 | FECHADO (T-0032, padrão de treinamento) |
+| MC-0019 | FECHADO (T-0032, padrão de treinamento) |
+| MC-0020 | FECHADO (T-0032, padrão de treinamento) |
+| MC-0021 | ABERTO (T-0032, Linha Baterias: títulos da tabela e da capa) |
+| MC-0022 | FECHADO (T-0032, Mecânica Básica); a foto da embreagem vai como pergunta ao Alexandre |
