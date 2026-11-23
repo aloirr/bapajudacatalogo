@@ -38,3 +38,22 @@ Voz, texto e o nome da página ficam com o `design-de-marca` (ver o parecer de m
 2. **No cartão do par sem os 2 arquivos**, saem 2 frases ("O PDF não está disponível agora." e "O PowerPoint…"). Uma só ("O PDF e o PowerPoint não estão disponíveis agora.") ocuparia menos espaço. É temporário, até as entregas.
 
 **Resultado: VOLTA PARA AJUSTE** (2 🟡). Depois do ajuste, confiro os prints de 1366 e 390 px.
+
+---
+
+## Reteste (web-site `09016a6`, integracao-placas `d5ee467`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 14:28 (Manaus) |
+| O que foi revisto | O diff `0d6556f..09016a6` (`pdfs.js`, `index.html`, `conta.js`, `admin.css` e `styles.css`) e os prints `depois-admin-pdfs-1366.png`, `depois-admin-pdfs-390.png` e `depois-menu-conta-390.png` |
+| Decisão do gerente | Título da marca nos 4 lugares; a parte comum dos treinamentos no subtítulo da seção; os títulos dos cartões ficam como os dos arquivos |
+| Resultado | **LIBERADO**, sem 🔴 e sem 🟡 |
+
+- 🟢 **🟡 1, os 8 portfólios juntos:** o geral vem primeiro, e os 7 por linha vêm logo depois, antes de Lubrificantes e Kit Filtros.
+- 🟢 **🟡 2, a parte comum num lugar só:** "Para os vendedores: em PDF para ler, em PowerPoint para apresentar." está uma vez, no subtítulo da seção (14 pt, `--texto-2`), colado ao título. Cada cartão traz só o que o diferencia ("Os sistemas do carro e a peça certa para cada sintoma."; "Tecnologias, teste, garantia e venda de baterias."…). Os portfólios dizem o que cada um tem (Baterias "com a tabela dos códigos", Autocenter "os itens de troca rápida").
+- 🟢 **O título**, "Catálogos, materiais e treinamentos", é o mesmo no item do menu, na trilha, no h1 e no `<title>`. Em 390 px, o h1 vai a 2 linhas sem cortar a palavra, e o item do menu cabe em 1 linha, com o ícone alinhado.
+- 🟢 **Os títulos dos cartões** ("Treinamento · …", "Portfólio · …") ficam iguais aos nomes dos arquivos, como decidido. A repetição com o nome da seção fica aceita.
+- 🟢 **390 px:** nada rola para o lado, e os 2 botões do par continuam empilhados, com a largura toda.
+
+**Resultado do reteste: LIBERADO** para seguir ao `revisor-codigo`.
