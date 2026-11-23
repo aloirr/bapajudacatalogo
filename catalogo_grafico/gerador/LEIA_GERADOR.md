@@ -42,7 +42,7 @@ Versão de 12/11/2026 (atualizada pelo PC EMPRESA; antes 27/10 pelo PC PESSOAL).
 | Base v13 (da v11: regra da v12 + aplicações do site) | `python base_v13.py` |
 | Base v14 (da v13: complementos do Fraga de 13/11) | `python base_v14.py` |
 | Auditoria do catálogo | `python auditoria_catalogo.py` |
-| Portfólio (cliente) | `python portfolio.py` (lê a base unificada de `dados/`, como os 3 PDFs; cada produto no sistema em que o Catálogo BAP o mostra, e os Rolamentos em Rodagem: T-0028, decisão 3b) |
+| Portfólio (cliente) | `python portfolio.py` (lê a base unificada de `dados/`, como os 3 PDFs; cada produto no sistema em que o Catálogo BAP o mostra, e os Rolamentos em Rodagem: T-0028, decisão 3b). T-0029: o ano vem do `digital2.ANO`, e o mês da capa, do dia da geração; a grafia da montadora usa o `montar.KEEPU`; os nomes de linha da BAP ficam no `LINHA_BAP`; na Linha Pesada, o item LEVE E PESADA mostra só a aplicação que o `taxo.HEAVY` reconhece como pesada (16a). O detalhe de cada regra fica no comentário do `portfolio.py` e do `taxo.py`. Hoje só o Portfólio usa o `taxo.HEAVY` (o `linha_of` não tem chamada; o `base_v9.py` é histórico). |
 | Kit Filtros (cliente) | `python kitfiltros/kit.py saidas/Kit_Filtros_BAP.pdf` (ajustar caminhos `G`/entradas no topo do `kit.py`/`parse.py` para a sua nuvem) |
 | Apresentação lubrificantes | `python apres_bemol.py` / `node apres_ppt.js` (texto em `apres_conteudo.json`) |
 | Encartelados moto | `python encartelados.py` |
