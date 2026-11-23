@@ -39,3 +39,28 @@ Sem preço e sem estoque: 🟢. A grafia ("ProActive", "Shiftease", caixa alta d
 3. **Corte sem "…", que já estava na simulação aprovada:** "Range Rover Evoque 2.0 L 1" (p43) e "Agrale Caminhões: 6500, 8500, 8700, 1" (p59). Vão para o item 6 da lista da T-0032.
 
 **Resultado: VOLTA PARA AJUSTE** (1 🟡, "Ford F-1" na p56). O resto da rodada está 🟢, e a variante a é a recomendada. Depois do ajuste, confiro só a p56.
+
+---
+
+## Reteste, rodada 3 (head `6d8f143`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 11:20 (Manaus) |
+| O que foi revisto | O `LEIA-ME.md` e os 48 PNGs de `sim-T-0029-final/rodada3/` (24 páginas, antes `71977dc` × depois). Também o PDF de 87 páginas: comparei, no texto, cada linha de "Principais aplicações" das 24 páginas com a rodada anterior |
+| Resultado | **LIBERADO**, sem 🔴 e sem 🟡 |
+
+- 🟢 **O 🟡 da p56 está resolvido.** Sai "Ford F-12000, F14000", inteiro, e a p59 passa a "Ford Caminhões F12000, F14000, F16000". O "2000" deixou de ser lido como ano.
+- 🟢 **Todo corte agora tem "…" e termina em palavra inteira** (18 páginas): "VW Fus" vira "VW…" (p42), "Sie" vira "Palio…" (p34), "Evoque 2.0 L 1" vira "Evoque 2.0 L…" (p43), "Agrale … 8700, 1" vira "8700…" (p59), "Motocicl" vira "Motocicletas…" (p75). Na busca em todo o PDF, não sobra pedaço de palavra sem "…" nas aplicações.
+- 🟢 **Sem buraco no meio.** As 24 páginas mantêm a quantidade de linhas, menos 2:
+  - a p53 passa de 12 para 11 (saem Ducato e Expert, entra VW Delivery), e a vaga fica no fim da 2ª coluna (6 + 5);
+  - a p56 volta a 12.
+  A grade de 2 colunas não muda, e nada passa da área.
+- 🟢 **A Pesada fica com veículo pesado.** Saem "300C" (p54), Ducato Cargo (p53 e p61), Expert (p53), Topic e Daily (p68). Voltam máquinas e caminhões (Dynapac, Muller e Putzmeister na p63; CBT, New Holland e Valmet na p56; GM C-60 e D40). A Leve, a Moto e a Universal mudam só no corte.
+- 🟢 **Numeração:** as 87 páginas batem com o número do rodapé.
+
+### Notas do reteste (não seguram)
+1. **Corte no meio do modelo.** Com o "…", o corte às vezes cai entre 2 palavras do mesmo modelo: "Novo Palio, Grand…" (p42, de "Grand Siena") e "Strada, Palio…" (p34, de "Palio Weekend"). Também sobra a linha "Volkswagen / Chevrolet / Ford VW…" (p42), sem modelo nenhum. O "…" avisa o corte, e por isso não seguro. Para o item 6 da lista da T-0032: cortar no último modelo inteiro ("Novo Uno, Novo Palio…"); sem modelo inteiro, a linha sai.
+2. **Notas que continuam:** "Toyota Etios 1.3" na p68 (HC26 na base, para o `catalogo-dados`) e o " - DE" em "Iveco STRALIS - DE" (p62, já estava antes; item 4 da lista da T-0032).
+
+**Resultado da rodada 3: LIBERADO.** A T-0029 fica sem 🔴 e sem 🟡, com a variante a.
