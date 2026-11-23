@@ -94,3 +94,25 @@ Na próxima rodada:
 - as capas e as contracapas iguais às desta tabela.
 
 Fechar o MC-0025 e o MC-0026.
+
+## Reteste do MC-0025 e do MC-0026 (head `79fb91071697cbe8b14cc08d599d690fdcd3770e`)
+
+**LIBERADO nos 8. MC-0025 e MC-0026 FECHADOS** ("Cherry" vai para o `catalogo-dados`).
+
+- **MC-0025:** a foto da vela saiu nas 4 páginas (geral p34 e p70, Leve p33 e Moto p04). No lugar, um ícone desenhado
+  de vela, nos verdes da paleta, sem marca nenhuma.
+  - A capa da Linha Moto ficou com 3 fotos BAP (caixa do filtro de ar, frascos ProActive e rolamento).
+  - Para a fila, sem achado: 2 dos 3 frascos são de óleo de carro (0W20 e 15W40). Quando houver foto do óleo 4T ou do
+    pneu de moto BAP, vale trocar, para a capa mostrar só a linha (item 1).
+- **MC-0026:** nenhum "Ix35", "Fzr" nem "Mwm" nos 8: saem "ix35", "FZR 1000" e "MWM". A regra das siglas de 3 letras
+  sem vogal não pegou nenhuma palavra que não fosse sigla. "Cherry" (5 vezes) vem da base e fica com o
+  `catalogo-dados`.
+- **"MWM" no `montar.KEEPU`:** concordo em deixar para a fila. Mudaria o A4 (14 "Mwm") e o Digital (69), que nesta
+  tarefa têm de sair iguais ao main. A troca nos 2 vai com simulação (regra 3 do `CLAUDE.md`), na próxima rodada deles.
+- **Unidades (Cintas, Selantes e Aditivos):** "3 t", "50 mm", "9 m", "gancho J", "300 ml", "85 g" e "50 g", com
+  espaço e no padrão do item 13. Certo.
+  - Para a fila (item 13, texto da base; `catalogo-dados`), sem achado:
+    - "Oximico" → "Oxímico";
+    - "anti ferrugem" → "antiferrugem";
+    - "(limpeza bico injetor/tbi/carburador, ETC)" → "(limpeza de bico injetor, TBI e carburador)";
+    - a ordem das medidas da cinta, que varia ("50 mm · 3 t" e "3 t · 50 mm"): recomendo "3 t · 50 mm · 9 m" em todas.
