@@ -43,6 +43,7 @@
 **Na busca, medida da bateria** (T-0006, fase 1; R-20261123-095435-alexandre e R-20261123-112006-alexandre):
 
 - O `site/app.js` lê do `x` (a ficha técnica, que já passa pela `FICHA` e pela `TRAVA`) o "C20(ah)" (C20(AH) da base) e o "Cca-18°" (CCA-18°), quando o valor é um número inteiro. A chave é comparada sem acento, caixa e sinais (`C20AH` e `CCA18`): se o rótulo da `FICHA` mudar, os filtros somem, e o `testes` confere.
+- Na ficha técnica da tela (página, janela e ficha impressa), esses dois aparecem como "Ah" e "CCA", o mesmo texto do filtro (T-0030, MC-0016): o mapa `ROTULO_FICHA` do `site/app.js` troca só o rótulo, pela mesma chave sem sinais. O valor, a `FICHA` e o JSON não mudam.
 - Filtros "Amperagem" (opções em Ah, do menor ao maior; `ah=60` no endereço) e "Partida a frio (CCA)" (5 faixas, de "até 400" a "acima de 800", na constante `FAIXAS_CCA` do `site/app.js`; `cca=401-500` no endereço), depois da Família, só quando a lista tem bateria com a medida.
 - Busca do campo q: a amperagem entra no texto da bateria como "60AH", e "60ah", "60 ah", "60Ah" e "60-Ah" viram essa palavra.
 - É só a tela: o JSON não muda.

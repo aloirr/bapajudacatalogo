@@ -980,6 +980,9 @@
     if (/^\d+$/.test(x.get("CCA18") || "")) { const n = +x.get("CCA18"); m.cca = FAIXAS_CCA.find(([lim]) => n <= lim)[1]; }
     return m.ah || m.cca ? m : null;
   }
+  // Rótulo da bateria na ficha técnica (T-0030, MC-0016): o mesmo texto do filtro ("Ah" e "CCA"). Só a tela: o JSON
+  // continua com "C20(ah)" e "Cca-18°", que o medidaDe lê.
+  const ROTULO_FICHA = new Map([["C20AH", "Ah"], ["CCA18", "CCA"]]);
   // rot: nome do grupo; nome: a opção e a etiqueta; ordem: a das opções (sem ela, a de mais produtos primeiro)
   const FILTROS = {
     li: { rot: "Linha" }, ca: { rot: "Categoria" }, si: { rot: "Sistema" }, fa: { rot: "Família" },
@@ -1572,7 +1575,7 @@
     if (p.po) ficha.push(["Posição", titulo(p.po)]);
     if (p.la) ficha.push(["Lado", titulo(p.la)]);
     if (p.de) ficha.push(["Detalhe", p.de]);
-    (p.x || []).forEach(([k, v]) => ficha.push([k, v]));
+    (p.x || []).forEach(([k, v]) => ficha.push([ROTULO_FICHA.get(normCod(k)) || k, v]));
     const junto = servemNoVeiculo(doSistema(listaCodigos(p.oj), p), VEI_LEVE, p);
     const link = location.origin + location.pathname + "#/produto/" + encodeURIComponent(p.c);
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900) e, embaixo, "Outros veículos e detalhes" (restoAplicacao);
