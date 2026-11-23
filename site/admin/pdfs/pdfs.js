@@ -8,7 +8,9 @@
   const F = window.BAPForm;
   const { esc, api } = window.BAP;
   const lugar = document.getElementById("pdfs");
-  const GRUPOS = [["catalogos", "Catálogos"], ["materiais", "Apresentações e materiais"], ["treinamentos", "Treinamentos"]];
+  // [chave, título, subtítulo (opcional): o que vale para todos os cartões do grupo]
+  const GRUPOS = [["catalogos", "Catálogos"], ["materiais", "Apresentações e materiais"],
+    ["treinamentos", "Treinamentos", "Para os vendedores: em PDF para ler, em PowerPoint para apresentar."]];
   const USO = { // o uso de cada cartão, em uma frase (a chave é o "par" ou o id; a lista é fixa no serviço)
     "completo-digital": "Todos os itens, para ver na tela.",
     "a4-grafica": "Para mandar imprimir na gráfica.",
@@ -16,17 +18,17 @@
     portfolio: "A BAP e todas as linhas, por sistema e família.",
     lubrificantes: "A apresentação comercial: em PDF para ver ou enviar, em PowerPoint para editar.",
     "kit-filtros": "Os kits de filtros de cada veículo.",
-    "portfolio-leve": "Só a linha leve, por sistema e família.",
-    "portfolio-pesada": "Só a linha pesada, por sistema e família.",
-    "portfolio-moto": "Só a linha de moto, por sistema e família.",
+    "portfolio-leve": "Só a Linha Leve, por sistema e família.",
+    "portfolio-pesada": "Só a Linha Pesada, por sistema e família.",
+    "portfolio-moto": "Só a Linha Moto, por sistema e família.",
     "portfolio-lubrificantes": "Só os lubrificantes e químicos, por sistema e família.",
     "portfolio-acessorios": "Só os acessórios, por sistema e família.",
-    "portfolio-baterias": "Só as baterias, por sistema e família.",
-    "portfolio-autocenter": "Só a linha autocenter, por sistema e família.",
-    "treinamento-mecanica-basica": "Mecânica básica para os vendedores: em PDF para ler, em PowerPoint para apresentar.",
-    "treinamento-baterias": "Baterias para os vendedores: em PDF para ler, em PowerPoint para apresentar.",
-    "treinamento-linha-moto": "A linha de moto para os vendedores: em PDF para ler, em PowerPoint para apresentar.",
-    "treinamento-lubrificantes": "Lubrificantes para os vendedores: em PDF para ler, em PowerPoint para apresentar.",
+    "portfolio-baterias": "Só as baterias da Linha Leve e da Linha Pesada, com a tabela dos códigos.",
+    "portfolio-autocenter": "Os itens de troca rápida do autocenter, por sistema e família.",
+    "treinamento-mecanica-basica": "Os sistemas do carro e a peça certa para cada sintoma.",
+    "treinamento-baterias": "Tecnologias, teste, garantia e venda de baterias.",
+    "treinamento-linha-moto": "Pneus, câmaras, óleo, velas e rolamentos de moto.",
+    "treinamento-lubrificantes": "Óleos ProActive, Shiftease e Effitech e os químicos.",
   };
   const NOME_TIPO = { pdf: "PDF", pptx: "PowerPoint" }; // o tipo vem da lista do serviço; sem ele, é PDF
   const IC_BAIXAR = window.BAPConta.IC.pdf;
@@ -93,11 +95,11 @@
       if (p.par) porPar.set(p.par, c);
       cartoes.push(c);
     }
-    return GRUPOS.map(([g, nome]) => {
+    return GRUPOS.map(([g, nome, sub]) => {
       const doGrupo = cartoes.filter((c) => c.grupo === g);
       if (!doGrupo.length) return "";
       return `<section class="pdf-grupo" aria-labelledby="grupo-${g}">
-        <h2 class="pdf-grupo-tit" id="grupo-${g}">${nome}</h2>
+        <h2 class="pdf-grupo-tit" id="grupo-${g}">${nome}</h2>${sub ? `<p class="pdf-grupo-sub">${sub}</p>` : ""}
         <div class="pdfs">${doGrupo.map(cartao).join("")}</div>
       </section>`;
     }).join("");

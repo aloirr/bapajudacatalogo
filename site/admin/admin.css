@@ -1,4 +1,4 @@
-/* Páginas do admin (T-0022, T-0024): "Criar usuários" e "Catálogos e materiais". Vem depois do /styles.css e do /entrar/entrar.css
+/* Páginas do admin (T-0022, T-0024): "Criar usuários" e "Catálogos, materiais e treinamentos". Vem depois do /styles.css e do /entrar/entrar.css
    e usa só as variáveis do :root. */
 
 /* ---------- lista de usuários ---------- */
@@ -78,6 +78,8 @@ dialog.dlg { background: var(--branco); }
 /* ---------- catálogos, materiais e treinamentos (T-0024, T-0032): 3 grupos de cartões ---------- */
 .pdf-grupo + .pdf-grupo { margin-top: 32px; }
 .pdf-grupo-tit { margin: 0 0 14px; font-size: 20px; line-height: 1.25; color: var(--escuro); }
+.pdf-grupo-tit:has(+ .pdf-grupo-sub) { margin-bottom: 4px; }
+.pdf-grupo-sub { margin: 0 0 14px; color: var(--texto-2); font-size: 14px; }
 /* 3 colunas no computador (a .pg tem 1200 px), 2 no tablet, 1 no celular */
 .pdfs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 @media (min-width: 1024px) { .pdfs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
