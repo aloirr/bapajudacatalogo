@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 22/11/2026 07:43 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 22/11/2026 19:10 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -9,7 +9,7 @@ Atualizado em 22/11/2026 07:43 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0003](tarefas/T-0003.md) | Publicar no Render (Blueprint) e checklist do domínio | web-site | gerente-projetos, testes | CONCLUÍDA em parte (Render no ar; doc e domínio a fazer) | #7 |
 | [T-0004](tarefas/T-0004.md) | Relatório de fotos que faltam e de produtos sem aplicação ou referência | catalogo-dados | testes | CONCLUÍDA | #5 |
 | [T-0005](tarefas/T-0005.md) | Consulta por placa (API PLACAS): desenho e serviço no Render | integracao-placas | web-site, revisor-codigo | CONCLUÍDA (em uso desde 11:29) | #22, #23, #24, #25 |
-| [T-0006](tarefas/T-0006.md) | Proposta de busca por medida (pneus, rolamentos, baterias) | web-site | catalogo-dados | NOVA | — |
+| [T-0006](tarefas/T-0006.md) | Proposta de busca por medida (pneus, rolamentos, baterias) | web-site | catalogo-dados, testes | EM APROVAÇÃO (proposta e simulação com o Alexandre) | o deste lote |
 | [T-0007](tarefas/T-0007.md) | Terminal Axial com "FORNECEDOR AMPRI": simulação da limpeza e "fornecedor" na TRAVA | catalogo-dados | web-site, testes | CONCLUÍDA | #8, #11, #12 |
 | [T-0008](tarefas/T-0008.md) | Busca por veículo ("Gol" × "Golf") e aba Código com a marca na frente | web-site | testes | CONCLUÍDA | #14, #15 |
 | [T-0009](tarefas/T-0009.md) | Preço no site: TER556556 com "R$" na APLICACAO, e "R$" na TRAVA | catalogo-dados | web-site, testes | CONCLUÍDA | #11, #12 |
@@ -30,13 +30,14 @@ Atualizado em 22/11/2026 07:43 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0024](tarefas/T-0024.md) | Downloads de todos os materiais na página "Catálogos e materiais" | integracao-placas | web-site, catalogo-grafico, designer-ux, design-de-marca | CONCLUÍDA | #133, #134, #135, #136, #137, #138 |
 | [T-0025](tarefas/T-0025.md) | Repetições e ajustes de marca nos materiais do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | CONCLUÍDA | #141, #142, #143 |
 | [T-0026](tarefas/T-0026.md) | Repetições nas páginas 2 a 4 do A4 e nos sumários do catálogo gráfico | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #146, #147, #148 |
-| [T-0027](tarefas/T-0027.md) | "1 itens": singular num lugar só no gerador do catálogo gráfico | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #152, #153, #154 |
+| [T-0027](tarefas/T-0027.md) | "1 itens": singular num lugar só no gerador do catálogo gráfico | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #151, #152, #153, #154, #155, #156 |
 
 ## Fila
-Main af3bae1 (#152).
+Main 7e5b0ee (#155).
 
-1. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
-2. **Fora da fila, para decidir depois:**
+1. **T-0006, busca por medida:** proposta e simulação com o Alexandre (4 perguntas na seção 7 da proposta).
+2. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
+3. **Fora da fila, para decidir depois** (parada, decisão 3 do R-20261122-223000-alexandre):
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - Portfólio: a entrega tem 82 páginas, mas o gerador dá mais com a base de hoje, porque agrupa pelo SISTEMA da v27; gerar de novo é decisão do Alexandre (catalogo-grafico, R-20261122-100047); junto entram o RD-0527 (o "1 itens" das págs. 69 e 76) e o RD-0526, com o `plural()` num módulo comum (T-0027);
    - MC-0011 e MC-0012 (fonte do .pptx; tamanho do logo e assinatura, com a etiqueta das apresentações e o topo do site): decisão do Alexandre (T-0025);
@@ -47,6 +48,13 @@ Main af3bae1 (#152).
    - "(coluna Leve também)" aparece com e sem aspas nos PDFs de pneus;
    - EQUIVALE A ainda pode começar uma linha com "·";
    - o quebra.py usa funções internas do ReportLab (fixar a versão).
+
+## Sessão Cowork (22/11, a partir das 18:10)
+- Retomada depois da PAUSA das 07:40 (R-20261122-114407), em R-20261122-223000-alexandre: sem os guardiões e sem a BAP_AGENTE; o Claude faz o po e o gerente-projetos na conversa e segue `.claude/agents` nos outros papéis. Sem ronda, timer ou agendamento.
+- Gravação: o git do shell só lê e busca; branch, commit, PR e merge pelo navegador (editor web do GitHub, conta aloirr). O editor web grava um arquivo por commit e não sobe imagem.
+- O aloirr/bapajudacatalogo continua público (decisão 2; fecha o item 3 do R-20261122-075711).
+- Governança só com "autorizo o merge do PR #N no commit <sha>" escrito pelo Alexandre no chat.
+- Na volta ao Claude Code: `node scripts/coord.mjs verificar` sobre os commits do período e conferência das autorizações de merge.
 
 ## Regras novas (20 e 21/11)
 - Merge: como no CLAUDE.md (seção Merge). Nenhum merge vai ao Alexandre (R-20261122-015249-alexandre).
