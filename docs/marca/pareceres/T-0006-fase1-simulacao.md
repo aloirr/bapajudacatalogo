@@ -85,7 +85,9 @@ pelo `gerente-projetos` e pelo `po`.
 | ID | Situação |
 |---|---|
 | MC-0016 | ABERTO, fora da fase 1; a encaminhar pelo `gerente-projetos` |
-| MC-0015, MC-0011, MC-0012 | ABERTOS, como antes; esta tarefa não os afeta |
+| MC-0011 | FECHADO como MANTIDO: o .pptx fica em Arial (R-20261123-112006-alexandre, 7 a) |
+| MC-0012 | PARADO, por decisão do Alexandre (R-20261123-112006-alexandre, 8 c) |
+| MC-0015 | ABERTO; a correção ("linhas" na capa da Linha Moto) vai pela T-0028, com simulação (R-20261123-112006-alexandre, 11 a). Esta tarefa não o afeta |
 
 ## Reteste
 
