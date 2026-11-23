@@ -1,0 +1,1054 @@
+{
+ "titulo": "Arrefecimento",
+ "arquivo": "Treinamento_Arrefecimento_BAP_Vendedores.pptx",
+ "rodape": "Treinamento Arrefecimento BAP  |  Equipe Comercial Externa · uso interno",
+ "nao_codigo": [
+  "HB20"
+ ],
+ "slides": [
+  {
+   "tipo": "capa",
+   "titulo": "Arrefecimento BAP",
+   "sub": "Bomba d'água, eletroventilador e fluido de radiador: do ponteiro subindo à peça certa",
+   "notas": "MENSAGEM-CHAVE\nO arrefecimento impede o motor de se destruir com o próprio calor. Superaquecimento custa caro, e o vendedor que entende o sistema vende a prevenção.\n\nCOMO CONDUZIR\nDê boas-vindas e diga a duração prevista (cerca de 1h30 com perguntas). O fluido de radiador também está no treinamento de Lubrificantes (módulo de Químicos).\n\nPERGUNTE AO TIME\nQual peça de arrefecimento vocês mais vendem? E quando o cliente pede, o motor já ferveu?"
+  },
+  {
+   "tipo": "aprender",
+   "k": "ABERTURA",
+   "t": "O que vamos aprender hoje?",
+   "frase": "Hoje você sai daqui sabendo |explicar, diagnosticar e vender| o arrefecimento — da bomba d'água ao fluido certo.",
+   "apoio": "Superaquecimento quase nunca tem uma causa só: quem conhece o sistema vende a solução completa, e não só a peça barata.",
+   "pilares": [
+    [
+     "ENTENDER",
+     "O caminho do calor e a função de cada peça",
+     "FaTemperatureHigh"
+    ],
+    [
+     "DIAGNOSTICAR",
+     "Ponteiro subindo, vazamento e ventoinha parada",
+     "FaStethoscope"
+    ],
+    [
+     "VENDER",
+     "Bomba com kit, fluido certo, combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nO objetivo é ligar o que o motorista vê no painel à peça BAP certa.\n\nCOMO CONDUZIR\nApresente os três pilares como jornada.\n\nPERGUNTE AO TIME\nQuantas vezes vocês vendem bomba d'água sem perguntar pela correia dentada?"
+  },
+  {
+   "tipo": "topicos",
+   "k": "ABERTURA",
+   "t": "Tópicos do treinamento",
+   "itens": [
+    [
+     "Como funciona",
+     "O caminho do calor e as peças",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Bomba d'água",
+     "Rotor, selo, vazamento e o kit de correia",
+     "FaDroplet"
+    ],
+    [
+     "Eletroventilador",
+     "Ventoinha, sensor e o trânsito",
+     "FaWind"
+    ],
+    [
+     "Fluido de radiador",
+     "Orgânico, anticorrosivo e diluição",
+     "FaFlask"
+    ],
+    [
+     "Superaquecimento",
+     "As causas e o diagnóstico de balcão",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Código e garantia",
+     "Aplicação, Ofereça junto e causas de falha",
+     "FaBarcode"
+    ],
+    [
+     "Vender arrefecimento",
+     "SPIN, cross-sell, combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nSão 7 módulos: do caminho do calor ao pedido.\n\nCOMO CONDUZIR\nPasse rápido pelos tópicos. O módulo 4 remete ao treinamento de Lubrificantes.\n\nINSIGHT PARA O CAMPO\nO módulo 5 é o mais útil no balcão: as 8 causas de superaquecimento."
+  },
+  {
+   "tipo": "preparado",
+   "k": "ABERTURA",
+   "t": "Ao final deste treinamento, você estará preparado para",
+   "itens": [
+    [
+     "Explicar",
+     "como o motor controla a própria temperatura",
+     "FaComments"
+    ],
+    [
+     "Ler",
+     "o ponteiro, o vazamento e a ventoinha que o cliente descreve",
+     "FaEye"
+    ],
+    [
+     "Identificar",
+     "a bomba e o eletroventilador certos no catálogo",
+     "FaMagnifyingGlass"
+    ],
+    [
+     "Orientar",
+     "o fluido certo, a diluição e a sangria do sistema",
+     "FaFlask"
+    ],
+    [
+     "Ampliar",
+     "o pedido com o kit de correia e o fluido",
+     "FaLayerGroup"
+    ],
+    [
+     "Defender",
+     "o valor da BAP com argumento técnico",
+     "FaShieldHalved"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nEstes são os seis compromissos do treinamento.\n\nCOMO CONDUZIR\nLeia os verbos em voz alta. No fechamento eles voltam como checklist.\n\nPERGUNTE AO TIME\nQual destes seis vocês acham mais difícil hoje?"
+  },
+  {
+   "tipo": "secao",
+   "n": "01",
+   "titulo": "Como funciona",
+   "sub": "O caminho do calor e a função de cada peça",
+   "notas": "MENSAGEM-CHAVE\nO fluido recolhe o calor do motor e o entrega no radiador.\n\nCOMO CONDUZIR\nTransição curta. Este módulo dá o mapa do arrefecimento."
+  },
+  {
+   "tipo": "desenho",
+   "k": "MÓDULO 01 · FUNCIONAMENTO",
+   "t": "Arrefecimento: o caminho do calor",
+   "img": "desenho:arrefecimento",
+   "legenda": [
+    "Radiador",
+    "Eletroventilador",
+    "Bomba d'água",
+    "Termostato",
+    "Reservatório",
+    "Mangueiras",
+    "Sensor",
+    "Fluido"
+   ],
+   "dica": "Nunca abra o reservatório com o motor quente: o sistema trabalha sob pressão e o fluido pode queimar. Oriente o cliente a esperar esfriar.",
+   "notas": "MENSAGEM-CHAVE\nA bomba d'água empurra, o termostato decide a hora e o eletroventilador ajuda no trânsito.\n\nCOMO CONDUZIR\nSiga as cores: em laranja, o fluido quente sai do motor pelo termostato (4) e vai ao radiador (1); em verde, volta frio pela mangueira de baixo até a bomba d'água (3). O eletroventilador (2) puxa ar com o carro parado. O reservatório (5) compensa a dilatação e o sensor (7) avisa a temperatura.\n\nPERGUNTE AO TIME\nPor que o motor esquenta no trânsito e volta ao normal na estrada? (Resposta: na estrada o vento faz o trabalho da ventoinha.)"
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 01 · FUNCIONAMENTO",
+   "t": "Cada peça tem uma função",
+   "cartoes": [
+    [
+     "Bomba d'água",
+     "faz o fluido circular",
+     "FaDroplet"
+    ],
+    [
+     "Radiador",
+     "troca o calor com o ar",
+     "FaWind"
+    ],
+    [
+     "Eletroventilador",
+     "puxa ar com o carro parado",
+     "FaWind"
+    ],
+    [
+     "Termostato",
+     "abre na temperatura certa",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Sensor",
+     "avisa a temperatura",
+     "FaGaugeHigh"
+    ],
+    [
+     "Reservatório",
+     "compensa a dilatação",
+     "FaFlask"
+    ],
+    [
+     "Mangueiras",
+     "levam o fluido",
+     "FaLink"
+    ],
+    [
+     "Fluido",
+     "leva o calor e protege",
+     "FaWater"
+    ]
+   ],
+   "painel": [
+    [
+     "{{n:Bomba D'Água}}",
+     "bombas d'água ATIVAS na base"
+    ],
+    [
+     "{{n:Eletroventiladores}}",
+     "eletroventiladores ATIVOS na base"
+    ]
+   ],
+   "fonte": "Números pela base unificada {{versao_base}}. Fluido de radiador: ver o treinamento de Lubrificantes.",
+   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e mostre o quadro escuro: os números vêm da base.\n\nINSIGHT PARA O CAMPO\nA linha BAP de arrefecimento é bomba d'água, eletroventilador e fluido; o resto o vendedor orienta."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 01 · FUNCIONAMENTO",
+   "t": "A temperatura certa",
+   "icone": "FaTemperatureHigh",
+   "numero": "≈ 90 °C",
+   "desc": "temperatura normal de trabalho: o ponteiro fica no meio do marcador",
+   "cards": [
+    [
+     "Sob pressão",
+     "A tampa pressuriza o sistema: o fluido passa de 100 °C sem ferver.",
+     "FaGaugeHigh"
+    ],
+    [
+     "Motor frio gasta mais",
+     "O termostato fecha para o motor esquentar rápido.",
+     "FaClock"
+    ],
+    [
+     "Motor quente estraga",
+     "Acima do normal, a junta do cabeçote pode queimar.",
+     "FaTriangleExclamation"
+    ]
+   ],
+   "dica": "Ponteiro subindo é sinal para parar: rodar com o motor quente pode empenar o cabeçote.",
+   "notas": "MENSAGEM-CHAVE\nO motor trabalha quente, perto de 90 °C, e o sistema pressurizado impede a fervura.\n\nCOMO CONDUZIR\nMostre o número grande e os três cartões.\n\nINSIGHT PARA O CAMPO\nCliente que conta “ferveu e eu continuei rodando” pode ter queimado a junta: oriente procurar o mecânico."
+  },
+  {
+   "tipo": "secao",
+   "n": "02",
+   "titulo": "Bomba d'água",
+   "sub": "Rotor, selo, vazamento e o kit de correia",
+   "notas": "MENSAGEM-CHAVE\nA bomba d'água é o coração do arrefecimento e, em muitos motores, anda com a correia dentada.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "lista4",
+   "k": "MÓDULO 02 · BOMBA",
+   "t": "A bomba d'água por dentro",
+   "img": "capa:cover_21",
+   "legenda": "Bomba d'água BAP: o rotor gira e empurra o fluido pelo motor e pelo radiador.",
+   "itens": [
+    [
+     "Rotor: as pás que empurram o fluido",
+     "FaRotate"
+    ],
+    [
+     "Selo mecânico: segura o fluido no eixo",
+     "FaShieldHalved"
+    ],
+    [
+     "Rolamento: deixa o eixo girar liso",
+     "FaCircleNotch"
+    ],
+    [
+     "Junta: veda a bomba no bloco do motor",
+     "FaLayerGroup"
+    ]
+   ],
+   "dica": "Gota no furo de dreno da bomba é o selo começando a vazar: é a hora de trocar, antes de o motor esquentar.",
+   "notas": "MENSAGEM-CHAVE\nRotor, selo, rolamento e junta: as quatro partes que gastam.\n\nCOMO CONDUZIR\nMostre a bomba BAP e passe pelas quatro partes.\n\nINSIGHT PARA O CAMPO\nNa base, a bomba {{cod:BDA50000}} (Gol) indica o kit {{oj:BDA50000}} no Ofereça junto."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 02 · BOMBA",
+   "t": "Bomba d'água e kit de correia",
+   "img": "foto:BDA50000",
+   "itens": [
+    [
+     "foto:BDA50003",
+     "Bomba d'água: em muitos motores, gira pela correia dentada.",
+     "Para o cliente: trocar junto evita abrir o motor de novo."
+    ],
+    [
+     "foto:KCD2500",
+     "Kit de correia: correia, tensor e polias da distribuição.",
+     "Para o cliente: a correia nova não perde a bomba."
+    ]
+   ],
+   "dica": "Bomba e kit andam juntos: na base, a bomba {{cod:BDA50003}} (Onix) indica o kit {{oj:BDA50003}}.",
+   "notas": "MENSAGEM-CHAVE\nQuando a bomba é tocada pela correia dentada, trocar as duas juntas poupa uma segunda desmontagem.\n\nCOMO CONDUZIR\nMostre a bomba e o kit. Explique que a bomba velha pode travar e romper a correia nova.\n\nINSIGHT PARA O CAMPO\nO Ofereça junto liga a bomba ao kit e o kit à bomba."
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 02 · BOMBA",
+   "t": "Bomba d'água: sinais de troca",
+   "t1": "Sinais de bomba gasta",
+   "itens1": [
+    [
+     "Vazamento ou gota no furo de dreno",
+     "FaDroplet"
+    ],
+    [
+     "Ruído de rolamento perto da correia",
+     "FaVolumeHigh"
+    ],
+    [
+     "Temperatura subindo mesmo com o nível certo",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Folga no eixo da polia",
+     "FaArrowsLeftRight"
+    ]
+   ],
+   "t2": "O que oferecer junto",
+   "itens2": [
+    "O kit de correia, quando a bomba é tocada pela correia dentada.",
+    "Fluido novo para completar e sangrar o sistema.",
+    "Na base, a bomba {{cod:BDA50002}} (Ford) indica {{oj:BDA50002}}."
+   ],
+   "dica": "Vazamento pequeno vira grande: o motor perde fluido aos poucos e o cliente só percebe quando ferve.",
+   "notas": "MENSAGEM-CHAVE\nA bomba avisa: gota no dreno, ruído e temperatura subindo.\n\nCOMO CONDUZIR\nLeia os sinais e os três itens de venda junto.\n\nINSIGHT PARA O CAMPO\nNa base, a bomba da Ford já indica o fluido e a água desmineralizada no Ofereça junto."
+  },
+  {
+   "tipo": "numero",
+   "k": "MÓDULO 02 · BOMBA",
+   "t": "Bomba d'água: o teste do balcão",
+   "img": "montagem:foto:BDA50001+foto:KCD2531",
+   "numero": "Junto",
+   "desc": "bomba e kit de correia na mesma troca, quando a bomba gira pela correia dentada",
+   "passos": [
+    "Pergunte: quando foi trocada a correia dentada?",
+    "Olhe: vazamento no dreno e marcas de fluido no motor",
+    "Escute: ruído de rolamento perto da correia",
+    "Ofereça bomba, kit e fluido no mesmo pedido"
+   ],
+   "exemplo": "Palio: bomba {{cod:BDA50001}} com o kit {{oj:BDA50001}}, que é o Ofereça junto da base.",
+   "notas": "MENSAGEM-CHAVE\nAs perguntas certas levam à bomba e ao kit.\n\nCOMO CONDUZIR\nPasse pelos quatro passos.\n\nINSIGHT PARA O CAMPO\nA pergunta da correia dentada é a que mais vende: correia vencida e bomba velha saem juntas."
+  },
+  {
+   "tipo": "passos5",
+   "k": "MÓDULO 02 · BOMBA",
+   "t": "Troca da bomba em 5 passos",
+   "passos": [
+    [
+     "Peça certa",
+     "Motor e aplicação no catálogo.",
+     "FaBarcode"
+    ],
+    [
+     "Correia",
+     "Bomba na correia dentada? Kit junto.",
+     "FaGears"
+    ],
+    [
+     "Junta nova",
+     "Superfície limpa e junta da bomba.",
+     "FaLayerGroup"
+    ],
+    [
+     "Fluido novo",
+     "O do manual, na diluição do rótulo.",
+     "FaFlask"
+    ],
+    [
+     "Sangria",
+     "Tirar o ar e conferir o nível frio.",
+     "FaRotate"
+    ]
+   ],
+   "dica": "Bomba nova com fluido velho e sujo vaza cedo: o selo é a primeira vítima da sujeira.",
+   "notas": "MENSAGEM-CHAVE\nCinco passos e nenhum retorno de bomba d'água.\n\nCOMO CONDUZIR\nPasse pelos cinco passos como roteiro para o mecânico. O vendedor não faz o serviço, mas orienta a compra completa.\n\nPERGUNTE AO TIME\nQual destes passos o cliente mais quer pular?"
+  },
+  {
+   "tipo": "secao",
+   "n": "03",
+   "titulo": "Eletroventilador",
+   "sub": "Ventoinha, sensor e o trânsito",
+   "notas": "MENSAGEM-CHAVE\nO eletroventilador faz o trabalho do vento quando o carro está parado.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "lista4",
+   "k": "MÓDULO 03 · ELETROVENTILADOR",
+   "t": "O eletroventilador por dentro",
+   "img": "capa:cover_33",
+   "legenda": "Eletroventilador BAP: motor elétrico e hélice que puxam ar pelo radiador.",
+   "itens": [
+    [
+     "Motor elétrico: gira a hélice",
+     "FaBolt"
+    ],
+    [
+     "Hélice: puxa o ar pelo radiador",
+     "FaWind"
+    ],
+    [
+     "Sensor de temperatura: manda ligar",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Relé e fusível: levam a energia",
+     "FaPlug"
+    ]
+   ],
+   "dica": "Ventoinha que não liga pode ser motor, relé, fusível ou sensor. Antes de vender o motor, peça para conferir o fusível e o relé.",
+   "notas": "MENSAGEM-CHAVE\nO eletroventilador liga quando o sensor manda e puxa ar pelo radiador.\n\nCOMO CONDUZIR\nPasse pelas quatro partes. Explique que a pane pode estar na parte elétrica.\n\nINSIGHT PARA O CAMPO\nNa base, o eletroventilador {{cod:ELE1000}} (Gol/Fox) indica a bomba {{oj:ELE1000}}."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 03 · ELETROVENTILADOR",
+   "t": "Eletroventilador por aplicação",
+   "img": "foto:ELE1000",
+   "itens": [
+    [
+     "foto:ELE1004",
+     "Com ou sem ar-condicionado: muda o eletroventilador.",
+     "Para o cliente: a peça certa de primeira."
+    ],
+    [
+     "foto:ELE1001",
+     "Cada motor e versão tem a sua aplicação no catálogo.",
+     "Para o cliente: sem adaptação."
+    ]
+   ],
+   "dica": "Pergunte sempre se o carro tem ar-condicionado: a aplicação do eletroventilador muda com ele.",
+   "notas": "MENSAGEM-CHAVE\nO eletroventilador muda com o motor, a versão e o ar-condicionado.\n\nCOMO CONDUZIR\nMostre os eletroventiladores BAP e reforce a pergunta do ar-condicionado.\n\nINSIGHT PARA O CAMPO\nNa base, o eletroventilador {{cod:ELE1004}} (Onix) indica a bomba {{oj:ELE1004}}."
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 03 · ELETROVENTILADOR",
+   "t": "Eletroventilador: sinais de troca",
+   "t1": "Sinais de eletroventilador com defeito",
+   "itens1": [
+    [
+     "Esquenta no trânsito, volta ao normal na estrada",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Ventoinha não liga com o motor quente",
+     "FaWind"
+    ],
+    [
+     "Ruído ou hélice raspando",
+     "FaVolumeHigh"
+    ],
+    [
+     "Ar-condicionado fraco com o carro parado",
+     "FaSun"
+    ]
+   ],
+   "t2": "O que oferecer junto",
+   "itens2": [
+    "Fluido novo, se o motor chegou a ferver e perdeu fluido.",
+    "A bomba d'água, quando a base indica no Ofereça junto.",
+    "Confira relé, fusível e sensor antes do motor."
+   ],
+   "dica": "Ar-condicionado fraco no trânsito também aponta para a ventoinha: ela ajuda o condensador do ar.",
+   "notas": "MENSAGEM-CHAVE\nO eletroventilador avisa: esquenta no trânsito e o ar enfraquece parado.\n\nCOMO CONDUZIR\nLeia os sinais e os itens de venda junto.\n\nINSIGHT PARA O CAMPO\nO sintoma “só esquenta parado” é quase assinatura de ventoinha."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 03 · ELETROVENTILADOR",
+   "t": "Ventoinha não liga: o que conferir antes",
+   "icone": "FaPlug",
+   "numero": "3",
+   "desc": "conferências antes de condenar o motor do eletroventilador",
+   "cards": [
+    [
+     "Fusível e relé",
+     "São baratos e queimam primeiro.",
+     "FaBolt"
+    ],
+    [
+     "Sensor",
+     "Se não manda ligar, a ventoinha fica parada.",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Motor",
+     "Ligado direto na bateria pelo mecânico, ele gira?",
+     "FaWind"
+    ]
+   ],
+   "dica": "Quem orienta a conferência vende o eletroventilador certo — e não perde o cliente quando era só o relé.",
+   "notas": "MENSAGEM-CHAVE\nA ventoinha parada nem sempre é o motor: fusível, relé e sensor vêm antes.\n\nCOMO CONDUZIR\nMostre o número e os três cartões, na ordem do mais barato ao mais caro.\n\nINSIGHT PARA O CAMPO\nO teste do motor ligado direto é do mecânico; o vendedor só orienta a sequência."
+  },
+  {
+   "tipo": "secao",
+   "n": "04",
+   "titulo": "Fluido de radiador",
+   "sub": "Orgânico, anticorrosivo e diluição (veja também Lubrificantes)",
+   "notas": "MENSAGEM-CHAVE\nO fluido certo protege o motor por dentro; só água ferrugem e ferve.\n\nCOMO CONDUZIR\nTransição curta. A linha completa está no treinamento de Lubrificantes (módulo de Químicos)."
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 04 · FLUIDO",
+   "t": "Os fluidos de radiador BAP",
+   "cards": [
+    [
+     "FaFlask",
+     "Orgânico",
+     "Tecnologia orgânica",
+     "Proteção longa contra corrosão. BAP: {{cod:RAD25001P}} (pronto, rosa).",
+     "= o do manual moderno"
+    ],
+    [
+     "FaShieldHalved",
+     "Anticorrosivo",
+     "Pronto para uso",
+     "Protege contra ferrugem e fervura. BAP: {{cod:RAD25005P}}.",
+     "= proteção do dia a dia"
+    ],
+    [
+     "FaDroplet",
+     "Concentrado",
+     "Para diluir",
+     "Rende mais; dilui com água desmineralizada. BAP: {{cod:RAD25000P}}.",
+     "= diluir antes de usar"
+    ],
+    [
+     "FaWater",
+     "Água desmin.",
+     "Sem calcário",
+     "Dilui o concentrado sem deixar depósito. BAP: {{cod:RAD25009P}}.",
+     "= nunca água da torneira"
+    ]
+   ],
+   "dica": "O tipo de fluido é o do manual. Não misture tecnologias diferentes; na troca, esvazie e lave o sistema.",
+   "notas": "MENSAGEM-CHAVE\nA BAP tem fluido orgânico e anticorrosivo, pronto ou concentrado, e a água desmineralizada.\n\nCOMO CONDUZIR\nPasse pelos quatro cartões e mostre o código de cada um.\n\nINSIGHT PARA O CAMPO\nNa base há {{n:Fluidos e Químicos}} químicos ATIVOS; a lista inteira dos fluidos está no treinamento de Lubrificantes."
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 04 · FLUIDO",
+   "t": "Fluidos de radiador: código e quando oferecer",
+   "cabecalho": [
+    "Código",
+    "Produto",
+    "Quando oferecer"
+   ],
+   "linhas": [
+    [
+     "{{cod:RAD25001P}}",
+     "Fluido orgânico pronto para uso, rosa, 1 L",
+     "Completar ou trocar, sem diluir"
+    ],
+    [
+     "{{cod:RAD25000P}}",
+     "Fluido orgânico concentrado, rosa, 1 L",
+     "Troca completa, diluído com água desmineralizada"
+    ],
+    [
+     "{{cod:RAD25005P}}",
+     "Fluido anticorrosivo pronto para uso, rosa, 1 L",
+     "Onde o manual pede anticorrosivo"
+    ],
+    [
+     "{{cod:RAD25016P}}",
+     "Fluido orgânico pronto para uso, rosa, 5 L",
+     "Oficina e frota: troca completa"
+    ],
+    [
+     "{{cod:RAD25009P}}",
+     "Água desmineralizada, 1 L",
+     "Diluir o concentrado sem calcário"
+    ]
+   ],
+   "atencao": "O tipo e a proporção são os do manual e do rótulo. Não misture fluidos de tecnologias diferentes.",
+   "notas": "MENSAGEM-CHAVE\nCada fluido tem o seu momento: completar, trocar ou diluir.\n\nCOMO CONDUZIR\nLeia a tabela. Os nomes e volumes vêm da descrição da base.\n\nINSIGHT PARA O CAMPO\nPara a oficina, o 5 L sai mais em conta por troca; para o balcão, o 1 L."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 04 · FLUIDO",
+   "t": "Diluição e troca do fluido",
+   "icone": "FaFlask",
+   "numero": "Rótulo",
+   "desc": "a proporção de concentrado e água é a do rótulo do fluido e do manual do carro",
+   "cards": [
+    [
+     "Água certa",
+     "Só água desmineralizada: a da torneira deixa calcário.",
+     "FaWater"
+    ],
+    [
+     "Sem misturar",
+     "Tecnologias diferentes não se misturam: esvazie e lave.",
+     "FaBan"
+    ],
+    [
+     "Sangrar",
+     "Tire o ar do sistema depois de completar.",
+     "FaRotate"
+    ]
+   ],
+   "dica": "Bolsa de ar no sistema esquenta o motor mesmo com o nível certo: oriente a sangria no fim da troca.",
+   "notas": "MENSAGEM-CHAVE\nDiluir certo, não misturar e sangrar: as três regras da troca de fluido.\n\nCOMO CONDUZIR\nMostre o número e os três cartões.\n\nPERGUNTE AO TIME\nPor que não usar água da torneira? (Resposta: o calcário entope o radiador e as galerias do motor.)"
+  },
+  {
+   "tipo": "secao",
+   "n": "05",
+   "titulo": "Superaquecimento",
+   "sub": "As causas e o diagnóstico de balcão",
+   "notas": "MENSAGEM-CHAVE\nSuperaquecimento quase nunca tem uma causa só.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 05 · SUPERAQUECIMENTO",
+   "t": "Superaquecimento: as causas mais comuns",
+   "cartoes": [
+    [
+     "Eletroventilador",
+     "parado: esquenta no trânsito",
+     "FaWind"
+    ],
+    [
+     "Bomba d'água",
+     "vazando ou com rotor gasto",
+     "FaDroplet"
+    ],
+    [
+     "Termostato travado",
+     "fechado, o fluido não circula",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Radiador entupido",
+     "sujeira por dentro e por fora",
+     "FaFilter"
+    ],
+    [
+     "Falta de fluido",
+     "vazamento em mangueira ou junta",
+     "FaWater"
+    ],
+    [
+     "Correia frouxa",
+     "a bomba perde rotação",
+     "FaLinkSlash"
+    ],
+    [
+     "Sensor com defeito",
+     "a ventoinha não liga na hora",
+     "FaPlug"
+    ],
+    [
+     "Só água no sistema",
+     "sem fluido: ferrugem e fervura",
+     "FaFlask"
+    ]
+   ],
+   "painel": [
+    [
+     "≈ 90 °C",
+     "temperatura normal: o ponteiro fica no meio"
+    ],
+    [
+     "Sob pressão",
+     "a tampa e o fluido certos evitam fervura"
+    ]
+   ],
+   "fonte": "Fluido e aditivo do radiador: ver o treinamento de Lubrificantes.",
+   "notas": "MENSAGEM-CHAVE\nO vendedor que conhece as 8 causas oferece a solução completa.\n\nCOMO CONDUZIR\nPercorra os cartões e ligue cada um a uma peça BAP: eletroventilador, bomba d'água, fluido.\n\nINSIGHT PARA O CAMPO\nMotor que ferveu pode ter queimado a junta do cabeçote: fumaça branca ou fluido sumindo sem vazamento pedem o mecânico."
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 05 · DIAGNÓSTICO",
+   "t": "Sintoma → peça BAP",
+   "cabecalho": [
+    "Sintoma",
+    "Causa provável",
+    "Peça BAP"
+   ],
+   "linhas": [
+    [
+     "Esquenta só no trânsito",
+     "Eletroventilador, relé ou sensor",
+     "{{prod:Eletroventiladores}}"
+    ],
+    [
+     "Fluido sumindo, gota na frente do motor",
+     "Selo da bomba d'água",
+     "{{prod:Bomba D'Água}}"
+    ],
+    [
+     "Esquenta na estrada também",
+     "Bomba, termostato ou radiador entupido",
+     "{{prod:Bomba D'Água}} · fluido"
+    ],
+    [
+     "Ferrugem no reservatório",
+     "Só água no sistema, sem fluido",
+     "{{prod:Fluidos e Químicos}} (fluido de radiador)"
+    ],
+    [
+     "Ruído perto da correia",
+     "Rolamento da bomba ou tensor",
+     "{{prod:Bomba D'Água}} · {{prod:Kit de Distribuição}}"
+    ]
+   ],
+   "atencao": "O balcão indica a peça provável; quem confirma o defeito é o mecânico. Não prometa que a peça resolve sem essa confirmação.",
+   "notas": "MENSAGEM-CHAVE\nA tabela de bolso do arrefecimento: cinco sintomas do dia a dia.\n\nCOMO CONDUZIR\nLeia linha por linha e peça para o time completar de cabeça.\n\nINSIGHT PARA O CAMPO\nImprima esta tabela para o balconista do cliente."
+  },
+  {
+   "tipo": "barulhos",
+   "k": "MÓDULO 05 · DIAGNÓSTICO",
+   "t": "O que o cliente descreve",
+   "t1": "O que o cliente fala → onde olhar",
+   "itens": [
+    [
+     "“Esquenta parado no trânsito”: eletroventilador",
+     "FaWind"
+    ],
+    [
+     "“Some água do reservatório”: vazamento ou bomba",
+     "FaDroplet"
+    ],
+    [
+     "“O ar fica fraco parado”: eletroventilador",
+     "FaSun"
+    ],
+    [
+     "“Sai fumaça branca”: possível junta queimada",
+     "FaTriangleExclamation"
+    ]
+   ],
+   "numero": "Esfriar",
+   "desc": "antes de abrir o reservatório: o sistema está sob pressão e o fluido queima",
+   "t2": "A ligação com o motor",
+   "texto2": "Bomba d'água e correia dentada andam juntas: o kit de distribuição está no treinamento de Motor.",
+   "dica": "Pergunte onde o carro esquenta: parado, na estrada ou na subida. Isso separa ventoinha de bomba e radiador.",
+   "notas": "MENSAGEM-CHAVE\nO momento em que o motor esquenta é a melhor pista.\n\nCOMO CONDUZIR\nLeia as falas e reforce a pergunta “onde esquenta?”.\n\nINSIGHT PARA O CAMPO\nFumaça branca com cheiro adocicado é fluido queimando: caso para o mecânico."
+  },
+  {
+   "tipo": "secao",
+   "n": "06",
+   "titulo": "Código e garantia",
+   "sub": "Aplicação, Ofereça junto e as causas de falha que não são defeito",
+   "notas": "MENSAGEM-CHAVE\nA bomba e o eletroventilador mudam com o motor e com o ar-condicionado.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 06 · CÓDIGO",
+   "t": "As 4 informações que definem a peça",
+   "cards": [
+    [
+     "FaCarSide",
+     "Aplicação",
+     "Modelo, ano e motor",
+     "Bomba e ventoinha mudam com o motor.",
+     "= o carro certo"
+    ],
+    [
+     "FaSun",
+     "A/C",
+     "Ar-condicionado",
+     "O eletroventilador muda com o ar.",
+     "= a ventoinha certa"
+    ],
+    [
+     "FaGears",
+     "Acionamento",
+     "Correia dentada ou não",
+     "Define se a bomba vai com o kit de correia.",
+     "= o pedido certo"
+    ],
+    [
+     "FaLink",
+     "Junto",
+     "Ofereça junto",
+     "O catálogo indica kit, bomba ou fluido.",
+     "= o pedido completo"
+    ]
+   ],
+   "dica": "Bomba que gira pela correia dentada: confira o kit pelo mesmo motor no Catálogo BAP.",
+   "notas": "MENSAGEM-CHAVE\nAplicação, ar-condicionado, acionamento e Ofereça junto: as quatro conferências.\n\nCOMO CONDUZIR\nMostre os quatro cartões.\n\nINSIGHT PARA O CAMPO\nA pergunta do ar-condicionado evita a devolução mais comum do eletroventilador."
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 06 · CÓDIGO",
+   "t": "Exemplos pela base: arrefecimento por carro",
+   "cabecalho": [
+    "Peça",
+    "Código BAP",
+    "Ofereça junto (base)"
+   ],
+   "linhas": [
+    [
+     "{{prod:Bomba D'Água}} · Gol",
+     "{{cod:BDA50000}}",
+     "{{oj:BDA50000}}"
+    ],
+    [
+     "{{prod:Bomba D'Água}} · Onix",
+     "{{cod:BDA50003}}",
+     "{{oj:BDA50003}}"
+    ],
+    [
+     "{{prod:Bomba D'Água}} · Palio",
+     "{{cod:BDA50001}}",
+     "{{oj:BDA50001}}"
+    ],
+    [
+     "{{prod:Eletroventiladores}} · Onix",
+     "{{cod:ELE1004}}",
+     "{{oj:ELE1004}}"
+    ],
+    [
+     "{{prod:Eletroventiladores}} · HB20",
+     "{{cod:ELE1095}}",
+     "{{oj:ELE1095}}"
+    ]
+   ],
+   "atencao": "Confira sempre ano, motor e ar-condicionado no Catálogo BAP: os códigos deste slide são exemplos.",
+   "notas": "MENSAGEM-CHAVE\nCom a base, o vendedor monta o pedido do arrefecimento numa consulta.\n\nCOMO CONDUZIR\nLeia a tabela: a bomba leva ao kit de correia e o eletroventilador leva à bomba ou ao fluido.\n\nINSIGHT PARA O CAMPO\nO ATENÇÃO é regra: ano, motor e ar-condicionado antes de fechar."
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 06 · GARANTIA",
+   "t": "Nem toda falha é defeito de fabricação",
+   "cartoes": [
+    [
+     "Só água",
+     "ferrugem e calcário no selo",
+     "FaWater"
+    ],
+    [
+     "Fluido misturado",
+     "tecnologias diferentes",
+     "FaFlask"
+    ],
+    [
+     "Sem sangria",
+     "bolsa de ar no sistema",
+     "FaRotate"
+    ],
+    [
+     "Correia velha",
+     "tensão errada no rolamento",
+     "FaLinkSlash"
+    ],
+    [
+     "Motor fervido",
+     "dano de outra peça",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Junta errada",
+     "ou sem junta nova",
+     "FaLayerGroup"
+    ],
+    [
+     "Aplicação errada",
+     "motor ou ar-condicionado",
+     "FaBarcode"
+    ],
+    [
+     "Parte elétrica",
+     "relé, fusível ou sensor",
+     "FaPlug"
+    ]
+   ],
+   "painel": [
+    [
+     "Fluido certo",
+     "o do manual, na diluição do rótulo"
+    ],
+    [
+     "Com o kit",
+     "bomba e correia dentada na mesma troca"
+    ]
+   ],
+   "fonte": "Orientações gerais de instalação; siga sempre o manual do veículo e a orientação do fabricante da peça.",
+   "notas": "MENSAGEM-CHAVE\nA maioria das falhas prematuras vem da instalação e do uso, não da peça.\n\nCOMO CONDUZIR\nPasse pelos oito cartões: cada um é uma pergunta na análise.\n\nINSIGHT PARA O CAMPO\nBomba que vaza cedo quase sempre trabalhou com só água ou com correia velha."
+  },
+  {
+   "tipo": "secao",
+   "n": "07",
+   "titulo": "Vender arrefecimento",
+   "sub": "Perguntas, cross-sell, combos e fechamento",
+   "notas": "MENSAGEM-CHAVE\nArrefecimento se vende como prevenção: bomba com kit e fluido certo.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "spin",
+   "k": "MÓDULO 07 · VENDA",
+   "t": "Venda consultiva: perguntas que vendem (SPIN)",
+   "spin": [
+    [
+     "Entender o cenário",
+     "“Quais carros mais passam pela sua oficina?”\n“Quantas correias dentadas você troca por semana?”"
+    ],
+    [
+     "Encontrar a dor",
+     "“Tem voltado carro esquentando?”\n“Falta fluido na hora da troca?”"
+    ],
+    [
+     "Mostrar o custo de não resolver",
+     "“Quanto custa um motor que ferveu por uma bomba que não foi trocada?”"
+    ],
+    [
+     "Fazer o cliente dizer o valor",
+     "“Se a bomba viesse com o kit e o fluido, quanto tempo você ganharia?”"
+    ]
+   ],
+   "dica": "Com o mecânico, fale de retorno e de motor fervido; com o lojista, de bomba e fluido na prateleira.",
+   "notas": "MENSAGEM-CHAVE\nQuem pergunta conduz.\n\nCOMO CONDUZIR\nExplique as 4 letras com os exemplos e faça um role-play.\n\nPERGUNTE AO TIME\nQual pergunta funciona melhor com o mecânico?"
+  },
+  {
+   "tipo": "hub",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Cross-sell: a bomba puxa o conjunto",
+   "itens": [
+    [
+     "Bomba d'água",
+     "a circulação do fluido",
+     "FaDroplet"
+    ],
+    [
+     "Kit de correia",
+     "a distribuição do motor",
+     "FaGears"
+    ],
+    [
+     "Fluido de radiador",
+     "a proteção por dentro",
+     "FaFlask"
+    ]
+   ],
+   "cards": [
+    [
+     "Mesmo serviço",
+     "O motor já está aberto: é a hora de trocar o que gira junto.",
+     "FaWrench"
+    ],
+    [
+     "Mesmo problema",
+     "Superaquecimento pode ser bomba, ventoinha ou fluido.",
+     "FaStethoscope"
+    ],
+    [
+     "Pedido maior",
+     "Mais itens por pedido, sem precisar de um cliente novo.",
+     "FaChartLine"
+    ]
+   ],
+   "dica": "Use o Ofereça junto do Catálogo BAP: o kit {{cod:KCD2501}} indica a bomba {{oj:KCD2501}}.",
+   "notas": "MENSAGEM-CHAVE\nToda peça do arrefecimento tem vizinhas que vão junto.\n\nCOMO CONDUZIR\nMostre os três itens e os três argumentos.\n\nINSIGHT PARA O CAMPO\nOutros pares da base: eletroventilador {{cod:ELE1001}} → bomba {{oj:ELE1001}}; bomba {{cod:BDA50002}} → {{oj:BDA50002}}."
+  },
+  {
+   "tipo": "combos",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Combos de arrefecimento e perguntas-gatilho",
+   "combos": [
+    [
+     "Distribuição",
+     "{{prod:Bomba D'Água}}  +  {{prod:Kit de Distribuição}}",
+     "Gol: {{cod:BDA50000}} + {{oj:BDA50000}}"
+    ],
+    [
+     "Trânsito",
+     "{{prod:Eletroventiladores}}  +  {{prod:Bomba D'Água}}",
+     "Onix: {{cod:ELE1004}} + {{oj:ELE1004}}"
+    ],
+    [
+     "Troca de fluido",
+     "Fluido concentrado  +  água desmineralizada",
+     "{{cod:RAD25000P}} + {{cod:RAD25009P}}"
+    ]
+   ],
+   "pergunte": [
+    "“Quando trocou a correia dentada?”",
+    "“Esquenta parado no trânsito?”",
+    "“Tem só água no radiador?”"
+   ],
+   "dica": "O que é medido melhora: acompanhe a % de bombas d'água que saem com o kit de correia.",
+   "notas": "MENSAGEM-CHAVE\nCombos transformam conhecimento em pedido maior.\n\nCOMO CONDUZIR\nApresente os 3 combos e as perguntas da faixa PERGUNTE. Os códigos vêm do Ofereça junto da base.\n\nINSIGHT PARA O CAMPO\nNo combo da troca de fluido, a proporção é a do rótulo e do manual."
+  },
+  {
+   "tipo": "fechamento",
+   "k": "MÓDULO 07 · FECHAMENTO",
+   "t": "Fechamento em 3 etapas",
+   "dica": "Arrefecimento fecha quando o cliente entende o risco: mostre o custo de um motor fervido antes de pedir o pedido."
+  },
+  {
+   "tipo": "naofechou",
+   "k": "MÓDULO 07 · NÃO FECHOU",
+   "t": "Não fechou? Os 5 motivos no arrefecimento",
+   "linhas": [
+    [
+     "Preço",
+     "Compare com o custo de um motor fervido: bomba, kit e fluido custam muito menos.",
+     "“Se eu resolver isso, fechamos?”"
+    ],
+    [
+     "Prazo ou limite",
+     "Não prometa prazo nem limite fora da regra. Monte um pedido menor com as bombas que mais giram.",
+     "“Se eu ajustar o pedido ao seu limite, fechamos?”"
+    ],
+    [
+     "Dúvida na aplicação",
+     "Mostre no Catálogo BAP a aplicação, o motor, o ar-condicionado e as referências cruzadas.",
+     "“Se eu te mostrar que serve, fechamos?”"
+    ],
+    [
+     "Já tem fornecedor",
+     "Não peça para trocar tudo. Entre onde ele perde venda: fluidos e eletroventiladores.",
+     "“Começamos por essa linha que falta?”"
+    ],
+    [
+     "Sem necessidade agora",
+     "Mostre o calendário: correia dentada vencida e verão chegando.",
+     "“Que dia eu volto pra fechar?”"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 5 motivos.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price."
+  },
+  {
+   "tipo": "checklist",
+   "t": "Checklist do vendedor BAP",
+   "itens": [
+    "Perguntei o veículo, o ano e o motor",
+    "Perguntei onde o motor esquenta",
+    "Perguntei se tem ar-condicionado",
+    "Liguei o sintoma à peça certa",
+    "Perguntei pela correia dentada",
+    "Ofereci a bomba com o kit de correia",
+    "Usei o Ofereça junto do Catálogo BAP",
+    "Ofereci o fluido do manual",
+    "Orientei a diluição e a sangria",
+    "Lembrei: nunca abrir o reservatório quente",
+    "Pedi o pedido; sem pedido, anotei o motivo",
+    "Deixei o próximo passo combinado"
+   ]
+  },
+  {
+   "tipo": "quiz",
+   "perguntas": [
+    "Qual a função do termostato?",
+    "O carro esquenta só no trânsito e volta ao normal na estrada. Qual peça você investiga?",
+    "Por que oferecer o kit de correia junto com a bomba d'água?",
+    "Por que não usar só água no radiador?",
+    "Com que água se dilui o fluido concentrado?",
+    "Por que não abrir o reservatório com o motor quente?"
+   ],
+   "respostas": [
+    "Abrir a passagem do fluido para o radiador quando o motor chega à temperatura certa.",
+    "O eletroventilador (e o relé, o fusível e o sensor).",
+    "Porque em muitos motores a bomba gira pela correia dentada: trocar junto evita desmontar de novo.",
+    "Porque a água sozinha enferruja o sistema e ferve mais fácil.",
+    "Com água desmineralizada, na proporção do rótulo e do manual.",
+    "O sistema está sob pressão: o fluido quente pode espirrar e queimar."
+   ]
+  },
+  {
+   "tipo": "obrigado",
+   "sobre": "TREINAMENTO ARREFECIMENTO BAP",
+   "titulo": "Obrigado!",
+   "sub": "Dúvidas? Agora é levar para o balcão e para a oficina.",
+   "notas": "MENSAGEM-CHAVE\nO conhecimento só vira resultado no campo.\n\nCOMO CONDUZIR\nAbra para dúvidas. Lembre que o fluido de radiador está detalhado no treinamento de Lubrificantes."
+  }
+ ]
+}

@@ -182,5 +182,6 @@ PYTHONHASHSEED=0 python treinamento_molde.py mecanica_basica --sim PASTA
 As saídas e o formato do JSON estão na docstring do `treinamento_molde.py`. Regras do JSON:
 - Treinamentos atualizados (Baterias, Linha Moto, Lubrificantes): o JSON aponta o `original` e só lista o que muda (`editar`, `inserir_depois`, `remover`); o resto sai igual ao original.
 - Um treinamento novo = um JSON novo, com o `molde` de cada slide.
+- Treinamentos de sistema (onda 2: Suspensão, Direção, Transmissão, Freio, Arrefecimento): JSON por tipo de slide; cada tipo é um slide-modelo do original de Baterias (lista em `gerador/treinamento_tipos.py`). Estrutura: capa, 3 aberturas, 7 módulos com divisória (o 07 é Vender), checklist, quiz e Obrigado.
 - Mitos e verdades e passo a passo numerado (Lubrificantes) ficam fora até ter desenho aprovado.
 - Grafia: "ProActive", "Shiftease" e "Effitech" (o `taxo.LINHA_BAP`); caixa alta só no kicker. Nome de produto no texto: macro `{{prod:...}}`, conferida na base.

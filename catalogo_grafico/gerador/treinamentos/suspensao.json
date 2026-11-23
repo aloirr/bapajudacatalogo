@@ -1,0 +1,993 @@
+{
+ "titulo": "Suspensão",
+ "arquivo": "Treinamento_Suspensao_BAP_Vendedores.pptx",
+ "rodape": "Treinamento Suspensão BAP  |  Equipe Comercial Externa · uso interno",
+ "slides": [
+  {
+   "tipo": "capa",
+   "titulo": "Suspensão BAP",
+   "sub": "Do barulho que o cliente conta à peça certa: amortecedor, kit, bandeja, pivô, bieleta e bucha",
+   "notas": "MENSAGEM-CHAVE\nSuspensão é o sistema que mais faz barulho — e o barulho é a melhor pista para o vendedor chegar na peça certa.\n\nCOMO CONDUZIR\nDê boas-vindas e diga a duração prevista (cerca de 1h45 com perguntas). Lembre que o treinamento de Mecânica Básica já mostrou a suspensão por fora; aqui vamos peça a peça, até o balcão.\n\nPERGUNTE AO TIME\nQual barulho de suspensão o cliente mais descreve para vocês?"
+  },
+  {
+   "tipo": "aprender",
+   "k": "ABERTURA",
+   "t": "O que vamos aprender hoje?",
+   "frase": "Hoje você sai daqui sabendo |explicar, diagnosticar e vender| a suspensão completa — da peça que gastou ao kit que evita o retorno.",
+   "apoio": "Suspensão é venda de par e de kit: quem entende o conjunto vende o serviço inteiro, e não uma peça solta.",
+   "pilares": [
+    [
+     "ENTENDER",
+     "Os tipos de suspensão e a função de cada peça",
+     "FaCarSide"
+    ],
+    [
+     "DIAGNOSTICAR",
+     "Do barulho e do desgaste à peça BAP",
+     "FaStethoscope"
+    ],
+    [
+     "VENDER",
+     "Par, kit, Ofereça junto, combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nO objetivo é sair sabendo ligar o que o cliente sente à peça certa da suspensão.\n\nCOMO CONDUZIR\nApresente os três pilares como jornada: entender o conjunto, diagnosticar pelo sintoma e vender o serviço completo.\n\nPERGUNTE AO TIME\nQuantas vezes por semana vocês vendem amortecedor sem o kit?"
+  },
+  {
+   "tipo": "topicos",
+   "k": "ABERTURA",
+   "t": "Tópicos do treinamento",
+   "itens": [
+    [
+     "Para que serve",
+     "Tipos de suspensão e as peças do conjunto",
+     "FaCarSide"
+    ],
+    [
+     "Amortecedor",
+     "Como funciona, teste e troca em par",
+     "FaArrowsRotate"
+    ],
+    [
+     "Kit do amortecedor",
+     "Coxim, batente e coifa",
+     "FaLayerGroup"
+    ],
+    [
+     "Bandeja e articulações",
+     "Pivô, bieleta, bucha e suporte tensor",
+     "FaLink"
+    ],
+    [
+     "Código e posição",
+     "Aplicação, posição, lado e Ofereça junto",
+     "FaBarcode"
+    ],
+    [
+     "Diagnóstico e garantia",
+     "Sintoma → peça e as causas de falha",
+     "FaShieldHalved"
+    ],
+    [
+     "Vender suspensão",
+     "SPIN, cross-sell, combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nSão 7 módulos: do conjunto ao balcão.\n\nCOMO CONDUZIR\nPasse rápido pelos tópicos. Diga que os módulos 2 a 4 seguem as peças de cima para baixo (amortecedor, kit, bandeja e articulações) e que o 5 e o 6 ensinam a achar a peça certa e a evitar o retorno.\n\nINSIGHT PARA O CAMPO\nO módulo 5 é o que mais evita devolução: posição e lado errados são o erro mais comum de suspensão."
+  },
+  {
+   "tipo": "preparado",
+   "k": "ABERTURA",
+   "t": "Ao final deste treinamento, você estará preparado para",
+   "itens": [
+    [
+     "Explicar",
+     "o que cada peça da suspensão faz, na linguagem do balcão",
+     "FaComments"
+    ],
+    [
+     "Ler",
+     "o barulho e o desgaste que o cliente descreve",
+     "FaVolumeHigh"
+    ],
+    [
+     "Identificar",
+     "a peça certa: aplicação, posição e lado no catálogo",
+     "FaMagnifyingGlass"
+    ],
+    [
+     "Orientar",
+     "a troca em par, o kit e o alinhamento depois",
+     "FaWrench"
+    ],
+    [
+     "Ampliar",
+     "o pedido com o kit, a bieleta e o Ofereça junto",
+     "FaLayerGroup"
+    ],
+    [
+     "Defender",
+     "o valor da BAP com argumento técnico",
+     "FaShieldHalved"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nEstes são os seis compromissos do treinamento.\n\nCOMO CONDUZIR\nLeia os verbos em voz alta. No fechamento eles voltam como checklist.\n\nPERGUNTE AO TIME\nQual destes seis vocês acham mais difícil hoje?"
+  },
+  {
+   "tipo": "secao",
+   "n": "01",
+   "titulo": "Para que serve a suspensão",
+   "sub": "Os tipos de suspensão e as peças do conjunto",
+   "notas": "MENSAGEM-CHAVE\nA suspensão mantém a roda no chão e o carro estável, absorvendo os buracos.\n\nCOMO CONDUZIR\nTransição curta. Diga que este módulo dá o mapa das peças que serão vistas no resto do treinamento."
+  },
+  {
+   "tipo": "desenho",
+   "k": "MÓDULO 01 · CONJUNTO",
+   "t": "Suspensão McPherson por dentro",
+   "img": "desenho:suspensao",
+   "legenda": [
+    "Coxim",
+    "Batente e coifa",
+    "Mola",
+    "Amortecedor",
+    "Bieleta",
+    "Estabilizadora",
+    "Bucha da barra",
+    "Bandeja",
+    "Pivô",
+    "Bucha da bandeja"
+   ],
+   "dica": "Mola segura o peso; amortecedor controla o balanço. Com amortecedor gasto, a mola continua lá — e o carro fica “flutuando”.",
+   "notas": "MENSAGEM-CHAVE\nA McPherson é a dianteira da maioria dos carros de passeio: o amortecedor é estrutural e também segura a mola e a roda.\n\nCOMO CONDUZIR\nO desenho mostra a roda esquerda vista de frente. Percorra os números de cima para baixo: coxim (1), batente e coifa (2), mola (3), amortecedor (4), bieleta (5) com a barra estabilizadora (6) e a bucha (7); embaixo, a bandeja (8), o pivô (9) e a bucha da bandeja (10).\n\nPERGUNTE AO TIME\nQuais destas 10 peças a BAP tem no catálogo? (Resposta: todas as de desgaste — amortecedor, kit, bieleta, bucha, bandeja, pivô e suporte tensor.)"
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 01 · CONJUNTO",
+   "t": "Cada peça tem uma função",
+   "cartoes": [
+    [
+     "Amortecedor",
+     "controla o balanço da mola",
+     "FaArrowsRotate"
+    ],
+    [
+     "Kit batente",
+     "protege a haste e o fim de curso",
+     "FaLayerGroup"
+    ],
+    [
+     "Coxim",
+     "prende e isola o conjunto",
+     "FaCubes"
+    ],
+    [
+     "Bandeja",
+     "segura a roda embaixo",
+     "FaRoad"
+    ],
+    [
+     "Pivô",
+     "a articulação da bandeja com a roda",
+     "FaCircleDot"
+    ],
+    [
+     "Bieleta",
+     "liga a barra estabilizadora",
+     "FaLink"
+    ],
+    [
+     "Bucha",
+     "amortece e isola as articulações",
+     "FaCircleNotch"
+    ],
+    [
+     "Suporte tensor",
+     "fixa e alinha a bandeja",
+     "FaWrench"
+    ]
+   ],
+   "painel": [
+    [
+     "{{n:Amortecedores}}",
+     "amortecedores ATIVOS na base, com posição e lado"
+    ],
+    [
+     "{{n:Kit Batente de Amortecedor}}",
+     "kits de amortecedor ATIVOS, para vender junto"
+    ]
+   ],
+   "fonte": "Números pela base unificada {{versao_base}}.",
+   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase — é essa frase que o vendedor usa com o cliente.\n\nCOMO CONDUZIR\nLeia as funções e peça para o time repetir com as próprias palavras. Mostre o quadro escuro: os números vêm da base unificada e são atualizados a cada geração.\n\nINSIGHT PARA O CAMPO\nQuando o cliente não sabe o nome da peça, pergunte pela função: “é o que segura a roda embaixo?” leva à bandeja; “é a haste fina ligada na barra?” leva à bieleta."
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 01 · TIPOS",
+   "t": "Os tipos de suspensão mais comuns",
+   "cards": [
+    [
+     "FaCarSide",
+     "McPherson",
+     "Dianteira da maioria",
+     "Amortecedor estrutural, preso no coxim em cima e na manga embaixo.",
+     "= amortecedor que também segura a roda"
+    ],
+    [
+     "FaRoad",
+     "Eixo de torção",
+     "Compactos (traseira)",
+     "Uma viga liga as duas rodas; amortecedor e mola trabalham separados.",
+     "= traseira simples e barata"
+    ],
+    [
+     "FaGears",
+     "Multilink",
+     "Médios e SUVs",
+     "Vários braços com buchas posicionam a roda com precisão.",
+     "= mais buchas para revisar"
+    ],
+    [
+     "FaTruck",
+     "Feixe de molas",
+     "Picapes e caminhões",
+     "Lâminas de aço seguram a carga; amortecedor à parte.",
+     "= feita para carga pesada"
+    ]
+   ],
+   "dica": "Pergunte o modelo e o ano: a mesma linha de carro pode mudar de suspensão entre versões. O Catálogo BAP separa por aplicação.",
+   "notas": "MENSAGEM-CHAVE\nO tipo de suspensão muda as peças que gastam e o jeito de vender.\n\nCOMO CONDUZIR\nPasse pelos quatro tipos usando a frase laranja. Na McPherson, o kit do amortecedor e o coxim são venda certa; no eixo de torção, o amortecedor traseiro e o batente; no multilink, as buchas; no feixe, a linha pesada.\n\nPERGUNTE AO TIME\nO Gol, o Onix e o HB20 têm qual tipo de suspensão traseira? (Resposta: eixo de torção.)"
+  },
+  {
+   "tipo": "paineis",
+   "k": "MÓDULO 01 · TIPOS",
+   "t": "Dianteira e traseira: peças diferentes",
+   "paineis": [
+    [
+     "Dianteira (McPherson)",
+     "Amortecedor estrutural com coxim\nBandeja, pivô e bieleta\nTrabalha com a direção",
+     "desenho:suspensao"
+    ],
+    [
+     "Traseira (eixo de torção)",
+     "Amortecedor e mola separados\nKit batente e bucha do eixo\nSem pivô nem bieleta",
+     "foto:AMT7002"
+    ]
+   ],
+   "dica": "Dianteiro e traseiro têm códigos diferentes. Pergunte sempre a posição antes de abrir o catálogo.",
+   "notas": "MENSAGEM-CHAVE\nNo mesmo carro, a dianteira e a traseira usam peças diferentes.\n\nCOMO CONDUZIR\nÀ esquerda, a McPherson da frente, que trabalha junto com a direção; à direita, o amortecedor traseiro {{cod:AMT7002}} (Gol G5), de um eixo de torção.\n\nINSIGHT PARA O CAMPO\nNa base, o traseiro {{cod:AMT7002}} indica o kit {{oj:AMT7002}} no Ofereça junto: o kit também muda entre dianteira e traseira."
+  },
+  {
+   "tipo": "secao",
+   "n": "02",
+   "titulo": "Amortecedor",
+   "sub": "Como funciona, como testar e por que trocar em par",
+   "notas": "MENSAGEM-CHAVE\nO amortecedor é a peça de maior valor da suspensão e a porta de entrada do kit.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo mostra o amortecedor por dentro, o teste de balcão e a regra do par."
+  },
+  {
+   "tipo": "desenho",
+   "k": "MÓDULO 02 · AMORTECEDOR",
+   "t": "O amortecedor por dentro",
+   "img": "desenho:amortecedor_corte",
+   "legenda": [
+    "Coxim",
+    "Haste",
+    "Coifa",
+    "Batente",
+    "Tubo externo",
+    "Pistão e válvulas",
+    "Óleo",
+    "Válvula de base"
+   ],
+   "dica": "O amortecedor não segura o peso: ele freia o movimento da mola, forçando o óleo a passar por válvulas pequenas.",
+   "notas": "MENSAGEM-CHAVE\nDentro do amortecedor, o óleo passa por válvulas e transforma o balanço da mola em calor.\n\nCOMO CONDUZIR\nSiga os números: o coxim (1) prende a haste (2); a coifa (3) e o batente (4) protegem a haste; dentro do tubo externo (5), o pistão com válvulas (6) empurra o óleo (7), que passa também pela válvula de base (8).\n\nINSIGHT PARA O CAMPO\nSem a coifa, a poeira risca a haste e o retentor vaza. É por isso que amortecedor novo com coifa velha volta antes do tempo."
+  },
+  {
+   "tipo": "numero",
+   "k": "MÓDULO 02 · AMORTECEDOR",
+   "t": "Amortecedor: o teste do balcão",
+   "img": "montagem:foto:AMT7004+foto:KAC11409",
+   "numero": "Em par",
+   "desc": "sempre os dois do mesmo eixo, para o carro não puxar",
+   "passos": [
+    "Pergunte: o carro balança ou “flutua” depois da lombada?",
+    "Olhe: óleo escorrendo no corpo é vazamento e pede troca",
+    "Teste: empurre o canto do carro; se balançar mais de uma vez, está gasto",
+    "Ofereça o kit: coxim, batente e coifa dos dois lados"
+   ],
+   "exemplo": "Gol G5 dianteiro: {{cod:AMT7004}} em par, com o kit {{oj:AMT7004}}, que é o Ofereça junto da base.",
+   "notas": "MENSAGEM-CHAVE\nAmortecedor gasto não quebra de uma vez: perde eficiência aos poucos. Por isso o cliente precisa de perguntas e de um teste simples.\n\nCOMO CONDUZIR\nFaça o teste com as mãos na mesa: empurre e solte. Bom volta e para; gasto continua balançando. Reforce a regra do par.\n\nPERGUNTE AO TIME\nPor que trocar só um amortecedor é um problema? (Resposta: o carro fica desigual, puxa na frenagem e na curva.)"
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 02 · AMORTECEDOR",
+   "t": "Amortecedor gasto: sinais e riscos",
+   "t1": "Sinais de amortecedor gasto",
+   "itens1": [
+    [
+     "O carro balança e “flutua” depois de lombada",
+     "FaWaveSquare"
+    ],
+    [
+     "Mergulha a frente na frenagem",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Pneu gasto em ondas (escamado)",
+     "FaCircleNotch"
+    ],
+    [
+     "Óleo escorrendo pelo corpo",
+     "FaDroplet"
+    ]
+   ],
+   "t2": "Por que isso é segurança",
+   "itens2": [
+    "Com amortecedor gasto, o pneu perde contato com o chão nas ondulações e o carro freia em distância maior.",
+    "A carroceria balança mais nas curvas e nas manobras de desvio: menos estabilidade.",
+    "Pneu, coxim, batente e buchas gastam mais rápido: o custo aparece em outras peças."
+   ],
+   "dica": "Névoa leve de óleo na haste é normal (lubrificação do retentor). Escorrendo pelo corpo, é vazamento.",
+   "notas": "MENSAGEM-CHAVE\nAmortecedor é item de segurança: além do conforto, ele mantém o pneu no chão.\n\nCOMO CONDUZIR\nLeia os quatro sinais e ligue cada um ao que o cliente fala. Depois os três riscos do lado direito.\n\nINSIGHT PARA O CAMPO\nO pneu escamado é a prova que o borracheiro vê primeiro: parceria com borracharia gera indicação de amortecedor."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 02 · AMORTECEDOR",
+   "t": "Troca certa: em par e com o carro no chão",
+   "icone": "FaWrench",
+   "numero": "2",
+   "desc": "amortecedores por eixo: dianteiro com dianteiro, traseiro com traseiro",
+   "cards": [
+    [
+     "Mesmo eixo",
+     "Os dois lados juntos, para o carro não ficar desigual.",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Kit novo",
+     "Coxim, batente e coifa novos protegem o amortecedor novo.",
+     "FaLayerGroup"
+    ],
+    [
+     "Aperto final no chão",
+     "As buchas apertadas com a roda suspensa ficam torcidas e quebram cedo.",
+     "FaTriangleExclamation"
+    ]
+   ],
+   "dica": "Mexeu na suspensão dianteira? Indique o alinhamento depois da troca: o pneu novo agradece.",
+   "notas": "MENSAGEM-CHAVE\nA troca certa tem três regras: em par, com kit novo e com o aperto final das buchas com o carro apoiado no chão.\n\nCOMO CONDUZIR\nMostre o número grande e os três cartões. O aperto final das buchas é o detalhe que o mecânico às vezes esquece e que gera retorno.\n\nPERGUNTE AO TIME\nQue argumento vocês usam quando o cliente quer trocar só um amortecedor?"
+  },
+  {
+   "tipo": "secao",
+   "n": "03",
+   "titulo": "Kit do amortecedor",
+   "sub": "Coxim, batente e coifa: o que protege o amortecedor novo",
+   "notas": "MENSAGEM-CHAVE\nO kit é o item que mais sobe o ticket da venda de amortecedor.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo mostra o que vem no kit e por que ele evita o retorno."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 03 · KIT",
+   "t": "Kit batente e kit completo",
+   "img": "capa:cover_1",
+   "itens": [
+    [
+     "foto:KAP11402",
+     "Kit batente: batente e coifa, que protegem a haste.",
+     "Para o cliente: amortecedor novo dura mais."
+    ],
+    [
+     "foto:KAC11409",
+     "Kit completo: inclui também o coxim e o rolamento.",
+     "Para o cliente: fim do estalo ao esterçar."
+    ]
+   ],
+   "dica": "Na base, o kit {{cod:KAP11402}} (Gol dianteiro) indica o amortecedor {{oj:KAP11402}}: o Ofereça junto funciona nos dois sentidos.",
+   "notas": "MENSAGEM-CHAVE\nO kit protege o amortecedor novo; sem ele, a garantia do serviço fica em risco.\n\nCOMO CONDUZIR\nMostre o kit batente (batente e coifa) e o kit completo (com coxim e rolamento). Explique quando cada um entra: o completo, quando o coxim estala ao esterçar.\n\nINSIGHT PARA O CAMPO\nO Ofereça junto do Catálogo BAP liga o amortecedor ao kit e o kit ao amortecedor. Use isso para montar o pedido."
+  },
+  {
+   "tipo": "lista4",
+   "k": "MÓDULO 03 · KIT",
+   "t": "O que cada peça do kit faz",
+   "img": "montagem:foto:KAC11409+foto:KAP11402",
+   "legenda": "Kit completo e kit batente BAP: as peças que trabalham em volta do amortecedor.",
+   "itens": [
+    [
+     "Coxim: prende o amortecedor na carroceria e isola a vibração",
+     "FaCubes"
+    ],
+    [
+     "Rolamento: deixa a mola girar quando a direção esterça",
+     "FaRotate"
+    ],
+    [
+     "Batente: segura o fim de curso nas lombadas fortes",
+     "FaShieldHalved"
+    ],
+    [
+     "Coifa: impede a poeira de riscar a haste",
+     "FaBan"
+    ]
+   ],
+   "dica": "Estalo ao esterçar com o carro parado costuma ser coxim ou rolamento: ofereça o kit completo.",
+   "notas": "MENSAGEM-CHAVE\nCada peça do kit tem uma função e um sintoma próprio.\n\nCOMO CONDUZIR\nLeia as quatro funções e ligue ao sintoma: coxim e rolamento estalam no esterço; batente gasto faz bater seco na lombada; coifa rasgada deixa riscar a haste.\n\nPERGUNTE AO TIME\nQual peça do kit o cliente mais esquece de trocar? (Em geral, a coifa.)"
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 03 · KIT",
+   "t": "Kit gasto: sinais e por que vender junto",
+   "t1": "Sinais de kit gasto",
+   "itens1": [
+    [
+     "Estalo ao esterçar com o carro parado",
+     "FaVolumeHigh"
+    ],
+    [
+     "Batida seca na lombada",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Coifa rasgada ou ressecada",
+     "FaLinkSlash"
+    ],
+    [
+     "Coxim rachado ou solto",
+     "FaCubes"
+    ]
+   ],
+   "t2": "Por que oferecer junto com o amortecedor",
+   "itens2": [
+    "A desmontagem é a mesma: trocar depois custa outra mão de obra.",
+    "Batente e coifa velhos encurtam a vida do amortecedor novo.",
+    "Item de valor menor que fecha o serviço completo."
+   ],
+   "dica": "Regra de ouro: nenhum amortecedor sai sem a pergunta “e o kit, como está?”.",
+   "notas": "MENSAGEM-CHAVE\nO kit gasto aparece em sinais que o cliente reconhece.\n\nCOMO CONDUZIR\nLeia os sinais e os três argumentos. O primeiro é o mais forte com o mecânico: a mão de obra é a mesma.\n\nINSIGHT PARA O CAMPO\nAcompanhe a porcentagem de pedidos de amortecedor que saem com kit: é o melhor indicador de venda consultiva em suspensão."
+  },
+  {
+   "tipo": "secao",
+   "n": "04",
+   "titulo": "Bandeja e articulações",
+   "sub": "Bandeja, pivô, bieleta, bucha e suporte tensor",
+   "notas": "MENSAGEM-CHAVE\nAs articulações são as peças do “toc-toc”: baratas, de giro alto e que andam juntas.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo mostra cada peça, o barulho dela e o que vai junto."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 04 · BANDEJA",
+   "t": "Bandeja, pivô e bieleta",
+   "img": "capa:cover_3",
+   "itens": [
+    [
+     "foto:PIV5004",
+     "Pivô: a articulação entre a bandeja e a manga da roda.",
+     "Para o cliente: fim da folga e do barulho embaixo."
+    ],
+    [
+     "foto:BIE20000",
+     "Bieleta: liga a barra estabilizadora ao amortecedor ou à bandeja.",
+     "Para o cliente: fim do “toc-toc” no buraco."
+    ]
+   ],
+   "dica": "Bandeja com pivô fixo troca inteira; com pivô parafusado, troca só o pivô. Confira no Catálogo BAP.",
+   "notas": "MENSAGEM-CHAVE\nBandeja, pivô e bieleta são as peças de baixo da suspensão dianteira.\n\nCOMO CONDUZIR\nMostre a bandeja BAP e as duas peças: o pivô ({{cod:PIV5004}}, Gol) e a bieleta ({{cod:BIE20000}}, Gol G5). Na base, a bandeja {{cod:BAN14502}} indica os pivôs {{oj:BAN14502}}.\n\nINSIGHT PARA O CAMPO\nA bieleta é a peça de giro mais alto da suspensão: vale estar exposta no balcão do cliente."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 04 · BUCHAS",
+   "t": "Bucha da barra e suporte tensor",
+   "img": "capa:cover_4",
+   "itens": [
+    [
+     "foto:BOR11045",
+     "Bucha da barra: fixa a estabilizadora no chassi.",
+     "Para o cliente: fim do rangido nas curvas."
+    ],
+    [
+     "foto:BAN9509",
+     "Suporte tensor (morcego): fixa e alinha a bandeja.",
+     "Para o cliente: o carro para de puxar."
+    ]
+   ],
+   "dica": "Bieleta e bucha da barra andam juntas: na base, a bieleta {{cod:BIE20000}} indica {{oj:BIE20000}}.",
+   "notas": "MENSAGEM-CHAVE\nBuchas e suporte tensor seguram tudo no lugar: gastos, o carro range, puxa e gasta pneu.\n\nCOMO CONDUZIR\nMostre o suporte tensor BAP e as duas peças. Explique que a bucha de borracha resseca com o tempo e com óleo.\n\nPERGUNTE AO TIME\nPor que a bucha da barra costuma ser vendida com a bieleta? (Resposta: as duas fazem barulho parecido e trabalham juntas na barra estabilizadora.)"
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 04 · ARTICULAÇÕES",
+   "t": "Pivô e bieleta gastos: sinais e o que vai junto",
+   "t1": "Sinais de articulação gasta",
+   "itens1": [
+    [
+     "Folga ao balançar a roda suspensa",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "“Toc-toc” em buraco e piso irregular",
+     "FaVolumeHigh"
+    ],
+    [
+     "Coifa do pivô rasgada, sem graxa",
+     "FaLinkSlash"
+    ],
+    [
+     "Pneu gasto por dentro ou por fora",
+     "FaCircleNotch"
+    ]
+   ],
+   "t2": "O que oferecer junto",
+   "itens2": [
+    "Pivô gasto: confira o terminal de direção — na base, o {{cod:PIV5001}} (Onix) indica {{oj:PIV5001}}.",
+    "Bieleta: ofereça a bucha da barra, que trabalha junto na estabilizadora.",
+    "Trocou pivô ou bandeja? Alinhamento logo depois."
+   ],
+   "dica": "Pivô é peça de segurança: com folga grande, a roda pode se soltar da bandeja. Não deixe para depois.",
+   "notas": "MENSAGEM-CHAVE\nPivô e bieleta avisam antes de falhar: folga, barulho e pneu gasto.\n\nCOMO CONDUZIR\nLeia os quatro sinais e os três itens de venda junto. Mostre que o Ofereça junto do pivô leva ao terminal de direção.\n\nINSIGHT PARA O CAMPO\nO pivô é peça de segurança: com o cliente, fale de risco antes de falar de preço."
+  },
+  {
+   "tipo": "barulhos",
+   "k": "MÓDULO 04 · BARULHOS",
+   "t": "Barulho na suspensão: o que o cliente descreve",
+   "t1": "O que o cliente fala → onde olhar",
+   "itens": [
+    [
+     "“Toc-toc” em buraco: bieleta ou bucha da barra",
+     "FaVolumeHigh"
+    ],
+    [
+     "Estalo ao esterçar parado: coxim do amortecedor",
+     "FaRotate"
+    ],
+    [
+     "Batida seca na lombada: batente ou amortecedor",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Puxando ou pneu gasto por dentro: bandeja, pivô ou bucha",
+     "FaRoad"
+    ]
+   ],
+   "numero": "10.000 km",
+   "desc": "intervalo de inspeção da suspensão recomendado pelos fabricantes de amortecedor — ou o que indicar o manual",
+   "t2": "A ligação com o alinhamento",
+   "texto2": "Trocou bandeja, pivô ou terminal? Indique o alinhamento logo depois: sem ele, o pneu novo gasta torto e o cliente culpa a peça.",
+   "dica": "Peça para o cliente imitar o barulho e dizer quando aparece: em buraco, em curva ou na frenagem. Isso já tira metade das peças da lista.",
+   "notas": "MENSAGEM-CHAVE\nCada barulho tem um endereço. O vendedor que sabe ler o barulho chega na peça certa antes do concorrente.\n\nCOMO CONDUZIR\nLeia cada linha e peça exemplos reais do time. O alinhamento é assunto do treinamento de Direção: lá ele aparece em detalhe.\n\nINSIGHT PARA O CAMPO\nInspeção periódica é argumento de venda preventiva, não de troca obrigatória."
+  },
+  {
+   "tipo": "secao",
+   "n": "05",
+   "titulo": "Código e posição",
+   "sub": "Aplicação, posição, lado e Ofereça junto no Catálogo BAP",
+   "notas": "MENSAGEM-CHAVE\nNa suspensão, o mesmo carro tem peças diferentes por posição, lado, ano e versão.\n\nCOMO CONDUZIR\nTransição curta. Diga que este módulo evita o erro mais caro da suspensão: a peça certa do lado errado."
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 05 · CÓDIGO",
+   "t": "As 4 informações que definem a peça",
+   "cards": [
+    [
+     "FaCarSide",
+     "Aplicação",
+     "Modelo, ano e versão",
+     "A mesma linha de carro muda de peça entre gerações e versões.",
+     "= o carro certo"
+    ],
+    [
+     "FaArrowsLeftRight",
+     "Posição",
+     "Dianteiro ou traseiro",
+     "Amortecedor, kit e bucha mudam entre a frente e a traseira.",
+     "= o eixo certo"
+    ],
+    [
+     "FaRotate",
+     "Lado",
+     "Direito ou esquerdo",
+     "Bandeja e suporte tensor podem ter código por lado.",
+     "= o lado certo"
+    ],
+    [
+     "FaLink",
+     "Ofereça junto",
+     "O que acompanha a peça",
+     "O catálogo indica, código a código, o que vai junto.",
+     "= o pedido completo"
+    ]
+   ],
+   "dica": "Bandeja e suporte tensor podem vir por lado (D/E). Na dúvida, peça a foto da peça velha ou o número gravado nela.",
+   "notas": "MENSAGEM-CHAVE\nAplicação, posição, lado e Ofereça junto: as quatro colunas que o vendedor confere antes de fechar.\n\nCOMO CONDUZIR\nMostre os quatro cartões e a frase laranja de cada um. Diga que todas estão no Catálogo BAP, na ficha de cada código.\n\nINSIGHT PARA O CAMPO\nNa base, a bandeja {{cod:BAN14545D}} (Onix) é do lado direito e indica o pivô {{oj:BAN14545D}}."
+  },
+  {
+   "tipo": "passos5",
+   "k": "MÓDULO 05 · CÓDIGO",
+   "t": "Achar a peça certa em 5 passos",
+   "passos": [
+    [
+     "Veículo",
+     "Modelo, ano, motor e versão.",
+     "FaCarSide"
+    ],
+    [
+     "Sistema",
+     "Suspensão: qual peça e qual sintoma.",
+     "FaMagnifyingGlass"
+    ],
+    [
+     "Posição e lado",
+     "Dianteiro ou traseiro; direito ou esquerdo.",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Código BAP",
+     "Confira a aplicação e as referências.",
+     "FaBarcode"
+    ],
+    [
+     "Ofereça junto",
+     "Monte o pedido com o que acompanha.",
+     "FaLayerGroup"
+    ]
+   ],
+   "dica": "Cliente com a referência de outra marca? Busque pela referência cruzada no Catálogo BAP: ela leva ao código BAP equivalente.",
+   "notas": "MENSAGEM-CHAVE\nCinco passos e nenhuma devolução por aplicação errada.\n\nCOMO CONDUZIR\nFaça um exemplo ao vivo no Catálogo BAP: Gol G5, suspensão dianteira, amortecedor, código e Ofereça junto.\n\nPERGUNTE AO TIME\nQual passo vocês mais pulam quando o cliente está com pressa?"
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 05 · CÓDIGO",
+   "t": "Exemplo pela base: Gol, suspensão dianteira",
+   "cabecalho": [
+    "Peça",
+    "Código BAP · posição",
+    "Ofereça junto (base)"
+   ],
+   "linhas": [
+    [
+     "{{prod:Amortecedores}}",
+     "{{cod:AMT7004}} · dianteiro",
+     "{{oj:AMT7004}}"
+    ],
+    [
+     "{{prod:Kit Batente de Amortecedor}}",
+     "{{cod:KAP11402}} · dianteiro",
+     "{{oj:KAP11402}}"
+    ],
+    [
+     "{{prod:Bieletas}}",
+     "{{cod:BIE20000}} · dianteira",
+     "{{oj:BIE20000}}"
+    ],
+    [
+     "{{prod:Pivô de Suspensão}}",
+     "{{cod:PIV5004}} · dianteiro",
+     "{{oj:PIV5004}}"
+    ],
+    [
+     "{{prod:Bandejas de Suspensão}}",
+     "{{cod:BAN14502}} · dianteira",
+     "{{oj:BAN14502}}"
+    ]
+   ],
+   "atencao": "Confira sempre ano e versão no Catálogo BAP: os códigos deste slide são exemplos de gerações diferentes do Gol.",
+   "notas": "MENSAGEM-CHAVE\nCom a base, o vendedor monta o pedido da suspensão dianteira inteira em uma consulta.\n\nCOMO CONDUZIR\nLeia a tabela: cada linha tem o código e o Ofereça junto que a base indica. Mostre que o Ofereça junto leva de uma peça à outra (bieleta → bucha, pivô → terminal).\n\nINSIGHT PARA O CAMPO\nOs códigos são de gerações diferentes do Gol (G4 e G5). O ATENÇÃO é regra: confira ano e versão antes de fechar."
+  },
+  {
+   "tipo": "secao",
+   "n": "06",
+   "titulo": "Diagnóstico e garantia",
+   "sub": "Do sintoma à peça e as causas de falha que não são defeito",
+   "notas": "MENSAGEM-CHAVE\nGarantia de suspensão se resolve na venda: quem orienta a troca certa não tem retorno.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo junta o diagnóstico de balcão e as causas de falha prematura."
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 06 · DIAGNÓSTICO",
+   "t": "Sintoma → peça BAP",
+   "cabecalho": [
+    "Sintoma",
+    "Causa provável",
+    "Peça BAP"
+   ],
+   "linhas": [
+    [
+     "“Toc-toc” em buraco",
+     "Folga na bieleta ou bucha da barra ressecada",
+     "{{prod:Bieletas}} · {{prod:Bucha da Barra Estabilizadora}}"
+    ],
+    [
+     "Carro “flutua” e balança",
+     "Amortecedor sem carga",
+     "{{prod:Amortecedores}} (em par)"
+    ],
+    [
+     "Estalo ao esterçar parado",
+     "Coxim ou rolamento do amortecedor",
+     "{{prod:Kit Batente de Amortecedor}}"
+    ],
+    [
+     "Folga e batida embaixo",
+     "Pivô ou bucha da bandeja gastos",
+     "{{prod:Pivô de Suspensão}} · {{prod:Bandejas de Suspensão}}"
+    ],
+    [
+     "Carro puxa e gasta pneu",
+     "Suporte tensor, bucha ou geometria",
+     "{{prod:Suporte Tensor (Morcego)}} · alinhamento"
+    ]
+   ],
+   "atencao": "O balcão indica a peça provável; quem confirma o defeito é o mecânico. Não prometa que a peça resolve sem essa confirmação.",
+   "notas": "MENSAGEM-CHAVE\nA tabela de bolso da suspensão: cinco sintomas que aparecem todo dia.\n\nCOMO CONDUZIR\nLeia linha por linha e peça para o time completar de cabeça antes de mostrar a terceira coluna. Os nomes da coluna Peça BAP são os produtos do Catálogo BAP.\n\nINSIGHT PARA O CAMPO\nImprima esta tabela para o balconista do cliente."
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 06 · GARANTIA",
+   "t": "Nem toda falha é defeito de fabricação",
+   "cartoes": [
+    [
+     "Troca de um lado só",
+     "o lado novo trabalha sozinho",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Kit velho",
+     "batente e coifa gastos",
+     "FaLayerGroup"
+    ],
+    [
+     "Aperto no ar",
+     "bucha torcida e quebrada",
+     "FaWrench"
+    ],
+    [
+     "Carga excessiva",
+     "acima do que o carro aguenta",
+     "FaTruck"
+    ],
+    [
+     "Rebaixamento",
+     "mola cortada ou fora do padrão",
+     "FaRuler"
+    ],
+    [
+     "Batida forte",
+     "buraco ou meio-fio",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Sem alinhamento",
+     "a geometria fora gasta tudo",
+     "FaRoad"
+    ],
+    [
+     "Aplicação errada",
+     "posição, lado ou versão",
+     "FaBarcode"
+    ]
+   ],
+   "painel": [
+    [
+     "Em par",
+     "a regra que mais evita retorno de amortecedor"
+    ],
+    [
+     "No chão",
+     "o aperto final das buchas, com o peso do carro"
+    ]
+   ],
+   "fonte": "Orientações gerais de instalação; siga sempre o manual do veículo e a orientação do fabricante da peça.",
+   "notas": "MENSAGEM-CHAVE\nA maioria das falhas prematuras vem da instalação e do uso, não da peça.\n\nCOMO CONDUZIR\nPasse pelos oito cartões. Diga que cada um é uma pergunta a fazer na análise: trocou em par? com kit? apertou no chão? alinhou?\n\nINSIGHT PARA O CAMPO\nExplique as regras na hora da venda, não na hora da reclamação. Cliente informado não vira cliente frustrado."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 06 · GARANTIA",
+   "t": "Na reclamação: o que conferir",
+   "icone": "FaClipboardCheck",
+   "numero": "3",
+   "desc": "conferências antes de abrir a análise de garantia",
+   "cards": [
+    [
+     "Nota e aplicação",
+     "A peça é a do catálogo para aquele carro, posição e lado?",
+     "FaFileSignature"
+    ],
+    [
+     "Instalação",
+     "Foi em par, com kit novo e aperto final no chão?",
+     "FaWrench"
+    ],
+    [
+     "Uso",
+     "Carga, rebaixamento, batida ou vazamento por coifa rasgada?",
+     "FaEye"
+    ]
+   ],
+   "dica": "Vazamento com coifa rasgada costuma ser poeira riscando a haste: mostre isso na peça e ofereça o kit na nova troca.",
+   "notas": "MENSAGEM-CHAVE\nTrês conferências separam defeito de fabricação de falha de aplicação, instalação ou uso.\n\nCOMO CONDUZIR\nLeia os três cartões como um roteiro. A análise técnica final é do processo de garantia BAP; o vendedor colhe as informações.\n\nPERGUNTE AO TIME\nQual destas três conferências vocês mais esquecem na hora da reclamação?"
+  },
+  {
+   "tipo": "secao",
+   "n": "07",
+   "titulo": "Vender suspensão",
+   "sub": "Perguntas, cross-sell, combos e fechamento",
+   "notas": "MENSAGEM-CHAVE\nSuspensão se vende em par e em conjunto. Este módulo transforma o conhecimento em pedido.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo segue o padrão de venda BAP: SPIN, cross-sell, combos e fechamento em 3 etapas."
+  },
+  {
+   "tipo": "spin",
+   "k": "MÓDULO 07 · VENDA",
+   "t": "Venda consultiva: perguntas que vendem (SPIN)",
+   "spin": [
+    [
+     "Entender o cenário",
+     "“Quais carros mais passam pela sua oficina?”\n“Quantas suspensões você faz por semana?”"
+    ],
+    [
+     "Encontrar a dor",
+     "“Tem tido retorno de amortecedor?”\n“Falta kit na hora da troca?”"
+    ],
+    [
+     "Mostrar o custo de não resolver",
+     "“Quanto custa refazer uma suspensão que voltou?”"
+    ],
+    [
+     "Fazer o cliente dizer o valor",
+     "“Se o amortecedor viesse com o kit, quanto tempo você ganharia?”"
+    ]
+   ],
+   "dica": "Com o mecânico, fale de retorno e de tempo de elevador; com o lojista, de giro, par e kit na prateleira.",
+   "notas": "MENSAGEM-CHAVE\nQuem pergunta conduz. As perguntas SPIN levam o cliente a dizer sozinho por que precisa do kit e do par.\n\nCOMO CONDUZIR\nExplique as 4 letras com os exemplos de suspensão e faça um role-play de 2 minutos.\n\nPERGUNTE AO TIME\nQual pergunta de Implicação funciona melhor com o mecânico que compra só pelo preço?"
+  },
+  {
+   "tipo": "hub",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Cross-sell: o amortecedor puxa o conjunto",
+   "itens": [
+    [
+     "Amortecedor",
+     "o conforto e a estabilidade",
+     "FaCarSide"
+    ],
+    [
+     "Kit do amortecedor",
+     "coxim, batente e coifa novos",
+     "FaLayerGroup"
+    ],
+    [
+     "Bieleta e bucha",
+     "o fim do “toc-toc” na mesma troca",
+     "FaLink"
+    ]
+   ],
+   "cards": [
+    [
+     "Mesmo serviço",
+     "A roda já está fora: é a hora de trocar o que está em volta.",
+     "FaWrench"
+    ],
+    [
+     "Mesmo sintoma",
+     "Barulho pode ser amortecedor, batente ou bieleta: ofereça a solução completa.",
+     "FaStethoscope"
+    ],
+    [
+     "Pedido maior",
+     "Mais itens por pedido, sem precisar de um cliente novo.",
+     "FaChartLine"
+    ]
+   ],
+   "dica": "Use o Ofereça junto do Catálogo BAP: o amortecedor {{cod:AMT7007}} (Onix) indica {{oj:AMT7007}}.",
+   "notas": "MENSAGEM-CHAVE\nToda peça de suspensão tem vizinhas que gastam junto. O Ofereça junto é o roteiro.\n\nCOMO CONDUZIR\nMostre os três itens de cima e os três argumentos de baixo.\n\nINSIGHT PARA O CAMPO\nOutros pares da base: bieleta {{cod:BIE20001}} → bucha {{oj:BIE20001}}; pivô {{cod:PIV5001}} → terminal {{oj:PIV5001}}; kit {{cod:KAP11113}} → amortecedor {{oj:KAP11113}}."
+  },
+  {
+   "tipo": "combos",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Combos de suspensão e perguntas-gatilho",
+   "combos": [
+    [
+     "Conforto",
+     "Amortecedor (par)  +  {{prod:Kit Batente de Amortecedor}}",
+     "Palio traseiro: {{cod:AMT7001}} + {{oj:AMT7001}}"
+    ],
+    [
+     "Silêncio",
+     "{{prod:Bieletas}}  +  {{prod:Bucha da Barra Estabilizadora}}",
+     "Onix: {{cod:BIE20001}} + {{oj:BIE20001}}"
+    ],
+    [
+     "Dianteira firme",
+     "{{prod:Bandejas de Suspensão}}  +  {{prod:Pivô de Suspensão}}",
+     "Palio: {{cod:BAN14511D}} + {{oj:BAN14511D}}"
+    ]
+   ],
+   "pergunte": [
+    "“O carro balança depois da lombada?”",
+    "“Faz ‘toc-toc’ no buraco?”",
+    "“O carro puxa ou gasta pneu por dentro?”"
+   ],
+   "dica": "O que é medido melhora: acompanhe a % de pedidos de amortecedor que saem com o kit e de bieleta que saem com a bucha.",
+   "notas": "MENSAGEM-CHAVE\nCombos transformam conhecimento em pedido maior; cada um tem uma pergunta-gatilho.\n\nCOMO CONDUZIR\nApresente os 3 combos e mostre que os códigos de exemplo vêm do Ofereça junto da base. Treine as perguntas da faixa PERGUNTE.\n\nINSIGHT PARA O CAMPO\nNo combo Dianteira firme, lembre do alinhamento: é a pergunta que fecha a venda com o mecânico."
+  },
+  {
+   "tipo": "fechamento",
+   "k": "MÓDULO 07 · FECHAMENTO",
+   "t": "Fechamento em 3 etapas",
+   "dica": "Suspensão fecha quando o cliente confia na aplicação: mostre código, posição e lado no Catálogo BAP antes de pedir o pedido."
+  },
+  {
+   "tipo": "naofechou",
+   "k": "MÓDULO 07 · NÃO FECHOU",
+   "t": "Não fechou? Os 5 motivos na suspensão",
+   "linhas": [
+    [
+     "Preço",
+     "Compare o custo do serviço refeito, não a etiqueta: par e kit evitam o carro voltar.",
+     "“Se eu resolver isso, fechamos?”"
+    ],
+    [
+     "Prazo ou limite",
+     "Não prometa prazo nem limite fora da regra. Monte um pedido menor com as peças que mais giram.",
+     "“Se eu ajustar o pedido ao seu limite, fechamos?”"
+    ],
+    [
+     "Dúvida na aplicação",
+     "Mostre no Catálogo BAP a aplicação, a posição, o lado e as referências cruzadas.",
+     "“Se eu te mostrar que serve, fechamos?”"
+    ],
+    [
+     "Já tem fornecedor",
+     "Não peça para trocar tudo. Entre onde ele perde venda: kits, bieletas e buchas.",
+     "“Começamos por essa linha que falta?”"
+    ],
+    [
+     "Sem necessidade agora",
+     "Mostre o giro: os sintomas mais comuns da frota da região e as peças que resolvem.",
+     "“Que dia eu volto pra fechar?”"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 5 motivos. Destaque a dúvida na aplicação: a resposta é o Catálogo BAP.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price."
+  },
+  {
+   "tipo": "checklist",
+   "t": "Checklist do vendedor BAP",
+   "itens": [
+    "Perguntei o veículo, o ano e a versão",
+    "Perguntei quando o barulho aparece",
+    "Liguei o sintoma à peça certa",
+    "Conferi posição e lado no catálogo",
+    "Ofereci o amortecedor em par",
+    "Ofereci o kit do amortecedor junto",
+    "Usei o Ofereça junto do Catálogo BAP",
+    "Ofereci bieleta e bucha da barra",
+    "Lembrei do alinhamento depois da troca",
+    "Orientei o aperto final com o carro no chão",
+    "Pedi o pedido; sem pedido, anotei o motivo",
+    "Deixei o próximo passo combinado"
+   ]
+  },
+  {
+   "tipo": "quiz",
+   "perguntas": [
+    "Qual a diferença entre o que a mola e o amortecedor fazem?",
+    "Por que o amortecedor se troca em par?",
+    "O cliente ouve “toc-toc” em buraco. Quais peças você investiga?",
+    "O que vem no kit do amortecedor e por que vender junto?",
+    "Quais as 4 informações que definem a peça certa no catálogo?",
+    "Cite duas causas de falha que não são defeito de fabricação."
+   ],
+   "respostas": [
+    "A mola segura o peso; o amortecedor controla o balanço da mola.",
+    "Para o carro não ficar desigual, puxando na frenagem e na curva.",
+    "A bieleta e a bucha da barra estabilizadora.",
+    "Coxim, batente e coifa (no kit completo, também o rolamento): protegem o amortecedor novo e a mão de obra é a mesma.",
+    "Aplicação, posição, lado e Ofereça junto.",
+    "Troca de um lado só, kit velho, aperto no ar, carga excessiva, rebaixamento, batida, falta de alinhamento ou aplicação errada."
+   ]
+  },
+  {
+   "tipo": "obrigado",
+   "sobre": "TREINAMENTO SUSPENSÃO BAP",
+   "titulo": "Obrigado!",
+   "sub": "Dúvidas? Agora é levar para o balcão e para a oficina.",
+   "notas": "MENSAGEM-CHAVE\nO conhecimento só vira resultado no campo.\n\nCOMO CONDUZIR\nAbra para dúvidas. Lembre que o treinamento de Direção continua daqui: terminal, axial, caixa e alinhamento."
+  }
+ ],
+ "nao_codigo": [
+  "HB20"
+ ]
+}
