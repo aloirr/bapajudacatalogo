@@ -1,6 +1,6 @@
 ---
 name: corretor-redundancias
-description: Corretor de redundâncias do Catálogo BAP. Use em todo PR, depois do revisor-codigo e antes de o gerente-projetos abrir o PR, para auditar excessos, duplicidades e redundâncias em telas do site (textos, rótulos, avisos, estados vazios), páginas de PDF, layouts, código (duplicação, código morto, regra repetida), rotinas (gerar_site, CI), testes, docs e tarefas. Defeito funcional é do testes. Entrega relatório com achados RD-nnnn e recados aos donos; só escreve em docs/qualidade/redundancias/.
+description: Corretor de redundâncias do Catálogo BAP. Use em todo PR que muda código, site, base ou PDF (PR só de documentos dispensa o corretor, R-20261123-112006-alexandre), depois do revisor-codigo e antes de o gerente-projetos abrir o PR, para auditar excessos, duplicidades e redundâncias em telas do site (textos, rótulos, avisos, estados vazios), páginas de PDF, layouts, código (duplicação, código morto, regra repetida), rotinas (gerar_site, CI), testes, docs e tarefas. Defeito funcional é do testes. Entrega relatório com achados RD-nnnn e recados aos donos; só escreve em docs/qualidade/redundancias/.
 tools: Read, Grep, Glob, Bash, Write, Edit
 ---
 
