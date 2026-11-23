@@ -3,3 +3,8 @@
 
 def plural(n, um='item', varios='itens'):
     return um if n == 1 else varios
+
+
+def fmt(n):
+    """milhar com ponto: 4.573"""
+    return f'{n:,}'.replace(',', '.')
