@@ -9,8 +9,8 @@ Guia tirado dos 3 treinamentos originais (out/2026), em `catalogo_grafico/origin
 | Lubrificantes | 43 | 7 | cerca de 1h45 |
 
 - Referência visual: `referencia/tipos_de_slide_originais.png` (os 13 tipos de slide, no de Lubrificantes).
-- Amostra no padrão (Mecânica Básica, 8 slides): `../simulacoes/T-0032/`.
-- Gerador: `../gerador/treinamento.py` + `../gerador/treinamento_ppt.js` (texto em `../gerador/treinamentos/<nome>.json`).
+- Modelo completo (Mecânica Básica, 45 slides), em simulação: a amostra de 8 slides desenhada do zero foi reprovada (R-20261123-153249-po) e saiu.
+- Gerador: `../gerador/treinamento_molde.py`. Ele **duplica o slide-modelo do original de Baterias** do mesmo tipo (XML e relações de imagem) e troca só o conteúdo, que fica em `../gerador/treinamentos/<nome>.json`. Os esquemas em corte (motor, arrefecimento, transmissão, suspensão, freios, ignição) saem do `../gerador/treinamento_desenhos.py`.
 - Público: vendedor externo BAP. O material fica só no admin (`/admin/pdfs/`). Por isso o conteúdo interno (alçada de desconto, Price) pode ficar.
 - Nenhum treinamento final é gerado antes do "aprovado" deste padrão.
 
@@ -119,7 +119,9 @@ Ordem fixa, igual nos 3 originais:
 
 **Fonte:** **Arial** em tudo (decisão 7 a, `docs/marca/manual.md`). Os originais estão em Calibri.
 
-**Ícones:** brancos, dentro de um círculo verde. São os mesmos dos originais, em `gerador/treinamento_img/icones/`.
+**Ícones:** brancos, dentro de um círculo verde. São os dos próprios originais: o gerador os tira dos 3 .pptx pelo nome (ex.: `FaWrench`).
+
+**Cores no gerador:** o texto verde sobre fundo claro sai em `#2F7D36` e o laranja sobre fundo claro em `#8A3F00`; sobre o escuro, ficam como no original. Número sobre círculo laranja sai em escuro.
 
 ## 4. O que melhorar em relação aos originais (sugestões para aprovar)
 
@@ -168,16 +170,15 @@ Em todos: estrutura mantida, Arial, números e códigos pela base atual, notas n
 | **Linha Moto** (5 módulos) | Tirar a coluna "Estoque" e os números de estoque (S2). Pneus e câmaras pela base: 12 pneus e 9 câmaras ativos. Incluir o "preparado para" (S4). |
 | **Lubrificantes** (7 módulos + Químicos) | Tirar a frase das 7 filiais (S2). Conferir as datas API (S7). ProActive, Shiftease e Effitech pela base: 24 itens, 18 ativos. Incluir o **módulo Químicos**: fluido de freio, aditivos, desengripante e silicone; 38 itens na base. |
 
-## 6. Como gerar (depois do aprovado)
+## 6. Como gerar
 
 ```
 cd catalogo_grafico/gerador
-python treinamento.py mecanica_basica --png ../simulacoes/T-0032
+PYTHONHASHSEED=0 python treinamento_molde.py mecanica_basica --sim PASTA
 ```
 
-- Precisa do Node com `pptxgenjs` e do LibreOffice (`soffice`), este só para os PNGs.
-- A saída vai para `gerador/saidas/` e, depois do aprovado, para `entregas/`.
-- Tipos ainda **a fazer** no gerador: aprender, preparado para e fechamento em 3 etapas. Neles, o texto verde sobre branco (os pilares do "aprender" e os verbos do "preparado para") vai em `#2F7D36`, e não no verde dos originais.
-- Eles seguem o desenho dos originais (`referencia/tipos_de_slide_originais.png`) e entram antes de gerar os treinamentos completos.
-- Mitos e verdades e passo a passo numerado ficam fora do padrão até ter desenho (seção 2).
-- Grafia: os nomes de linha vão como "ProActive", "Shiftease" e "Effitech"; caixa alta só onde todo o texto é caixa alta (kicker). O nome do produto sai do Catálogo BAP (PRODUTO da base), não é digitado.
+- Saída: o .pptx em `gerador/saidas/` (ou em PASTA, com `--sim`, junto do PDF, dos PNGs a 100 ppi, do mosaico de 8 slides e do comparativo original × novo dos pares listados no JSON).
+- Depois do aprovado, o .pptx e o PDF vão para `entregas/`.
+- Um treinamento novo = um JSON novo. Cada slide aponta o `molde` (nº do slide no original de Baterias) e troca textos (`t`), imagens (`img`), ícones (`icone`), tabelas (`tabela`) e notas, pelo índice da forma no slide-modelo.
+- Mitos e verdades e passo a passo numerado (Lubrificantes) ficam fora até ter desenho aprovado.
+- Grafia: os nomes de linha vão como "ProActive", "Shiftease" e "Effitech"; caixa alta só onde todo o texto é caixa alta (kicker). Nome de produto no texto: macro `{{prod:...}}`, conferida na base.

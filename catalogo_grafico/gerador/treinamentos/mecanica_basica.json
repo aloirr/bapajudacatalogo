@@ -1,159 +1,1049 @@
 {
-  "_leia": "Conteúdo do treinamento de Mecânica Básica (T-0032, AMOSTRA do padrão). O desenho fica no treinamento_ppt.js; os números e códigos vêm da base unificada pelo treinamento.py. Material interno (só /admin/pdfs/).",
-  "nome": "Mecânica Básica",
-  "arquivo": "Treinamento_Mecanica_Basica_BAP",
-  "rodape": "Treinamento Mecânica Básica BAP  |  Equipe Comercial Externa",
-  "slides": [
-    {
-      "tipo": "capa",
-      "sobretitulo": "TREINAMENTO COMERCIAL",
-      "titulo": "Mecânica Básica BAP",
-      "texto": "Os sistemas do carro, os sinais de desgaste e a peça certa: a base para vender qualquer linha",
-      "rodape": "Equipe Comercial Externa  ·  Novembro de 2026",
-      "notas": {
-        "MENSAGEM-CHAVE": "Quem entende como o carro funciona pergunta melhor, indica a peça certa e vende mais de um sistema na mesma visita.",
-        "COMO CONDUZIR": "Dê boas-vindas e diga a duração prevista (cerca de 1h30 com perguntas). Este é o treinamento de base: os de cada sistema aprofundam o que aparece aqui.",
-        "PERGUNTE AO TIME": "Qual foi a última peça que você vendeu sem saber direito para que servia?"
-      }
-    },
-    {
-      "tipo": "topicos",
-      "kicker": "ABERTURA",
-      "titulo": "Tópicos do treinamento",
-      "itens": [
-        ["01", "carro", "O carro em sistemas", "Os sistemas e o que cada um faz"],
-        ["02", "engrenagem", "Motor e arrefecimento", "Combustão, distribuição e temperatura"],
-        ["03", "estrada", "Suspensão, direção e rodagem", "Estabilidade, alinhamento e rodas"],
-        ["04", "escudo", "Freio e transmissão", "Parar e levar a força até a roda"],
-        ["05", "bateria", "Elétrica e filtração", "Ignição, bateria, sensores e filtros"],
-        ["06", "chave", "Sinais de desgaste", "O que o cliente sente e o que verificar"],
-        ["07", "aperto", "Cross-sell e fechamento", "Uma visita, vários sistemas"],
-        ["✓", "lista", "Fechamento", "Checklist do vendedor e teste de conhecimentos"]
-      ],
-      "notas": {
-        "MENSAGEM-CHAVE": "Sete módulos: do carro inteiro aos sinais de desgaste e à venda de vários sistemas juntos.",
-        "COMO CONDUZIR": "Mostre o caminho do treinamento. Diga que cada sistema tem um treinamento próprio, mais fundo, e que aqui o objetivo é a visão do todo.",
-        "PERGUNTE AO TIME": "Qual sistema você tem mais dificuldade de explicar ao cliente?"
-      }
-    },
-    {
-      "tipo": "secao",
-      "numero": "01",
-      "titulo": "O carro em sistemas",
-      "texto": "Cada peça mora num sistema; cada sistema tem a sua pergunta certa",
-      "notas": {
-        "MENSAGEM-CHAVE": "Pensar em sistemas organiza a conversa: do sintoma ao sistema, do sistema à peça.",
-        "COMO CONDUZIR": "Abra o módulo com a pergunta: o que acontece entre o pé no acelerador e a roda girando?"
-      }
-    },
-    {
-      "tipo": "sistemas",
-      "kicker": "MÓDULO 01 · SISTEMAS",
-      "titulo": "Os sistemas do carro e a linha BAP",
-      "funcoes": {
-        "MOTOR": "Gera a força: distribuição, polias e bomba de óleo",
-        "ARREFECIMENTO": "Segura a temperatura de trabalho: bomba d'água e eletroventilador",
-        "LUBRIFICANTES": "Reduzem atrito e desgaste: motor, câmbio e diferencial",
-        "FILTRAÇÃO": "Seguram a sujeira do ar, do óleo, do combustível e da cabine",
-        "ELÉTRICA": "Partida, ignição, luz e sensores: bateria, vela e lâmpada",
-        "TRANSMISSÃO": "Leva a força às rodas: homocinética e embreagem",
-        "SUSPENSÃO": "Mantém o pneu no chão: amortecedor, bandeja e pivô",
-        "DIREÇÃO": "Aponta as rodas: caixa de direção, terminal e axial",
-        "FREIO": "Para o carro: pastilha, sapata, cilindro de roda e sensor ABS",
-        "RODAGEM": "Faz a roda girar: cubo, rolamento, pneu e câmara de moto",
-        "ACESSÓRIOS": "Visibilidade e amarração: palheta e cinta com catraca",
-        "QUÍMICOS": "Fluido de freio, aditivo e produtos de manutenção"
-      },
-      "rotulo_numero": "itens no catálogo",
-      "dica": "Pergunte pelo sintoma e ache o sistema: barulho na roda pode ser rodagem, suspensão ou freio. O sistema certo leva à peça certa.",
-      "notas": {
-        "MENSAGEM-CHAVE": "A BAP cobre os 12 sistemas da reposição; o número em cada cartão é a quantidade de itens no catálogo, tirada da base atual.",
-        "COMO CONDUZIR": "Passe pelos sistemas em pares: motor e arrefecimento; suspensão, direção e rodagem; freio e transmissão; elétrica e filtração. Lubrificantes e químicos têm treinamento próprio.",
-        "INSIGHT PARA O CAMPO": "Suspensão é o sistema com mais itens no Catálogo BAP: é a porta de entrada mais larga na oficina."
-      }
-    },
-    {
-      "tipo": "tabela",
-      "kicker": "MÓDULO 06 · SINAIS DE DESGASTE",
-      "titulo": "O que o cliente sente e o que verificar",
-      "cabecalho": ["O cliente conta", "Sistema", "Verificar", "Na BAP"],
-      "larguras": [3.6, 1.6, 3.0, 3.93],
-      "coluna_produtos": 3,
-      "linhas": [
-        ["Chiado metálico ao frear", "Freio", "Pastilha gasta até o indicador", ["Pastilha de Freio", "Sapata de Freio"]],
-        ["O carro balança depois da lombada", "Suspensão", "Amortecedor e Kit Batente de Amortecedor", ["Amortecedores", "Kit Batente de Amortecedor"]],
-        ["Batida seca (“toc-toc”) em buraco", "Suspensão", "Bieleta, bucha da barra e pivô", ["Bieletas", "Bucha da Barra Estabilizadora", "Pivô de Suspensão"]],
-        ["Estalo ao virar e acelerar na curva", "Transmissão", "Junta homocinética", ["Junta Homocinética", "Kit Reparo da Junta Homocinética"]],
-        ["Ronco que aumenta com a velocidade", "Rodagem", "Rolamento ou cubo de roda", ["Cubo de Roda", "Rolamentos"]],
-        ["Ponteiro da temperatura subindo", "Arrefecimento", "Bomba, ventoinha do radiador e aditivo", ["Bomba D'Água", "Eletroventiladores"]]
-      ],
-      "atencao": "Sintoma abre a conversa; quem confirma é o mecânico. Não prometa que a peça resolve sem a avaliação na oficina.",
-      "notas": {
-        "MENSAGEM-CHAVE": "O cliente descreve o sintoma, não a peça. Quem traduz o sintoma em sistema faz a pergunta certa.",
-        "COMO CONDUZIR": "Leia cada linha da esquerda para a direita: o que o cliente conta, onde fica, o que o mecânico verifica e o que a BAP tem.",
-        "PERGUNTE AO TIME": "Qual sintoma o seu cliente mais conta no balcão?"
-      }
-    },
-    {
-      "tipo": "hub",
-      "kicker": "MÓDULO 07 · CROSS-SELL",
-      "titulo": "Um carro, vários sistemas: a peça puxa a outra",
-      "veiculo": "ONIX",
-      "centro": ["Onix 1.0 e 1.4 8V", "2013 a 2015 · exemplo do Catálogo BAP"],
-      "cartoes": [
-        {"titulo": "Filtro de óleo", "codigos": ["FLU6006"], "junto": "base"},
-        {"titulo": "Kit de Distribuição", "codigos": ["KCD2500"], "junto": "base"},
-        {"titulo": "Amortecedor dianteiro", "codigos": ["AMT7507", "AMT7508"], "junto": "base"},
-        {"titulo": "Sapata de freio traseira", "codigos": ["SFR30014"], "junto": "base"},
-        {"titulo": "Cabo de Vela", "codigos": ["CV-G101"], "junto": "base"},
-        {"titulo": "Pastilha dianteira", "codigos": ["PAF0094"], "junto": ["FLU15001", "FLU15002"], "obs_junto": "DOT 3 ou DOT 4: o que pede a tampa"}
-      ],
-      "nomes": {
-        "FAR6019": "Filtro de ar", "FAC6016": "Filtro de cabine", "FLU15001": "Fluido de freio", "FLU15002": "Fluido de freio"
-      },
-      "dica": "Ano, motor e versão mudam a peça: o Onix 1.0 12V de 2019 em diante já usa o filtro de ar FAR6101, não o FAR6019.",
-      "notas": {
-        "MENSAGEM-CHAVE": "Na mesma revisão, o carro passa por vários sistemas. O campo OFEREÇA JUNTO do Catálogo BAP já diz qual peça puxa a outra.",
-        "COMO CONDUZIR": "Use o Onix como exemplo: mostre cada peça e o que vai junto. Lembre que ano, motor e versão mudam a peça: o Onix 1.0 12V de 2019 em diante já usa outros filtros.",
-        "INSIGHT PARA O CAMPO": "Os pares deste slide saem do campo OFEREÇA JUNTO da base: atualizou a base, o slide sai atualizado."
-      }
-    },
-    {
-      "tipo": "checklist",
-      "kicker": "FECHAMENTO",
-      "titulo": "Checklist do vendedor BAP",
-      "itens": [
-        "Perguntei modelo, ano, motor e versão",
-        "Perguntei o sintoma e achei o sistema",
-        "Conferi a posição: dianteiro, traseiro e lado",
-        "Busquei o código no catálogo, não na memória",
-        "Indiquei a troca em par no mesmo eixo",
-        "Ofereci os itens do OFEREÇA JUNTO",
-        "Lembrei a troca rápida: filtros, palheta e bateria",
-        "Não prometi diagnóstico: o mecânico confirma",
-        "Indiquei o treinamento do sistema na dúvida",
-        "Pedi o pedido; sem pedido, anotei o motivo"
-      ],
-      "notas": {
-        "MENSAGEM-CHAVE": "Dez hábitos que valem para qualquer linha.",
-        "COMO CONDUZIR": "Peça para cada vendedor marcar o que já faz e escolher um item para melhorar na próxima semana."
-      }
-    },
-    {
-      "tipo": "quiz",
-      "kicker": "FECHAMENTO",
-      "titulo": "Teste seus conhecimentos",
-      "perguntas": [
-        ["Qual sistema leva a força do motor até as rodas?", "Transmissão (junta homocinética, trizeta, semieixo e embreagem)."],
-        ["O cliente ouve um estalo ao virar e acelerar na curva. Qual peça o mecânico deve verificar?", "A junta homocinética (sistema de transmissão)."],
-        ["Um ronco que aumenta com a velocidade aponta para qual sistema?", "Rodagem: rolamento ou cubo de roda."],
-        ["Por que o amortecedor se troca em par no mesmo eixo?", "Para os dois lados trabalharem igual: um novo com um gasto desequilibra o carro."],
-        ["Qual o filtro de ar BAP para o Onix 1.0 8V 2014?", "FAR6019."],
-        ["Na venda do Kit de Distribuição KCD2500, o que o Catálogo BAP manda oferecer junto?", "A Bomba D'Água BDA50003."]
-      ],
-      "notas": {
-        "MENSAGEM-CHAVE": "Revisão rápida."
-      }
-    }
-  ]
+ "arquivo": "Treinamento_Mecanica_Basica_BAP_Vendedores.pptx",
+ "rodape": "Treinamento Mecânica Básica BAP  |  Equipe Comercial Externa · uso interno",
+ "mosaico": [
+  1,
+  3,
+  6,
+  10,
+  22,
+  26,
+  39,
+  40
+ ],
+ "pares": [
+  2,
+  6,
+  7,
+  8,
+  17,
+  22,
+  34,
+  39
+ ],
+ "slides": [
+  {
+   "molde": 1,
+   "t": {
+    "0": "TREINAMENTO COMERCIAL",
+    "1": "Mecânica Básica BAP",
+    "2": "Como o carro funciona, o que o cliente sente e qual peça BAP resolve",
+    "3": "Equipe Comercial Externa  ·  Novembro 2026"
+   },
+   "notas": "MENSAGEM-CHAVE\nQuem entende como o carro funciona vende a solução, e não só a peça. Este é o treinamento-base: os outros (Suspensão, Freio, Motor...) aprofundam cada sistema.\n\nCOMO CONDUZIR\nDê boas-vindas, apresente-se e diga a duração prevista (cerca de 2h15 com perguntas). Explique que o treinamento é prático: em cada módulo vamos ligar o sintoma que o cliente conta ao sistema do carro e à peça BAP. Combine que as perguntas podem vir a qualquer momento.\n\nPERGUNTE AO TIME\nQual foi a última peça que vocês deixaram de vender porque não souberam explicar para que ela servia?"
+  },
+  {
+   "molde": 2,
+   "t": {
+    "2": "Hoje você sai daqui sabendo |explicar, ligar e recomendar| — do sintoma que o cliente conta até a peça BAP certa.",
+    "3": "Quem entende como o carro funciona fala a língua do mecânico e deixa de competir só por preço.",
+    "7": "ENTENDER",
+    "8": "Os sistemas do carro e as peças de cada um",
+    "12": "DIAGNOSTICAR",
+    "13": "Do sintoma ao sistema e à peça BAP",
+    "17": "VENDER",
+    "18": "Perguntas, Ofereça junto, combos e fechamento"
+   },
+   "icone": {
+    "6": "FaGears"
+   },
+   "notas": "MENSAGEM-CHAVE\nO objetivo não é formar mecânicos, e sim vendedores que entendem o suficiente para recomendar com segurança e defender valor.\n\nCOMO CONDUZIR\nApresente os três pilares como uma jornada: primeiro ENTENDER os sistemas, depois DIAGNOSTICAR (ligar o sintoma à peça) e, por fim, VENDER com perguntas, Ofereça junto e combos. Diga que cada módulo termina com uma dica de campo.\n\nPERGUNTE AO TIME\nQuando o mecânico liga pedindo “uma peça para o barulho na frente”, o que vocês perguntam primeiro?"
+  },
+  {
+   "molde": 3,
+   "t": {
+    "6": "Como o carro funciona",
+    "7": "Os 10 sistemas e o caminho da força",
+    "12": "Motor e arrefecimento",
+    "13": "4 tempos, distribuição e temperatura",
+    "18": "Transmissão",
+    "19": "Embreagem, câmbio e homocinética",
+    "24": "Suspensão e direção",
+    "25": "Amortecedor, bandeja, pivô e terminais",
+    "30": "Freio e rodagem",
+    "31": "Disco, tambor, fluido e cubo de roda",
+    "36": "Elétrica, filtros e óleo",
+    "37": "Partida, ignição, filtros e lubrificação",
+    "42": "Diagnóstico e venda",
+    "43": "Sintoma → peça, SPIN, combos e fechamento",
+    "48": "Fechamento",
+    "49": "Checklist do vendedor e teste de conhecimentos"
+   },
+   "icone": {
+    "5": "FaCarSide",
+    "11": "FaGears",
+    "17": "FaGear",
+    "23": "FaRoad",
+    "29": "FaCircleDot",
+    "35": "FaBolt",
+    "41": "FaHandshake",
+    "47": "FaListCheck"
+   },
+   "notas": "MENSAGEM-CHAVE\nSão 7 módulos que seguem o carro: como ele funciona, cada grupo de sistemas e, no fim, como transformar isso em venda.\n\nCOMO CONDUZIR\nPasse rápido pelos tópicos. Diga que os módulos 2 a 6 seguem o mesmo roteiro (como funciona, o que gasta, que sintoma aparece, que peça BAP resolve) e que o módulo 7 junta tudo no balcão.\n\nINSIGHT PARA O CAMPO\nO módulo 7 é o que mais vende: a tabela sintoma → sistema → peça vale a pena ficar impressa no balcão do cliente.",
+   "mover": {
+    "7": [
+     null,
+     3.38,
+     null,
+     null
+    ],
+    "13": [
+     null,
+     3.38,
+     null,
+     null
+    ],
+    "19": [
+     null,
+     3.38,
+     null,
+     null
+    ],
+    "25": [
+     null,
+     3.38,
+     null,
+     null
+    ],
+    "31": [
+     null,
+     5.98,
+     null,
+     null
+    ],
+    "37": [
+     null,
+     5.98,
+     null,
+     null
+    ],
+    "43": [
+     null,
+     5.98,
+     null,
+     null
+    ],
+    "49": [
+     null,
+     5.98,
+     null,
+     null
+    ]
+   }
+  },
+  {
+   "molde": 4,
+   "t": {
+    "5": "Explicar",
+    "6": "como cada sistema funciona, na linguagem do balcão",
+    "10": "Ligar",
+    "11": "o sintoma que o cliente conta ao sistema e à peça",
+    "15": "Identificar",
+    "16": "a peça certa: aplicação, posição e lado no catálogo",
+    "20": "Perguntar",
+    "21": "o que confirma o defeito antes de indicar a peça",
+    "25": "Ampliar",
+    "26": "o pedido com o Ofereça junto e os combos por sistema",
+    "30": "Defender",
+    "31": "o valor da BAP com argumento técnico, não com desconto"
+   },
+   "icone": {
+    "4": "FaComments",
+    "9": "FaLink",
+    "14": "FaMagnifyingGlass",
+    "19": "FaCircleQuestion",
+    "24": "FaMedal",
+    "29": "FaShieldHalved"
+   },
+   "notas": "MENSAGEM-CHAVE\nEstes são os compromissos do treinamento: ao final, cada um deve conseguir fazer essas seis coisas sozinho.\n\nCOMO CONDUZIR\nLeia os verbos em voz alta (Explicar, Ligar, Identificar, Perguntar, Ampliar, Defender). Diga que no fechamento vamos voltar a este slide em forma de checklist.\n\nPERGUNTE AO TIME\nQual destes seis verbos vocês acham mais difícil no dia a dia? Anote a resposta e retome no fim."
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "01",
+    "1": "Como o carro funciona",
+    "2": "Os sistemas do carro e o caminho da força"
+   },
+   "notas": "MENSAGEM-CHAVE\nAntes de falar de peça, entender o carro como um conjunto de sistemas.\n\nCOMO CONDUZIR\nTransição curta. Diga que este módulo dá o mapa que será usado no resto do treinamento: todo defeito mora num sistema."
+  },
+  {
+   "molde": 7,
+   "t": {
+    "0": "MÓDULO 01 · SISTEMAS",
+    "1": "O carro em 10 sistemas",
+    "4": "01  |Motor\n02  |Arrefecimento\n03  |Lubrificação\n04  |Filtração\n05  |Transmissão",
+    "5": "06  |Suspensão\n07  |Direção\n08  |Freio\n09  |Rodagem\n10  |Elétrica",
+    "9": "DICA DE CAMPO  |Todo defeito mora num sistema. Antes de falar de peça, descubra em qual sistema está o problema — e só então abra o catálogo."
+   },
+   "img": {
+    "3": "desenho:carro_sistemas"
+   },
+   "notas": "MENSAGEM-CHAVE\nO carro é um conjunto de 10 sistemas que trabalham juntos. Saber onde cada um fica ajuda a entender o que o cliente está descrevendo.\n\nCOMO CONDUZIR\nMostre o desenho visto de cima, com a frente do carro à esquerda. Percorra os números: motor (1) e câmbio (5) na frente, o radiador (2) na ponta, a bateria (10) no cofre, o volante e a caixa de direção (7), as torres de suspensão (6) nas quatro rodas, as linhas de freio (8) em laranja e os pneus (9). Não é preciso decorar: o objetivo é ter o mapa na cabeça.\n\nPERGUNTE AO TIME\nQuais destes sistemas a BAP atende? (Resposta: todos os 10; o catálogo é organizado por sistema.)"
+  },
+  {
+   "molde": 31,
+   "t": {
+    "0": "MÓDULO 01 · SISTEMAS",
+    "1": "Cada sistema tem uma função",
+    "5": "Motor",
+    "6": "transforma combustível em força",
+    "10": "Arrefecimento",
+    "11": "segura o motor na temperatura certa",
+    "15": "Transmissão",
+    "16": "leva a força do motor até as rodas",
+    "20": "Suspensão",
+    "21": "mantém a roda no chão e o carro estável",
+    "25": "Direção",
+    "26": "aponta as rodas para onde se quer ir",
+    "30": "Freio",
+    "31": "transforma movimento em calor para parar",
+    "35": "Elétrica",
+    "36": "dá a partida e alimenta o carro",
+    "40": "Filtros e óleo",
+    "41": "protegem e lubrificam o motor",
+    "43": "{{n_itens}}",
+    "44": "itens no Catálogo BAP, de {{n_produtos}} produtos diferentes",
+    "45": "{{n_sistemas}} sistemas",
+    "46": "no catálogo, com aplicação, posição e lado de cada peça",
+    "47": "Números do Catálogo BAP pela base unificada {{versao_base}}."
+   },
+   "icone": {
+    "4": "FaGears",
+    "9": "FaTemperatureHigh",
+    "14": "FaGear",
+    "19": "FaRoad",
+    "24": "FaArrowsLeftRight",
+    "29": "FaCircleDot",
+    "34": "FaBolt",
+    "39": "FaFilter"
+   },
+   "notas": "MENSAGEM-CHAVE\nCada sistema tem uma função que dá para explicar numa frase. É essa frase que o vendedor usa com o cliente.\n\nCOMO CONDUZIR\nLeia as funções e peça para o time repetir com as próprias palavras. Mostre o quadro escuro: o número de itens do catálogo vem da base unificada e é atualizado a cada geração do treinamento.\n\nINSIGHT PARA O CAMPO\nQuando o cliente não sabe o nome da peça, pergunte pela função: “é o que segura a roda?”, “é o que esfria o motor?”. A função leva ao sistema, e o sistema leva à peça."
+  },
+  {
+   "molde": 28,
+   "t": {
+    "0": "MÓDULO 01 · SISTEMAS",
+    "1": "O caminho da força: da chave à roda",
+    "7": "Partida",
+    "8": "Bateria e motor de partida giram o motor.",
+    "15": "Combustão",
+    "16": "Ar, combustível e faísca empurram os pistões.",
+    "23": "Embreagem",
+    "24": "Liga e desliga o motor do câmbio.",
+    "31": "Câmbio",
+    "32": "Escolhe força (marcha baixa) ou velocidade.",
+    "39": "Rodas",
+    "40": "Semieixos e juntas levam o giro às rodas.",
+    "44": "DICA DE CAMPO  |Defeito em qualquer elo dessa corrente aparece como “o carro não anda direito”. Pergunte quando acontece: na partida, ao acelerar, ao trocar marcha ou na curva."
+   },
+   "icone": {
+    "6": "FaCarBattery",
+    "14": "FaFire",
+    "22": "FaLink",
+    "30": "FaGears",
+    "38": "FaCircleNotch"
+   },
+   "notas": "MENSAGEM-CHAVE\nA força nasce no motor e passa por uma corrente de peças até chegar ao chão. Cada elo tem peças BAP.\n\nCOMO CONDUZIR\nConte a história da esquerda para a direita, como uma viagem: a chave gira, o motor pega, a embreagem liga o motor ao câmbio, o câmbio escolhe a marcha e os semieixos levam o giro às rodas. Diga que os próximos módulos abrem cada um desses elos.\n\nPERGUNTE AO TIME\nSe o carro acelera, o motor sobe o giro, mas o carro não ganha velocidade, em qual elo está o problema? (Resposta: embreagem patinando.)"
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "02",
+    "1": "Motor e arrefecimento",
+    "2": "Como o motor gera força e como controla a temperatura"
+   },
+   "notas": "MENSAGEM-CHAVE\nO motor é o coração do carro; o arrefecimento é o que impede que ele se destrua com o próprio calor.\n\nCOMO CONDUZIR\nTransição curta. Diga que aqui estão peças de alto valor (kit de distribuição, bomba d'água, eletroventilador) e que quase sempre são vendidas em conjunto."
+  },
+  {
+   "molde": 7,
+   "t": {
+    "0": "MÓDULO 02 · MOTOR",
+    "1": "O motor por dentro",
+    "4": "01  |Cabeçote\n02  |Válvulas\n03  |Comando\n04  |Vela de ignição\n05  |Pistão e anéis\n06  |Biela",
+    "5": "07  |Virabrequim\n08  |Cárter e óleo\n09  |Correia dentada\n10  |Tensor\n11  |Bomba d'água",
+    "9": "DICA DE CAMPO  |As peças BAP do motor são as que giram e se desgastam: correia, tensor, polias, bomba d'água e bomba de óleo. Elas trabalham sempre em conjunto."
+   },
+   "img": {
+    "3": "desenho:motor_corte"
+   },
+   "notas": "MENSAGEM-CHAVE\nDentro do motor, o pistão sobe e desce; a biela e o virabrequim transformam esse vaivém em giro. Em cima, o comando abre e fecha as válvulas no tempo certo.\n\nCOMO CONDUZIR\nÀ esquerda está o corte de um cilindro: cabeçote (1), válvulas (2), comando de válvulas (3), vela (4), pistão (5), biela (6), virabrequim (7) e o cárter com o óleo (8). À direita está a distribuição: a correia dentada (9) liga a polia do virabrequim à do comando, passando pelo tensor (10) e, em muitos motores, pela bomba d'água (11).\n\nINSIGHT PARA O CAMPO\nNão é preciso saber montar um motor: basta saber que comando e virabrequim têm de girar sincronizados, e que quem garante isso é a correia com o tensor."
+  },
+  {
+   "molde": 8,
+   "t": {
+    "0": "MÓDULO 02 · MOTOR",
+    "1": "4 tempos e sincronismo",
+    "3": "Os 4 tempos",
+    "5": "Admissão: entra ar e combustível\nCompressão: o pistão aperta a mistura\nCombustão: a faísca empurra o pistão\nEscape: saem os gases queimados",
+    "7": "Sincronismo",
+    "9": "A correia dentada sincroniza o virabrequim e o comando\nSe ela rompe, em muitos motores as válvulas batem no pistão\nTroca no prazo do manual, com o tensor",
+    "13": "DICA DE CAMPO  |Correia dentada não avisa quando vai romper: o prazo de troca está no manual do veículo. Pergunte a quilometragem da última troca."
+   },
+   "img": {
+    "4": "desenho:quatro_tempos",
+    "8": "capa:cover_24"
+   },
+   "mover": {
+    "4": [
+     0.85,
+     2.35,
+     3.05,
+     3.2
+    ],
+    "8": [
+     7.03,
+     2.35,
+     3.05,
+     3.2
+    ]
+   },
+   "notas": "MENSAGEM-CHAVE\nO motor trabalha em 4 tempos, e as válvulas precisam abrir no tempo exato. Quem garante esse tempo é a correia dentada.\n\nCOMO CONDUZIR\nExplique os 4 tempos com as mãos: desce (admissão), sobe (compressão), explode e desce (combustão), sobe (escape). Depois mostre o kit: se a correia rompe, o comando para e, em muitos motores, as válvulas batem no pistão — é o famoso “motor que entortou válvula”.\n\nPERGUNTE AO TIME\nPor que a correia dentada se troca por prazo, e não quando faz barulho? (Resposta: ela costuma romper sem aviso, e o estrago é muito maior que o preço do kit.)"
+  },
+  {
+   "molde": 13,
+   "t": {
+    "0": "MÓDULO 02 · MOTOR",
+    "1": "Distribuição: troque o kit, não só a correia",
+    "5": "Tensor e polias gastos fazem a correia pular dente.",
+    "6": "Para o cliente: kit completo, troca feita uma vez só.",
+    "8": "Bomba d'água: em muitos motores, gira pela correia dentada.",
+    "9": "Para o cliente: trocar junto evita abrir o motor de novo.",
+    "13": "DICA DE CAMPO  |Pediu correia? Ofereça o kit e pergunte pela bomba d'água: na base, o Ofereça junto do kit {{cod:KCD2501}} é a bomba {{oj:KCD2501}}."
+   },
+   "img": {
+    "3": "foto:KCD2500",
+    "4": "capa:cover_25",
+    "7": "foto:BDA50000"
+   },
+   "mover": {
+    "4": [
+     6.2,
+     1.62,
+     1.6,
+     0.95
+    ],
+    "7": [
+     6.2,
+     3.71,
+     1.6,
+     0.95
+    ]
+   },
+   "notas": "MENSAGEM-CHAVE\nA correia não trabalha sozinha: tensor, polias e, em muitos motores, a bomba d'água giram junto com ela. Por isso a venda certa é o kit.\n\nCOMO CONDUZIR\nMostre o kit de distribuição BAP: correia e tensor na mesma caixa. Explique que o rolamento do tensor gasto deixa a correia frouxa e ela pula dente. Depois mostre a bomba d'água: quando ela é tocada pela correia dentada, trocar as duas juntas poupa uma segunda desmontagem.\n\nINSIGHT PARA O CAMPO\nO Ofereça junto do Catálogo BAP já traz essa ligação: no kit {{cod:KCD2501}}, a base indica a bomba {{oj:KCD2501}}. Use o código na conversa com o mecânico."
+  },
+  {
+   "molde": 7,
+   "t": {
+    "0": "MÓDULO 02 · ARREFECIMENTO",
+    "1": "Arrefecimento: o caminho do calor",
+    "4": "01  |Radiador\n02  |Eletroventilador\n03  |Bomba d'água\n04  |Termostato",
+    "5": "05  |Reservatório\n06  |Mangueiras\n07  |Sensor\n08  |Fluido",
+    "9": "DICA DE CAMPO  |Nunca abra o reservatório com o motor quente: o sistema trabalha sob pressão e o fluido pode queimar. Oriente o cliente a esperar esfriar."
+   },
+   "img": {
+    "3": "desenho:arrefecimento"
+   },
+   "notas": "MENSAGEM-CHAVE\nO fluido circula pelo motor, recolhe o calor e o entrega no radiador. A bomba d'água empurra, o termostato decide a hora e o eletroventilador ajuda no trânsito.\n\nCOMO CONDUZIR\nSiga as cores: em laranja, o fluido quente sai do motor pelo termostato (4) e vai ao radiador (1); em verde, volta frio pela mangueira de baixo até a bomba d'água (3). O eletroventilador (2) puxa ar pelo radiador quando o carro está parado. O reservatório (5) compensa a dilatação, e o sensor (7) avisa a temperatura ao painel e à injeção.\n\nPERGUNTE AO TIME\nPor que o motor esquenta no trânsito, mas volta ao normal na estrada? (Resposta: na estrada, o vento faz o trabalho do eletroventilador; se ele não liga, o problema só aparece parado.)"
+  },
+  {
+   "molde": 31,
+   "t": {
+    "0": "MÓDULO 02 · ARREFECIMENTO",
+    "1": "Superaquecimento: as causas mais comuns",
+    "5": "Eletroventilador",
+    "6": "parado: esquenta no trânsito",
+    "10": "Bomba d'água",
+    "11": "vazando ou com rotor gasto",
+    "15": "Termostato travado",
+    "16": "fechado, o fluido não circula",
+    "20": "Radiador entupido",
+    "21": "sujeira por dentro e por fora",
+    "25": "Falta de fluido",
+    "26": "vazamento em mangueira ou junta",
+    "30": "Correia frouxa",
+    "31": "a bomba d'água perde rotação",
+    "35": "Sensor com defeito",
+    "36": "o ventilador não liga na hora",
+    "40": "Só água no sistema",
+    "41": "sem aditivo: ferrugem e fervura",
+    "43": "≈ 90 °C",
+    "44": "temperatura normal do motor: o ponteiro fica no meio do marcador",
+    "45": "Sob pressão",
+    "46": "a tampa certa e o fluido certo evitam fervura e vazamento",
+    "47": "Fluido e aditivo do radiador: ver o treinamento de Lubrificantes."
+   },
+   "icone": {
+    "4": "FaWind",
+    "9": "FaDroplet",
+    "14": "FaTemperatureHigh",
+    "19": "FaFilter",
+    "24": "FaWater",
+    "29": "FaLinkSlash",
+    "34": "FaPlug",
+    "39": "FaFlask"
+   },
+   "notas": "MENSAGEM-CHAVE\nSuperaquecimento quase nunca tem uma causa só. O vendedor que conhece as 8 causas oferece a solução completa.\n\nCOMO CONDUZIR\nPercorra os cartões e ligue cada um a uma peça BAP: eletroventilador, bomba d'água, fluido de radiador. Explique o quadro escuro: o normal é o ponteiro no meio; o sistema trabalha pressurizado, e é isso que permite ao fluido passar dos 100 °C sem ferver.\n\nINSIGHT PARA O CAMPO\nMotor que ferveu pode ter queimado a junta do cabeçote. Se o cliente fala em “fumaça branca” ou em fluido sumindo sem vazamento, oriente procurar o mecânico antes de trocar só a peça barata."
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "03",
+    "1": "Transmissão",
+    "2": "Como a força do motor chega às rodas"
+   },
+   "notas": "MENSAGEM-CHAVE\nA transmissão leva a força do motor até as rodas e deixa o motorista escolher entre força e velocidade.\n\nCOMO CONDUZIR\nTransição curta. Diga que aqui estão juntas homocinéticas, kits de reparo, semieixos, trizetas, cruzetas e a embreagem — linhas fortes da BAP."
+  },
+  {
+   "molde": 7,
+   "t": {
+    "0": "MÓDULO 03 · TRANSMISSÃO",
+    "1": "Do motor à roda: a transmissão por dentro",
+    "4": "01  |Motor\n02  |Embreagem\n03  |Atuador\n04  |Câmbio\n05  |Diferencial",
+    "5": "06  |Trizeta\n07  |Semieixo\n08  |Homocinética\n09  |Coifa\n10  |Roda e cubo",
+    "9": "DICA DE CAMPO  |Na tração dianteira, cada roda tem um semieixo com duas juntas: a trizeta do lado do câmbio e a homocinética do lado da roda."
+   },
+   "img": {
+    "3": "desenho:transmissao"
+   },
+   "notas": "MENSAGEM-CHAVE\nNo carro de tração dianteira, o motor, a embreagem e o câmbio ficam atravessados na frente, e dois semieixos levam a força às rodas.\n\nCOMO CONDUZIR\nO desenho é visto de cima. Siga a força: motor (1), embreagem (2) acionada pelo atuador (3), câmbio (4) e diferencial (5), que divide o giro entre as duas rodas. Cada semieixo (7) tem a trizeta (6) do lado do câmbio e a junta homocinética (8) do lado da roda, protegida pela coifa (9).\n\nPERGUNTE AO TIME\nPor que o diferencial é necessário? (Resposta: na curva, a roda de fora anda mais que a de dentro; o diferencial deixa cada uma girar numa velocidade.)"
+  },
+  {
+   "molde": 12,
+   "t": {
+    "0": "MÓDULO 03 · TRANSMISSÃO",
+    "1": "Embreagem: o conjunto que liga e desliga",
+    "4": "Kit de embreagem (platô, disco e rolamento) e o cilindro que aciona o conjunto.",
+    "7": "Platô: aperta o disco contra o volante do motor",
+    "10": "Disco: o revestimento que agarra e passa a força",
+    "13": "Rolamento: alivia o platô quando se pisa no pedal",
+    "16": "Servo e cilindro: o comando hidráulico do pedal",
+    "20": "DICA DE CAMPO  |Patinando, trepidando ou pedal duro? Troque o conjunto inteiro: disco novo com platô velho volta a falhar logo."
+   },
+   "img": {
+    "3": "montagem:capa:cover_15+foto:SCE14010"
+   },
+   "icone": {
+    "6": "FaCircleDot",
+    "9": "FaLayerGroup",
+    "12": "FaRotate",
+    "15": "FaGaugeHigh"
+   },
+   "notas": "MENSAGEM-CHAVE\nA embreagem é um conjunto: platô, disco e rolamento se gastam juntos e se trocam juntos.\n\nCOMO CONDUZIR\nExplique com as mãos: o platô é a mão que aperta, o disco é a sola que agarra e o rolamento é o dedo que solta quando o pedal desce. Mostre o servo e o cilindro de embreagem: no comando hidráulico, eles levam a força do pé até o rolamento.\n\nINSIGHT PARA O CAMPO\nSintomas que o cliente conta: o motor sobe o giro e o carro não anda (patinando), o carro treme ao sair (trepidação), pedal duro ou que não volta (comando). Os dois primeiros pedem o kit; o último, o servo ou o cilindro."
+  },
+  {
+   "molde": 40,
+   "t": {
+    "0": "MÓDULO 03 · TRANSMISSÃO",
+    "1": "Homocinética: sinais de troca",
+    "3": "Sinais de junta e coifa gastas",
+    "6": "Estalo ao acelerar em curva fechada",
+    "9": "Graxa espalhada na roda e na suspensão",
+    "12": "Coifa rasgada ou abraçadeira solta",
+    "15": "Vibração ao acelerar em reta",
+    "17": "Por que oferecer o kit reparo junto",
+    "20": "Coifa rasgada deixa entrar água e areia: a junta nova se gasta em poucos meses.",
+    "23": "O kit reparo traz coifa, abraçadeiras e graxa: o mecânico fecha o serviço sem improviso.",
+    "26": "Na base, a junta {{cod:JUH70001}} (Gol G5) indica {{oj:JUH70001}} no Ofereça junto.",
+    "30": "DICA DE CAMPO  |Estalo só em curva é quase sempre a homocinética do lado da roda; vibração em reta costuma ser a trizeta, do lado do câmbio."
+   },
+   "icone": {
+    "5": "FaVolumeHigh",
+    "8": "FaDroplet",
+    "11": "FaLinkSlash",
+    "14": "FaWaveSquare"
+   },
+   "notas": "MENSAGEM-CHAVE\nA junta homocinética morre quase sempre pela coifa: rasgou, a graxa sai, a sujeira entra e a junta começa a estalar.\n\nCOMO CONDUZIR\nPeça para o time imitar o “tec-tec-tec” da homocinética em curva fechada. Mostre que graxa espalhada na roda é o sinal precoce: ainda dá para salvar a junta trocando só o kit reparo.\n\nINSIGHT PARA O CAMPO\nNo Catálogo BAP, a junta {{cod:JUH70001}} já traz o kit reparo no Ofereça junto ({{oj:JUH70001}}). Venda a junta com o kit: é o que garante que o serviço não volte."
+  },
+  {
+   "molde": 13,
+   "t": {
+    "0": "MÓDULO 03 · TRANSMISSÃO",
+    "1": "Semieixo, trizeta e cruzeta",
+    "5": "Trizeta: a junta do lado do câmbio, que deixa o eixo deslizar.",
+    "6": "Para o cliente: fim da vibração ao acelerar.",
+    "8": "Cruzeta: une o cardã na tração traseira e no caminhão.",
+    "9": "Para o cliente: fim da batida ao arrancar.",
+    "13": "DICA DE CAMPO  |Semieixo completo chega montado, com as duas juntas: é a troca mais rápida para o mecânico quando as duas juntas estão gastas."
+   },
+   "img": {
+    "3": "foto:SEH80000",
+    "4": "foto:TRI90000",
+    "7": "foto:CRU5273"
+   },
+   "mover": {
+    "4": [
+     6.2,
+     1.62,
+     1.6,
+     0.95
+    ],
+    "7": [
+     6.2,
+     3.71,
+     1.6,
+     0.95
+    ]
+   },
+   "notas": "MENSAGEM-CHAVE\nSemieixo, trizeta e cruzeta são as peças que levam o giro até a roda. Cada uma tem um sintoma típico.\n\nCOMO CONDUZIR\nMostre o semieixo homocinético BAP completo e explique onde fica cada junta. A trizeta deixa o semieixo encolher e esticar quando a suspensão trabalha. A cruzeta aparece no cardã dos carros de tração traseira, picapes e caminhões.\n\nPERGUNTE AO TIME\nQuando vale mais vender o semieixo completo do que a junta? (Resposta: quando as duas juntas estão gastas ou o eixo está empenado; o mecânico ganha tempo e o carro sai mais rápido.)"
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "04",
+    "1": "Suspensão e direção",
+    "2": "O que mantém a roda no chão e o carro na linha"
+   },
+   "notas": "MENSAGEM-CHAVE\nSuspensão e direção são os sistemas que mais fazem barulho — e o barulho é a melhor pista para o vendedor.\n\nCOMO CONDUZIR\nTransição curta. Diga que é o maior volume de itens da BAP: amortecedores, kits, bandejas, pivôs, bieletas, buchas, terminais e caixas de direção."
+  },
+  {
+   "molde": 7,
+   "t": {
+    "0": "MÓDULO 04 · SUSPENSÃO",
+    "1": "Suspensão McPherson por dentro",
+    "4": "01  |Coxim\n02  |Batente e coifa\n03  |Mola\n04  |Amortecedor\n05  |Bieleta",
+    "5": "06  |Estabilizadora\n07  |Bucha da barra\n08  |Bandeja\n09  |Pivô\n10  |Bucha da bandeja",
+    "9": "DICA DE CAMPO  |Amortecedor novo com coxim, batente e coifa velhos faz barulho e dura menos. Na base, o {{cod:AMT7004}} do Gol pede {{oj:AMT7004}}."
+   },
+   "img": {
+    "3": "desenho:suspensao"
+   },
+   "notas": "MENSAGEM-CHAVE\nA McPherson é a suspensão dianteira da maioria dos carros de passeio: o amortecedor também segura a mola e a roda.\n\nCOMO CONDUZIR\nO desenho mostra a roda esquerda vista de frente. Em cima, o coxim (1) prende o conjunto na carroceria; na haste ficam o batente e a coifa (2); a mola (3) segura o peso e o amortecedor (4) controla o balanço. A bieleta (5) liga a barra estabilizadora (6), presa pela bucha (7). Embaixo, a bandeja (8) segura a roda pelo pivô (9) e se prende ao chassi pela bucha (10).\n\nINSIGHT PARA O CAMPO\nNo Catálogo BAP, o amortecedor {{cod:AMT7004}} já indica o kit {{oj:AMT7004}} no Ofereça junto. Mostre isso ao mecânico: é o serviço completo numa linha só."
+  },
+  {
+   "molde": 24,
+   "t": {
+    "0": "MÓDULO 04 · SUSPENSÃO",
+    "1": "Amortecedor: o teste do balcão",
+    "4": "Em par",
+    "5": "sempre os dois do mesmo eixo, para o carro não puxar",
+    "8": "Pergunte: o carro balança ou “flutua” depois da lombada?",
+    "11": "Olhe: óleo escorrendo no corpo é vazamento e pede troca",
+    "14": "Teste: empurre o canto do carro; se balançar mais de uma vez, está gasto",
+    "17": "Ofereça o kit: coxim, batente e coifa dos dois lados",
+    "19": "Exemplo:  |Gol G5 dianteiro: {{cod:AMT7004}} em par, com o kit {{oj:AMT7004}}, que é o Ofereça junto da base."
+   },
+   "img": {
+    "3": "montagem:foto:AMT7004+foto:KAC11409"
+   },
+   "notas": "MENSAGEM-CHAVE\nAmortecedor gasto não quebra de uma vez: ele perde eficiência aos poucos. Por isso o cliente precisa de perguntas e de um teste simples.\n\nCOMO CONDUZIR\nFaça o teste com as mãos na mesa: empurre e solte. Amortecedor bom volta e para; gasto continua balançando. Reforce a regra do par: trocar um só deixa o carro desigual, puxando na frenagem e na curva.\n\nPERGUNTE AO TIME\nPor que oferecer o kit batente junto? (Resposta: o batente e a coifa protegem a haste do amortecedor novo; velhos, eles deixam entrar sujeira e o amortecedor novo vaza antes do tempo.)"
+  },
+  {
+   "molde": 41,
+   "t": {
+    "0": "MÓDULO 04 · SUSPENSÃO",
+    "1": "Barulho na suspensão: o que o cliente descreve",
+    "3": "O que o cliente fala → onde olhar",
+    "6": "“Toc-toc” em buraco: bieleta ou bucha da barra",
+    "9": "Estalo ao esterçar parado: coxim do amortecedor",
+    "12": "Batida seca na lombada: batente ou amortecedor",
+    "15": "Puxando ou pneu gasto por dentro: bandeja, pivô ou bucha",
+    "17": "10.000 km",
+    "18": "intervalo de inspeção da suspensão recomendado pelos fabricantes de amortecedor — ou o que indicar o manual",
+    "20": "A ligação com o alinhamento",
+    "21": "Trocou bandeja, pivô ou terminal? Indique o alinhamento logo depois: sem ele, o pneu novo gasta torto e o cliente culpa a peça.",
+    "25": "DICA DE CAMPO  |Peça para o cliente imitar o barulho e dizer quando aparece: em buraco, em curva ou na frenagem. Isso já tira metade das peças da lista."
+   },
+   "icone": {
+    "5": "FaVolumeHigh",
+    "8": "FaRotate",
+    "11": "FaTriangleExclamation",
+    "14": "FaRoad"
+   },
+   "notas": "MENSAGEM-CHAVE\nCada barulho tem um endereço. O vendedor que sabe ler o barulho chega na peça certa antes do concorrente.\n\nCOMO CONDUZIR\nLeia cada linha e peça exemplos reais do time. Explique o quadro escuro: inspeção periódica é argumento de venda preventiva, não de troca obrigatória. Feche com o alinhamento: toda troca de bandeja, pivô ou terminal mexe na geometria.\n\nINSIGHT PARA O CAMPO\nO “toc-toc” em buraco é a reclamação mais comum de suspensão — e a bieleta é peça de giro alto e preço baixo. Bom item para deixar exposto no balcão do cliente."
+  },
+  {
+   "molde": 12,
+   "t": {
+    "0": "MÓDULO 04 · DIREÇÃO",
+    "1": "Direção: do volante à roda",
+    "4": "Caixa de direção, terminal axial e terminal de direção: as peças que ligam o volante às rodas.",
+    "7": "Caixa: transforma o giro do volante em vaivém",
+    "10": "Axial: liga a caixa ao terminal de direção",
+    "13": "Terminal: liga o axial à manga da roda",
+    "16": "Folga no volante ou batida no piso ruim: confira os terminais",
+    "20": "DICA DE CAMPO  |Terminal e axial trabalham em par: na base, o axial {{cod:TAX10192}} indica o terminal {{oj:TAX10192}}. Depois da troca, alinhamento sempre."
+   },
+   "img": {
+    "3": "montagem:capa:cover_9+foto:TAX10192+capa:cover_7"
+   },
+   "icone": {
+    "6": "FaGears",
+    "9": "FaArrowsLeftRight",
+    "12": "FaLink",
+    "15": "FaTriangleExclamation"
+   },
+   "notas": "MENSAGEM-CHAVE\nA direção é uma corrente de três peças: caixa, terminal axial e terminal de direção. Folga em qualquer uma vira folga no volante.\n\nCOMO CONDUZIR\nMostre as fotos da esquerda para a direita: a caixa de direção, o axial que sai dela e o terminal que chega na roda. Explique que a caixa pode ser mecânica, hidráulica ou elétrica, e que o catálogo separa cada tipo.\n\nPERGUNTE AO TIME\nO cliente trocou o terminal e o carro ficou puxando. O que faltou? (Resposta: o alinhamento.)"
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "05",
+    "1": "Freio e rodagem",
+    "2": "O que para o carro e o que faz a roda girar"
+   },
+   "notas": "MENSAGEM-CHAVE\nFreio é segurança: aqui o vendedor não pode chutar. Rodagem é o que faz a roda girar livre.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo cobre disco e tambor, o sistema hidráulico, o fluido e o cubo de roda com rolamento."
+  },
+  {
+   "molde": 8,
+   "t": {
+    "0": "MÓDULO 05 · FREIO",
+    "1": "Freio a disco × freio a tambor",
+    "3": "Freio a disco",
+    "5": "A pinça aperta as pastilhas contra o disco\nMais usado na dianteira\nPeças: pastilha, disco e pinça",
+    "7": "Freio a tambor",
+    "9": "O cilindro de roda abre as sapatas contra o tambor\nComum na traseira dos carros de entrada\nPeças: sapata, cilindro e molas",
+    "13": "DICA DE CAMPO  |A dianteira faz a maior parte da frenagem, por isso a pastilha gasta antes da sapata. Pergunte sempre: “dianteiro ou traseiro?”"
+   },
+   "img": {
+    "4": "desenho:freio_disco",
+    "8": "desenho:freio_tambor"
+   },
+   "mover": {
+    "4": [
+     0.85,
+     2.35,
+     3.05,
+     3.2
+    ],
+    "8": [
+     7.03,
+     2.35,
+     3.05,
+     3.2
+    ]
+   },
+   "notas": "MENSAGEM-CHAVE\nOs dois freios fazem a mesma coisa — transformar movimento em calor por atrito —, mas de jeitos diferentes.\n\nCOMO CONDUZIR\nÀ esquerda, o corte do freio a disco: o fluido (5) empurra o pistão (4) da pinça (3), que aperta as pastilhas (2) contra o disco (1). À direita, o tambor visto de frente: o cilindro de roda (4) abre as sapatas (2), e a lona (3) encosta no tambor (1); as molas (5) puxam tudo de volta.\n\nPERGUNTE AO TIME\nPor que quase todo carro tem disco na frente? (Resposta: na frenagem o peso vai para a frente; o disco esfria melhor e aguenta mais esforço.)"
+  },
+  {
+   "molde": 7,
+   "t": {
+    "0": "MÓDULO 05 · FREIO",
+    "1": "Do pedal à roda: o freio hidráulico",
+    "4": "01  |Pedal\n02  |Servo-freio\n03  |Cilindro-mestre\n04  |Reservatório\n05  |Tubulação",
+    "5": "06  |Pinça\n07  |Disco\n08  |Tambor e sapata\n09  |Cilindro de roda",
+    "9": "DICA DE CAMPO  |O pé faz pouca força: o servo multiplica e o fluido leva a pressão até as 4 rodas. Pedal baixo ou “borrachudo” é sinal de ar ou de fluido velho."
+   },
+   "img": {
+    "3": "desenho:freio_hidraulico"
+   },
+   "notas": "MENSAGEM-CHAVE\nO freio é hidráulico: o fluido não se comprime, então a força do pé chega inteira às quatro rodas.\n\nCOMO CONDUZIR\nSiga o desenho: o pedal (1) empurra o servo-freio (2), que multiplica a força; o cilindro-mestre (3) pressuriza o fluido do reservatório (4); a tubulação (5) leva a pressão à pinça (6) que aperta o disco (7) e, atrás, ao cilindro de roda (9) que abre as sapatas no tambor (8).\n\nINSIGHT PARA O CAMPO\nQualquer peça hidráulica trocada (cilindro de roda, pinça, flexível) deixa entrar ar: o mecânico precisa sangrar o sistema, e o fluido novo entra na venda."
+  },
+  {
+   "molde": 30,
+   "t": {
+    "0": "MÓDULO 05 · FREIO",
+    "1": "Fluido de freio: o item esquecido",
+    "4": "2 anos",
+    "5": "prazo de troca do fluido de freio indicado pela maioria das montadoras",
+    "9": "Absorve umidade",
+    "10": "O fluido puxa água do ar com o tempo, mesmo com o carro parado.",
+    "14": "Ferve mais fácil",
+    "15": "Com água, ele ferve na frenagem forte e o pedal vai ao fundo.",
+    "19": "Corrói por dentro",
+    "20": "A umidade enferruja cilindros e pinças: vazamento e freio preso.",
+    "24": "DICA DE CAMPO  |Vendeu cilindro de roda? Ofereça o fluido: na base, o {{cod:CIL8501}} indica {{oj:CIL8501}}. O tipo (DOT) é sempre o do manual."
+   },
+   "icone": {
+    "3": "FaCalendarDays",
+    "8": "FaDroplet",
+    "13": "FaTemperatureHigh",
+    "18": "FaTriangleExclamation"
+   },
+   "notas": "MENSAGEM-CHAVE\nO fluido de freio envelhece mesmo sem uso, porque absorve umidade. Fluido velho é freio que falha justo na frenagem mais forte.\n\nCOMO CONDUZIR\nMostre o número grande e explique: a troca é por tempo, não por quilometragem. Passe pelos três cartões como uma sequência: absorve água, ferve mais fácil, corrói por dentro.\n\nINSIGHT PARA O CAMPO\nO tipo do fluido (DOT 3, DOT 4...) é o que o manual indica. O Ofereça junto do cilindro de roda {{cod:CIL8501}} já traz o fluido {{oj:CIL8501}} — o detalhe de uso está no treinamento de Lubrificantes."
+  },
+  {
+   "molde": 13,
+   "t": {
+    "0": "MÓDULO 05 · FREIO",
+    "1": "Pastilha, sapata e cilindro de roda",
+    "5": "Sapata: a lona do freio a tambor, trocada por eixo.",
+    "6": "Para o cliente: o freio de mão volta a segurar.",
+    "8": "Cilindro de roda: se vaza, estraga a lona nova.",
+    "9": "Para o cliente: o carro freia reto, sem puxar.",
+    "13": "DICA DE CAMPO  |Chiado metálico ao frear é a pastilha no fim. Trocou pastilha? Confira o disco: abaixo da espessura mínima, ele também sai."
+   },
+   "img": {
+    "3": "capa:cover_16",
+    "4": "foto:SFR30017",
+    "7": "foto:CIL8507"
+   },
+   "mover": {
+    "4": [
+     6.2,
+     1.62,
+     1.6,
+     0.95
+    ],
+    "7": [
+     6.2,
+     3.71,
+     1.6,
+     0.95
+    ]
+   },
+   "notas": "MENSAGEM-CHAVE\nPastilha e sapata são peças de desgaste: o cliente vai voltar para trocar. Cilindro de roda é o que garante que a sapata nova dure.\n\nCOMO CONDUZIR\nMostre a pastilha BAP e explique o fim de vida: chiado metálico, pedal mais baixo ou luz do sensor de desgaste. Depois mostre a sapata e o cilindro de roda: no freio traseiro a tambor, o freio de mão também usa as sapatas.\n\nPERGUNTE AO TIME\nPor que trocar o cilindro de roda que está vazando junto com a sapata? (Resposta: o fluido que vaza contamina a lona nova, e o carro passa a puxar para um lado.) Na base, a sapata {{cod:SFR30017}} indica o cilindro {{oj:SFR30017}}."
+  },
+  {
+   "molde": 40,
+   "t": {
+    "0": "MÓDULO 05 · RODAGEM",
+    "1": "Cubo e rolamento de roda: sinais de troca",
+    "3": "Sinais de rolamento gasto",
+    "6": "Ronco que aumenta com a velocidade",
+    "9": "O ronco muda de tom nas curvas",
+    "12": "Folga ao balançar a roda suspensa",
+    "15": "Luz do ABS acesa (sensor junto ao cubo)",
+    "17": "Por que oferecer junto",
+    "20": "Rolamento solto esquenta e gasta a ponta de eixo: trocar no início do ronco sai mais barato.",
+    "23": "Em muitos carros o sensor ABS fica no cubo: confira o sensor na mesma troca.",
+    "26": "Na base, o cubo {{cod:CUB60000}} (Gol) indica {{oj:CUB60000}} no Ofereça junto.",
+    "30": "DICA DE CAMPO  |Para achar o lado: o ronco piora quando a curva carrega a roda gasta. Curva para a esquerda carrega o lado direito."
+   },
+   "icone": {
+    "5": "FaVolumeHigh",
+    "8": "FaRotate",
+    "11": "FaArrowsLeftRight",
+    "14": "FaCircleExclamation"
+   },
+   "notas": "MENSAGEM-CHAVE\nRolamento de roda gasto ronca — e o ronco cresce com a velocidade. É o sintoma mais fácil de reconhecer no balcão.\n\nCOMO CONDUZIR\nImite o ronco e diga que ele não muda com a marcha, só com a velocidade (isso separa rodagem de câmbio). Explique o truque da curva: a roda que recebe o peso é a que ronca mais.\n\nINSIGHT PARA O CAMPO\nNo Catálogo BAP, o cubo {{cod:CUB60000}} já indica os rolamentos {{oj:CUB60000}}. Em carros com ABS, pergunte pela luz no painel: o sensor pode sair na mesma venda."
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "06",
+    "1": "Elétrica, filtros e óleo",
+    "2": "Partida, carga e ignição; o que protege e lubrifica o motor"
+   },
+   "notas": "MENSAGEM-CHAVE\nElétrica faz o carro pegar; filtros e óleo fazem o motor durar.\n\nCOMO CONDUZIR\nTransição curta. Diga que bateria, óleo e lubrificantes têm treinamento próprio; aqui o foco é o que o vendedor precisa para ligar sintoma e peça."
+  },
+  {
+   "molde": 6,
+   "t": {
+    "0": "MÓDULO 06 · ELÉTRICA",
+    "1": "Partida e carga: o trio elétrico",
+    "2": "DEFINIÇÃO",
+    "3": "A bateria dá a partida; com o motor ligado, quem alimenta o carro e recarrega a bateria é o alternador.",
+    "4": "12,6 V",
+    "5": "bateria cheia, com o motor desligado",
+    "6": "14 V",
+    "7": "motor ligado: o alternador carrega (13,5 a 14,5 V)",
+    "10": "Quem gira o motor na hora da partida?",
+    "11": "O motor de partida. |Ele puxa a maior corrente do carro: por isso a bateria fraca aparece primeiro na partida.",
+    "15": "DICA DE CAMPO  |Bateria, terminal, vela e cabo: quatro motivos de partida difícil. O teste com multímetro está no treinamento de Baterias."
+   },
+   "notas": "MENSAGEM-CHAVE\nTrês peças fazem o carro pegar e se manter ligado: bateria, motor de partida e alternador.\n\nCOMO CONDUZIR\nMostre os dois números: 12,6 V com o motor desligado (bateria cheia) e cerca de 14 V com o motor ligado (o alternador carregando). Depois mostre o alternador e pergunte quem gira o motor na partida.\n\nINSIGHT PARA O CAMPO\nMuitas “baterias ruins” são alternador com defeito. Se o cliente mede menos de 13,5 V com o motor ligado, o problema está no sistema de carga, não na bateria."
+  },
+  {
+   "molde": 12,
+   "t": {
+    "0": "MÓDULO 06 · ELÉTRICA",
+    "1": "Ignição: vela, cabo e bobina",
+    "4": "1 Bobina  ·  2 Cabo de vela  ·  3 Vela  ·  4 Faísca no eletrodo",
+    "7": "Bobina: transforma 12 V em milhares de volts",
+    "10": "Cabo de vela: leva a alta tensão sem fuga",
+    "13": "Vela: a faísca que queima a mistura",
+    "16": "Sintoma: falha, marcha lenta irregular e consumo alto",
+    "20": "DICA DE CAMPO  |Vela e cabo trocam juntos: na base, o jogo de velas {{cod:VEL7506}} (Gol AP) indica o cabo {{oj:VEL7506}}."
+   },
+   "img": {
+    "3": "desenho:ignicao"
+   },
+   "icone": {
+    "6": "FaBolt",
+    "9": "FaPlug",
+    "12": "FaFire",
+    "15": "FaTriangleExclamation"
+   },
+   "notas": "MENSAGEM-CHAVE\nA ignição transforma os 12 V da bateria numa faísca de milhares de volts, no momento exato de cada cilindro.\n\nCOMO CONDUZIR\nSiga o desenho da esquerda para a direita: a bobina (1) gera a alta tensão, o cabo de vela (2) a leva sem fuga e a vela (3) solta a faísca (4) dentro do cilindro. Lembre do tempo de combustão visto no módulo 2.\n\nPERGUNTE AO TIME\nO cliente diz que o carro “falha” na subida e gasta mais combustível. Por onde começar? (Resposta: velas e cabos; se o carro for de bobina individual, a bobina.)"
+  },
+  {
+   "molde": 17,
+   "t": {
+    "0": "MÓDULO 06 · FILTRAÇÃO",
+    "1": "Os 4 filtros do carro",
+    "5": "Óleo",
+    "6": "Filtro de óleo",
+    "7": "Segura as partículas de metal e de carvão que o óleo recolhe no motor.",
+    "8": "= o rim do motor",
+    "12": "Ar",
+    "13": "Filtro de ar do motor",
+    "14": "Barra poeira e areia antes da admissão. Sujo, o motor perde força.",
+    "15": "= o pulmão do motor",
+    "19": "Injeção",
+    "20": "Filtro de combustível",
+    "21": "Retém sujeira e água do combustível antes da bomba e dos bicos.",
+    "22": "= a proteção dos bicos",
+    "26": "Cabine",
+    "27": "Filtro de ar da cabine",
+    "28": "Filtra o ar que entra pela ventilação e pelo ar-condicionado.",
+    "29": "= o ar que a família respira",
+    "33": "DICA DE CAMPO  |Troca de óleo sem filtro de óleo é meio serviço: o óleo novo passa pelo filtro velho. Pergunte também pelo filtro de ar e pelo de cabine."
+   },
+   "icone": {
+    "4": "FaOilCan",
+    "11": "FaWind",
+    "18": "FaGasPump",
+    "25": "FaCarSide"
+   },
+   "notas": "MENSAGEM-CHAVE\nO carro tem 4 filtros, e cada um protege uma coisa diferente. Todos são peças de troca periódica — venda que se repete.\n\nCOMO CONDUZIR\nPasse pelos 4 cartões usando a frase laranja de cada um: rim, pulmão, proteção dos bicos e o ar da família. Diga que o prazo de cada filtro está no manual do veículo.\n\nINSIGHT PARA O CAMPO\nA troca de óleo é a porta de entrada: quem troca o óleo pode trocar os 4 filtros no mesmo serviço. O Kit Filtros BAP já junta os filtros por aplicação."
+  },
+  {
+   "molde": 12,
+   "t": {
+    "0": "MÓDULO 06 · LUBRIFICAÇÃO",
+    "1": "Lubrificação: o óleo certo no prazo certo",
+    "4": "Óleos BAP ProActive e a bomba de óleo, que leva o óleo a todas as peças do motor.",
+    "7": "Viscosidade 5W30: o 5W é o frio; o 30, o quente",
+    "10": "Prazo de troca: o do manual, em km ou em meses",
+    "13": "Troca de óleo sempre com o filtro de óleo",
+    "16": "Luz do óleo acesa: falta pressão, pare o motor",
+    "20": "DICA DE CAMPO  |Normas API e escolha do óleo estão no treinamento de Lubrificantes. Aqui, o recado é um só: óleo novo pede filtro novo."
+   },
+   "img": {
+    "3": "montagem:capa:cover_26+foto:BOL40000"
+   },
+   "icone": {
+    "6": "FaOilCan",
+    "9": "FaCalendarDays",
+    "12": "FaFilter",
+    "15": "FaGaugeHigh"
+   },
+   "notas": "MENSAGEM-CHAVE\nO óleo separa as peças que se movem; sem ele, metal raspa em metal. A bomba de óleo faz o óleo chegar a todo o motor com pressão.\n\nCOMO CONDUZIR\nLeia a viscosidade como exemplo: no 5W30, o “5W” diz como o óleo se comporta no frio (W de winter) e o 30, no motor quente. O óleo certo é o do manual: viscosidade e norma.\n\nPERGUNTE AO TIME\nA luz do óleo acendeu com o carro andando. O que o motorista deve fazer? (Resposta: parar e desligar o motor; sem pressão de óleo, o motor funde em minutos.) Na base, a bomba {{cod:BOL40000}} indica o interruptor {{oj:BOL40000}}."
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "07",
+    "1": "Diagnóstico de balcão e venda",
+    "2": "Do sintoma à peça BAP; do argumento ao pedido fechado"
+   },
+   "notas": "MENSAGEM-CHAVE\nAgora juntamos tudo: o sintoma leva ao sistema, o sistema leva à peça, e a peça leva ao combo.\n\nCOMO CONDUZIR\nTransição curta. Diga que este módulo é o que vai para o dia a dia: diagnóstico de balcão, perguntas, cross-sell, combos e fechamento."
+  },
+  {
+   "molde": 44,
+   "t": {
+    "0": "MÓDULO 07 · DIAGNÓSTICO",
+    "1": "Sintoma → sistema → peça BAP",
+    "10": "ATENÇÃO  |O balcão indica a peça provável; quem confirma o defeito é o mecânico. Não prometa que a peça resolve sem essa confirmação."
+   },
+   "tabela": {
+    "2": [
+     [
+      "Sintoma",
+      "Sistema e causa provável",
+      "Peça BAP"
+     ],
+     [
+      "Temperatura subindo",
+      "Arrefecimento: eletroventilador parado, bomba d'água vazando ou termostato travado",
+      "{{prod:Eletroventiladores}} · {{prod:Bomba D'Água}}"
+     ]
+    ],
+    "3": [
+     [
+      "“Toc-toc” em buraco",
+      "Suspensão: folga na bieleta ou na bucha da barra estabilizadora",
+      "{{prod:Bieletas}} · {{prod:Bucha da Barra Estabilizadora}}"
+     ]
+    ],
+    "4": [
+     [
+      "Estalo em curva",
+      "Transmissão: junta homocinética gasta, quase sempre com a coifa rasgada",
+      "{{prod:Junta Homocinética}} · {{prod:Kit Reparo da Junta Homocinética}}"
+     ]
+    ],
+    "5": [
+     [
+      "Chiado ao frear",
+      "Freio: pastilha no fim; confira o disco e o sensor de desgaste",
+      "{{prod:Pastilha de Freio}}"
+     ]
+    ],
+    "6": [
+     [
+      "Ronco que cresce com a velocidade",
+      "Rodagem: rolamento ou cubo de roda gasto; o ronco muda na curva",
+      "{{prod:Cubo de Roda}} · {{prod:Rolamentos}}"
+     ]
+    ]
+   },
+   "notas": "MENSAGEM-CHAVE\nEsta é a tabela de bolso do vendedor: cinco sintomas que aparecem todo dia no balcão, o sistema e a peça BAP.\n\nCOMO CONDUZIR\nLeia linha por linha e peça para o time completar de cabeça antes de mostrar a terceira coluna. Os nomes da coluna Peça BAP são os produtos do Catálogo BAP, conferidos na base.\n\nINSIGHT PARA O CAMPO\nImprima esta tabela para o balconista do cliente. Quem tem a tabela na mão liga para você quando o sintoma aparece."
+  },
+  {
+   "molde": 37,
+   "t": {
+    "0": "MÓDULO 07 · VENDA",
+    "1": "Venda consultiva: perguntas que vendem (SPIN)",
+    "6": "Entender o cenário",
+    "7": "“Quais carros mais passam pela sua oficina?”\n“Que serviço você mais faz?”",
+    "12": "Encontrar a dor",
+    "13": "“Tem tido retorno de serviço?”\n“Que peça falta na hora?”",
+    "18": "Mostrar o custo de não resolver",
+    "19": "“Quanto custa refazer uma suspensão que voltou?”",
+    "24": "Fazer o cliente dizer o valor",
+    "25": "“Se a peça viesse com o kit, quanto tempo você ganharia?”",
+    "29": "DICA DE CAMPO  |Com o mecânico, fale de retorno de serviço e de tempo de elevador; com o lojista, de giro e de mix para a frota da região."
+   },
+   "notas": "MENSAGEM-CHAVE\nNa venda técnica, quem pergunta conduz. As perguntas SPIN levam o cliente a dizer sozinho por que precisa do kit completo.\n\nCOMO CONDUZIR\nExplique as 4 letras com os exemplos de mecânica: Situação (frota e serviços), Problema (retorno e falta de peça), Implicação (o custo de refazer o serviço) e Necessidade (o ganho de tempo com o kit). Faça um role-play rápido de 2 minutos.\n\nPERGUNTE AO TIME\nQual pergunta de Implicação funciona melhor com o mecânico que só compra pelo preço?"
+  },
+  {
+   "molde": 39,
+   "t": {
+    "0": "MÓDULO 07 · CROSS-SELL",
+    "1": "Cross-sell: uma peça puxa a outra",
+    "4": "Amortecedor",
+    "5": "o conforto e a estabilidade",
+    "9": "Kit do amortecedor",
+    "10": "coxim, batente e coifa novos",
+    "14": "Bieleta",
+    "15": "o fim do “toc-toc” na mesma troca",
+    "19": "Mesmo serviço",
+    "20": "A roda já está fora: é a hora certa de trocar o que está em volta.",
+    "24": "Mesmo sintoma",
+    "25": "Barulho pode ser amortecedor, batente ou bieleta: ofereça a solução completa.",
+    "29": "Pedido maior",
+    "30": "Mais itens por pedido, sem precisar de um cliente novo.",
+    "34": "DICA DE CAMPO  |Use o Ofereça junto do Catálogo BAP: ele mostra, código a código, o que acompanha a peça. Ex.: bieleta {{cod:BIE20000}} → {{oj:BIE20000}}."
+   },
+   "icone": {
+    "3": "FaCarSide",
+    "8": "FaLayerGroup",
+    "13": "FaLink",
+    "18": "FaWrench"
+   },
+   "notas": "MENSAGEM-CHAVE\nToda peça de mecânica tem vizinhas que gastam junto. O Ofereça junto do Catálogo BAP é o roteiro do cross-sell.\n\nCOMO CONDUZIR\nUse a suspensão como exemplo: o amortecedor puxa o kit e a bieleta. Mostre os três argumentos de baixo: mesmo serviço (a roda já está desmontada), mesmo sintoma (o barulho pode vir de três peças) e pedido maior.\n\nINSIGHT PARA O CAMPO\nOutros pares da base para usar na visita: kit de correia {{cod:KCD2501}} → bomba {{oj:KCD2501}}; junta {{cod:JUH70001}} → kit reparo {{oj:JUH70001}}; cubo {{cod:CUB60000}} → rolamentos {{oj:CUB60000}}."
+  },
+  {
+   "molde": 42,
+   "t": {
+    "0": "MÓDULO 07 · CROSS-SELL",
+    "1": "Combos por sistema e perguntas-gatilho",
+    "5": "Suspensão",
+    "6": "Amortecedor  +  Kit  +  Bieleta",
+    "7": "Gol G5: {{cod:AMT7004}} + {{oj:AMT7004}}",
+    "11": "Freio traseiro",
+    "12": "Sapata  +  Cilindro de roda  +  Fluido",
+    "13": "Gol G5: {{cod:SFR30017}} + {{oj:SFR30017}}",
+    "17": "Distribuição",
+    "18": "Kit de correia  +  Bomba d'água",
+    "19": "Na base: {{cod:KCD2501}} + {{oj:KCD2501}}",
+    "22": "“O carro balança ou bate em buraco?”",
+    "23": "“O pedal do freio está baixo?”",
+    "24": "“Quando trocou a correia dentada?”",
+    "28": "DICA DE CAMPO  |O que é medido melhora: acompanhe a % de pedidos de amortecedor que saem com o kit e de correia que saem com a bomba d'água."
+   },
+   "notas": "MENSAGEM-CHAVE\nCombos transformam conhecimento técnico em pedido maior. Cada combo tem uma pergunta-gatilho que abre a conversa.\n\nCOMO CONDUZIR\nApresente os 3 combos como pacotes prontos e mostre que os códigos de exemplo vêm do Ofereça junto da base. Treine as perguntas da faixa PERGUNTE: cada uma leva a um combo.\n\nINSIGHT PARA O CAMPO\nNo freio traseiro, o fluido (DOT do manual) completa o combo: troca de cilindro de roda exige sangria, e sangria usa fluido novo."
+  },
+  {
+   "molde": 43,
+   "t": {
+    "0": "MÓDULO 07 · FECHAMENTO",
+    "1": "Fechamento em 3 etapas",
+    "6": "“Fechamos com esses itens?”",
+    "7": "Direto, logo depois de mostrar a aplicação no catálogo. Não espere o cliente pedir.",
+    "12": "“O que falta pra fechar hoje?”",
+    "13": "Escute até o fim. O motivo cai num destes 5: preço, prazo, aplicação, fornecedor ou sem necessidade.",
+    "18": "“Se eu resolver isso, fechamos?”",
+    "19": "Prenda o cliente antes de resolver. Só resolva o que está dentro da regra.",
+    "21": "Sem pedido? Anote o motivo:  |preço · prazo · aplicação · fornecedor · sem necessidade",
+    "25": "DICA DE CAMPO  |Peça técnica fecha quando o cliente confia na aplicação: mostre o código, a posição e o lado no Catálogo BAP antes de pedir o pedido."
+   },
+   "notas": "MENSAGEM-CHAVE\nFechar é uma etapa da venda, não um susto no fim. São três frases que todo vendedor deve saber de cor.\n\nCOMO CONDUZIR\nLeia as três frases em voz alta e peça para o time repetir. Reforce a faixa escura: sem pedido, o motivo é anotado — é assim que a gestão descobre onde está perdendo venda.\n\nPERGUNTE AO TIME\nNa mecânica, qual destes 5 motivos vocês mais escutam? (Em geral, preço e dúvida na aplicação.)"
+  },
+  {
+   "molde": 44,
+   "t": {
+    "0": "MÓDULO 07 · NÃO FECHOU",
+    "1": "Não fechou? Os 5 motivos na mecânica",
+    "10": "ATENÇÃO  |Desconto só dentro da alçada de 15%; acima disso, o Price aprova. Prazo e limite: nunca prometa fora da regra."
+   },
+   "tabela": {
+    "2": [
+     [
+      "Motivo",
+      "Responda com prova",
+      "Volte ao pedido"
+     ],
+     [
+      "Preço",
+      "Compare o custo do serviço refeito, não a etiqueta: a peça certa com o kit evita o carro voltar.",
+      "“Se eu resolver isso, fechamos?”"
+     ]
+    ],
+    "3": [
+     [
+      "Prazo ou limite",
+      "Não prometa prazo nem limite fora da regra. Monte um pedido menor com as peças que mais giram.",
+      "“Se eu ajustar o pedido ao seu limite, fechamos?”"
+     ]
+    ],
+    "4": [
+     [
+      "Dúvida na aplicação",
+      "Mostre no Catálogo BAP a aplicação, a posição, o lado e as referências cruzadas.",
+      "“Se eu te mostrar que serve, fechamos?”"
+     ]
+    ],
+    "5": [
+     [
+      "Já tem fornecedor",
+      "Não peça para trocar tudo. Entre onde ele perde venda: kits, combos e peças que faltam.",
+      "“Começamos por essa linha que falta?”"
+     ]
+    ],
+    "6": [
+     [
+      "Sem necessidade agora",
+      "Mostre o giro: os sintomas mais comuns da frota da região e as peças que resolvem.",
+      "“Que dia eu volto pra fechar?”"
+     ]
+    ]
+   },
+   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 5 motivos: um faz o cliente, outro o vendedor. Destaque a linha nova da mecânica, a dúvida na aplicação: a resposta é o Catálogo BAP com aplicação, posição, lado e referências cruzadas.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price. Prazo e limite nunca são prometidos fora da regra."
+  },
+  {
+   "molde": 45,
+   "t": {
+    "0": "FECHAMENTO",
+    "1": "Checklist do vendedor BAP",
+    "5": "Perguntei o veículo, o ano e o motor",
+    "9": "Perguntei quando e onde o defeito aparece",
+    "13": "Liguei o sintoma ao sistema certo",
+    "17": "Conferi aplicação, posição e lado no catálogo",
+    "21": "Expliquei a peça na linguagem do cliente",
+    "25": "Ofereci o kit completo, não só a peça",
+    "29": "Usei o Ofereça junto do Catálogo BAP",
+    "33": "Ofereci um combo do mesmo sistema",
+    "37": "Lembrei do alinhamento após suspensão e direção",
+    "41": "Indiquei o fluido certo pelo manual",
+    "45": "Pedi o pedido; sem pedido, anotei o motivo",
+    "49": "Deixei o próximo passo combinado"
+   },
+   "notas": "MENSAGEM-CHAVE\nO checklist resume o treinamento em 12 atitudes. Vale usar antes de cada visita.\n\nCOMO CONDUZIR\nVolte ao slide “Ao final deste treinamento” e mostre que cada verbo virou um item do checklist. Peça para cada um marcar os itens que já faz e escolher um para começar amanhã.\n\nPERGUNTE AO TIME\nQual item do checklist faria mais diferença no seu resultado do mês?"
+  },
+  {
+   "molde": 46,
+   "t": {
+    "0": "FECHAMENTO",
+    "1": "Teste seus conhecimentos",
+    "5": "Cite os 4 tempos do motor, na ordem.",
+    "9": "Por que a bomba d'água costuma ser trocada junto com a correia dentada?",
+    "13": "O cliente ouve um estalo ao acelerar em curva fechada. Qual peça você investiga?",
+    "17": "Qual o prazo de troca do fluido de freio indicado pela maioria das montadoras?",
+    "21": "Ao vender um amortecedor, que itens você oferece junto e por quê?",
+    "25": "Ronco que aumenta com a velocidade e muda na curva: qual sistema e qual peça?"
+   },
+   "notas": "MENSAGEM-CHAVE\nO teste fixa os pontos principais. Faça em duplas ou em voz alta, sem consultar.\n\nCOMO CONDUZIR\nLeia uma pergunta por vez, dê 30 segundos e peça a resposta a alguém diferente a cada pergunta.\n\nRESPOSTAS\n1. Admissão, compressão, combustão e escape.\n2. Porque em muitos motores ela é tocada pela correia dentada: trocar junto evita desmontar tudo de novo. Na base, o kit {{cod:KCD2501}} indica a bomba {{oj:KCD2501}}.\n3. A junta homocinética do lado da roda (e a coifa).\n4. 2 anos, ou o que indicar o manual; a troca é por tempo, porque o fluido absorve umidade.\n5. Coxim, batente e coifa (o kit do amortecedor) e a bieleta, porque gastam junto e protegem o amortecedor novo; e o par do mesmo eixo.\n6. Rodagem: o rolamento ou o cubo de roda."
+  },
+  {
+   "molde": 47,
+   "t": {
+    "0": "TREINAMENTO MECÂNICA BÁSICA BAP",
+    "1": "Obrigado!",
+    "2": "Dúvidas? Agora é levar para o balcão e para a oficina."
+   },
+   "notas": "MENSAGEM-CHAVE\nO conhecimento só vira resultado no campo.\n\nCOMO CONDUZIR\nAbra para dúvidas. Lembre que os treinamentos de Suspensão, Freio, Motor, Transmissão e Elétrica aprofundam cada sistema, e que o Catálogo BAP é a ferramenta para conferir aplicação e Ofereça junto na hora da visita."
+  }
+ ]
 }

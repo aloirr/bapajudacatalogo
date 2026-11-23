@@ -90,5 +90,5 @@ Os dois scripts da apresentação leem o texto do `apres_conteudo.json` (RD-0431
 **Observações**
 
 - **Tema de cores do PowerPoint:** o `apres_ppt.js` grava o tema "BAP" com o `apply_theme.js`. Sem ele, as cores dos slides sairiam as do tema "Office" (azul, laranja, amarelo); por isso o script para com erro se o `apply_theme.js` faltar.
-- **Treinamentos (T-0032):** o `treinamento_ppt.js` usa o mesmo `apply_theme.js`, com o tema "BAP Treinamento" e Arial; o `treinamento.py` chama o Node e, com `--png`, o LibreOffice (`soffice`) para os PNGs.
+- **Treinamentos (T-0032):** o `treinamento_molde.py` não desenha do zero: duplica os slides do original de Baterias e troca o conteúdo (JSON em `gerador/treinamentos/`), com Arial e as cores fechadas pela marca. Não usa Node; o caminho antigo (`treinamento.py` + `treinamento_ppt.js`, pptxgenjs) saiu. Com `--sim`, usa o LibreOffice (`soffice`) para o PDF e os PNGs.
 - **Nomes de arquivo:** os scripts usam caminhos relativos à pasta `gerador/`. Não mude os nomes das subpastas.
