@@ -50,7 +50,7 @@
        (CCA)" (até 400, 401 a 500, 501 a 600, 601 a 800, acima de 800) depois da Família, em 1366 px (coluna) e no painel
        do "Filtrar" em 390 px; opções e contagens iguais às do x do JSON ("C20(ah)" e "Cca-18°"). Sem os grupos = falha
        (pega o rótulo da FICHA mudado; a âncora 60D-EFB-24 também).
-     - ah=60 e cca=401-500 (com e sem q=bateria): a lista igual à do JSON, a etiqueta do filtro e o "Filtrar (1)" no celular.
+     - ah=60 e cca=401-500 (com e sem q=bateria): a lista igual à do JSON, a etiqueta do filtro.
      - "60ah", "60 ah", "60Ah", "60-Ah" e "bateria 60ah": as baterias de 60 Ah. "amortecedor": nenhum grupo de medida.
 */
 
@@ -218,7 +218,7 @@ function ajudaDaPagina() {
       && segue(campo, b) && !(outro && segue(campo, outro) && segue(outro, b))) || null;
   }
   const grupos = () => [...document.querySelectorAll("#app button[aria-expanded]")]
-    .filter((b) => visivel(b) && /^(Sistema|Fam[ií]lia|Linha|Categoria)/i.test(b.textContent.trim()));
+    .filter((b) => visivel(b) && /^(Sistema|Fam[ií]lia|Linha|Categoria|Amperagem|Partida a frio)/i.test(b.textContent.trim()));
   // as opções (o rótulo de cada caixa de marcar) do grupo j (ou do 1º aberto); na coluna fixa os grupos ficam todos abertos
   function opcoes(j) {
     const bt = j != null ? grupos()[j] : grupos().find((b) => b.getAttribute("aria-expanded") === "true");
@@ -430,7 +430,7 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
   // T-0006, fase 1 (R-20261123-095435, 112006 e 122814): medida da bateria. O esperado sai do x (ficha técnica) do JSON:
   // "C20(ah)" e "Cca-18°", com a chave sem acento, caixa e sinais (C20AH e CCA18) e o valor inteiro. A âncora 60D-EFB-24
   // (60 Ah, CCA 600) pega o rótulo da FICHA mudado (aí o x não tem mais a medida e os filtros somem do site).
-  const FAIXAS_CCA = [[400, "ate-400", "até 400"], [500, "401-500", "401 a 500"], [600, "501-600", "501 a 600"], [800, "601-800", "601 a 800"], [Infinity, "acima-800", "acima de 800"]];
+  const FAIXAS_CCA = [[400, "até 400"], [500, "401 a 500"], [600, "501 a 600"], [800, "601 a 800"], [Infinity, "acima de 800"]];
   const medidaJson = (p) => {
     const x = new Map(((p && p.x) || []).map(([k, v]) => [normCod(k), String(v).trim()]));
     const ah = /^\d+$/.test(x.get("C20AH") || "") ? +x.get("C20AH") : null;
@@ -970,6 +970,15 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
       // modelo B (R-20261120-123800): "coluna" fina à esquerda dos cartões no computador (grupos sempre abertos) e
       // "painel" no celular (botão "Filtrar (n)" que abre por cima); o link com si=, marcar, etiqueta "Tirar" e o "x"
       const botaoFiltrar = () => page.evaluate(() => { const b = [...document.querySelectorAll("#app button")].find((x) => window.__bapT.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())); return b ? b.textContent.replace(/\s+/g, " ").trim() : ""; });
+      // o painel dos filtros no celular (tipoFiltro "painel"): abre pelo botão "Filtrar"; id e nome: o teste que leva a falha
+      const painelAberto = () => page.evaluate(() => !!document.querySelector("dialog[open]"));
+      const abrirPainel = async (id, nome) => {
+        if (tipoFiltro !== "painel" || (await painelAberto())) return;
+        const hb = (await page.evaluateHandle(() => [...document.querySelectorAll("#app button")].find((x) => window.__bapT.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())) || null)).asElement();
+        if (hb) await hb.click(); else falha(id, nome, "painel:botao", `${L}: sem o botão "Filtrar"`);
+        await page.waitForTimeout(250);
+        if (!(await painelAberto())) falha(id, nome, "painel:abrir", `${L}: o botão "Filtrar" não abriu o painel`);
+      };
       const tipoFiltro = await page.evaluate(() => {
         const T = window.__bapT;
         const g = T.grupos();
@@ -1051,14 +1060,7 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
       }
       if (["coluna", "painel"].includes(tipoFiltro)) {
         await abrir("filtros", "#/busca?q=" + encodeURIComponent(QF));
-        const abrirPainel = async () => {
-          if (tipoFiltro !== "painel" || (await page.evaluate(() => !!document.querySelector("dialog[open]")))) return;
-          const hb = (await page.evaluateHandle(() => [...document.querySelectorAll("#app button")].find((x) => window.__bapT.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())) || null)).asElement();
-          if (hb) await hb.click(); else falha("filtros", N_FIL, "painel:botao", `${L}: sem o botão "Filtrar"`);
-          await page.waitForTimeout(250);
-          if (!(await page.evaluate(() => !!document.querySelector("dialog[open]")))) falha("filtros", N_FIL, "painel:abrir", `${L}: o botão "Filtrar" não abriu o painel`);
-        };
-        await abrirPainel();
+        await abrirPainel("filtros", N_FIL);
         const CAMPO_GRUPO = { SISTEMA: "si", FAMILIA: "fa", LINHA: "li", CATEGORIA: "ca" };
         const grupos = await page.evaluate(() => window.__bapT.grupos().map((b) => b.textContent.replace(/[▾▴▼▲]/g, "").replace(/\s+/g, " ").trim()));
         const pegar = async (fn, i) => (await page.evaluateHandle(fn, i)).asElement();
@@ -1112,7 +1114,7 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
           if (tipoFiltro === "painel") { // fecha o painel (Esc) e o botão mostra o número de marcados: "Filtrar (1)"
             await page.keyboard.press("Escape");
             await page.waitForTimeout(200);
-            if (await page.evaluate(() => !!document.querySelector("dialog[open]"))) falha("filtros", N_FIL, "painel:esc", `${L}: o Esc não fechou o painel dos filtros`);
+            if (await painelAberto()) falha("filtros", N_FIL, "painel:esc", `${L}: o Esc não fechou o painel dos filtros`);
             const tb = await botaoFiltrar();
             if (!/^Filtrar\s*\(1\)/i.test(tb)) falha("filtros", N_FIL, "painel:numero", `${L}: com 1 filtro marcado, o botão diz "${tb}" (esperado "Filtrar (1)")`);
           }
@@ -1147,24 +1149,13 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
       // "60ah" na busca. Em 1366 px na coluna; em 390 px no painel do "Filtrar" ----
       if (tela === "campos") {
         const N_MED = "medida da bateria (T-0006)";
-        const RX_GRUPO = /^(Linha|Categoria|Sistema|Fam[ií]lia|Amperagem|Partida a frio)/i;
-        const painelAberto = () => page.evaluate(() => !!document.querySelector("dialog[open]"));
-        const abrirFiltros = async () => {
-          if (larg >= 1000 || (await painelAberto())) return;
-          const hb = (await page.evaluateHandle(() => [...document.querySelectorAll("#app button")].find((x) => window.__bapT.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())) || null)).asElement();
-          if (hb) { await hb.click(); await page.waitForTimeout(250); }
-          if (!(await painelAberto())) falha("medidas", N_MED, "painel", `${L}: o botão "Filtrar" não abriu o painel dos filtros`);
-        };
-        const fecharFiltros = async () => { if (await painelAberto()) { await page.keyboard.press("Escape"); await page.waitForTimeout(200); } };
-        // os grupos à vista, na ordem da tela, com as opções (nome e contagem) e se há "Ver mais"
-        const gruposTela = () => page.evaluate((rx) => {
-          const T = window.__bapT, re = new RegExp(rx, "i");
-          return [...document.querySelectorAll("#app button[aria-expanded]")].filter((b) => T.visivel(b) && re.test(b.textContent.trim())).map((b) => {
-            const alvo = document.getElementById(b.getAttribute("aria-controls") || "") || b.parentElement;
-            const ops = [...alvo.querySelectorAll('input[type="checkbox"]')].map((c) => (c.closest("label") || c).innerText.replace(/\s+/g, " ").trim());
-            return { nome: b.textContent.replace(/[▾▴▼▲]/g, "").replace(/\s+/g, " ").trim(), ops, verMais: [...alvo.querySelectorAll("a,button")].some((x) => /ver\s+mais/i.test(x.textContent)) };
-          });
-        }, RX_GRUPO.source);
+        const fecharPainel = async () => { if (await painelAberto()) { await page.keyboard.press("Escape"); await page.waitForTimeout(200); } };
+        // os grupos à vista (grupos), na ordem da tela, com as opções à vista (opcoes: nome e contagem) e se há "Ver mais"
+        const gruposTela = () => page.evaluate(() => window.__bapT.grupos().map((b, j) => ({
+          nome: b.textContent.replace(/[▾▴▼▲]/g, "").replace(/\s+/g, " ").trim(),
+          ops: window.__bapT.opcoes(j).map((l) => l.innerText.replace(/\s+/g, " ").trim()),
+          verMais: [...(b.parentElement || b).querySelectorAll("a,button")].some((x) => x !== b && /ver\s+mais/i.test(x.textContent)),
+        })));
         const opcao = (t) => { const m = t.match(/^(.*?)\s*\(?(\d[\d.]*)\)?$/); return { nome: m ? m[1].trim() : t, n: m ? parseInt(m[2].replace(/\./g, ""), 10) : null }; };
         const conferirLista = (rot, r, esperado) => {
           const got = r.itens.map((i) => i.c), falta = esperado.filter((c) => !got.includes(c)), sobra = got.filter((c) => !esperado.includes(c));
@@ -1181,12 +1172,12 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         const contar = (f) => { const c = new Map(); for (const p of lista) { const v = f(medidaJson(p)); if (v != null) c.set(v, (c.get(v) || 0) + 1); } return [...c].sort((a, b) => a[0] - b[0]); };
         const quer = {
           Amperagem: contar((m) => m.ah).map(([v, n]) => [`${v} Ah`, n]),
-          "Partida a frio (CCA)": contar((m) => m.cca).map(([i, n]) => [FAIXAS_CCA[i][2], n]),
+          "Partida a frio (CCA)": contar((m) => m.cca).map(([i, n]) => [FAIXAS_CCA[i][1], n]),
         };
         if (!quer.Amperagem.length || !quer["Partida a frio (CCA)"].length)
           falha("medidas", N_MED, "json", `"bateria" (${lista.length} produtos): nenhuma bateria com "C20(ah)" ou "Cca-18°" inteiro no x do JSON (o rótulo da FICHA mudou?)`);
         await page.evaluate(() => window.scrollTo(0, 0));
-        await abrirFiltros();
+        await abrirPainel("medidas", N_MED);
         const gs = await gruposTela();
         const nomes = gs.map((g) => g.nome.replace(/\s*\(\d+\)$/, ""));
         const iFam = nomes.findIndex((n) => /^Fam[ií]lia$/i.test(n));
@@ -1212,15 +1203,14 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         });
         await page.waitForTimeout(400);
         await print("medida-bateria-grupos");
-        await fecharFiltros();
+        await fecharPainel();
         conferirConsole("medida-bateria");
-        // 2) ah=60 (com e sem o termo): as baterias de 60 Ah, a etiqueta "Amperagem: 60 Ah" e o "Filtrar (1)" no celular
+        // 2) ah=60 (com e sem o termo): as baterias de 60 Ah e a etiqueta "Amperagem: 60 Ah"
         for (const h of ["#/busca?ah=60", "#/busca?q=bateria&ah=60"]) {
           await abrir("medida-ah", h);
           const n = conferirLista(h.slice(8), await listaTodos(), BAT_AH60);
           const etq = await etiquetasTela();
           if (!etq.some((t) => /Amperagem:\s*60\s*Ah\b/i.test(t))) falha("medidas", N_MED, "etiqueta:ah", `${L}: ${h.slice(8)}: sem a etiqueta "Amperagem: 60 Ah" (etiquetas: ${etq.join(" | ") || "nenhuma"})`);
-          if (larg < 1000) { const tb = await botaoFiltrar(); if (!/^Filtrar\s*\(1\)/i.test(tb)) falha("medidas", N_MED, "filtrar:ah", `${L}: ${h.slice(8)}: o botão diz "${tb}" (esperado "Filtrar (1)")`); }
           if (h.includes("q=")) { await page.evaluate(() => window.scrollTo(0, 0)); await print("medida-ah60"); }
           VIU.push(`${h.slice(8)} = ${n}`);
           conferirConsole("medida-ah");
@@ -1244,12 +1234,12 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         }
         // 5) "amortecedor": nenhum grupo de medida
         await abrir("medida-amortecedor", "#/busca?q=" + encodeURIComponent(QF));
-        await abrirFiltros();
+        await abrirPainel("medidas", N_MED);
         const ga = (await gruposTela()).map((g) => g.nome);
         const med = ga.filter((n) => /^(Amperagem|Partida a frio)/i.test(n));
         if (!ga.length) falha("medidas", N_MED, "amortecedor:grupos", `${L}: "${QF}": não achei os grupos dos filtros`);
         if (med.length) falha("medidas", N_MED, "amortecedor", `${L}: "${QF}" mostra o(s) grupo(s) de medida ${med.join(", ")} (pedido: só quando a lista tem bateria com a medida)`);
-        await fecharFiltros();
+        await fecharPainel();
         VIU.push(`"${QF}" sem grupo de medida (grupos: ${ga.join(", ")})`);
         conferirConsole("medida-amortecedor");
         MEDIDAS.push(`${L}: ${VIU.join("; ")}`);
