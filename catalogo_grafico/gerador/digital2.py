@@ -11,7 +11,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import datas
 import tags as TG
-from plural import plural   # singular num lugar só: plural.py (RD-0510, RD-0527)
+from plural import plural
 from quebra import NBSP  # B8: o import também instala a quebra (palavra longa no espaço inseparável ou no separador, não no meio)
 
 FD = 'fontes/'

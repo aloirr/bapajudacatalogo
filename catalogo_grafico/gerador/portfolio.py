@@ -5,7 +5,7 @@ conforme a classificação da base unificada / Catálogo BAP 2026.
 Material para cliente/prospect: sem estoque, sem preço, sem aviso de uso interno, sem nome de cliente.
 Uso (dentro de gerador/):  python portfolio.py [saida.pdf] [base.xlsx]
 """
-import sys, os, collections, html
+import sys, os, re, collections, html
 import pandas as pd
 import apres_bemol as A
 from apres_bemol import S, W, H
@@ -143,94 +143,10 @@ def dados(base):
 
 
 # ---------------------------------------------------------------- desenho
-def card_v(s, c, x, y, w, h):
-    """card vertical: foto em cima, nome, descrição e nº de itens"""
-    s.rect(x, y, w, h, fill='white', stroke='line', r=12, sw=.8)
-    ih = h - 80
-    s.foto(c['img'], x + 7, y + 7, w - 14, ih)
-    if c['lanc']: s.chip(x + 14, y + 14, 'NOVIDADE 2026', 'white', 'orange', 6.8)
-    size = 13
-    while size > 9.5 and pw(c['nome'], 'PB', size) > w - 26: size -= .25
-    yy = y + 7 + ih + 10
-    s.t(x + 13, yy, c['nome'], size, 'ink', 'PB')
-    s.p(x + 13, yy + 18, w - 26, html.escape(curto(c['desc'], w - 26, 8.2, 2)), 8.2, 10.6, 'sec')
-    s.t(x + 13, y + h - 20, f"{c['n']} {plural(c['n'])}", 8, 'grey', 'PM')
-
-
-def curto(t, w, size, n):
-    """corta a descrição em n linhas (termina em '…' se precisar)"""
-    from reportlab.lib.utils import simpleSplit
-    ls = simpleSplit(t, 'PR', size, w)
-    if len(ls) <= n: return t
-    r = ' '.join(ls[:n])
-    while simpleSplit(r + '…', 'PR', size, w).__len__() > n: r = r.rsplit(' ', 1)[0]
-    return r.rstrip(',;') + '…'
-
-
-def card_h(s, c, x, y, w, h):
-    """card horizontal (pouca altura): foto à esquerda"""
-    s.rect(x, y, w, h, fill='white', stroke='line', r=12, sw=.8)
-    iw = min(h - 14, w * .42)
-    s.foto(c['img'], x + 7, y + 7, iw, h - 14)
-    tx = x + 7 + iw + 10; tw = w - (tx - x) - 10
-    size = 11.5
-    nm = c['nome']
-    while size > 8.8 and pw(nm, 'PB', size) > tw * 2 - 10: size -= .25
-    hn = s.p(tx, y + 9, tw, html.escape(nm), size, size * 1.15, 'ink', 'PB')
-    if c['lanc']:
-        s.chip(tx, y + 12 + hn, 'NOVIDADE', 'white', 'orange', 6.2); hn += 16
-    s.p(tx, y + 12 + hn, tw, html.escape(c['desc']), 7.6, 9.8, 'sec')
-    s.t(tx, y + h - 17, f"{c['n']} {plural(c['n'])}", 7.8, 'grey', 'PM')
-
-
-def pacote(fams, cols):
-    """agrupa as famílias em fileiras de até `cols` cards (família grande ocupa fileiras inteiras)"""
-    rows, cur, usado = [], [], 0
-    for fam, cards in fams.items():
-        k = len(cards)
-        if k > cols:
-            if cur: rows.append(cur); cur, usado = [], 0
-            for i in range(0, k, cols): rows.append([(fam if i == 0 else fam + ' (cont.)', cards[i:i + cols])])
-            continue
-        if usado + k > cols:
-            rows.append(cur); cur, usado = [], 0
-        cur.append((fam, cards)); usado += k
-    if cur: rows.append(cur)
-    return rows
-
-
-def pagina_sistema(s, lin_nome, num, sis, fams):
-    n_it = sum(c['n'] for cs in fams.values() for c in cs); n_pr = sum(len(cs) for cs in fams.values())
-    s.header(f'{lin_nome} · {num:02d} · {FRASE[sis]}', TITULO[sis],
-             f"{len(fams)} {plural(len(fams), 'família', 'famílias')} · {n_pr} {plural(n_pr, 'produto', 'produtos')} · {fmt(n_it)} {plural(n_it)}")
-    top, bot = 128, H - 46
-    if n_pr == 1:
-        fam, cards = next(iter(fams.items())); heroi(s, fam, cards[0], top, bot); s.footer(); return
-    cols = 4 if max(len(cs) for cs in fams.values()) >= 4 or n_pr >= 7 else 3
-    rows = pacote(fams, cols)
-    gap, lab = 12, 20
-    ch = min(300, (bot - top - len(rows) * (lab + gap) + gap) / len(rows))
-    cw = (W - 80 - gap * (cols - 1)) / cols
-    y = top
-    for row in rows:
-        x = 40
-        for fam, cards in row:
-            gw = len(cards) * cw + (len(cards) - 1) * gap
-            s.rect(x, y + 13, gw, 1.2, fill='green')
-            s.t(x, y, tit(fam.replace(' (cont.)', '')).upper() + (' (cont.)' if '(cont.)' in fam else ''), 8.5, 'gdark', 'PB', ls=1.3)
-            for k, c in enumerate(cards):
-                cx = x + k * (cw + gap)
-                (card_v if ch >= 150 else card_h)(s, c, cx, y + lab, cw, ch)
-            x += gw + gap
-        y += lab + ch + gap
-    s.footer()
-
-
 def carro(mod, m):
     """o "mesmo carro" de uma aplicação: a montadora (a 1ª, se forem várias) e o modelo, com o número quando o nome
     é uma sigla (CG 125, G 400). Na linha da base v27 a montadora vem na frente: "FORD ECOSPORT 1.6 L" = "Ford" +
     "Ecosport 1.6 L 16V"."""
-    import re
     from montar import BRANDS_RX, BR_SHORT
     from pneus_fix import BR
     t = mod.upper()
@@ -249,7 +165,6 @@ def carro(mod, m):
 
 def aplicacoes(rows, n=12):
     """principais aplicações na ordem do catálogo (ranking): montadora + modelos, sem repetir"""
-    import re
     out, vistos = [], set()
     for r in rows:
         segs = r.get('segs') or []
@@ -283,7 +198,6 @@ def aplicacoes(rows, n=12):
 
 
 def heroi(s, fam, c, top, bot):
-    import re
     ih = bot - top - 30
     s.foto(c['img'], 40, top, 400, ih)
     if c['lanc']: s.chip(56, top + 16, 'NOVIDADE 2026', 'white', 'orange', 7.5)
