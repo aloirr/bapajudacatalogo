@@ -1,0 +1,17 @@
+Testes T-0031 · 23/11/2026 10:40 (Manaus)
+Branch testado: catalogo-dados/T-0031-v28, head 1a4afa4fa312e47bad4bbd54d23bae864672520e (base v28)
+Comparado com: main 9f37e19 (site/data/produtos.json)
+
+base v28 = versoes/..._v28.xlsx .. PASSOU (sha256 e1fddbfae57f74662f1ee0062e6356d23dbc0833df940c6bff59227aa9a0cfab)
+gerar_site.py ..................... PASSOU (código 0; 4.419 produtos, igual ao main; 0 [ERRO], 0 [PARADO])
+diferenças do JSON ................ só as aprovadas (6 produtos):
+  AMT7084, AMT7115, BAN9513, BAN9516  li: LEVE E PESADA -> LEVE
+  BIE20042                            li: PESADA -> LEVE; ve: sai ["FORD","Cargo"] (2 -> 1)
+  BOR11030                            li: PESADA -> LEVE; ve: sai ["FORD","Cargo"] (7 -> 6)
+  gerado_em; nada mais (códigos, ordem, sc, fonte e total iguais)
+testar_site.mjs --comparar ........ só a falha esperada "JSON igual ao de referência" (os 6 acima); 0 falha nova
+palavra interna ................... PASSOU
+buscas (1366 e 390 px) ............ PASSOU (código CXD13062; referência TRW 16900255S; veículo VOLKSWAGEN Gol 2018; geral "amortecedor dianteiro Onix" e "15W40"; sem resultado)
+Ford Cargo no filtro do veículo ... PASSOU (Marca Ford, Modelo Cargo: 40 produtos, eram 42 no main; sem BIE20042 e sem BOR11030; "BIE20042" e "BOR11030" com Ford Cargo: "Nada para Ford Cargo com essa busca.")
+busca BIE20042 .................... PASSOU (1º cartão BIE20042; página do produto com o selo "Leve", sem "Pesada", sem "Ford Cargo")
+390 px sem rolar de lado .......... PASSOU (scrollWidth 390)
