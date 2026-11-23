@@ -359,7 +359,7 @@ def build(out, base=BASE):
 
     # quem somos
     s.header('Quem somos', NOME)
-    s.p(40, 132, 600, 'Empresa brasileira criada em 2021 para oferecer componentes automotivos de qualidade, com segurança e preço acessível. '
+    s.p(40, 132, 600, 'Empresa brasileira criada em 2021 para oferecer componentes automotivos de qualidade, com segurança e bom custo-benefício. '
         'O portfólio vai da suspensão à parte elétrica, passando por filtros, lubrificantes e químicos, para as linhas leve, pesada e moto.', 13, 20, 'sec')
     tiles = [(str(len(produtos)), 'linhas de produtos'), (f'+{fmt(total // 100 * 100)}', 'itens no catálogo'),
              (str(len(sistemas)), 'sistemas do veículo'), ('3', 'linhas: leve, pesada e moto')]
