@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 23/11/2026 09:20 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 23/11/2026 12:43 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -32,20 +32,25 @@ Atualizado em 23/11/2026 09:20 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0026](tarefas/T-0026.md) | Repetições nas páginas 2 a 4 do A4 e nos sumários do catálogo gráfico | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #146, #147, #148 |
 | [T-0027](tarefas/T-0027.md) | "1 itens": singular num lugar só no gerador do catálogo gráfico | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #151, #152, #153, #154, #155, #156 |
 | [T-0028](tarefas/T-0028.md) | Portfólio regerado pela v27 e capa da Linha Moto com "linhas" | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #164, #165, #166 |
+| [T-0029](tarefas/T-0029.md) | Portfólio 2027, siglas e Linha Pesada só com veículos pesados | catalogo-grafico | designer-ux, design-de-marca, testes | CONCLUÍDA | #179, #180 |
+| [T-0030](tarefas/T-0030.md) | Rótulos "Ah" e "CCA" na ficha da bateria (MC-0016) | web-site | testes, designer-ux, design-de-marca | CONCLUÍDA | #173, #174 |
+| [T-0031](tarefas/T-0031.md) | Aplicações suspeitas da Linha Pesada (base v28) | catalogo-dados | web-site, testes | CONCLUÍDA | #175, #176, #177 |
+| T-0032 | 7 portfólios por linha, melhorias do Portfólio e treinamentos (Mecânica Básica, 3 atualizados e 10 de sistema) | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes | EM ANDAMENTO (onda 1) | |
 
 ## Fila
-Main a1129e0 (#169).
+Main bb8b3cc (#180).
 
 1. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
 2. **Fora da fila, para decidir depois** (parada, decisão 3 do R-20261122-223000-alexandre):
    - T-0006, fases 2 (pneus) e 3 (rolamentos) da busca por medida: só com pedido novo do Alexandre;
-   - MC-0016: os rótulos "C20(ah)" e "Cca-18°" da ficha da bateria, que o filtro mostra como "Ah" e "CCA"; se mudar, o filtro muda no mesmo PR (web-site, T-0006);
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
-   - Portfólio: as datas de 2026 passam a 2027 (capa, contracapa, pág. 3 e o selo "NOVIDADE 2026"), com a seta "→" da pág. 3, que a fonte não tem: simulação própria (catalogo-grafico, T-0028);
-   - RD-0535 (o sistema no sobretítulo e no título das páginas de produto do Portfólio) e MC-0017 (siglas de montadora em caixa errada e "effitech"): decisão do Alexandre, com simulação (T-0028);
-   - as divisórias da Moto e do Universal com muito espaço vazio, e a variedade de montadoras nas "Principais aplicações" do Portfólio (6 Volvo nos Filtros de Óleo da Pesada): layout e regra nova, com simulação (T-0028);
-   - aplicações estranhas da base no Portfólio ("Agile" e "GOL G IV de" sem montadora; "Doblo", "Ford Focus" e "Volvo V40" na Linha Pesada; ônibus e caminhões nas Cruzetas da Leve): catalogo-dados (T-0028);
    - MC-0012 (tamanho do logo e assinatura): parado (R-20261123-112006-alexandre, 8c);
+   - Portfólio, as 12 melhorias de prioridade média e baixa da T-0032 (MELHORIAS_PORTFOLIO.md; R-20261123-162032-po, 8b), entre elas as divisórias com poucos produtos e o selo com uma palavra só;
+   - RD-0550 e RD-0551 (montadora repetida ou com 2 grafias nas aplicações do Portfólio) e RD-0552 (regra própria de pesado no Kit Filtros): com simulação (catalogo-grafico, T-0029);
+   - "preço acessível" → "bom custo-benefício" também no A4 (print_cat.py) e na apresentação de Lubrificantes (15a, catalogo-grafico, com simulação);
+   - o mês da capa do Portfólio vem do dia da geração (edicao()): fixar, se o Alexandre quiser (T-0029);
+   - base, catalogo-dados: "Agile" e "GOL G IV de" sem montadora; ônibus e caminhões nas Cruzetas da Leve; o HC26 (Etios) só PESADA; o PAF1582 "LEVE E PESADA" pela "Expert Cargo"; "PUTSMEISTER", "Iveco S-WAY", "Mwm" e "API sljaso MA"; os 2 textos de MOTIVO da mesma causa na VEICULOS; o RD-0546 (T-0028, T-0029, T-0031);
+   - bateria, catalogo-dados e web-site: "Amperagem" × "Ah" (75AE-LP-18 e 40D-MXWF-15 divergem); "Ca +25c" e "12v" (T-0030);
    - RD-0511 (pneus e câmaras de moto em 2 lugares), o vazio da pág. 2 do A4 e a página da Lâmpadas Moto (1 cartão e cerca de 2/3 em branco): parados (R-20261123-112006-alexandre, 10c e 12c);
    - RD-0528: os blocos `__main__` de `moto.py` e `pneus_fix.py` ainda procuram o texto do `cover_page`, que saiu; não muda página (catalogo-grafico, T-0027);
    - CIL8546: o "—" no ano do site vem de o site ler o texto (web-site);
