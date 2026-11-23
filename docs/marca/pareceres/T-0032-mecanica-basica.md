@@ -66,3 +66,21 @@ Layout, leitura e comparação com o original: ver o parecer de UX.
 ## Reteste
 
 Na próxima rodada: a capa, os slides 17, 18, 30, 39 e 40 e o tema (`ppt/theme/theme1.xml`). Fechar o MC-0022.
+
+## Reteste do MC-0022 (head `b28e880e2484e704b3029202238128aee1e5e86a`)
+
+**LIBERADO. MC-0022 fechado**, com a foto da embreagem como pergunta ao Alexandre.
+
+1. **Capa:** "Novembro de 2026". Fechado.
+2. **Slides 39 e 40:** "Kit Batente de Amortecedor"; "Amortecedor + Kit Batente de Amortecedor + Bieleta"; "Sapata de
+   Freio + Cilindro de Roda + Fluido de Freio"; "Kit de Distribuição + Bomba D'Água". Fechado.
+3. **Cor:**
+   - o tema tem o `accent5 #D9E6DA` e o `accent6 #8A3F00`, e o amarelo `#F2C14E` saiu;
+   - o vermelho `#D64545` fica gravado só nos 2 ícones de sinal grave (slides 18 e 30), e nenhum outro slide o usa;
+   - o guia registra o vermelho como "só em ícone", a aprovar pelo Alexandre junto com o padrão, com o laranja como
+     saída se ele não aprovar.
+
+   Fechado.
+4. **Foto da embreagem (slide 17):** fica, porque não há outra foto BAP do kit. Vai ao Alexandre como pergunta, com a
+   recomendação da marca: aceitar nesta simulação e trocar quando houver foto do kit BAP sem o emblema à mostra. Não
+   segura.
