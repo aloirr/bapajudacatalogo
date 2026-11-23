@@ -644,6 +644,15 @@ def ignicao():
     return svg(W, H, ''.join(o))
 
 
+
+def icone_video():
+    """Ícone de vídeo do padrão: câmera branca no círculo verde do logo (no lugar de logo de terceiro)."""
+    o = [circ(100, 100, 98, fill=VERDE, stroke='none', sw=0)]
+    o.append(rect(42, 66, 80, 68, fill=BRANCO, stroke='none', sw=0, rx=12))
+    o.append(path('M128,88 L160,68 L160,132 L128,112 Z', fill=BRANCO, stroke=BRANCO, sw=4))
+    return svg(200, 200, ''.join(o))
+
+
 DESENHOS = {
     'carro_sistemas': carro_sistemas,
     'motor_corte': motor_corte,
@@ -655,6 +664,7 @@ DESENHOS = {
     'freio_tambor': freio_tambor,
     'freio_hidraulico': freio_hidraulico,
     'ignicao': ignicao,
+    'icone_video': icone_video,
 }
 
 

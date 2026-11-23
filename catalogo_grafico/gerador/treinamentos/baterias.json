@@ -199,6 +199,20 @@
     "30": "Terminais oxidados",
     "31": "ou soltos: aquecimento e mau contato"
    }
+  },
+  "22": {
+   "img": {
+    "3": "desenho:icone_video"
+   },
+   "link_por_palavra": [
+    5,
+    8
+   ]
+  },
+  "41": {
+   "t": {
+    "1": "Velas: partida difícil nem sempre é a bateria"
+   }
   }
  }
 }

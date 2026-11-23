@@ -497,6 +497,35 @@ def textos_do_slide(slide):
     return out
 
 
+def link_por_palavra(txBody):
+    """Divide o trecho com hyperlink em uma palavra por trecho (o espaço fica fora do link): no LibreOffice o
+    link vira um campo que não quebra entre palavras."""
+    for r in list(txBody.iter(A + 'r')):
+        rpr = r.find(A + 'rPr')
+        if rpr is None or rpr.find(A + 'hlinkClick') is None:
+            continue
+        partes = re.split(r'( )', r.find(A + 't').text or '')
+        pai, pos = r.getparent(), r.getparent().index(r)
+        pai.remove(r)
+        for k, parte in enumerate(p for p in partes if p):
+            novo = copy.deepcopy(r)
+            novo.find(A + 't').text = parte
+            if parte == ' ':
+                h = novo.find(A + 'rPr').find(A + 'hlinkClick')
+                novo.find(A + 'rPr').remove(h)
+            pai.insert(pos + k, novo)
+
+
+def cor_do_texto(forma, cor):
+    """Pinta todos os trechos da forma: cor de tema (tx2...) ou hex."""
+    for rpr in forma._element.iter(A + 'rPr'):
+        for f in rpr.findall(A + 'solidFill'):
+            rpr.remove(f)
+        sf = etree.Element(A + 'solidFill')
+        etree.SubElement(sf, A + ('srgbClr' if re.fullmatch(r'[0-9A-F]{6}', cor) else 'schemeClr'), val=cor)
+        rpr.insert(0, sf)
+
+
 def caixa(sh):
     return sh.left, sh.top, sh.left + sh.width, sh.top + sh.height
 
@@ -515,6 +544,13 @@ def corrigir_cores(slide):
     """Texto verde ou laranja sobre fundo claro passa para #2F7D36 e #8A3F00; sobre laranja, número escuro."""
     formas = list(slide.shapes)
     for sh in formas:
+        if getattr(sh, 'has_table', False) and sh.has_table:
+            # tabela: fundo claro; texto vermelho vira laranja-escuro (MC-0024); cabeçalho fica como está
+            for clr in sh._element.iter(A + 'schemeClr'):
+                pai = clr.getparent()
+                if clr.get('val') == 'accent5' and pai.tag == A + 'solidFill' and pai.getparent().tag == A + 'rPr':
+                    pai.replace(clr, etree.Element(A + 'srgbClr', val=LARANJA_TEXTO))
+            continue
         if not sh.has_text_frame:
             continue
         x0, y0, x1, y1 = caixa(sh)
@@ -539,6 +575,8 @@ def corrigir_cores(slide):
             elif not escuro and v == 'accent2':
                 novo = etree.Element(A + 'srgbClr', val=LARANJA_TEXTO)
                 pai.replace(clr, novo)
+            elif not escuro and v == 'accent5' and fundo != 'accent5':   # texto vermelho em fundo claro (MC-0024)
+                pai.replace(clr, etree.Element(A + 'srgbClr', val=LARANJA_TEXTO))
             elif fundo == 'accent2' and v == 'bg1':
                 clr.set('val', 'tx1')
 
@@ -683,6 +721,10 @@ def montar(nome, saida=None):
                 v = base.expandir(v)
                 base.conferir(v, onde)
                 escrever(tab.cell(i, j).text_frame._txBody, v)
+        for k in spec.get('link_por_palavra', []):
+            link_por_palavra(formas[int(k)].text_frame._txBody)
+        for k, cor in spec.get('cor_texto', {}).items():
+            cor_do_texto(formas[int(k)], cor)
         for k, ref in spec.get('img', {}).items():
             trocar_imagem(s, formas[int(k)], imgs.caminho(ref))
         for k, nome_ic in spec.get('icone', {}).items():
