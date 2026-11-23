@@ -44,6 +44,14 @@
      - Página do produto: a seção "Leve também" (R-20261120-141100b); "Ofereça junto" na página = falha.
      - Janela do produto (<dialog>, "+ Detalhes"): conferida só se existir no site. A página do produto é sempre
        conferida pelo link direto #/produto/CODIGO.
+
+   T-0006, fase 1 (23/11/2026; R-20261123-095435, 112006 e 122814-po): medida da bateria.
+     - "bateria": os grupos "Amperagem" (opções em Ah, do menor ao maior, todas à vista, sem "Ver mais") e "Partida a frio
+       (CCA)" (até 400, 401 a 500, 501 a 600, 601 a 800, acima de 800) depois da Família, em 1366 px (coluna) e no painel
+       do "Filtrar" em 390 px; opções e contagens iguais às do x do JSON ("C20(ah)" e "Cca-18°"). Sem os grupos = falha
+       (pega o rótulo da FICHA mudado; a âncora 60D-EFB-24 também).
+     - ah=60 e cca=401-500 (com e sem q=bateria): a lista igual à do JSON, a etiqueta do filtro.
+     - "60ah", "60 ah", "60Ah", "60-Ah" e "bateria 60ah": as baterias de 60 Ah. "amortecedor": nenhum grupo de medida.
 */
 
 import { createRequire } from "node:module";
@@ -210,7 +218,7 @@ function ajudaDaPagina() {
       && segue(campo, b) && !(outro && segue(campo, outro) && segue(outro, b))) || null;
   }
   const grupos = () => [...document.querySelectorAll("#app button[aria-expanded]")]
-    .filter((b) => visivel(b) && /^(Sistema|Fam[ií]lia|Linha|Categoria)/i.test(b.textContent.trim()));
+    .filter((b) => visivel(b) && /^(Sistema|Fam[ií]lia|Linha|Categoria|Amperagem|Partida a frio)/i.test(b.textContent.trim()));
   // as opções (o rótulo de cada caixa de marcar) do grupo j (ou do 1º aberto); na coluna fixa os grupos ficam todos abertos
   function opcoes(j) {
     const bt = j != null ? grupos()[j] : grupos().find((b) => b.getAttribute("aria-expanded") === "true");
@@ -419,6 +427,21 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
   const TELAS = new Set(), FILTROS = new Set(), JANELAS = new Set(); // o que foi detectado (T-0014), nas 2 larguras
   const CARTOES = [], FILTRO_SI = {}, CAMPOS_TELA = {}, MV = [];
   const FILTRO_SI_CASO = comFoto && comFoto.si; // o sistema do produto com foto (AMT7115: SUSPENSÃO)
+  // T-0006, fase 1 (R-20261123-095435, 112006 e 122814): medida da bateria. O esperado sai do x (ficha técnica) do JSON:
+  // "C20(ah)" e "Cca-18°", com a chave sem acento, caixa e sinais (C20AH e CCA18) e o valor inteiro. A âncora 60D-EFB-24
+  // (60 Ah, CCA 600) pega o rótulo da FICHA mudado (aí o x não tem mais a medida e os filtros somem do site).
+  const FAIXAS_CCA = [[400, "até 400"], [500, "401 a 500"], [600, "501 a 600"], [800, "601 a 800"], [Infinity, "acima de 800"]];
+  const medidaJson = (p) => {
+    const x = new Map(((p && p.x) || []).map(([k, v]) => [normCod(k), String(v).trim()]));
+    const ah = /^\d+$/.test(x.get("C20AH") || "") ? +x.get("C20AH") : null;
+    const n = /^\d+$/.test(x.get("CCA18") || "") ? +x.get("CCA18") : null;
+    return { ah, cca: n == null ? null : FAIXAS_CCA.findIndex(([lim]) => n <= lim) };
+  };
+  const ANCORA_BAT = "60D-EFB-24";
+  { const m = medidaJson(porCod.get(normCod(ANCORA_BAT))); if (m.ah !== 60 || m.cca !== 2) falha("casos", "casos do JSON", ANCORA_BAT, `o ${ANCORA_BAT} não tem mais "C20(ah)" 60 e "Cca-18°" 600 no x do JSON (o rótulo da FICHA mudou? os filtros Amperagem e CCA do site somem)`); }
+  const BAT_AH60 = prods.filter((p) => medidaJson(p).ah === 60).map((p) => p.c);
+  const BAT_CCA2 = prods.filter((p) => medidaJson(p).cca === 1).map((p) => p.c); // cca=401-500
+  const MEDIDAS = []; // o que a bateria viu, para o detalhe
   const browser = await chromium.launch();
   try {
     for (const [larg, alt] of [[1366, 768], [390, 844]]) {
@@ -947,6 +970,15 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
       // modelo B (R-20261120-123800): "coluna" fina à esquerda dos cartões no computador (grupos sempre abertos) e
       // "painel" no celular (botão "Filtrar (n)" que abre por cima); o link com si=, marcar, etiqueta "Tirar" e o "x"
       const botaoFiltrar = () => page.evaluate(() => { const b = [...document.querySelectorAll("#app button")].find((x) => window.__bapT.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())); return b ? b.textContent.replace(/\s+/g, " ").trim() : ""; });
+      // o painel dos filtros no celular (tipoFiltro "painel"): abre pelo botão "Filtrar"; id e nome: o teste que leva a falha
+      const painelAberto = () => page.evaluate(() => !!document.querySelector("dialog[open]"));
+      const abrirPainel = async (id, nome) => {
+        if (tipoFiltro !== "painel" || (await painelAberto())) return;
+        const hb = (await page.evaluateHandle(() => [...document.querySelectorAll("#app button")].find((x) => window.__bapT.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())) || null)).asElement();
+        if (hb) await hb.click(); else falha(id, nome, "painel:botao", `${L}: sem o botão "Filtrar"`);
+        await page.waitForTimeout(250);
+        if (!(await painelAberto())) falha(id, nome, "painel:abrir", `${L}: o botão "Filtrar" não abriu o painel`);
+      };
       const tipoFiltro = await page.evaluate(() => {
         const T = window.__bapT;
         const g = T.grupos();
@@ -1028,14 +1060,7 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
       }
       if (["coluna", "painel"].includes(tipoFiltro)) {
         await abrir("filtros", "#/busca?q=" + encodeURIComponent(QF));
-        const abrirPainel = async () => {
-          if (tipoFiltro !== "painel" || (await page.evaluate(() => !!document.querySelector("dialog[open]")))) return;
-          const hb = (await page.evaluateHandle(() => [...document.querySelectorAll("#app button")].find((x) => window.__bapT.visivel(x) && /^Filtrar\b/i.test(x.textContent.trim())) || null)).asElement();
-          if (hb) await hb.click(); else falha("filtros", N_FIL, "painel:botao", `${L}: sem o botão "Filtrar"`);
-          await page.waitForTimeout(250);
-          if (!(await page.evaluate(() => !!document.querySelector("dialog[open]")))) falha("filtros", N_FIL, "painel:abrir", `${L}: o botão "Filtrar" não abriu o painel`);
-        };
-        await abrirPainel();
+        await abrirPainel("filtros", N_FIL);
         const CAMPO_GRUPO = { SISTEMA: "si", FAMILIA: "fa", LINHA: "li", CATEGORIA: "ca" };
         const grupos = await page.evaluate(() => window.__bapT.grupos().map((b) => b.textContent.replace(/[▾▴▼▲]/g, "").replace(/\s+/g, " ").trim()));
         const pegar = async (fn, i) => (await page.evaluateHandle(fn, i)).asElement();
@@ -1089,7 +1114,7 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
           if (tipoFiltro === "painel") { // fecha o painel (Esc) e o botão mostra o número de marcados: "Filtrar (1)"
             await page.keyboard.press("Escape");
             await page.waitForTimeout(200);
-            if (await page.evaluate(() => !!document.querySelector("dialog[open]"))) falha("filtros", N_FIL, "painel:esc", `${L}: o Esc não fechou o painel dos filtros`);
+            if (await painelAberto()) falha("filtros", N_FIL, "painel:esc", `${L}: o Esc não fechou o painel dos filtros`);
             const tb = await botaoFiltrar();
             if (!/^Filtrar\s*\(1\)/i.test(tb)) falha("filtros", N_FIL, "painel:numero", `${L}: com 1 filtro marcado, o botão diz "${tb}" (esperado "Filtrar (1)")`);
           }
@@ -1118,6 +1143,106 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         else if (!marcou) falha("filtros", N_FIL, "sem-opcao", `${L}: "${QF}" (${total0}): nenhum grupo abriu com uma opção que reduza a lista`);
         else FILTRO_SI.marcou = `${L}: "${marcou.nome}" (${marcou.grupo}) ${total0} → ${marcou.total1} e o "x" volta a ${total0}`;
         conferirConsole("filtros");
+      }
+
+      // ---- T-0006, fase 1: filtros de medida da bateria ("Amperagem" e "Partida a frio (CCA)"), ah= e cca= no endereço,
+      // "60ah" na busca. Em 1366 px na coluna; em 390 px no painel do "Filtrar" ----
+      if (tela === "campos") {
+        const N_MED = "medida da bateria (T-0006)";
+        const fecharPainel = async () => { if (await painelAberto()) { await page.keyboard.press("Escape"); await page.waitForTimeout(200); } };
+        // os grupos à vista (grupos), na ordem da tela, com as opções à vista (opcoes: nome e contagem) e se há "Ver mais"
+        const gruposTela = () => page.evaluate(() => window.__bapT.grupos().map((b, j) => ({
+          nome: b.textContent.replace(/[▾▴▼▲]/g, "").replace(/\s+/g, " ").trim(),
+          ops: window.__bapT.opcoes(j).map((l) => l.innerText.replace(/\s+/g, " ").trim()),
+          verMais: [...(b.parentElement || b).querySelectorAll("a,button")].some((x) => x !== b && /ver\s+mais/i.test(x.textContent)),
+        })));
+        const opcao = (t) => { const m = t.match(/^(.*?)\s*\(?(\d[\d.]*)\)?$/); return { nome: m ? m[1].trim() : t, n: m ? parseInt(m[2].replace(/\./g, ""), 10) : null }; };
+        const conferirLista = (rot, r, esperado) => {
+          const got = r.itens.map((i) => i.c), falta = esperado.filter((c) => !got.includes(c)), sobra = got.filter((c) => !esperado.includes(c));
+          if (falta.length || sobra.length || got.length !== esperado.length || r.proximos.trim())
+            falha("medidas", N_MED, "lista:" + rot, `${L}: ${rot}: ${got.length} produto(s), esperado ${esperado.length}` + (r.proximos.trim() ? ` (o site mostrou "${cortar(r.proximos, 50)}")` : "") +
+              (falta.length ? `; faltam ${falta.slice(0, 5).join(", ")}` : "") + (sobra.length ? `; sobram ${sobra.slice(0, 5).join(", ")}` : ""));
+          return got.length;
+        };
+        const VIU = [];
+        // 1) "bateria": os 2 grupos depois da Família, com as opções do JSON (em ordem) e as contagens; sem "Ver mais"
+        await abrir("medida-bateria", "#/busca?q=bateria");
+        const rBat = await listaTodos();
+        const lista = rBat.itens.map((i) => porCod.get(normCod(i.c))).filter(Boolean);
+        const contar = (f) => { const c = new Map(); for (const p of lista) { const v = f(medidaJson(p)); if (v != null) c.set(v, (c.get(v) || 0) + 1); } return [...c].sort((a, b) => a[0] - b[0]); };
+        const quer = {
+          Amperagem: contar((m) => m.ah).map(([v, n]) => [`${v} Ah`, n]),
+          "Partida a frio (CCA)": contar((m) => m.cca).map(([i, n]) => [FAIXAS_CCA[i][1], n]),
+        };
+        if (!quer.Amperagem.length || !quer["Partida a frio (CCA)"].length)
+          falha("medidas", N_MED, "json", `"bateria" (${lista.length} produtos): nenhuma bateria com "C20(ah)" ou "Cca-18°" inteiro no x do JSON (o rótulo da FICHA mudou?)`);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await abrirPainel("medidas", N_MED);
+        const gs = await gruposTela();
+        const nomes = gs.map((g) => g.nome.replace(/\s*\(\d+\)$/, ""));
+        const iFam = nomes.findIndex((n) => /^Fam[ií]lia$/i.test(n));
+        for (const [rot, ops] of Object.entries(quer)) {
+          const i = nomes.indexOf(rot), g = gs[i];
+          if (i < 0) { falha("medidas", N_MED, "grupo:" + rot, `${L}: "bateria": sem o grupo "${rot}" nos filtros (grupos: ${nomes.join(", ") || "nenhum"})`); continue; }
+          if (iFam < 0 || i < iFam) falha("medidas", N_MED, "ordem:" + rot, `${L}: "bateria": o grupo "${rot}" não vem depois da Família (ordem: ${nomes.join(", ")})`);
+          const opsTela = g.ops.map(opcao);
+          const txtTela = opsTela.map((o) => `${o.nome} (${o.n})`).join(", "), txtQuer = ops.map(([n, q]) => `${n} (${q})`).join(", ");
+          if (txtTela !== txtQuer) falha("medidas", N_MED, "opcoes:" + rot, `${L}: "bateria", "${rot}": ${opsTela.length} opção(ões) "${cortar(txtTela, 200)}"; esperado ${ops.length}, do menor ao maior: "${cortar(txtQuer, 200)}"`);
+          if (g.verMais) falha("medidas", N_MED, "ver-mais:" + rot, `${L}: "bateria", "${rot}" tem "Ver mais" (aprovado: todas as opções à vista, R-20261123-122814)`);
+          VIU.push(`"${rot}" ${opsTela.length} opções`);
+        }
+        const iAh = nomes.indexOf("Amperagem"), iCca = nomes.indexOf("Partida a frio (CCA)");
+        if (iAh >= 0 && iCca >= 0 && iCca < iAh) falha("medidas", N_MED, "ordem:ah-cca", `${L}: "bateria": "Partida a frio (CCA)" vem antes de "Amperagem" (ordem: ${nomes.join(", ")})`);
+        await print("medida-bateria");
+        // o 2º print com os grupos de medida à vista (rola até a última opção da CCA, na página ou no painel)
+        await page.evaluate(() => {
+          const b = [...document.querySelectorAll("#app button[aria-expanded]")].find((x) => window.__bapT.visivel(x) && /^Partida a frio/i.test(x.textContent.trim()));
+          const alvo = b && (document.getElementById(b.getAttribute("aria-controls") || "") || b);
+          const ult = alvo && [...alvo.querySelectorAll('input[type="checkbox"]')].pop();
+          if (ult || b) (ult || b).scrollIntoView({ block: "end", behavior: "instant" });
+        });
+        await page.waitForTimeout(400);
+        await print("medida-bateria-grupos");
+        await fecharPainel();
+        conferirConsole("medida-bateria");
+        // 2) ah=60 (com e sem o termo): as baterias de 60 Ah e a etiqueta "Amperagem: 60 Ah"
+        for (const h of ["#/busca?ah=60", "#/busca?q=bateria&ah=60"]) {
+          await abrir("medida-ah", h);
+          const n = conferirLista(h.slice(8), await listaTodos(), BAT_AH60);
+          const etq = await etiquetasTela();
+          if (!etq.some((t) => /Amperagem:\s*60\s*Ah\b/i.test(t))) falha("medidas", N_MED, "etiqueta:ah", `${L}: ${h.slice(8)}: sem a etiqueta "Amperagem: 60 Ah" (etiquetas: ${etq.join(" | ") || "nenhuma"})`);
+          if (h.includes("q=")) { await page.evaluate(() => window.scrollTo(0, 0)); await print("medida-ah60"); }
+          VIU.push(`${h.slice(8)} = ${n}`);
+          conferirConsole("medida-ah");
+        }
+        // 3) cca=401-500 (com e sem o termo)
+        for (const h of ["#/busca?cca=401-500", "#/busca?q=bateria&cca=401-500"]) {
+          await abrir("medida-cca", h);
+          const n = conferirLista(h.slice(8), await listaTodos(), BAT_CCA2);
+          const etq = await etiquetasTela();
+          if (!etq.some((t) => /Partida a frio \(CCA\):\s*401 a 500/i.test(t))) falha("medidas", N_MED, "etiqueta:cca", `${L}: ${h.slice(8)}: sem a etiqueta "Partida a frio (CCA): 401 a 500" (etiquetas: ${etq.join(" | ") || "nenhuma"})`);
+          VIU.push(`${h.slice(8)} = ${n}`);
+          conferirConsole("medida-cca");
+        }
+        // 4) a amperagem escrita na busca: "60ah", "60 ah", "60Ah", "60-Ah" e "bateria 60ah" = as baterias de 60 Ah
+        for (const q of ["60ah", "60 ah", "60Ah", "60-Ah", "bateria 60ah"]) {
+          await abrir("medida-q", "#/busca?q=" + encodeURIComponent(q));
+          const n = conferirLista(`"${q}"`, await listaTodos(), BAT_AH60);
+          if (q === "bateria 60ah") { await page.evaluate(() => window.scrollTo(0, 0)); await print("medida-bateria-60ah"); }
+          VIU.push(`"${q}" = ${n}`);
+          conferirConsole("medida-q");
+        }
+        // 5) "amortecedor": nenhum grupo de medida
+        await abrir("medida-amortecedor", "#/busca?q=" + encodeURIComponent(QF));
+        await abrirPainel("medidas", N_MED);
+        const ga = (await gruposTela()).map((g) => g.nome);
+        const med = ga.filter((n) => /^(Amperagem|Partida a frio)/i.test(n));
+        if (!ga.length) falha("medidas", N_MED, "amortecedor:grupos", `${L}: "${QF}": não achei os grupos dos filtros`);
+        if (med.length) falha("medidas", N_MED, "amortecedor", `${L}: "${QF}" mostra o(s) grupo(s) de medida ${med.join(", ")} (pedido: só quando a lista tem bateria com a medida)`);
+        await fecharPainel();
+        VIU.push(`"${QF}" sem grupo de medida (grupos: ${ga.join(", ")})`);
+        conferirConsole("medida-amortecedor");
+        MEDIDAS.push(`${L}: ${VIU.join("; ")}`);
       }
 
       // ---- janela do produto (T-0014, se existir no site): "+ Detalhes" e código/nome abrem; Esc fecha e devolve o foco;
@@ -1475,6 +1600,8 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
     detalhe("placa", "campo da placa", `Enter e botão chamam o serviço (interceptado, 503) e mostram mensagem; veículo falso VW GOL 2018 1.6 → ${CAMPOS_TELA.placa || "?"} em destaque na faixa, com o rótulo "Placa" em cima (${(CAMPOS_TELA.rotulo || []).join("; ") || "?"}) e antes da Marca, e as listas "${CAMPOS_TELA.veiculo || "?"}"; ${CAMPOS_TELA.trava || ""}; ${CAMPOS_TELA.dois || ""}; placa fora do endereço, título, storage, console e do resto do DOM; o "x" tira a placa do DOM e esvazia as listas`);
     detalhe("meuveiculo", "meu veículo", MV.join("; ") + '; faixa logo abaixo do quadro da busca, 5 listas em cascata (Marca, Modelo, Ano, Motor, Versão); sem "Meu veículo", sem "Trocar veículo", sem chave liga/desliga, sem "Departamentos"');
     detalhe("filtros", "filtros da busca", [FILTRO_SI.si ? `link "amortecedor" com si=${FILTRO_SI.si} = ${FILTRO_SI.n}, só desse sistema` : "", FILTRO_SI.coluna || "", FILTRO_SI.painel || "", FILTRO_SI.sempre ? `"${COD}" (1 opção por grupo): ${FILTRO_SI.sempre}` : "", FILTRO_SI.marcou || ""].filter(Boolean).join("; "));
+    teste("medidas", "medida da bateria (T-0006)");
+    detalhe("medidas", "medida da bateria (T-0006)", `do JSON: ${BAT_AH60.length} de 60 Ah e ${BAT_CCA2.length} com CCA 401 a 500; ` + MEDIDAS.join(" | "));
     detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 4 na 1ª linha em 1366 e 1536 (fA2), 5 em 1920 (a partir de 1680), 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes"`);
   }
   if (JANELAS.size) detalhe("janela", "janela do produto", `"+ Detalhes" e código/nome abrem o dialog com o código; Esc fecha e devolve o foco ao cartão; a foto do cartão só amplia (${[...JANELAS].join(" e ")})`);
