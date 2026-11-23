@@ -55,3 +55,27 @@ O cartão pergunta "Quem gira o motor na hora da partida?" e responde "O motor d
 4. **"uso interno" no rodapé** é a S12 do padrão, que ainda espera o "aprovado" do Alexandre.
 
 **Resultado: VOLTA PARA AJUSTE** (3 🟡: slides 6 e 7, 26 e 32). O resto do deck está no nível do original. Depois do ajuste, confiro só os slides 6, 7, 26 e 32.
+
+---
+
+## Reteste (head `b28e880`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 12:14 (Manaus) |
+| O que foi revisto | Os slides 1, 7, 26, 32, 39 e 40 regerados, e os 18 e 30 (tema sem o amarelo) |
+| Resultado | **LIBERADO**: os 3 🟡 estão 🟢, sem 🔴 e sem 🟡 |
+
+- 🟢 **Slide 7 (🟡 1):** são os 10 sistemas do slide 6, com o mesmo nome e na mesma ordem, numa grade 2 × 5. Todos os ícones estão no verde (o laranja de "Filtros e óleo" saiu). O painel explica os 12: "os 10 do carro, mais Acessórios e Químicos". A grade e o painel terminam na mesma altura.
+- 🟢 **Slide 26 (🟡 2):** cada desenho tem a sua legenda embaixo ("1 Disco · 2 Pastilha · 3 Pinça · 4 Pistão · 5 Fluido"; "1 Tambor · 2 Sapata · 3 Lona · 4 Cilindro · 5 Mola"), como no slide 33. Os números continuam legíveis.
+- 🟢 **Slide 32 (🟡 3):** a pergunta ("Quem recarrega a bateria com o motor ligado? O alternador") agora combina com a foto, e a definição fala da mesma divisão de papéis.
+- 🟢 **Slide 1:** "Novembro de 2026" cabe na linha do rodapé da capa, e o resto não muda.
+- 🟢 **Slide 39:** "Kit Batente de Amortecedor" cabe em 1 linha, sob o círculo do meio, sem encostar nos sinais de "+".
+- 🟢 **Slide 40:** os nomes da base cabem em 2 linhas nos 3 quadros, que ficaram mais altos. A faixa PERGUNTE e a DICA continuam acima do rodapé.
+- 🟢 **Slides 18 e 30:** a aparência é a mesma da rodada anterior.
+
+### Notas do reteste (não seguram)
+1. **Slide 40, combo 1:** "KAC11420" quebra para a 2ª linha e fica a cerca de 0,1" da borda de baixo do quadro, menos que nos outros 2. Se der, tirar o "Gol G5:" ou pôr os 3 códigos em 1 linha.
+2. **"COMBO 1" em branco sobre o verde `#59BA61`** (2,4:1): é igual no original de Baterias (slide 42) e não muda aqui.
+
+**Resultado do reteste: LIBERADO.** O deck de Mecânica Básica está no nível do original de Baterias e pode seguir ao Alexandre (pelo `po`).
