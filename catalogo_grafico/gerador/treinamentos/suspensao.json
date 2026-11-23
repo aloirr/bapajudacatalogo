@@ -154,7 +154,7 @@
     ],
     [
      "Kit batente",
-     "protege a haste e o fim de curso",
+     "protege a haste",
      "FaLayerGroup"
     ],
     [
@@ -169,7 +169,7 @@
     ],
     [
      "Pivô",
-     "a articulação da bandeja com a roda",
+     "liga a bandeja à roda",
      "FaCircleDot"
     ],
     [
@@ -179,7 +179,7 @@
     ],
     [
      "Bucha",
-     "amortece e isola as articulações",
+     "isola as articulações",
      "FaCircleNotch"
     ],
     [
@@ -199,7 +199,10 @@
     ]
    ],
    "fonte": "Números pela base unificada {{versao_base}}.",
-   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase — é essa frase que o vendedor usa com o cliente.\n\nCOMO CONDUZIR\nLeia as funções e peça para o time repetir com as próprias palavras. Mostre o quadro escuro: os números vêm da base unificada e são atualizados a cada geração.\n\nINSIGHT PARA O CAMPO\nQuando o cliente não sabe o nome da peça, pergunte pela função: “é o que segura a roda embaixo?” leva à bandeja; “é a haste fina ligada na barra?” leva à bieleta."
+   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase — é essa frase que o vendedor usa com o cliente.\n\nCOMO CONDUZIR\nLeia as funções e peça para o time repetir com as próprias palavras. Mostre o quadro escuro: os números vêm da base unificada e são atualizados a cada geração.\n\nINSIGHT PARA O CAMPO\nQuando o cliente não sabe o nome da peça, pergunte pela função: “é o que segura a roda embaixo?” leva à bandeja; “é a haste fina ligada na barra?” leva à bieleta.",
+   "preencher": {
+    "38": "accent1"
+   }
   },
   {
    "tipo": "indicadores",

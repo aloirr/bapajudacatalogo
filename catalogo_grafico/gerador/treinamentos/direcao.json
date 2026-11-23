@@ -198,12 +198,12 @@
     ],
     [
      "Cremalheira",
-     "a barra dentada dentro da caixa",
+     "a barra dentada da caixa",
      "FaRuler"
     ],
     [
      "Coifa",
-     "protege a cremalheira da sujeira",
+     "protege a cremalheira",
      "FaShieldHalved"
     ],
     [
@@ -238,7 +238,10 @@
     ]
    ],
    "fonte": "Números pela base unificada {{versao_base}}. Fluido da direção: ver o treinamento de Lubrificantes.",
-   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e peça para o time repetir. Mostre o quadro escuro: há na base quase o mesmo número de terminais e de axiais, porque eles andam juntos.\n\nINSIGHT PARA O CAMPO\nO fluido da direção hidráulica é o do manual; a linha BAP de fluidos está no treinamento de Lubrificantes."
+   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e peça para o time repetir. Mostre o quadro escuro: há na base quase o mesmo número de terminais e de axiais, porque eles andam juntos.\n\nINSIGHT PARA O CAMPO\nO fluido da direção hidráulica é o do manual; a linha BAP de fluidos está no treinamento de Lubrificantes.",
+   "preencher": {
+    "38": "accent1"
+   }
   },
   {
    "tipo": "secao",

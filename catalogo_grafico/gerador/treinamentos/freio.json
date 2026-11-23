@@ -2,244 +2,972 @@
  "titulo": "Freio",
  "arquivo": "Treinamento_Freio_BAP_Vendedores.pptx",
  "rodape": "Treinamento Freio BAP  |  Equipe Comercial Externa · uso interno",
- "nao_codigo": ["HB20"],
+ "nao_codigo": [
+  "HB20"
+ ],
  "slides": [
-  {"tipo": "capa", "titulo": "Freio BAP", "sub": "Pastilha, sapata, cilindro de roda, sensor ABS, cuíca e catraca: segurança se vende com certeza",
-   "notas": "MENSAGEM-CHAVE\nFreio é o sistema em que o vendedor não pode chutar: a peça certa é questão de segurança.\n\nCOMO CONDUZIR\nDê boas-vindas e diga a duração prevista (cerca de 1h45 com perguntas). Lembre que o Mecânica Básica mostrou o caminho do pedal até a roda; aqui vamos peça a peça. O fluido de freio é tratado também no treinamento de Lubrificantes.\n\nPERGUNTE AO TIME\nQual peça de freio vocês mais vendem? E qual o cliente mais devolve?"},
-  {"tipo": "aprender", "k": "ABERTURA", "t": "O que vamos aprender hoje?",
+  {
+   "tipo": "capa",
+   "titulo": "Freio BAP",
+   "sub": "Pastilha, sapata, cilindro de roda, sensor ABS, cuíca e catraca: segurança se vende com certeza",
+   "notas": "MENSAGEM-CHAVE\nFreio é o sistema em que o vendedor não pode chutar: a peça certa é questão de segurança.\n\nCOMO CONDUZIR\nDê boas-vindas e diga a duração prevista (cerca de 1h45 com perguntas). Lembre que o Mecânica Básica mostrou o caminho do pedal até a roda; aqui vamos peça a peça. O fluido de freio é tratado também no treinamento de Lubrificantes.\n\nPERGUNTE AO TIME\nQual peça de freio vocês mais vendem? E qual o cliente mais devolve?"
+  },
+  {
+   "tipo": "aprender",
+   "k": "ABERTURA",
+   "t": "O que vamos aprender hoje?",
    "frase": "Hoje você sai daqui sabendo |explicar, diagnosticar e vender| o freio — da pastilha ao fluido, do carro ao caminhão.",
    "apoio": "Freio é venda de eixo e de conjunto: os dois lados juntos, a peça vizinha e o fluido novo.",
-   "pilares": [["ENTENDER", "Disco, tambor, hidráulica, ABS e freio a ar", "FaCircleDot"],
-               ["DIAGNOSTICAR", "Chiado, pedal baixo, puxando e luz do ABS", "FaStethoscope"],
-               ["VENDER", "Por eixo, com o vizinho e o fluido; combos e fechamento", "FaHandshake"]],
-   "notas": "MENSAGEM-CHAVE\nO objetivo é ligar o que o motorista sente no pedal à peça BAP certa.\n\nCOMO CONDUZIR\nApresente os três pilares como jornada.\n\nPERGUNTE AO TIME\nQuantas vezes vocês vendem cilindro de roda sem o fluido?"},
-  {"tipo": "topicos", "k": "ABERTURA", "t": "Tópicos do treinamento",
-   "itens": [["Como o freio funciona", "Hidráulica, disco e tambor", "FaCircleDot"],
-             ["Disco e pastilha", "Desgaste, chiado e troca por eixo", "FaLayerGroup"],
-             ["Tambor e sapata", "Sapata, cilindro de roda e molas", "FaRotate"],
-             ["Fluido de freio", "DOT, umidade e prazo de troca", "FaDroplet"],
-             ["ABS e linha pesada", "Sensor ABS, cuíca e catraca", "FaTruck"],
-             ["Diagnóstico e garantia", "Sintoma → peça e as causas de falha", "FaShieldHalved"],
-             ["Vender freio", "SPIN, cross-sell, combos e fechamento", "FaHandshake"]],
-   "notas": "MENSAGEM-CHAVE\nSão 7 módulos: da hidráulica ao balcão.\n\nCOMO CONDUZIR\nPasse rápido pelos tópicos. O módulo 4 remete ao treinamento de Lubrificantes, onde a linha de fluidos BAP está completa.\n\nINSIGHT PARA O CAMPO\nO módulo 5 abre a linha pesada: cuíca e catraca são venda de frotista."},
-  {"tipo": "preparado", "k": "ABERTURA", "t": "Ao final deste treinamento, você estará preparado para",
-   "itens": [["Explicar", "como a força do pé chega às quatro rodas", "FaComments"],
-             ["Ler", "o chiado, o pedal baixo e a luz do ABS que o cliente descreve", "FaVolumeHigh"],
-             ["Identificar", "a peça certa: eixo, lado, aplicação e ABS", "FaMagnifyingGlass"],
-             ["Orientar", "a troca por eixo, a sangria e o fluido novo", "FaWrench"],
-             ["Ampliar", "o pedido com o vizinho e o fluido do manual", "FaLayerGroup"],
-             ["Defender", "o valor da BAP com argumento de segurança", "FaShieldHalved"]],
-   "notas": "MENSAGEM-CHAVE\nEstes são os seis compromissos do treinamento.\n\nCOMO CONDUZIR\nLeia os verbos em voz alta. No fechamento eles voltam como checklist.\n\nPERGUNTE AO TIME\nQual destes seis vocês acham mais difícil hoje?"},
-
-  {"tipo": "secao", "n": "01", "titulo": "Como o freio funciona", "sub": "A hidráulica, o freio a disco e o freio a tambor",
-   "notas": "MENSAGEM-CHAVE\nO freio transforma movimento em calor por atrito; a hidráulica leva a força do pé até as rodas.\n\nCOMO CONDUZIR\nTransição curta. Este módulo dá o mapa do freio."},
-  {"tipo": "desenho", "k": "MÓDULO 01 · FUNCIONAMENTO", "t": "Do pedal à roda: o freio hidráulico", "img": "desenho:freio_hidraulico",
-   "legenda": ["Pedal", "Servo-freio", "Cilindro-mestre", "Reservatório", "Tubulação", "Pinça", "Disco", "Tambor e sapata", "Cilindro de roda"],
+   "pilares": [
+    [
+     "ENTENDER",
+     "Disco, tambor, hidráulica, ABS e freio a ar",
+     "FaCircleDot"
+    ],
+    [
+     "DIAGNOSTICAR",
+     "Chiado, pedal baixo, puxando e luz do ABS",
+     "FaStethoscope"
+    ],
+    [
+     "VENDER",
+     "Por eixo, com o vizinho e o fluido; combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nO objetivo é ligar o que o motorista sente no pedal à peça BAP certa.\n\nCOMO CONDUZIR\nApresente os três pilares como jornada.\n\nPERGUNTE AO TIME\nQuantas vezes vocês vendem cilindro de roda sem o fluido?"
+  },
+  {
+   "tipo": "topicos",
+   "k": "ABERTURA",
+   "t": "Tópicos do treinamento",
+   "itens": [
+    [
+     "Como o freio funciona",
+     "Hidráulica, disco e tambor",
+     "FaCircleDot"
+    ],
+    [
+     "Disco e pastilha",
+     "Desgaste, chiado e troca por eixo",
+     "FaLayerGroup"
+    ],
+    [
+     "Tambor e sapata",
+     "Sapata, cilindro de roda e molas",
+     "FaRotate"
+    ],
+    [
+     "Fluido de freio",
+     "DOT, umidade e prazo de troca",
+     "FaDroplet"
+    ],
+    [
+     "ABS e linha pesada",
+     "Sensor ABS, cuíca e catraca",
+     "FaTruck"
+    ],
+    [
+     "Diagnóstico e garantia",
+     "Sintoma → peça e as causas de falha",
+     "FaShieldHalved"
+    ],
+    [
+     "Vender freio",
+     "SPIN, cross-sell, combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nSão 7 módulos: da hidráulica ao balcão.\n\nCOMO CONDUZIR\nPasse rápido pelos tópicos. O módulo 4 remete ao treinamento de Lubrificantes, onde a linha de fluidos BAP está completa.\n\nINSIGHT PARA O CAMPO\nO módulo 5 abre a linha pesada: cuíca e catraca são venda de frotista."
+  },
+  {
+   "tipo": "preparado",
+   "k": "ABERTURA",
+   "t": "Ao final deste treinamento, você estará preparado para",
+   "itens": [
+    [
+     "Explicar",
+     "como a força do pé chega às quatro rodas",
+     "FaComments"
+    ],
+    [
+     "Ler",
+     "o chiado, o pedal baixo e a luz do ABS que o cliente descreve",
+     "FaVolumeHigh"
+    ],
+    [
+     "Identificar",
+     "a peça certa: eixo, lado, aplicação e ABS",
+     "FaMagnifyingGlass"
+    ],
+    [
+     "Orientar",
+     "a troca por eixo, a sangria e o fluido novo",
+     "FaWrench"
+    ],
+    [
+     "Ampliar",
+     "o pedido com o vizinho e o fluido do manual",
+     "FaLayerGroup"
+    ],
+    [
+     "Defender",
+     "o valor da BAP com argumento de segurança",
+     "FaShieldHalved"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nEstes são os seis compromissos do treinamento.\n\nCOMO CONDUZIR\nLeia os verbos em voz alta. No fechamento eles voltam como checklist.\n\nPERGUNTE AO TIME\nQual destes seis vocês acham mais difícil hoje?"
+  },
+  {
+   "tipo": "secao",
+   "n": "01",
+   "titulo": "Como o freio funciona",
+   "sub": "A hidráulica, o freio a disco e o freio a tambor",
+   "notas": "MENSAGEM-CHAVE\nO freio transforma movimento em calor por atrito; a hidráulica leva a força do pé até as rodas.\n\nCOMO CONDUZIR\nTransição curta. Este módulo dá o mapa do freio."
+  },
+  {
+   "tipo": "desenho",
+   "k": "MÓDULO 01 · FUNCIONAMENTO",
+   "t": "Do pedal à roda: o freio hidráulico",
+   "img": "desenho:freio_hidraulico",
+   "legenda": [
+    "Pedal",
+    "Servo-freio",
+    "Cilindro-mestre",
+    "Reservatório",
+    "Tubulação",
+    "Pinça",
+    "Disco",
+    "Tambor e sapata",
+    "Cilindro de roda"
+   ],
    "dica": "O pé faz pouca força: o servo multiplica e o fluido leva a pressão até as 4 rodas. Pedal baixo ou “borrachudo” é sinal de ar ou de fluido velho.",
-   "notas": "MENSAGEM-CHAVE\nO fluido não se comprime: a força do pé chega inteira às quatro rodas.\n\nCOMO CONDUZIR\nSiga o desenho: pedal (1), servo-freio (2), cilindro-mestre (3) com o reservatório (4), tubulação (5), pinça (6) que aperta o disco (7) e, atrás, o cilindro de roda (9) que abre as sapatas no tambor (8).\n\nINSIGHT PARA O CAMPO\nQualquer peça hidráulica trocada deixa entrar ar: o mecânico sangra o sistema e o fluido novo entra na venda."},
-  {"tipo": "paineis", "k": "MÓDULO 01 · FUNCIONAMENTO", "t": "Freio a disco × freio a tambor",
-   "paineis": [["Freio a disco", "A pinça aperta as pastilhas contra o disco\nMais usado na dianteira\nPeças BAP: pastilha", "desenho:freio_disco"],
-               ["Freio a tambor", "O cilindro abre as sapatas contra o tambor\nComum na traseira dos carros de entrada\nPeças BAP: sapata e cilindro de roda", "desenho:freio_tambor"]],
-   "legendas": ["1 Disco  ·  2 Pastilha  ·  3 Pinça  ·  4 Pistão  ·  5 Fluido", "1 Tambor  ·  2 Sapata  ·  3 Lona  ·  4 Cilindro  ·  5 Mola"],
+   "notas": "MENSAGEM-CHAVE\nO fluido não se comprime: a força do pé chega inteira às quatro rodas.\n\nCOMO CONDUZIR\nSiga o desenho: pedal (1), servo-freio (2), cilindro-mestre (3) com o reservatório (4), tubulação (5), pinça (6) que aperta o disco (7) e, atrás, o cilindro de roda (9) que abre as sapatas no tambor (8).\n\nINSIGHT PARA O CAMPO\nQualquer peça hidráulica trocada deixa entrar ar: o mecânico sangra o sistema e o fluido novo entra na venda."
+  },
+  {
+   "tipo": "paineis",
+   "k": "MÓDULO 01 · FUNCIONAMENTO",
+   "t": "Freio a disco × freio a tambor",
+   "paineis": [
+    [
+     "Freio a disco",
+     "A pinça aperta as pastilhas contra o disco\nMais usado na dianteira\nPeças BAP: pastilha",
+     "desenho:freio_disco"
+    ],
+    [
+     "Freio a tambor",
+     "O cilindro abre as sapatas contra o tambor\nComum na traseira dos carros de entrada\nPeças BAP: sapata e cilindro de roda",
+     "desenho:freio_tambor"
+    ]
+   ],
+   "legendas": [
+    "1 Disco  ·  2 Pastilha  ·  3 Pinça  ·  4 Pistão  ·  5 Fluido",
+    "1 Tambor  ·  2 Sapata  ·  3 Lona  ·  4 Cilindro  ·  5 Mola"
+   ],
    "dica": "A dianteira faz a maior parte da frenagem, por isso a pastilha gasta antes da sapata. Pergunte sempre: “dianteiro ou traseiro?”",
-   "notas": "MENSAGEM-CHAVE\nOs dois fazem a mesma coisa — atrito —, de jeitos diferentes.\n\nCOMO CONDUZIR\nÀ esquerda, o corte do disco; à direita, o tambor visto de frente. Use as legendas numeradas.\n\nPERGUNTE AO TIME\nPor que quase todo carro tem disco na frente? (Resposta: na frenagem o peso vai para a frente; o disco esfria melhor.)"},
-  {"tipo": "cartoes8", "k": "MÓDULO 01 · FUNCIONAMENTO", "t": "Cada peça tem uma função",
-   "cartoes": [["Pastilha", "atrito no disco", "FaLayerGroup"], ["Sapata", "atrito no tambor", "FaRotate"],
-               ["Cilindro de roda", "abre as sapatas", "FaArrowsLeftRight"], ["Fluido", "leva a pressão do pedal", "FaDroplet"],
-               ["Sensor ABS", "lê a velocidade da roda", "FaWaveSquare"], ["Cuíca", "freio a ar do caminhão", "FaTruck"],
-               ["Catraca", "ajusta a folga da sapata", "FaWrench"], ["Disco e tambor", "a superfície de atrito", "FaCircleDot"]],
-   "painel": [["{{n:Pastilha de Freio}}", "pastilhas ATIVAS na base, por eixo e aplicação"], ["{{n:Sensor ABS}}", "sensores ABS ATIVOS, por roda e lado"]],
+   "notas": "MENSAGEM-CHAVE\nOs dois fazem a mesma coisa — atrito —, de jeitos diferentes.\n\nCOMO CONDUZIR\nÀ esquerda, o corte do disco; à direita, o tambor visto de frente. Use as legendas numeradas.\n\nPERGUNTE AO TIME\nPor que quase todo carro tem disco na frente? (Resposta: na frenagem o peso vai para a frente; o disco esfria melhor.)"
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 01 · FUNCIONAMENTO",
+   "t": "Cada peça tem uma função",
+   "cartoes": [
+    [
+     "Pastilha",
+     "atrito no disco",
+     "FaLayerGroup"
+    ],
+    [
+     "Sapata",
+     "atrito no tambor",
+     "FaRotate"
+    ],
+    [
+     "Cilindro de roda",
+     "abre as sapatas",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Fluido",
+     "leva a pressão do pedal",
+     "FaDroplet"
+    ],
+    [
+     "Sensor ABS",
+     "lê a velocidade da roda",
+     "FaWaveSquare"
+    ],
+    [
+     "Cuíca",
+     "freio a ar do caminhão",
+     "FaTruck"
+    ],
+    [
+     "Catraca",
+     "ajusta a folga da sapata",
+     "FaWrench"
+    ],
+    [
+     "Disco e tambor",
+     "a superfície de atrito",
+     "FaCircleDot"
+    ]
+   ],
+   "painel": [
+    [
+     "{{n:Pastilha de Freio}}",
+     "pastilhas ATIVAS na base, por eixo e aplicação"
+    ],
+    [
+     "{{n:Sensor ABS}}",
+     "sensores ABS ATIVOS, por roda e lado"
+    ]
+   ],
    "fonte": "Números pela base unificada {{versao_base}}. Fluido de freio: ver o treinamento de Lubrificantes.",
-   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e mostre o quadro escuro: os números vêm da base.\n\nINSIGHT PARA O CAMPO\nDisco e tambor não são linha BAP: oriente o mecânico a medir e, se preciso, trocar junto."},
-
-  {"tipo": "secao", "n": "02", "titulo": "Disco e pastilha", "sub": "Desgaste, chiado e a troca por eixo",
-   "notas": "MENSAGEM-CHAVE\nA pastilha é a peça de freio de maior giro: o cliente volta para trocar.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "lista4", "k": "MÓDULO 02 · PASTILHA", "t": "A pastilha por dentro", "img": "capa:cover_16",
+   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e mostre o quadro escuro: os números vêm da base.\n\nINSIGHT PARA O CAMPO\nDisco e tambor não são linha BAP: oriente o mecânico a medir e, se preciso, trocar junto.",
+   "preencher": {
+    "38": "accent1"
+   }
+  },
+  {
+   "tipo": "secao",
+   "n": "02",
+   "titulo": "Disco e pastilha",
+   "sub": "Desgaste, chiado e a troca por eixo",
+   "notas": "MENSAGEM-CHAVE\nA pastilha é a peça de freio de maior giro: o cliente volta para trocar.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "lista4",
+   "k": "MÓDULO 02 · PASTILHA",
+   "t": "A pastilha por dentro",
+   "img": "capa:cover_16",
    "legenda": "Pastilhas BAP: o material de atrito colado na base de aço, com os acessórios de cada aplicação.",
-   "itens": [["Material de atrito: é ele que gasta e freia", "FaLayerGroup"], ["Base de aço: aguenta a força da pinça", "FaShieldHalved"],
-             ["Indicador de desgaste: chiado ou sensor no fim da vida", "FaCircleExclamation"], ["Posição: dianteira e traseira têm códigos diferentes", "FaArrowsLeftRight"]],
+   "itens": [
+    [
+     "Material de atrito: é ele que gasta e freia",
+     "FaLayerGroup"
+    ],
+    [
+     "Base de aço: aguenta a força da pinça",
+     "FaShieldHalved"
+    ],
+    [
+     "Indicador de desgaste: chiado ou sensor no fim da vida",
+     "FaCircleExclamation"
+    ],
+    [
+     "Posição: dianteira e traseira têm códigos diferentes",
+     "FaArrowsLeftRight"
+    ]
+   ],
    "dica": "Pastilha se troca por eixo: os dois lados juntos, para o carro não puxar na frenagem.",
-   "notas": "MENSAGEM-CHAVE\nA pastilha é material de atrito numa base de aço; o indicador avisa o fim da vida.\n\nCOMO CONDUZIR\nMostre a pastilha BAP e passe pelas quatro partes.\n\nINSIGHT PARA O CAMPO\nNa base, a pastilha {{cod:PAF0051}} (Gol dianteiro) indica o sensor {{oj:PAF0051}} no Ofereça junto."},
-  {"tipo": "sinais", "k": "MÓDULO 02 · PASTILHA", "t": "Pastilha gasta: sinais e o que vai junto",
+   "notas": "MENSAGEM-CHAVE\nA pastilha é material de atrito numa base de aço; o indicador avisa o fim da vida.\n\nCOMO CONDUZIR\nMostre a pastilha BAP e passe pelas quatro partes.\n\nINSIGHT PARA O CAMPO\nNa base, a pastilha {{cod:PAF0051}} (Gol dianteiro) indica o sensor {{oj:PAF0051}} no Ofereça junto."
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 02 · PASTILHA",
+   "t": "Pastilha gasta: sinais e o que vai junto",
    "t1": "Sinais de pastilha gasta",
-   "itens1": [["Chiado metálico ao frear", "FaVolumeHigh"], ["Pedal mais baixo que o normal", "FaGaugeHigh"],
-              ["Luz de desgaste acesa no painel", "FaCircleExclamation"], ["Disco riscado ou com degrau na borda", "FaCircleDot"]],
+   "itens1": [
+    [
+     "Chiado metálico ao frear",
+     "FaVolumeHigh"
+    ],
+    [
+     "Pedal mais baixo que o normal",
+     "FaGaugeHigh"
+    ],
+    [
+     "Luz de desgaste acesa no painel",
+     "FaCircleExclamation"
+    ],
+    [
+     "Disco riscado ou com degrau na borda",
+     "FaCircleDot"
+    ]
+   ],
    "t2": "O que oferecer junto",
-   "itens2": ["Os dois lados do eixo: pastilha se troca em jogo.",
-              "Sensor de desgaste ou sensor ABS, quando a base indica: o Ofereça junto mostra.",
-              "Disco abaixo da espessura mínima também sai: oriente a medir."],
+   "itens2": [
+    "Os dois lados do eixo: pastilha se troca em jogo.",
+    "Sensor de desgaste ou sensor ABS, quando a base indica: o Ofereça junto mostra.",
+    "Disco abaixo da espessura mínima também sai: oriente a medir."
+   ],
    "dica": "Chiado metálico é a pastilha no fim: rodar assim risca o disco e a troca fica bem mais cara.",
-   "notas": "MENSAGEM-CHAVE\nA pastilha avisa antes de acabar: chiado, pedal baixo e luz no painel.\n\nCOMO CONDUZIR\nLeia os sinais e os três itens de venda junto.\n\nINSIGHT PARA O CAMPO\nQuanto mais cedo a troca, mais barato para o cliente: argumento forte para a revisão preventiva."},
-  {"tipo": "numero", "k": "MÓDULO 02 · PASTILHA", "t": "Pastilha: o teste do balcão", "img": "capa:cover_16",
-   "numero": "Por eixo", "desc": "os dois lados juntos, sempre: dianteiro com dianteiro, traseiro com traseiro",
-   "passos": ["Pergunte: dianteiro ou traseiro? O carro tem ABS?", "Escute: chiado metálico é o indicador de desgaste",
-              "Olhe: espessura da pastilha e o disco (riscos e degrau)", "Ofereça o jogo e o fluido para completar o nível"],
+   "notas": "MENSAGEM-CHAVE\nA pastilha avisa antes de acabar: chiado, pedal baixo e luz no painel.\n\nCOMO CONDUZIR\nLeia os sinais e os três itens de venda junto.\n\nINSIGHT PARA O CAMPO\nQuanto mais cedo a troca, mais barato para o cliente: argumento forte para a revisão preventiva."
+  },
+  {
+   "tipo": "numero",
+   "k": "MÓDULO 02 · PASTILHA",
+   "t": "Pastilha: o teste do balcão",
+   "img": "capa:cover_16",
+   "numero": "Por eixo",
+   "desc": "os dois lados juntos, sempre: dianteiro com dianteiro, traseiro com traseiro",
+   "passos": [
+    "Pergunte: dianteiro ou traseiro? O carro tem ABS?",
+    "Escute: chiado metálico é o indicador de desgaste",
+    "Olhe: espessura da pastilha e o disco (riscos e degrau)",
+    "Ofereça o jogo e o fluido para completar o nível"
+   ],
    "exemplo": "Onix dianteiro: pastilha {{cod:PAF0094}} com o sensor {{oj:PAF0094}}, que é o Ofereça junto da base.",
-   "notas": "MENSAGEM-CHAVE\nA pastilha se vende por eixo, com as perguntas certas.\n\nCOMO CONDUZIR\nPasse pelos quatro passos. A pergunta do ABS evita a devolução: a pastilha e o sensor mudam com ele.\n\nINSIGHT PARA O CAMPO\nPastilha nova precisa de assentamento: oriente o cliente a frear com suavidade nos primeiros quilômetros."},
-  {"tipo": "tabela", "k": "MÓDULO 02 · PASTILHA", "t": "Exemplos pela base: pastilha e o que vai junto",
-   "cabecalho": ["Peça", "Código BAP · posição", "Ofereça junto (base)"],
-   "linhas": [["{{prod:Pastilha de Freio}} · Gol", "{{cod:PAF0051}} · dianteira", "{{oj:PAF0051}}"],
-              ["{{prod:Pastilha de Freio}} · Onix", "{{cod:PAF0094}} · dianteira", "{{oj:PAF0094}}"],
-              ["{{prod:Pastilha de Freio}} · Palio", "{{cod:PAF0085}} · dianteira", "{{oj:PAF0085}}"],
-              ["{{prod:Pastilha de Freio}} · HB20", "{{cod:PAF1441}} · dianteira", "{{oj:PAF1441}}"],
-              ["{{prod:Sensor ABS}} · Palio", "{{cod:ABS4511}} · dianteiro", "{{oj:ABS4511}}"]],
+   "notas": "MENSAGEM-CHAVE\nA pastilha se vende por eixo, com as perguntas certas.\n\nCOMO CONDUZIR\nPasse pelos quatro passos. A pergunta do ABS evita a devolução: a pastilha e o sensor mudam com ele.\n\nINSIGHT PARA O CAMPO\nPastilha nova precisa de assentamento: oriente o cliente a frear com suavidade nos primeiros quilômetros."
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 02 · PASTILHA",
+   "t": "Exemplos pela base: pastilha e o que vai junto",
+   "cabecalho": [
+    "Peça",
+    "Código BAP · posição",
+    "Ofereça junto (base)"
+   ],
+   "linhas": [
+    [
+     "{{prod:Pastilha de Freio}} · Gol",
+     "{{cod:PAF0051}} · dianteira",
+     "{{oj:PAF0051}}"
+    ],
+    [
+     "{{prod:Pastilha de Freio}} · Onix",
+     "{{cod:PAF0094}} · dianteira",
+     "{{oj:PAF0094}}"
+    ],
+    [
+     "{{prod:Pastilha de Freio}} · Palio",
+     "{{cod:PAF0085}} · dianteira",
+     "{{oj:PAF0085}}"
+    ],
+    [
+     "{{prod:Pastilha de Freio}} · HB20",
+     "{{cod:PAF1441}} · dianteira",
+     "{{oj:PAF1441}}"
+    ],
+    [
+     "{{prod:Sensor ABS}} · Palio",
+     "{{cod:ABS4511}} · dianteiro",
+     "{{oj:ABS4511}}"
+    ]
+   ],
    "atencao": "Confira sempre ano, versão e ABS no Catálogo BAP: os códigos deste slide são exemplos.",
-   "notas": "MENSAGEM-CHAVE\nCom a base, o vendedor monta o pedido de freio dianteiro numa consulta.\n\nCOMO CONDUZIR\nLeia a tabela: a pastilha leva ao sensor e o sensor leva à pastilha.\n\nINSIGHT PARA O CAMPO\nO ATENÇÃO é regra: ano, versão e ABS antes de fechar."},
-
-  {"tipo": "secao", "n": "03", "titulo": "Tambor e sapata", "sub": "Sapata, cilindro de roda e as molas",
-   "notas": "MENSAGEM-CHAVE\nNo tambor, a sapata e o cilindro de roda andam juntos.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "foto2", "k": "MÓDULO 03 · TAMBOR", "t": "Sapata e cilindro de roda", "img": "capa:cover_17",
-   "itens": [["foto:SFR30000", "Sapata: a lona do freio a tambor, trocada por eixo.", "Para o cliente: o freio de mão volta a segurar."],
-             ["foto:CIL8501", "Cilindro de roda: se vaza, estraga a lona nova.", "Para o cliente: o carro freia reto, sem puxar."]],
+   "notas": "MENSAGEM-CHAVE\nCom a base, o vendedor monta o pedido de freio dianteiro numa consulta.\n\nCOMO CONDUZIR\nLeia a tabela: a pastilha leva ao sensor e o sensor leva à pastilha.\n\nINSIGHT PARA O CAMPO\nO ATENÇÃO é regra: ano, versão e ABS antes de fechar."
+  },
+  {
+   "tipo": "secao",
+   "n": "03",
+   "titulo": "Tambor e sapata",
+   "sub": "Sapata, cilindro de roda e as molas",
+   "notas": "MENSAGEM-CHAVE\nNo tambor, a sapata e o cilindro de roda andam juntos.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 03 · TAMBOR",
+   "t": "Sapata e cilindro de roda",
+   "img": "capa:cover_17",
+   "itens": [
+    [
+     "foto:SFR30000",
+     "Sapata: a lona do freio a tambor, trocada por eixo.",
+     "Para o cliente: o freio de mão volta a segurar."
+    ],
+    [
+     "foto:CIL8501",
+     "Cilindro de roda: se vaza, estraga a lona nova.",
+     "Para o cliente: o carro freia reto, sem puxar."
+    ]
+   ],
    "dica": "Sapata e cilindro andam juntos: na base, a sapata {{cod:SFR30000}} (Palio) indica o cilindro {{oj:SFR30000}}.",
-   "notas": "MENSAGEM-CHAVE\nA sapata é a peça de desgaste; o cilindro de roda é o que garante que a sapata nova dure.\n\nCOMO CONDUZIR\nMostre a sapata BAP e as duas peças. No freio traseiro a tambor, o freio de mão também usa as sapatas.\n\nINSIGHT PARA O CAMPO\nO Ofereça junto liga a sapata ao cilindro e o cilindro ao fluido."},
-  {"tipo": "sinais", "k": "MÓDULO 03 · TAMBOR", "t": "Tambor: sinais e o que vai junto",
+   "notas": "MENSAGEM-CHAVE\nA sapata é a peça de desgaste; o cilindro de roda é o que garante que a sapata nova dure.\n\nCOMO CONDUZIR\nMostre a sapata BAP e as duas peças. No freio traseiro a tambor, o freio de mão também usa as sapatas.\n\nINSIGHT PARA O CAMPO\nO Ofereça junto liga a sapata ao cilindro e o cilindro ao fluido."
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 03 · TAMBOR",
+   "t": "Tambor: sinais e o que vai junto",
    "t1": "Sinais de sapata ou cilindro gastos",
-   "itens1": [["Freio de mão sem segurar o carro", "FaTriangleExclamation"], ["Carro puxa para um lado na frenagem", "FaArrowsLeftRight"],
-              ["Fluido na parte de dentro da roda", "FaDroplet"], ["Ruído de raspagem atrás", "FaVolumeHigh"]],
+   "itens1": [
+    [
+     "Freio de mão sem segurar o carro",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Carro puxa para um lado na frenagem",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Fluido na parte de dentro da roda",
+     "FaDroplet"
+    ],
+    [
+     "Ruído de raspagem atrás",
+     "FaVolumeHigh"
+    ]
+   ],
    "t2": "Por que oferecer o cilindro junto",
-   "itens2": ["Cilindro que vaza contamina a lona nova: o carro passa a puxar.",
-              "A roda já está aberta: a mão de obra é a mesma.",
-              "Na base, o cilindro {{cod:CIL8501}} (Gol) indica {{oj:CIL8501}}."],
+   "itens2": [
+    "Cilindro que vaza contamina a lona nova: o carro passa a puxar.",
+    "A roda já está aberta: a mão de obra é a mesma.",
+    "Na base, o cilindro {{cod:CIL8501}} (Gol) indica {{oj:CIL8501}}."
+   ],
    "dica": "Fluido na parte de dentro do pneu traseiro é o sinal clássico de cilindro de roda vazando.",
-   "notas": "MENSAGEM-CHAVE\nNo tambor, o cilindro vazando estraga a sapata nova.\n\nCOMO CONDUZIR\nLeia os sinais e os três argumentos.\n\nINSIGHT PARA O CAMPO\nCilindro trocado pede sangria: o fluido novo entra na venda."},
-  {"tipo": "numero3", "k": "MÓDULO 03 · TAMBOR", "t": "A troca certa no tambor", "icone": "FaWrench",
-   "numero": "Eixo", "desc": "sapatas dos dois lados juntas, com o cilindro conferido",
-   "cards": [["Sapatas por eixo", "Os dois lados juntos, para frear por igual.", "FaArrowsLeftRight"],
-             ["Cilindro e molas", "Cilindro vazando e mola cansada saem na mesma troca.", "FaRotate"],
-             ["Regular e sangrar", "Ajuste da folga e sangria do fluido no fim.", "FaDroplet"]],
+   "notas": "MENSAGEM-CHAVE\nNo tambor, o cilindro vazando estraga a sapata nova.\n\nCOMO CONDUZIR\nLeia os sinais e os três argumentos.\n\nINSIGHT PARA O CAMPO\nCilindro trocado pede sangria: o fluido novo entra na venda."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 03 · TAMBOR",
+   "t": "A troca certa no tambor",
+   "icone": "FaWrench",
+   "numero": "Eixo",
+   "desc": "sapatas dos dois lados juntas, com o cilindro conferido",
+   "cards": [
+    [
+     "Sapatas por eixo",
+     "Os dois lados juntos, para frear por igual.",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Cilindro e molas",
+     "Cilindro vazando e mola cansada saem na mesma troca.",
+     "FaRotate"
+    ],
+    [
+     "Regular e sangrar",
+     "Ajuste da folga e sangria do fluido no fim.",
+     "FaDroplet"
+    ]
+   ],
    "dica": "Sapata nova com tambor ovalizado trepida no pedal: oriente o mecânico a conferir o tambor.",
-   "notas": "MENSAGEM-CHAVE\nA troca certa no tambor é por eixo, com cilindro e molas conferidos, regulagem e sangria.\n\nCOMO CONDUZIR\nPasse pelos três cartões.\n\nPERGUNTE AO TIME\nPor que o freio de mão fica frouxo depois da troca? (Resposta: falta de regulagem da folga das sapatas.)"},
-
-  {"tipo": "secao", "n": "04", "titulo": "Fluido de freio", "sub": "DOT, umidade e o prazo de troca (veja também Lubrificantes)",
-   "notas": "MENSAGEM-CHAVE\nO fluido envelhece mesmo sem uso, porque absorve umidade.\n\nCOMO CONDUZIR\nTransição curta. Diga que a linha completa de fluidos BAP está no treinamento de Lubrificantes (módulo de Químicos)."},
-  {"tipo": "numero3", "k": "MÓDULO 04 · FLUIDO", "t": "Fluido de freio: o item esquecido", "icone": "FaCalendarDays",
-   "numero": "2 anos", "desc": "prazo de troca do fluido de freio indicado pela maioria das montadoras",
-   "cards": [["Absorve umidade", "O fluido puxa água do ar com o tempo, mesmo com o carro parado.", "FaDroplet"],
-             ["Ferve mais fácil", "Com água, ele ferve na frenagem forte e o pedal vai ao fundo.", "FaTemperatureHigh"],
-             ["Corrói por dentro", "A umidade enferruja cilindros e pinças: vazamento e freio preso.", "FaTriangleExclamation"]],
+   "notas": "MENSAGEM-CHAVE\nA troca certa no tambor é por eixo, com cilindro e molas conferidos, regulagem e sangria.\n\nCOMO CONDUZIR\nPasse pelos três cartões.\n\nPERGUNTE AO TIME\nPor que o freio de mão fica frouxo depois da troca? (Resposta: falta de regulagem da folga das sapatas.)"
+  },
+  {
+   "tipo": "secao",
+   "n": "04",
+   "titulo": "Fluido de freio",
+   "sub": "DOT, umidade e o prazo de troca (veja também Lubrificantes)",
+   "notas": "MENSAGEM-CHAVE\nO fluido envelhece mesmo sem uso, porque absorve umidade.\n\nCOMO CONDUZIR\nTransição curta. Diga que a linha completa de fluidos BAP está no treinamento de Lubrificantes (módulo de Químicos)."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 04 · FLUIDO",
+   "t": "Fluido de freio: o item esquecido",
+   "icone": "FaCalendarDays",
+   "numero": "2 anos",
+   "desc": "prazo de troca do fluido de freio indicado pela maioria das montadoras",
+   "cards": [
+    [
+     "Absorve umidade",
+     "O fluido puxa água do ar com o tempo, mesmo com o carro parado.",
+     "FaDroplet"
+    ],
+    [
+     "Ferve mais fácil",
+     "Com água, ele ferve na frenagem forte e o pedal vai ao fundo.",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Corrói por dentro",
+     "A umidade enferruja cilindros e pinças: vazamento e freio preso.",
+     "FaTriangleExclamation"
+    ]
+   ],
    "dica": "Vendeu cilindro de roda? Ofereça o fluido: na base, o {{cod:CIL8501}} indica {{oj:CIL8501}}. O tipo (DOT) é sempre o do manual.",
-   "notas": "MENSAGEM-CHAVE\nFluido velho é freio que falha justo na frenagem mais forte.\n\nCOMO CONDUZIR\nMostre o número grande: a troca é por tempo, não por quilometragem. Passe pelos três cartões em sequência.\n\nINSIGHT PARA O CAMPO\nA tabela de fluidos e o detalhe de uso estão no treinamento de Lubrificantes."},
-  {"tipo": "indicadores", "k": "MÓDULO 04 · FLUIDO", "t": "DOT: o que está escrito na tampa",
-   "cards": [["FaDroplet", "DOT 3", "Base glicol", "O mais comum nos carros de passeio mais antigos. BAP: {{cod:FLU15001}}.", "= o da tampa DOT 3"],
-             ["FaTemperatureHigh", "DOT 4", "Base glicol", "Ferve mais alto; serve onde o manual pede DOT 3. BAP: {{cod:FLU15002}}.", "= DOT 3 ou DOT 4"],
-             ["FaGauge", "DOT 5.1", "Base glicol", "Ainda mais resistente ao calor; mistura com DOT 3 e 4.", "= só se o manual pedir"],
-             ["FaBan", "DOT 5", "Base silicone", "Não se mistura com os de base glicol.", "= nunca misturar"]],
+   "notas": "MENSAGEM-CHAVE\nFluido velho é freio que falha justo na frenagem mais forte.\n\nCOMO CONDUZIR\nMostre o número grande: a troca é por tempo, não por quilometragem. Passe pelos três cartões em sequência.\n\nINSIGHT PARA O CAMPO\nA tabela de fluidos e o detalhe de uso estão no treinamento de Lubrificantes."
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 04 · FLUIDO",
+   "t": "DOT: o que está escrito na tampa",
+   "cards": [
+    [
+     "FaDroplet",
+     "DOT 3",
+     "Base glicol",
+     "O mais comum nos carros de passeio mais antigos. BAP: {{cod:FLU15001}}.",
+     "= o da tampa DOT 3"
+    ],
+    [
+     "FaTemperatureHigh",
+     "DOT 4",
+     "Base glicol",
+     "Ferve mais alto; serve onde o manual pede DOT 3. BAP: {{cod:FLU15002}}.",
+     "= DOT 3 ou DOT 4"
+    ],
+    [
+     "FaGauge",
+     "DOT 5.1",
+     "Base glicol",
+     "Ainda mais resistente ao calor; mistura com DOT 3 e 4.",
+     "= só se o manual pedir"
+    ],
+    [
+     "FaBan",
+     "DOT 5",
+     "Base silicone",
+     "Não se mistura com os de base glicol.",
+     "= nunca misturar"
+    ]
+   ],
    "dica": "Na dúvida, o fluido certo é o que está escrito na tampa do reservatório ou no manual.",
-   "notas": "MENSAGEM-CHAVE\nO DOT está na tampa do reservatório; DOT 4 atende onde pede DOT 3, e DOT 5 (silicone) não se mistura.\n\nCOMO CONDUZIR\nPasse pelos quatro cartões. A BAP tem DOT 3 e DOT 4 em 500 ml.\n\nPERGUNTE AO TIME\nO cliente pede DOT 3 e você só tem DOT 4. Pode vender? (Resposta: sim, DOT 4 atende onde pede DOT 3.)"},
-  {"tipo": "numero", "k": "MÓDULO 04 · FLUIDO", "t": "Troca de fluido: o que orientar", "img": "montagem:capa:cover_18+foto:CIL8507",
-   "numero": "Sangrar", "desc": "toda troca de peça hidráulica deixa entrar ar: o sistema é sangrado com fluido novo",
-   "passos": ["Pergunte quando foi a última troca do fluido", "Confira o DOT na tampa do reservatório",
-              "Ofereça fluido suficiente para a sangria completa", "Lembre: frasco aberto puxa umidade; venda o tamanho certo"],
+   "notas": "MENSAGEM-CHAVE\nO DOT está na tampa do reservatório; DOT 4 atende onde pede DOT 3, e DOT 5 (silicone) não se mistura.\n\nCOMO CONDUZIR\nPasse pelos quatro cartões. A BAP tem DOT 3 e DOT 4 em 500 ml.\n\nPERGUNTE AO TIME\nO cliente pede DOT 3 e você só tem DOT 4. Pode vender? (Resposta: sim, DOT 4 atende onde pede DOT 3.)"
+  },
+  {
+   "tipo": "numero",
+   "k": "MÓDULO 04 · FLUIDO",
+   "t": "Troca de fluido: o que orientar",
+   "img": "montagem:capa:cover_18+foto:CIL8507",
+   "numero": "Sangrar",
+   "desc": "toda troca de peça hidráulica deixa entrar ar: o sistema é sangrado com fluido novo",
+   "passos": [
+    "Pergunte quando foi a última troca do fluido",
+    "Confira o DOT na tampa do reservatório",
+    "Ofereça fluido suficiente para a sangria completa",
+    "Lembre: frasco aberto puxa umidade; venda o tamanho certo"
+   ],
    "exemplo": "Gol: cilindro {{cod:CIL8501}} com o fluido {{oj:CIL8501}}, que é o Ofereça junto da base.",
-   "notas": "MENSAGEM-CHAVE\nPeça hidráulica trocada pede sangria; sangria pede fluido novo.\n\nCOMO CONDUZIR\nPasse pelos quatro passos.\n\nINSIGHT PARA O CAMPO\nFrasco aberto e guardado puxa umidade: na oficina, frasco do tamanho do serviço."},
-
-  {"tipo": "secao", "n": "05", "titulo": "ABS e linha pesada", "sub": "Sensor ABS, cuíca e catraca",
-   "notas": "MENSAGEM-CHAVE\nO ABS impede a roda de travar; na linha pesada, o freio é a ar.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "desenho", "k": "MÓDULO 05 · ABS", "t": "Como o ABS sabe que a roda vai travar", "img": "desenho:abs_sensor",
-   "legenda": ["Cubo da roda", "Roda fônica (dentes)", "Sensor ABS", "Chicote", "Módulo ABS", "Luz do ABS no painel"],
+   "notas": "MENSAGEM-CHAVE\nPeça hidráulica trocada pede sangria; sangria pede fluido novo.\n\nCOMO CONDUZIR\nPasse pelos quatro passos.\n\nINSIGHT PARA O CAMPO\nFrasco aberto e guardado puxa umidade: na oficina, frasco do tamanho do serviço."
+  },
+  {
+   "tipo": "secao",
+   "n": "05",
+   "titulo": "ABS e linha pesada",
+   "sub": "Sensor ABS, cuíca e catraca",
+   "notas": "MENSAGEM-CHAVE\nO ABS impede a roda de travar; na linha pesada, o freio é a ar.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "desenho",
+   "k": "MÓDULO 05 · ABS",
+   "t": "Como o ABS sabe que a roda vai travar",
+   "img": "desenho:abs_sensor",
+   "legenda": [
+    "Cubo da roda",
+    "Roda fônica (dentes)",
+    "Sensor ABS",
+    "Chicote",
+    "Módulo ABS",
+    "Luz do ABS no painel"
+   ],
    "dica": "Luz do ABS acesa: o freio comum continua funcionando, mas a roda pode travar na frenagem forte. Sensor é a causa mais comum.",
-   "notas": "MENSAGEM-CHAVE\nO sensor lê os dentes da roda fônica; se uma roda para de girar, o módulo alivia a pressão daquela roda.\n\nCOMO CONDUZIR\nSiga os números: a roda fônica (2) gira junto com o cubo (1); o sensor (3) lê os dentes e manda o sinal pelo chicote (4) ao módulo (5); com defeito, acende a luz (6).\n\nINSIGHT PARA O CAMPO\nNa base, o sensor é por roda e lado: o {{cod:ABS4500}} é dianteiro direito."},
-  {"tipo": "sinais", "k": "MÓDULO 05 · ABS", "t": "Sensor ABS: sinais e o que vai junto",
+   "notas": "MENSAGEM-CHAVE\nO sensor lê os dentes da roda fônica; se uma roda para de girar, o módulo alivia a pressão daquela roda.\n\nCOMO CONDUZIR\nSiga os números: a roda fônica (2) gira junto com o cubo (1); o sensor (3) lê os dentes e manda o sinal pelo chicote (4) ao módulo (5); com defeito, acende a luz (6).\n\nINSIGHT PARA O CAMPO\nNa base, o sensor é por roda e lado: o {{cod:ABS4500}} é dianteiro direito."
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 05 · ABS",
+   "t": "Sensor ABS: sinais e o que vai junto",
    "t1": "Sinais de sensor ABS com defeito",
-   "itens1": [["Luz do ABS acesa no painel", "FaCircleExclamation"], ["Roda trava na frenagem forte", "FaTriangleExclamation"],
-              ["Chicote do sensor partido ou oxidado", "FaLinkSlash"], ["Luz acende depois de troca de cubo ou junta", "FaRotate"]],
+   "itens1": [
+    [
+     "Luz do ABS acesa no painel",
+     "FaCircleExclamation"
+    ],
+    [
+     "Roda trava na frenagem forte",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Chicote do sensor partido ou oxidado",
+     "FaLinkSlash"
+    ],
+    [
+     "Luz acende depois de troca de cubo ou junta",
+     "FaRotate"
+    ]
+   ],
    "t2": "O que oferecer junto",
-   "itens2": ["Pastilha da mesma roda: na base, o sensor {{cod:ABS4511}} (Palio) indica {{oj:ABS4511}}.",
-              "Cubo de roda, quando o sensor lê o anel do cubo.",
-              "Confira lado e posição: cada roda tem o seu código."],
+   "itens2": [
+    "Pastilha da mesma roda: na base, o sensor {{cod:ABS4511}} (Palio) indica {{oj:ABS4511}}.",
+    "Cubo de roda, quando o sensor lê o anel do cubo.",
+    "Confira lado e posição: cada roda tem o seu código."
+   ],
    "dica": "Trocou junta ou cubo e a luz do ABS acendeu? Confira se a peça tem o anel do ABS e se o sensor não foi danificado.",
-   "notas": "MENSAGEM-CHAVE\nLuz do ABS acesa é a reclamação mais comum, e o sensor é a causa mais frequente.\n\nCOMO CONDUZIR\nLeia os sinais e os itens de venda junto.\n\nINSIGHT PARA O CAMPO\nA conferência de lado e posição evita a devolução: há sensor dianteiro direito, dianteiro esquerdo e traseiro."},
-  {"tipo": "desenho", "k": "MÓDULO 05 · LINHA PESADA", "t": "Freio a ar: cuíca e catraca", "img": "desenho:freio_pesado",
-   "legenda": ["Cuíca (câmara de ar)", "Haste", "Catraca (ajustador)", "Eixo do came", "Came S", "Sapata", "Tambor"],
+   "notas": "MENSAGEM-CHAVE\nLuz do ABS acesa é a reclamação mais comum, e o sensor é a causa mais frequente.\n\nCOMO CONDUZIR\nLeia os sinais e os itens de venda junto.\n\nINSIGHT PARA O CAMPO\nA conferência de lado e posição evita a devolução: há sensor dianteiro direito, dianteiro esquerdo e traseiro."
+  },
+  {
+   "tipo": "desenho",
+   "k": "MÓDULO 05 · LINHA PESADA",
+   "t": "Freio a ar: cuíca e catraca",
+   "img": "desenho:freio_pesado",
+   "legenda": [
+    "Cuíca (câmara de ar)",
+    "Haste",
+    "Catraca (ajustador)",
+    "Eixo do came",
+    "Came S",
+    "Sapata",
+    "Tambor"
+   ],
    "dica": "Na linha pesada, o ar empurra a haste da cuíca; a catraca gira o came S, que abre as sapatas.",
-   "notas": "MENSAGEM-CHAVE\nNo caminhão, o freio é a ar: a cuíca empurra, a catraca transmite e ajusta, o came S abre as sapatas.\n\nCOMO CONDUZIR\nSiga os números: cuíca (1), haste (2), catraca (3), eixo (4), came S (5), sapata (6) e tambor (7).\n\nINSIGHT PARA O CAMPO\nNa base há {{n:Cuíca de Freio}} cuícas e {{n:Catraca de Freio}} catracas ATIVAS: venda de frotista."},
-  {"tipo": "foto2", "k": "MÓDULO 05 · LINHA PESADA", "t": "Cuíca e catraca BAP", "img": "capa:cover_19",
-   "itens": [["capa:cover_19", "Cuíca: a câmara de ar que aciona o freio. Na base, {{cod:CFR9001}}.", "Para o frotista: freio de serviço e estacionamento."],
-             ["capa:catraca", "Catraca: transmite a força e ajusta a folga. Na base, {{cod:CAF10702}}.", "Para o frotista: freio regulado e por igual."]],
+   "notas": "MENSAGEM-CHAVE\nNo caminhão, o freio é a ar: a cuíca empurra, a catraca transmite e ajusta, o came S abre as sapatas.\n\nCOMO CONDUZIR\nSiga os números: cuíca (1), haste (2), catraca (3), eixo (4), came S (5), sapata (6) e tambor (7).\n\nINSIGHT PARA O CAMPO\nNa base há {{n:Cuíca de Freio}} cuícas e {{n:Catraca de Freio}} catracas ATIVAS: venda de frotista."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 05 · LINHA PESADA",
+   "t": "Cuíca e catraca BAP",
+   "img": "capa:cover_19",
+   "itens": [
+    [
+     "capa:cover_19",
+     "Cuíca: a câmara de ar que aciona o freio. Na base, {{cod:CFR9001}}.",
+     "Para o frotista: freio de serviço e estacionamento."
+    ],
+    [
+     "capa:catraca",
+     "Catraca: transmite a força e ajusta a folga. Na base, {{cod:CAF10702}}.",
+     "Para o frotista: freio regulado e por igual."
+    ]
+   ],
    "dica": "Catraca desregulada deixa o curso da haste grande: o caminhão freia menos. Inspeção periódica é rotina de frota.",
-   "notas": "MENSAGEM-CHAVE\nCuíca e catraca são as peças de giro do freio pesado.\n\nCOMO CONDUZIR\nMostre as fotos. A cuíca tem a parte de serviço e, nas de mola, a de estacionamento.\n\nINSIGHT PARA O CAMPO\nCom o frotista, fale de caminhão parado: a peça certa em mão evita dias sem rodar."},
-
-  {"tipo": "secao", "n": "06", "titulo": "Diagnóstico e garantia", "sub": "Do sintoma à peça e as causas de falha que não são defeito",
-   "notas": "MENSAGEM-CHAVE\nNo freio, o diagnóstico certo é segurança.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "tabela", "k": "MÓDULO 06 · DIAGNÓSTICO", "t": "Sintoma → peça BAP",
-   "cabecalho": ["Sintoma", "Causa provável", "Peça BAP"],
-   "linhas": [["Chiado metálico ao frear", "Pastilha no fim; confira o disco", "{{prod:Pastilha de Freio}}"],
-              ["Pedal baixo ou “borrachudo”", "Ar no sistema ou fluido velho", "{{prod:Fluidos e Químicos}} (fluido DOT)"],
-              ["Carro puxa na frenagem", "Cilindro vazando ou sapata contaminada", "{{prod:Cilindro de Roda}} · {{prod:Sapata de Freio}}"],
-              ["Freio de mão não segura", "Sapata gasta ou sem regulagem", "{{prod:Sapata de Freio}}"],
-              ["Luz do ABS acesa", "Sensor ou chicote do sensor", "{{prod:Sensor ABS}}"]],
+   "notas": "MENSAGEM-CHAVE\nCuíca e catraca são as peças de giro do freio pesado.\n\nCOMO CONDUZIR\nMostre as fotos. A cuíca tem a parte de serviço e, nas de mola, a de estacionamento.\n\nINSIGHT PARA O CAMPO\nCom o frotista, fale de caminhão parado: a peça certa em mão evita dias sem rodar."
+  },
+  {
+   "tipo": "secao",
+   "n": "06",
+   "titulo": "Diagnóstico e garantia",
+   "sub": "Do sintoma à peça e as causas de falha que não são defeito",
+   "notas": "MENSAGEM-CHAVE\nNo freio, o diagnóstico certo é segurança.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 06 · DIAGNÓSTICO",
+   "t": "Sintoma → peça BAP",
+   "cabecalho": [
+    "Sintoma",
+    "Causa provável",
+    "Peça BAP"
+   ],
+   "linhas": [
+    [
+     "Chiado metálico ao frear",
+     "Pastilha no fim; confira o disco",
+     "{{prod:Pastilha de Freio}}"
+    ],
+    [
+     "Pedal baixo ou “borrachudo”",
+     "Ar no sistema ou fluido velho",
+     "{{prod:Fluidos e Químicos}} (fluido DOT)"
+    ],
+    [
+     "Carro puxa na frenagem",
+     "Cilindro vazando ou sapata contaminada",
+     "{{prod:Cilindro de Roda}} · {{prod:Sapata de Freio}}"
+    ],
+    [
+     "Freio de mão não segura",
+     "Sapata gasta ou sem regulagem",
+     "{{prod:Sapata de Freio}}"
+    ],
+    [
+     "Luz do ABS acesa",
+     "Sensor ou chicote do sensor",
+     "{{prod:Sensor ABS}}"
+    ]
+   ],
    "atencao": "O balcão indica a peça provável; quem confirma o defeito é o mecânico. Freio é segurança: não prometa sem essa confirmação.",
-   "notas": "MENSAGEM-CHAVE\nA tabela de bolso do freio: cinco sintomas do dia a dia.\n\nCOMO CONDUZIR\nLeia linha por linha e peça para o time completar de cabeça.\n\nINSIGHT PARA O CAMPO\nImprima esta tabela para o balconista do cliente."},
-  {"tipo": "barulhos", "k": "MÓDULO 06 · DIAGNÓSTICO", "t": "O que o motorista sente no pedal",
+   "notas": "MENSAGEM-CHAVE\nA tabela de bolso do freio: cinco sintomas do dia a dia.\n\nCOMO CONDUZIR\nLeia linha por linha e peça para o time completar de cabeça.\n\nINSIGHT PARA O CAMPO\nImprima esta tabela para o balconista do cliente."
+  },
+  {
+   "tipo": "barulhos",
+   "k": "MÓDULO 06 · DIAGNÓSTICO",
+   "t": "O que o motorista sente no pedal",
    "t1": "O que o cliente fala → onde olhar",
-   "itens": [["“Chia quando freio”: pastilha no fim", "FaVolumeHigh"], ["“O pedal está baixo”: ar ou fluido velho", "FaGaugeHigh"],
-             ["“O pedal treme”: disco ou tambor empenado", "FaWaveSquare"], ["“Puxa para um lado”: cilindro ou sapata", "FaArrowsLeftRight"]],
-   "numero": "2 anos", "desc": "o prazo de troca do fluido que a maioria das montadoras indica",
-   "t2": "A ligação com a suspensão", "texto2": "Carro que mergulha a frente ou puxa na frenagem também pode ter amortecedor gasto: veja o treinamento de Suspensão.",
+   "itens": [
+    [
+     "“Chia quando freio”: pastilha no fim",
+     "FaVolumeHigh"
+    ],
+    [
+     "“O pedal está baixo”: ar ou fluido velho",
+     "FaGaugeHigh"
+    ],
+    [
+     "“O pedal treme”: disco ou tambor empenado",
+     "FaWaveSquare"
+    ],
+    [
+     "“Puxa para um lado”: cilindro ou sapata",
+     "FaArrowsLeftRight"
+    ]
+   ],
+   "numero": "2 anos",
+   "desc": "o prazo de troca do fluido que a maioria das montadoras indica",
+   "t2": "A ligação com a suspensão",
+   "texto2": "Carro que mergulha a frente ou puxa na frenagem também pode ter amortecedor gasto: veja o treinamento de Suspensão.",
    "dica": "Peça para o cliente dizer como sente: no pedal, no volante ou no barulho. Isso separa freio de suspensão.",
-   "notas": "MENSAGEM-CHAVE\nO motorista descreve o freio pelo pedal.\n\nCOMO CONDUZIR\nLeia cada frase e peça exemplos.\n\nINSIGHT PARA O CAMPO\nPedal que treme é disco ou tambor: não é linha BAP, mas a orientação certa ganha a confiança do mecânico."},
-  {"tipo": "cartoes8", "k": "MÓDULO 06 · GARANTIA", "t": "Nem toda falha é defeito de fabricação",
-   "cartoes": [["Um lado só", "o carro freia torto", "FaArrowsLeftRight"], ["Disco gasto", "pastilha nova não assenta", "FaCircleDot"],
-               ["Cilindro vazando", "lona contaminada", "FaDroplet"], ["Fluido velho", "ferve e corrói", "FaTemperatureHigh"],
-               ["Sem assentamento", "frenagem forte logo de cara", "FaGaugeHigh"], ["Sem regulagem", "sapata longe do tambor", "FaWrench"],
-               ["Aplicação errada", "eixo, versão ou ABS", "FaBarcode"], ["Uso severo", "serra, carga e reboque", "FaTruck"]],
-   "painel": [["Por eixo", "os dois lados juntos, sempre"], ["Fluido novo", "com a sangria, em toda troca hidráulica"]],
+   "notas": "MENSAGEM-CHAVE\nO motorista descreve o freio pelo pedal.\n\nCOMO CONDUZIR\nLeia cada frase e peça exemplos.\n\nINSIGHT PARA O CAMPO\nPedal que treme é disco ou tambor: não é linha BAP, mas a orientação certa ganha a confiança do mecânico."
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 06 · GARANTIA",
+   "t": "Nem toda falha é defeito de fabricação",
+   "cartoes": [
+    [
+     "Um lado só",
+     "o carro freia torto",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Disco gasto",
+     "pastilha nova não assenta",
+     "FaCircleDot"
+    ],
+    [
+     "Cilindro vazando",
+     "lona contaminada",
+     "FaDroplet"
+    ],
+    [
+     "Fluido velho",
+     "ferve e corrói",
+     "FaTemperatureHigh"
+    ],
+    [
+     "Sem assentamento",
+     "frenagem forte logo de cara",
+     "FaGaugeHigh"
+    ],
+    [
+     "Sem regulagem",
+     "sapata longe do tambor",
+     "FaWrench"
+    ],
+    [
+     "Aplicação errada",
+     "eixo, versão ou ABS",
+     "FaBarcode"
+    ],
+    [
+     "Uso severo",
+     "serra, carga e reboque",
+     "FaTruck"
+    ]
+   ],
+   "painel": [
+    [
+     "Por eixo",
+     "os dois lados juntos, sempre"
+    ],
+    [
+     "Fluido novo",
+     "com a sangria, em toda troca hidráulica"
+    ]
+   ],
    "fonte": "Orientações gerais de instalação; siga sempre o manual do veículo e a orientação do fabricante da peça.",
-   "notas": "MENSAGEM-CHAVE\nA maioria das falhas prematuras vem da instalação e do uso, não da peça.\n\nCOMO CONDUZIR\nPasse pelos oito cartões: cada um é uma pergunta na análise.\n\nINSIGHT PARA O CAMPO\nExplique as regras na hora da venda, não na hora da reclamação."},
-  {"tipo": "passos5", "k": "MÓDULO 06 · GARANTIA", "t": "Troca de pastilha em 5 passos",
-   "passos": [["Peça certa", "Eixo, versão e ABS no catálogo.", "FaBarcode"], ["Disco medido", "Abaixo do mínimo, troca junto.", "FaRuler"],
-              ["Pinça livre", "Guias limpas e pistão recolhido.", "FaWrench"], ["Fluido no nível", "Sem completar acima do máximo.", "FaDroplet"],
-              ["Assentamento", "Frenagens suaves nos primeiros km.", "FaRoad"]],
+   "notas": "MENSAGEM-CHAVE\nA maioria das falhas prematuras vem da instalação e do uso, não da peça.\n\nCOMO CONDUZIR\nPasse pelos oito cartões: cada um é uma pergunta na análise.\n\nINSIGHT PARA O CAMPO\nExplique as regras na hora da venda, não na hora da reclamação."
+  },
+  {
+   "tipo": "passos5",
+   "k": "MÓDULO 06 · GARANTIA",
+   "t": "Troca de pastilha em 5 passos",
+   "passos": [
+    [
+     "Peça certa",
+     "Eixo, versão e ABS no catálogo.",
+     "FaBarcode"
+    ],
+    [
+     "Disco medido",
+     "Abaixo do mínimo, troca junto.",
+     "FaRuler"
+    ],
+    [
+     "Pinça livre",
+     "Guias limpas e pistão recolhido.",
+     "FaWrench"
+    ],
+    [
+     "Fluido no nível",
+     "Sem completar acima do máximo.",
+     "FaDroplet"
+    ],
+    [
+     "Assentamento",
+     "Frenagens suaves nos primeiros km.",
+     "FaRoad"
+    ]
+   ],
    "dica": "Pinça com guia travada gasta só uma pastilha: oriente a conferir as guias em toda troca.",
-   "notas": "MENSAGEM-CHAVE\nCinco passos e nenhum retorno de pastilha.\n\nCOMO CONDUZIR\nPasse pelos cinco passos como roteiro para o mecânico.\n\nPERGUNTE AO TIME\nQual destes passos o cliente mais quer pular?"},
-
-  {"tipo": "secao", "n": "07", "titulo": "Vender freio", "sub": "Perguntas, cross-sell, combos e fechamento",
-   "notas": "MENSAGEM-CHAVE\nFreio se vende por eixo, com o vizinho e o fluido.\n\nCOMO CONDUZIR\nTransição curta."},
-  {"tipo": "spin", "k": "MÓDULO 07 · VENDA", "t": "Venda consultiva: perguntas que vendem (SPIN)",
-   "spin": [["Entender o cenário", "“Quais carros mais passam pela sua oficina?”\n“Você atende frota pesada?”"],
-            ["Encontrar a dor", "“Tem voltado carro com pedal baixo?”\n“Falta fluido na hora da sangria?”"],
-            ["Mostrar o custo de não resolver", "“Quanto custa refazer um freio que voltou puxando?”"],
-            ["Fazer o cliente dizer o valor", "“Se o cilindro viesse com o fluido, quanto tempo você ganharia?”"]],
+   "notas": "MENSAGEM-CHAVE\nCinco passos e nenhum retorno de pastilha.\n\nCOMO CONDUZIR\nPasse pelos cinco passos como roteiro para o mecânico.\n\nPERGUNTE AO TIME\nQual destes passos o cliente mais quer pular?"
+  },
+  {
+   "tipo": "secao",
+   "n": "07",
+   "titulo": "Vender freio",
+   "sub": "Perguntas, cross-sell, combos e fechamento",
+   "notas": "MENSAGEM-CHAVE\nFreio se vende por eixo, com o vizinho e o fluido.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "spin",
+   "k": "MÓDULO 07 · VENDA",
+   "t": "Venda consultiva: perguntas que vendem (SPIN)",
+   "spin": [
+    [
+     "Entender o cenário",
+     "“Quais carros mais passam pela sua oficina?”\n“Você atende frota pesada?”"
+    ],
+    [
+     "Encontrar a dor",
+     "“Tem voltado carro com pedal baixo?”\n“Falta fluido na hora da sangria?”"
+    ],
+    [
+     "Mostrar o custo de não resolver",
+     "“Quanto custa refazer um freio que voltou puxando?”"
+    ],
+    [
+     "Fazer o cliente dizer o valor",
+     "“Se o cilindro viesse com o fluido, quanto tempo você ganharia?”"
+    ]
+   ],
    "dica": "Com o mecânico, fale de retorno e segurança; com o frotista, de caminhão parado.",
-   "notas": "MENSAGEM-CHAVE\nQuem pergunta conduz.\n\nCOMO CONDUZIR\nExplique as 4 letras com os exemplos de freio e faça um role-play.\n\nPERGUNTE AO TIME\nQual pergunta funciona melhor com o frotista?"},
-  {"tipo": "hub", "k": "MÓDULO 07 · CROSS-SELL", "t": "Cross-sell: a pastilha puxa o conjunto",
-   "itens": [["Pastilha de freio", "o atrito na roda da frente", "FaLayerGroup"], ["Sensor ABS", "a leitura da roda", "FaWaveSquare"],
-             ["Fluido de freio", "a pressão do pedal", "FaDroplet"]],
-   "cards": [["Mesmo serviço", "A roda já está aberta: é a hora de conferir o que está em volta.", "FaWrench"],
-             ["Segurança", "Freio completo é argumento que o cliente entende.", "FaShieldHalved"],
-             ["Pedido maior", "Mais itens por pedido, sem precisar de um cliente novo.", "FaChartLine"]],
+   "notas": "MENSAGEM-CHAVE\nQuem pergunta conduz.\n\nCOMO CONDUZIR\nExplique as 4 letras com os exemplos de freio e faça um role-play.\n\nPERGUNTE AO TIME\nQual pergunta funciona melhor com o frotista?"
+  },
+  {
+   "tipo": "hub",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Cross-sell: a pastilha puxa o conjunto",
+   "itens": [
+    [
+     "Pastilha de freio",
+     "o atrito na roda da frente",
+     "FaLayerGroup"
+    ],
+    [
+     "Sensor ABS",
+     "a leitura da roda",
+     "FaWaveSquare"
+    ],
+    [
+     "Fluido de freio",
+     "a pressão do pedal",
+     "FaDroplet"
+    ]
+   ],
+   "cards": [
+    [
+     "Mesmo serviço",
+     "A roda já está aberta: é a hora de conferir o que está em volta.",
+     "FaWrench"
+    ],
+    [
+     "Segurança",
+     "Freio completo é argumento que o cliente entende.",
+     "FaShieldHalved"
+    ],
+    [
+     "Pedido maior",
+     "Mais itens por pedido, sem precisar de um cliente novo.",
+     "FaChartLine"
+    ]
+   ],
    "dica": "Use o Ofereça junto do Catálogo BAP: a pastilha {{cod:PAF1441}} (HB20) indica {{oj:PAF1441}}.",
-   "notas": "MENSAGEM-CHAVE\nToda peça de freio tem vizinhas que vão junto.\n\nCOMO CONDUZIR\nMostre os três itens e os três argumentos.\n\nINSIGHT PARA O CAMPO\nOutros pares da base: sapata {{cod:SFR30014}} → cilindro {{oj:SFR30014}}; cilindro {{cod:CIL8519}} → sapatas {{oj:CIL8519}}."},
-  {"tipo": "combos", "k": "MÓDULO 07 · CROSS-SELL", "t": "Combos de freio e perguntas-gatilho",
-   "combos": [["Freio dianteiro", "{{prod:Pastilha de Freio}}  +  {{prod:Sensor ABS}}", "Gol: {{cod:PAF0051}} + {{oj:PAF0051}}"],
-              ["Freio traseiro", "{{prod:Sapata de Freio}}  +  {{prod:Cilindro de Roda}}  +  fluido", "HB20: {{cod:SFR30027}} + {{oj:SFR30027}}"],
-              ["Sangria", "{{prod:Cilindro de Roda}}  +  fluido DOT", "Gol: {{cod:CIL8501}} + {{oj:CIL8501}}"]],
-   "pergunte": ["“O freio está chiando?”", "“O freio de mão segura o carro?”", "“Quando trocou o fluido?”"],
+   "notas": "MENSAGEM-CHAVE\nToda peça de freio tem vizinhas que vão junto.\n\nCOMO CONDUZIR\nMostre os três itens e os três argumentos.\n\nINSIGHT PARA O CAMPO\nOutros pares da base: sapata {{cod:SFR30014}} → cilindro {{oj:SFR30014}}; cilindro {{cod:CIL8519}} → sapatas {{oj:CIL8519}}."
+  },
+  {
+   "tipo": "combos",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Combos de freio e perguntas-gatilho",
+   "combos": [
+    [
+     "Freio dianteiro",
+     "{{prod:Pastilha de Freio}}  +  {{prod:Sensor ABS}}",
+     "Gol: {{cod:PAF0051}} + {{oj:PAF0051}}"
+    ],
+    [
+     "Freio traseiro",
+     "{{prod:Sapata de Freio}}  +  {{prod:Cilindro de Roda}}  +  Fluido de Freio",
+     "HB20: {{cod:SFR30027}} + {{oj:SFR30027}}"
+    ],
+    [
+     "Sangria",
+     "{{prod:Cilindro de Roda}}  +  Fluido de Freio",
+     "Gol: {{cod:CIL8501}} + {{oj:CIL8501}}"
+    ]
+   ],
+   "pergunte": [
+    "“O freio está chiando?”",
+    "“O freio de mão segura o carro?”",
+    "“Quando trocou o fluido?”"
+   ],
    "dica": "O que é medido melhora: acompanhe a % de cilindros de roda que saem com o fluido.",
-   "notas": "MENSAGEM-CHAVE\nCombos transformam conhecimento em pedido maior.\n\nCOMO CONDUZIR\nApresente os 3 combos e as perguntas da faixa PERGUNTE. Os códigos vêm do Ofereça junto da base.\n\nINSIGHT PARA O CAMPO\nO fluido certo é o DOT da tampa; a linha completa está no treinamento de Lubrificantes."},
-  {"tipo": "fechamento", "k": "MÓDULO 07 · FECHAMENTO", "t": "Fechamento em 3 etapas",
-   "dica": "Freio fecha quando o cliente confia na aplicação: mostre eixo, lado e ABS no Catálogo BAP antes de pedir o pedido."},
-  {"tipo": "naofechou", "k": "MÓDULO 07 · NÃO FECHOU", "t": "Não fechou? Os 5 motivos no freio",
-   "linhas": [["Preço", "Fale de segurança e de retorno: freio refeito custa mais que o conjunto certo.", "“Se eu resolver isso, fechamos?”"],
-              ["Prazo ou limite", "Não prometa prazo nem limite fora da regra. Monte um pedido menor com as pastilhas que mais giram.", "“Se eu ajustar o pedido ao seu limite, fechamos?”"],
-              ["Dúvida na aplicação", "Mostre no Catálogo BAP a aplicação, o eixo, o ABS e as referências cruzadas.", "“Se eu te mostrar que serve, fechamos?”"],
-              ["Já tem fornecedor", "Não peça para trocar tudo. Entre onde ele perde venda: sensores ABS e linha pesada.", "“Começamos por essa linha que falta?”"],
-              ["Sem necessidade agora", "Mostre o giro: as pastilhas da frota da região e o fluido vencido.", "“Que dia eu volto pra fechar?”"]],
-   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 5 motivos.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price."},
-  {"tipo": "checklist", "t": "Checklist do vendedor BAP",
-   "itens": ["Perguntei o veículo, o ano e a versão", "Perguntei dianteiro ou traseiro", "Perguntei se o carro tem ABS",
-             "Liguei o sintoma à peça certa", "Ofereci a peça por eixo", "Ofereci o cilindro com a sapata",
-             "Usei o Ofereça junto do Catálogo BAP", "Ofereci o fluido do DOT da tampa", "Orientei a sangria e o assentamento",
-             "Na linha pesada, ofereci cuíca e catraca", "Pedi o pedido; sem pedido, anotei o motivo", "Deixei o próximo passo combinado"]},
-  {"tipo": "quiz",
-   "perguntas": ["Por que o freio hidráulico leva a força do pé inteira às quatro rodas?", "O cliente ouve chiado metálico ao frear. Qual a peça provável?",
-                 "Por que oferecer o cilindro de roda junto com a sapata?", "Qual o prazo de troca do fluido de freio e por quê?",
-                 "O cliente tem DOT 3 na tampa e você só tem DOT 4. Pode vender?", "A luz do ABS acendeu. Qual a causa mais comum?"],
-   "respostas": ["Porque o fluido não se comprime: a pressão chega igual em todas as rodas.", "A pastilha no fim da vida (indicador de desgaste).",
-                 "Cilindro vazando contamina a lona nova e o carro passa a puxar; a mão de obra é a mesma.", "2 anos, ou o que indicar o manual: o fluido absorve umidade e passa a ferver mais fácil.",
-                 "Sim: DOT 4 atende onde o manual pede DOT 3.", "O sensor ABS ou o chicote do sensor."]},
-  {"tipo": "obrigado", "sobre": "TREINAMENTO FREIO BAP", "titulo": "Obrigado!", "sub": "Dúvidas? Agora é levar para o balcão e para a oficina.",
-   "notas": "MENSAGEM-CHAVE\nO conhecimento só vira resultado no campo.\n\nCOMO CONDUZIR\nAbra para dúvidas. Lembre que o fluido de freio está detalhado no treinamento de Lubrificantes."}
+   "notas": "MENSAGEM-CHAVE\nCombos transformam conhecimento em pedido maior.\n\nCOMO CONDUZIR\nApresente os 3 combos e as perguntas da faixa PERGUNTE. Os códigos vêm do Ofereça junto da base.\n\nINSIGHT PARA O CAMPO\nO fluido certo é o DOT da tampa; a linha completa está no treinamento de Lubrificantes."
+  },
+  {
+   "tipo": "fechamento",
+   "k": "MÓDULO 07 · FECHAMENTO",
+   "t": "Fechamento em 3 etapas",
+   "dica": "Freio fecha quando o cliente confia na aplicação: mostre eixo, lado e ABS no Catálogo BAP antes de pedir o pedido."
+  },
+  {
+   "tipo": "naofechou",
+   "k": "MÓDULO 07 · NÃO FECHOU",
+   "t": "Não fechou? Os 5 motivos no freio",
+   "linhas": [
+    [
+     "Preço",
+     "Fale de segurança e de retorno: freio refeito custa mais que o conjunto certo.",
+     "“Se eu resolver isso, fechamos?”"
+    ],
+    [
+     "Prazo ou limite",
+     "Não prometa prazo nem limite fora da regra. Monte um pedido menor com as pastilhas que mais giram.",
+     "“Se eu ajustar o pedido ao seu limite, fechamos?”"
+    ],
+    [
+     "Dúvida na aplicação",
+     "Mostre no Catálogo BAP a aplicação, o eixo, o ABS e as referências cruzadas.",
+     "“Se eu te mostrar que serve, fechamos?”"
+    ],
+    [
+     "Já tem fornecedor",
+     "Não peça para trocar tudo. Entre onde ele perde venda: sensores ABS e linha pesada.",
+     "“Começamos por essa linha que falta?”"
+    ],
+    [
+     "Sem necessidade agora",
+     "Mostre o giro: as pastilhas da frota da região e o fluido vencido.",
+     "“Que dia eu volto pra fechar?”"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 5 motivos.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price."
+  },
+  {
+   "tipo": "checklist",
+   "t": "Checklist do vendedor BAP",
+   "itens": [
+    "Perguntei o veículo, o ano e a versão",
+    "Perguntei dianteiro ou traseiro",
+    "Perguntei se o carro tem ABS",
+    "Liguei o sintoma à peça certa",
+    "Ofereci a peça por eixo",
+    "Ofereci o cilindro com a sapata",
+    "Usei o Ofereça junto do Catálogo BAP",
+    "Ofereci o fluido do DOT da tampa",
+    "Orientei a sangria e o assentamento",
+    "Na linha pesada, ofereci cuíca e catraca",
+    "Pedi o pedido; sem pedido, anotei o motivo",
+    "Deixei o próximo passo combinado"
+   ]
+  },
+  {
+   "tipo": "quiz",
+   "perguntas": [
+    "Por que o freio hidráulico leva a força do pé inteira às quatro rodas?",
+    "O cliente ouve chiado metálico ao frear. Qual a peça provável?",
+    "Por que oferecer o cilindro de roda junto com a sapata?",
+    "Qual o prazo de troca do fluido de freio e por quê?",
+    "O cliente tem DOT 3 na tampa e você só tem DOT 4. Pode vender?",
+    "A luz do ABS acendeu. Qual a causa mais comum?"
+   ],
+   "respostas": [
+    "Porque o fluido não se comprime: a pressão chega igual em todas as rodas.",
+    "A pastilha no fim da vida (indicador de desgaste).",
+    "Cilindro vazando contamina a lona nova e o carro passa a puxar; a mão de obra é a mesma.",
+    "2 anos, ou o que indicar o manual: o fluido absorve umidade e passa a ferver mais fácil.",
+    "Sim: DOT 4 atende onde o manual pede DOT 3.",
+    "O sensor ABS ou o chicote do sensor."
+   ]
+  },
+  {
+   "tipo": "obrigado",
+   "sobre": "TREINAMENTO FREIO BAP",
+   "titulo": "Obrigado!",
+   "sub": "Dúvidas? Agora é levar para o balcão e para a oficina.",
+   "notas": "MENSAGEM-CHAVE\nO conhecimento só vira resultado no campo.\n\nCOMO CONDUZIR\nAbra para dúvidas. Lembre que o fluido de freio está detalhado no treinamento de Lubrificantes."
+  }
  ]
 }
