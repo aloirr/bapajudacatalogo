@@ -15,7 +15,7 @@ from detalhe import BASE_UNIFICADA as BASE   # a base unificada do Git (dados/),
 
 NOME = 'BAP AUTOPARTS'
 SITE = 'www.bapautoparts.com.br  ·  @bapautoparts'
-A.C.update(dict(ochip='#fdeedd', gchip='#e3f1e0', soft='#f3f6f2'))
+A.C.update(dict(gchip='#e3f1e0', soft='#f3f6f2'))
 pw = A.pdfmetrics.stringWidth
 
 LINHAS = [('LEVE', 'Linha Leve', 'Automóveis, picapes e utilitários.'),
