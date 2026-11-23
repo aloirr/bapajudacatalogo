@@ -980,8 +980,7 @@
     if (/^\d+$/.test(x.get("CCA18") || "")) { const n = +x.get("CCA18"); m.cca = FAIXAS_CCA.find(([lim]) => n <= lim)[1]; }
     return m.ah || m.cca ? m : null;
   }
-  // Rótulo da bateria na ficha técnica (T-0030, MC-0016): o mesmo texto do filtro ("Ah" e "CCA"). Só a tela: o JSON
-  // continua com "C20(ah)" e "Cca-18°", que o medidaDe lê.
+  // Rótulo da bateria na ficha técnica: o mesmo texto do filtro (T-0030, MC-0016; docs/DADOS_DO_SITE.md).
   const ROTULO_FICHA = new Map([["C20AH", "Ah"], ["CCA18", "CCA"]]);
   // rot: nome do grupo; nome: a opção e a etiqueta; ordem: a das opções (sem ela, a de mais produtos primeiro)
   const FILTROS = {
