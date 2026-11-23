@@ -83,3 +83,19 @@ Correção:
 
 Na próxima rodada: Baterias, slides 22, 23 e 29; Lubrificantes, slides 20 a 23 e 27; e o guia (a tabela de cores).
 Fechar o MC-0023 e o MC-0024. A resposta do Alexandre sobre "BATER LIFE" entra aqui.
+
+## Reteste do MC-0023 e do MC-0024 (head `c75390d0dd7fdd44dc592a9466ba9e5607d35839`)
+
+**Baterias e Lubrificantes: LIBERADO. MC-0023 e MC-0024 FECHADOS.**
+
+- **MC-0023:**
+  - Baterias, slide 22: o logo do YouTube saiu. No lugar, o ícone de vídeo (câmera branca no círculo `#59BA61`) com
+    "VÍDEO", no padrão dos outros ícones. A quebra de palavra do título e do link também saiu.
+  - Nota, sem achado: o arquivo do logo (`ppt/media/image-22-1.png`) ficou no pacote do .pptx, sem uso em nenhum slide.
+    Tirar na próxima geração, para o .pptx não levar logo de terceiro nem escondido.
+- **MC-0024:**
+  - Nenhum texto em `#D64545` ou `#F2C14E` nos 2 decks. O texto de alerta de Lubrificantes (slides 20 a 23 e 27) está
+    em `#8A3F00`.
+  - O vermelho ficou só em ícone (Baterias 11, 26 e 40; Lubrificantes 31 e 35), na faixa que reprova (Baterias 29) e
+    na escala de leitura (Baterias 23). O amarelo ficou só na escala, com texto escuro.
+  - O guia registra os 2 usos como "a aprovar pelo Alexandre", com a saída em laranja se ele não aprovar.
