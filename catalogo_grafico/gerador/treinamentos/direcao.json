@@ -1,0 +1,1040 @@
+{
+ "titulo": "Direção",
+ "arquivo": "Treinamento_Direcao_BAP_Vendedores.pptx",
+ "rodape": "Treinamento Direção BAP  |  Equipe Comercial Externa · uso interno",
+ "nao_codigo": [
+  "HB20"
+ ],
+ "slides": [
+  {
+   "tipo": "capa",
+   "titulo": "Direção BAP",
+   "sub": "Caixa de direção, terminal axial e terminal de direção: da folga no volante à peça certa",
+   "notas": "MENSAGEM-CHAVE\nDireção é segurança e é precisão: o vendedor que entende a corrente volante → roda vende o conjunto certo e o alinhamento junto.\n\nCOMO CONDUZIR\nDê boas-vindas e diga a duração prevista (cerca de 1h30 com perguntas). Lembre que a Suspensão já mostrou o pivô e a bandeja; aqui a peça é a que aponta a roda.\n\nPERGUNTE AO TIME\nO que o cliente mais reclama da direção: folga, barulho, volante duro ou vazamento?"
+  },
+  {
+   "tipo": "aprender",
+   "k": "ABERTURA",
+   "t": "O que vamos aprender hoje?",
+   "frase": "Hoje você sai daqui sabendo |explicar, diagnosticar e vender| a direção — da caixa ao terminal, com o alinhamento no fim.",
+   "apoio": "Direção se vende em corrente: caixa, axial e terminal trabalham juntos, e folga em qualquer um vira folga no volante.",
+   "pilares": [
+    [
+     "ENTENDER",
+     "Os tipos de direção e as peças da corrente",
+     "FaCarSide"
+    ],
+    [
+     "DIAGNOSTICAR",
+     "Folga, ruído, volante duro e vazamento",
+     "FaStethoscope"
+    ],
+    [
+     "VENDER",
+     "Par axial + terminal, alinhamento, combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nO objetivo é sair sabendo ligar o que o motorista sente no volante à peça BAP certa.\n\nCOMO CONDUZIR\nApresente os três pilares como jornada: entender a corrente, diagnosticar pelo sintoma e vender o conjunto.\n\nPERGUNTE AO TIME\nQuantas vezes vocês vendem terminal sem perguntar pelo axial?"
+  },
+  {
+   "tipo": "topicos",
+   "k": "ABERTURA",
+   "t": "Tópicos do treinamento",
+   "itens": [
+    [
+     "Tipos de direção",
+     "Mecânica, hidráulica e elétrica",
+     "FaCarSide"
+    ],
+    [
+     "Caixa de direção",
+     "Cremalheira, pinhão, coifas e vedação",
+     "FaGears"
+    ],
+    [
+     "Terminal e axial",
+     "A corrente da caixa até a roda",
+     "FaLink"
+    ],
+    [
+     "Aplicação e código",
+     "Versão, lado e Ofereça junto",
+     "FaBarcode"
+    ],
+    [
+     "Sintomas",
+     "Folga, ruído, volante duro e vazamento",
+     "FaStethoscope"
+    ],
+    [
+     "Alinhamento e garantia",
+     "A troca certa e as causas de falha",
+     "FaShieldHalved"
+    ],
+    [
+     "Vender direção",
+     "SPIN, cross-sell, combos e fechamento",
+     "FaHandshake"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nSão 7 módulos: do volante à roda, e do sintoma ao pedido.\n\nCOMO CONDUZIR\nPasse rápido pelos tópicos. Diga que o módulo 5 é a tabela de bolso dos sintomas e que o 6 explica por que o alinhamento é parte da venda.\n\nINSIGHT PARA O CAMPO\nNa direção, o retorno quase sempre vem de peça trocada sozinha ou de carro que saiu sem alinhar."
+  },
+  {
+   "tipo": "preparado",
+   "k": "ABERTURA",
+   "t": "Ao final deste treinamento, você estará preparado para",
+   "itens": [
+    [
+     "Explicar",
+     "como a direção leva o giro do volante até as rodas",
+     "FaComments"
+    ],
+    [
+     "Ler",
+     "a folga, o ruído e o vazamento que o cliente descreve",
+     "FaVolumeHigh"
+    ],
+    [
+     "Identificar",
+     "a caixa, o axial e o terminal certos no catálogo",
+     "FaMagnifyingGlass"
+    ],
+    [
+     "Orientar",
+     "a troca em par e o alinhamento depois",
+     "FaWrench"
+    ],
+    [
+     "Ampliar",
+     "o pedido com o axial, a coifa e o fluido",
+     "FaLayerGroup"
+    ],
+    [
+     "Defender",
+     "o valor da BAP com argumento técnico",
+     "FaShieldHalved"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nEstes são os seis compromissos do treinamento.\n\nCOMO CONDUZIR\nLeia os verbos em voz alta. No fechamento eles voltam como checklist.\n\nPERGUNTE AO TIME\nQual destes seis vocês acham mais difícil hoje?"
+  },
+  {
+   "tipo": "secao",
+   "n": "01",
+   "titulo": "Tipos de direção",
+   "sub": "Mecânica, hidráulica e elétrica: o que muda para o vendedor",
+   "notas": "MENSAGEM-CHAVE\nToda direção tem a mesma corrente de peças; o que muda é quem ajuda o motorista a esterçar.\n\nCOMO CONDUZIR\nTransição curta. Diga que este módulo dá o mapa da direção."
+  },
+  {
+   "tipo": "desenho",
+   "k": "MÓDULO 01 · TIPOS",
+   "t": "A direção por dentro",
+   "img": "desenho:direcao",
+   "legenda": [
+    "Volante",
+    "Coluna de direção",
+    "Caixa (cremalheira)",
+    "Coifa da caixa",
+    "Terminal axial",
+    "Terminal de direção",
+    "Roda e manga",
+    "Bomba hidráulica",
+    "Reservatório"
+   ],
+   "dica": "Na direção elétrica não há bomba, mangueira nem fluido: um motor elétrico ajuda a esterçar.",
+   "notas": "MENSAGEM-CHAVE\nO giro do volante desce pela coluna até a caixa, que o transforma em vaivém; o axial e o terminal levam esse movimento até a roda.\n\nCOMO CONDUZIR\nO desenho é visto de cima, com a frente do carro para cima. Siga os números: volante (1), coluna (2), caixa com a cremalheira (3) protegida pelas coifas (4), terminal axial (5), terminal de direção (6) e roda (7). Na hidráulica, a bomba (8) e o reservatório (9) mandam fluido para a caixa.\n\nPERGUNTE AO TIME\nQuais destas peças a BAP tem? (Resposta: caixa de direção, terminal axial e terminal de direção.)"
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 01 · TIPOS",
+   "t": "Os tipos de direção",
+   "cards": [
+    [
+     "FaWrench",
+     "Mecânica",
+     "Só a força do braço",
+     "Caixa sem assistência: mais pesada nas manobras.",
+     "= simples e sem fluido"
+    ],
+    [
+     "FaDroplet",
+     "Hidráulica",
+     "Bomba e fluido",
+     "A bomba, tocada pela correia, manda fluido para a caixa.",
+     "= leve, mas pede fluido"
+    ],
+    [
+     "FaBolt",
+     "Eletro-hidráulica",
+     "Bomba elétrica",
+     "Igual à hidráulica, mas a bomba é movida a motor elétrico.",
+     "= fluido sem correia"
+    ],
+    [
+     "FaPlug",
+     "Elétrica",
+     "Motor na coluna ou caixa",
+     "Um motor elétrico ajuda a esterçar; não há fluido.",
+     "= sem bomba e sem óleo"
+    ]
+   ],
+   "dica": "Pergunte o tipo de direção antes de oferecer a caixa: o Catálogo BAP separa a caixa mecânica da hidráulica.",
+   "notas": "MENSAGEM-CHAVE\nO tipo de direção muda a caixa e o que vai junto.\n\nCOMO CONDUZIR\nPasse pelos quatro cartões usando a frase laranja. Na hidráulica entram fluido e, às vezes, mangueira; na elétrica, nada de fluido.\n\nINSIGHT PARA O CAMPO\nNa base há caixas mecânicas e hidráulicas: a {{cod:CXD13051}} é mecânica e a {{cod:CXD13062}} é hidráulica, ambas do Gol, de gerações diferentes."
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 01 · TIPOS",
+   "t": "Cada peça tem uma função",
+   "cartoes": [
+    [
+     "Volante e coluna",
+     "levam o giro até a caixa",
+     "FaCircleNotch"
+    ],
+    [
+     "Caixa de direção",
+     "transforma giro em vaivém",
+     "FaGears"
+    ],
+    [
+     "Cremalheira",
+     "a barra dentada dentro da caixa",
+     "FaRuler"
+    ],
+    [
+     "Coifa",
+     "protege a cremalheira da sujeira",
+     "FaShieldHalved"
+    ],
+    [
+     "Terminal axial",
+     "liga a caixa ao terminal",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Terminal de direção",
+     "liga o axial à roda",
+     "FaLink"
+    ],
+    [
+     "Bomba hidráulica",
+     "dá a força de assistência",
+     "FaDroplet"
+    ],
+    [
+     "Fluido",
+     "transmite a força e lubrifica",
+     "FaOilCan"
+    ]
+   ],
+   "painel": [
+    [
+     "{{n:Terminais de Direção}}",
+     "terminais de direção ATIVOS na base"
+    ],
+    [
+     "{{n:Terminal Axial}}",
+     "terminais axiais ATIVOS, para vender em par"
+    ]
+   ],
+   "fonte": "Números pela base unificada {{versao_base}}. Fluido da direção: ver o treinamento de Lubrificantes.",
+   "notas": "MENSAGEM-CHAVE\nCada peça tem uma função que dá para explicar numa frase.\n\nCOMO CONDUZIR\nLeia as funções e peça para o time repetir. Mostre o quadro escuro: há na base quase o mesmo número de terminais e de axiais, porque eles andam juntos.\n\nINSIGHT PARA O CAMPO\nO fluido da direção hidráulica é o do manual; a linha BAP de fluidos está no treinamento de Lubrificantes."
+  },
+  {
+   "tipo": "secao",
+   "n": "02",
+   "titulo": "Caixa de direção",
+   "sub": "Cremalheira, pinhão, coifas e vedação",
+   "notas": "MENSAGEM-CHAVE\nA caixa é a peça de maior valor da direção e a que pede mais cuidado na venda.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo mostra o que tem dentro da caixa, os sinais de defeito e a troca certa."
+  },
+  {
+   "tipo": "lista4",
+   "k": "MÓDULO 02 · CAIXA",
+   "t": "A caixa de direção por dentro",
+   "img": "capa:cover_9",
+   "legenda": "Caixa de direção BAP: a cremalheira corre dentro do tubo, empurrada pelo pinhão ligado à coluna.",
+   "itens": [
+    [
+     "Pinhão: a engrenagem ligada à coluna",
+     "FaGear"
+    ],
+    [
+     "Cremalheira: a barra dentada que corre para os lados",
+     "FaRuler"
+    ],
+    [
+     "Vedações: seguram o fluido na hidráulica",
+     "FaDroplet"
+    ],
+    [
+     "Coifas: protegem a cremalheira de água e poeira",
+     "FaShieldHalved"
+    ]
+   ],
+   "dica": "Caixa hidráulica nova com fluido velho e sujo volta a vazar: ofereça o fluido do manual na mesma venda.",
+   "notas": "MENSAGEM-CHAVE\nDentro da caixa, o pinhão gira e empurra a cremalheira; na hidráulica, o fluido ajuda a empurrar.\n\nCOMO CONDUZIR\nMostre a foto da caixa BAP e passe pelas quatro peças. As coifas são o ponto fraco: rasgadas, deixam entrar água e a cremalheira enferruja.\n\nPERGUNTE AO TIME\nPor que a coifa rasgada leva a caixa à troca? (Resposta: a sujeira gasta as vedações e a cremalheira, e começa a folga e o vazamento.)"
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 02 · CAIXA",
+   "t": "Caixa com defeito: sinais e o que vai junto",
+   "t1": "Sinais de caixa com defeito",
+   "itens1": [
+    [
+     "Folga no volante, mesmo com terminais bons",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Vazamento de fluido na caixa ou nas coifas",
+     "FaDroplet"
+    ],
+    [
+     "Volante duro ou pesado de um lado",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Ruído ou “toc” ao esterçar parado",
+     "FaVolumeHigh"
+    ]
+   ],
+   "t2": "O que oferecer junto com a caixa",
+   "itens2": [
+    "Terminais axiais e de direção: na base, a caixa {{cod:CXD13062}} (Gol) indica {{oj:CXD13062}}.",
+    "Fluido do manual, na hidráulica: caixa nova com fluido velho volta a vazar.",
+    "Alinhamento logo depois da troca."
+   ],
+   "dica": "Antes de condenar a caixa, confira os terminais e os axiais: folga neles também aparece no volante.",
+   "notas": "MENSAGEM-CHAVE\nCaixa com defeito dá folga, vazamento, volante duro ou ruído — mas terminais gastos dão sintomas parecidos.\n\nCOMO CONDUZIR\nLeia os quatro sinais e os três itens de venda junto. Reforce a dica: primeiro confirmar os terminais.\n\nINSIGHT PARA O CAMPO\nO Ofereça junto da caixa no Catálogo BAP já aponta o terminal da mesma aplicação."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 02 · CAIXA",
+   "t": "Direção hidráulica: o fluido também é peça",
+   "icone": "FaDroplet",
+   "numero": "Manual",
+   "desc": "o fluido certo é o que o manual pede; muitos carros usam ATF",
+   "cards": [
+    [
+     "Nível certo",
+     "Com o motor desligado, entre o mínimo e o máximo do reservatório.",
+     "FaGaugeHigh"
+    ],
+    [
+     "Sem misturar",
+     "Fluidos de especificação diferente não se misturam.",
+     "FaBan"
+    ],
+    [
+     "Troca com a caixa",
+     "Caixa nova pede fluido novo e sangria do sistema.",
+     "FaRotate"
+    ]
+   ],
+   "dica": "Na linha BAP, o Shiftease ATF Dexron III ({{cod:ATF DEXRON III}}) atende onde o manual pede Dexron III. Detalhes no treinamento de Lubrificantes.",
+   "notas": "MENSAGEM-CHAVE\nNa direção hidráulica, o fluido transmite a força e lubrifica a caixa e a bomba.\n\nCOMO CONDUZIR\nMostre o quadro escuro: o fluido é o do manual. Passe pelos três cartões. A sangria tira o ar do sistema depois da troca.\n\nPERGUNTE AO TIME\nO que acontece com uma caixa nova que recebe fluido velho? (Resposta: a sujeira e as partículas gastam as vedações novas e ela volta a vazar.)"
+  },
+  {
+   "tipo": "numero",
+   "k": "MÓDULO 02 · CAIXA",
+   "t": "Folga no volante: o teste do balcão",
+   "img": "capa:cover_9",
+   "numero": "Par",
+   "desc": "terminal e axial dos dois lados trabalham juntos: confira os quatro",
+   "passos": [
+    "Pergunte: a folga aparece com o carro parado ou só andando?",
+    "Olhe: coifa da caixa rasgada ou com fluido escorrendo",
+    "Teste: com a roda no chão, alguém mexe o volante; veja onde está a folga",
+    "Ofereça a corrente completa: caixa, axial e terminal"
+   ],
+   "exemplo": "Gol G5: caixa {{cod:CXD13062}} com o terminal {{oj:CXD13062}}, que é o Ofereça junto da base.",
+   "notas": "MENSAGEM-CHAVE\nO teste de folga mostra em qual peça da corrente ela está.\n\nCOMO CONDUZIR\nExplique o teste: com o carro no chão, uma pessoa mexe o volante de um lado para o outro e a outra olha onde aparece a folga (caixa, axial ou terminal).\n\nINSIGHT PARA O CAMPO\nQuem orienta o teste vende a peça certa e evita a troca da caixa quando o problema era o terminal."
+  },
+  {
+   "tipo": "secao",
+   "n": "03",
+   "titulo": "Terminal e axial",
+   "sub": "A corrente que leva o movimento da caixa até a roda",
+   "notas": "MENSAGEM-CHAVE\nTerminal e axial são as peças de giro alto da direção e andam sempre juntas.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo mostra as duas peças, os sinais de folga e a regra do par."
+  },
+  {
+   "tipo": "foto2",
+   "k": "MÓDULO 03 · TERMINAIS",
+   "t": "Terminal axial e terminal de direção",
+   "img": "capa:cover_7",
+   "itens": [
+    [
+     "foto:TAX10192",
+     "Axial: a barra que sai da caixa e vai até o terminal.",
+     "Para o cliente: fim da folga no volante."
+    ],
+    [
+     "foto:TER5597000",
+     "Terminal de direção: a ponta com pivô que prende na manga.",
+     "Para o cliente: direção firme e sem barulho."
+    ]
+   ],
+   "dica": "Axial e terminal andam juntos: na base, o axial {{cod:TAX10192}} (Gol) indica o terminal {{oj:TAX10192}}.",
+   "notas": "MENSAGEM-CHAVE\nO axial liga a caixa ao terminal; o terminal liga o axial à roda.\n\nCOMO CONDUZIR\nMostre o terminal BAP e as duas peças. O terminal tem um pivô esférico com coifa e graxa; o axial tem a articulação dentro da coifa da caixa.\n\nINSIGHT PARA O CAMPO\nO Ofereça junto do Catálogo BAP liga o axial ao terminal e o terminal ao axial."
+  },
+  {
+   "tipo": "lista4",
+   "k": "MÓDULO 03 · TERMINAIS",
+   "t": "O que faz cada parte do terminal",
+   "img": "montagem:foto:TAX10192+foto:TER5597000",
+   "legenda": "Terminal axial e terminal de direção BAP: a corrente da caixa até a roda.",
+   "itens": [
+    [
+     "Pivô esférico: deixa a roda esterçar e subir com a suspensão",
+     "FaCircleDot"
+    ],
+    [
+     "Coifa do terminal: segura a graxa e barra a sujeira",
+     "FaShieldHalved"
+    ],
+    [
+     "Rosca de regulagem: é nela que se ajusta a convergência",
+     "FaRuler"
+    ],
+    [
+     "Lado: direito e esquerdo podem ter código diferente",
+     "FaArrowsLeftRight"
+    ]
+   ],
+   "dica": "Coifa do terminal rasgada é o começo da folga: na revisão, peça para o mecânico olhar as quatro coifas.",
+   "notas": "MENSAGEM-CHAVE\nO terminal é um pivô com coifa e uma rosca de regulagem: é pela rosca que o alinhamento ajusta a convergência.\n\nCOMO CONDUZIR\nLeia as quatro partes. Explique que por isso toda troca de terminal pede alinhamento.\n\nPERGUNTE AO TIME\nPor que o carro sai desalinhado depois da troca do terminal? (Resposta: a regulagem da convergência está na rosca do terminal.)"
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 03 · TERMINAIS",
+   "t": "Terminal gasto: sinais e a regra do par",
+   "t1": "Sinais de terminal ou axial gasto",
+   "itens1": [
+    [
+     "Folga no volante e direção “solta”",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "“Toc” na frente em piso irregular",
+     "FaVolumeHigh"
+    ],
+    [
+     "Pneu gastando por dentro ou por fora",
+     "FaCircleNotch"
+    ],
+    [
+     "Coifa do terminal rasgada, sem graxa",
+     "FaLinkSlash"
+    ]
+   ],
+   "t2": "Por que vender em par",
+   "itens2": [
+    "Axial e terminal do mesmo lado gastam juntos: trocar só um traz o cliente de volta.",
+    "Os dois lados trabalham iguais: um gasto indica o outro perto do fim.",
+    "Uma troca, um alinhamento: o cliente paga a mão de obra uma vez só."
+   ],
+   "dica": "Terminal é peça de segurança: com folga grande, a roda pode perder o comando. Não deixe para depois.",
+   "notas": "MENSAGEM-CHAVE\nTerminal e axial avisam antes de falhar: folga, barulho e pneu gasto.\n\nCOMO CONDUZIR\nLeia os sinais e os três argumentos do par.\n\nINSIGHT PARA O CAMPO\nO argumento mais forte é o alinhamento: trocar tudo junto evita pagar dois alinhamentos."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 03 · TERMINAIS",
+   "t": "A troca certa do terminal",
+   "icone": "FaWrench",
+   "numero": "1",
+   "desc": "alinhamento depois de qualquer troca de terminal, axial ou caixa",
+   "cards": [
+    [
+     "Mesmo lado",
+     "Terminal e axial do mesmo lado, juntos.",
+     "FaLink"
+    ],
+    [
+     "Contar as voltas",
+     "Na troca, conte as voltas da rosca para o carro sair perto do ajuste.",
+     "FaRotate"
+    ],
+    [
+     "Alinhar no fim",
+     "O ajuste final da convergência é no alinhamento.",
+     "FaRoad"
+    ]
+   ],
+   "dica": "Contar as voltas do terminal velho ajuda o carro a chegar no alinhamento; não substitui o alinhamento.",
+   "notas": "MENSAGEM-CHAVE\nA troca certa do terminal termina no alinhamento.\n\nCOMO CONDUZIR\nMostre o número grande e os três cartões. Contar as voltas da rosca é prática de oficina para o carro sair perto do ajuste.\n\nPERGUNTE AO TIME\nQue argumento vocês usam quando o cliente não quer pagar o alinhamento?"
+  },
+  {
+   "tipo": "secao",
+   "n": "04",
+   "titulo": "Aplicação e código",
+   "sub": "Versão, tipo de caixa, lado e Ofereça junto no Catálogo BAP",
+   "notas": "MENSAGEM-CHAVE\nNa direção, o mesmo modelo de carro muda de peça por ano, versão e tipo de caixa.\n\nCOMO CONDUZIR\nTransição curta. Diga que este módulo evita a devolução por aplicação errada."
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 04 · CÓDIGO",
+   "t": "As 4 informações que definem a peça",
+   "cards": [
+    [
+     "FaCarSide",
+     "Aplicação",
+     "Modelo, ano e versão",
+     "A mesma linha de carro muda de peça entre gerações.",
+     "= o carro certo"
+    ],
+    [
+     "FaGears",
+     "Tipo",
+     "Mecânica ou hidráulica",
+     "A caixa e o axial mudam com o tipo de direção.",
+     "= a caixa certa"
+    ],
+    [
+     "FaArrowsLeftRight",
+     "Lado",
+     "Direito ou esquerdo",
+     "Muitos terminais têm código por lado.",
+     "= o lado certo"
+    ],
+    [
+     "FaLink",
+     "Junto",
+     "Ofereça junto",
+     "O catálogo indica o par axial + terminal.",
+     "= o pedido completo"
+    ]
+   ],
+   "dica": "Terminal pode ter código por lado. Na dúvida, peça a foto da peça velha ou o número gravado nela.",
+   "notas": "MENSAGEM-CHAVE\nAplicação, tipo de direção, lado e Ofereça junto: as quatro conferências antes de fechar.\n\nCOMO CONDUZIR\nMostre os quatro cartões e a frase laranja. Todas estão no Catálogo BAP, na ficha de cada código.\n\nINSIGHT PARA O CAMPO\nNa base, o terminal {{cod:TER5597000}} (Gol) é do lado esquerdo e indica os axiais {{oj:TER5597000}}."
+  },
+  {
+   "tipo": "passos5",
+   "k": "MÓDULO 04 · CÓDIGO",
+   "t": "Achar a peça certa em 5 passos",
+   "passos": [
+    [
+     "Veículo",
+     "Modelo, ano, motor e versão.",
+     "FaCarSide"
+    ],
+    [
+     "Tipo",
+     "Mecânica, hidráulica ou elétrica.",
+     "FaGears"
+    ],
+    [
+     "Peça e lado",
+     "Caixa, axial ou terminal; direito ou esquerdo.",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Código BAP",
+     "Confira a aplicação e as referências.",
+     "FaBarcode"
+    ],
+    [
+     "Ofereça junto",
+     "Monte o pedido com o par.",
+     "FaLayerGroup"
+    ]
+   ],
+   "dica": "Cliente com a referência de outra marca? Busque pela referência cruzada no Catálogo BAP.",
+   "notas": "MENSAGEM-CHAVE\nCinco passos e nenhuma devolução por aplicação errada.\n\nCOMO CONDUZIR\nFaça um exemplo ao vivo no Catálogo BAP: Onix, direção, terminal, código e Ofereça junto.\n\nPERGUNTE AO TIME\nQual passo vocês mais pulam quando o cliente está com pressa?"
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 04 · CÓDIGO",
+   "t": "Exemplos pela base: a corrente por carro",
+   "cabecalho": [
+    "Peça",
+    "Código BAP",
+    "Ofereça junto (base)"
+   ],
+   "linhas": [
+    [
+     "{{prod:Caixa de Direção}} · Gol",
+     "{{cod:CXD13062}}",
+     "{{oj:CXD13062}}"
+    ],
+    [
+     "{{prod:Terminal Axial}} · Gol",
+     "{{cod:TAX10192}}",
+     "{{oj:TAX10192}}"
+    ],
+    [
+     "{{prod:Terminais de Direção}} · Onix",
+     "{{cod:TER5593024}}",
+     "{{oj:TER5593024}}"
+    ],
+    [
+     "{{prod:Terminal Axial}} · Palio",
+     "{{cod:TAX10382}}",
+     "{{oj:TAX10382}}"
+    ],
+    [
+     "{{prod:Caixa de Direção}} · Palio",
+     "{{cod:CXD13027}}",
+     "{{oj:CXD13027}}"
+    ]
+   ],
+   "atencao": "Confira sempre ano, versão e tipo de direção no Catálogo BAP: os códigos deste slide são exemplos.",
+   "notas": "MENSAGEM-CHAVE\nCom a base, o vendedor monta a corrente da direção numa consulta.\n\nCOMO CONDUZIR\nLeia a tabela e mostre que o Ofereça junto leva da caixa ao terminal e do axial ao terminal.\n\nINSIGHT PARA O CAMPO\nO ATENÇÃO é regra: ano, versão e tipo de direção antes de fechar."
+  },
+  {
+   "tipo": "secao",
+   "n": "05",
+   "titulo": "Sintomas",
+   "sub": "Folga, ruído, volante duro e vazamento: do sintoma à peça",
+   "notas": "MENSAGEM-CHAVE\nCada sintoma da direção tem um endereço.\n\nCOMO CONDUZIR\nTransição curta. Diga que o módulo é a tabela de bolso da direção."
+  },
+  {
+   "tipo": "tabela",
+   "k": "MÓDULO 05 · SINTOMAS",
+   "t": "Sintoma → peça BAP",
+   "cabecalho": [
+    "Sintoma",
+    "Causa provável",
+    "Peça BAP"
+   ],
+   "linhas": [
+    [
+     "Folga no volante",
+     "Terminal, axial ou caixa com folga",
+     "{{prod:Terminais de Direção}} · {{prod:Terminal Axial}}"
+    ],
+    [
+     "“Toc” em piso irregular",
+     "Terminal ou axial gasto",
+     "{{prod:Terminais de Direção}} · {{prod:Terminal Axial}}"
+    ],
+    [
+     "Vazamento na caixa",
+     "Vedação ou coifa da caixa",
+     "{{prod:Caixa de Direção}}"
+    ],
+    [
+     "Volante duro (hidráulica)",
+     "Fluido baixo, bomba ou caixa",
+     "{{prod:Caixa de Direção}} · fluido do manual"
+    ],
+    [
+     "Pneu gastando torto",
+     "Terminal gasto ou carro desalinhado",
+     "{{prod:Terminais de Direção}} · alinhamento"
+    ]
+   ],
+   "atencao": "O balcão indica a peça provável; quem confirma o defeito é o mecânico. Não prometa que a peça resolve sem essa confirmação.",
+   "notas": "MENSAGEM-CHAVE\nA tabela de bolso da direção: cinco sintomas do dia a dia.\n\nCOMO CONDUZIR\nLeia linha por linha e peça para o time completar de cabeça antes de mostrar a terceira coluna.\n\nINSIGHT PARA O CAMPO\nVolante duro na hidráulica: primeiro o nível do fluido; ele é o mais barato de resolver."
+  },
+  {
+   "tipo": "barulhos",
+   "k": "MÓDULO 05 · SINTOMAS",
+   "t": "O que o motorista sente no volante",
+   "t1": "O que o cliente fala → onde olhar",
+   "itens": [
+    [
+     "“A direção está solta”: terminal, axial ou caixa",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "“Bate na frente no buraco”: terminal ou axial",
+     "FaVolumeHigh"
+    ],
+    [
+     "“O volante ficou duro”: fluido, bomba ou caixa",
+     "FaTriangleExclamation"
+    ],
+    [
+     "“O carro puxa para um lado”: alinhamento ou terminal",
+     "FaRoad"
+    ]
+   ],
+   "numero": "Alinhar",
+   "desc": "depois de trocar caixa, axial ou terminal — e sempre que o carro puxar",
+   "t2": "A ligação com a suspensão",
+   "texto2": "Pivô, bandeja e buchas gastos também tiram o carro do alinhamento: veja o treinamento de Suspensão.",
+   "dica": "Peça para o cliente dizer quando sente: parado, em manobra, em buraco ou em velocidade. Isso separa direção de suspensão.",
+   "notas": "MENSAGEM-CHAVE\nO motorista descreve a direção pelo que sente no volante.\n\nCOMO CONDUZIR\nLeia cada frase e peça exemplos reais. Mostre a ligação com a suspensão: pivô e bandeja também desalinham o carro.\n\nINSIGHT PARA O CAMPO\nVolante torto com o carro andando reto é sinal claro de desalinhamento."
+  },
+  {
+   "tipo": "numero3",
+   "k": "MÓDULO 05 · SINTOMAS",
+   "t": "Vazamento na direção hidráulica",
+   "icone": "FaDroplet",
+   "numero": "3",
+   "desc": "pontos de vazamento para conferir antes de condenar a caixa",
+   "cards": [
+    [
+     "Mangueiras",
+     "Conexões e mangueiras de pressão e de retorno.",
+     "FaLink"
+    ],
+    [
+     "Bomba",
+     "Retentor do eixo e a junta da bomba.",
+     "FaGears"
+    ],
+    [
+     "Caixa e coifas",
+     "Fluido dentro da coifa é vedação da caixa.",
+     "FaShieldHalved"
+    ]
+   ],
+   "dica": "Fluido dentro da coifa da caixa indica vedação interna gasta: aí a caixa é a peça.",
+   "notas": "MENSAGEM-CHAVE\nNem todo vazamento é da caixa: mangueira e bomba também vazam.\n\nCOMO CONDUZIR\nPasse pelos três pontos. Fluido dentro da coifa é o sinal que leva à caixa.\n\nPERGUNTE AO TIME\nO que fazer com o fluido quando a caixa for trocada? (Resposta: fluido novo do manual e sangria.)"
+  },
+  {
+   "tipo": "sinais",
+   "k": "MÓDULO 05 · SINTOMAS",
+   "t": "Ruído e vibração: direção ou outro sistema?",
+   "t1": "O que o cliente sente → de onde costuma vir",
+   "itens1": [
+    [
+     "Volante tremendo em velocidade: balanceamento",
+     "FaCircleDot"
+    ],
+    [
+     "Chiado ao esterçar (hidráulica): fluido ou bomba",
+     "FaVolumeHigh"
+    ],
+    [
+     "Estalo ao esterçar parado: coxim (suspensão)",
+     "FaRotate"
+    ],
+    [
+     "Puxa na frenagem: freio ou amortecedor",
+     "FaTriangleExclamation"
+    ]
+   ],
+   "t2": "Como o vendedor ajuda",
+   "itens2": [
+    "Pergunte quando o sintoma aparece: parado, em manobra, em velocidade ou na frenagem.",
+    "Mostre que o sintoma pode ser de outro sistema: Suspensão e Freio têm treinamentos próprios.",
+    "Ofereça a peça provável e combine a confirmação com o mecânico."
+   ],
+   "dica": "Nem todo sintoma no volante é da direção: separar o sistema evita a troca errada e o retorno.",
+   "notas": "MENSAGEM-CHAVE\nO volante sente tudo o que acontece na frente do carro; nem todo sintoma é da direção.\n\nCOMO CONDUZIR\nLeia as quatro situações e os três passos de como ajudar.\n\nINSIGHT PARA O CAMPO\nQuem separa o sistema certo vira referência técnica para o mecânico."
+  },
+  {
+   "tipo": "secao",
+   "n": "06",
+   "titulo": "Alinhamento e garantia",
+   "sub": "A troca certa e as causas de falha que não são defeito",
+   "notas": "MENSAGEM-CHAVE\nGarantia de direção se resolve na venda: par, alinhamento e coifas inteiras.\n\nCOMO CONDUZIR\nTransição curta."
+  },
+  {
+   "tipo": "indicadores",
+   "k": "MÓDULO 06 · ALINHAMENTO",
+   "t": "O que o alinhamento acerta",
+   "cards": [
+    [
+     "FaArrowsLeftRight",
+     "Convergência",
+     "Pelo terminal",
+     "Ângulo das rodas vistas de cima; regulado na rosca do terminal.",
+     "= pneu sem gastar torto"
+    ],
+    [
+     "FaRuler",
+     "Cambagem",
+     "Inclinação da roda",
+     "Ângulo visto de frente; muda com pivô, bandeja e amortecedor.",
+     "= pneu apoiado por igual"
+    ],
+    [
+     "FaRotate",
+     "Cáster",
+     "Retorno do volante",
+     "Inclinação do eixo de esterço; ajuda o volante a voltar.",
+     "= direção estável"
+    ],
+    [
+     "FaCircleDot",
+     "Balanceamento",
+     "É outro serviço",
+     "Corrige o peso da roda e evita a vibração no volante.",
+     "= volante sem tremer"
+    ]
+   ],
+   "dica": "Alinhamento corrige ângulos; balanceamento corrige peso. Volante tremendo em velocidade costuma ser balanceamento.",
+   "notas": "MENSAGEM-CHAVE\nO alinhamento acerta os ângulos das rodas; o terminal é onde se regula a convergência.\n\nCOMO CONDUZIR\nExplique os três ângulos e diferencie do balanceamento.\n\nINSIGHT PARA O CAMPO\nParceria com centro de alinhamento gera indicação de terminal e axial."
+  },
+  {
+   "tipo": "cartoes8",
+   "k": "MÓDULO 06 · GARANTIA",
+   "t": "Nem toda falha é defeito de fabricação",
+   "cartoes": [
+    [
+     "Sem alinhamento",
+     "o pneu e as peças gastam torto",
+     "FaRoad"
+    ],
+    [
+     "Troca de um só",
+     "a peça velha do par força a nova",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Coifa rasgada",
+     "água e areia no pivô",
+     "FaLinkSlash"
+    ],
+    [
+     "Batida forte",
+     "buraco ou meio-fio",
+     "FaTriangleExclamation"
+    ],
+    [
+     "Fluido errado",
+     "vedação da caixa ataca",
+     "FaFlask"
+    ],
+    [
+     "Fluido velho",
+     "sujeira gasta a caixa nova",
+     "FaDroplet"
+    ],
+    [
+     "Aperto errado",
+     "porca sem torque ou sem trava",
+     "FaWrench"
+    ],
+    [
+     "Aplicação errada",
+     "versão, tipo ou lado",
+     "FaBarcode"
+    ]
+   ],
+   "painel": [
+    [
+     "Em par",
+     "axial e terminal do mesmo lado, juntos"
+    ],
+    [
+     "Alinhar",
+     "depois de qualquer troca da corrente"
+    ]
+   ],
+   "fonte": "Orientações gerais de instalação; siga sempre o manual do veículo e a orientação do fabricante da peça.",
+   "notas": "MENSAGEM-CHAVE\nA maioria das falhas prematuras vem da instalação e do uso, não da peça.\n\nCOMO CONDUZIR\nPasse pelos oito cartões. Cada um é uma pergunta na análise: alinhou? trocou em par? a coifa estava inteira? o fluido era o do manual?\n\nINSIGHT PARA O CAMPO\nExplique as regras na hora da venda, não na hora da reclamação."
+  },
+  {
+   "tipo": "passos5",
+   "k": "MÓDULO 06 · GARANTIA",
+   "t": "Troca da caixa em 5 passos",
+   "passos": [
+    [
+     "Diagnóstico",
+     "Confirme que a folga ou o vazamento é da caixa.",
+     "FaStethoscope"
+    ],
+    [
+     "Peça certa",
+     "Tipo de direção, versão e aplicação.",
+     "FaBarcode"
+    ],
+    [
+     "Conjunto",
+     "Axial e terminal conferidos e, se gastos, trocados.",
+     "FaLink"
+    ],
+    [
+     "Fluido e sangria",
+     "Fluido novo do manual e ar fora do sistema.",
+     "FaDroplet"
+    ],
+    [
+     "Alinhamento",
+     "O ajuste final da convergência.",
+     "FaRoad"
+    ]
+   ],
+   "dica": "Caixa nova com terminal velho e sem alinhamento é o retorno mais comum da direção.",
+   "notas": "MENSAGEM-CHAVE\nA troca certa da caixa tem cinco passos, e o alinhamento fecha o serviço.\n\nCOMO CONDUZIR\nPasse pelos cinco passos como roteiro para o mecânico. O vendedor não faz o serviço, mas orienta a compra completa.\n\nPERGUNTE AO TIME\nQual destes passos o cliente mais quer pular?"
+  },
+  {
+   "tipo": "secao",
+   "n": "07",
+   "titulo": "Vender direção",
+   "sub": "Perguntas, cross-sell, combos e fechamento",
+   "notas": "MENSAGEM-CHAVE\nDireção se vende em corrente e com o alinhamento. Este módulo transforma o conhecimento em pedido.\n\nCOMO CONDUZIR\nTransição curta. O módulo segue o padrão de venda BAP."
+  },
+  {
+   "tipo": "spin",
+   "k": "MÓDULO 07 · VENDA",
+   "t": "Venda consultiva: perguntas que vendem (SPIN)",
+   "spin": [
+    [
+     "Entender o cenário",
+     "“Quais carros mais passam pela sua oficina?”\n“Você faz alinhamento aí?”"
+    ],
+    [
+     "Encontrar a dor",
+     "“Tem voltado carro com folga depois da troca?”\n“Falta axial na hora?”"
+    ],
+    [
+     "Mostrar o custo de não resolver",
+     "“Quanto custa um segundo alinhamento por um terminal que voltou?”"
+    ],
+    [
+     "Fazer o cliente dizer o valor",
+     "“Se o terminal viesse com o axial, quanto tempo você ganharia?”"
+    ]
+   ],
+   "dica": "Com o mecânico, fale de retorno e de alinhamento; com o lojista, de par na prateleira.",
+   "notas": "MENSAGEM-CHAVE\nQuem pergunta conduz. As perguntas SPIN levam o cliente a pedir o par.\n\nCOMO CONDUZIR\nExplique as 4 letras com os exemplos de direção e faça um role-play de 2 minutos.\n\nPERGUNTE AO TIME\nQual pergunta de Implicação funciona melhor com o mecânico?"
+  },
+  {
+   "tipo": "hub",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Cross-sell: o terminal puxa a corrente",
+   "itens": [
+    [
+     "Terminal de direção",
+     "a ponta que prende na roda",
+     "FaLink"
+    ],
+    [
+     "Terminal axial",
+     "a barra que sai da caixa",
+     "FaArrowsLeftRight"
+    ],
+    [
+     "Pivô de suspensão",
+     "a articulação vizinha, embaixo",
+     "FaCircleDot"
+    ]
+   ],
+   "cards": [
+    [
+     "Mesmo serviço",
+     "A roda já está desmontada: é a hora de trocar o que está em volta.",
+     "FaWrench"
+    ],
+    [
+     "Mesmo sintoma",
+     "Folga e “toc” podem vir do terminal, do axial ou do pivô.",
+     "FaStethoscope"
+    ],
+    [
+     "Um alinhamento",
+     "Tudo trocado junto, o cliente alinha uma vez só.",
+     "FaRoad"
+    ]
+   ],
+   "dica": "Use o Ofereça junto do Catálogo BAP: o pivô {{cod:PIV5001}} (Onix) indica o terminal {{oj:PIV5001}}.",
+   "notas": "MENSAGEM-CHAVE\nToda peça da direção tem vizinhas que gastam junto.\n\nCOMO CONDUZIR\nMostre os três itens e os três argumentos.\n\nINSIGHT PARA O CAMPO\nOutros pares da base: axial {{cod:TAX10494}} → terminal {{oj:TAX10494}}; terminal {{cod:TER556016}} → axiais {{oj:TER556016}}."
+  },
+  {
+   "tipo": "combos",
+   "k": "MÓDULO 07 · CROSS-SELL",
+   "t": "Combos de direção e perguntas-gatilho",
+   "combos": [
+    [
+     "Direção firme",
+     "{{prod:Terminal Axial}}  +  {{prod:Terminais de Direção}}",
+     "Onix: {{cod:TAX10494}} + {{oj:TAX10494}}"
+    ],
+    [
+     "Dianteira completa",
+     "{{prod:Terminais de Direção}}  +  {{prod:Pivô de Suspensão}}",
+     "Gol: {{cod:PIV5004}} + {{oj:PIV5004}}"
+    ],
+    [
+     "Caixa nova",
+     "{{prod:Caixa de Direção}}  +  {{prod:Terminais de Direção}}",
+     "Palio: {{cod:CXD13027}} + {{oj:CXD13027}}"
+    ]
+   ],
+   "pergunte": [
+    "“A direção está com folga?”",
+    "“Bate na frente no buraco?”",
+    "“Tem fluido vazando na caixa?”"
+   ],
+   "dica": "O que é medido melhora: acompanhe a % de terminais que saem com o axial.",
+   "notas": "MENSAGEM-CHAVE\nCombos transformam conhecimento em pedido maior.\n\nCOMO CONDUZIR\nApresente os 3 combos e as perguntas da faixa PERGUNTE. Os códigos vêm do Ofereça junto da base.\n\nINSIGHT PARA O CAMPO\nEm todos os combos, termine com o alinhamento: é a pergunta que fecha a venda."
+  },
+  {
+   "tipo": "fechamento",
+   "k": "MÓDULO 07 · FECHAMENTO",
+   "t": "Fechamento em 3 etapas",
+   "dica": "Direção fecha quando o cliente confia na aplicação: mostre código, tipo e lado no Catálogo BAP antes de pedir o pedido."
+  },
+  {
+   "tipo": "naofechou",
+   "k": "MÓDULO 07 · NÃO FECHOU",
+   "t": "Não fechou? Os 5 motivos na direção",
+   "linhas": [
+    [
+     "Preço",
+     "Compare com o custo de um segundo alinhamento e de um retorno: o par evita os dois.",
+     "“Se eu resolver isso, fechamos?”"
+    ],
+    [
+     "Prazo ou limite",
+     "Não prometa prazo nem limite fora da regra. Monte um pedido menor com os terminais que mais giram.",
+     "“Se eu ajustar o pedido ao seu limite, fechamos?”"
+    ],
+    [
+     "Dúvida na aplicação",
+     "Mostre no Catálogo BAP a aplicação, o tipo de direção, o lado e as referências cruzadas.",
+     "“Se eu te mostrar que serve, fechamos?”"
+    ],
+    [
+     "Já tem fornecedor",
+     "Não peça para trocar tudo. Entre onde ele perde venda: axiais e caixas.",
+     "“Começamos por essa linha que falta?”"
+    ],
+    [
+     "Sem necessidade agora",
+     "Mostre o giro: os terminais da frota da região e o par que mais sai.",
+     "“Que dia eu volto pra fechar?”"
+    ]
+   ],
+   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 5 motivos.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price."
+  },
+  {
+   "tipo": "checklist",
+   "t": "Checklist do vendedor BAP",
+   "itens": [
+    "Perguntei o veículo, o ano e a versão",
+    "Perguntei o tipo de direção",
+    "Perguntei quando o cliente sente o sintoma",
+    "Conferi a aplicação e o lado no catálogo",
+    "Ofereci axial e terminal em par",
+    "Ofereci os dois lados",
+    "Usei o Ofereça junto do Catálogo BAP",
+    "Lembrei do alinhamento depois da troca",
+    "Indiquei o fluido do manual na hidráulica",
+    "Orientei a conferir as coifas",
+    "Pedi o pedido; sem pedido, anotei o motivo",
+    "Deixei o próximo passo combinado"
+   ]
+  },
+  {
+   "tipo": "quiz",
+   "perguntas": [
+    "Qual a função da caixa de direção?",
+    "O que liga a caixa ao terminal de direção?",
+    "Por que toda troca de terminal pede alinhamento?",
+    "O volante ficou duro numa direção hidráulica. O que conferir primeiro?",
+    "Por que vender axial e terminal em par?",
+    "Qual a diferença entre alinhamento e balanceamento?"
+   ],
+   "respostas": [
+    "Transformar o giro do volante no vaivém que esterça as rodas.",
+    "O terminal axial.",
+    "Porque a convergência é regulada na rosca do terminal.",
+    "O nível do fluido; depois, bomba e caixa.",
+    "Porque gastam juntos e a troca junto evita retorno e um segundo alinhamento.",
+    "Alinhamento acerta os ângulos das rodas; balanceamento corrige o peso da roda."
+   ]
+  },
+  {
+   "tipo": "obrigado",
+   "sobre": "TREINAMENTO DIREÇÃO BAP",
+   "titulo": "Obrigado!",
+   "sub": "Dúvidas? Agora é levar para o balcão e para a oficina.",
+   "notas": "MENSAGEM-CHAVE\nO conhecimento só vira resultado no campo.\n\nCOMO CONDUZIR\nAbra para dúvidas. Lembre que Suspensão e Direção se completam no alinhamento."
+  }
+ ]
+}

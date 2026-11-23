@@ -653,6 +653,185 @@ def icone_video():
     return svg(200, 200, ''.join(o))
 
 
+
+def direcao():
+    """Direção com cremalheira vista de cima (frente para cima): volante, coluna, caixa, coifas, axiais e terminais."""
+    global R
+    R = 27
+    W, H = 1360, 790
+    o = []
+    for x in (60, 1180):   # rodas
+        o.append(rect(x, 300, 120, 260, fill=ESC, stroke=ESC, rx=30))
+        o.append(rect(x + (90 if x < 600 else -40), 370, 70, 120, fill=C3, stroke=LINHA, sw=3, rx=10))
+    # braço da manga
+    o.append(path('M220,430 L290,470', stroke=LINHA, sw=14))
+    o.append(path('M1140,430 L1070,470', stroke=LINHA, sw=14))
+    # terminais de direção (pivô esférico)
+    for x in (300, 1060):
+        o.append(circ(x, 476, 26, fill=C2, stroke=LINHA, sw=4))
+        o.append(circ(x, 476, 10, fill=LINHA, stroke=LINHA, sw=2))
+    # axiais
+    o.append(path('M326,480 L430,500', stroke=CINZA, sw=16))
+    o.append(path('M1034,480 L930,500', stroke=CINZA, sw=16))
+    for x in (436, 924):
+        o.append(circ(x, 500, 18, fill=C1, stroke=LINHA, sw=4))
+    # coifas (sanfona)
+    for x0, d in ((450, 1), (910, -1)):
+        pts = ' '.join(f'L{x0 + d * k * 14},{500 + (22 if k % 2 else -22)}' for k in range(1, 9))
+        o.append(path(f'M{x0},500 {pts} L{x0 + d * 120},500', fill='none', stroke=ESC, sw=12))
+    # caixa (tubo da cremalheira)
+    o.append(rect(570, 476, 220, 48, fill=C2, stroke=LINHA, sw=5, rx=16))
+    o.append(rect(650, 450, 70, 100, fill=C1, stroke=LINHA, sw=4, rx=12))
+    # coluna e volante
+    o.append(path('M685,450 L760,220', stroke=LINHA, sw=14))
+    o.append(path('M760,220 L800,110', stroke=LINHA, sw=10))
+    o.append(f'<ellipse cx="810" cy="90" rx="110" ry="40" fill="none" stroke="{ESC}" stroke-width="16"/>')
+    # bomba hidráulica, reservatório e mangueiras
+    o.append(circ(360, 190, 52, fill=VERDE, stroke=VESC, sw=4))
+    o.append(circ(360, 190, 16, fill=BRANCO, stroke=VESC, sw=3))
+    o.append(rect(470, 120, 90, 110, fill=BRANCO, stroke=LINHA, sw=4, rx=14))
+    o.append(rect(474, 165, 82, 61, fill=LAR, stroke='none', sw=0, rx=10, extra='opacity="0.45"'))
+    o.append(path('M412,190 C520,260 600,330 640,460', stroke=VESC, sw=8))
+    o.append(path('M515,230 C560,330 620,380 700,450', stroke=VESC, sw=8, extra='stroke-dasharray="14 9"'))
+    o.append(marca(1, 960, 70, 905, 95))
+    o.append(marca(2, 900, 250, 750, 250))
+    o.append(marca(3, 680, 650, 680, 545))
+    o.append(marca(4, 520, 640, 520, 522))
+    o.append(marca(5, 400, 640, 410, 500))
+    o.append(marca(6, 300, 640, 300, 502))
+    o.append(marca(7, 120, 660, 120, 560))
+    o.append(marca(8, 250, 120, 320, 160))
+    o.append(marca(9, 620, 90, 555, 150))
+    return svg(W, H, ''.join(o))
+
+
+def amortecedor_corte():
+    """Amortecedor em corte (bitubo): coxim, haste, coifa, batente, tubos, pistão com válvulas, óleo e base."""
+    global R
+    R = 27
+    W, H = 1360, 790
+    o = []
+    cx = 560
+    # coxim e prato
+    o.append(rect(cx - 120, 40, 240, 46, fill=ESC, stroke=ESC, rx=14))
+    o.append(rect(cx - 70, 86, 140, 24, fill=C3, stroke=LINHA, sw=3, rx=6))
+    # haste
+    o.append(rect(cx - 16, 100, 32, 360, fill='#E8ECEA', stroke=LINHA, sw=4))
+    # coifa e batente
+    pts = ' '.join(f'L{cx + (60 if k % 2 else 44)},{120 + k * 16}' for k in range(1, 12))
+    o.append(path(f'M{cx + 44},120 {pts} L{cx + 44},296 L{cx - 44},296 ' +
+                  ' '.join(f'L{cx - (60 if k % 2 else 44)},{296 - k * 16}' for k in range(1, 12)) + ' Z',
+                  fill=ESC, stroke=ESC, sw=3, extra='opacity="0.85"'))
+    o.append(rect(cx - 30, 230, 60, 50, fill='#E9D79A', stroke=LINHA, sw=3, rx=10))
+    # tubo externo (reservatório) e tubo de pressão
+    o.append(rect(cx - 120, 300, 240, 430, fill=C1, stroke=LINHA, sw=6, rx=18))
+    o.append(rect(cx - 70, 312, 140, 380, fill=BRANCO, stroke=LINHA, sw=4, rx=6))
+    o.append(rect(cx - 66, 470, 132, 218, fill=LAR, stroke='none', sw=0, extra='opacity="0.35"'))
+    o.append(rect(cx - 114, 560, 44, 160, fill=LAR, stroke='none', sw=0, extra='opacity="0.35"'))
+    o.append(rect(cx + 70, 560, 44, 160, fill=LAR, stroke='none', sw=0, extra='opacity="0.35"'))
+    # pistão com válvulas
+    o.append(rect(cx - 66, 440, 132, 40, fill=C3, stroke=LINHA, sw=4, rx=6))
+    for x in (cx - 36, cx + 36):
+        o.append(circ(x, 460, 9, fill=BRANCO, stroke=LINHA, sw=3))
+    # válvula de base
+    o.append(rect(cx - 66, 660, 132, 26, fill=C3, stroke=LINHA, sw=3, rx=4))
+    # olhal
+    o.append(circ(cx, 752, 26, fill=C2, stroke=LINHA, sw=5))
+    o.append(circ(cx, 752, 10, fill=BRANCO, stroke=LINHA, sw=3))
+    o.append(marca(1, 300, 62, cx - 120, 62))
+    o.append(marca(2, 300, 160, cx - 16, 160))
+    o.append(marca(3, 300, 250, cx - 46, 250))
+    o.append(marca(4, 820, 200, cx + 30, 255))
+    o.append(marca(5, 300, 420, cx - 120, 420))
+    o.append(marca(6, 820, 470, cx + 66, 460))
+    o.append(marca(7, 300, 600, cx - 66, 600))
+    o.append(marca(8, 820, 673, cx + 66, 673))
+    return svg(W, H, ''.join(o))
+
+
+def abs_sensor():
+    """ABS: a roda fônica gira junto com a roda, o sensor lê os dentes e o módulo controla a pressão do freio."""
+    global R
+    R = 27
+    W, H = 1360, 790
+    o = []
+    cx, cy = 420, 400
+    o.append(circ(cx, cy, 300, fill=C1, stroke=LINHA, sw=6))
+    o.append(circ(cx, cy, 200, fill=BRANCO, stroke=LINHA, sw=4))
+    n = 40
+    for k in range(n):
+        a = 2 * math.pi * k / n
+        x1, y1 = cx + 205 * math.cos(a), cy + 205 * math.sin(a)
+        x2, y2 = cx + 240 * math.cos(a), cy + 240 * math.sin(a)
+        o.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{VESC}" stroke-width="12"/>')
+    o.append(circ(cx, cy, 90, fill=C2, stroke=LINHA, sw=4))
+    for k in range(5):
+        a = 2 * math.pi * k / 5
+        o.append(circ(cx + 50 * math.cos(a), cy + 50 * math.sin(a), 11, fill=LINHA, stroke=LINHA, sw=2))
+    # sensor
+    o.append(rect(cx + 250, cy - 26, 120, 52, fill=ESC, stroke=ESC, rx=10))
+    o.append(rect(cx + 240, cy - 14, 20, 28, fill=VERDE, stroke=VESC, sw=3, rx=4))
+    o.append(path(f'M{cx + 370},{cy} C{cx + 470},{cy} {cx + 470},{cy - 220} {cx + 560},{cy - 220} L1040,{cy - 220}', stroke=ESC, sw=10))
+    # módulo ABS
+    o.append(rect(1040, cy - 300, 240, 170, fill=C2, stroke=LINHA, sw=5, rx=16))
+    for k in range(4):
+        o.append(circ(1090 + k * 48, cy - 110, 14, fill=LAR, stroke=LINHA, sw=3))
+        o.append(path(f'M{1090 + k * 48},{cy - 96} L{1090 + k * 48},{cy + 40}', stroke=LAR, sw=5, extra='stroke-dasharray="10 8"'))
+    # luz do painel
+    o.append(circ(1160, 620, 70, fill=ESC, stroke=ESC, sw=2))
+    o.append(f'<text x="1160" y="640" font-size="52" font-weight="bold" fill="{LAR}" text-anchor="middle">ABS</text>')
+    o.append(marca(1, 120, 120, cx - 160, cy - 200))
+    o.append(marca(2, 120, 700, cx - 140, cy + 170))
+    o.append(marca(3, 700, 520, cx + 310, cy + 26))
+    o.append(marca(4, 860, 120, 900, cy - 220))
+    o.append(marca(5, 1320, 160, 1280, cy - 220))
+    o.append(marca(6, 960, 620, 1090, 620))
+    return svg(W, H, ''.join(o))
+
+
+def freio_pesado():
+    """Freio a ar da linha pesada: cuíca (câmara), haste, catraca (ajustador), eixo S e sapatas no tambor."""
+    global R
+    R = 27
+    W, H = 1360, 790
+    o = []
+    # tambor e sapatas
+    cx, cy = 960, 420
+    o.append(circ(cx, cy, 300, fill='#F4F7F5', stroke=LINHA, sw=14))
+    o.append(path(f'M{cx - 240},{cy - 120} A270,270 0 0,1 {cx - 120},{cy - 245}', stroke=LAR, sw=26))
+    o.append(path(f'M{cx - 240},{cy + 120} A270,270 0 0,0 {cx - 120},{cy + 245}', stroke=LAR, sw=26))
+    o.append(path(f'M{cx + 240},{cy - 120} A270,270 0 0,0 {cx + 120},{cy - 245}', stroke=C3, sw=0))
+    o.append(path(f'M{cx - 210},{cy - 120} A240,240 0 0,1 {cx + 200},{cy - 140}', stroke=C3, sw=22))
+    o.append(path(f'M{cx - 210},{cy + 120} A240,240 0 0,0 {cx + 200},{cy + 140}', stroke=C3, sw=22))
+    o.append(path(f'M{cx - 230},{cy - 110} A250,250 0 0,1 {cx + 190},{cy - 160}', stroke=LAR, sw=14))
+    o.append(path(f'M{cx - 230},{cy + 110} A250,250 0 0,0 {cx + 190},{cy + 160}', stroke=LAR, sw=14))
+    # came S
+    o.append(path(f'M{cx - 250},{cy - 50} C{cx - 200},{cy - 60} {cx - 200},{cy} {cx - 250},{cy} C{cx - 300},{cy} {cx - 300},{cy + 60} {cx - 250},{cy + 50}',
+                  stroke=VESC, sw=18))
+    o.append(circ(cx, cy, 60, fill=C1, stroke=LINHA, sw=4))
+    # eixo do came até a catraca
+    o.append(path(f'M{cx - 250},{cy} L420,{cy}', stroke=CINZA, sw=22))
+    # catraca (ajustador)
+    o.append(circ(420, cy, 56, fill=C2, stroke=LINHA, sw=5))
+    o.append(circ(420, cy, 26, fill=BRANCO, stroke=LINHA, sw=4))
+    o.append(path(f'M420,{cy} L420,{cy - 250}', stroke=LINHA, sw=26))
+    o.append(circ(420, cy - 250, 16, fill=BRANCO, stroke=LINHA, sw=4))
+    # cuíca (câmara de ar) e haste
+    o.append(path(f'M140,{cy - 330} C60,{cy - 330} 60,{cy - 170} 140,{cy - 170} L260,{cy - 170} C320,{cy - 170} 320,{cy - 330} 260,{cy - 330} Z',
+                  fill=ESC, stroke=ESC, sw=4))
+    o.append(path(f'M300,{cy - 250} L404,{cy - 250}', stroke=C3, sw=14))
+    o.append(path(f'M90,{cy - 330} L40,{cy - 380}', stroke=VERDE, sw=10))
+    o.append(seta(330, cy - 280, 400, cy - 280, cor=VESC, sw=6))
+    o.append(marca(1, 190, 120, 190, cy - 330))
+    o.append(marca(2, 360, 70, 360, cy - 250))
+    o.append(marca(3, 300, 600, 400, cy + 40))
+    o.append(marca(4, 600, 300, 600, cy))
+    o.append(marca(5, 620, 640, cx - 255, cy + 40))
+    o.append(marca(6, 1300, 300, cx + 210, cy - 140))
+    o.append(marca(7, 1300, 640, cx + 230, cy + 190))
+    return svg(W, H, ''.join(o))
+
+
 DESENHOS = {
     'carro_sistemas': carro_sistemas,
     'motor_corte': motor_corte,
@@ -665,6 +844,10 @@ DESENHOS = {
     'freio_hidraulico': freio_hidraulico,
     'ignicao': ignicao,
     'icone_video': icone_video,
+    'direcao': direcao,
+    'amortecedor_corte': amortecedor_corte,
+    'abs_sensor': abs_sensor,
+    'freio_pesado': freio_pesado,
 }
 
 

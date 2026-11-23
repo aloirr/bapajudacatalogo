@@ -48,6 +48,7 @@ from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.util import Inches
 
 import treinamento_desenhos
+import treinamento_tipos
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.normpath(os.path.join(AQUI, '..', '..'))
@@ -146,7 +147,11 @@ class Base:
                 return self.ativo(arg).CODIGO_BAP
             if tipo == 'oj':
                 oj = [x.strip() for x in self.ativo(arg).OFERECA_JUNTO.split('·') if x.strip()]
-                cods = [RE_COD.search(x).group(0) for x in oj if RE_COD.search(x)]
+                cods = []
+                for x in oj:   # o código inteiro da base (ex.: ROL102949/102910) ou o que tem cara de código
+                    m = self.rx_base.search(x) or RE_COD.search(x)
+                    if m:
+                        cods.append(m.group(0))
                 for c in cods:
                     self.ativo(c)
                 return ' · '.join(cods) if cods else '—'
@@ -188,7 +193,9 @@ class Base:
     def conferir(self, txt, onde):
         if PROIBIDO.search(txt):
             parar(f'palavra proibida ("estoque" ou "R$") em {onde}: {PROIBIDO.search(txt).group(0)}')
-        for cod in RE_COD.findall(txt):
+        for m in self.rx_base.finditer(txt):
+            self.ativo(m.group(0))
+        for cod in RE_COD.findall(self.rx_base.sub(' ', txt)):
             self.ativo(cod)
 
 
@@ -666,6 +673,7 @@ def montar(nome, saida=None):
     molde_ref = Presentation(arq_original)
     originais = list(prs.slides)
     cfg = expandir_slides(cfg, len(originais))
+    cfg = treinamento_tipos.expandir_cfg(cfg)
     outros = {}
     contagem = {}
     nao_codigo = set(cfg.get('nao_codigo', []))
@@ -742,6 +750,9 @@ def montar(nome, saida=None):
                 escrever(tab.cell(i, j).text_frame._txBody, v)
         for k in spec.get('link_por_palavra', []):
             link_por_palavra(formas[int(k)].text_frame._txBody)
+        for k, pt in spec.get('tamanho', {}).items():      # tamanho da fonte (pt) de todos os trechos da forma
+            for rpr in formas[int(k)]._element.iter(A + 'rPr', A + 'endParaRPr'):
+                rpr.set('sz', str(int(pt * 100)))
         for k, cor in spec.get('cor_texto', {}).items():
             cor_do_texto(formas[int(k)], cor)
         for k, ref in spec.get('img', {}).items():
