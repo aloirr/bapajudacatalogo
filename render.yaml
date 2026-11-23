@@ -68,6 +68,9 @@ services:
         - catalogo_grafico/entregas/BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pdf
         - catalogo_grafico/entregas/BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pptx
         - catalogo_grafico/entregas/Kit_Filtros_BAP.pdf
+        - catalogo_grafico/entregas/Portfolio_Produtos_BAP_AUTOPARTS_Linha_*.pdf
+        - catalogo_grafico/entregas/Treinamento_*_BAP_Vendedores.pdf
+        - catalogo_grafico/entregas/Treinamento_*_BAP_Vendedores.pptx
     disk:
       name: login-usuarios
       mountPath: /var/data
