@@ -225,19 +225,24 @@ def pagina_sistema(s, lin_nome, num, sis, fams):
 
 
 def carro(mod, m):
-    """o "mesmo carro" de uma aplicação: o modelo, com o número quando o nome é uma sigla (CG 125, G 400),
-    sem a montadora (na linha da base v27 ela vem na frente: "FORD ECOSPORT 1.6 L" = "Ford" + "Ecosport 1.6 L 16V")"""
+    """o "mesmo carro" de uma aplicação: a montadora (a 1ª, se forem várias) e o modelo, com o número quando o nome
+    é uma sigla (CG 125, G 400). Na linha da base v27 a montadora vem na frente: "FORD ECOSPORT 1.6 L" = "Ford" +
+    "Ecosport 1.6 L 16V"."""
     import re
-    from montar import BRANDS_RX
+    from montar import BRANDS_RX, BR_SHORT
     from pneus_fix import BR
     t = mod.upper()
-    if not m: t = re.sub(rf'^(?:{BRANDS_RX}|{BR}|VW|MB)\b[:\s]*', '', t)
-    ws = [w for w in re.split(r'[\s/,]+', t) if w] or ['']
+    if not m:
+        pre = re.match(rf'(?:{BRANDS_RX}|{BR}|VW|MB)\b[:\s]*', t)
+        if pre: m, t = pre.group(0), t[pre.end():]
+    mt = re.split(r'\s*[/+]\s*', m.upper().strip(' :'))[0]
+    mt = BR_SHORT.get(mt.replace('Ë', 'E'), mt)
+    ws = [w.strip(':;.') for w in re.split(r'[\s/,]+', t) if w.strip(':;.')] or ['']
     if re.fullmatch(r'\d+', ws[0]) and len(ws) > 1 and re.fullmatch(r'[A-ZÀ-Ý]{3,}', ws[1]):
-        return ws[1]                                                    # MB 1315 ATEGO: o modelo é o Atego
+        return mt, ws[1]                                                # MB 1315 ATEGO: o modelo é o Atego
     if re.fullmatch(r'[A-Z]{1,3}', ws[0]) and len(ws) > 1 and re.fullmatch(r'\d{2,4}', ws[1]):
-        return ws[0] + ' ' + ws[1]                                      # sigla + número: CG 125 ≠ CG 150 (o Atego 1315 é Atego)
-    return ws[0]
+        return mt, ws[0] + ' ' + ws[1]                                  # sigla + número: CG 125 ≠ CG 150 (o Atego 1315 é Atego)
+    return mt, ws[0]
 
 
 def aplicacoes(rows, n=12):
@@ -267,7 +272,7 @@ def aplicacoes(rows, n=12):
             mod = re.sub(r'(?i)\s*\b(?:diant|tras|dir|esq|sup|inf)(?:eir[oa]|eit[oa]|uerd[oa]|erior)?\.?(?=\s|$)', '', mod).strip(' ,·/+')
             if not mod: continue
             k = carro(mod, m)                                                # não repetir o mesmo carro
-            if k in vistos: continue
+            if k in vistos or (k[0], k[1].split(' ')[0]) in vistos: continue   # "Dodge RAM" já cobre o "RAM 2500"
             vistos.add(k); out.append((m, mod))
             if len(out) >= n: return out
     return out
