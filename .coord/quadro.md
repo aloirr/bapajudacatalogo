@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 23/11/2026 09:05 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 23/11/2026 09:09 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -42,6 +42,7 @@ Main 813a7f3 (#166).
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - Portfólio: as datas de 2026 passam a 2027 (capa, contracapa, pág. 3 e o selo "NOVIDADE 2026"), com a seta "→" da pág. 3, que a fonte não tem: simulação própria (catalogo-grafico, T-0028);
    - RD-0535 (o sistema no sobretítulo e no título das páginas de produto do Portfólio) e MC-0017 (siglas de montadora em caixa errada e "effitech"): decisão do Alexandre, com simulação (T-0028);
+   - as divisórias da Moto e do Universal com muito espaço vazio, e a variedade de montadoras nas "Principais aplicações" do Portfólio (6 Volvo nos Filtros de Óleo da Pesada): layout e regra nova, com simulação (T-0028);
    - aplicações estranhas da base no Portfólio ("Agile" e "GOL G IV de" sem montadora; "Doblo", "Ford Focus" e "Volvo V40" na Linha Pesada; ônibus e caminhões nas Cruzetas da Leve): catalogo-dados (T-0028);
    - MC-0012 (tamanho do logo e assinatura): parado (R-20261123-112006-alexandre, 8c);
    - RD-0511 (pneus e câmaras de moto em 2 lugares), o vazio da pág. 2 do A4 e a página da Lâmpadas Moto (1 cartão e cerca de 2/3 em branco): parados (R-20261123-112006-alexandre, 10c e 12c);
