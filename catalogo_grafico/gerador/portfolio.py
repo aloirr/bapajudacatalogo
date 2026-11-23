@@ -5,16 +5,17 @@ conforme a classificação da base unificada / Catálogo BAP 2026.
 Material para cliente/prospect: sem estoque, sem preço, sem aviso de uso interno, sem nome de cliente.
 Uso (dentro de gerador/):  python portfolio.py [saida.pdf] [base.xlsx]
 """
-import sys, os, collections, html
+import sys, os, re, collections, html
 import pandas as pd
 import apres_bemol as A
 from apres_bemol import S, W, H
 from taxo import ORDER_SIS, META
+from plural import plural
+from detalhe import BASE_UNIFICADA as BASE   # a base unificada do Git (dados/), como nos 3 PDFs
 
-BASE = 'saidas/BASE_BAP_UNIFICADA_PRODUTOS_BAP_v11.xlsx'
 NOME = 'BAP AUTOPARTS'
 SITE = 'www.bapautoparts.com.br  ·  @bapautoparts'
-A.C.update(dict(ochip='#fdeedd', gchip='#e3f1e0', soft='#f3f6f2'))
+A.C.update(dict(gchip='#e3f1e0', soft='#f3f6f2'))
 pw = A.pdfmetrics.stringWidth
 
 LINHAS = [('LEVE', 'Linha Leve', 'Automóveis, picapes e utilitários.'),
@@ -25,12 +26,6 @@ MINIMO = {'LEVE': 3, 'PESADA': 3, 'MOTO': 1, 'UNIVERSAL': 1}     # nº mínimo d
 TITULO = {'SUSPENSÃO': 'Suspensão', 'DIREÇÃO': 'Direção', 'TRANSMISSÃO': 'Transmissão', 'FREIO': 'Freio',
           'ARREFECIMENTO': 'Arrefecimento', 'MOTOR': 'Motor', 'ELÉTRICA': 'Elétrica', 'FILTRAÇÃO': 'Filtração',
           'LUBRIFICANTES': 'Lubrificantes', 'QUÍMICOS': 'Químicos', 'RODAGEM': 'Rodagem', 'ACESSÓRIOS': 'Acessórios'}
-FRASE = {'SUSPENSÃO': 'Conforto, estabilidade e segurança.', 'DIREÇÃO': 'Precisão e firmeza no controle.',
-         'TRANSMISSÃO': 'Força do motor chegando às rodas.', 'FREIO': 'Frenagem segura.',
-         'ARREFECIMENTO': 'Motor na temperatura certa.', 'MOTOR': 'Lubrificação, alimentação e sincronismo.',
-         'ELÉTRICA': 'Partida, ignição, iluminação e sinalização.', 'FILTRAÇÃO': 'Ar, óleo, combustível e cabine limpos.',
-         'LUBRIFICANTES': 'Óleos para motor, transmissão e hidráulico.', 'QUÍMICOS': 'Manutenção e proteção do veículo.',
-         'RODAGEM': 'Cubos, rolamentos, rodas e pneus.', 'ACESSÓRIOS': 'Visibilidade e transporte de carga.'}
 SEM_IMAGEM = {'Cuíca de Freio'}          # a imagem da linha mostra marca de terceiro
 # produtos com mais de uma família (Filtros, Óleo, Químicos): o card leva o nome da família
 FAM_CARD = {
@@ -110,6 +105,7 @@ def dados(base):
     todos = set()
     for f in moto.FAMS:
         if f.get('moto'): continue
+        sis_cat = f['eyebrow'].split(' · ')[0]      # o sistema do produto no Catálogo BAP (Rolamentos: RODAGEM)
         for r in f['rows']:
             c = r['code'].strip().upper(); x = B.get(c, {})
             if not x: continue
@@ -120,9 +116,10 @@ def dados(base):
             if L == 'MOTO' or c in moto_cod: ls.add('MOTO')
             if L == 'UNIVERSAL': ls.add('UNIVERSAL')
             nfam[f['name']].add(x['FAMILIA'])
+            sis = sis_cat if sis_cat in ORDER_SIS else x['SISTEMA']   # um produto, um sistema por linha
             for l in ls:
-                acc[(l, x['SISTEMA'], x['FAMILIA'], f['name'])].add(c)
-                ordem[(l, x['SISTEMA'], x['FAMILIA'], f['name'])].append(r)
+                acc[(l, sis, x['FAMILIA'], f['name'])].add(c)
+                ordem[(l, sis, x['FAMILIA'], f['name'])].append(r)
     arv = {l: collections.OrderedDict() for l, _, _ in LINHAS}
     for (l, sis, fam, prod), cs in sorted(acc.items(), key=lambda kv: (ORDER_SIS.index(kv[0][1]) if kv[0][1] in ORDER_SIS else 99, kv[0][2], kv[0][3])):
         if len(cs) < MINIMO[l]: continue
@@ -140,121 +137,65 @@ def dados(base):
 
 
 # ---------------------------------------------------------------- desenho
-def card_v(s, c, x, y, w, h):
-    """card vertical: foto em cima, nome, descrição e nº de itens"""
-    s.rect(x, y, w, h, fill='white', stroke='line', r=12, sw=.8)
-    ih = h - 80
-    s.foto(c['img'], x + 7, y + 7, w - 14, ih)
-    if c['lanc']: s.chip(x + 14, y + 14, 'NOVIDADE 2026', 'white', 'orange', 6.8)
-    size = 13
-    while size > 9.5 and pw(c['nome'], 'PB', size) > w - 26: size -= .25
-    yy = y + 7 + ih + 10
-    s.t(x + 13, yy, c['nome'], size, 'ink', 'PB')
-    s.p(x + 13, yy + 18, w - 26, html.escape(curto(c['desc'], w - 26, 8.2, 2)), 8.2, 10.6, 'sec')
-    s.t(x + 13, y + h - 20, f"{c['n']} itens", 8, 'grey', 'PM')
-
-
-def curto(t, w, size, n):
-    """corta a descrição em n linhas (termina em '…' se precisar)"""
-    from reportlab.lib.utils import simpleSplit
-    ls = simpleSplit(t, 'PR', size, w)
-    if len(ls) <= n: return t
-    r = ' '.join(ls[:n])
-    while simpleSplit(r + '…', 'PR', size, w).__len__() > n: r = r.rsplit(' ', 1)[0]
-    return r.rstrip(',;') + '…'
-
-
-def card_h(s, c, x, y, w, h):
-    """card horizontal (pouca altura): foto à esquerda"""
-    s.rect(x, y, w, h, fill='white', stroke='line', r=12, sw=.8)
-    iw = min(h - 14, w * .42)
-    s.foto(c['img'], x + 7, y + 7, iw, h - 14)
-    tx = x + 7 + iw + 10; tw = w - (tx - x) - 10
-    size = 11.5
-    nm = c['nome']
-    while size > 8.8 and pw(nm, 'PB', size) > tw * 2 - 10: size -= .25
-    hn = s.p(tx, y + 9, tw, html.escape(nm), size, size * 1.15, 'ink', 'PB')
-    if c['lanc']:
-        s.chip(tx, y + 12 + hn, 'NOVIDADE', 'white', 'orange', 6.2); hn += 16
-    s.p(tx, y + 12 + hn, tw, html.escape(c['desc']), 7.6, 9.8, 'sec')
-    s.t(tx, y + h - 17, f"{c['n']} itens", 7.8, 'grey', 'PM')
-
-
-def pacote(fams, cols):
-    """agrupa as famílias em fileiras de até `cols` cards (família grande ocupa fileiras inteiras)"""
-    rows, cur, usado = [], [], 0
-    for fam, cards in fams.items():
-        k = len(cards)
-        if k > cols:
-            if cur: rows.append(cur); cur, usado = [], 0
-            for i in range(0, k, cols): rows.append([(fam if i == 0 else fam + ' (cont.)', cards[i:i + cols])])
-            continue
-        if usado + k > cols:
-            rows.append(cur); cur, usado = [], 0
-        cur.append((fam, cards)); usado += k
-    if cur: rows.append(cur)
-    return rows
-
-
-def pagina_sistema(s, lin_nome, num, sis, fams):
-    n_it = sum(c['n'] for cs in fams.values() for c in cs); n_pr = sum(len(cs) for cs in fams.values())
-    s.header(f'{lin_nome} · {num:02d} · {FRASE[sis]}', TITULO[sis],
-             f"{len(fams)} {'família' if len(fams) == 1 else 'famílias'} · {n_pr} {'produto' if n_pr == 1 else 'produtos'} · {fmt(n_it)} itens")
-    top, bot = 128, H - 46
-    if n_pr == 1:
-        fam, cards = next(iter(fams.items())); heroi(s, fam, cards[0], top, bot); s.footer(); return
-    cols = 4 if max(len(cs) for cs in fams.values()) >= 4 or n_pr >= 7 else 3
-    rows = pacote(fams, cols)
-    gap, lab = 12, 20
-    ch = min(300, (bot - top - len(rows) * (lab + gap) + gap) / len(rows))
-    cw = (W - 80 - gap * (cols - 1)) / cols
-    y = top
-    for row in rows:
-        x = 40
-        for fam, cards in row:
-            gw = len(cards) * cw + (len(cards) - 1) * gap
-            s.rect(x, y + 13, gw, 1.2, fill='green')
-            s.t(x, y, tit(fam.replace(' (cont.)', '')).upper() + (' (cont.)' if '(cont.)' in fam else ''), 8.5, 'gdark', 'PB', ls=1.3)
-            for k, c in enumerate(cards):
-                cx = x + k * (cw + gap)
-                (card_v if ch >= 150 else card_h)(s, c, cx, y + lab, cw, ch)
-            x += gw + gap
-        y += lab + ch + gap
-    s.footer()
+def carro(mod, m):
+    """o "mesmo carro" de uma aplicação: a montadora (a 1ª, se forem várias) e o modelo, com o número quando o nome
+    é uma sigla (CG 125, G 400). Na linha da base v27 a montadora vem na frente: "FORD ECOSPORT 1.6 L" = "Ford" +
+    "Ecosport 1.6 L 16V"."""
+    from montar import BRANDS_RX, BR_SHORT
+    from pneus_fix import BR
+    t = mod.upper()
+    if not m:
+        pre = re.match(rf'(?:{BRANDS_RX}|{BR}|VW|MB)\b[:\s]*', t)
+        if pre: m, t = pre.group(0), t[pre.end():]
+    mt = re.split(r'\s*[/+]\s*', m.upper().strip(' :'))[0]
+    mt = BR_SHORT.get(mt.replace('Ë', 'E'), mt)
+    ws = [w.strip(':;.') for w in re.split(r'[\s/,]+', t) if w.strip(':;.')] or ['']
+    if re.fullmatch(r'\d+', ws[0]) and len(ws) > 1 and re.fullmatch(r'[A-ZÀ-Ý]{3,}', ws[1]):
+        return mt, ws[1]                                                # MB 1315 ATEGO: o modelo é o Atego
+    if re.fullmatch(r'[A-Z]{1,3}', ws[0]) and len(ws) > 1 and re.fullmatch(r'\d{2,4}', ws[1]):
+        return mt, ws[0] + ' ' + ws[1]                                  # sigla + número: CG 125 ≠ CG 150 (o Atego 1315 é Atego)
+    return mt, ws[0]
 
 
 def aplicacoes(rows, n=12):
     """principais aplicações na ordem do catálogo (ranking): montadora + modelos, sem repetir"""
-    import re
     out, vistos = [], set()
     for r in rows:
         segs = r.get('segs') or []
         tr, cur = [], None
         for t, b in segs:
-            if b: cur = [t.strip(), '']; tr.append(cur)
-            elif cur is None: cur = ['', t]; tr.append(cur)
-            else: cur[1] += t
+            if b: cur = [t.strip(), '']; tr.append(cur); continue
+            # APLICACAO da base v27: uma aplicação por linha. A linha quebrada no meio (a de cima sem ano no fim
+            # e esta sem uma 1ª palavra já vista, como "SUSPENSÃO" + "PNEUMÁTICA 4X2...") continua a de cima.
+            lns, vistas = t.split('\n'), set()
+            for k, ln in enumerate(lns):
+                p1 = (ln.split() or [''])[0]
+                if cur is None or (k and (re.search(r'(?:(?:19|20)\d{2}|[>+])\s*[·;]?\s*$', lns[k - 1]) or p1 in vistas)):
+                    cur = ['', ln]; tr.append(cur); vistas.add(p1)
+                else: cur[1] += (' ' if k else '') + ln
         for m, t in tr:
             mod = re.split(r'\s·\s|;\s|\s\(', t.strip(' ·;'))[0].strip(' ,·/')
-            mod = re.sub(r'\s*(?:\d{2}/)?(?:19|20)\d{2}.*$', '', mod).strip(' ,·/')     # tira anos
+            # o ano ("2014–2015") ou o mês/ano da base ("12/97 12/03"), e o " - " antes dele. O mês vai de 01 a 12: o par
+            # de anos curto ("Monza 82/96") e a medida ("60/55W", "90/90-19", '13/16"') não são data
+            ano = re.search(r'(?:\s+[-–])?\s*(?:(?:\d{2}/)?(?:19|20)\d{2}|(?<![\w/.,])(?:0[1-9]|1[0-2])/\d{2}(?![\d/"\'”%A-Za-z])).*$', mod)
+            if ano and re.search(r'(?:^|\s)(?<!\d\s)[A-Za-z]-?$', mod[:ano.start()]): continue   # "FORD F 2000": não é ano, o corte partiria o modelo
+            if ano: mod = mod[:ano.start()].strip(' ,·/')                                       # tira anos
             if not mod and not m: continue
             if len(mod) > 46: mod = mod[:46].rsplit('/', 1)[0].rsplit(',', 1)[0].strip(' ,/') + '…'
             mod = re.sub(r'(?i)\s*\b(?:diant|tras|dir|esq|sup|inf)(?:eir[oa]|eit[oa]|uerd[oa]|erior)?\.?(?=\s|$)', '', mod).strip(' ,·/+')
             if not mod: continue
-            w1 = re.split(r'[\s/,]+', mod.upper())[0]                       # 1º modelo: não repetir o mesmo carro
-            k = (m.upper(), w1)
-            if k in vistos: continue
+            k = carro(mod, m)                                                # não repetir o mesmo carro
+            if k in vistos or (k[0], k[1].split(' ')[0]) in vistos: continue   # "Dodge RAM" já cobre o "RAM 2500"
             vistos.add(k); out.append((m, mod))
             if len(out) >= n: return out
     return out
 
 
 def heroi(s, fam, c, top, bot):
-    import re
     ih = bot - top - 30
     s.foto(c['img'], 40, top, 400, ih)
     if c['lanc']: s.chip(56, top + 16, 'NOVIDADE 2026', 'white', 'orange', 7.5)
-    s.t(40, top + ih + 12, f"{c['n']} itens", 11, 'grey', 'PM')          # nº de itens embaixo da imagem
+    s.t(40, top + ih + 12, f"{c['n']} {plural(c['n'])}", 11, 'grey', 'PM')          # nº de itens embaixo da imagem
     x = 476; y = top + 6; wr = W - 40 - x
     s.t(x, y, tit(fam).upper(), 9.5, 'gdark', 'PB', ls=1.4); y += 22
     s.t(x, y, c['nome'], 28, 'ink', 'PB', ls=-.4); y += 46

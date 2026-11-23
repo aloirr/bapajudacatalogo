@@ -26,6 +26,22 @@ Texto literal: "1) a  2) a  3) a  4) a  5) a  6) a  7) a  8) a  9) a  10) a". As
 Também aprovadas na mesma resposta, com efeito na marca: **9 a**, o desenho e as telas do login como simulados
 (parecer `docs/marca/pareceres/T-0022-simulacao.md`). As outras respostas (1 a 5) são de serviço e de UX.
 
+## 23/11/2026 ~07:20 · R-20261123-112006-alexandre
+
+Resposta no chat do PO às 12 decisões da mensagem do PO.
+Texto literal: "1) a  2) a  3) a  4) a  5) a  6) a  7) a  8) c  9) a  10) c  11) a  12) c". As decisões com efeito na marca:
+
+| Nº | Pergunta | Decisão |
+|---|---|---|
+| 6 a | Etiqueta "BAP AUTOPARTS" ao lado do logo no cabeçalho de Lubrificantes (RD-0428) | **Fica.** RD-0428 fechado como mantido |
+| 7 a | Fonte do .pptx de Lubrificantes (MC-0011) | **Fica em Arial.** MC-0011 fechado como mantido |
+| 8 c | Tamanho do logo no cabeçalho (MC-0012) | **Continua parado** |
+| 11 a | Capa da Linha Moto com "linhas" no lugar de "famílias" (MC-0015) | **Sim, com simulação** (T-0028); entra no manual só depois do "aprovado" da simulação |
+
+Também com efeito na marca: **5 a**, a fase 1 da T-0006 (filtros "Amperagem" e "Partida a frio (CCA)"), com simulação
+da tela antes (parecer `docs/marca/pareceres/T-0006-fase1-simulacao.md`), e **9 a**, o Portfólio gerado de novo, com
+simulação (T-0028).
+
 ## 23/11/2026 ~08:28 · T-0028 · R-20261123-122814-po
 
 Resposta do Alexandre na sessão do PO, passada pelo `po` no R-20261123-122814-po. Texto literal:
