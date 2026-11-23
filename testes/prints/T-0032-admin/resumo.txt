@@ -1,37 +1,44 @@
-Testes T-0032 (onda 1, admin) · 23/11/2026 14:37 (Manaus)
-Teste: testes/login.mjs atualizado (branch testes/T-0032-admin, do origin/main 2c2b125)
+Testes T-0032 (onda 1, admin) · 23/11/2026 14:46 (Manaus)
+Teste: testes/login.mjs (branch testes/T-0032-admin, do origin/main 2c2b125), 2ª versão: sem números fixos
 Rodado com: node scripts/testar_site.mjs --login --conhecidos testes/conhecidos.json (o mesmo passo do testes.yml)
 Valores de teste: senhas, segredo e chave falsos, gerados na hora pelo teste (nunca impressos)
 
-Combinações (worktrees temporárias, merge sem commit):
-  A. main + integracao-placas d5ee467 + web-site 09016a6 ........... PASSOU (0 falha; 1 AVISO: 15 arquivos da T-0032
-     ainda fora de catalogo_grafico/entregas/, botões desabilitados como esperado)
-  B. A + catalogo_grafico/entregas/ do PR #185 (ebde992) ........... PASSOU (0 falha, 0 aviso no admin: os 22 links de baixar)
-  C. main sozinho ....................................................... FALHOU (11 falhas, todas em "login: telas do admin":
-     título no menu, title, h1 e trilha; /api/pdfs com 7 ids; 6 cartões em 2 grupos; os 4 cartões de treinamento)
-  D. main + só integracao-placas ......................................... FALHOU (17 falhas: título; 7 cartões no grupo Catálogos,
-     os treinamentos caem no 1º grupo sem o pdfs.js novo)
-  E. main + só web-site .................................................. FALHOU (7 falhas: /api/pdfs com 7 ids, 6 cartões, sem treinamentos)
-  Teste antigo (o do main) para comparar:
-  F. A com o login.mjs do main ......................................... FALHOU (2: 3 grupos e 17 cartões, esperava 2 e 6)
-  G. só integracao-placas com o login.mjs do main ......................... FALHOU (1: 17 cartões, esperava 6)
-  H. só web-site com o login.mjs do main .................................. PASSOU
+De onde saem as expectativas de /admin/pdfs (a própria árvore testada):
+  - ids, títulos, grupos, pares, tipos e a regex do arquivo: a lista PDFS do servicos/login/server.mjs;
+  - os grupos da tela e a ordem deles: o GRUPOS do site/admin/pdfs/pdfs.js (grupo fora do GRUPOS vai para o 1º, como no pdfs.js);
+  - cartões: os itens da lista, com os do mesmo "par" juntos.
+O que confere:
+  - GET /api/pdfs (admin) com os ids da lista PDFS, na ordem, e o mesmo título, grupo, tipo e par;
+  - as seções (id, h2) na ordem do GRUPOS, cada uma com os títulos dos cartões na ordem da lista; o total de cartões;
+  - os botões de cada cartão na ordem dos itens ("Baixar PDF", "Baixar PowerPoint"); link /admin/pdfs/baixar/<id>
+    obrigatório em todo item cujo arquivo (regex da lista) está em catalogo_grafico/entregas/; sem arquivo, botão
+    desabilitado e AVISO;
+  - com o grupo "treinamentos" na lista: cada treinamento com PDF e PowerPoint no mesmo par; com a seção na tela, o subtítulo;
+  - o nome da página: "Catálogos e materiais" ou "Catálogos, materiais e treinamentos", o MESMO no menu, title, trilha e h1;
+  - ADMIN_TXT = /Criar usu[aá]rios|Cat[aá]logos(,| e) materiais/i tem de casar com os 2 itens reais do menu do admin.
 
-O que o teste confere agora em /admin/pdfs:
-  - title, trilha e h1 "Catálogos, materiais e treinamentos"; o item do menu do admin com o mesmo nome;
-  - GET /api/pdfs (admin) com os 22 ids, na ordem;
-  - 17 cartões em 3 grupos, na ordem: Catálogos 3, Apresentações e materiais 10, Treinamentos 4; Treinamentos com subtítulo;
-  - cada id com o seu botão no cartão do seu título: link /admin/pdfs/baixar/<id> obrigatório nos 7 da T-0024 e nos 15 da
-    T-0032 quando o arquivo está em catalogo_grafico/entregas/; sem o arquivo, botão desabilitado + AVISO;
-  - os 4 treinamentos: 1 cartão cada, botões "Baixar PDF" e "Baixar PowerPoint", nessa ordem;
-  - ADMIN_TXT = /Criar usu[aá]rios|Cat[aá]logos(,| e) materiais/i: casa com "Criar usuários" e com
-    "Catálogos, materiais e treinamentos" (o teste confere isso nos itens reais do menu do admin; se não casar, falha).
+Combinações (worktrees temporárias, merge sem commit; código de saída do testar_site.mjs):
+  A. main + integracao-placas d5ee467 + web-site 09016a6 .... PASSOU (0) 22 ids, 17 cartões em 3 grupos (3 | 10 | 4),
+     4 treinamentos com PDF e PowerPoint e o subtítulo; AVISO: 15 arquivos fora de entregas/ (botões desabilitados)
+  B. A + catalogo_grafico/entregas/ do PR #185 (ebde992) .... PASSOU (0) 22 ids, 17 cartões em 3 grupos; 22 links, 0 aviso
+  C. main sozinho ................................................ PASSOU (0) 7 ids, 6 cartões em 2 grupos (3 | 3), "Catálogos e materiais"
+  D. main + só integracao-placas ................................. PASSOU (0) 22 ids, 17 cartões em 2 grupos (Catálogos 7 | 10:
+     os treinamentos caem no 1º grupo, regra do pdfs.js do main); AVISO dos 15 arquivos
+  E. main + só web-site .......................................... PASSOU (0) 7 ids, 6 cartões em 2 grupos, o nome novo nos 4 lugares
+  Erros de propósito (o teste tem de pegar):
+  N. A com o h1 de volta a "Catálogos e materiais" e o Kit Filtros fora da tela ... FALHOU (1), 3 falhas:
+     o nome não bate (menu/title/trilha novos, h1 antigo); 16 cartões, esperados 17; "Apresentações e materiais: 9
+     cartões, esperados 10 (falta Kit Filtros)"
+  N2. A sem o subtítulo dos Treinamentos e sem o treinamento-baterias-pptx na lista PDFS ... FALHOU (1), 2 falhas:
+     o treinamento "Treinamento · Baterias" só com pdf; o grupo Treinamentos sem o subtítulo
 
-Restante da bateria em A: gerar_site.py código 0, 4.419 produtos, 0 [ERRO], 0 [PARADO]; buscas, página do produto,
-390 px sem rolar de lado, console e acessibilidade: PASSOU (saída completa em testar_site.txt).
+Restante da bateria em A: 4.419 produtos (igual ao main); buscas, página do produto, 390 px sem rolar de lado,
+console e acessibilidade: PASSOU (saída completa em testar_site.txt).
 
 Prints (deviceScaleFactor 1; a página do admin inteira, fullPage):
-  pdfs-1366.png, pdfs-390.png ........................... combinação A (os 15 novos com o botão desabilitado)
-  pdfs-com-arquivos-pr185-1366.png, -390.png ............. combinação B (os 22 com o link de baixar)
-  menu-admin-1366.png, menu-admin-390.png ................ menu da conta do admin (combinação A)
-  menu-cliente-1366.png, menu-cliente-390.png ............ menu do usuário comum, sem os itens do admin (combinação A)
+  pdfs-1366.png, pdfs-390.png ............................ combinação A (os 15 novos com o botão desabilitado)
+  pdfs-com-arquivos-pr185-1366.png, -390.png .............. combinação B (os 22 com o link de baixar)
+  pdfs-so-integracao-placas-1366.png ...................... combinação D (o estado intermediário, se o integracao-placas
+                                                            entrar antes do web-site: os treinamentos dentro de "Catálogos")
+  menu-admin-1366.png, menu-admin-390.png ................. menu da conta do admin (combinação A)
+  menu-cliente-1366.png, menu-cliente-390.png ............. menu do usuário comum, sem os itens do admin (combinação A)

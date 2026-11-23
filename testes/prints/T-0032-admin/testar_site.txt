@@ -1,5 +1,5 @@
-Testes T-0002 e T-0022 (com login) · 23/11/2026 14:32 (Manaus)
-total do JSON ................ PASSOU (4.419 produtos, gerado em 23/11/2026 14:31; no commit: 4.419)
+Testes T-0002 e T-0022 (com login) · 23/11/2026 14:46 (Manaus)
+total do JSON ................ PASSOU (4.419 produtos, gerado em 23/11/2026 10:51; no commit: 4.419)
 código único no site ......... PASSOU
 campos do JSON ............... PASSOU (só os 19 campos conhecidos; "ve" em 3.617 produtos (12.158 veículos) no formato [fabricante, modelo, versão?]; "ss" em 121 produtos)
 palavra interna .............. PASSOU
@@ -8,9 +8,9 @@ login: sem login fecha ....... PASSOU (20 pedidos sem cookie (página, app.js, p
 login: sessão de 5 h ......... PASSOU (cookie no navegador HttpOnly, Secure, SameSite=Lax e 5 h; relógio adiantado, pela tela: 4 h 59 o catálogo abre; 5 h 01 leva a /entrar?expirou=1 com o aviso)
 login: comum sem admin ....... PASSOU (menu e página sem os itens do admin (1366 e 390); /admin/usuarios e /admin/pdfs 404 sem a tela)
 login: link do produto ....... PASSOU (#/produto/CXD13062 antes do login abre o produto depois do login e da troca obrigatória (1366); #/produto/AMT7115 depois do login direto (390))
-login: volta segura .......... PASSOU (8 volta(s) no navegador ("//example.invalid/x", "/\\example.invalid/x", "%2F%2Fexample.invalid%2Fx", "%2F%5Cexample.invalid", "/%5Cexample.invalid", "https://example.invalid/", "/%09/example.invalid", "/%0A/example.invalid") ficam em http://localhost:45517)
+login: volta segura .......... PASSOU (8 volta(s) no navegador ("//example.invalid/x", "/\\example.invalid/x", "%2F%2Fexample.invalid%2Fx", "%2F%5Cexample.invalid", "/%5Cexample.invalid", "https://example.invalid/", "/%09/example.invalid", "/%0A/example.invalid") ficam em http://localhost:38851)
 login: etiqueta da troca ..... PASSOU (cliente.teste com a etiqueta "Falta trocar a senha inicial" logo depois de criado e sem ela depois da troca; admin sem a etiqueta)
-login: telas do admin ........ PASSOU (1º acesso → troca obrigatória (sem a senha atual) → catálogo; menu com Criar usuários, Catálogos, materiais e treinamentos, Trocar senha e Sair; usuário criado pela tela; Catálogos, materiais e treinamentos (title, trilha e h1): GET /api/pdfs com os 22 ids, 17 cartões em 3 grupos (Catálogos 3, Apresentações e materiais 10, Treinamentos 4), os 4 treinamentos com PDF e PowerPoint; link de baixar em todo id com o arquivo em entregas/)
+login: telas do admin ........ PASSOU (1º acesso → troca obrigatória (sem a senha atual) → catálogo; menu com Criar usuários, "Catálogos, materiais e treinamentos", Trocar senha e Sair; usuário criado pela tela; "Catálogos, materiais e treinamentos" igual no menu, title, trilha e h1; 22 ids da lista PDFS no GET /api/pdfs, 17 cartões em 3 grupos (Catálogos 3 | Apresentações e materiais 10 | Treinamentos 4), os 4 treinamentos com PDF e PowerPoint e o subtítulo; link de baixar em todo item com o arquivo em entregas/ (15 sem arquivo, com o botão desabilitado))
 login: console sem erro ...... PASSOU (0 erro de script, 0 console.error do site, 0 403 e 0 4xx/5xx não esperados em login, troca obrigatória (admin e comum), catálogo, menu, Criar usuários, Catálogos, materiais e treinamentos, volta e sessão)
 login: acessibilidade ........ PASSOU (login, troca obrigatória, janela Criar usuário, Criar usuários e Catálogos, materiais e treinamentos: campos com rótulo e imagens com alt)
 login: log sem segredo ....... PASSOU (100 linhas de log, sem as 4 senhas, o segredo da sessão e a chave interna)
@@ -35,13 +35,13 @@ cartões da lista ............. PASSOU ("amortecedor": 1366 px: 4 na 1ª linha (
 janela do produto ............ PASSOU ("+ Detalhes" e código/nome abrem o dialog com o código; Esc fecha e devolve o foco ao cartão; a foto do cartão só amplia (1366 px e 390 px))
 390 px sem rolar de lado ..... PASSOU (scrollWidth <= 390 em todas as telas abertas)
 link antigo redireciona ...... PASSOU (#/busca?cod= e #/busca?mo=&modelo=&ano= viram #/busca?q=)
-prints ....................... <rascunho>/prints-junto/
+prints ....................... <rascunho>/prints-y-A/
 
 Resultado: PASSOU (0 falha(s) nova(s), 0 CONHECIDO(S) ignorado(s) por testes/conhecidos.json)
 
 Detalhe:
 [login: telas do admin]
-  AVISO      15 arquivo(s) da T-0032 ainda fora de catalogo_grafico/entregas/ (botão desabilitado na tela, como esperado): portfolio-leve, portfolio-pesada, portfolio-moto, portfolio-lubrificantes, portfolio-acessorios, portfolio-baterias, portfolio-autocenter, treinamento-mecanica-basica-pdf, treinamento-mecanica-basica-pptx, treinamento-baterias-pdf, treinamento-baterias-pptx, treinamento-linha-moto-pdf, treinamento-linha-moto-pptx, treinamento-lubrificantes-pdf, treinamento-lubrificantes-pptx
+  AVISO      15 arquivo(s) da lista PDFS fora de catalogo_grafico/entregas/ (botão desabilitado na tela, como esperado): portfolio-leve, portfolio-pesada, portfolio-moto, portfolio-lubrificantes, portfolio-acessorios, portfolio-baterias, portfolio-autocenter, treinamento-mecanica-basica-pdf, treinamento-mecanica-basica-pptx, treinamento-baterias-pdf, treinamento-baterias-pptx, treinamento-linha-moto-pdf, treinamento-linha-moto-pptx, treinamento-lubrificantes-pdf, treinamento-lubrificantes-pptx
 
 [campo da placa]
   AVISO      o site chamou o serviço de placas sem busca de placa: https://bapajudacatalogo-placas.onrender.com/mais-vistos (respondido 503 no teste, sem rede)
@@ -54,3 +54,4 @@ Detalhe:
 [meu veículo]
   AVISO      1366 px: "amortecedor" com VOLKSWAGEN › GOL › 2026 › 1.0: a lista Versão não tem opção
   AVISO      390 px: "amortecedor" com VOLKSWAGEN › GOL › 2026 › 1.0: a lista Versão não tem opção
+codigo 0

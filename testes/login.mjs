@@ -37,39 +37,53 @@ const SESSAO_H = 5;
 const falsa = (rot) => `${rot}-falsa-de-teste-${crypto.randomBytes(6).toString("hex")}`;
 const FORA = "example.invalid"; // o "outro site" dos testes da volta (nunca é chamado: o pedido é barrado)
 const ETIQUETA = "Falta trocar a senha inicial";
-// Catálogos, materiais e treinamentos (T-0024, T-0032). O Content-Type, o download e a regex de cada arquivo são dos testes
-// do serviço (servicos/login/login.test.mjs); aqui, a lista que a tela recebe (GET /api/pdfs) e o que a tela monta.
-const TITULO_PDFS = "Catálogos, materiais e treinamentos";
-// os 7 da T-0024: o arquivo está em catalogo_grafico/entregas/ desde então; o link de baixar de cada um é obrigatório
-const IDS_T0024 = ["completo-digital", "a4-grafica", "linha-moto", "portfolio", "lubrificantes-pdf", "lubrificantes-pptx", "kit-filtros"];
-// os 15 da T-0032 (nome de arquivo fixo): o link é obrigatório quando o arquivo está em catalogo_grafico/entregas/; sem o
-// arquivo, o cartão mostra o botão desabilitado (o serviço manda tamanho null) e o teste avisa
-const ARQ_T0032 = {
-  "portfolio-leve": "Portfolio_Produtos_BAP_AUTOPARTS_Linha_Leve.pdf",
-  "portfolio-pesada": "Portfolio_Produtos_BAP_AUTOPARTS_Linha_Pesada.pdf",
-  "portfolio-moto": "Portfolio_Produtos_BAP_AUTOPARTS_Linha_Moto.pdf",
-  "portfolio-lubrificantes": "Portfolio_Produtos_BAP_AUTOPARTS_Linha_Lubrificantes.pdf",
-  "portfolio-acessorios": "Portfolio_Produtos_BAP_AUTOPARTS_Linha_Acessorios.pdf",
-  "portfolio-baterias": "Portfolio_Produtos_BAP_AUTOPARTS_Linha_Baterias.pdf",
-  "portfolio-autocenter": "Portfolio_Produtos_BAP_AUTOPARTS_Linha_Autocenter.pdf",
-};
-const TREINOS = ["mecanica-basica", "baterias", "linha-moto", "lubrificantes"];
-for (const t of TREINOS) {
-  const raiz = "Treinamento_" + t.split("-").map((x) => x[0].toUpperCase() + x.slice(1)).join("_") + "_BAP_Vendedores";
-  ARQ_T0032[`treinamento-${t}-pdf`] = raiz + ".pdf";
-  ARQ_T0032[`treinamento-${t}-pptx`] = raiz + ".pptx";
-}
-// os 22 ids, na ordem da lista do serviço (os 8 portfólios juntos, logo depois do geral; os treinamentos no fim)
-const IDS = [
-  "completo-digital", "a4-grafica", "linha-moto", "portfolio",
-  "portfolio-leve", "portfolio-pesada", "portfolio-moto", "portfolio-lubrificantes", "portfolio-acessorios", "portfolio-baterias", "portfolio-autocenter",
-  "lubrificantes-pdf", "lubrificantes-pptx", "kit-filtros",
-  ...TREINOS.flatMap((t) => [`treinamento-${t}-pdf`, `treinamento-${t}-pptx`]),
-];
-// na tela: os itens com o mesmo "par" (Lubrificantes e cada treinamento) viram 1 cartão; 17 cartões em 3 grupos, nesta ordem
-const GRUPOS_PDF = [["catalogos", "Catálogos", 3], ["materiais", "Apresentações e materiais", 10], ["treinamentos", "Treinamentos", 4]];
-const N_CARTOES = GRUPOS_PDF.reduce((n, [, , c]) => n + c, 0), N_GRUPOS = GRUPOS_PDF.length;
+// Catálogos, materiais e treinamentos (T-0024, T-0032). As expectativas saem da própria árvore testada, nunca de números
+// fixos: a lista PDFS do servicos/login/server.mjs (id, título, grupo, tipo, par e a regex do arquivo) e o GRUPOS do
+// site/admin/pdfs/pdfs.js (os grupos da tela e a ordem deles). Assim o teste vale antes e depois de cada PR, em qualquer
+// ordem. O Content-Type e o download de cada arquivo são dos testes do serviço (servicos/login/login.test.mjs).
+const TITULOS_PDFS = ["Catálogos e materiais", "Catálogos, materiais e treinamentos"]; // o nome da T-0024 e o da T-0032
 const NOME_TIPO = { pdf: "PDF", pptx: "PowerPoint" };
+
+// a lista PDFS do server.mjs: [{ id, titulo, grupo, tipo, par, re }], na ordem; erro se não achar ou não entender um item
+function lerListaPdfs(raiz) {
+  const src = fs.readFileSync(path.join(raiz, "servicos", "login", "server.mjs"), "utf8");
+  const ini = src.indexOf("const PDFS = [");
+  const fim = ini < 0 ? -1 : src.indexOf("\n];", ini);
+  if (ini < 0 || fim < 0) throw new Error("não achei a lista PDFS no servicos/login/server.mjs");
+  const lista = [];
+  for (const linha of src.slice(ini, fim).split("\n")) {
+    if (!/^\s*\{\s*id:/.test(linha)) continue;
+    const campo = (k) => { const m = linha.match(new RegExp(`\\b${k}:\\s*'([^']*)'`)); return m ? m[1] : null; };
+    const re = linha.match(/\bre:\s*\/(.+)\/([a-z]*)\s*\}/);
+    const it = { id: campo("id"), titulo: campo("titulo"), grupo: campo("grupo"), tipo: campo("tipo") || "pdf", par: campo("par"), re: re ? new RegExp(re[1], re[2]) : null };
+    if (!it.id || !it.titulo || !it.re) throw new Error(`não entendi o item da lista PDFS: ${linha.trim().slice(0, 90)}`);
+    lista.push(it);
+  }
+  if (!lista.length) throw new Error("a lista PDFS do servicos/login/server.mjs está vazia");
+  return lista;
+}
+// o GRUPOS do pdfs.js: [[chave, título]], na ordem da tela
+function lerGruposTela(raiz) {
+  const src = fs.readFileSync(path.join(raiz, "site", "admin", "pdfs", "pdfs.js"), "utf8");
+  const ini = src.indexOf("const GRUPOS = [");
+  const fim = ini < 0 ? -1 : src.indexOf("];", ini);
+  if (ini < 0 || fim < 0) throw new Error("não achei o GRUPOS no site/admin/pdfs/pdfs.js");
+  const grupos = [...src.slice(ini, fim).matchAll(/\[\s*"([^"]+)",\s*"([^"]+)"/g)].map((m) => [m[1], m[2]]);
+  if (!grupos.length) throw new Error("o GRUPOS do site/admin/pdfs/pdfs.js está vazio");
+  return grupos;
+}
+// o que a tela tem de montar, com a regra do pdfs.js: o mesmo "par" vira 1 cartão (o 1º item é o principal); grupo fora
+// do GRUPOS vai para o 1º. Devolve as seções na ordem do GRUPOS, só as que têm cartão: [{ g, nome, cartoes: [{ titulo, itens }] }]
+function telaEsperada(lista, grupos) {
+  const cartoes = [], porPar = new Map();
+  for (const p of lista) {
+    if (p.par && porPar.has(p.par)) { porPar.get(p.par).itens.push(p); continue; }
+    const c = { grupo: grupos.some(([g]) => g === p.grupo) ? p.grupo : grupos[0][0], titulo: p.titulo, itens: [p] };
+    if (p.par) porPar.set(p.par, c);
+    cartoes.push(c);
+  }
+  return grupos.map(([g, nome]) => ({ g, nome, cartoes: cartoes.filter((c) => c.grupo === g) })).filter((x) => x.cartoes.length);
+}
 
 // ---------- o serviço ----------
 // Sobe node servicos/login/server.mjs (PORT=0: porta livre) e espera o "login ouvindo <porta>".
@@ -269,6 +283,8 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
   // os 2 itens do admin no menu e nas páginas: "Criar usuários" e "Catálogos, materiais e treinamentos" (T-0032; casa também
   // com o nome antigo, "Catálogos e materiais")
   const ADMIN_TXT = /Criar usu[aá]rios|Cat[aá]logos(,| e) materiais/i;
+  // o nome da página dos arquivos visto no menu e no h1, e o resumo do que a página mostrou (para o detalhe)
+  let tituloMenu = "", tituloPdfs = "/admin/pdfs", resumoPdfs = "não conferido";
   const ehAdmin = ([t, h]) => ADMIN_TXT.test(t) || h.startsWith("/admin");
 
   let adminCtx = null;
@@ -302,11 +318,12 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
         for (const h of ["/admin/usuarios", "/admin/pdfs", "/trocar-senha"]) if (!hrefs.includes(h)) falha("l-admin", N_ADMIN, "menu:" + h, `1366 px: o menu do admin não tem o link ${h}`);
         if (!menu.some(([t]) => t === "Sair")) falha("l-admin", N_ADMIN, "menu:sair", "1366 px: o menu do admin não tem o \"Sair\"");
         const itemPdfs = menu.find(([, h]) => h === "/admin/pdfs");
-        if (itemPdfs && itemPdfs[0] !== TITULO_PDFS) falha("l-admin", N_ADMIN, "menu:titulo", `1366 px: o item /admin/pdfs do menu diz "${cortar(itemPdfs[0], 60)}" (esperado "${TITULO_PDFS}")`);
+        if (itemPdfs) tituloMenu = itemPdfs[0];
+        if (itemPdfs && !TITULOS_PDFS.includes(itemPdfs[0])) falha("l-admin", N_ADMIN, "menu:titulo", `1366 px: o item /admin/pdfs do menu diz "${cortar(itemPdfs[0], 60)}" (esperado ${TITULOS_PDFS.map((t) => `"${t}"`).join(" ou ")})`);
         if (menu.some(([t, h]) => !h.startsWith("/admin") && ADMIN_TXT.test(t))) falha("l-admin", N_ADMIN, "menu:regex", "1366 px: item do menu com o nome de admin sem link /admin");
-        for (const [nome, h] of [["Criar usuários", "/admin/usuarios"], [TITULO_PDFS, "/admin/pdfs"]]) {
+        for (const h of ["/admin/usuarios", "/admin/pdfs"]) {
           const it = menu.find(([, x]) => x === h);
-          if (it && !ADMIN_TXT.test(it[0])) falha("l-admin", N_ADMIN, "menu:regex:" + h, `1366 px: o ADMIN_TXT do teste não casa com "${it[0]}" (${nome}): a conferência do comum ficaria cega`);
+          if (it && !ADMIN_TXT.test(it[0])) falha("l-admin", N_ADMIN, "menu:regex:" + h, `1366 px: o ADMIN_TXT do teste não casa com "${it[0]}" (o item ${h} do menu): a conferência do comum ficaria cega`);
         }
       }
       await print(page, "menu-admin", 1366);
@@ -336,7 +353,11 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
       await print(page, "criar-usuarios", 1366);
       c.conferir("Criar usuários");
 
-      // Catálogos, materiais e treinamentos: a lista do serviço (22 ids), o título e, na tela, 17 cartões em 3 grupos
+      // Catálogos, materiais e treinamentos: a lista do serviço, o título e, na tela, os cartões e os grupos que a árvore
+      // testada manda (lista PDFS do server.mjs + GRUPOS do pdfs.js)
+      let fonte = null;
+      try { const lista = lerListaPdfs(raiz); fonte = { lista, secoes: telaEsperada(lista, lerGruposTela(raiz)) }; }
+      catch (e) { falha("l-admin", N_ADMIN, "pdf-fonte", `não li as expectativas da árvore: ${cortar(e.message, 120)}`); }
       await page.goto(base + "admin/pdfs", { waitUntil: "networkidle" });
       await page.waitForSelector("#pdfs article.pdf", { timeout: 10000 }).catch(() => {});
       const tela = await page.evaluate(async () => {
@@ -352,60 +373,86 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
             cartoes: [...s.querySelectorAll("article.pdf")].map((a) => ({
               h3: txt(a.querySelector("h3")),
               bts: [...a.querySelectorAll("a.bt, button.bt")].map((b) => ({
-                txt: txt(b), href: b.getAttribute("href") || "", desab: b.tagName === "BUTTON" && b.disabled,
+                txt: txt(b).replace(/ ·.*$/, ""), href: b.getAttribute("href") || "", desab: b.tagName === "BUTTON" && b.disabled,
               })),
             })),
           })),
         };
       });
-      // o título novo na aba, na trilha e no h1
-      if (!tela.title.startsWith(TITULO_PDFS)) falha("l-admin", N_ADMIN, "pdf-title", `/admin/pdfs com o title "${cortar(tela.title, 70)}" (esperado "${TITULO_PDFS} · ...")`);
-      if (tela.h1 !== TITULO_PDFS) falha("l-admin", N_ADMIN, "pdf-h1", `/admin/pdfs com o h1 "${cortar(tela.h1, 60)}" (esperado "${TITULO_PDFS}")`);
-      if (!tela.trilha.endsWith(TITULO_PDFS)) falha("l-admin", N_ADMIN, "pdf-trilha", `/admin/pdfs com a trilha "${cortar(tela.trilha, 70)}" (esperado "Catálogo › ${TITULO_PDFS}")`);
-      // a lista do serviço: os 22 ids, na ordem
+      // o título: um dos 2 aceitos, e o MESMO no menu, no title, na trilha e no h1
+      tituloPdfs = tela.h1 || tituloPdfs;
+      const titulos = { menu: tituloMenu, title: tela.title.split(" · ")[0].trim(), trilha: tela.trilha.split("›").pop().trim(), h1: tela.h1 };
+      const vistos = [...new Set(Object.values(titulos))];
+      if (vistos.length !== 1 || !TITULOS_PDFS.includes(vistos[0]))
+        falha("l-admin", N_ADMIN, "pdf-titulo", `/admin/pdfs: o nome não bate (${Object.entries(titulos).map(([k, v]) => `${k} "${cortar(v || "", 50)}"`).join(", ")}); esperado o mesmo nos 4, ${TITULOS_PDFS.map((t) => `"${t}"`).join(" ou ")}`);
       const lista = Array.isArray(tela.lista) ? tela.lista : [];
       const idsApi = lista.map((p) => p.id);
-      if (tela.api !== 200 || idsApi.join() !== IDS.join())
-        falha("l-admin", N_ADMIN, "pdf-api", `GET /api/pdfs (admin) respondeu ${tela.api} com ${idsApi.length} ids (${cortar(idsApi.join(" "), 160)}); esperados os ${IDS.length}, nesta ordem: ${IDS.join(" ")}`);
-      // os grupos: 3, nesta ordem, com 3, 10 e 4 cartões; o dos Treinamentos com o subtítulo
-      const nCart = tela.grupos.reduce((n, g) => n + g.cartoes.length, 0);
-      const descr = tela.grupos.map((g) => `${g.h2} ${g.cartoes.length}`).join(" | ") || "nenhum";
-      if (tela.grupos.length !== N_GRUPOS || GRUPOS_PDF.some(([g, nome, n], i) => !tela.grupos[i] || tela.grupos[i].id !== "grupo-" + g || tela.grupos[i].h2 !== nome || tela.grupos[i].cartoes.length !== n))
-        falha("l-admin", N_ADMIN, "pdf-grupos", `${TITULO_PDFS}: grupos ${descr}; esperados ${GRUPOS_PDF.map(([, nome, n]) => `${nome} ${n}`).join(" | ")}`);
-      if (nCart !== N_CARTOES || tela.soltos !== N_CARTOES)
-        falha("l-admin", N_ADMIN, "pdf-cartoes", `${TITULO_PDFS} com ${nCart} cartões nos grupos (${tela.soltos} no total); esperados ${N_CARTOES}`);
-      const gTrein = tela.grupos.find((g) => g.id === "grupo-treinamentos");
-      if (gTrein && !gTrein.sub) falha("l-admin", N_ADMIN, "pdf-sub", "o grupo Treinamentos sem o subtítulo (p.pdf-grupo-sub)");
-      // cada id: o botão no cartão do título dele, no grupo dele; com o arquivo, o link de baixar; sem, o botão desabilitado
-      const entregas = path.join(raiz, "catalogo_grafico", "entregas");
-      const faltam = [];
-      for (const p of lista.filter((x) => IDS.includes(x.id))) {
-        const nomeArq = ARQ_T0032[p.id];
-        const deveTer = !nomeArq || fs.existsSync(path.join(entregas, nomeArq));
-        const g = tela.grupos.find((x) => x.id === "grupo-" + p.grupo);
-        const card = g && g.cartoes.find((k) => k.h3 === p.titulo);
-        const rot = "Baixar " + (NOME_TIPO[p.tipo] || "PDF");
-        const bt = card && card.bts.find((b) => b.txt === rot || b.txt.startsWith(rot + " ·"));
-        const href = "/admin/pdfs/baixar/" + p.id;
-        if (!bt) { falha("l-admin", N_ADMIN, "pdf-bt:" + p.id, `${TITULO_PDFS}: sem o botão "${rot}" do ${p.id} no cartão "${p.titulo}" do grupo ${p.grupo}`); continue; }
-        if (deveTer && bt.href !== href) falha("l-admin", N_ADMIN, "pdf-link:" + p.id, `${TITULO_PDFS}: o ${p.id} sem o link ${href}${bt.desab ? " (botão desabilitado, com o arquivo em entregas/)" : ""}`);
-        if (!deveTer) {
-          faltam.push(p.id);
-          if (!bt.desab || bt.href) falha("l-admin", N_ADMIN, "pdf-fora:" + p.id, `${TITULO_PDFS}: o ${p.id} sem arquivo em entregas/ e o botão não está desabilitado`);
+      if (fonte) {
+        // a lista do serviço: os ids da lista PDFS, na ordem, com o mesmo título
+        const idsFonte = fonte.lista.map((p) => p.id);
+        if (tela.api !== 200 || idsApi.join() !== idsFonte.join())
+          falha("l-admin", N_ADMIN, "pdf-api", `GET /api/pdfs (admin) respondeu ${tela.api} com ${idsApi.length} ids (${cortar(idsApi.join(" "), 160)}); a lista PDFS do server.mjs tem ${idsFonte.length}: ${cortar(idsFonte.join(" "), 160)}`);
+        for (const p of fonte.lista) {
+          const a = lista.find((x) => x.id === p.id);
+          if (a && (a.titulo !== p.titulo || a.grupo !== p.grupo || (a.tipo || "pdf") !== p.tipo || (a.par || null) !== p.par))
+            falha("l-admin", N_ADMIN, "pdf-api:" + p.id, `GET /api/pdfs: o ${p.id} difere da lista PDFS do server.mjs`);
         }
+        // os grupos e os cartões: as seções na ordem do GRUPOS, cada uma com os cartões na ordem da lista
+        const esp = fonte.secoes;
+        const nEsp = esp.reduce((n, x) => n + x.cartoes.length, 0);
+        const descrEsp = esp.map((x) => `${x.nome} ${x.cartoes.length}`).join(" | ");
+        const descrTela = tela.grupos.map((g) => `${g.h2} ${g.cartoes.length}`).join(" | ") || "nenhum";
+        const gruposOk = tela.grupos.length === esp.length && esp.every((x, i) => tela.grupos[i].id === "grupo-" + x.g && tela.grupos[i].h2 === x.nome);
+        if (!gruposOk) falha("l-admin", N_ADMIN, "pdf-grupos", `/admin/pdfs com os grupos ${descrTela}; esperados ${descrEsp}`);
+        if (tela.soltos !== nEsp) falha("l-admin", N_ADMIN, "pdf-cartoes", `/admin/pdfs com ${tela.soltos} cartões; esperados ${nEsp} (${descrEsp})`);
+        // cada cartão: o título, e os botões na ordem dos itens; com o arquivo em entregas/, o link de baixar; sem, desabilitado
+        const entregas = path.join(raiz, "catalogo_grafico", "entregas");
+        const arquivos = fs.existsSync(entregas) ? fs.readdirSync(entregas, { withFileTypes: true }).filter((d) => d.isFile()).map((d) => d.name) : [];
+        const faltam = [];
+        for (const x of esp) {
+          const g = tela.grupos.find((k) => k.id === "grupo-" + x.g);
+          const h3s = g ? g.cartoes.map((k) => k.h3) : [];
+          const titulosEsp = x.cartoes.map((c) => c.titulo);
+          if (h3s.join("|") !== titulosEsp.join("|")) {
+            const falta = titulosEsp.filter((t) => !h3s.includes(t)), sobra = h3s.filter((t) => !titulosEsp.includes(t));
+            const qual = [falta.length ? `falta ${falta.join(", ")}` : "", sobra.length ? `sobra ${sobra.join(", ")}` : ""].filter(Boolean).join("; ") || "ordem diferente";
+            falha("l-admin", N_ADMIN, "pdf-ordem:" + x.g, `${x.nome}: ${h3s.length} cartões, esperados ${titulosEsp.length} (${qual}); na tela: ${cortar(h3s.join(" | ") || "nenhum", 160)}`);
+          }
+          for (const c of x.cartoes) {
+            const k = g && g.cartoes.find((y) => y.h3 === c.titulo);
+            if (!k) continue; // já contado acima
+            const rotEsp = c.itens.map((p) => "Baixar " + (NOME_TIPO[p.tipo] || "PDF"));
+            if (k.bts.map((b) => b.txt).join("|") !== rotEsp.join("|"))
+              falha("l-admin", N_ADMIN, "pdf-bts:" + c.titulo, `${x.nome}, cartão "${c.titulo}": botões ${k.bts.map((b) => b.txt).join(", ") || "nenhum"}; esperados ${rotEsp.join(", ")}`);
+            c.itens.forEach((p, i) => {
+              const bt = k.bts[i];
+              if (!bt) return;
+              const href = "/admin/pdfs/baixar/" + p.id;
+              if (arquivos.some((f) => p.re.test(f))) {
+                if (bt.href !== href) falha("l-admin", N_ADMIN, "pdf-link:" + p.id, `/admin/pdfs: o ${p.id} tem o arquivo em entregas/ e está sem o link ${href}${bt.desab ? " (botão desabilitado)" : ""}`);
+              } else {
+                faltam.push(p.id);
+                if (!bt.desab || bt.href) falha("l-admin", N_ADMIN, "pdf-fora:" + p.id, `/admin/pdfs: o ${p.id} sem arquivo em entregas/ e o botão não está desabilitado`);
+              }
+            });
+          }
+        }
+        if (faltam.length) aviso("l-admin", N_ADMIN, `${faltam.length} arquivo(s) da lista PDFS fora de catalogo_grafico/entregas/ (botão desabilitado na tela, como esperado): ${faltam.join(", ")}`);
+        // os treinamentos (se a lista tiver): cada cartão com 2 botões, PDF e PowerPoint; o grupo na tela com o subtítulo
+        const treinos = esp.flatMap((x) => x.cartoes).filter((c) => c.itens[0].grupo === "treinamentos");
+        for (const c of treinos) {
+          const tipos = c.itens.map((p) => p.tipo).join("|");
+          if (tipos !== "pdf|pptx") falha("l-admin", N_ADMIN, "pdf-treino:" + c.titulo, `o treinamento "${c.titulo}" na lista PDFS com ${tipos} (esperado pdf e pptx, no mesmo par)`);
+        }
+        const gTrein = tela.grupos.find((g) => g.id === "grupo-treinamentos");
+        if (gTrein && !gTrein.sub) falha("l-admin", N_ADMIN, "pdf-sub", "o grupo Treinamentos sem o subtítulo (p.pdf-grupo-sub)");
+        resumoPdfs = `${idsFonte.length} ids da lista PDFS no GET /api/pdfs, ${nEsp} cartões em ${esp.length} grupos (${descrEsp})` +
+          (treinos.length ? `, os ${treinos.length} treinamentos com PDF e PowerPoint${gTrein ? " e o subtítulo" : ""}` : "") +
+          `; link de baixar em todo item com o arquivo em entregas/ (${faltam.length} sem arquivo, com o botão desabilitado)`;
       }
-      if (faltam.length) aviso("l-admin", N_ADMIN, `${faltam.length} arquivo(s) da T-0032 ainda fora de catalogo_grafico/entregas/ (botão desabilitado na tela, como esperado): ${faltam.join(", ")}`);
-      // os 4 treinamentos: 1 cartão cada, com 2 botões, PDF (principal) e PowerPoint
-      for (const t of TREINOS) {
-        const p = lista.find((x) => x.id === `treinamento-${t}-pdf`);
-        const card = gTrein && p && gTrein.cartoes.find((k) => k.h3 === p.titulo);
-        const rots = card ? card.bts.map((b) => b.txt.replace(/ ·.*$/, "")) : [];
-        if (!card || rots.join("|") !== "Baixar PDF|Baixar PowerPoint")
-          falha("l-admin", N_ADMIN, "pdf-treino:" + t, `Treinamentos: o cartão do ${t} ${card ? `com os botões ${rots.join(", ") || "nenhum"}` : "não existe"} (esperado 1 cartão com "Baixar PDF" e "Baixar PowerPoint")`);
-      }
-      await a11y(page, TITULO_PDFS, 1366);
-      await page.screenshot({ path: path.join(dirPrints, "login-pdfs-1366.png"), fullPage: true }); // a página inteira: os 17 cartões
-      c.conferir(TITULO_PDFS);
+      await a11y(page, tituloPdfs, 1366);
+      await page.screenshot({ path: path.join(dirPrints, "login-pdfs-1366.png"), fullPage: true }); // a página inteira: todos os cartões
+      c.conferir(tituloPdfs);
       adminCtx = c; // fica aberto para conferir a etiqueta depois da troca do comum
     }
 
@@ -435,7 +482,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
         if (!menu.some(([, h]) => h === "/trocar-senha") || !menu.some(([t]) => t === "Sair")) falha("l-comum", N_COMUM, "menu-conta", "1366 px: o menu do comum sem \"Trocar senha\" ou \"Sair\"");
       }
       const dom = await page.evaluate(() => ({ txt: document.body.innerText, html: document.documentElement.outerHTML }));
-      if (ADMIN_TXT.test(dom.txt) || /href="\/admin/.test(dom.html)) falha("l-comum", N_COMUM, "dom", `1366 px: a página do comum tem "Criar usuários", "${TITULO_PDFS}" ou link para /admin`);
+      if (ADMIN_TXT.test(dom.txt) || /href="\/admin/.test(dom.html)) falha("l-comum", N_COMUM, "dom", `1366 px: a página do comum tem "Criar usuários", "${tituloPdfs}" ou link para /admin`);
       await page.goto(base + "#/", { waitUntil: "networkidle" });
       await catalogoPronto(page);
       await abrirMenu(page);
@@ -475,7 +522,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
       await entrarUI(page, "admin", seg.senhaAdmin1);
       await catalogoPronto(page);
       const menu = await abrirMenu(page);
-      if (!menu || !menu.some(([, h]) => h === "/admin/usuarios") || !menu.some(([, h]) => h === "/admin/pdfs")) falha("l-admin", N_ADMIN, "menu-390", `390 px: o menu do admin sem "Criar usuários" ou "${TITULO_PDFS}"`);
+      if (!menu || !menu.some(([, h]) => h === "/admin/usuarios") || !menu.some(([, h]) => h === "/admin/pdfs")) falha("l-admin", N_ADMIN, "menu-390", `390 px: o menu do admin sem "Criar usuários" ou "${tituloPdfs}"`);
       await print(page, "menu-admin", 390);
       c.conferir("catálogo com o menu (admin)");
       for (const [cam, sel, nome] of [["admin/usuarios", "#us-lista table", "criar-usuarios"], ["admin/pdfs", "#pdfs article.pdf", "pdfs"]]) {
@@ -513,7 +560,7 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
     }
     detalhe("l-link", N_LINK, `#/produto/${COD} antes do login abre o produto depois do login e da troca obrigatória (1366); #/produto/${FOTO} depois do login direto (390)`);
     detalhe("l-comum", N_COMUM, "menu e página sem os itens do admin (1366 e 390); /admin/usuarios e /admin/pdfs 404 sem a tela");
-    detalhe("l-admin", N_ADMIN, `1º acesso → troca obrigatória (sem a senha atual) → catálogo; menu com Criar usuários, ${TITULO_PDFS}, Trocar senha e Sair; usuário criado pela tela; ${TITULO_PDFS} (title, trilha e h1): GET /api/pdfs com os ${IDS.length} ids, ${N_CARTOES} cartões em ${N_GRUPOS} grupos (${GRUPOS_PDF.map(([, n, k]) => `${n} ${k}`).join(", ")}), os ${TREINOS.length} treinamentos com PDF e PowerPoint; link de baixar em todo id com o arquivo em entregas/`);
+    detalhe("l-admin", N_ADMIN, `1º acesso → troca obrigatória (sem a senha atual) → catálogo; menu com Criar usuários, "${tituloPdfs}", Trocar senha e Sair; usuário criado pela tela; "${tituloPdfs}" igual no menu, title, trilha e h1; ${resumoPdfs}`);
 
     // ---- 5. volta no navegador: "//", "/\", codificados, outro site, tabulação e quebra de linha não levam para fora ----
     {
@@ -582,8 +629,8 @@ export async function testarLogin({ raiz, srv, dirPrints, prods, reg }) {
         }
       } else if (mod) falha("l-sessao", N_SESSAO, "criarServico", "o server.mjs não exporta criarServico (o teste do relógio precisa dele)");
     }
-    detalhe("l-cons", N_CONS, `0 erro de script, 0 console.error do site, 0 403 e 0 4xx/5xx não esperados em login, troca obrigatória (admin e comum), catálogo, menu, Criar usuários, ${TITULO_PDFS}, volta e sessão`);
-    detalhe("l-a11y", N_A11Y, `login, troca obrigatória, janela Criar usuário, Criar usuários e ${TITULO_PDFS}: campos com rótulo e imagens com alt`);
+    detalhe("l-cons", N_CONS, `0 erro de script, 0 console.error do site, 0 403 e 0 4xx/5xx não esperados em login, troca obrigatória (admin e comum), catálogo, menu, Criar usuários, ${tituloPdfs}, volta e sessão`);
+    detalhe("l-a11y", N_A11Y, `login, troca obrigatória, janela Criar usuário, Criar usuários e ${tituloPdfs}: campos com rótulo e imagens com alt`);
   } finally {
     await browser.close();
   }
