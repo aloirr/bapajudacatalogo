@@ -1,5 +1,5 @@
-Testes T-0002 · 23/11/2026 08:42 (Manaus)
-total do JSON ................ PASSOU (4.419 produtos, gerado em 23/11/2026 08:29; no commit: 4.419)
+Testes T-0002 · 23/11/2026 09:04 (Manaus)
+total do JSON ................ PASSOU (4.419 produtos, gerado em 23/11/2026 09:03; no commit: 4.419)
 código único no site ......... PASSOU
 campos do JSON ............... PASSOU (só os 19 campos conhecidos; "ve" em 3.617 produtos (12.160 veículos) no formato [fabricante, modelo, versão?]; "ss" em 121 produtos)
 palavra interna .............. PASSOU
