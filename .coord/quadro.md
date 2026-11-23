@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 23/11/2026 09:11 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 23/11/2026 09:20 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -31,19 +31,22 @@ Atualizado em 23/11/2026 09:11 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0025](tarefas/T-0025.md) | Repetições e ajustes de marca nos materiais do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | CONCLUÍDA | #141, #142, #143 |
 | [T-0026](tarefas/T-0026.md) | Repetições nas páginas 2 a 4 do A4 e nos sumários do catálogo gráfico | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #146, #147, #148 |
 | [T-0027](tarefas/T-0027.md) | "1 itens": singular num lugar só no gerador do catálogo gráfico | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #151, #152, #153, #154, #155, #156 |
+| [T-0028](tarefas/T-0028.md) | Portfólio regerado pela v27 e capa da Linha Moto com "linhas" | catalogo-grafico | designer-ux, design-de-marca | CONCLUÍDA | #164, #165, #166 |
 
 ## Fila
-Main 05d687b (#168).
+Main a1129e0 (#169).
 
 1. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
 2. **Fora da fila, para decidir depois** (parada, decisão 3 do R-20261122-223000-alexandre):
    - T-0006, fases 2 (pneus) e 3 (rolamentos) da busca por medida: só com pedido novo do Alexandre;
    - MC-0016: os rótulos "C20(ah)" e "Cca-18°" da ficha da bateria, que o filtro mostra como "Ah" e "CCA"; se mudar, o filtro muda no mesmo PR (web-site, T-0006);
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
-   - Portfólio: a entrega tem 82 páginas, mas o gerador dá mais com a base de hoje, porque agrupa pelo SISTEMA da v27; gerar de novo é decisão do Alexandre (catalogo-grafico, R-20261122-100047); junto entram o RD-0527 (o "1 itens" das págs. 69 e 76) e o RD-0526, com o `plural()` num módulo comum (T-0027);
-   - MC-0011 e MC-0012 (fonte do .pptx; tamanho do logo e assinatura, com a etiqueta das apresentações e o topo do site): decisão do Alexandre (T-0025);
-   - RD-0511, MC-0015 e o vazio da pág. 2 do A4 (pneus e câmaras de moto em 2 lugares; "7 famílias" na capa da Linha Moto; nota 5.1 do UX): decisão do Alexandre, com simulação (T-0026);
-   - a página da Lâmpadas Moto (1 cartão e cerca de 2/3 em branco): layout, decisão do Alexandre, com simulação (T-0027);
+   - Portfólio: as datas de 2026 passam a 2027 (capa, contracapa, pág. 3 e o selo "NOVIDADE 2026"), com a seta "→" da pág. 3, que a fonte não tem: simulação própria (catalogo-grafico, T-0028);
+   - RD-0535 (o sistema no sobretítulo e no título das páginas de produto do Portfólio) e MC-0017 (siglas de montadora em caixa errada e "effitech"): decisão do Alexandre, com simulação (T-0028);
+   - as divisórias da Moto e do Universal com muito espaço vazio, e a variedade de montadoras nas "Principais aplicações" do Portfólio (6 Volvo nos Filtros de Óleo da Pesada): layout e regra nova, com simulação (T-0028);
+   - aplicações estranhas da base no Portfólio ("Agile" e "GOL G IV de" sem montadora; "Doblo", "Ford Focus" e "Volvo V40" na Linha Pesada; ônibus e caminhões nas Cruzetas da Leve): catalogo-dados (T-0028);
+   - MC-0012 (tamanho do logo e assinatura): parado (R-20261123-112006-alexandre, 8c);
+   - RD-0511 (pneus e câmaras de moto em 2 lugares), o vazio da pág. 2 do A4 e a página da Lâmpadas Moto (1 cartão e cerca de 2/3 em branco): parados (R-20261123-112006-alexandre, 10c e 12c);
    - RD-0528: os blocos `__main__` de `moto.py` e `pneus_fix.py` ainda procuram o texto do `cover_page`, que saiu; não muda página (catalogo-grafico, T-0027);
    - CIL8546: o "—" no ano do site vem de o site ler o texto (web-site);
    - "(coluna Leve também)" aparece com e sem aspas nos PDFs de pneus;
