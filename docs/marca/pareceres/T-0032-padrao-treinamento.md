@@ -108,3 +108,14 @@ produto do catálogo e o rodapé (com "uso interno", se aprovado). Fechar o MC-0
 | MC-0020 | `treinamento_ppt.js:15` (`laranjaEsc: 'A9530A'`) e `PADRAO_TREINAMENTO.md`, seção 3 (a palavra "ATENÇÃO") | cor | regra "nenhuma cor nova nem quase igual sem aprovação" (manual a aprovar) | baixa | `#A9530A` → **`#8A3F00`**, o texto laranja que o PDF já usa (`otext` do dicionário `C` em `digital2.py`). Dá 6,8:1 no fundo `#FDF1E6`, contra 4,8:1 do `#A9530A`. Na mesma linha, as cores do tema `accent5 'D64545'` e `accent6 'F2C14E'` (linha 20) não estão em paleta nenhuma: trocar por cores da paleta ou registrar no guia que não se usam | catalogo-grafico |
 
 O MC-0020 não segura: o padrão pode ir ao Alexandre com a troca feita ou com a nota de que ela entra antes de gerar.
+
+## Reteste do MC-0020 (head `0371d28e86ede0291ad834eeeb2f45efde450ef1`)
+
+**LIBERADO. MC-0020 FECHADO.**
+
+- "ATENÇÃO" em `#8A3F00` (o `otext` do `digital2.py`), no `slide_05.png` novo e no `treinamento_ppt.js:15`.
+- No tema, o `accent5` passou a `#D9E6DA` (a borda) e o `accent6` a `#8A3F00`. O vermelho e o amarelo saíram. Agora o
+  tema só tem cores do padrão.
+- No slide 5, a coluna "Na BAP" sai do PRODUTO da base ("Bomba D'Água, Eletroventiladores", "Pastilha de Freio, Sapata
+  de Freio"...), e a coluna "Verificar" usa as palavras do balcão ("Bomba, ventoinha do radiador e aditivo"). A
+  grafia "D'Água" é a da base, e a troca dela é o item 23 da lista de melhorias.

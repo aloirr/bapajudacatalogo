@@ -50,3 +50,28 @@ No PR: o `pdftotext` do PDF de `entregas/` igual ao desta pasta (87 págs., 19 "
 |---|---|
 | MC-0017 | Corrigido; fecha com a entrega deste PDF |
 | MC-0016 | Ver `docs/marca/pareceres/T-0030-simulacao.md` (outro branch) |
+
+## Rodada 3 (head `6d8f14300b37b790ece8176fc87e6191ce35d3ca`)
+
+| Campo | Valor |
+|---|---|
+| O que foi visto | O `LEIA-ME.md`, os PNGs antes e depois das 24 páginas e o `pdftotext` do PDF da pasta `rodada3` (87 págs.) |
+| Parecer | **LIBERADO**. O MC-0017 continua a fechar com a entrega. Nenhum achado novo de marca |
+
+- **Grafia que se mantém:** 19 "NOVIDADE 2026", 7 "ProActive", 7 "Shiftease", 1 "Effitech", e nenhum "Vw", "Gm" nem
+  "Mb".
+- **O que entra, certo:** "CBT Tratores", "New Holland Colheitadeira 4040/5050", "Valmet Tratores", "Cummins ISBe"
+  (antes "Isb"), "GM C-60 4.9 L 12V", "GM D40, A40, C40", "DAF CF", "MB Axor 12.0 L 24V", "VW Delivery 4.150",
+  "Ford F-12000, F14000" (p56) e "Ford Caminhões F12000, F14000, F16000" (p59).
+- **Corte com "…":** nenhum modelo partido no meio da palavra. Na p42, "VW Fus" virou "VW…".
+- **O que entra com a grafia da base, como as outras linhas em caixa alta (item 8 da lista; sem achado novo):**
+  - "DYNAPAC CC21 – PERKINS 4236", "MULLER 26 – MB OM321" e "Iveco S-WAY" (a grafia da marca é "S-Way");
+  - "PUTSMEISTER BSA1003" (p63): o nome certo da fabricante é **"Putzmeister"**. O erro já estava na Leve (rodada
+    anterior) e vem da APLICACAO da base: o `catalogo-dados` corrige na origem.
+- **Anteriores, para a fila (item 8 e item 4):**
+  - "Mwm" em "Agrale 6000 Mwm 4-10 Tca" (p59) e "GM Blazer Mwm Sprint" (Leve) → "MWM". É a mesma falha do `title()`
+    do MC-0017, mas no texto do modelo: pôr "MWM" no `montar.KEEPU` resolve as duas;
+  - "Cummins Motores Cummins ISBe 3.9L" (p56) repete "Cummins" e cola a unidade ("3.9 L");
+  - "MB Pode ser aplicado na ré, neutro…" (p59) não é veículo (item 4).
+- **Fora da marca (para o `gerente-projetos`):** a p68 da Pesada ainda mostra "Toyota Etios 1.3 L 16V", que é carro. A
+  regra nova tirou a Topic e a Daily, mas não o Etios.
