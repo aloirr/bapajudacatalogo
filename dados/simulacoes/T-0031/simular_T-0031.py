@@ -1,28 +1,38 @@
 """T-0031 (item 4a): simulação, só leitura da base. Uso: python3 -I simular_T-0031.py <base.xlsx> <saida.xlsx>"""
-import sys, openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment
-base, saida = sys.argv[1], sys.argv[2]
-wb = openpyxl.load_workbook(base, read_only=True)
+import sys
+from pathlib import Path
 
-def produto(cod):
-    ws = wb['PRODUTOS']
-    for i, r in enumerate(ws.iter_rows(values_only=True), 1):
-        if r[0] == cod: return i, r
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment
+
+RAIZ = Path(__file__).resolve().parents[3]
+sys.path[:0] = [str(RAIZ / "dados" / "scripts")]
+from base_comum import CAB_VEICULOS, conferir_cabecalho, limpo, linhas_por_codigo  # noqa: E402
+
+base, saida = sys.argv[1], sys.argv[2]
+wb = openpyxl.load_workbook(base)
+wp, wv = wb['PRODUTOS'], wb['VEICULOS']
+conferir_cabecalho(wv, CAB_VEICULOS)
+cp = [limpo(c.value) for c in wp[1]]
+lp, lv = linhas_por_codigo(wp), linhas_por_codigo(wv)
+IV = {k: i + 1 for i, k in enumerate(CAB_VEICULOS)}       # coluna da VEICULOS pelo nome (RD-0544)
+
+def produto(cod, col):
+    """O valor da coluna col (pelo nome) na linha do código na PRODUTOS."""
+    return wp.cell(lp[cod][0], cp.index(col) + 1).value
 def veiculo(cod, fab, mod):
-    ws = wb['VEICULOS']
-    for i, r in enumerate(ws.iter_rows(values_only=True), 1):
-        if r[0] == cod and r[1] == fab and r[2] == mod: return i, r
-P = ['CODIGO_BAP','DESCRICAO','APLICACAO','REFERENCIAS_CRUZADAS','DADOS_ADICIONAIS','PRODUTO','CATEGORIA','SISTEMA','FAMILIA','LINHA']
-V = ['CODIGO_BAP','FABRICANTE','MODELO','VERSAO','ANO_INICIO','ANO_FIM','ORIGEM','SITUACAO','MOTIVO','CILINDRADA','ANO_DUVIDA']
+    """A primeira linha do código na VEICULOS com esse FABRICANTE e MODELO."""
+    return next(n for n in lv[cod] if wv.cell(n, IV['FABRICANTE']).value == fab and wv.cell(n, IV['MODELO']).value == mod)
+
 MOT_V = ("'Cargo' aqui é o Doblò Cargo (versão do Fiat), não o caminhão Ford Cargo; sai do filtro do site até a revisão")
 
 def lin_prod(cod, depois, porque):
-    i, r = produto(cod); a = r[P.index('LINHA')]
-    return ['PRODUTOS', i, cod, r[P.index('PRODUTO')], 'LINHA', a, depois, r[2], porque]
+    return ['PRODUTOS', lp[cod][0], cod, produto(cod, 'PRODUTO'), 'LINHA', produto(cod, 'LINHA'), depois,
+            produto(cod, 'APLICACAO'), porque]
 def lin_veic(cod, porque):
-    i, r = veiculo(cod, 'FORD', 'Cargo')
-    return [['VEICULOS', i, cod, 'FORD Cargo', 'SITUACAO', r[V.index('SITUACAO')], 'duvidoso', '', porque],
-            ['VEICULOS', i, cod, 'FORD Cargo', 'MOTIVO', r[V.index('MOTIVO')] or '', MOT_V, '', porque]]
+    n = veiculo(cod, 'FORD', 'Cargo')
+    return [['VEICULOS', n, cod, 'FORD Cargo', 'SITUACAO', wv.cell(n, IV['SITUACAO']).value, 'duvidoso', '', porque],
+            ['VEICULOS', n, cod, 'FORD Cargo', 'MOTIVO', wv.cell(n, IV['MOTIVO']).value or '', MOT_V, '', porque]]
 
 CAB = ['ABA','LINHA_NA_PLANILHA','CODIGO_BAP','PRODUTO_OU_VEICULO','COLUNA','ANTES','DEPOIS','APLICACAO (não muda)','MOTIVO_E_FONTE']
 F_BIE = ("Doblò é utilitário leve. Fontes da própria base: refs só de linha leve (OEM Fiat 46836399, Nakata N96003, "
@@ -38,8 +48,8 @@ extra += lin_veic('BOR11030', "A APLICACAO diz 'Doblô Cargo 1.3 / 1.6 / 1.8': a
 for c in ['AMT7084', 'AMT7115', 'BAN9513', 'BAN9516']:
     extra.append(lin_prod(c, 'LEVE', F_MESMA + " Na aba VEICULOS a linha 'FORD Cargo' deste código já está 'duvidoso' (fora do site): sem mudança lá."))
 
-i, r = produto('FAC6260')
-conf = [['FAC6260', r[P.index('LINHA')], r[2], r[3], 'Fonte: FILTROS_TABELA_APLICACAO_2026.pdf (DADOS_ADICIONAIS), Tecfil ACP213',
+conf = [['FAC6260', produto('FAC6260', 'LINHA'), produto('FAC6260', 'APLICACAO'),
+         produto('FAC6260', 'REFERENCIAS_CRUZADAS'), 'Fonte: FILTROS_TABELA_APLICACAO_2026.pdf (DADOS_ADICIONAIS), Tecfil ACP213',
          'Certo segundo a fonte. Focus e V40 (2013>) são leves e o VW Delivery 2018> é pesado: LEVE E PESADA está pela regra. '
          'Focus III e Volvo V40 (2012–2019) são da mesma plataforma Ford (C1) [SUPOSIÇÃO: conhecimento geral, não conferido no catálogo Tecfil]. '
          'Não deu para conferir o catálogo Tecfil fora da base (o acesso à internet é bloqueado neste ambiente).',

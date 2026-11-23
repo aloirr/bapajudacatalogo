@@ -9,8 +9,10 @@ O que faz (regra 4 do CLAUDE.md):
    LEVE E PESADA -> LEVE);
 2. VEICULOS: a linha "FORD Cargo" do BIE20042 e a do BOR11030, SITUACAO separado -> duvidoso e o MOTIVO (padrão
    VEICULO_DUVIDOSO da T-0017). Nenhuma linha sai;
-3. uma linha no LOG_CORRECOES por código e aba (8); o LEIA-ME não muda (só as células da tarefa mudam);
+3. uma linha no LOG_CORRECOES por código e aba (8) e o bloco da v28 no topo do LEIA-ME, como da v20 à v27;
 4. compara célula a célula a base nova com a v27 (base_comum.rodar) e grava a base e a cópia em dados/versoes/.
+A conferência do ANTES e a gravação das células são as do base_comum (conferir_antes e escrever, RD-0545); a coluna
+da VEICULOS vem sempre pelo nome (CAB_VEICULOS).
 
 Uso: python3 dados/scripts/base_v28.py            (grava)
      python3 dados/scripts/base_v28.py --conferir (só compara a base de hoje com a v27)
@@ -21,8 +23,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from base_comum import (CAB_VEICULOS, RAIZ, acrescentar_log, conferir_cabecalho, conferir_celulas,  # noqa: E402
-                        ler_antes_depois, limpo, linhas_por_codigo, parar, rodar)
+from base_comum import (CAB_VEICULOS, RAIZ, acrescentar_leia_me, acrescentar_log, conferir_antes,  # noqa: E402
+                        conferir_cabecalho, conferir_celulas, escrever, ler_antes_depois, limpo, linhas_por_codigo,
+                        parar, rodar)
 
 SIM = RAIZ / "dados" / "simulacoes" / "T-0031" / "SIMULACAO_T-0031_aplicacoes_linha_pesada.xlsx"
 ABAS_SIM = ("ANTES_E_DEPOIS", "MESMA_CAUSA_FORA_DO_PEDIDO")     # as duas aprovadas (13 a e 14 a)
@@ -38,6 +41,17 @@ LINHA = {"BIE20042": ("PESADA", "LEVE"), "BOR11030": ("PESADA", "LEVE"), "AMT708
 VEICULO = {"BIE20042": 7959, "BOR11030": 6504}                    # linha da "FORD Cargo" na VEICULOS
 MOTIVO = ("'Cargo' aqui é o Doblò Cargo (versão do Fiat), não o caminhão Ford Cargo; sai do filtro do site até a "
           "revisão")
+
+LEIA_ME = [
+    ("BASE BAP UNIFICADA v28 (23/11/2026)", None),
+    ("LINHA (6 itens)", "O 'Cargo' do Fiat Doblò não é o caminhão Ford Cargo: BIE20042 e BOR11030 PESADA → LEVE; "
+                        "AMT7084, AMT7115, BAN9513 e BAN9516 LEVE E PESADA → LEVE (T-0031)."),
+    ("VEICULOS (2 linhas)", "A linha 'FORD Cargo' do BIE20042 e a do BOR11030: separado → duvidoso, com MOTIVO; sai do "
+                            "filtro do site até a revisão. Nenhuma linha sai (T-0031)."),
+    ("Formato", "Mesmas abas e colunas da v27. 8 linhas no LOG_CORRECOES (uma por código e aba). "
+                f"Aprovado em {APROVACAO}."),
+    (None, None),
+]
 
 
 def ler() -> list[dict]:
@@ -65,6 +79,7 @@ def aplicar(wb, cel):
     conferir_cabecalho(wv, CAB_VEICULOS)
     cp = [limpo(c.value) for c in wp[1]]
     il = cp.index("LINHA") + 1
+    iv = {k: i + 1 for i, k in enumerate(CAB_VEICULOS)}
     linha_p = linhas_por_codigo(wp)
     origem = f"Simulação em dados/simulacoes/{TAREFA}/; aprovado em {APROVACAO}. {TAREFA} (v28), {DATA}"
     erros, fp, fv, log = [], {}, {}, []
@@ -72,31 +87,30 @@ def aplicar(wb, cel):
         if x["ABA"] != "PRODUTOS":
             continue
         cod, n, antes, depois = x["CODIGO_BAP"], x["LINHA_NA_PLANILHA"], x["ANTES"], x["DEPOIS"]
-        if linha_p.get(cod) != [n] or wp.cell(n, il).value != antes:
-            erros.append(f"{cod}: a linha ou a LINHA de hoje não é a da simulação ({linha_p.get(cod)})")
+        if e := conferir_antes(wp, linha_p, cod, n, il, antes):
+            erros.append(e)
             continue
         fp[(n, il)] = depois
         log.append(["CLASSIFICACAO_ALTERADA", "PRODUTOS", cod, None,
                     f"LINHA: '{antes}' -> '{depois}' (o resto da linha não muda). {x['MOTIVO_E_FONTE']} {origem}"])
     for cod, n in VEICULO.items():
-        r = [wv.cell(n, c).value for c in range(1, len(CAB_VEICULOS) + 1)]
-        if (r[0], r[1], r[2], r[7], r[8]) != (cod, "FORD", "Cargo", "separado", None):
+        r = {k: wv.cell(n, c).value for k, c in iv.items()}
+        if (r["CODIGO_BAP"], r["FABRICANTE"], r["MODELO"], r["SITUACAO"], r["MOTIVO"]) != (
+                cod, "FORD", "Cargo", "separado", None):
             erros.append(f"VEICULOS linha {n}: não é a 'FORD Cargo' separada do {cod} ({r})")
             continue
-        fv[(n, CAB_VEICULOS.index("SITUACAO") + 1)] = "duvidoso"
-        fv[(n, CAB_VEICULOS.index("MOTIVO") + 1)] = MOTIVO
+        fv[(n, iv["SITUACAO"])] = "duvidoso"
+        fv[(n, iv["MOTIVO"])] = MOTIVO
         fonte = next(x["MOTIVO_E_FONTE"] for x in cel if x["ABA"] == "VEICULOS" and x["CODIGO_BAP"] == cod)
         log.append(["VEICULO_DUVIDOSO", "VEICULOS", cod, None,
                     f"VEICULOS: SITUACAO separado -> duvidoso em 1 linha(s) (FORD Cargo, linha {n}): {MOTIVO}; "
                     f"MOTIVO preenchido; nenhuma linha sai. {fonte} {origem}"])
     parar(erros)
-    for (n, c), v in fp.items():
-        wp.cell(n, c).value = v
-    for (n, c), v in fv.items():
-        wv.cell(n, c).value = v
+    escrever(wb, {"PRODUTOS": fp, "VEICULOS": fv})
     ult = acrescentar_log(wb, log)
-    print(f"  células: PRODUTOS {len(fp)}; VEICULOS {len(fv)}; LOG_CORRECOES +{len(log)}; LEIA-ME +0")
-    return {"PRODUTOS": set(fp), "VEICULOS": set(fv)}, ult, 0, (fp, fv)
+    leia_n = acrescentar_leia_me(wb, LEIA_ME)
+    print(f"  células: PRODUTOS {len(fp)}; VEICULOS {len(fv)}; LOG_CORRECOES +{len(log)}; LEIA-ME +{leia_n}")
+    return {"PRODUTOS": set(fp), "VEICULOS": set(fv)}, ult, leia_n, (fp, fv)
 
 
 if __name__ == "__main__":

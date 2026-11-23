@@ -8,7 +8,8 @@ Da v23 em diante, também a leitura da aba ANTES_DEPOIS da simulação, o "(vazi
 cada célula (RD-0247; o base_v22.py fica como rodou). Da v24 em diante, as linhas novas no fim de uma aba (ex.: a
 VEICULOS): acrescentar_linhas grava e o comparar confere (novas_no_fim). Da v26 em diante, também antes_log,
 linhas_por_codigo e conferir_cabecalho (RD-0272; os base_v22 a base_v25 ficam como rodaram). Da v27 em diante, também
-o gerar_site_copia e o contar_duvidoso das simulações (RD-0310; o simular_v26.py fica como rodou).
+o gerar_site_copia e o contar_duvidoso das simulações (RD-0310; o simular_v26.py fica como rodou). Da v28 em diante,
+também o conferir_antes e o escrever (RD-0545; os base_v22 a base_v27 ficam como rodaram).
 """
 from __future__ import annotations
 
@@ -126,6 +127,20 @@ def ler_antes_depois(sim: Path, cab: list[str], aba: str = "ANTES_DEPOIS") -> li
     linhas = [dict(zip(cab, r)) for r in it if r[0]]
     wb.close()
     return linhas
+
+
+def conferir_antes(ws, linhas: dict[str, list[int]], cod: str, n: int, c: int, antes) -> str | None:
+    """Erro se o código não está só na linha n ou se a célula de hoje não é o ANTES da simulação (da v28, RD-0545)."""
+    if linhas.get(cod) != [n] or ws.cell(n, c).value != antes:
+        return f"{cod}: a linha ou a {limpo(ws.cell(1, c).value)} de hoje não é a da simulação ({linhas.get(cod)})"
+    return None
+
+
+def escrever(wb, feitas: dict[str, dict[tuple[int, int], object]]) -> None:
+    """Grava as células já conferidas: {aba: {(linha, coluna): valor}} (da v28, RD-0545)."""
+    for aba, cel in feitas.items():
+        for (n, c), v in cel.items():
+            wb[aba].cell(n, c).value = v
 
 
 def conferir_celulas(p: Path, extra) -> list[str]:
