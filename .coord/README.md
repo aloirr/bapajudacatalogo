@@ -16,7 +16,7 @@ O repositório `aloirr/bapajudacatalogo` tem um time de 11 agentes do Claude Cod
 | `designer-ux` | Visual e experiência do site e do PDF: tokens, componentes, especificação de tela e página, revisão de UX (🔴/🟡/🟢) de toda mudança de tela, PDF ou marca, antes do `revisor-codigo`. Só especifica e aponta; não edita `site/` nem `catalogo_grafico/`. | `docs/ux/` |
 | `design-de-marca` | Guardião da marca BAP (logo, verde, Poppins, tom de voz) no site e nos PDFs. Em toda mudança de tela, PDF ou marca, junto com o `designer-ux` e antes do `revisor-codigo`. Só lê e aponta; o manual só tem o que o Alexandre aprovou. | `docs/marca/` |
 | `revisor-codigo` | Revisão independente de cada PR. Só lê e aponta. | — |
-| `corretor-redundancias` | Corta o que se repete ou sobra (telas do site, PDF, código, CI, docs, tarefas). Passa em todo PR, depois do `revisor-codigo` e antes do PR. Só lê e aponta (RD-nnnn). | `docs/qualidade/redundancias/` |
+| `corretor-redundancias` | Corta o que se repete ou sobra (telas do site, PDF, código, CI, docs, tarefas). Passa em todo PR que muda código, site, base ou PDF, depois do `revisor-codigo` e antes do PR; PR só de documentos passa só pelo `revisor-codigo` (R-20261123-112006-alexandre). Só lê e aponta (RD-nnnn). | `docs/qualidade/redundancias/` |
 
 O dono de cada caminho está em **`.coord/donos.json`** (vale o primeiro padrão que casar). Dono `alexandre`: `.claude/**`, `.coord/donos.json`, `render.yaml`, `.github/**`, `CLAUDE.md` e `.gitignore`.
 
@@ -37,13 +37,13 @@ Alexandre ◀──entrega + prints + PR── po ◀─┘
     └── "aprovado" da simulação ──▶ po autoriza o merge (número + SHA) ──▶ gerente-projetos faz o merge
 ```
 
-Caminho: dono → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` → PR → `po`. O `po` autoriza todos os merges, inclusive os de governança, e o `gerente-projetos` executa (R-20261120-111308-alexandre); as simulações de tela e de PDF continuam indo ao Alexandre.
+Caminho: dono → `testes` → `designer-ux` e `design-de-marca` (em mudança de tela, PDF ou marca) → `revisor-codigo` → `corretor-redundancias` (só em PR que muda código, site, base ou PDF) → PR → `po`. O `po` autoriza todos os merges, inclusive os de governança, e o `gerente-projetos` executa (R-20261120-111308-alexandre); as simulações de tela e de PDF continuam indo ao Alexandre.
 
 1. **Pedido.** O Alexandre fala com o `po`. O `po` cria `.coord/tarefas/T-nnnn.md` (modelo abaixo) e a linha no `quadro.md`.
 2. **Plano.** O `gerente-projetos` escreve os passos na tarefa e abre o branch.
 3. **Trabalho.** Cada dono mexe só na sua pasta.
 4. **Testes.** O `testes` roda a bateria e escreve o resultado na tarefa.
-5. **Revisão.** Em mudança de tela, PDF ou marca, o `designer-ux` e o `design-de-marca` dão parecer sobre os prints. Depois, o `revisor-codigo` lê o diff inteiro e o `corretor-redundancias` caça o que se repete ou sobra. O gerente registra os pareceres na tarefa.
+5. **Revisão.** Em mudança de tela, PDF ou marca, o `designer-ux` e o `design-de-marca` dão parecer sobre os prints. Depois, o `revisor-codigo` lê o diff inteiro e, em PR que muda código, site, base ou PDF, o `corretor-redundancias` caça o que se repete ou sobra. O gerente registra os pareceres na tarefa.
 6. **PR.** O `gerente-projetos` abre o PR para o `main` e devolve ao `po`.
 7. **Entrega.** O `po` mostra ao Alexandre o que foi feito, os prints e o link do PR.
 8. **Aprovação e merge.** Simulação de tela ou de PDF só segue com o **"aprovado"** do Alexandre. O `po` autoriza o merge em recado, com o número e o SHA do head, depois de conferir os arquivos, o CI verde e as revisões LIBERADO; o `gerente-projetos` executa (R-20261120-111308-alexandre).
