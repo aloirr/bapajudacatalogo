@@ -121,3 +121,46 @@ Print: `port-aplic-b-p73-moto-filtros-de-ar-depois.png`.
 2. **Os Filtros de Óleo da Linha Leve (pág. 40 da b) abrem com 3 máquinas** ("DYNAPAC CC21 – PERKINS 4236", "MULLER 26 – MB OM321" e "PUTSMEISTER BSA1003 – MWM D229.4"), antes dos carros. A Dynapac já abria a lista na 1ª rodada; o ajuste só separou as outras 2, que estavam coladas. É a ordem e a LINHA da base: para o `catalogo-dados`, junto da nota 2 do §5.
 
 **Resultado do reteste: VOLTA PARA AJUSTE** (1 🟡 novo, no Filtro de Ar Moto). O 🟡 da 1ª rodada está 🟢. As recomendações do §6 não mudam (1b e 2a), e as perguntas podem seguir ao Alexandre.
+
+---
+
+## 2º reteste: o "mesmo carro" (head `e2cded4`)
+
+| Campo | Valor |
+|---|---|
+| Data | 23/11/2026 08:11 (Manaus) |
+| O que foi revisto | O diff `6c035be..e2cded4` (a função `carro()` e o corte do ano no `aplicacoes()`), a seção "Reteste do UX: o 'mesmo carro'" do `LEIA.md`, o `carro-aplicacoes-antes-depois.txt` e os PNGs `port-carro-*` (recados, commit 8cc82fb). Também os PDFs gerados pelo `e2cded4` (as 2 variantes do Portfólio e o A4, o Digital, a Linha Moto e a Lista), comparados com os do `6c035be` e com as entregas |
+| Resultado | **VOLTA PARA AJUSTE**: o 🟡 do Filtro de Ar Moto fica 🟢; sobra 1 🟡, das datas "MM/AA" nas aplicações |
+
+### O 🟡 do 1º reteste: 🟢
+- 🟢 **O Filtro de Ar Moto mostra os 3 modelos** (pág. 73 da b, `port-carro-b-p73-depois.png`): "HONDA CG 125 CARGO ESD", "HONDA CG 150 CARGO ESD" e "HONDA CG 160 CARGO". Quem lê a página sabe que o filtro serve na CG 125, na 150 e na 160.
+- 🟢 **O mesmo carro aparece uma vez só**: Ecosport (pág. 37 da b), Royale (13), Ranger (19) e Courier (33). A montadora na chave mantém separados os "Caminhões" da Agrale e os da MB.
+- 🟢 **Mudam só as listas de aplicações**, nas 23 páginas da b e nas 27 da a do `LEIA.md` (conferi no texto e no pixel, contra o `6c035be`). Nenhuma lista fica vazia, nenhuma passa de 12 linhas e a grade de 2 colunas não muda.
+- 🟢 **O caractere vazio dá 0 nas aplicações** das 2 variantes. Sobram só os 2 da seta da pág. 3 (nota 1 do §5, com a marca).
+- 🟢 **Os outros PDFs não mudam.** No `e2cded4`, A4 (56 págs.), Completo Digital (311) e Lista (21) ficam iguais às entregas e ao código do main; na Linha Moto, só a capa, na mesma caixa da 1ª rodada.
+
+### A aplicação que sai quando o ano partiria o modelo: 🟢, aceitável
+- Saem "Clark Empilhadeira C-" (págs. 22 e 54 da b) e "Ford F-" (pág. 54). Do jeito que estavam no `6c035be`, mostravam um modelo partido: o leitor não sabe que carro é "Ford F-".
+- Tirar é melhor que mostrar partido, porque a lista é das "principais" aplicações, não de todas: a vaga vai para a próxima do ranking ("Seat Leon 1.8", "Agrale MT 12.0", "MB 1726-e"), e nenhuma lista fica vazia.
+- Na base, "F 2000" e "F-1998>" não dizem se o número é modelo ou ano. Não peço outra regra.
+
+### 🟡 As datas "MM/AA" aparecem partidas nas aplicações (as 2 variantes)
+Eu devia ter apontado isto na 1ª rodada: já estava no `223ce6b`, e o ajuste do "mesmo carro" trouxe mais 2 linhas. O corte do ano reconhece "2014–2015", mas não as datas "mês/ano" da base. Elas ficam na linha e são cortadas no meio, às vezes sem o "…":
+
+| Variante b | Variante a | Página | O que se lê |
+|---|---|---|---|
+| 13 | 13 | Linha Leve · Terminais de Direção | "VW Gol Mec. 12/97 12…", "VW Fusca 08/65 04…", "VW Passat 01/74 12…", "VW Kombi Carat Central 01/97 12…" |
+| 15 | 15 | Linha Leve · Cruzetas (`port-carro-b-p15-depois.png`) | "MB 1621 4x2 01/89 12/96 + MB 1622 4x2 0" |
+| 49 | 51 | Linha Pesada · Cruzetas | "Scania R113 s/ ABS DS 10.6 L SOHV 01/91 1" |
+
+- Na entrega, só 1 linha tinha data (pág. 53, "LO914 00/04 OM904LA"); no `e2cded4`, são 12 linhas em 6 páginas. Na tabela estão as que saem partidas ou cortadas ("12…", "0", "1").
+- **Pedido ao `catalogo-grafico` (o resultado; o como é dele):**
+  1. a data "mês/ano" sai da linha como sai o ano: "VW Gol Mec.", "VW Fusca", "VW Passat", "VW Kombi Carat Central", "MB 1621 4x2 + MB 1622 4x2" e "Scania R113 s/ ABS DS 10.6 L SOHV";
+  2. nova prova das páginas que mudarem, nas 2 variantes.
+- Fica fora do pedido o par de anos curto, que se lê inteiro ("Monza 82/96", "Kadett / Ipanema 89/98", pág. 12; "Elba 92/96 - Mille 92/13…", pág. 6). Se o ajuste também tirar esses anos, a linha continua legível.
+
+### Notas do 2º reteste (não seguram)
+1. **Os Filtros de Óleo da Pesada (pág. 64 da b) ficam com 6 Volvo em 12 linhas.** A chave nova separa, com razão, FH12, FM12, NH12, VM 260 e VM 310, e o ranking da base os põe antes de Foton, Iveco Cursor, JAC e MB LO 815, que saem. A lista fica certa, mas mostra menos montadoras. A regra de "principais" pela ordem do catálogo não muda nesta tarefa. Se o Alexandre quiser variedade de montadoras, a regra é nova e pede simulação.
+2. **Vêm da base, para o `catalogo-dados`:** aplicação sem montadora ("Agile", pág. 12 da b; "GOL G IV de", pág. 13); modelo de outra linha ("Ford Focus" e "Volvo V40" nos Filtros de Cabine da Pesada, pág. 62; caminhão e ônibus nas Cruzetas da Linha Leve, pág. 15). Vão junto com a nota 2 do §5.
+
+**Resultado do 2º reteste: VOLTA PARA AJUSTE** (1 🟡, as datas "MM/AA"). O Filtro de Ar Moto e o "mesmo carro" estão 🟢, e a regra da aplicação que sai é aceitável. As recomendações do §6 não mudam (1b e 2a).
