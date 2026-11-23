@@ -232,12 +232,18 @@ def aplicacoes(rows, n=12):
         segs = r.get('segs') or []
         tr, cur = [], None
         for t, b in segs:
-            if b: cur = [t.strip(), '']; tr.append(cur)
-            elif cur is None: cur = ['', t]; tr.append(cur)
-            else: cur[1] += t
+            if b: cur = [t.strip(), '']; tr.append(cur); continue
+            # APLICACAO da base v27: uma aplicação por linha. A linha quebrada no meio (a de cima sem ano no fim
+            # e esta sem uma 1ª palavra já vista, como "SUSPENSÃO" + "PNEUMÁTICA 4X2...") continua a de cima.
+            lns, vistas = t.split('\n'), set()
+            for k, ln in enumerate(lns):
+                p1 = (ln.split() or [''])[0]
+                if cur is None or (k and (re.search(r'(?:(?:19|20)\d{2}|[>+])\s*[·;]?\s*$', lns[k - 1]) or p1 in vistas)):
+                    cur = ['', ln]; tr.append(cur); vistas.add(p1)
+                else: cur[1] += (' ' if k else '') + ln
         for m, t in tr:
             mod = re.split(r'\s·\s|;\s|\s\(', t.strip(' ·;'))[0].strip(' ,·/')
-            mod = re.sub(r'\s*(?:\d{2}/)?(?:19|20)\d{2}.*$', '', mod).strip(' ,·/')     # tira anos
+            mod = re.sub(r'(?:\s+[-–])?\s*(?:\d{2}/)?(?:19|20)\d{2}.*$', '', mod).strip(' ,·/')     # tira anos (e o " - " antes deles)
             if not mod and not m: continue
             if len(mod) > 46: mod = mod[:46].rsplit('/', 1)[0].rsplit(',', 1)[0].strip(' ,/') + '…'
             mod = re.sub(r'(?i)\s*\b(?:diant|tras|dir|esq|sup|inf)(?:eir[oa]|eit[oa]|uerd[oa]|erior)?\.?(?=\s|$)', '', mod).strip(' ,·/+')
