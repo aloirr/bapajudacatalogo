@@ -51,7 +51,7 @@
 **Nunca vai para o site:**
 
 - preço;
-- estoque;
+- estoque (a aba interna "Estoque", T-0034, lê `GET /api/estoque` do serviço de login, fora de `site/data/`; ver `servicos/login/LEIA.md`);
 - custo FOB/USD;
 - MOQ;
 - ranking;

@@ -91,7 +91,7 @@ main:focus, main:focus-visible { outline: none; }
 .form-busca { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px) auto; gap: 8px 14px; padding: 12px 16px; align-items: start; }
 .bq-campo { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .campo-rot, .campo label { font-size: 12px; font-weight: 600; color: var(--texto-2); text-transform: uppercase; letter-spacing: .04em; }
-.bq-campo input, .mf-geral input, .campo input[type=text], .campo input[type=password], .campo input[type=search] { width: 100%; height: 44px; border: 1px solid var(--borda-campo); border-radius: 8px; padding: 0 12px; font: inherit; font-size: 15px; color: var(--texto); background: var(--branco); }
+.bq-campo input, .mf-geral input, .campo input[type=text], .campo input[type=password], .campo input[type=search], .campo select { width: 100%; height: 44px; border: 1px solid var(--borda-campo); border-radius: 8px; padding: 0 12px; font: inherit; font-size: 15px; color: var(--texto); background: var(--branco); }
 .bq-placa input { text-transform: uppercase; letter-spacing: .06em; }
 .bq-placa input::placeholder { text-transform: none; letter-spacing: 0; }
 .bq-bt { padding-top: 22px; } /* alinha o botão com os campos (altura do rótulo) */
@@ -133,7 +133,7 @@ main:focus, main:focus-visible { outline: none; }
 .filtro-lista label span { flex: 1; }
 .filtro-lista label:has(input:checked) span { font-weight: 600; color: var(--escuro); } /* marcada: negrito, além da caixa */
 .filtro-lista label em { min-width: 3ch; text-align: right; font-style: normal; font-variant-numeric: tabular-nums; color: var(--texto-2); font-size: 13px; }
-.filtro-lista input { accent-color: var(--verde-esc); width: 18px; height: 18px; flex: none; }
+.filtro-lista input, .opcao input { accent-color: var(--verde-esc); width: 18px; height: 18px; flex: none; }
 @media (hover: hover) { .filtro-lista label:hover { background: var(--branco); } }
 /* opção com 0 produtos: fica na lista, na mesma ordem, em --texto-2 (5,36:1 no --fundo-filtros) e desabilitada */
 .filtro-lista label.off, .filtro-lista label.off input { cursor: not-allowed; }
@@ -362,6 +362,7 @@ body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
   :root { --alto-topo: 76px; }
   .menu { gap: 2px; }
   .menu a { font-size: 13px; white-space: nowrap; padding-inline: 6px; } /* 3 itens (op4e): o "Sobre a BAP" aparece também no celular; o "Início" com 44 px de largura (43 px com 5 px) */
+  .menu .menu-estoque { display: none; } /* o "Estoque" (T-0034) fica só no menu da conta: aqui cabem 3 itens */
   .marca img { height: 38px; }
   .marca { gap: 8px; min-height: 44px; } /* toque com 44 px (o logo tem 38 a 40 px) */
   .marca span { font-size: 10px; line-height: 1.2; letter-spacing: .1em; padding-left: 8px; } /* "Catálogo online" em 2 linhas (T-0018) */
@@ -753,4 +754,28 @@ body.pg-conta main { flex: 1; }
 @media (max-width: 640px) {
   .painel { padding: 18px 16px; }
   .pg-cab h1 { font-size: 22px; }
+}
+
+/* ---------- lista em tabela (T-0022; T-0034): a barra de busca, a table.us e a caixa de marcar de "Criar usuários" e do
+   "Estoque". Aqui, e não no /admin/admin.css, porque o /admin só abre para o admin e o Estoque abre também para o vendedor */
+.us-barra { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin: 0 0 14px; }
+.us-barra .campo { flex: 1 1 260px; max-width: 420px; }
+.us-total { font-size: 14px; color: var(--texto-2); margin: 0 0 10px; }
+table.us { width: 100%; border-collapse: collapse; background: var(--branco); border-radius: var(--raio); overflow: hidden; box-shadow: var(--sombra); }
+/* o rótulo das colunas (computador) e o de cada linha do cartão (celular) */
+table.us th, table.us td[data-rot]::before { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--texto-2); }
+table.us th { text-align: left; background: var(--fundo-filtros); padding: 10px 14px; }
+table.us td { padding: 12px 14px; border-top: 1px solid var(--linha); vertical-align: middle; font-size: 14px; }
+/* caixa de marcar com o texto ao lado (T-0034: "Pode ver o estoque" e "Somente produtos com estoque"), 44 px de toque */
+.opcao { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; color: var(--texto); cursor: pointer; }
+.opcao input { margin: 0; }
+@media (max-width: 900px) {
+  /* celular e tablet: cada linha vira um cartão com rótulos */
+  table.us, table.us tbody, table.us tr, table.us td { display: block; width: 100%; }
+  table.us { background: none; box-shadow: none; border-radius: 0; }
+  table.us thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  table.us tr { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); margin: 0 0 12px; padding: 12px 14px; }
+  table.us td { border: 0; padding: 4px 0; display: flex; gap: 10px; min-width: 0; }
+  table.us td[data-rot]::before { content: attr(data-rot); flex: 0 0 104px; padding-top: 2px; }
+  .us-barra .campo { max-width: none; }
 }

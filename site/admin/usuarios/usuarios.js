@@ -1,6 +1,7 @@
 /* Criar usuários (T-0022): a lista dos usuários do catálogo e as janelas de criar, editar, trocar a senha e desativar
    (ou reativar), mais o envio e a remoção da logo. Só o admin abre esta página e só ele usa estas rotas: quem decide é o
    servidor (os outros recebem 404). O navegador só monta a tela e confere o formulário para ajudar quem digita.
+   A caixa "Pode ver o estoque" (T-0034) manda "estoque" no POST e no PATCH.
    API: GET/POST /api/usuarios · PATCH /api/usuarios/:u · POST /api/usuarios/:u/senha · PUT/DELETE/GET /api/usuarios/:u/logo.
    A senha inicial aparece uma vez só, na janela, para o admin passar ao cliente; nunca vai para o storage ou o console. */
 (function () {
@@ -49,7 +50,7 @@
       <td class="us-td-emp"><div class="us-emp">${logoDe(u)}<div><b>${esc(u.empresa)}</b>${u.temLogo || u.admin ? "" : "<small>Sem logo: usa a da BAP</small>"}</div></div></td>
       <td data-rot="Nome">${n}</td>
       <td data-rot="Usuário"><span class="us-login">${ua}</span></td>
-      <td data-rot="Situação"><div class="us-sit">${u.admin ? '<span class="tag tag-escura">Admin</span>' : ""}${u.ativo ? '<span class="tag tag-verde">Ativo</span>' : '<span class="tag">Desativado</span>'}${u.ativo && u.trocarSenha ? '<span class="tag">Falta trocar a senha inicial</span>' : ""}</div></td>
+      <td data-rot="Situação"><div class="us-sit">${u.admin ? '<span class="tag tag-escura">Admin</span>' : ""}${u.ativo ? '<span class="tag tag-verde">Ativo</span>' : '<span class="tag">Desativado</span>'}${!u.admin && u.estoque === true ? '<span class="tag">Vê o estoque</span>' : ""}${u.ativo && u.trocarSenha ? '<span class="tag">Falta trocar a senha inicial</span>' : ""}</div></td>
       <td data-rot="Último acesso">${esc(F.quando(u.ultimoAcesso) || "Ainda não entrou")}</td>
       <td class="us-td-acoes"><div class="us-acoes">${acoes}</div></td>
     </tr>`;
@@ -103,6 +104,8 @@
   const campoTexto = (id, rot, extra, dica) => `<div class="campo"><label for="${id}">${rot}</label><input id="${id}" type="text" ${extra}${dica ? ` aria-describedby="${id}-dica"` : ""}>${dica ? `<p class="dica" id="${id}-dica">${dica}</p>` : ""}</div>`;
   const campoSenha = (id, rot, dica, foco) => `<div class="campo"><label for="${id}">${rot}</label>
     <div class="senha-box com-gerar"><input id="${id}" type="password" autocomplete="new-password" required aria-describedby="${id}-dica"${foco ? " autofocus" : ""}><button type="button" class="ver gerar" aria-label="Gerar senha" aria-controls="${id}">Gerar</button><button type="button" class="ver" aria-controls="${id}">Mostrar</button></div><p class="dica" id="${id}-dica">${dica}</p></div>`;
+  // "Pode ver o estoque" (T-0034): o admin não tem a caixa, ele vê sempre
+  const caixaEstoque = (id, marcada) => `<label class="opcao"><input id="${id}" type="checkbox"${marcada ? " checked" : ""}>Pode ver o estoque</label>`;
   const ACOES = (principal, classe) => `<div class="form-acoes"><button type="submit" class="bt${classe ? " " + classe : ""}">${principal}</button><button type="button" class="bt-texto" data-fecha>Cancelar</button></div>`;
   // "Gerar": a senha nova aparece (o campo vira texto e o botão vira "Ocultar")
   function ligarGerar(corpo) {
@@ -202,6 +205,7 @@
       <div class="duas">${campoTexto("n-nome", "Nome", 'autocomplete="off" maxlength="80" required autofocus')}${campoTexto("n-emp", "Empresa", 'autocomplete="organization" maxlength="80" required')}</div>
       ${campoTexto("n-us", "Usuário (para entrar)", 'autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="32" required', `${REGRA_US[0].toUpperCase() + REGRA_US.slice(1)}. Ex.: maria.silva. Não muda depois.`)}
       ${campoSenha("n-senha", "Senha inicial", F.DICA_MIN + " O usuário troca no 1º acesso.")}
+      ${caixaEstoque("n-estoque", false)}
       ${blocoLogo(null)}
       ${ACOES("Criar usuário")}</form>`);
     const f = $("form", corpo), aviso = $("#dlg-aviso", corpo);
@@ -228,7 +232,7 @@
       if (F.focarErro(f)) return;
       const bt = $('button[type="submit"]', f);
       bt.disabled = true;
-      const r = await api("POST", "/api/usuarios", { usuario: us.value, nome: nome.value.trim(), empresa: emp.value.trim(), senha: senha.value });
+      const r = await api("POST", "/api/usuarios", { usuario: us.value, nome: nome.value.trim(), empresa: emp.value.trim(), senha: senha.value, estoque: $("#n-estoque", corpo).checked });
       if (r.status !== 201 && r.status !== 200) {
         bt.disabled = false;
         if (r.status === 409) { F.erroCampo(us, F.erroDe(r, "Este usuário já existe. Escolha outro.")); us.focus(); return; }
@@ -247,6 +251,7 @@
     const corpo = abrirJanela("Editar usuário", `<form class="form" novalidate><div id="dlg-aviso"></div>
       <div class="duas">${campoTexto("e-nome", "Nome", `autocomplete="off" maxlength="80" required autofocus value="${esc(u.nome)}"`)}${campoTexto("e-emp", "Empresa", `autocomplete="organization" maxlength="80" required value="${esc(u.empresa)}"`)}</div>
       ${campoTexto("e-us", "Usuário (para entrar)", `autocomplete="off" readonly value="${esc(u.usuario)}"`, "O usuário não muda depois de criado.")}
+      ${u.admin ? "" : caixaEstoque("e-estoque", u.estoque === true)}
       ${blocoLogo(u)}
       ${ACOES("Salvar")}</form>`);
     const f = $("form", corpo), aviso = $("#dlg-aviso", corpo), nome = $("#e-nome", corpo), emp = $("#e-emp", corpo);
@@ -262,6 +267,8 @@
       const mud = {};
       if (nome.value.trim() !== u.nome) mud.nome = nome.value.trim();
       if (emp.value.trim() !== u.empresa) mud.empresa = emp.value.trim();
+      const est = $("#e-estoque", corpo);
+      if (est && est.checked !== (u.estoque === true)) mud.estoque = est.checked;
       if (Object.keys(mud).length) {
         const r = await api("PATCH", "/api/usuarios/" + encodeURIComponent(u.usuario), mud);
         if (r.status !== 200 && r.status !== 204) { bt.disabled = false; falhou(r, aviso, "Não foi possível salvar. Confira os campos."); return; }
