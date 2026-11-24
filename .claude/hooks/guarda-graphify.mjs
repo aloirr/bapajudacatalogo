@@ -6,20 +6,10 @@ import { fileURLToPath } from 'node:url';
 import {
   commonDirDe, criarRepoDe, lerMarcas, gravarMarcas, decidirRead, decidirGrep, contarLinhas,
 } from './guarda-graphify-lib.mjs';
-
-function lerEntrada() {
-  return new Promise((ok) => {
-    let txt = '';
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (d) => (txt += d));
-    process.stdin.on('end', () => {
-      try { ok(JSON.parse(txt || '{}')); } catch { ok({}); }
-    });
-  });
-}
+import { lerEntradaDoHook } from './guarda-bash-lib.mjs';
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const entrada = await lerEntrada();
+const entrada = (await lerEntradaDoHook()) ?? {};
 const ferramenta = entrada.tool_name || '';
 if (ferramenta !== 'Read' && ferramenta !== 'Grep') process.exit(0);
 if ((entrada.hook_event_name || 'PreToolUse') !== 'PreToolUse') process.exit(0);
