@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estoque (SIMULAÇÃO) · Catálogo online BAP</title>
+<meta name="robots" content="noindex">
+<!-- T-0034 · SIMULAÇÃO da aba Estoque: só para mostrar a tela, não é a implementação.
+     Abra com: python3 -m http.server 8000 -d <raiz do repositório>
+     e depois /servicos/login/simulacao/estoque.html?visao=admin | vendedor | cliente
+     O CSS é o do site (styles.css, entrar.css, admin.css), sem cópia; o estoque.css só traz o que a tabela nova pede. -->
+<link rel="icon" href="../../../site/assets/logo_escuro.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../site/styles.css">
+<link rel="stylesheet" href="../../../site/entrar/entrar.css">
+<link rel="stylesheet" href="../../../site/admin/admin.css">
+<link rel="stylesheet" href="estoque.css">
+</head>
+<body class="pg-conta">
+<div class="sim-faixa" role="note">
+  <b>SIMULAÇÃO · valores fictícios</b>
+  <span class="sim-visoes">Visão:
+    <a href="?visao=admin" data-visao="admin">Admin</a>
+    <a href="?visao=vendedor" data-visao="vendedor">Vendedor</a>
+    <a href="?visao=cliente" data-visao="cliente">Cliente</a>
+  </span>
+</div>
+<header class="topo">
+  <div class="topo-in">
+    <a href="#" class="marca" aria-label="Catálogo online BAP: início"><img src="../../../site/assets/logo_branco.png" alt="bap componentes de qualidade"><span>Catálogo <br class="so-cel">online</span></a>
+    <div class="topo-dir">
+      <nav class="menu" aria-label="Menu">
+        <a href="#">Início</a>
+        <a href="#">Produtos</a>
+        <a href="#" id="menu-estoque" aria-current="page" hidden>Estoque</a>
+        <a href="#">Sobre a BAP</a>
+      </nav>
+    </div>
+  </div>
+</header>
+<main id="app" tabindex="-1">
+<!-- visão cliente: o servidor responde 404, igual às páginas do admin (erro() do server.mjs) -->
+<div id="sem-acesso" class="pg" hidden>
+  <p class="est-404"><b>404</b> Não encontrado.</p>
+  <p class="est-404-nota">Na versão final o cliente nem chega aqui: o menu não mostra "Estoque" e o servidor responde 404 em <code>/estoque</code> e em <code>/api/estoque</code>.</p>
+</div>
+<div id="com-acesso" hidden>
+<div class="pg-cab"><div class="pg-cab-in">
+  <p class="trilha"><a href="#">Catálogo</a> › Estoque</p>
+  <h1>Estoque</h1>
+  <p class="est-posicao">Posição de <b id="est-data"></b> às <b id="est-hora"></b> · fonte: BAP Central</p>
+  <span class="so-admin" id="est-quem"></span>
+</div></div>
+<div class="pg pg-larga">
+  <div class="us-barra est-barra">
+    <div class="campo"><label for="est-busca">Buscar</label><input id="est-busca" type="search" placeholder="Código BAP, código do fornecedor ou descrição" autocomplete="off"></div>
+    <div class="campo est-filial"><label for="est-filial">Cidade / filial</label>
+      <select id="est-filial"><option value="">Todas</option></select></div>
+  </div>
+  <p class="us-total" id="est-total" aria-live="polite"></p>
+  <div id="est-lista"></div>
+  <p class="est-sim-nota"><span class="tag tag-escura">SIMULAÇÃO</span> Amostra de 21 linhas. Código, descrição, fornecedor, cidade e filial são reais; estoque<span class="so-admin-txt">, preço, custo, markup, tabela, PPEDIDO e sucata</span> são fictícios.</p>
+</div>
+</div>
+</main>
+<footer class="rodape">
+  <div class="rodape-in">
+    <div class="rodape-txt">
+      <p class="rodape-copy">© 2026 - BAP AUTOPARTS - Componentes de qualidade - Todos os direitos reservados.</p>
+      <p class="mini">As fotos são ilustrativas.<span class="rodape-confira"> Confira sempre a aplicação antes da compra.</span></p>
+    </div>
+  </div>
+</footer>
+<div class="sim-selo" aria-hidden="true">SIMULAÇÃO · valores fictícios</div>
+<script src="amostra.js"></script>
+<script src="estoque.js"></script>
+</body>
+</html>
