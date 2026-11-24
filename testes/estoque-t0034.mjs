@@ -194,12 +194,18 @@ const menuCima = (page) => page.$$eval(".topo .menu a", (as) => as.filter((a) =>
 const porCidade = (cidade) => LINHAS.filter((l) => l.CIDADE === cidade).length;
 const comEstoqueN = LINHAS.filter((l) => l.ESTOQUE != null && l.ESTOQUE !== 0).length;
 
+// rodapé de cada tela (texto) e a fonte do filtro Filial (conferidos no passo 7c)
+const rodape = (page) => page.$eval("footer.rodape", (f) => f.innerText).catch(() => null);
+const rodapes = { inicio: null, estoque: null, usuarios: null };
+let fonteFilial = { sel: "", busca: "" };
+
 try {
   // ---- 1. cliente: os menus e a página 404 no navegador (o 404 por HTTP é do login.test.mjs) ----
   {
     const { ctx, page } = await contexto(S, "cli.teste", 1366, 768);
     await page.waitForSelector("#conta .conta-bt", { timeout: 15000 });
     const cima = await menuCima(page);
+    rodapes.inicio = await rodape(page);
     const conta = await menuConta(page);
     page.esperados.push(404);
     await page.goto(S.base + "/estoque", { waitUntil: "networkidle" });
@@ -222,6 +228,8 @@ try {
     const corpo = sem(await page.evaluate(() => document.body.innerText));
     const cima = await menuCima(page);
     await print(page, "vendedor-1366");
+    rodapes.estoque = await rodape(page);
+    fonteFilial = await page.evaluate(() => ({ sel: getComputedStyle(document.getElementById("est-filial")).fontFamily, busca: getComputedStyle(document.getElementById("est-busca")).fontFamily }));
     const conta = await menuConta(page);
     await ctx.close();
     res("vendedor: colunas exatas", JSON.stringify(cab) === JSON.stringify(COLS_VENDEDOR), `[${cab.join(", ")}]`);
@@ -456,6 +464,7 @@ try {
     await page.waitForLoadState("networkidle");
     const cliApi2 = (await pedir(S.base, "/api/estoque", { cookie: cli })).status;
     await print(page, "criar-usuarios-lista-1366");
+    rodapes.usuarios = await rodape(page);
     await ctx.close();
     // o novo usuário entra, troca a senha e vê o Estoque nos menus
     S.senhas["novo.vend"] = s1;
@@ -500,6 +509,15 @@ try {
     await ctx.close();
     res("Criar usuários 390: lista e caixa sem rolar de lado", w <= 390 && w2 <= 390 && caixa.rot === "Pode ver o estoque" && caixa.dentro && tag.includes("vend.teste"),
       `scrollWidth lista ${w}, janela ${w2}; caixa "${caixa.rot}" dentro da tela: ${caixa.dentro} (altura ${caixa.alt} px); "Vê o estoque" em ${tag.join(", ")}`);
+  }
+
+  // ---- 7c. rodapé e fonte do filtro: no /estoque sai "As fotos são ilustrativas…" (a aba não tem foto); nas outras fica ----
+  {
+    const tem = (t) => /fotos s[aã]o ilustrativas/i.test(t);
+    const ok = rodapes.estoque !== null && !tem(rodapes.estoque) && /BAP AUTOPARTS/.test(rodapes.estoque)
+      && tem(rodapes.inicio || "") && tem(rodapes.usuarios || "") && fonteFilial.sel === fonteFilial.busca && fonteFilial.sel !== "";
+    res("rodapé do /estoque sem \"fotos ilustrativas\" (as outras com) e o filtro com a fonte da página", ok,
+      `/estoque: "${(rodapes.estoque || "").replace(/\s+/g, " ").trim()}"; início (catálogo) com a frase: ${tem(rodapes.inicio || "")}; Criar usuários com a frase: ${tem(rodapes.usuarios || "")}; fonte do select Filial "${fonteFilial.sel}", do campo Buscar "${fonteFilial.busca}"`);
   }
 
   // ---- 8. console e log ----
