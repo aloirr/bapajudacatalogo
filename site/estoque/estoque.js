@@ -42,7 +42,7 @@
   }
   const rotMais = (aberto) => (aberto ? "− Menos detalhes" : "+ Detalhes");
   const linhaHtml = (l) => `<tr>${PRINC.map((c) => celula(c, l, false)).join("")}${EXTRAS.map((c) => celula(c, l, true)).join("")}${
-    EXTRAS.length ? '<td class="est-td-mais"><button type="button" class="bt est-bt-mais" aria-expanded="false">${rotMais(false)}</button></td>' : ""}</tr>`;
+    EXTRAS.length ? `<td class="est-td-mais"><button type="button" class="bt est-bt-mais" aria-expanded="false">${rotMais(false)}</button></td>` : ""}</tr>`;
 
   function colunas(cols) {
     COLS = Array.isArray(cols) ? cols.filter((c) => c && c.campo) : [];
