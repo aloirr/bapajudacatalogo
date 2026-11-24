@@ -51,7 +51,7 @@
 **Nunca vai para o site:**
 
 - preço;
-- estoque (a aba interna "Estoque" da T-0034, em `/estoque`, não lê o `produtos.json`: os dados vêm de `GET /api/estoque`, servido pelo serviço de login só ao admin e a quem tem a permissão "Pode ver o estoque"; nada de estoque, custo ou preço entra em `site/data/` nem na página);
+- estoque (a aba interna "Estoque", T-0034, lê `GET /api/estoque` do serviço de login, fora de `site/data/`; ver `servicos/login/LEIA.md`);
 - custo FOB/USD;
 - MOQ;
 - ranking;

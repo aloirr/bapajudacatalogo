@@ -2,7 +2,7 @@
    Mostra a logo da empresa (ou a da BAP, sem logo ou com 404), o nome e a empresa; aberto, "Trocar senha" e "Sair" e,
    para o admin, o grupo Administração ("Criar usuários" e "Catálogos, materiais e treinamentos").
    Com "estoque: true" no /api/eu (o admin sempre; T-0034), o "Estoque" entra no alto do menu da conta, fora do grupo
-   Administração, e no menu de cima (só no computador: no celular o menu de cima comporta 3 itens, styles.css).
+   Administração, e no menu de cima.
    A segurança é toda do servidor: o navegador não decide acesso e aqui não há segredo. Sem o serviço (site aberto com
    http.server, /api/eu responde 404), o botão não aparece e o catálogo funciona como antes.
    Um 401 (sessão vencida: ela vale 5 h desde o login) leva a /entrar?expirou=1, com a volta para a mesma tela: quem cuida

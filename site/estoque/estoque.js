@@ -42,7 +42,7 @@
   }
   const rotMais = (aberto) => (aberto ? "− Menos detalhes" : "+ Detalhes");
   const linhaHtml = (l) => `<tr>${PRINC.map((c) => celula(c, l, false)).join("")}${EXTRAS.map((c) => celula(c, l, true)).join("")}${
-    EXTRAS.length ? '<td class="est-td-mais"><button type="button" class="bt est-bt-mais" aria-expanded="false">+ Detalhes</button></td>' : ""}</tr>`;
+    EXTRAS.length ? '<td class="est-td-mais"><button type="button" class="bt est-bt-mais" aria-expanded="false">${rotMais(false)}</button></td>' : ""}</tr>`;
 
   function colunas(cols) {
     COLS = Array.isArray(cols) ? cols.filter((c) => c && c.campo) : [];
@@ -75,8 +75,7 @@
   function erro(r) {
     total.textContent = "";
     mais.hidden = true;
-    const msg = r.status === 404 ? "Não encontrado." : r.status === 503 ? "Estoque indisponível no momento."
-      : "Não foi possível carregar o estoque.";
+    const msg = F.erroDe(r, "Não foi possível carregar o estoque."); // 404 e 503: o texto do servidor
     lista.innerHTML = '<div class="est-erro"><div></div><button type="button" class="bt" id="est-tentar">Tentar de novo</button></div>';
     F.caixa(lista.querySelector(".est-erro > div"), "erro", F.frase(msg));
     lista.querySelector("#est-tentar").addEventListener("click", () => carregar(false));

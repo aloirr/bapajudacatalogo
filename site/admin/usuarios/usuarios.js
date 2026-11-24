@@ -1,7 +1,7 @@
 /* Criar usuários (T-0022): a lista dos usuários do catálogo e as janelas de criar, editar, trocar a senha e desativar
    (ou reativar), mais o envio e a remoção da logo. Só o admin abre esta página e só ele usa estas rotas: quem decide é o
    servidor (os outros recebem 404). O navegador só monta a tela e confere o formulário para ajudar quem digita.
-   A caixa "Pode ver o estoque" (T-0034) manda "estoque" no POST e no PATCH; o admin vê sempre (o servidor decide).
+   A caixa "Pode ver o estoque" (T-0034) manda "estoque" no POST e no PATCH.
    API: GET/POST /api/usuarios · PATCH /api/usuarios/:u · POST /api/usuarios/:u/senha · PUT/DELETE/GET /api/usuarios/:u/logo.
    A senha inicial aparece uma vez só, na janela, para o admin passar ao cliente; nunca vai para o storage ou o console. */
 (function () {
