@@ -1,15 +1,13 @@
 /* T-0034 · SIMULAÇÃO da aba Estoque. Vem depois do styles.css, do entrar.css e do admin.css (a tabela é a table.us da
    "Criar usuários": cartões até 900 px). Usa só as variáveis do :root. */
 
-/* ---------- selo da simulação ---------- */
+/* ---------- faixa da simulação (só na simulação; não vai para a tela final) ---------- */
 .sim-faixa { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; justify-content: center; padding: 6px 16px;
   background: var(--erro); color: var(--branco); font-size: 13px; }
 .sim-faixa b { letter-spacing: .06em; }
 .sim-visoes { display: inline-flex; gap: 4px; align-items: center; }
 .sim-visoes a { color: var(--branco); padding: 2px 8px; border-radius: 999px; min-height: 28px; display: inline-flex; align-items: center; }
 .sim-visoes a[aria-current="page"] { background: var(--branco); color: var(--erro); font-weight: 600; text-decoration: none; }
-.sim-selo { position: fixed; left: 12px; bottom: 12px; z-index: 30; padding: 4px 10px; border-radius: 999px; background: var(--erro);
-  color: var(--branco); font-size: 12px; font-weight: 700; letter-spacing: .04em; box-shadow: var(--sombra); pointer-events: none; }
 
 /* o .menu a do styles.css tem display: flex, que vence o [hidden]: sem permissão, o "Estoque" some de verdade */
 .menu a[hidden] { display: none; }
@@ -17,6 +15,7 @@
 /* ---------- cabeçalho da página ---------- */
 .pg-cab .est-posicao b { font-weight: 600; }
 .pg-larga { max-width: var(--largura); }
+body.est-admin .pg-cab-in { max-width: var(--largura); } /* B3: no admin, o título alinha com a busca e a tabela */
 body.est-vendedor .pg-larga { max-width: 1200px; } /* 5 colunas: a largura das outras páginas do admin */
 body.est-vendedor .so-admin-txt { display: none; }
 
@@ -27,28 +26,29 @@ body.est-vendedor .so-admin-txt { display: none; }
 
 /* ---------- tabela ---------- */
 .est-rolar { overflow-x: auto; border-radius: var(--raio); box-shadow: var(--sombra); background: var(--branco); }
-.est-rolar table.us { box-shadow: none; border-radius: 0; }
+.est-rolar table.us { box-shadow: none; border-radius: 0; overflow: visible; }
 table.est th { white-space: nowrap; }
 table.est td { font-size: 14px; }
 table.est .est-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .est-cod { font-weight: 600; color: var(--escuro); white-space: nowrap; }
-.est-cid { white-space: nowrap; }
+table.est td.est-c-cidade { white-space: nowrap; } /* B7: cidade e filial numa linha só */
 table.est td small { color: var(--texto-2); font-size: 12px; }
 table.est td.est-c-estoque b { font-size: 16px; color: var(--escuro); }
 .est-vazio { color: var(--texto-2); }
 .est-td-mais { display: none; }
-.est-nada, .est-404-nota { color: var(--texto-2); font-size: 14px; }
+.est-nada { color: var(--texto-2); font-size: 14px; }
 .est-sim-nota { margin: 16px 0 0; font-size: 13px; color: var(--texto-2); }
-.est-404 { font-size: 20px; margin: 40px 0 8px; }
-.est-404 b { color: var(--erro); margin-right: 8px; }
 
-/* admin no computador: 25 colunas, rola de lado com o código parado à esquerda */
+/* computador (B6): a caixa da tabela tem altura máxima, o cabeçalho fica parado no alto e a barra de rolar de lado
+   fica sempre à vista. No admin, 22 colunas rolam de lado com o código parado à esquerda. */
 @media (min-width: 901px) {
-  body.est-admin table.est { min-width: 2600px; }
+  .est-rolar { overflow: auto; max-height: calc(100vh - var(--alto-topo) - 24px); }
+  table.est thead th { position: sticky; top: 0; z-index: 2; }
+  table.est td.est-c-id_produto { white-space: nowrap; } /* o ID não quebra no hífen */
+  body.est-admin table.est { min-width: 2300px; }
   body.est-admin table.est td.est-c-descricao_produto { min-width: 280px; }
-  body.est-admin table.est th:first-child, body.est-admin table.est td:first-child { position: sticky; left: 0; z-index: 1;
-    background: var(--branco); box-shadow: 1px 0 0 var(--linha); }
-  body.est-admin table.est th:first-child { background: var(--fundo-filtros); }
+  body.est-admin table.est td:first-child { position: sticky; left: 0; z-index: 1; background: var(--branco); box-shadow: 1px 0 0 var(--linha); }
+  body.est-admin table.est th:first-child { left: 0; z-index: 3; box-shadow: 1px 0 0 var(--linha); }
   table.est tbody tr:hover td { background: var(--verde-claro); }
 }
 
@@ -65,15 +65,19 @@ table.est td.est-c-estoque b { font-size: 16px; color: var(--escuro); }
   table.est td.est-c-estoque b::after { content: " un."; font-size: 13px; font-weight: 500; color: var(--texto-2); }
   table.est td.est-c-descricao_produto { border-bottom: 1px solid var(--linha); padding-bottom: 8px; margin-bottom: 4px; }
   table.est td.est-c-descricao_produto::before { display: none; }
+  table.est td.est-c-id_produto { overflow-wrap: anywhere; word-break: break-all; } /* quebra em qualquer ponto, sem preferir o hífen */
   table.est .est-num { text-align: left; }
   table.est td.est-extra { display: none; }
   table.est tr.aberta td.est-extra { display: flex; }
   table.est td.est-td-mais { display: block; padding-top: 8px; }
-  table.est td.est-td-mais .bt { width: 100%; justify-content: center; height: 44px; }
+  /* "+ Detalhes": botão neutro (B5), 44 px de toque, sem a borda verde em todo cartão */
+  .est-bt-mais { width: 100%; height: 44px; justify-content: center; font-size: 14px; background: var(--branco); color: var(--verde-txt);
+    border: 1px solid var(--borda-campo); }
+  .est-bt-mais:hover { background: var(--verde-claro); border-color: var(--borda-campo); color: var(--verde-txt); }
 }
 @media (max-width: 640px) {
   .sim-faixa { font-size: 12px; }
   /* no celular o menu de cima só tem lugar para 3 itens (styles.css, op4e): o "Estoque" vai para o menu da conta
-     [SUPOSIÇÃO; a decisão é do designer-ux, a mudança no conta.js é do web-site] */
+     (B1, designer-ux; a mudança no conta.js é do web-site) */
   .menu #menu-estoque { display: none; }
 }

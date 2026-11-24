@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <!-- T-0034 · SIMULAÇÃO da aba Estoque: só para mostrar a tela, não é a implementação.
      Abra com: python3 -m http.server 8000 -d <raiz do repositório>
-     e depois /servicos/login/simulacao/estoque.html?visao=admin | vendedor | cliente
+     e depois /servicos/login/simulacao/estoque.html?visao=admin | vendedor | cliente (mais &q=, &filial= e &abrir=1)
      O CSS é o do site (styles.css, entrar.css, admin.css), sem cópia; o estoque.css só traz o que a tabela nova pede. -->
 <link rel="icon" href="../../../site/assets/logo_escuro.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,28 +41,21 @@
   </div>
 </header>
 <main id="app" tabindex="-1">
-<!-- visão cliente: o servidor responde 404, igual às páginas do admin (erro() do server.mjs) -->
-<div id="sem-acesso" class="pg" hidden>
-  <p class="est-404"><b>404</b> Não encontrado.</p>
-  <p class="est-404-nota">Na versão final o cliente nem chega aqui: o menu não mostra "Estoque" e o servidor responde 404 em <code>/estoque</code> e em <code>/api/estoque</code>.</p>
-</div>
-<div id="com-acesso" hidden>
+<!-- visão cliente: o estoque.js troca a página inteira pelo 404 simples do server.mjs (HTML_SIMPLES) -->
 <div class="pg-cab"><div class="pg-cab-in">
   <p class="trilha"><a href="#">Catálogo</a> › Estoque</p>
   <h1>Estoque</h1>
-  <p class="est-posicao">Posição de <b id="est-data"></b> às <b id="est-hora"></b> · fonte: BAP Central</p>
-  <span class="so-admin" id="est-quem"></span>
+  <p class="est-posicao">Posição de <b id="est-data"></b> às <b id="est-hora"></b></p>
 </div></div>
 <div class="pg pg-larga">
   <div class="us-barra est-barra">
-    <div class="campo"><label for="est-busca">Buscar</label><input id="est-busca" type="search" placeholder="Código BAP, código do fornecedor ou descrição" autocomplete="off"></div>
+    <div class="campo"><label for="est-busca">Buscar</label><input id="est-busca" type="search" placeholder="Código, fornecedor ou descrição" autocomplete="off"></div>
     <div class="campo est-filial"><label for="est-filial">Cidade / filial</label>
       <select id="est-filial"><option value="">Todas</option></select></div>
   </div>
   <p class="us-total" id="est-total" aria-live="polite"></p>
   <div id="est-lista"></div>
-  <p class="est-sim-nota"><span class="tag tag-escura">SIMULAÇÃO</span> Amostra de 21 linhas. Código, descrição, fornecedor, cidade e filial são reais; estoque<span class="so-admin-txt">, preço, custo, markup, tabela, PPEDIDO e sucata</span> são fictícios.</p>
-</div>
+  <p class="est-sim-nota"><span class="tag tag-escura">SIMULAÇÃO</span> Amostra de 21 linhas. Código, descrição, fornecedor, cidade e filial são reais; os números de estoque<span class="so-admin-txt">, pedido pendente, preço, custo, markup e sucata, a origem do custo e as tabelas</span> são fictícios.</p>
 </div>
 </main>
 <footer class="rodape">
@@ -73,7 +66,6 @@
     </div>
   </div>
 </footer>
-<div class="sim-selo" aria-hidden="true">SIMULAÇÃO · valores fictícios</div>
 <script src="amostra.js"></script>
 <script src="estoque.js"></script>
 </body>
