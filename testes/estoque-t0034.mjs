@@ -9,8 +9,8 @@
      - sobe o serviço de login de verdade (criarServico do servicos/login/server.mjs, com o site/ real) numa porta livre,
        com PASTA_DADOS temporária e senhas falsas geradas aqui a cada rodada (nunca impressas, nunca gravadas);
      - cria admin, vendedor (estoque: true) e cliente (sem a permissão) e confere, por HTTP e no Chromium, as regras da
-       aba (404 do cliente, lista branca do vendedor, 23 colunas do admin, busca, filtro, caixa, "Mostrar mais 50",
-       vazio, 503, a caixa "Pode ver o estoque" da Criar usuários), 390 px sem rolar de lado e o console;
+       aba (404 do cliente, lista branca do vendedor, 23 colunas do admin, busca, filtro, caixa, "Mostrar mais N",
+       vazio, 503 e outro erro, a caixa "Pode ver o estoque" da Criar usuários), 390 px sem rolar de lado e o console;
      - prints de página inteira, deviceScaleFactor 2, em 1366 × 768 e 390 × 844.
    Nada aqui é dado da BAP. Nenhuma rede de fora: as fontes do Google e o serviço de placas são respondidos no teste. */
 
@@ -202,12 +202,19 @@ async function contexto(s, usuario, larg, alt) {
   }
   return { ctx, page };
 }
-const print = (page, nome) => page.screenshot({ path: path.join(PRINTS, nome + ".png"), fullPage: true });
+// página inteira; a janela (dialog modal) só na tela visível: na página inteira ela fica por cima do fim da lista
+const print = (page, nome, inteira = true) => page.screenshot({ path: path.join(PRINTS, nome + ".png"), fullPage: inteira });
 const larguraOk = async (page) => page.evaluate(() => document.documentElement.scrollWidth);
 async function abrirEstoque(page, base) {
   await page.goto(base + "/estoque", { waitUntil: "networkidle" });
   await page.waitForSelector("table.est, .est-nada, .est-erro", { timeout: 15000 });
 }
+// celular: a largura do rótulo (::before) do Fornecedor no 1º cartão e quantas linhas o valor ocupa
+const larguraRotulo = (page) => page.$eval("table.est tbody tr:first-child td.est-c-fornecedor", (td) => {
+  const r = document.createRange(); r.selectNodeContents(td);
+  const tops = new Set([...r.getClientRects()].filter((x) => x.width > 0).map((x) => Math.round(x.top)));
+  return { base: getComputedStyle(td, "::before").flexBasis, linhasFornecedor: tops.size, fornecedor: td.textContent.trim() };
+});
 const cabecalhos = (page) => page.$$eval("table.est thead th", (ths) => ths.map((t) => t.textContent.trim()));
 const totalTxt = (page) => page.$eval("#est-total", (e) => e.textContent.trim());
 async function esperarLista(page) {
@@ -288,6 +295,7 @@ try {
     await abrirEstoque(v.page, S.base);
     const w = await larguraOk(v.page);
     const corpo390 = sem(await v.page.evaluate(() => document.body.innerText));
+    const rotV = await larguraRotulo(v.page);
     await print(v.page, "vendedor-390");
     const conta390 = await menuConta(v.page);
     const w2 = await larguraOk(v.page);
@@ -295,6 +303,9 @@ try {
     await v.ctx.close();
     res("vendedor 390: sem rolar de lado, sem dado interno, Estoque no menu da conta", w <= 390 && w2 <= 390 && !RX_TELA_INTERNA.test(corpo390) && conta390.includes("Estoque"),
       `scrollWidth ${w} (menu aberto ${w2}); conta [${conta390.join(", ")}]`);
+    // o rótulo de 142 px vale só no admin; no vendedor fica o de 104 px (o da table.us) e o Fornecedor não quebra
+    res("vendedor 390: rótulo do cartão com 104 px e Fornecedor numa linha", rotV.base === "104px" && rotV.linhasFornecedor === 1,
+      `flex-basis do rótulo ${rotV.base}; o valor do Fornecedor ocupa ${rotV.linhasFornecedor} linha(s) ("${rotV.fornecedor}")`);
   }
 
   // ---- 4. admin ----
@@ -319,6 +330,7 @@ try {
     const w = await larguraOk(a.page);
     await print(a.page, "admin-390");
     await a.page.click("table.est tbody tr:first-child .est-bt-mais");
+    const rotA = await larguraRotulo(a.page);
     const aberto = await a.page.$eval("table.est tbody tr:first-child", (tr) => ({ cls: tr.classList.contains("aberta"), bt: tr.querySelector(".est-bt-mais").textContent.trim(), extras: [...tr.querySelectorAll("td.est-extra")].filter((t) => getComputedStyle(t).display !== "none").length }));
     const w2 = await larguraOk(a.page);
     await print(a.page, "admin-390-detalhes");
@@ -328,6 +340,7 @@ try {
     res("admin 390: sem rolar de lado e \"+ Detalhes\" abre", w <= 390 && w2 <= 390 && aberto.cls && aberto.extras === 18 && /Menos detalhes/.test(aberto.bt),
       `scrollWidth ${w} (aberto ${w2}); cartão aberto com ${aberto.extras} campos a mais, botão "${aberto.bt}"`);
     res("admin: Estoque no menu da conta (390)", conta[0] === "Estoque", `[${conta.join(", ")}]`);
+    res("admin 390: rótulo do cartão com 142 px", rotA.base === "142px", `flex-basis do rótulo ${rotA.base}`);
   }
 
   // ---- 5. busca, filtro, caixa, mais 50, vazio (vendedor, 1366) ----
@@ -336,8 +349,10 @@ try {
     await abrirEstoque(page, S.base);
     const linhasTela = () => page.$$eval("table.est tbody tr", (trs) => trs.map((tr) => ({
       filial: tr.querySelector(".est-c-cidade")?.textContent.trim(), est: tr.querySelector(".est-c-estoque")?.textContent.trim() })));
-    // Mostrar mais 50 até o fim
+    // "Mostrar mais N" até o fim: N é o que falta, até 50 (50 de 120 → "Mostrar mais 50"; 100 de 120 → "Mostrar mais 20")
+    const textoBt = () => page.$eval("#est-mais-bt", (b) => b.textContent.trim());
     const passos = [await totalTxt(page)];
+    const botoes = [await textoBt()];
     let n = (await linhasTela()).length;
     const contagens = [n];
     for (let k = 0; k < 5 && await page.isVisible("#est-mais-bt"); k++) {
@@ -345,10 +360,15 @@ try {
       await page.waitForFunction((m) => document.querySelectorAll("table.est tbody tr").length > m, n, { timeout: 10000 });
       await page.waitForLoadState("networkidle");
       n = (await linhasTela()).length; contagens.push(n); passos.push(await totalTxt(page));
+      if (await page.isVisible("#est-mais-bt")) {
+        botoes.push(await textoBt());
+        if (n === 100) await print(page, "mostrar-mais-ultimo-1366");
+      }
     }
     const maisSumiu = !(await page.isVisible("#est-mais-bt"));
-    res("Mostrar mais 50 até o fim", JSON.stringify(contagens) === JSON.stringify([50, 100, 120]) && maisSumiu,
-      `linhas ${contagens.join(" → ")}; contagem "${passos.join('" → "')}"; botão some no fim: ${maisSumiu}`);
+    res("Mostrar mais N até o fim", JSON.stringify(contagens) === JSON.stringify([50, 100, 120]) && maisSumiu
+      && JSON.stringify(botoes) === JSON.stringify(["Mostrar mais 50", "Mostrar mais 20"]),
+      `linhas ${contagens.join(" → ")}; contagem "${passos.join('" → "')}"; botão "${botoes.join('" → "')}"; botão some no fim: ${maisSumiu}`);
 
     // busca
     const buscar = async (t) => { await page.fill("#est-busca", t); await page.waitForTimeout(450); await esperarLista(page); };
@@ -394,6 +414,7 @@ try {
     const zerosAntes = antes.filter((l) => /Sem estoque|—/.test(l.est)).length;
     await page.check("#est-com"); await esperarLista(page);
     const totCom = await totalTxt(page);
+    const btCom = await textoBt();
     while (await page.isVisible("#est-mais-bt")) {
       const m = (await linhasTela()).length;
       await page.click("#est-mais-bt");
@@ -404,8 +425,9 @@ try {
     const zerosDepois = depois.filter((l) => /Sem estoque|—/.test(l.est) || !/^\d/.test(l.est)).length;
     await page.evaluate(() => window.scrollTo(0, 0));
     await print(page, "com-estoque-marcada-1366");
-    res("caixa \"Somente produtos com estoque\"", desmarcada && zerosAntes > 0 && zerosDepois === 0 && depois.length === comEstoqueN,
-      `começa desmarcada: ${desmarcada}; desmarcada: ${zerosAntes} de ${antes.length} linhas da 1ª página com "Sem estoque" ou vazio; marcada: "${totCom}", ${depois.length} linhas (esperado ${comEstoqueN}), ${zerosDepois} com 0 ou vazio`);
+    res("caixa \"Somente produtos com estoque\"", desmarcada && zerosAntes > 0 && zerosDepois === 0 && depois.length === comEstoqueN
+      && btCom === `Mostrar mais ${Math.min(50, comEstoqueN - 50)}`,
+      `começa desmarcada: ${desmarcada}; desmarcada: ${zerosAntes} de ${antes.length} linhas da 1ª página com "Sem estoque" ou vazio; marcada: "${totCom}", botão "${btCom}", ${depois.length} linhas (esperado ${comEstoqueN}), ${zerosDepois} com 0 ou vazio`);
     await ctx.close();
   }
 
@@ -431,8 +453,29 @@ try {
     await print(p390.page, "503-390");
     await p390.ctx.close(); await ctx.close();
     const cat = await pedir(S503.base, "/api/eu", { cookie: S503.adm });
-    res("503 com a fonte quebrada", api.status === 503 && api.json?.erro === "Estoque indisponível no momento." && /Estoque indisponível no momento\./.test(msg) && bt === "Tentar de novo" && pedidos === 1 && /indisponível/.test(msg2) && w <= 390 && cat.status === 200 && S503.logs.includes("estoque indisponivel"),
-      `API ${api.status} ${JSON.stringify(api.json)}; tela "${msg.replace(/\s+/g, " ")}"; botão "${bt}"; "Tentar de novo" fez ${pedidos} pedido e mostrou de novo a mensagem; 390 scrollWidth ${w}; /api/eu ${cat.status}; log "estoque indisponivel": ${S503.logs.includes("estoque indisponivel")}`);
+    // a caixa de erro tem só a frase (sem "Tente de novo." acima do botão); o botão é "Tentar de novo"
+    const ESPERADA = "Estoque indisponível no momento.\nTentar de novo";
+    const limpa = (t) => t.split("\n").map((x) => x.trim()).filter(Boolean).join("\n");
+    res("503 com a fonte quebrada", api.status === 503 && api.json?.erro === "Estoque indisponível no momento." && limpa(msg) === ESPERADA && bt === "Tentar de novo" && pedidos === 1 && limpa(msg2) === ESPERADA && w <= 390 && cat.status === 200 && S503.logs.includes("estoque indisponivel"),
+      `API ${api.status} ${JSON.stringify(api.json)}; tela "${limpa(msg).replace(/\n/g, " | ")}"; botão "${bt}"; "Tentar de novo" fez ${pedidos} pedido e mostrou "${limpa(msg2).replace(/\n/g, " | ")}"; 390 scrollWidth ${w}; /api/eu ${cat.status}; log "estoque indisponivel": ${S503.logs.includes("estoque indisponivel")}`);
+  }
+
+  // ---- 6b. outro erro (500, simulado no navegador): "Não foi possível carregar o estoque." ----
+  {
+    const { ctx, page } = await contexto(S, "vend.teste", 1366, 768);
+    page.esperados.push(500);
+    let falhar = true;
+    await page.route("**/api/estoque?*", (r) => falhar ? r.fulfill({ status: 500, contentType: "application/json", body: '{"erro":"teste"}' }) : r.continue());
+    await abrirEstoque(page, S.base);
+    const limpa = (t) => t.split("\n").map((x) => x.trim()).filter(Boolean).join("\n");
+    const msg = limpa(await page.$eval(".est-erro", (e) => e.innerText).catch(() => ""));
+    falhar = false;
+    await page.click("#est-tentar").catch(() => {});
+    await esperarLista(page);
+    const linhasDepois = await page.$$eval("table.est tbody tr", (trs) => trs.length).catch(() => 0);
+    await ctx.close();
+    res("outro erro: \"Não foi possível carregar o estoque.\" e \"Tentar de novo\" recupera", msg === "Não foi possível carregar o estoque.\nTentar de novo" && linhasDepois === 50,
+      `tela "${msg.replace(/\n/g, " | ")}"; depois do "Tentar de novo" (API de volta): ${linhasDepois} linhas`);
   }
 
   // ---- 7. Criar usuários: a caixa "Pode ver o estoque" ----
@@ -451,7 +494,7 @@ try {
     await page.fill("#n-us", "novo.vend");
     await page.fill("#n-senha", s1);
     await page.check("#n-estoque");
-    await print(page, "criar-usuario-caixa-1366");
+    await print(page, "criar-usuario-caixa-1366", false);
     await page.click('dialog button[type="submit"], .janela button[type="submit"]');
     await page.waitForSelector("#copiar", { timeout: 10000 });
     await page.click("[data-fecha]");
@@ -498,6 +541,28 @@ try {
         && cima.includes("Estoque") && conta.includes("Estoque") && JSON.stringify(cabN) === JSON.stringify(COLS_VENDEDOR)
         && tagVend.some(([u, t]) => u === "vend.teste" && t) && tagVend.some(([u, t]) => u === "cli.teste" && !t),
       `etiqueta "Vê o estoque" na lista: ${tagVend.filter(([, t]) => t).map(([u]) => u).join(", ")}; caixa "${rotulo}" começa desmarcada: ${desm}; criado novo.vend com a caixa → API estoque=${novo?.estoque}; ele entra (troca obrigatória) e vê Estoque no menu de cima [${cima.join(", ")}] e na conta [${conta.join(", ")}], abre a aba com as 6 colunas do vendedor; Editar cli.teste: caixa desmarcada ${eDesm} → marcada: /api/estoque da sessão antiga ${cliApi}; reaberta marcada ${eMarc} → desmarcada: ${cliApi2}`);
+  }
+
+  // ---- 7b. Criar usuários em 390 px (F5 da UX): a lista e a janela com a caixa ----
+  {
+    const { ctx, page } = await contexto(S, "admin", 390, 844);
+    await page.goto(S.base + "/admin/usuarios", { waitUntil: "networkidle" });
+    await page.waitForSelector("#us-lista table", { timeout: 15000 });
+    const w = await larguraOk(page);
+    const tag = await page.$$eval("#us-lista tbody tr", (trs) => trs.filter((tr) => /Vê o estoque/.test(tr.innerText)).map((tr) => tr.querySelector(".us-login")?.textContent));
+    await print(page, "criar-usuarios-lista-390");
+    await page.click("#us-criar");
+    await page.waitForSelector("#n-estoque");
+    await page.fill("#n-nome", "Pessoa Nova Teste");
+    await page.fill("#n-emp", "Empresa Teste");
+    await page.fill("#n-us", "outro.vend");
+    await page.check("#n-estoque");
+    const caixa = await page.$eval("#n-estoque", (i) => { const r = i.closest("label").getBoundingClientRect(); return { rot: i.closest("label").textContent.trim(), dentro: r.left >= 0 && r.right <= 390, alt: Math.round(r.height) }; });
+    const w2 = await larguraOk(page);
+    await print(page, "criar-usuario-caixa-390", false);
+    await ctx.close();
+    res("Criar usuários 390: lista e caixa sem rolar de lado", w <= 390 && w2 <= 390 && caixa.rot === "Pode ver o estoque" && caixa.dentro && tag.includes("vend.teste"),
+      `scrollWidth lista ${w}, janela ${w2}; caixa "${caixa.rot}" dentro da tela: ${caixa.dentro} (altura ${caixa.alt} px); "Vê o estoque" em ${tag.join(", ")}`);
   }
 
   // ---- 8. console e log ----
