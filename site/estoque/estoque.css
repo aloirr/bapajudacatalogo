@@ -50,7 +50,7 @@ table.est td.est-c-estoque b { font-size: 16px; color: var(--escuro); }
   .est-barra .est-filial, .est-barra .est-com { flex: 1 1 100%; }
   table.est tr { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 12px; }
   table.est td { grid-column: 1 / -1; }
-  table.est td[data-rot]::before { flex-basis: 142px; } /* "Custo do produto" cabe numa linha: os valores alinham */
+  body.est-larga table.est td[data-rot]::before { flex-basis: 142px; } /* admin: "Custo do produto" cabe numa linha e os valores alinham; no vendedor fica o de 104 px, e o Fornecedor não quebra */
   table.est td.est-c-cidade, table.est td.est-c-filial_bap { grid-row: 1; padding-bottom: 0; align-items: baseline; }
   table.est td.est-c-cidade { grid-column: 1; font-size: 13px; font-weight: 600; color: var(--texto-2); }
   table.est td.est-c-filial_bap { grid-column: 2 / -1; font-size: 12px; color: var(--texto-2); }

@@ -2,7 +2,7 @@
    o usuário e já corta as colunas (o vendedor nem recebe as de valor). Aqui não há lista de colunas: a tela desenha as
    que chegarem, na ordem em que chegarem, e formata pelo "tipo" (texto, numero, dinheiro ou markup).
    Resposta: { posicao:{data,hora}, colunas:[{campo,rotulo,tipo}], total, desde, limite, linhas:[{campo:valor}],
-   filiais:[{numero,nome}] }. 50 linhas por vez, com o "Mostrar mais 50".
+   filiais:[{numero,nome}] }. 50 linhas por vez, com o "Mostrar mais N" (N: o que falta, até 50).
    Celular: o cartão fechado mostra as colunas até a do estoque; as que vêm depois dela ficam no "+ Detalhes". */
 (function () {
   "use strict";
@@ -64,6 +64,7 @@
   function contagem() {
     total.textContent = totalAtual ? `${inteiro.format(mostradas)} de ${inteiro.format(totalAtual)}` : "";
     mais.hidden = mostradas >= totalAtual;
+    maisBt.textContent = `Mostrar mais ${Math.min(LIMITE, Math.max(0, totalAtual - mostradas))}`;
   }
   function vazio() {
     const termo = busca.value.trim();
@@ -75,13 +76,13 @@
     total.textContent = "";
     mais.hidden = true;
     const msg = r.status === 404 ? "Não encontrado." : r.status === 503 ? "Estoque indisponível no momento."
-      : "Não deu para carregar o estoque.";
+      : "Não foi possível carregar o estoque.";
     lista.innerHTML = '<div class="est-erro"><div></div><button type="button" class="bt" id="est-tentar">Tentar de novo</button></div>';
-    F.caixa(lista.querySelector(".est-erro > div"), "erro", F.frase(msg, r.status === 404 ? "" : "Tente de novo."));
+    F.caixa(lista.querySelector(".est-erro > div"), "erro", F.frase(msg));
     lista.querySelector("#est-tentar").addEventListener("click", () => carregar(false));
   }
 
-  // pede uma página; "continuar" acrescenta à lista (Mostrar mais 50). Uma resposta velha (busca já mudou) é jogada fora.
+  // pede uma página; "continuar" acrescenta à lista (Mostrar mais). Uma resposta velha (busca já mudou) é jogada fora.
   async function carregar(continuar) {
     const n = ++pedido;
     const p = new URLSearchParams({ q: busca.value.trim(), filial: sel.value, desde: String(continuar ? mostradas : 0), limite: String(LIMITE) });
@@ -90,7 +91,7 @@
     else lista.innerHTML = '<div class="carregando est-lista-carregando">Carregando o estoque…</div>';
     const r = await api("GET", "/api/estoque?" + p.toString());
     if (n !== pedido) return;
-    maisBt.disabled = false; maisBt.textContent = "Mostrar mais 50";
+    maisBt.disabled = false; // o texto volta na contagem()
     const d = r.dados;
     if (r.status !== 200 || !d || !Array.isArray(d.linhas)) { erro(r); return; }
     posicao(d.posicao);
