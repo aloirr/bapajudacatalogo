@@ -56,6 +56,7 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
   - **BapAjuda-PO** → `po`: é onde o Alexandre conversa;
   - **BapAjuda-GP** → `gerente-projetos`: sessão fixa do gerente, que chama os outros agentes como subagentes.
   - Sem a variável, a sessão é **restrita**: os guardiões não deixam alterar nada.
+- **Modelo (pedido do Alexandre, 24/11/2026):** toda sessão nova (`create_session`) é criada com o **Opus 5.5** (`claude-opus-5-5`) e esforço **médio** (`effort: "medium"`).
 - **Recados** ficam no **`aloirr/bapajudacatalogo-recados`**. A sessão abre com **os dois repositórios anexados** (este e o de recados).
   - Leia e grave **só com `node scripts/coord.mjs`** (`caixa`, `pendencias`, `ler`, `fio`, `enviar`, `lido`). Com o clone anexado, ele grava **com git**: `pull --rebase`, commit com o nome do agente (`<agente>@bapajuda.invalid`) e `push origin HEAD:main`, pela integração de GitHub do próprio Claude. Nenhum token entra.
   - **Ponte do po (R-20261120-150200-alexandre):** só o `po` grava recado do Alexandre, com `node scripts/coord.mjs enviar --de alexandre --ponte …` (cabeçalho "via: po", autor `po@bapajuda.invalid`); esse recado nunca vale como autorização de merge.
