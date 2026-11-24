@@ -15,7 +15,7 @@
 //    "Agente: alexandre" não dão a identidade); altera arquivo de qualquer dono (sem-dono,
 //    congelado e recados continuam valendo). O resultado do git rev-parse/log fica em cache por
 //    HEAD num arquivo temporário (commitsDoBranch em scripts/coord-lib.mjs).
-//  - sessão manual local (sem agente) → liberado. Desligar tudo: BAP_GUARDA=off.
+//  - sessão manual local (sem agente) → liberado. Desligar tudo: BAP_GUARDA=off (menos a trava do graphify).
 //  - PreToolUse: bloqueia (exit 2) escrita evidente em caminho de outro dono e tira a foto do
 //    git status (+ data/tamanho) para o PostToolUse.
 //    A foto guarda também os ALVOS EVIDENTES do comando (os mesmos que o analisador extraiu).
@@ -61,14 +61,30 @@ import {
   conferirMerge, conferirGhApi, consultarPrGh, lerRecadosDoGerente, motivosRecadoFalso, mensagemRecadoFalso,
   motivosIndiceDeRecados, mensagemIndiceDeRecados, vigiarRecados, conferirGitDeAnexo,
 } from './guarda-merge-lib.mjs';
+import { analisarBash, commonDirDe, criarRepoDe, lerMarcas, gravarMarcas } from './guarda-graphify-lib.mjs';
 
 /** Conteúdo de um arquivo do repositório (rel) ou null. */
 const lerDoRepo = (rel) => { try { return readFileSync(join(RAIZ, rel), 'utf8'); } catch { return null; } };
 
-if (guardaDesligada()) process.exit(0);
-
 const entrada = (await lerEntradaDoHook()) ?? {};
 if (entrada.tool_name && entrada.tool_name !== 'Bash') process.exit(0);
+
+// Trava do graphify (pedido do Alexandre em 24/11/2026; portada do macuxierp, T-0064), antes do BAP_GUARDA=off:
+// leitura de código pelo Bash (cat, sed, head, grep, rg...) só depois de consultar o graphify. Ver guarda-graphify-lib.mjs.
+if ((entrada.hook_event_name || 'PreToolUse') === 'PreToolUse' && entrada.tool_input?.command) {
+  const comum = commonDirDe(RAIZ);
+  const g = analisarBash({
+    comando: String(entrada.tool_input.command), cwd: entrada.cwd || process.cwd(),
+    marcas: lerMarcas(comum, entrada.session_id), repoDe: criarRepoDe(comum),
+  });
+  if (g.marcar.length) gravarMarcas(comum, entrada.session_id, g.marcar);
+  if (g.mensagem) {
+    process.stderr.write(g.mensagem + '\n');
+    process.exit(2);
+  }
+}
+
+if (guardaDesligada()) process.exit(0);
 const { agente, origem } = agenteDaSessao({ argumento: process.argv[2], entrada });
 const comando = String(entrada.tool_input?.command || '');
 const evento = entrada.hook_event_name || 'PreToolUse';
