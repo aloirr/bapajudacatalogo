@@ -130,7 +130,7 @@ function cru(base, caminho, cab) {
 }
 
 // login pela tela: preenche o /entrar já aberto e espera sair dele
-async function entrarUI(page, usuario, senha) {
+export async function entrarUI(page, usuario, senha) {
   await page.waitForSelector("#form-entrar #usuario", { timeout: 10000 });
   await page.fill("#usuario", usuario);
   await page.fill("#senha", senha);

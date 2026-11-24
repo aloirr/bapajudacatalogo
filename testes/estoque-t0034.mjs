@@ -1,17 +1,22 @@
 /* Testes da aba Estoque, versão final (T-0034, 24/11/2026). Dono: agente testes.
+   DEPENDE do servicos/login/xlsx-ficticio.mjs (integracao-placas/T-0034-estoque): este script só roda depois do merge
+   do branch do integracao-placas (o merge sai nessa ordem).
    Uso (da raiz do repositório, com o servidor e a tela da T-0034 juntos):
      node testes/estoque-t0034.mjs [--prints testes/prints/T-0034-final]
    Saída: 0 se tudo passou, 1 se algo falhou.
 
    O que faz:
-     - monta um ESTOQUE_BAP.xlsx SINTÉTICO (120 linhas, 6 filiais, estoque 0 e vazio em algumas; custo, preço, markup,
+     - monta, com o xlsxFicticio do servicos/login/xlsx-ficticio.mjs, um ESTOQUE_BAP.xlsx SINTÉTICO (120 linhas, 6 filiais, estoque 0 e vazio em algumas; custo, preço, markup,
        tabela, sucata e origem FICTÍCIOS) e serve em 127.0.0.1 (também um /quebrado.xlsx para o 503);
      - sobe o serviço de login de verdade (criarServico do servicos/login/server.mjs, com o site/ real) numa porta livre,
        com PASTA_DADOS temporária e senhas falsas geradas aqui a cada rodada (nunca impressas, nunca gravadas);
-     - cria admin, vendedor (estoque: true) e cliente (sem a permissão) e confere, por HTTP e no Chromium, as regras da
-       aba (404 do cliente, lista branca do vendedor, 23 colunas do admin, busca, filtro, caixa, "Mostrar mais N",
-       vazio, 503 e outro erro, a caixa "Pode ver o estoque" da Criar usuários), 390 px sem rolar de lado e o console;
-     - prints de página inteira, deviceScaleFactor 2, em 1366 × 768 e 390 × 844.
+     - cria admin, vendedor (estoque: true) e cliente (sem a permissão) e confere no Chromium o que é da tela: menus
+       e página 404 do cliente, colunas e texto visível do vendedor, 23 colunas do admin, busca, filtro, caixa,
+       "Mostrar mais N", vazio, a mensagem do 503 e do outro erro, a caixa "Pode ver o estoque" da Criar usuários,
+       390 px sem rolar de lado e o console. As regras da API (404, lista branca do JSON, 503 e log do estoque) são
+       dos testes do serviço (servicos/login/login.test.mjs);
+     - prints com deviceScaleFactor 2, em 1366 × 768 e 390 × 844 (página inteira; menu aberto, cartão aberto e janela
+       só na área visível).
    Nada aqui é dado da BAP. Nenhuma rede de fora: as fontes do Google e o serviço de placas são respondidos no teste. */
 
 import crypto from "node:crypto";
@@ -19,9 +24,10 @@ import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import zlib from "node:zlib";
 import { createRequire } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { xlsxFicticio } from "../servicos/login/xlsx-ficticio.mjs";
+import { entrarUI } from "./login.mjs";
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const arg = (n, p) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : p; };
@@ -57,40 +63,6 @@ function linha(i) {
   };
 }
 const LINHAS = Array.from({ length: N }, (_, k) => linha(k + 1));
-const TAB_CRC = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
-const crc32 = (b) => { let c = 0xffffffff; for (const x of b) c = TAB_CRC[(c ^ x) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
-function zipar(arquivos) {
-  const locais = [], centrais = []; let off = 0;
-  for (const [nome, texto] of Object.entries(arquivos)) {
-    const cru = Buffer.from(texto, "utf8"), comp = zlib.deflateRawSync(cru), nb = Buffer.from(nome);
-    const h = Buffer.alloc(30); h.writeUInt32LE(0x04034b50, 0); h.writeUInt16LE(20, 4); h.writeUInt16LE(8, 8);
-    h.writeUInt32LE(crc32(cru), 14); h.writeUInt32LE(comp.length, 18); h.writeUInt32LE(cru.length, 22); h.writeUInt16LE(nb.length, 26);
-    const c = Buffer.alloc(46); c.writeUInt32LE(0x02014b50, 0); c.writeUInt16LE(20, 4); c.writeUInt16LE(20, 6); c.writeUInt16LE(8, 10);
-    c.writeUInt32LE(crc32(cru), 16); c.writeUInt32LE(comp.length, 20); c.writeUInt32LE(cru.length, 24); c.writeUInt16LE(nb.length, 28); c.writeUInt32LE(off, 42);
-    locais.push(h, nb, comp); centrais.push(c, nb); off += 30 + nb.length + comp.length;
-  }
-  const dir = Buffer.concat(centrais), fim = Buffer.alloc(22);
-  fim.writeUInt32LE(0x06054b50, 0); fim.writeUInt16LE(centrais.length / 2, 8); fim.writeUInt16LE(centrais.length / 2, 10);
-  fim.writeUInt32LE(dir.length, 12); fim.writeUInt32LE(off, 16);
-  return Buffer.concat([...locais, dir, fim]);
-}
-const xmlEsc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const letra = (i) => (i < 26 ? String.fromCharCode(65 + i) : "A" + String.fromCharCode(65 + i - 26));
-function xlsx() {
-  const ss = [], idx = new Map();
-  const comp = (s) => { if (!idx.has(s)) { idx.set(s, ss.length); ss.push(s); } return idx.get(s); };
-  const cel = (ref, v) => v == null ? `<c r="${ref}"/>` : typeof v === "number" ? `<c r="${ref}"><v>${v}</v></c>` : `<c r="${ref}" t="s"><v>${comp(v)}</v></c>`;
-  const rows = [CAB.map((h, i) => cel(`${letra(i)}1`, h)).join("")];
-  LINHAS.forEach((l, k) => rows.push(CAB.map((h, i) => cel(`${letra(i)}${k + 2}`, l[h])).join("")));
-  const sheet = `<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${rows.map((r, i) => `<row r="${i + 1}">${r}</row>`).join("")}</sheetData></worksheet>`;
-  return zipar({
-    "[Content_Types].xml": "<Types/>",
-    "xl/workbook.xml": '<workbook xmlns:r="r"><sheets><sheet name="ESTOQUE_BAP" sheetId="1" r:id="rId1"/></sheets></workbook>',
-    "xl/_rels/workbook.xml.rels": '<Relationships><Relationship Id="rId1" Type="x" Target="worksheets/sheet1.xml"/></Relationships>',
-    "xl/sharedStrings.xml": `<sst>${ss.map((s) => `<si><t>${xmlEsc(s)}</t></si>`).join("")}</sst>`,
-    "xl/worksheets/sheet1.xml": sheet,
-  });
-}
 
 // ---------- utilidades HTTP ----------
 const portaLivre = () => new Promise((r) => { const s = http.createServer(); s.listen(0, "127.0.0.1", () => { const p = s.address().port; s.close(() => r(p)); }); });
@@ -143,22 +115,15 @@ async function criarUsuario(s, usuario, estoque) {
   s.senhas[usuario] = s2;
   return cookieDe(t);
 }
-const chavesDe = (v, acc = []) => {
-  if (Array.isArray(v)) v.forEach((x) => chavesDe(x, acc));
-  else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) { acc.push(k); chavesDe(x, acc); }
-  return acc;
-};
-
 const COLS_VENDEDOR = ["Filial", "Nº filial", "Código", "Descrição", "Fornecedor", "Estoque"];
-// a ordem do servicos/login/LEIA.md (Aba Estoque, "Admin (23 colunas, nesta ordem)")
+// admin: as 23 colunas, nesta ordem
 const COLS_ADMIN = ["Filial", "Nº filial", "Código", "Descrição", "Estoque", "Custo do produto", "Custo total", "Preço capital", "Preço interior",
   "Markup capital", "Markup interior", "Fornecedor", "Tabela capital", "Tabela interior", "Sucata", "Origem do custo", "ID do produto",
   "Cód. fornecedor", "Filial CD", "Categoria", "Sistema", "Família", "Linha"];
-const RX_CHAVE_INTERNA = /PPEDIDO|CUSTO|PRECO|PREÇO|MARKUP|TABELA|SUCATA|ORIGEM/i;
 const RX_TELA_INTERNA = /custo|preco|markup|tabela|sucata|origem|r\$/; // sobre o texto sem acento e minúsculo
 
 // ---------- rodada ----------
-const fonte = xlsx();
+const fonte = xlsxFicticio(CAB, LINHAS);
 const srvFonte = http.createServer((req, r) => {
   if (req.url === "/ESTOQUE_BAP.xlsx") return r.writeHead(200, { "Content-Length": fonte.length }).end(fonte);
   if (req.url === "/quebrado.xlsx") return r.writeHead(200).end("isto-nao-e-um-zip");
@@ -169,7 +134,7 @@ const FONTE = `http://127.0.0.1:${srvFonte.address().port}`;
 
 const S = await subirServico(`${FONTE}/ESTOQUE_BAP.xlsx`, "t0034-ok-");
 const S503 = await subirServico(`${FONTE}/quebrado.xlsx`, "t0034-503-");
-const vend = await criarUsuario(S, "vend.teste", true);
+await criarUsuario(S, "vend.teste", true);
 const cli = await criarUsuario(S, "cli.teste");
 
 const { chromium } = createRequire(import.meta.url)("playwright");
@@ -196,9 +161,7 @@ async function contexto(s, usuario, larg, alt) {
   page.on("pageerror", (e) => errosConsole.push(`${rot}: erro de script: ${e.message.slice(0, 140)}`));
   if (usuario) {
     await page.goto(s.base + "/entrar", { waitUntil: "networkidle" });
-    await page.fill("#usuario", usuario);
-    await page.fill("#senha", s.senhas[usuario]);
-    await Promise.all([page.waitForURL((u) => !u.pathname.startsWith("/entrar"), { timeout: 15000 }), page.click('#form-entrar button[type="submit"]')]);
+    await entrarUI(page, usuario, s.senhas[usuario]);
   }
   return { ctx, page };
 }
@@ -232,11 +195,8 @@ const porCidade = (cidade) => LINHAS.filter((l) => l.CIDADE === cidade).length;
 const comEstoqueN = LINHAS.filter((l) => l.ESTOQUE != null && l.ESTOQUE !== 0).length;
 
 try {
-  // ---- 1. cliente ----
+  // ---- 1. cliente: os menus e a página 404 no navegador (o 404 por HTTP é do login.test.mjs) ----
   {
-    const p1 = await pedir(S.base, "/estoque", { cookie: cli, accept: "text/html" });
-    const p2 = await pedir(S.base, "/api/estoque", { cookie: cli });
-    const p3 = await pedir(S.base, "/estoque/estoque.js", { cookie: cli, accept: "text/html" });
     const { ctx, page } = await contexto(S, "cli.teste", 1366, 768);
     await page.waitForSelector("#conta .conta-bt", { timeout: 15000 });
     const cima = await menuCima(page);
@@ -249,31 +209,9 @@ try {
     await p390.waitForSelector("#conta .conta-bt", { timeout: 15000 });
     const conta390 = await menuConta(p390);
     await c390.close(); await ctx.close();
-    const ok = p1.status === 404 && p2.status === 404 && p3.status === 404 && !cima.some((t) => /estoque/i.test(t))
+    const ok = !cima.some((t) => /estoque/i.test(t))
       && !conta.some((t) => /estoque/i.test(t)) && !conta390.some((t) => /estoque/i.test(t)) && /Não encontrado/.test(txt404);
-    res("cliente: 404 e sem Estoque nos menus", ok, `/estoque ${p1.status}, /api/estoque ${p2.status} ${JSON.stringify(p2.json)}, /estoque/estoque.js ${p3.status}; menu de cima [${cima.join(", ")}]; conta 1366 [${conta.join(", ")}]; conta 390 [${conta390.join(", ")}]; tela: "${txt404.slice(0, 40)}"`);
-  }
-
-  // ---- 2. vendedor: JSON inteiro ----
-  {
-    const vistos = []; let ruins = []; let ordem = true; let linhas = 0;
-    for (let desde = 0; desde < N; desde += 50) {
-      for (const extra of ["", "&com_estoque=1", "&q=teste", "&filial=90000001"]) {
-        const r = await pedir(S.base, `/api/estoque?limite=50&desde=${desde}${extra}`, { cookie: vend });
-        if (r.status !== 200) { ruins.push(`status ${r.status}`); continue; }
-        const ch = chavesDe(r.json);
-        vistos.push(...ch);
-        ruins.push(...ch.filter((k) => RX_CHAVE_INTERNA.test(k)));
-        for (const c of r.json.colunas) if (RX_CHAVE_INTERNA.test(c.campo) || RX_TELA_INTERNA.test(sem(c.rotulo))) ruins.push(c.campo);
-        if (JSON.stringify(r.json.colunas.map((c) => c.rotulo)) !== JSON.stringify(COLS_VENDEDOR)) ordem = false;
-        if (/R\$|TAB TESTE|ORIGEM TESTE/.test(r.texto)) ruins.push("valor interno no texto");
-        if (!extra) linhas += r.json.linhas.length;
-      }
-    }
-    const lim = await pedir(S.base, "/api/estoque?limite=200", { cookie: vend });
-    const busca = await pedir(S.base, "/api/estoque?q=ORIGEM%20TESTE", { cookie: vend });
-    res("vendedor: JSON de /api/estoque sem chave interna", !ruins.length && ordem && linhas === N && busca.json.total === 0,
-      `${[...new Set(vistos)].length} chaves distintas: ${[...new Set(vistos)].join(", ")}; ${linhas} linhas lidas em 3 páginas; limite=200 → ${lim.json.linhas.length}; q="ORIGEM TESTE" → ${busca.json.total}${ruins.length ? "; ACHADOS: " + [...new Set(ruins)].join(", ") : ""}`);
+    res("cliente: página 404 e sem Estoque nos menus", ok, `menu de cima [${cima.join(", ")}]; conta 1366 [${conta.join(", ")}]; conta 390 [${conta390.join(", ")}]; tela: "${txt404.slice(0, 40)}"`);
   }
 
   // ---- 3. vendedor na tela ----
@@ -299,7 +237,7 @@ try {
     await print(v.page, "vendedor-390");
     const conta390 = await menuConta(v.page);
     const w2 = await larguraOk(v.page);
-    await print(v.page, "menu-conta-vendedor-390");
+    await print(v.page, "menu-conta-vendedor-390", false);
     await v.ctx.close();
     res("vendedor 390: sem rolar de lado, sem dado interno, Estoque no menu da conta", w <= 390 && w2 <= 390 && !RX_TELA_INTERNA.test(corpo390) && conta390.includes("Estoque"),
       `scrollWidth ${w} (menu aberto ${w2}); conta [${conta390.join(", ")}]`);
@@ -320,7 +258,7 @@ try {
     await ctx.close();
     const dinheiro = ["Custo do produto", "Custo total", "Preço capital", "Preço interior"].every((k) => /^R\$\s?\d{1,3}(\.\d{3})*,\d{2}$/.test(val[k] || ""));
     const markup = ["Markup capital", "Markup interior"].every((k) => /^\d+,\d{2}$/.test(val[k] || ""));
-    res("admin: 23 colunas na ordem do LEIA.md", cab.length === 23 && JSON.stringify(cab) === JSON.stringify(COLS_ADMIN) && api.json.colunas.length === 23,
+    res("admin: 23 colunas na ordem", cab.length === 23 && JSON.stringify(cab) === JSON.stringify(COLS_ADMIN) && api.json.colunas.length === 23,
       `${cab.length} colunas na tela, ${api.json.colunas.length} na API`);
     res("admin: R$ e markup formatados", dinheiro && markup,
       `1ª linha: Custo do produto "${val["Custo do produto"]}", Custo total "${val["Custo total"]}", Preço capital "${val["Preço capital"]}", Preço interior "${val["Preço interior"]}", Markup capital "${val["Markup capital"]}", Markup interior "${val["Markup interior"]}", Sucata "${val["Sucata"]}"`);
@@ -333,9 +271,9 @@ try {
     const rotA = await larguraRotulo(a.page);
     const aberto = await a.page.$eval("table.est tbody tr:first-child", (tr) => ({ cls: tr.classList.contains("aberta"), bt: tr.querySelector(".est-bt-mais").textContent.trim(), extras: [...tr.querySelectorAll("td.est-extra")].filter((t) => getComputedStyle(t).display !== "none").length }));
     const w2 = await larguraOk(a.page);
-    await print(a.page, "admin-390-detalhes");
+    await print(a.page, "admin-390-detalhes", false);
     const conta = await menuConta(a.page);
-    await print(a.page, "menu-conta-admin-390");
+    await print(a.page, "menu-conta-admin-390", false);
     await a.ctx.close();
     res("admin 390: sem rolar de lado e \"+ Detalhes\" abre", w <= 390 && w2 <= 390 && aberto.cls && aberto.extras === 18 && /Menos detalhes/.test(aberto.bt),
       `scrollWidth ${w} (aberto ${w2}); cartão aberto com ${aberto.extras} campos a mais, botão "${aberto.bt}"`);
@@ -431,9 +369,8 @@ try {
     await ctx.close();
   }
 
-  // ---- 6. 503 ----
+  // ---- 6. 503 na tela (o 503 da API e o log são do login.test.mjs) ----
   {
-    const api = await pedir(S503.base, "/api/estoque", { cookie: S503.adm });
     const { ctx, page } = await contexto(S503, "admin", 1366, 768);
     page.esperados.push(503);
     await abrirEstoque(page, S503.base);
@@ -456,8 +393,8 @@ try {
     // a caixa de erro tem só a frase (sem "Tente de novo." acima do botão); o botão é "Tentar de novo"
     const ESPERADA = "Estoque indisponível no momento.\nTentar de novo";
     const limpa = (t) => t.split("\n").map((x) => x.trim()).filter(Boolean).join("\n");
-    res("503 com a fonte quebrada", api.status === 503 && api.json?.erro === "Estoque indisponível no momento." && limpa(msg) === ESPERADA && bt === "Tentar de novo" && pedidos === 1 && limpa(msg2) === ESPERADA && w <= 390 && cat.status === 200 && S503.logs.includes("estoque indisponivel"),
-      `API ${api.status} ${JSON.stringify(api.json)}; tela "${limpa(msg).replace(/\n/g, " | ")}"; botão "${bt}"; "Tentar de novo" fez ${pedidos} pedido e mostrou "${limpa(msg2).replace(/\n/g, " | ")}"; 390 scrollWidth ${w}; /api/eu ${cat.status}; log "estoque indisponivel": ${S503.logs.includes("estoque indisponivel")}`);
+    res("503 com a fonte quebrada", limpa(msg) === ESPERADA && bt === "Tentar de novo" && pedidos === 1 && limpa(msg2) === ESPERADA && w <= 390 && cat.status === 200,
+      `tela "${limpa(msg).replace(/\n/g, " | ")}"; botão "${bt}"; "Tentar de novo" fez ${pedidos} pedido e mostrou "${limpa(msg2).replace(/\n/g, " | ")}"; 390 scrollWidth ${w}; o catálogo segue no ar (/api/eu ${cat.status})`);
   }
 
   // ---- 6b. outro erro (500, simulado no navegador): "Não foi possível carregar o estoque." ----
