@@ -31,8 +31,7 @@ table.est th { white-space: nowrap; }
 table.est td { font-size: 14px; }
 table.est .est-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .est-cod { font-weight: 600; color: var(--escuro); white-space: nowrap; }
-table.est td.est-c-cidade { white-space: nowrap; } /* B7: cidade e filial numa linha só */
-table.est td small { color: var(--texto-2); font-size: 12px; }
+table.est td.est-c-cidade, table.est td.est-c-filial_bap { white-space: nowrap; } /* B7: filial e nº filial sem quebra */
 table.est td.est-c-estoque b { font-size: 16px; color: var(--escuro); }
 .est-vazio { color: var(--texto-2); }
 .est-td-mais { display: none; }
@@ -40,7 +39,7 @@ table.est td.est-c-estoque b { font-size: 16px; color: var(--escuro); }
 .est-sim-nota { margin: 16px 0 0; font-size: 13px; color: var(--texto-2); }
 
 /* computador (B6): a caixa da tabela tem altura máxima, o cabeçalho fica parado no alto e a barra de rolar de lado
-   fica sempre à vista. No admin, 22 colunas rolam de lado com a filial (1ª coluna) parada à esquerda. */
+   fica sempre à vista. No admin, 23 colunas rolam de lado com a filial (1ª coluna) parada à esquerda. */
 @media (min-width: 901px) {
   .est-rolar { overflow: auto; max-height: calc(100vh - var(--alto-topo) - 24px); }
   table.est thead th { position: sticky; top: 0; z-index: 2; }
@@ -56,13 +55,17 @@ table.est td.est-c-estoque b { font-size: 16px; color: var(--escuro); }
 @media (max-width: 900px) {
   .est-rolar { overflow: visible; box-shadow: none; background: none; border-radius: 0; }
   .est-barra .est-filial { flex: 1 1 100%; }
-  table.est tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; }
+  table.est tr { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 12px; }
   table.est td { grid-column: 1 / -1; }
-  /* cartão: a filial no alto (1ª da ordem do Alexandre), depois o código e o estoque lado a lado, depois a descrição */
   table.est td[data-rot]::before { flex-basis: 142px; } /* "Custo do produto" cabe numa linha: os valores alinham */
-  table.est td.est-c-cidade { grid-row: 1; padding-bottom: 0; font-size: 13px; font-weight: 600; color: var(--texto-2); }
-  table.est td.est-c-cidade::before { display: none; }
-  table.est td.est-c-cod_produto, table.est td.est-c-estoque { grid-column: auto; grid-row: 2; padding-bottom: 6px; align-items: center; }
+  /* cartão: filial e nº filial no alto (as 2 primeiras da ordem do Alexandre), depois o código e o estoque lado a lado,
+     depois a descrição. 3 colunas: filial | nº filial (e o código embaixo) | estoque */
+  table.est td.est-c-cidade, table.est td.est-c-filial_bap { grid-row: 1; padding-bottom: 0; align-items: baseline; }
+  table.est td.est-c-cidade { grid-column: 1; font-size: 13px; font-weight: 600; color: var(--texto-2); }
+  table.est td.est-c-filial_bap { grid-column: 2 / -1; font-size: 12px; color: var(--texto-2); }
+  table.est td.est-c-cidade::before, table.est td.est-c-filial_bap::before { display: none; }
+  table.est td.est-c-cod_produto { grid-column: 1 / 3; grid-row: 2; padding-bottom: 6px; align-items: center; }
+  table.est td.est-c-estoque { grid-column: 3; grid-row: 2; padding-bottom: 6px; align-items: center; }
   table.est td.est-c-cod_produto::before, table.est td.est-c-estoque::before { display: none; }
   table.est td.est-c-cod_produto .est-cod { font-size: 16px; white-space: normal; overflow-wrap: anywhere; }
   table.est td.est-c-estoque { justify-content: flex-end; }
