@@ -75,7 +75,8 @@
   function erro(r) {
     total.textContent = "";
     mais.hidden = true;
-    const msg = F.erroDe(r, "Não foi possível carregar o estoque."); // 404 e 503: o texto do servidor
+    const padrao = "Não foi possível carregar o estoque.";
+    const msg = r.status === 404 || r.status === 503 ? F.erroDe(r, padrao) : padrao; // 404 e 503: o texto do servidor
     lista.innerHTML = '<div class="est-erro"><div></div><button type="button" class="bt" id="est-tentar">Tentar de novo</button></div>';
     F.caixa(lista.querySelector(".est-erro > div"), "erro", F.frase(msg));
     lista.querySelector("#est-tentar").addEventListener("click", () => carregar(false));
