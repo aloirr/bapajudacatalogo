@@ -58,7 +58,7 @@ const CABECALHO = '[guardião BAP] BLOQUEADO (gh pr merge):';
 const MODELO = `gh pr merge <N> -R ${REPO_OFICIAL} --squash --match-head-commit <sha de 40> [--subject "<título do squash>"] --body "<resumo> (T-nnnn)\n\nAgente: <dono da tarefa>"`;
 
 const barras = (p) => String(p).replace(/\\/g, '/');
-const nomeBase = (p) => barras(p).replace(/\/+$/, '').split('/').pop().replace(/\.exe$/i, '').toLowerCase();
+export const nomeBase = (p) => barras(p).replace(/\/+$/, '').split('/').pop().replace(/\.exe$/i, '').toLowerCase();
 
 // ───────────────────────────── detecção no comando ─────────────────────────────
 
@@ -953,7 +953,7 @@ const ctxNeutro = { existe: () => false, ehDiretorio: () => false, ler: () => nu
 const textoDe = (palavras) => palavras.map((w) => w.valor).join(' ');
 
 /** Remove VAR=... (também `f=$(...)`: a atribuição em si não grava), palavras-chave e prefixos. */
-function semAtribuicoes(palavras) {
+export function semAtribuicoes(palavras) {
   const p = palavras.slice();
   for (;;) {
     if (!p.length) return { nome: undefined, args: [], palavras: p };

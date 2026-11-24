@@ -39,6 +39,6 @@ jobs:
       - name: Testes da CLI e dos guardiões
         env:
           BAP_AGENTES_TESTE: gerente-projetos,po,catalogo-dados,catalogo-grafico,web-site,integracao-placas,testes,revisor-codigo,designer-ux,design-de-marca,corretor-redundancias
-        run: node --test scripts/coord-recados.test.mjs scripts/coord-verificar.test.mjs .claude/hooks/guarda-agente.test.mjs .claude/hooks/guarda-recado.test.mjs .claude/hooks/guarda-merge-mcp.test.mjs
+        run: node --test scripts/coord-recados.test.mjs scripts/coord-verificar.test.mjs .claude/hooks/guarda-agente.test.mjs .claude/hooks/guarda-recado.test.mjs .claude/hooks/guarda-merge-mcp.test.mjs .claude/hooks/guarda-graphify.test.mjs
       - name: Testes dos serviços (login e placa, T-0022)
         run: node --test servicos/login/*.test.mjs servicos/placas/*.test.mjs

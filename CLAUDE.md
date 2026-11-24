@@ -68,5 +68,6 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
 ## Graphify (mapa do código, T-0020)
 - O mapa fica em `graphify-out/` (fora do Git). Ele é montado no setup do ambiente, só com o código: `GRAPHIFY_BACKEND=none graphify extract . --code-only` e depois `graphify cluster-only .` (sem `GRAPHIFY_BACKEND=none` ele chama um LLM e gasta token: nunca rode sem).
 - **Antes de procurar no código**, use o mapa: `graphify query "<pergunta>"`, `graphify path "<A>" "<B>"` ou `graphify explain "<conceito>"`. Abra o arquivo só nas linhas que o mapa apontar. Ponha esta regra no prompt de todo subagente que explora código.
+- **Trava (pedido do Alexandre, 24/11/2026, portada do macuxierp):** o guardião (`.claude/hooks/guarda-graphify*.mjs` e `guarda-bash.mjs`) bloqueia `Read`, `Grep` e `cat`/`sed`/`grep`/`rg`... em código (site/, scripts/, catalogo_grafico/, dados/, servicos/, .github/) até a sessão rodar `graphify query|explain|path|update` ou ler `graphify-out/GRAPH_REPORT.md`. Arquivo de código com mais de 300 linhas só com offset/limit. Docs, .md, dados e PDFs são livres. Não desliga com `BAP_GUARDA=off`.
 - **Depois de mudar código**, rode `graphify update .`.
 - PDFs, imagens e docs ficam fora do mapa.
