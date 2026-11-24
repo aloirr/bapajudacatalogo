@@ -1,5 +1,5 @@
 // T-0034 · SIMULAÇÃO da aba Estoque. Só mostra a tela; não é a implementação.
-// ?visao=admin (22 colunas na tela), ?visao=vendedor (5 colunas) ou ?visao=cliente (404). ?q= preenche a busca, ?filial= a cidade
+// ?visao=admin (22 colunas na tela; 4 no cartão fechado do celular e 18 no "+ Detalhes"), ?visao=vendedor (5 colunas) ou ?visao=cliente (404). ?q= preenche a busca, ?filial= a cidade
 // e ?abrir=1 abre todos os cartões do admin no celular (para o print).
 // Admin: as 25 colunas do xlsx viram 22 na tela: CIDADE e FILIAL_BAP juntas, e DATA e HORA só no cabeçalho ("Posição de …"; B5).
 // Na versão final o corte das colunas é feito NO SERVIDOR: o vendedor nem recebe preço, custo ou markup.
@@ -25,39 +25,43 @@
   document.body.classList.add("est-" + visao);
 
   // As 5 colunas do vendedor (decisão 2a). "Cidade / filial" junta CIDADE e FILIAL_BAP.
-  const VENDEDOR = ["COD_PRODUTO", "DESCRICAO_PRODUTO", "FORNECEDOR", "CIDADE", "FILIAL_BAP", "ESTOQUE"];
+  const VENDEDOR = ["CIDADE", "FILIAL_BAP", "COD_PRODUTO", "DESCRICAO_PRODUTO", "FORNECEDOR", "ESTOQUE"];
   const linhas = visao === "admin" ? sim.linhas
     : sim.linhas.map((l) => Object.fromEntries(VENDEDOR.map((c) => [c, l[c]])));
   // DATA e HORA da posição: só no cabeçalho, uma vez (na final, o servidor manda à parte).
   document.getElementById("est-data").textContent = sim.linhas[0].DATA;
   document.getElementById("est-hora").textContent = sim.linhas[0].HORA;
 
-  // Nome de exibição das cidades (B8). A busca acha os dois jeitos. "MATOGROSSO" fica como vem: é pergunta ao Alexandre.
+  // Nome de exibição das cidades (B8; "Mato Grosso": R-20261124-213943-alexandre). A busca acha os dois jeitos.
   const CIDADE = {
     "BELÉM": "Belém", "BOA VISTA": "Boa Vista", "MACAPÁ": "Macapá", "MANAUS": "Manaus",
-    "SANTARÉM": "Santarém", "SÃO LUIS": "São Luís",
+    "MATOGROSSO": "Mato Grosso", "SANTARÉM": "Santarém", "SÃO LUIS": "São Luís",
   };
   const cidade = (c) => CIDADE[c] || c;
 
   const ROT = {
     COD_PRODUTO: "Código", DESCRICAO_PRODUTO: "Descrição", FORNECEDOR: "Fornecedor", CIDADE: "Cidade / filial", ESTOQUE: "Estoque",
     ID_PRODUTO: "ID do produto", COD_FORNECEDOR: "Cód. fornecedor", FILIAL_CD: "Filial CD",
-    PPEDIDO: "Pedido pendente", ORIGEM_CUSTO: "Origem do custo", TABELA_CAPITAL: "Tabela capital", PRECO_CAPITAL: "Preço capital",
+    PPEDIDO: "Custo do produto", ORIGEM_CUSTO: "Origem do custo", TABELA_CAPITAL: "Tabela capital", PRECO_CAPITAL: "Preço capital",
     TABELA_INTERIOR: "Tabela interior", PRECO_INTERIOR: "Preço interior", MARKUP_CAPITAL: "Markup capital",
     MARKUP_INTERIOR: "Markup interior", CATEGORIA: "Categoria", SISTEMA: "Sistema", FAMILIA: "Família", LINHA: "Linha",
     SUCATA: "Sucata", CUSTO_TOTAL: "Custo total",
   };
-  // Colunas da tela: as 5 principais primeiro; o admin ganha as outras 17 (22 no total), na ordem do B5/B6:
-  // o que decide (preço, custo, markup, tabela, pedido pendente), os códigos e, por fim, a classificação.
-  const PRINCIPAIS = ["COD_PRODUTO", "DESCRICAO_PRODUTO", "FORNECEDOR", "CIDADE", "ESTOQUE"];
+  // Ordem do Alexandre (R-20261124-214135-alexandre; especificação do po em R-20261124-214137-po):
+  // Filial, Código, Descrição, Estoque, Custo do produto, Custo total, Preço capital, Preço interior, Markup capital,
+  // Markup interior e depois as demais. PRINCIPAIS = o que o cartão fechado mostra no celular; EXTRAS = o "+ Detalhes".
+  // Admin: 4 + 18 = 22 colunas na tela. Vendedor: a mesma ordem, sem custo, preço e markup [SUPOSIÇÃO do po].
+  const PRINCIPAIS = visao === "admin"
+    ? ["CIDADE", "COD_PRODUTO", "DESCRICAO_PRODUTO", "ESTOQUE"]
+    : ["CIDADE", "COD_PRODUTO", "DESCRICAO_PRODUTO", "FORNECEDOR", "ESTOQUE"];
   const EXTRAS = visao === "admin" ? [
-    "PRECO_CAPITAL", "PRECO_INTERIOR", "CUSTO_TOTAL", "MARKUP_CAPITAL", "MARKUP_INTERIOR", "TABELA_CAPITAL", "TABELA_INTERIOR", "PPEDIDO",
-    "ID_PRODUTO", "COD_FORNECEDOR", "FILIAL_CD", "ORIGEM_CUSTO",
-    "CATEGORIA", "SISTEMA", "FAMILIA", "LINHA", "SUCATA",
+    "PPEDIDO", "CUSTO_TOTAL", "PRECO_CAPITAL", "PRECO_INTERIOR", "MARKUP_CAPITAL", "MARKUP_INTERIOR",
+    "FORNECEDOR", "TABELA_CAPITAL", "TABELA_INTERIOR", "SUCATA", "ORIGEM_CUSTO",
+    "ID_PRODUTO", "COD_FORNECEDOR", "FILIAL_CD", "CATEGORIA", "SISTEMA", "FAMILIA", "LINHA",
   ] : [];
-  // SUCATA sai como número simples: pode ser quantidade ou indicador [SUPOSIÇÃO; o po confirma com o Alexandre].
-  const DINHEIRO = new Set(["PRECO_CAPITAL", "PRECO_INTERIOR", "CUSTO_TOTAL"]);
-  const NUMERO = new Set(["ESTOQUE", "PPEDIDO", "MARKUP_CAPITAL", "MARKUP_INTERIOR", "SUCATA", ...DINHEIRO]);
+  // PPEDIDO é o custo do produto e CUSTO_TOTAL = custo do produto + sucata (R-20261124-213943-alexandre): os três em R$.
+  const DINHEIRO = new Set(["PPEDIDO", "CUSTO_TOTAL", "SUCATA", "PRECO_CAPITAL", "PRECO_INTERIOR"]);
+  const NUMERO = new Set(["ESTOQUE", "MARKUP_CAPITAL", "MARKUP_INTERIOR", ...DINHEIRO]);
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const norm = (s) => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -113,7 +117,7 @@
       EXTRAS.length ? `<td class="est-td-mais"><button type="button" class="bt est-bt-mais" aria-expanded="${abrir}">${rotMais(abrir)}</button></td>` : ""}</tr>`).join("");
     lista.innerHTML = `<div class="est-rolar" tabindex="0" role="region" aria-label="Tabela de estoque"><table class="us est"><thead><tr>${cab}</tr></thead><tbody>${corpo}</tbody></table></div>`;
   }
-  // Celular, visão admin: o cartão mostra as 5 principais; o "+ Detalhes" abre as outras 17.
+  // Celular, visão admin: o cartão mostra as 5 principais; o "+ Detalhes" abre as outras 18, começando pelos custos.
   document.getElementById("est-lista").addEventListener("click", (e) => {
     const b = e.target.closest(".est-bt-mais");
     if (!b) return;
