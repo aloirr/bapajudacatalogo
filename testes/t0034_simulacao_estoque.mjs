@@ -15,6 +15,11 @@ mkdirSync(SAIDA, { recursive: true });
 
 const TAMANHOS = { 1366: { width: 1366, height: 768 }, 390: { width: 390, height: 844 } };
 const PROIBIDAS = ["preco", "custo", "markup", "tabela", "ppedido", "pedido pend", "pendente", "sucata", "origem", "r$", "detalhes"];
+// Ordem do Alexandre (passo 6): as 10 primeiras exatas; depois "o resto" (as 12 demais, em qualquer ordem, sem faltar nenhuma).
+const ADMIN_10 = ["Cidade / filial", "Código", "Descrição", "Estoque", "Custo do produto", "Custo total", "Preço capital", "Preço interior", "Markup capital", "Markup interior"];
+const ADMIN_RESTO = ["Fornecedor", "Tabela capital", "Tabela interior", "Sucata", "Origem do custo", "ID do produto", "Cód. fornecedor", "Filial CD", "Categoria", "Sistema", "Família", "Linha"];
+const VENDEDOR_COLS = ["Cidade / filial", "Código", "Descrição", "Fornecedor", "Estoque"];
+const CARTAO_FECHADO = ["est-c-cidade", "est-c-cod_produto", "est-c-estoque", "est-c-descricao_produto"];
 const resultados = [];
 const ok = (item, passou, detalhe = "") => { resultados.push({ item, passou, detalhe }); };
 const semAcento = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -63,7 +68,7 @@ for (const larg of [1366, 390]) {
       const pos = await page.$eval(".pg-cab-in", (e) => e.innerText.trim().split("\n").pop());
       ok(`cabeçalho só com "Posição de … às …" ${larg}`, /^Posição de \d{2}\/\d{2}\/\d{4} às \d{2}:\d{2}$/.test(pos), pos);
       const cab = await page.$$eval("table.est thead th", (ths) => ths.map((t) => t.textContent.trim()));
-      ok(`vendedor cabeçalho ${larg}`, JSON.stringify(cab) === JSON.stringify(["Código", "Descrição", "Fornecedor", "Cidade / filial", "Estoque"]), cab.join(" | "));
+      ok(`vendedor cabeçalho ${larg}`, JSON.stringify(cab) === JSON.stringify(VENDEDOR_COLS), cab.join(" | "));
       const extras = await page.$$eval("td.est-extra, .est-td-mais, .est-bt-mais", (e) => e.length);
       ok(`vendedor sem colunas extras no DOM ${larg}`, extras === 0, `extras=${extras}`);
       // HTML da tabela sem o aria-label "Tabela de estoque" (é o nome da região, não uma coluna).
@@ -72,7 +77,7 @@ for (const larg of [1366, 390]) {
       ok(`vendedor sem termos proibidos no HTML da tabela ${larg}`, noHtml.length === 0, noHtml.join(", ") || "0 achados");
     }
     if (nome === "admin") {
-      // 25 campos do xlsx em 22 colunas: CIDADE e FILIAL_BAP juntas; DATA e HORA só no cabeçalho. 17 no "+ Detalhes".
+      // 25 campos do xlsx em 22 colunas: CIDADE e FILIAL_BAP juntas; DATA e HORA só no cabeçalho. 18 no "+ Detalhes".
       const r = await page.evaluate(() => {
         const tr = document.querySelector("table.est tbody tr");
         return {
@@ -83,10 +88,18 @@ for (const larg of [1366, 390]) {
           filial: tr.querySelector("td.est-c-cidade small")?.textContent || "",
           cidade: tr.querySelector("td.est-c-cidade .est-cid")?.textContent || "",
           pos: document.querySelector(".est-posicao").innerText.trim(),
+          custo: tr.querySelector("td.est-c-ppedido")?.textContent.trim() || "",
+          total: tr.querySelector("td.est-c-custo_total")?.textContent.trim() || "",
+          extrasRot: [...tr.querySelectorAll("td.est-extra")].map((t) => t.dataset.rot),
         };
       });
+      const resto = r.th.slice(10);
+      ok(`admin ordem exata das 10 primeiras colunas ${larg}`, JSON.stringify(r.th.slice(0, 10)) === JSON.stringify(ADMIN_10), r.th.slice(0, 10).join(" | "));
+      ok(`admin as 12 demais colunas depois ${larg}`, resto.length === 12 && [...resto].sort().join("|") === [...ADMIN_RESTO].sort().join("|"), resto.join(" | "));
+      ok(`admin "+ Detalhes" = colunas 5 a 22, na mesma ordem ${larg}`, JSON.stringify(r.extrasRot) === JSON.stringify(r.th.slice(4)), r.extrasRot.join(" | "));
+      ok(`admin custo do produto e custo total em R$ ${larg}`, /^R\$\s?\d/.test(r.custo) && /^R\$\s?\d/.test(r.total), `${r.custo}; ${r.total}`);
       ok(`admin 22 colunas, sem Data/Hora ${larg}`, r.th.length === 22 && !r.th.includes("Data") && !r.th.includes("Hora"), `th=${r.th.length}`);
-      ok(`admin 17 colunas no "+ Detalhes" ${larg}`, r.extras === 17 && r.bt.length === r.linhas && r.bt.every((b) => b === "+ Detalhes"), `extras=${r.extras}; botões=${r.bt.length}/${r.linhas} "${r.bt[0]}"`);
+      ok(`admin 18 colunas no "+ Detalhes" ${larg}`, r.extras === 18 && r.bt.length === r.linhas && r.bt.every((b) => b === "+ Detalhes"), `extras=${r.extras}; botões=${r.bt.length}/${r.linhas} "${r.bt[0]}"`);
       ok(`admin cidade sem caixa alta e filial ${larg}`, r.cidade !== r.cidade.toUpperCase() && /^\d{8}$/.test(r.filial), `${r.cidade} ${r.filial}`);
       ok(`admin cabeçalho "Posição de … às …" ${larg}`, /^Posição de \d{2}\/\d{2}\/\d{4} às \d{2}:\d{2}$/.test(r.pos), r.pos);
     }
@@ -120,15 +133,23 @@ for (const larg of [1366, 390]) {
       extrasVis: trs.map((t) => [...t.querySelectorAll("td.est-extra")].filter(vis).length),
       bt: [...new Set([...document.querySelectorAll(".est-bt-mais")].map((b) => b.textContent.trim() + "/" + b.getAttribute("aria-expanded")))] };
   });
-  ok("admin 390 &abrir=1 abre todos os cartões (17 detalhes visíveis em cada)", ab.n > 0 && ab.n === ab.abertas && ab.extrasVis.every((x) => x === 17) && ab.bt.length === 1 && ab.bt[0] === "− Menos detalhes/true", `${ab.abertas} de ${ab.n}; ${ab.bt.join(", ")}`);
+  ok("admin 390 &abrir=1 abre todos os cartões (18 detalhes visíveis em cada)", ab.n > 0 && ab.n === ab.abertas && ab.extrasVis.every((x) => x === 18) && ab.bt.length === 1 && ab.bt[0] === "− Menos detalhes/true", `${ab.abertas} de ${ab.n}; ${ab.bt.join(", ")}`);
   // fechado (sem &abrir): nenhum detalhe visível no celular; o clique em "+ Detalhes" abre só aquele cartão
   const p2 = await ctx.newPage();
   await p2.goto(`${BASE}?visao=admin`, { waitUntil: "load" });
   const antes = await p2.$$eval("td.est-extra", (t) => t.filter((e) => getComputedStyle(e).display !== "none").length);
+  // cartão fechado: filial, código, estoque e descrição (nessa ordem na tela: filial no alto, código e estoque lado a lado, depois a descrição)
+  const fechado = await p2.evaluate(() => {
+    const tr = document.querySelector("tbody tr");
+    const tds = [...tr.querySelectorAll("td")].filter((e) => !e.classList.contains("est-td-mais") && getComputedStyle(e).display !== "none" && e.getBoundingClientRect().height > 0);
+    return tds.map((e) => ({ c: [...e.classList].find((k) => k.startsWith("est-c-")), y: Math.round(e.getBoundingClientRect().top), x: Math.round(e.getBoundingClientRect().left) }))
+      .sort((a, b) => a.y - b.y || a.x - b.x).map((e) => e.c);
+  });
+  ok("admin 390 cartão fechado: filial, código, estoque e descrição", JSON.stringify(fechado) === JSON.stringify(CARTAO_FECHADO), fechado.join(" | "));
   await p2.click("tbody tr:first-child .est-bt-mais");
   const depois = await p2.evaluate(() => ({ vis: [...document.querySelectorAll("td.est-extra")].filter((e) => getComputedStyle(e).display !== "none").length,
     bt: document.querySelector("tbody tr:first-child .est-bt-mais").textContent.trim() }));
-  ok("admin 390 \"+ Detalhes\" abre só o cartão clicado", antes === 0 && depois.vis === 17 && depois.bt === "− Menos detalhes", `antes=${antes}; depois=${depois.vis}; ${depois.bt}`);
+  ok("admin 390 \"+ Detalhes\" abre só o cartão clicado", antes === 0 && depois.vis === 18 && depois.bt === "− Menos detalhes", `antes=${antes}; depois=${depois.vis}; ${depois.bt}`);
   await ctx.close();
 }
 
@@ -144,6 +165,21 @@ for (const larg of [1366, 390]) {
   const [n, de] = r.total.split(" de ").map((s) => parseInt(s, 10));
   ok(`busca "manaus" filtra ${larg}`, /^\d+ de \d+$/.test(r.total) && n > 0 && n < de && r.cidades.length === n && r.cidades.every((c) => /manaus/i.test(c)), `${r.total}; ${[...new Set(r.cidades)].join(" | ")}`);
   if (larg === 390) ok("sem rolagem lateral vendedor &q=manaus 390", r.sw <= 390, `scrollWidth=${r.sw}`);
+  await ctx.close();
+}
+
+// "mato grosso" e "matogrosso" acham as linhas da filial de Mato Grosso (nas duas visões)
+for (const v of ["vendedor", "admin"]) {
+  const { ctx, page } = await abrir(`visao=${v}`, 1366);
+  const res = {};
+  for (const q of ["mato grosso", "matogrosso", "Mato Grosso", "MATOGROSSO"]) {
+    await page.fill("#est-busca", q);
+    res[q] = await page.evaluate(() => ({ total: document.getElementById("est-total").textContent,
+      cid: [...new Set([...document.querySelectorAll("tbody td.est-c-cidade")].map((t) => t.textContent.trim()))] }));
+  }
+  const ok1 = Object.values(res).every((x) => /^[1-9]\d* de 21$/.test(x.total) && x.cid.length === 1 && /^Mato Grosso \d{8}$/.test(x.cid[0]));
+  const iguais = new Set(Object.values(res).map((x) => x.total)).size === 1;
+  ok(`busca "mato grosso" e "matogrosso" acham as linhas (${v})`, ok1 && iguais, Object.entries(res).map(([q, x]) => `${q}: ${x.total} ${x.cid.join(",")}`).join("; "));
   await ctx.close();
 }
 
