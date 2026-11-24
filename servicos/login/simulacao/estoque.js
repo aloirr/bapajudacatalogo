@@ -1,7 +1,7 @@
 // T-0034 · SIMULAÇÃO da aba Estoque. Só mostra a tela; não é a implementação.
-// ?visao=admin (22 colunas na tela; 4 no cartão fechado do celular e 18 no "+ Detalhes"), ?visao=vendedor (5 colunas) ou ?visao=cliente (404). ?q= preenche a busca, ?filial= a cidade
+// ?visao=admin (23 colunas na tela; 5 no cartão fechado do celular e 18 no "+ Detalhes"), ?visao=vendedor (5 colunas) ou ?visao=cliente (404). ?q= preenche a busca, ?filial= a cidade
 // e ?abrir=1 abre todos os cartões do admin no celular (para o print).
-// Admin: as 25 colunas do xlsx viram 22 na tela: CIDADE e FILIAL_BAP juntas, e DATA e HORA só no cabeçalho ("Posição de …"; B5).
+// Admin: as 25 colunas do xlsx viram 23 na tela: DATA e HORA só no cabeçalho ("Posição de …"; B5).
 // Na versão final o corte das colunas é feito NO SERVIDOR: o vendedor nem recebe preço, custo ou markup.
 // Aqui o corte imita o servidor logo ao carregar: na visão vendedor as outras colunas são apagadas da memória.
 (function () {
@@ -24,7 +24,7 @@
   document.getElementById("menu-estoque").hidden = false;
   document.body.classList.add("est-" + visao);
 
-  // As 5 colunas do vendedor (decisão 2a). "Cidade / filial" junta CIDADE e FILIAL_BAP.
+  // As colunas do vendedor (decisão 2a), com "Filial" (CIDADE) e "Nº filial" (FILIAL_BAP) separadas (passo 7 do Alexandre).
   const VENDEDOR = ["CIDADE", "FILIAL_BAP", "COD_PRODUTO", "DESCRICAO_PRODUTO", "FORNECEDOR", "ESTOQUE"];
   const linhas = visao === "admin" ? sim.linhas
     : sim.linhas.map((l) => Object.fromEntries(VENDEDOR.map((c) => [c, l[c]])));
@@ -40,20 +40,21 @@
   const cidade = (c) => CIDADE[c] || c;
 
   const ROT = {
-    COD_PRODUTO: "Código", DESCRICAO_PRODUTO: "Descrição", FORNECEDOR: "Fornecedor", CIDADE: "Cidade / filial", ESTOQUE: "Estoque",
+    COD_PRODUTO: "Código", DESCRICAO_PRODUTO: "Descrição", FORNECEDOR: "Fornecedor", CIDADE: "Filial", FILIAL_BAP: "Nº filial", ESTOQUE: "Estoque",
     ID_PRODUTO: "ID do produto", COD_FORNECEDOR: "Cód. fornecedor", FILIAL_CD: "Filial CD",
     PPEDIDO: "Custo do produto", ORIGEM_CUSTO: "Origem do custo", TABELA_CAPITAL: "Tabela capital", PRECO_CAPITAL: "Preço capital",
     TABELA_INTERIOR: "Tabela interior", PRECO_INTERIOR: "Preço interior", MARKUP_CAPITAL: "Markup capital",
     MARKUP_INTERIOR: "Markup interior", CATEGORIA: "Categoria", SISTEMA: "Sistema", FAMILIA: "Família", LINHA: "Linha",
     SUCATA: "Sucata", CUSTO_TOTAL: "Custo total",
   };
-  // Ordem do Alexandre (R-20261124-214135-alexandre; especificação do po em R-20261124-214137-po):
-  // Filial, Código, Descrição, Estoque, Custo do produto, Custo total, Preço capital, Preço interior, Markup capital,
-  // Markup interior e depois as demais. PRINCIPAIS = o que o cartão fechado mostra no celular; EXTRAS = o "+ Detalhes".
-  // Admin: 4 + 18 = 22 colunas na tela. Vendedor: a mesma ordem, sem custo, preço e markup [SUPOSIÇÃO do po].
+  // Ordem do Alexandre (R-20261124-214135-alexandre; especificação do po em R-20261124-214137-po; passo 7):
+  // Filial, Nº filial, Código, Descrição, Estoque, Custo do produto, Custo total, Preço capital, Preço interior,
+  // Markup capital, Markup interior e depois as demais. PRINCIPAIS = o que o cartão fechado mostra no celular;
+  // EXTRAS = o "+ Detalhes". Admin: 5 + 18 = 23 colunas na tela.
+  // Vendedor: Filial, Nº filial, Código, Descrição, Fornecedor, Estoque (o Estoque é a última; nada vem depois).
   const PRINCIPAIS = visao === "admin"
-    ? ["CIDADE", "COD_PRODUTO", "DESCRICAO_PRODUTO", "ESTOQUE"]
-    : ["CIDADE", "COD_PRODUTO", "DESCRICAO_PRODUTO", "FORNECEDOR", "ESTOQUE"];
+    ? ["CIDADE", "FILIAL_BAP", "COD_PRODUTO", "DESCRICAO_PRODUTO", "ESTOQUE"]
+    : ["CIDADE", "FILIAL_BAP", "COD_PRODUTO", "DESCRICAO_PRODUTO", "FORNECEDOR", "ESTOQUE"];
   const EXTRAS = visao === "admin" ? [
     "PPEDIDO", "CUSTO_TOTAL", "PRECO_CAPITAL", "PRECO_INTERIOR", "MARKUP_CAPITAL", "MARKUP_INTERIOR",
     "FORNECEDOR", "TABELA_CAPITAL", "TABELA_INTERIOR", "SUCATA", "ORIGEM_CUSTO",
@@ -91,7 +92,7 @@
     const cls = [NUMERO.has(c) ? "est-num" : "", extra ? "est-extra" : ""].filter(Boolean).join(" ");
     let v;
     if (c === "COD_PRODUTO") v = `<b class="est-cod">${esc(l.COD_PRODUTO)}</b>`;
-    else if (c === "CIDADE") v = `<span class="est-cid">${esc(cidade(l.CIDADE))}</span> <small>${esc(l.FILIAL_BAP)}</small>`;
+    else if (c === "CIDADE") v = esc(cidade(l.CIDADE));
     else if (c === "ESTOQUE") v = Number(l.ESTOQUE) === 0 ? '<span class="tag">Sem estoque</span>' : `<b>${esc(l.ESTOQUE)}</b>`;
     else v = valor(c, l[c]);
     return `<td class="${cls} est-c-${c.toLowerCase()}" data-rot="${esc(ROT[c])}">${v}</td>`;
@@ -117,7 +118,8 @@
       EXTRAS.length ? `<td class="est-td-mais"><button type="button" class="bt est-bt-mais" aria-expanded="${abrir}">${rotMais(abrir)}</button></td>` : ""}</tr>`).join("");
     lista.innerHTML = `<div class="est-rolar" tabindex="0" role="region" aria-label="Tabela de estoque"><table class="us est"><thead><tr>${cab}</tr></thead><tbody>${corpo}</tbody></table></div>`;
   }
-  // Celular, visão admin: o cartão mostra as 5 principais; o "+ Detalhes" abre as outras 18, começando pelos custos.
+  // Celular, visão admin: o cartão fechado mostra filial, nº filial, código, descrição e estoque;
+  // o "+ Detalhes" abre as outras 18 colunas, começando pelos custos.
   document.getElementById("est-lista").addEventListener("click", (e) => {
     const b = e.target.closest(".est-bt-mais");
     if (!b) return;
