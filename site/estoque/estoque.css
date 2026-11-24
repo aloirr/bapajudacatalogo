@@ -1,4 +1,4 @@
-/* T-0034 · aba Estoque. Vem depois do styles.css, do entrar.css e do admin.css (a tabela é a table.us da "Criar usuários":
+/* T-0034 · aba Estoque. Vem depois do styles.css e do entrar.css (a tabela é a table.us do styles.css, a mesma da "Criar usuários":
    cartões até 900 px). Usa só as variáveis do :root. As colunas vêm do servidor; as classes est-c-<campo> só arrumam o
    cartão do celular. body.est-larga: a tabela com muitas colunas (admin), na largura do site, rolando de lado. */
 
