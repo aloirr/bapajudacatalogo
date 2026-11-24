@@ -15,11 +15,13 @@ mkdirSync(SAIDA, { recursive: true });
 
 const TAMANHOS = { 1366: { width: 1366, height: 768 }, 390: { width: 390, height: 844 } };
 const PROIBIDAS = ["preco", "custo", "markup", "tabela", "ppedido", "pedido pend", "pendente", "sucata", "origem", "r$", "detalhes"];
-// Ordem do Alexandre (passo 6): as 10 primeiras exatas; depois "o resto" (as 12 demais, em qualquer ordem, sem faltar nenhuma).
-const ADMIN_10 = ["Cidade / filial", "Código", "Descrição", "Estoque", "Custo do produto", "Custo total", "Preço capital", "Preço interior", "Markup capital", "Markup interior"];
+// Ordem do Alexandre (passo 8): as 11 primeiras exatas; depois "o resto" (as 12 demais, em qualquer ordem, sem faltar nenhuma).
+const ADMIN_11 = ["Filial", "Nº filial", "Código", "Descrição", "Estoque", "Custo do produto", "Custo total", "Preço capital", "Preço interior", "Markup capital", "Markup interior"];
 const ADMIN_RESTO = ["Fornecedor", "Tabela capital", "Tabela interior", "Sucata", "Origem do custo", "ID do produto", "Cód. fornecedor", "Filial CD", "Categoria", "Sistema", "Família", "Linha"];
-const VENDEDOR_COLS = ["Cidade / filial", "Código", "Descrição", "Fornecedor", "Estoque"];
-const CARTAO_FECHADO = ["est-c-cidade", "est-c-cod_produto", "est-c-estoque", "est-c-descricao_produto"];
+const VENDEDOR_COLS = ["Filial", "Nº filial", "Código", "Descrição", "Fornecedor", "Estoque"];
+const VENDEDOR_TDS = ["est-c-cidade", "est-c-filial_bap", "est-c-cod_produto", "est-c-descricao_produto", "est-c-fornecedor", "est-c-estoque"];
+// cartão fechado (na tela, de cima para baixo e da esquerda para a direita): filial e nº filial; código e estoque; descrição
+const CARTAO_FECHADO = ["est-c-cidade", "est-c-filial_bap", "est-c-cod_produto", "est-c-estoque", "est-c-descricao_produto"];
 const resultados = [];
 const ok = (item, passou, detalhe = "") => { resultados.push({ item, passou, detalhe }); };
 const semAcento = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -68,7 +70,13 @@ for (const larg of [1366, 390]) {
       const pos = await page.$eval(".pg-cab-in", (e) => e.innerText.trim().split("\n").pop());
       ok(`cabeçalho só com "Posição de … às …" ${larg}`, /^Posição de \d{2}\/\d{2}\/\d{4} às \d{2}:\d{2}$/.test(pos), pos);
       const cab = await page.$$eval("table.est thead th", (ths) => ths.map((t) => t.textContent.trim()));
-      ok(`vendedor cabeçalho ${larg}`, JSON.stringify(cab) === JSON.stringify(VENDEDOR_COLS), cab.join(" | "));
+      ok(`vendedor cabeçalho, ordem exata ${larg}`, JSON.stringify(cab) === JSON.stringify(VENDEDOR_COLS), cab.join(" | "));
+      // cada linha: as 6 células na ordem do cabeçalho, o Estoque é a última e nada vem depois
+      const tds = await page.$$eval("table.est tbody tr", (trs) => trs.map((tr) => [...tr.children].map((td) => [...td.classList].find((k) => k.startsWith("est-c-")) || td.className).join(",")));
+      const ruins = tds.filter((t) => t !== VENDEDOR_TDS.join(","));
+      ok(`vendedor linhas: 6 células, Estoque por último ${larg}`, tds.length === 21 && ruins.length === 0, ruins[0] || `${tds.length} linhas ok`);
+      const vf = await page.$eval("table.est tbody tr", (tr) => [tr.querySelector(".est-c-cidade").textContent.trim(), tr.querySelector(".est-c-filial_bap").textContent.trim()]);
+      ok(`vendedor Filial só o nome e Nº filial só o número ${larg}`, /^[^\d]+$/.test(vf[0]) && vf[0] !== vf[0].toUpperCase() && /^\d{8}$/.test(vf[1]), vf.join(" | "));
       const extras = await page.$$eval("td.est-extra, .est-td-mais, .est-bt-mais", (e) => e.length);
       ok(`vendedor sem colunas extras no DOM ${larg}`, extras === 0, `extras=${extras}`);
       // HTML da tabela sem o aria-label "Tabela de estoque" (é o nome da região, não uma coluna).
@@ -77,7 +85,7 @@ for (const larg of [1366, 390]) {
       ok(`vendedor sem termos proibidos no HTML da tabela ${larg}`, noHtml.length === 0, noHtml.join(", ") || "0 achados");
     }
     if (nome === "admin") {
-      // 25 campos do xlsx em 22 colunas: CIDADE e FILIAL_BAP juntas; DATA e HORA só no cabeçalho. 18 no "+ Detalhes".
+      // 25 campos do xlsx em 23 colunas: DATA e HORA só no cabeçalho. 5 no cartão fechado, 18 no "+ Detalhes".
       const r = await page.evaluate(() => {
         const tr = document.querySelector("table.est tbody tr");
         return {
@@ -85,22 +93,24 @@ for (const larg of [1366, 390]) {
           extras: tr.querySelectorAll("td.est-extra").length,
           bt: [...document.querySelectorAll(".est-bt-mais")].map((b) => b.textContent.trim()),
           linhas: document.querySelectorAll("table.est tbody tr").length,
-          filial: tr.querySelector("td.est-c-cidade small")?.textContent || "",
-          cidade: tr.querySelector("td.est-c-cidade .est-cid")?.textContent || "",
+          filial: tr.querySelector("td.est-c-filial_bap")?.textContent.trim() || "",
+          cidade: tr.querySelector("td.est-c-cidade")?.textContent.trim() || "",
+          principais: [...tr.querySelectorAll("td:not(.est-extra):not(.est-td-mais)")].map((t) => [...t.classList].find((k) => k.startsWith("est-c-"))),
           pos: document.querySelector(".est-posicao").innerText.trim(),
           custo: tr.querySelector("td.est-c-ppedido")?.textContent.trim() || "",
           total: tr.querySelector("td.est-c-custo_total")?.textContent.trim() || "",
           extrasRot: [...tr.querySelectorAll("td.est-extra")].map((t) => t.dataset.rot),
         };
       });
-      const resto = r.th.slice(10);
-      ok(`admin ordem exata das 10 primeiras colunas ${larg}`, JSON.stringify(r.th.slice(0, 10)) === JSON.stringify(ADMIN_10), r.th.slice(0, 10).join(" | "));
+      const resto = r.th.slice(11);
+      ok(`admin ordem exata das 11 primeiras colunas ${larg}`, JSON.stringify(r.th.slice(0, 11)) === JSON.stringify(ADMIN_11), r.th.slice(0, 11).join(" | "));
+      ok(`admin 5 principais (cartão fechado): filial, nº filial, código, descrição, estoque ${larg}`, JSON.stringify(r.principais) === JSON.stringify(["est-c-cidade", "est-c-filial_bap", "est-c-cod_produto", "est-c-descricao_produto", "est-c-estoque"]), r.principais.join(" | "));
       ok(`admin as 12 demais colunas depois ${larg}`, resto.length === 12 && [...resto].sort().join("|") === [...ADMIN_RESTO].sort().join("|"), resto.join(" | "));
-      ok(`admin "+ Detalhes" = colunas 5 a 22, na mesma ordem ${larg}`, JSON.stringify(r.extrasRot) === JSON.stringify(r.th.slice(4)), r.extrasRot.join(" | "));
+      ok(`admin "+ Detalhes" = colunas 6 a 23, na mesma ordem ${larg}`, JSON.stringify(r.extrasRot) === JSON.stringify(r.th.slice(5)), r.extrasRot.join(" | "));
       ok(`admin custo do produto e custo total em R$ ${larg}`, /^R\$\s?\d/.test(r.custo) && /^R\$\s?\d/.test(r.total), `${r.custo}; ${r.total}`);
-      ok(`admin 22 colunas, sem Data/Hora ${larg}`, r.th.length === 22 && !r.th.includes("Data") && !r.th.includes("Hora"), `th=${r.th.length}`);
+      ok(`admin 23 colunas, sem Data/Hora ${larg}`, r.th.length === 23 && !r.th.includes("Data") && !r.th.includes("Hora"), `th=${r.th.length}`);
       ok(`admin 18 colunas no "+ Detalhes" ${larg}`, r.extras === 18 && r.bt.length === r.linhas && r.bt.every((b) => b === "+ Detalhes"), `extras=${r.extras}; botões=${r.bt.length}/${r.linhas} "${r.bt[0]}"`);
-      ok(`admin cidade sem caixa alta e filial ${larg}`, r.cidade !== r.cidade.toUpperCase() && /^\d{8}$/.test(r.filial), `${r.cidade} ${r.filial}`);
+      ok(`admin Filial sem caixa alta (só o nome) e Nº filial (só o número) ${larg}`, /^[^\d]+$/.test(r.cidade) && r.cidade !== r.cidade.toUpperCase() && /^\d{8}$/.test(r.filial), `${r.cidade} ${r.filial}`);
       ok(`admin cabeçalho "Posição de … às …" ${larg}`, /^Posição de \d{2}\/\d{2}\/\d{4} às \d{2}:\d{2}$/.test(r.pos), r.pos);
     }
     if (nome === "cliente") {
@@ -145,7 +155,7 @@ for (const larg of [1366, 390]) {
     return tds.map((e) => ({ c: [...e.classList].find((k) => k.startsWith("est-c-")), y: Math.round(e.getBoundingClientRect().top), x: Math.round(e.getBoundingClientRect().left) }))
       .sort((a, b) => a.y - b.y || a.x - b.x).map((e) => e.c);
   });
-  ok("admin 390 cartão fechado: filial, código, estoque e descrição", JSON.stringify(fechado) === JSON.stringify(CARTAO_FECHADO), fechado.join(" | "));
+  ok("admin 390 cartão fechado: filial, nº filial, código, estoque e descrição (5)", JSON.stringify(fechado) === JSON.stringify(CARTAO_FECHADO), fechado.join(" | "));
   await p2.click("tbody tr:first-child .est-bt-mais");
   const depois = await p2.evaluate(() => ({ vis: [...document.querySelectorAll("td.est-extra")].filter((e) => getComputedStyle(e).display !== "none").length,
     bt: document.querySelector("tbody tr:first-child .est-bt-mais").textContent.trim() }));
@@ -160,10 +170,11 @@ for (const larg of [1366, 390]) {
   const r = await page.evaluate(() => ({
     total: document.getElementById("est-total").textContent,
     cidades: [...document.querySelectorAll("tbody td.est-c-cidade")].map((t) => t.textContent.trim()),
+    filiais: [...new Set([...document.querySelectorAll("tbody td.est-c-filial_bap")].map((t) => t.textContent.trim()))],
     sw: document.documentElement.scrollWidth,
   }));
   const [n, de] = r.total.split(" de ").map((s) => parseInt(s, 10));
-  ok(`busca "manaus" filtra ${larg}`, /^\d+ de \d+$/.test(r.total) && n > 0 && n < de && r.cidades.length === n && r.cidades.every((c) => /manaus/i.test(c)), `${r.total}; ${[...new Set(r.cidades)].join(" | ")}`);
+  ok(`busca "manaus" filtra ${larg}`, /^\d+ de \d+$/.test(r.total) && n > 0 && n < de && r.cidades.length === n && r.cidades.every((c) => c === "Manaus") && r.filiais.join() === "40101002", `${r.total}; ${[...new Set(r.cidades)].join(" | ")} ${r.filiais.join(",")}`);
   if (larg === 390) ok("sem rolagem lateral vendedor &q=manaus 390", r.sw <= 390, `scrollWidth=${r.sw}`);
   await ctx.close();
 }
@@ -175,7 +186,7 @@ for (const v of ["vendedor", "admin"]) {
   for (const q of ["mato grosso", "matogrosso", "Mato Grosso", "MATOGROSSO"]) {
     await page.fill("#est-busca", q);
     res[q] = await page.evaluate(() => ({ total: document.getElementById("est-total").textContent,
-      cid: [...new Set([...document.querySelectorAll("tbody td.est-c-cidade")].map((t) => t.textContent.trim()))] }));
+      cid: [...new Set([...document.querySelectorAll("tbody tr")].map((tr) => tr.querySelector("td.est-c-cidade").textContent.trim() + " " + tr.querySelector("td.est-c-filial_bap").textContent.trim()))] }));
   }
   const ok1 = Object.values(res).every((x) => /^[1-9]\d* de 21$/.test(x.total) && x.cid.length === 1 && /^Mato Grosso \d{8}$/.test(x.cid[0]));
   const iguais = new Set(Object.values(res).map((x) => x.total)).size === 1;
@@ -209,8 +220,8 @@ for (const v of ["vendedor", "admin"]) {
   await page.fill("#est-busca", "");
   await page.selectOption("#est-filial", "40101002");
   const t2 = await page.textContent("#est-total");
-  const cid = await page.$$eval("tbody td.est-c-cidade", (t) => [...new Set(t.map((x) => x.textContent.trim()))]);
-  ok("filtro de filial 40101002 filtra", parseInt(t2, 10) > 0 && cid.length === 1 && cid[0].includes("40101002"), `${t2}; ${cid.join(" | ")}`);
+  const cid = await page.$$eval("tbody tr", (t) => [...new Set(t.map((tr) => tr.querySelector("td.est-c-cidade").textContent.trim() + " " + tr.querySelector("td.est-c-filial_bap").textContent.trim()))]);
+  ok("filtro de filial 40101002 filtra", parseInt(t2, 10) > 0 && cid.length === 1 && cid[0] === "Manaus 40101002", `${t2}; ${cid.join(" | ")}`);
   await ctx.close();
 }
 
