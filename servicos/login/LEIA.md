@@ -59,8 +59,7 @@ Fonte: o `ESTOQUE_BAP.xlsx` da BAP Central (`https://raw.githubusercontent.com/a
   - Limites (o serviço roda com 512 MB): download até 50 MB (lido em pedaços; para ao passar, com ou sem `Content-Length`), descompressão **total** até 64 MB (somando todas as partes do xlsx), até 200 mil linhas e 16.384 colunas. O XML é lido com uma varredura linear (`indexOf`), sem regex com retrocesso; XML sem fechamento dá erro. Passou de qualquer limite: só a aba dá 503.
   - Medido localmente com a planilha atual (cerca de 18 mil linhas): leitura em menos de 1 s, ~40 MB de memória retida (pico de ~150 a 190 MB de RSS durante a leitura); o download leva ~0,1 a 0,3 s. Cada consulta leva poucos ms.
   - Log: só `estoque ok <n> linhas <ms>ms` ou `estoque indisponivel` (sem endereço nem dado).
-- **Permissão "pode ver o estoque"** (regra única, `podeVerEstoque` no `server.mjs`): o admin **sempre** pode; os outros, pelo campo `estoque: true|false` do registro. Usuário antigo sem o campo vale `false`, menos o **`bap.vendedor`**, que começa com `true` enquanto não tiver o campo gravado.
-  - `GET /api/usuarios` e `GET /api/eu` trazem `estoque` já com essa regra (o admin aparece com `true`).
+- **Permissão "pode ver o estoque"** (regra única, `podeVerEstoque` no `server.mjs`): o admin **sempre** pode; os outros, pelo campo `estoque: true|false` do registro. Usuário antigo sem o campo vale `false`, menos o **`bap.vendedor`**, que começa com `true` enquanto não tiver o campo gravado. O campo `estoque` das rotas (seção **Rotas**) já segue essa regra (o admin aparece com `estoque: true`).
   - `PATCH /api/usuarios/<u>` com `{"estoque": true|false}` e `POST /api/usuarios` com `"estoque"` (opcional; padrão `false`): só o admin; valor que não é booleano → 400. A mudança vale no pedido seguinte, sem derrubar a sessão.
 - **`GET /estoque`** (e `/estoque/`, que servem `site/estoque/index.html`): sem sessão, como as outras páginas (302 para o `/entrar`); sem a permissão, **404** (a página simples "Não encontrado."); com a permissão, a página. Tudo em `site/estoque/` segue a mesma regra e vai com `Cache-Control: no-store`. A conferência do caminho não diferencia maiúscula (`/ESTOQUE/` também exige a permissão).
 - **`GET /api/estoque?q=&filial=&com_estoque=1&desde=0&limite=50`** (sem sessão: 401; sem a permissão: 404; só GET; `Cache-Control: no-store`):
@@ -76,13 +75,13 @@ Fonte: o `ESTOQUE_BAP.xlsx` da BAP Central (`https://raw.githubusercontent.com/a
 
   - `tipo`: `texto`, `numero`, `dinheiro` ou `markup`. Os valores vão **crus** (número como número; célula vazia como `null`); quem formata é a tela.
   - **Vendedor** (lista branca, cortada no servidor, nesta ordem): Filial (`CIDADE`, com o nome de exibição), Nº filial (`FILIAL_BAP`), Código (`COD_PRODUTO`), Descrição (`DESCRICAO_PRODUTO`), Fornecedor (`FORNECEDOR`), Estoque (`ESTOQUE`). Nenhuma outra chave sai, em nenhuma parte da resposta.
-  - **Admin** (23 colunas, nesta ordem): Filial, Nº filial, Código, Descrição, Estoque, Custo do produto (`PPEDIDO`), Custo total (`CUSTO_TOTAL`), Preço capital, Preço interior, Markup capital, Markup interior, Fornecedor, Tabela capital, Tabela interior, Sucata, Origem do custo, ID do produto, Cód. fornecedor, Filial CD, Categoria, Sistema, Família, Linha. DATA e HORA só vão em `posicao`.
-  - Nome de exibição das cidades: Belém, Boa Vista, Macapá, Manaus, Mato Grosso (`MATOGROSSO`), Santarém, São Luís (`SÃO LUIS`); outra cidade vai como veio.
+  - **Admin**: as 23 colunas de `COLUNAS_ADMIN` (`estoque.mjs`, com os rótulos e tipos em `COLUNAS`), na ordem decidida pelo Alexandre (T-0034, 24/11 17:45). DATA e HORA só vão em `posicao`.
+  - Nome de exibição das cidades: `CIDADES` (`estoque.mjs`); outra cidade vai como veio.
   - `q`: todas as palavras (até 20; até 200 caracteres), sem acento e sem caixa, como trecho, em código, código do fornecedor, ID, descrição, fornecedor, cidade (como veio e o nome de exibição) e número da filial. "matogrosso" e "mato grosso" acham as duas.
   - `filial`: o número da filial (igual). `com_estoque=1`: esconde estoque 0 ou vazio.
   - `desde` (padrão 0) e `limite` (padrão 50, de 1 a 200; fora disso, vale o mais perto). Valor que não é número: o padrão. A ordem é a da planilha. `total` é o número de linhas achadas.
   - `filiais`: todas as filiais da planilha, em ordem alfabética do nome de exibição (para o filtro).
-- Testes (`login.test.mjs`, sem rede): um xlsx **sintético**, montado no próprio teste com valores fictícios, servido por um servidor local (também uma zip-bomba e uma resposta de 51 MB sem `Content-Length`); a fonte entra por `criarServico({ estoqueUrl })` (`null` = sem fonte, o padrão dos testes).
+- Testes (`login.test.mjs`, sem rede): um xlsx **sintético**, com valores fictícios, montado por `xlsx-ficticio.mjs` (só de teste; o `testes/estoque-t0034.mjs` usa o mesmo), servido por um servidor local (também uma zip-bomba e uma resposta de 51 MB sem `Content-Length`); a fonte entra por `criarServico({ estoqueUrl })` (`null` = sem fonte, o padrão dos testes).
 
 ## Segurança (resumo)
 

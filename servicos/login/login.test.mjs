@@ -10,6 +10,7 @@ import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { criarServico, caminhoLogico, tipoDaImagem, voltaSegura, podeVerEstoque, SESSAO_MS, JANELA_ERROS_MS } from './server.mjs';
 import { lerXlsx, DESCOMPACTADO_MAX, LINHAS_MAX } from './estoque.mjs';
+import { zipar, xlsxFicticio } from './xlsx-ficticio.mjs';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const ORIGEM = 'https://catalogo.exemplo.invalid';
@@ -819,53 +820,14 @@ const LINHAS_FICT = Array.from({ length: N_ESTOQUE }, (_, i) => linhaFicticia(i 
 const MARCAS_INTERNAS = ['SECRET', '9101', '9201', '9301', '94.01', '95.01', '9601', '9701'];
 const CHAVES_INTERNAS = /PPEDIDO|CUSTO|PRECO|PREÇO|MARKUP|TABELA|SUCATA|ORIGEM/i;
 
-// zip mínimo (deflate + CRC-32), só para o teste.
-const TAB_CRC = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
-const crc32 = (b) => { let c = 0xffffffff; for (const x of b) c = TAB_CRC[(c ^ x) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
-function zipar(arquivos) {
-  const locais = []; const centrais = []; let off = 0;
-  for (const [nome, texto] of Object.entries(arquivos)) {
-    const cru = Buffer.isBuffer(texto) ? texto : Buffer.from(texto, 'utf8'); const comp = zlib.deflateRawSync(cru); const n = Buffer.from(nome);
-    const h = Buffer.alloc(30); h.writeUInt32LE(0x04034b50, 0); h.writeUInt16LE(20, 4); h.writeUInt16LE(8, 8);
-    h.writeUInt32LE(crc32(cru), 14); h.writeUInt32LE(comp.length, 18); h.writeUInt32LE(cru.length, 22); h.writeUInt16LE(n.length, 26);
-    const c = Buffer.alloc(46); c.writeUInt32LE(0x02014b50, 0); c.writeUInt16LE(20, 4); c.writeUInt16LE(20, 6); c.writeUInt16LE(8, 10);
-    c.writeUInt32LE(crc32(cru), 16); c.writeUInt32LE(comp.length, 20); c.writeUInt32LE(cru.length, 24); c.writeUInt16LE(n.length, 28); c.writeUInt32LE(off, 42);
-    locais.push(h, n, comp); centrais.push(c, n); off += 30 + n.length + comp.length;
-  }
-  const dir = Buffer.concat(centrais); const fim = Buffer.alloc(22);
-  fim.writeUInt32LE(0x06054b50, 0); fim.writeUInt16LE(centrais.length / 2, 8); fim.writeUInt16LE(centrais.length / 2, 10);
-  fim.writeUInt32LE(dir.length, 12); fim.writeUInt32LE(off, 16);
-  return Buffer.concat([...locais, dir, fim]);
-}
-const xmlEsc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const letra = (i) => (i < 26 ? String.fromCharCode(65 + i) : 'A' + String.fromCharCode(65 + i - 26));
-// Texto: sharedStrings (t="s"); a descrição vai em inlineStr (os dois jeitos do Excel); vazio: célula autofechada.
-function xlsxFicticio(linhas = LINHAS_FICT) {
-  const ss = []; const idx = new Map();
-  const comp = (s) => { if (!idx.has(s)) { idx.set(s, ss.length); ss.push(s); } return idx.get(s); };
-  const cel = (ref, v, col) => {
-    if (v === null || v === undefined) return `<c r="${ref}" s="2"/>`;
-    if (typeof v === 'number') return `<c r="${ref}" t="n"><v>${v}</v></c>`;
-    if (col === 'DESCRICAO_PRODUTO') return `<c r="${ref}" t="inlineStr"><is><t>${xmlEsc(v)}</t></is></c>`;
-    return `<c r="${ref}" t="s"><v>${comp(v)}</v></c>`;
-  };
-  const rows = [CAB_ESTOQUE.map((h, i) => cel(`${letra(i)}1`, h, h)).join('')];
-  linhas.forEach((l, k) => rows.push(CAB_ESTOQUE.map((h, i) => cel(`${letra(i)}${k + 2}`, l[h], h)).join('')));
-  const sheet = `<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${
-    rows.map((r, i) => `<row r="${i + 1}">${r}</row>`).join('')}</sheetData></worksheet>`;
-  return zipar({
-    '[Content_Types].xml': '<Types/>',
-    'xl/workbook.xml': '<workbook xmlns:r="r"><sheets><sheet name="ESTOQUE_BAP" sheetId="1" r:id="rId1"/></sheets></workbook>',
-    'xl/_rels/workbook.xml.rels': '<Relationships><Relationship Id="rId1" Type="x" Target="worksheets/aba.xml"/></Relationships>',
-    'xl/sharedStrings.xml': `<sst>${ss.map((s) => `<si><t>${xmlEsc(s)}</t></si>`).join('')}</sst>`,
-    'xl/worksheets/aba.xml': sheet,
-  });
-}
+// O xlsx sintético vem de xlsx-ficticio.mjs (o mesmo do testes/estoque-t0034.mjs, RD-0593).
+// Texto em sharedStrings; a descrição em inlineStr (os dois jeitos do Excel); vazio: célula autofechada.
+const xlsxEstoque = (linhas = LINHAS_FICT) => xlsxFicticio(CAB_ESTOQUE, linhas, { inline: ['DESCRICAO_PRODUTO'] });
 
 // Fonte local (127.0.0.1): /ESTOQUE_BAP.xlsx responde o xlsx fictício, /quebrado.xlsx bytes sem sentido, o resto 404.
 let FONTE;
 before(async () => {
-  const xlsx = xlsxFicticio();
+  const xlsx = xlsxEstoque();
   // Zip-bomba: duas partes, cada uma ABAIXO do limite, que juntas passam do limite TOTAL de descompressão.
   const metade = Buffer.alloc(Math.ceil(DESCOMPACTADO_MAX / 2) + 1024, 0x20);
   const bomba = zipar({
@@ -911,7 +873,7 @@ const chavesDe = (v, acc = []) => {
 };
 
 test('leitor de xlsx: sharedStrings, inlineStr, número, célula vazia e data/hora do Excel (T-0034)', () => {
-  const t = lerXlsx(xlsxFicticio(LINHAS_FICT.slice(0, 3)));
+  const t = lerXlsx(xlsxEstoque(LINHAS_FICT.slice(0, 3)));
   assert.equal(t.length, 4);
   assert.deepEqual(t[0], CAB_ESTOQUE);
   assert.equal(t[1][2], 'MATOGROSSO');
@@ -919,6 +881,14 @@ test('leitor de xlsx: sharedStrings, inlineStr, número, célula vazia e data/ho
   assert.equal(t[1][9], 1);
   assert.equal(t[1][0], SERIE_DATA);
   assert.throws(() => lerXlsx(Buffer.from('isto-nao-e-um-zip')));
+  // A aba é achada pelo workbook.xml e pelo .rels, mesmo com outro nome de arquivo.
+  const outra = lerXlsx(zipar({
+    'xl/workbook.xml': '<workbook xmlns:r="r"><sheets><sheet name="X" sheetId="1" r:id="rId7"/></sheets></workbook>',
+    'xl/_rels/workbook.xml.rels': '<Relationships><Relationship Id="rId1" Target="worksheets/sheet1.xml"/><Relationship Id="rId7" Target="worksheets/aba.xml"/></Relationships>',
+    'xl/worksheets/sheet1.xml': '<worksheet><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>ERRADA</t></is></c></row></sheetData></worksheet>',
+    'xl/worksheets/aba.xml': '<worksheet><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>CERTA &amp; ok</t></is></c></row></sheetData></worksheet>',
+  }));
+  assert.deepEqual(outra, [['CERTA & ok']]);
 });
 
 test('permissão do estoque: admin sempre; os outros pelo campo; antigo sem o campo = false, menos o bap.vendedor (T-0034)', () => {
@@ -1130,7 +1100,7 @@ test('estoque: limites contra planilha ruim (descompressão total, linhas, XML s
   assert.doesNotThrow(() => lerXlsx(duas, { descompactadoMax: 2 * 1024 * 1024 }));
   // Teto de linhas (o padrão é 200 mil): 11 linhas com teto de 10 dão erro.
   assert.equal(LINHAS_MAX, 200000);
-  const onze = xlsxFicticio(LINHAS_FICT.slice(0, 10));
+  const onze = xlsxEstoque(LINHAS_FICT.slice(0, 10));
   assert.throws(() => lerXlsx(onze, { linhasMax: 10 }));
   assert.equal(lerXlsx(onze, { linhasMax: 11 }).length, 11);
   // XML sem fechamento: erro rápido (varredura linear, sem retrocesso), nunca trava.
