@@ -1,6 +1,6 @@
 // Serviço de login do catálogo (T-0022, T-0024). Node 20+, sem dependências.
 // Serve o site/ inteiro atrás de login (sessão de 5 h a partir do login), mais a
-// API das telas (contrato T-0022), os arquivos do admin (T-0024) e /interno/codigos para a placa.
+// API das telas (contrato T-0022), os arquivos do admin (T-0024), /interno/codigos para a placa e a aba Estoque (T-0034).
 // Regras: senha só com hash scrypt; o log nunca leva senha, hash, cookie, segredo,
 // chave, usuário, caminho pedido nem IP. Fora de site/ só saem os arquivos da lista.
 import http from 'node:http';
@@ -12,6 +12,7 @@ import zlib from 'node:zlib';
 import { pipeline } from 'node:stream';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { criarEstoque, FONTE_ESTOQUE, LIMITE_PADRAO, LIMITE_MAX } from './estoque.mjs';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const RAIZ = path.resolve(AQUI, '..', '..');
@@ -53,6 +54,7 @@ const MSG = {
   empresaLonga: `A empresa pode ter até ${TEXTO_MAX} caracteres.`,
   usuarioExiste: 'Esse usuário já existe.',
   logoTipo: 'Envie a logo em PNG, JPG ou WEBP.',
+  estoque: 'Estoque indisponível no momento.',
 };
 const RETRY = { 'Retry-After': String(JANELA_ERROS_MS / 1000) };
 
@@ -69,6 +71,7 @@ const PAGINAS = {
   '/trocar-senha': '/trocar-senha/index.html',
   '/admin/usuarios': '/admin/usuarios/index.html',
   '/admin/pdfs': '/admin/pdfs/index.html',
+  '/estoque': '/estoque/index.html',
 };
 // Só as extensões que o site/ usa (git ls-files site). Extensão nova no site: entra aqui.
 const TIPOS = {
@@ -166,6 +169,11 @@ function texto(v, { obrigatorio }) {
   return s;
 }
 const normUsuario = (v) => (typeof v === 'string' ? v.trim().toLowerCase() : '');
+// Permissão "pode ver o estoque" (T-0034): regra ÚNICA. O admin sempre pode; os outros, pelo campo "estoque".
+// Usuário antigo sem o campo: false, menos o bap.vendedor, que começa com true (R-20261124-215759-po).
+const VENDEDOR_INICIAL = 'bap.vendedor';
+export const podeVerEstoque = (nome, u) => Boolean(u) && (u.admin === true
+  || (typeof u.estoque === 'boolean' ? u.estoque : nome === VENDEDOR_INICIAL));
 const senhaValida = (s) => typeof s === 'string' && [...s].length >= SENHA_MIN && s.length <= SENHA_MAX;
 const MSG_SENHA = `A senha precisa ter pelo menos ${SENHA_MIN} caracteres (e no máximo ${SENHA_MAX}).`;
 
@@ -388,8 +396,8 @@ export async function criarServico(opcoes = {}) {
   const semente = crypto.randomBytes(32);
   const chaveIp = (req) => crypto.createHmac('sha256', semente).update(ipDoPedido(req)).digest('hex');
   const limite = criarLimite(agora);
-  const novoUsuario = ({ nome, empresa, admin, hash }) => ({
-    nome, empresa, admin, ativo: true, hash, trocarSenha: true, geracao: 1, logo: null,
+  const novoUsuario = ({ nome, empresa, admin, hash, estoque = false }) => ({
+    nome, empresa, admin, estoque, ativo: true, hash, trocarSenha: true, geracao: 1, logo: null,
     criadoEm: new Date(agora()).toISOString(), ultimoAcesso: null,
   });
   const hashFalso = await gerarHash(crypto.randomBytes(18).toString('base64url'));
@@ -420,6 +428,10 @@ export async function criarServico(opcoes = {}) {
       } catch { fechar('usuarios.json nao gravou'); }
     }
   }
+
+  // Aba Estoque (T-0034): baixa a fonte uma vez, no início, só para a memória. Falhou: só a aba dá 503.
+  // opcoes.estoqueUrl troca a fonte nos testes (null = sem fonte); nunca vem de variável nem do pedido.
+  const estoque = criarEstoque({ url: opcoes.estoqueUrl === undefined ? FONTE_ESTOQUE : opcoes.estoqueUrl, log, agora });
 
   // ---------- sessão: cookie assinado (HMAC-SHA256) ----------
   const assinar = (corpo) => crypto.createHmac('sha256', segredo).update(corpo).digest('base64url');
@@ -455,7 +467,7 @@ export async function criarServico(opcoes = {}) {
   }
 
   const publico = (nome, u) => ({
-    usuario: nome, nome: u.nome, empresa: u.empresa, admin: u.admin === true, ativo: u.ativo === true,
+    usuario: nome, nome: u.nome, empresa: u.empresa, admin: u.admin === true, estoque: podeVerEstoque(nome, u), ativo: u.ativo === true,
     temLogo: Boolean(u.logo), trocarSenha: u.trocarSenha === true, ultimoAcesso: u.ultimoAcesso || null,
   });
 
@@ -482,16 +494,16 @@ export async function criarServico(opcoes = {}) {
     gzCache.set(k, b); gzTotal += b.length;
     return b;
   }
-  async function servirArquivo(req, res, a) {
+  async function servirArquivo(req, res, a, semCache = false) {
     const etag = `W/"${a.st.size.toString(16)}-${Math.floor(a.st.mtimeMs).toString(16)}"`;
     const cab = {
       ...SEGURANCA,
       'Content-Type': TIPOS[a.ext],
-      'Cache-Control': LONGO.has(a.ext) ? 'private, max-age=86400' : 'private, no-cache',
+      'Cache-Control': semCache ? 'no-store' : LONGO.has(a.ext) ? 'private, max-age=86400' : 'private, no-cache',
       ETag: etag,
       Vary: 'Cookie, Accept-Encoding',
     };
-    if (req.headers['if-none-match'] === etag) { res.writeHead(304, cab); return res.end(); }
+    if (!semCache && req.headers['if-none-match'] === etag) { res.writeHead(304, cab); return res.end(); }
     if (COMPRIMIR.has(a.ext) && a.st.size > 1024 && /\bgzip\b/.test(req.headers['accept-encoding'] || '')) {
       const b = await comprimido(a);
       res.writeHead(200, { ...cab, 'Content-Encoding': 'gzip', 'Content-Length': b.length });
@@ -620,13 +632,14 @@ export async function criarServico(opcoes = {}) {
       const empresa = texto(c.empresa, { obrigatorio: false });
       if (empresa === null) return json(res, 400, { erro: MSG.empresaLonga });
       if (!senhaValida(c.senha)) return json(res, 400, { erro: MSG_SENHA });
+      if ('estoque' in c && typeof c.estoque !== 'boolean') return json(res, 400, { erro: MSG.pedido });
       if (loja.get(usuario)) return json(res, 409, { erro: MSG.usuarioExiste });
       const hash = await gerarHash(c.senha);
       let r;
       try {
         r = await loja.alterar((m) => {
           if (m.has(usuario)) return NADA;
-          const novo = novoUsuario({ nome, empresa, admin: false, hash });
+          const novo = novoUsuario({ nome, empresa, admin: false, hash, estoque: c.estoque === true });
           m.set(usuario, novo);
           return publico(usuario, novo);
         });
@@ -649,6 +662,10 @@ export async function criarServico(opcoes = {}) {
         if (!c.ativo && alvo === s.nome) return json(res, 400, { erro: 'O administrador não pode se desativar.' });
         mud.ativo = c.ativo;
       }
+      if ('estoque' in c) {
+        if (typeof c.estoque !== 'boolean') return json(res, 400, { erro: MSG.pedido });
+        mud.estoque = c.estoque;
+      }
       if (!Object.keys(mud).length) return json(res, 400, { erro: 'Nada para alterar.' });
       let r;
       try {
@@ -657,6 +674,8 @@ export async function criarServico(opcoes = {}) {
           if (!x) return NADA;
           if ('nome' in mud) x.nome = mud.nome;
           if ('empresa' in mud) x.empresa = mud.empresa;
+          // A permissão vale no pedido seguinte (é lida a cada pedido): não precisa derrubar a sessão.
+          if ('estoque' in mud) x.estoque = mud.estoque;
           // Desativar (ou reativar) derruba as sessões abertas: geração nova.
           if ('ativo' in mud && mud.ativo !== x.ativo) { x.ativo = mud.ativo; x.geracao += 1; }
           return publico(alvo, x);
@@ -742,6 +761,26 @@ export async function criarServico(opcoes = {}) {
     pipeline(fs.createReadStream(a.arquivo), res, () => {});
   }
 
+  // ---------- aba Estoque (T-0034) ----------
+  const inteiro = (v, padrao, min, max) => {
+    if (v === null || v === '' || !/^\d{1,9}$/.test(v)) return padrao;
+    return Math.min(max, Math.max(min, Number(v)));
+  };
+  function apiEstoque(req, res, s, url) {
+    if (req.method !== 'GET') return metodoErrado(res, 'GET');
+    const ps = new URLSearchParams(url.split('?')[1] || '');
+    const r = estoque.consultar({
+      q: ps.get('q') || '',
+      filial: ps.get('filial') || '',
+      comEstoque: ps.get('com_estoque') === '1',
+      desde: inteiro(ps.get('desde'), 0, 0, 1e9),
+      limite: inteiro(ps.get('limite'), LIMITE_PADRAO, 1, LIMITE_MAX),
+      admin: s.u.admin === true,
+    });
+    if (!r) return json(res, 503, { erro: MSG.estoque });
+    return json(res, 200, r);
+  }
+
   // ---------- roteador ----------
   const MUDA = new Set(['POST', 'PATCH', 'PUT', 'DELETE']);
   async function tratar(req, res, p) {
@@ -808,6 +847,12 @@ export async function criarServico(opcoes = {}) {
         if (mu[1] !== undefined) { try { alvo = decodeURIComponent(mu[1]); } catch { alvo = ''; } }
         return apiUsuarios(req, res, s, alvo, mu[2] ?? null);
       }
+      if (rota === '/api/estoque') {
+        p.nome = 'estoque';
+        req.resume();
+        if (!podeVerEstoque(s.nome, s.u)) return json(res, 404, { erro: MSG.naoEncontrado });
+        return apiEstoque(req, res, s, url);
+      }
       if (rota === '/api/pdfs') {
         p.nome = 'pdfs';
         if (!s.u.admin) return json(res, 404, { erro: MSG.naoEncontrado });
@@ -843,9 +888,12 @@ export async function criarServico(opcoes = {}) {
       return querPagina(req) ? redirecionar(res, '/trocar-senha') : json(res, 403, { erro: MSG.trocar });
     }
     if ((logico === '/admin' || logico.startsWith('/admin/')) && !s.u.admin) return erro(req, res, 404, MSG.naoEncontrado);
+    // Aba Estoque (T-0034): a página e o que estiver em site/estoque/ só com a permissão; sem cache nenhum.
+    const ehEstoque = logico === '/estoque' || logico.startsWith('/estoque/');
+    if (ehEstoque && !podeVerEstoque(s.nome, s.u)) return erro(req, res, 404, MSG.naoEncontrado);
     const a = await acharNoSite(logico);
     if (!a) return erro(req, res, 404, MSG.naoEncontrado);
-    return servirArquivo(req, res, a);
+    return servirArquivo(req, res, a, ehEstoque);
   }
 
   const faxina = setInterval(() => limite.faxina(), 60000);
@@ -865,6 +913,7 @@ export async function criarServico(opcoes = {}) {
   });
   srv.on('clientError', (_e, sock) => sock.destroy());
   srv.on('close', () => clearInterval(faxina));
+  srv.estoquePronto = estoque.pronto; // os testes esperam a carga; carregar() nunca rejeita
   srv.requestTimeout = 30000;
   srv.headersTimeout = 10000;
   return srv;

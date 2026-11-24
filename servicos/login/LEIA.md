@@ -1,6 +1,6 @@
-# Serviço de login do catálogo (T-0022, T-0024)
+# Serviço de login do catálogo (T-0022, T-0024, T-0034)
 
-Node 20+, **sem dependências**. Serve o `site/` inteiro atrás de login, a API das telas (contrato da T-0022), os arquivos do admin (lista fixa, T-0024) e a lista de códigos para o serviço da placa.
+Node 20+, **sem dependências**. Serve o `site/` inteiro atrás de login, a API das telas (contrato da T-0022), os arquivos do admin (lista fixa, T-0024), a aba Estoque (T-0034) e a lista de códigos para o serviço da placa.
 Roda da raiz do repositório (sem `rootDir`): `node servicos/login/server.mjs`, na porta `PORT` (padrão 10000).
 
 ## Variáveis de ambiente
@@ -31,7 +31,8 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 - **Com sessão:** todo o resto do `site/`. Sem sessão, pedido de página (`Accept: text/html`) → 302 `/entrar?volta=<caminho>` (ou `/entrar?expirou=1` se o cookie venceu); o resto → 401.
 - **Troca pendente:** página → 302 `/trocar-senha`; outros arquivos e API → 403. Só abrem `/trocar-senha/**`, `/api/eu`, `/api/sair` e `/api/trocar-senha`.
 - **Só admin** (os outros recebem 404): `/admin/**`, `/api/usuarios/**`, `/api/pdfs` e `GET /admin/pdfs/baixar/<id>` (os da lista abaixo).
-- **API** (JSON; erro sempre `{"erro": "..."}`): `POST /api/entrar`, `POST /api/sair`, `GET /api/eu`, `GET /api/eu/logo`, `POST /api/trocar-senha`, `GET|POST /api/usuarios`, `PATCH /api/usuarios/<u>`, `POST /api/usuarios/<u>/senha`, `GET|PUT|DELETE /api/usuarios/<u>/logo`, `GET /api/pdfs`. Detalhes no contrato da T-0022. Cada usuário da lista (`GET /api/usuarios`) traz `usuario, nome, empresa, admin, ativo, temLogo, trocarSenha, ultimoAcesso`.
+- **Só com a permissão do estoque** (os outros recebem 404): `/estoque` (e `/estoque/**`) e `GET /api/estoque`. Ver **Aba Estoque**, abaixo.
+- **API** (JSON; erro sempre `{"erro": "..."}`): `POST /api/entrar`, `POST /api/sair`, `GET /api/eu`, `GET /api/eu/logo`, `POST /api/trocar-senha`, `GET|POST /api/usuarios`, `PATCH /api/usuarios/<u>`, `POST /api/usuarios/<u>/senha`, `GET|PUT|DELETE /api/usuarios/<u>/logo`, `GET /api/pdfs`, `GET /api/estoque`. Detalhes no contrato da T-0022. Cada usuário da lista (`GET /api/usuarios`) traz `usuario, nome, empresa, admin, estoque, ativo, temLogo, trocarSenha, ultimoAcesso`; o `GET /api/eu` traz `usuario, nome, empresa, admin, estoque, temLogo, trocarSenha, expiraEm`.
 - **Interna:** `GET /interno/codigos` com o cabeçalho `X-Chave-Interna` → `{"total": n, "codigos": [...]}`; sem a chave certa, 401.
 
 ## Arquivos do admin (T-0024, T-0032)
@@ -49,6 +50,38 @@ Lista **fixa** `PDFS` no `server.mjs` (id, título, arquivo por regex ancorada, 
 - **Nunca saem:** os `.xlsx` e os `.png` de `entregas/`, o `Aplicacoes_Catalogo_Online_Antes_Depois_*.pdf`, qualquer outro arquivo que não case com a lista e qualquer coisa de `dados/`. Os testes conferem, também com `..`, `%2F` e `%2e%2e`.
 - O `buildFilter` do `render.yaml` só decide quando o serviço é publicado de novo.
 
+## Aba Estoque (T-0034)
+
+Fonte: o `ESTOQUE_BAP.xlsx` da BAP Central (`https://raw.githubusercontent.com/aloirr/bapcentral/main/RELATORIOS/ESTOQUE_BAP.xlsx`, repositório público, leitura **sem chave**). O código fica em `estoque.mjs`.
+
+- **Carga:** no início do serviço (cada publicação), uma vez. Baixa (até 50 MB, 60 s), lê a 1ª aba com um leitor de xlsx mínimo (só `zlib`; aceita texto inline, sharedStrings, número e data/hora como número de série do Excel) e guarda **só na memória**. Nada vai para o disco, para o `site/` nem para o `produtos.json`.
+  - Falhou (rede, 404, arquivo quebrado ou sem as colunas DATA, HORA, CIDADE, FILIAL_BAP, COD_PRODUTO, DESCRICAO_PRODUTO e ESTOQUE): o catálogo segue no ar e só a aba responde **503** `{"erro": "Estoque indisponível no momento."}`. Enquanto carrega, também 503. A posição nova só entra na próxima publicação.
+  - Medido localmente com a planilha de 19/11/2026 (18.274 linhas): leitura em ~0,9 s, ~40 MB de memória retida (pico de ~190 MB de RSS durante a leitura); o download leva ~0,1 a 0,3 s. Cada consulta leva poucos ms.
+  - Log: só `estoque ok <n> linhas <ms>ms` ou `estoque indisponivel` (sem endereço nem dado).
+- **Permissão "pode ver o estoque"** (regra única, `podeVerEstoque` no `server.mjs`): o admin **sempre** pode; os outros, pelo campo `estoque: true|false` do registro. Usuário antigo sem o campo vale `false`, menos o **`bap.vendedor`**, que começa com `true` enquanto não tiver o campo gravado.
+  - `GET /api/usuarios` e `GET /api/eu` trazem `estoque` já com essa regra (o admin aparece com `true`).
+  - `PATCH /api/usuarios/<u>` com `{"estoque": true|false}` e `POST /api/usuarios` com `"estoque"` (opcional; padrão `false`): só o admin; valor que não é booleano → 400. A mudança vale no pedido seguinte, sem derrubar a sessão.
+- **`GET /estoque`** (e `/estoque/`, que servem `site/estoque/index.html`): sem sessão, como as outras páginas (302 para o `/entrar`); sem a permissão, **404** (a página simples "Não encontrado."); com a permissão, a página. Tudo em `site/estoque/` segue a mesma regra e vai com `Cache-Control: no-store`.
+- **`GET /api/estoque?q=&filial=&com_estoque=1&desde=0&limite=50`** (sem sessão: 401; sem a permissão: 404; só GET; `Cache-Control: no-store`):
+
+```
+{ "posicao": {"data": "19/11/2026", "hora": "16:48"},
+  "colunas": [{"campo": "CIDADE", "rotulo": "Filial", "tipo": "texto"}, ...],
+  "total": 18274, "desde": 0, "limite": 50,
+  "linhas": [{"CIDADE": "Mato Grosso", "FILIAL_BAP": "40101001", ...}],
+  "filiais": [{"numero": "40101005", "nome": "Belém"}, ...] }
+```
+
+  - `tipo`: `texto`, `numero`, `dinheiro` ou `markup`. Os valores vão **crus** (número como número; célula vazia como `null`); quem formata é a tela.
+  - **Vendedor** (lista branca, cortada no servidor, nesta ordem): Filial (`CIDADE`, com o nome de exibição), Nº filial (`FILIAL_BAP`), Código (`COD_PRODUTO`), Descrição (`DESCRICAO_PRODUTO`), Fornecedor (`FORNECEDOR`), Estoque (`ESTOQUE`). Nenhuma outra chave sai, em nenhuma parte da resposta.
+  - **Admin** (23 colunas, nesta ordem): Filial, Nº filial, Código, Descrição, Estoque, Custo do produto (`PPEDIDO`), Custo total (`CUSTO_TOTAL`), Preço capital, Preço interior, Markup capital, Markup interior, Fornecedor, Tabela capital, Tabela interior, Sucata, Origem do custo, ID do produto, Cód. fornecedor, Filial CD, Categoria, Sistema, Família, Linha. DATA e HORA só vão em `posicao`.
+  - Nome de exibição das cidades: Belém, Boa Vista, Macapá, Manaus, Mato Grosso (`MATOGROSSO`), Santarém, São Luís (`SÃO LUIS`); outra cidade vai como veio.
+  - `q`: todas as palavras (até 20; até 200 caracteres), sem acento e sem caixa, como trecho, em código, código do fornecedor, ID, descrição, fornecedor, cidade (como veio e o nome de exibição) e número da filial. "matogrosso" e "mato grosso" acham as duas.
+  - `filial`: o número da filial (igual). `com_estoque=1`: esconde estoque 0 ou vazio.
+  - `desde` (padrão 0) e `limite` (padrão 50, de 1 a 200; fora disso, vale o mais perto). Valor que não é número: o padrão. A ordem é a da planilha. `total` é o número de linhas achadas.
+  - `filiais`: todas as filiais da planilha, em ordem alfabética do nome de exibição (para o filtro).
+- Testes (`login.test.mjs`, sem rede): um xlsx **sintético**, montado no próprio teste com valores fictícios, servido por um servidor local; a fonte entra por `criarServico({ estoqueUrl })` (`null` = sem fonte, o padrão dos testes).
+
 ## Segurança (resumo)
 
 - Senha: scrypt (N=16384, r=8, p=1, sal de 16 bytes), comparação em tempo constante; de 8 a 200 caracteres.
@@ -60,4 +93,4 @@ Lista **fixa** `PDFS` no `server.mjs` (id, título, arquivo por regex ancorada, 
   - **[SUPOSIÇÃO]** O desenho aprovado falava em até 200 KB, com o serviço reduzindo a imagem. Sem dependências, não há como reduzir; por isso vale o limite de 1 MB do contrato com as telas.
 - `volta` do redirecionamento ao login: vira `/` se o caminho (cru ou decodificado) tiver caractere de controle (o navegador apaga tab, LF e CR: `/%09/x` vira `//x`) ou começar com `//` ou `/\` (não leva para outro site). O `entrar.js` também confere.
 - `usuarios.json`: gravação segura (`.tmp`, `fsync`, `rename`), arquivo 0600. Arquivo ilegível: o serviço fecha (503) e não sobrescreve.
-- Log: só o tipo da rota, o status e o tempo (`entrar 401 52ms`), mais as linhas de partida (`login ouvindo`, `usuarios ok N`, `fechado: <motivo>`). Nunca senha, hash, cookie, segredo, chave, usuário, caminho ou IP.
+- Log: só o tipo da rota, o status e o tempo (`entrar 401 52ms`), mais as linhas de partida (`login ouvindo`, `usuarios ok N`, `fechado: <motivo>`, `estoque ok N linhas Xms` ou `estoque indisponivel`). Nunca senha, hash, cookie, segredo, chave, usuário, caminho ou IP.
