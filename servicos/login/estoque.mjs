@@ -6,7 +6,9 @@ import zlib from 'node:zlib';
 
 export const FONTE_ESTOQUE = 'https://raw.githubusercontent.com/aloirr/bapcentral/main/RELATORIOS/ESTOQUE_BAP.xlsx';
 const DOWNLOAD_MAX = 50 * 1024 * 1024;      // o xlsx real tem ~2,3 MB
-const XML_MAX = 300 * 1024 * 1024;          // descompactado (~25 MB hoje); trava contra zip-bomba
+// Descompactado, somando todas as partes (~25 MB hoje). O serviço roda com 512 MB: passou, só a aba dá 503.
+export const DESCOMPACTADO_MAX = 64 * 1024 * 1024;
+export const LINHAS_MAX = 200000;           // ~18 mil hoje
 const DOWNLOAD_MS = 60000;
 export const LIMITE_PADRAO = 50;
 export const LIMITE_MAX = 200;
@@ -62,7 +64,8 @@ export const nomeCidade = (c) => (c == null ? null : CIDADES[c] || String(c));
 export const normalizar = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 // ---------- zip (só o necessário: diretório central, "stored" e "deflate") ----------
-function lerZip(buf) {
+// orcamento: bytes que ainda podem sair da descompressão, somando TODAS as partes do xlsx (trava contra zip-bomba).
+function lerZip(buf, orcamento) {
   let fim = -1;
   for (let i = buf.length - 22; i >= Math.max(0, buf.length - 22 - 65535); i--) {
     if (buf.readUInt32LE(i) === 0x06054b50) { fim = i; break; }
@@ -90,13 +93,38 @@ function lerZip(buf) {
     if (l + 30 > buf.length || buf.readUInt32LE(l) !== 0x04034b50) throw new Error('zip');
     const ini = l + 30 + buf.readUInt16LE(l + 26) + buf.readUInt16LE(l + 28);
     const dados = buf.subarray(ini, ini + e.tamComp);
-    if (e.metodo === 0) return dados.toString('utf8');
-    if (e.metodo === 8) return zlib.inflateRawSync(dados, { maxOutputLength: XML_MAX }).toString('utf8');
-    throw new Error('zip');
+    let cru;
+    if (e.metodo === 0) cru = dados;
+    else if (e.metodo === 8) cru = zlib.inflateRawSync(dados, { maxOutputLength: Math.max(1, orcamento.resta) }); // passou: RangeError
+    else throw new Error('zip');
+    orcamento.resta -= cru.length;
+    if (orcamento.resta < 0) throw new Error('grande');
+    return cru.toString('utf8');
   };
 }
 
-// ---------- xml (o mínimo do SpreadsheetML) ----------
+// ---------- xml (o mínimo do SpreadsheetML), varredura LINEAR com indexOf ----------
+// Percorre os elementos <tag ...>...</tag> ou <tag .../> de um trecho, sem regex com retrocesso.
+// Sem o fechamento: erro (não volta a procurar do começo). Não serve para tag aninhada nela mesma (o xlsx não tem).
+const FIM_NOME = new Set([' ', '>', '/', '\t', '\n', '\r']);
+function* elementos(xml, tag) {
+  const abre = '<' + tag;
+  const fecha = '</' + tag + '>';
+  let pos = 0;
+  for (;;) {
+    const p = xml.indexOf(abre, pos);
+    if (p < 0) return;
+    if (!FIM_NOME.has(xml[p + abre.length])) { pos = p + abre.length; continue; } // <cols>, <rowX>...
+    const gt = xml.indexOf('>', p);
+    if (gt < 0) throw new Error('xml');
+    if (xml[gt - 1] === '/') { yield [xml.slice(p + abre.length, gt - 1), '']; pos = gt + 1; continue; }
+    const f = xml.indexOf(fecha, gt);
+    if (f < 0) throw new Error('xml');
+    yield [xml.slice(p + abre.length, gt), xml.slice(gt + 1, f)];
+    pos = f + fecha.length;
+  }
+}
+const primeiro = (xml, tag) => { for (const e of elementos(xml, tag)) return e; return null; };
 const ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
 const desescapar = (s) => s.replace(/&(#x[0-9a-fA-F]+|#\d+|amp|lt|gt|quot|apos);/g, (_, e) => {
   if (e[0] !== '#') return ENT[e];
@@ -106,15 +134,16 @@ const desescapar = (s) => s.replace(/&(#x[0-9a-fA-F]+|#\d+|amp|lt|gt|quot|apos);
 // Junta os <t> de um <si> ou <is> (texto com formatação vem em vários <r><t>).
 const textoDe = (xml) => {
   let s = '';
-  for (const m of xml.matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)) s += m[1];
+  for (const [, t] of elementos(xml, 't')) s += t;
   return desescapar(s);
 };
 const atributo = (attrs, nome) => {
   const m = new RegExp(`(?:^|\\s)${nome}="([^"]*)"`).exec(attrs);
   return m ? m[1] : null;
 };
+const COLUNAS_MAX = 16384; // o limite do Excel (XFD)
 function indiceColuna(ref) {
-  const m = /^([A-Z]+)/.exec(ref || '');
+  const m = /^([A-Z]{1,3})\d/.exec(ref || '');
   if (!m) return -1;
   let n = 0;
   for (const ch of m[1]) n = n * 26 + (ch.charCodeAt(0) - 64);
@@ -122,49 +151,49 @@ function indiceColuna(ref) {
 }
 
 // Lê a 1ª aba do xlsx: devolve as linhas como arrays (texto, número, booleano ou null).
-export function lerXlsx(buf) {
-  const ler = lerZip(buf);
+// Planilha grande demais (descompressão total, linhas ou colunas): erro, nunca derruba o serviço.
+export function lerXlsx(buf, { descompactadoMax = DESCOMPACTADO_MAX, linhasMax = LINHAS_MAX } = {}) {
+  const ler = lerZip(buf, { resta: descompactadoMax });
   let alvo = 'xl/worksheets/sheet1.xml';
   const wb = ler('xl/workbook.xml');
   const rels = ler('xl/_rels/workbook.xml.rels');
   if (wb && rels) {
-    const sheet = /<sheet\b([^>]*)\/?>/.exec(wb);
-    const rid = sheet ? atributo(sheet[1], 'r:id') : null;
-    for (const m of rels.matchAll(/<Relationship\b([^>]*)\/?>/g)) {
-      if (rid && atributo(m[1], 'Id') === rid) {
-        const t = atributo(m[1], 'Target');
+    const sheet = primeiro(wb, 'sheet');
+    const rid = sheet ? atributo(sheet[0], 'r:id') : null;
+    for (const [attrs] of elementos(rels, 'Relationship')) {
+      if (rid && atributo(attrs, 'Id') === rid) {
+        const t = atributo(attrs, 'Target');
         if (t) alvo = t.startsWith('/') ? t.slice(1) : 'xl/' + t.replace(/^\.\//, '');
       }
     }
   }
   const compartilhadas = [];
   const ss = ler('xl/sharedStrings.xml');
-  if (ss) for (const m of ss.matchAll(/<si\b[^>]*>([\s\S]*?)<\/si>/g)) compartilhadas.push(textoDe(m[1]));
+  if (ss) for (const [, si] of elementos(ss, 'si')) compartilhadas.push(textoDe(si));
   const xml = ler(alvo);
   if (!xml) throw new Error('aba');
   const linhas = [];
-  for (const r of xml.matchAll(/<row\b[^>]*?(?:\/>|>([\s\S]*?)<\/row>)/g)) {
+  for (const [, dentroLinha] of elementos(xml, 'row')) {
+    if (linhas.length >= linhasMax) throw new Error('linhas');
     const linha = [];
-    if (r[1]) {
-      let pos = 0;
-      for (const c of r[1].matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
-        const attrs = c[1];
-        const dentro = c[2] || '';
-        const i = indiceColuna(atributo(attrs, 'r'));
-        const col = i >= 0 ? i : pos;
-        pos = col + 1;
-        const t = atributo(attrs, 't') || 'n';
-        const v = /<v>([\s\S]*?)<\/v>/.exec(dentro);
-        let valor = null;
-        if (t === 'inlineStr') valor = textoDe(dentro);
-        else if (t === 's') valor = v ? compartilhadas[Number(v[1])] ?? null : null;
-        else if (t === 'str') valor = v ? desescapar(v[1]) : null;
-        else if (t === 'b') valor = v ? v[1] === '1' : null;
-        else if (t === 'e') valor = null;
-        else if (v && v[1] !== '') { const n = Number(v[1]); valor = Number.isFinite(n) ? n : null; }
-        if (typeof valor === 'string' && valor === '') valor = null;
-        linha[col] = valor;
-      }
+    let pos = 0;
+    for (const [attrs, dentro] of elementos(dentroLinha, 'c')) {
+      const i = indiceColuna(atributo(attrs, 'r'));
+      const col = i >= 0 ? i : pos;
+      if (col >= COLUNAS_MAX) throw new Error('colunas');
+      pos = col + 1;
+      const t = atributo(attrs, 't') || 'n';
+      const ve = primeiro(dentro, 'v');
+      const v = ve ? ve[1] : null;
+      let valor = null;
+      if (t === 'inlineStr') valor = textoDe(dentro);
+      else if (t === 's') valor = v !== null ? compartilhadas[Number(v)] ?? null : null;
+      else if (t === 'str') valor = v !== null ? desescapar(v) : null;
+      else if (t === 'b') valor = v !== null ? v === '1' : null;
+      else if (t === 'e') valor = null;
+      else if (v !== null && v !== '') { const n = Number(v); valor = Number.isFinite(n) ? n : null; }
+      if (typeof valor === 'string' && valor === '') valor = null;
+      linha[col] = valor;
     }
     for (let k = 0; k < linha.length; k++) if (linha[k] === undefined) linha[k] = null;
     linhas.push(linha);
@@ -172,7 +201,7 @@ export function lerXlsx(buf) {
   return linhas;
 }
 
-// Data e hora da posição: texto ("19/11/2026", "16:48") ou número de série do Excel.
+// Data e hora da posição: texto ("01/01/2000", "08:00") ou número de série do Excel.
 const dois = (n) => String(n).padStart(2, '0');
 function textoData(v) {
   if (typeof v === 'number' && Number.isFinite(v)) {
@@ -228,25 +257,35 @@ export function montarBase(tabela) {
 }
 
 // Baixa a fonte (com limite de tamanho e de tempo). Erro: exceção sem dado nenhum da resposta.
-async function baixar(url) {
+// Lê em pedaços e para assim que passa do limite (com ou sem Content-Length).
+async function baixar(url, max = DOWNLOAD_MAX) {
   const r = await fetch(url, { signal: AbortSignal.timeout(DOWNLOAD_MS), redirect: 'follow' });
-  if (!r.ok) throw new Error('http');
+  if (!r.ok || !r.body) throw new Error('http');
   const decl = Number(r.headers.get('content-length'));
-  if (Number.isFinite(decl) && decl > DOWNLOAD_MAX) throw new Error('grande');
-  const b = Buffer.from(await r.arrayBuffer());
-  if (b.length > DOWNLOAD_MAX) throw new Error('grande');
-  return b;
+  if (Number.isFinite(decl) && decl > max) { await r.body.cancel().catch(() => {}); throw new Error('grande'); }
+  const partes = [];
+  let tam = 0;
+  const leitor = r.body.getReader();
+  for (;;) {
+    const { done, value } = await leitor.read();
+    if (done) break;
+    tam += value.length;
+    if (tam > max) { await leitor.cancel().catch(() => {}); throw new Error('grande'); }
+    partes.push(value);
+  }
+  return Buffer.concat(partes, tam);
 }
 
 // Estado da aba: 'carregando' -> 'ok' | 'falhou'. carregar() nunca rejeita (o catálogo segue no ar).
-export function criarEstoque({ url = FONTE_ESTOQUE, log = () => {}, agora = Date.now } = {}) {
+// limites: só os testes trocam ({ downloadMax, descompactadoMax, linhasMax }).
+export function criarEstoque({ url = FONTE_ESTOQUE, log = () => {}, agora = Date.now, limites = {} } = {}) {
   let base = null;
   let estado = 'carregando';
   async function carregar() {
     const t0 = agora();
     try {
       if (!url) throw new Error('sem fonte');
-      base = montarBase(lerXlsx(await baixar(url)));
+      base = montarBase(lerXlsx(await baixar(url, limites.downloadMax), limites));
       estado = 'ok';
       log(`estoque ok ${base.linhas.length} linhas ${agora() - t0}ms`);
     } catch {

@@ -889,7 +889,9 @@ export async function criarServico(opcoes = {}) {
     }
     if ((logico === '/admin' || logico.startsWith('/admin/')) && !s.u.admin) return erro(req, res, 404, MSG.naoEncontrado);
     // Aba Estoque (T-0034): a página e o que estiver em site/estoque/ só com a permissão; sem cache nenhum.
-    const ehEstoque = logico === '/estoque' || logico.startsWith('/estoque/');
+    // Sem diferenciar maiúscula: num disco que não diferencia, /ESTOQUE/ abriria a mesma página.
+    const minusc = logico.toLowerCase();
+    const ehEstoque = minusc === '/estoque' || minusc.startsWith('/estoque/');
     if (ehEstoque && !podeVerEstoque(s.nome, s.u)) return erro(req, res, 404, MSG.naoEncontrado);
     const a = await acharNoSite(logico);
     if (!a) return erro(req, res, 404, MSG.naoEncontrado);

@@ -9,7 +9,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { criarServico, caminhoLogico, tipoDaImagem, voltaSegura, podeVerEstoque, SESSAO_MS, JANELA_ERROS_MS } from './server.mjs';
-import { lerXlsx } from './estoque.mjs';
+import { lerXlsx, DESCOMPACTADO_MAX, LINHAS_MAX } from './estoque.mjs';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const ORIGEM = 'https://catalogo.exemplo.invalid';
@@ -798,9 +798,9 @@ const CAB_ESTOQUE = ['DATA', 'HORA', 'CIDADE', 'FILIAL_BAP', 'ID_PRODUTO', 'COD_
   'PRECO_INTERIOR', 'MARKUP_CAPITAL', 'MARKUP_INTERIOR', 'CATEGORIA', 'SISTEMA', 'FAMILIA', 'LINHA', 'SUCATA', 'CUSTO_TOTAL'];
 const FILIAIS_FICT = [['MANAUS', '90000002'], ['MATOGROSSO', '90000001'], ['SÃO LUIS', '90000006'], ['BELÉM', '90000005']];
 const N_ESTOQUE = 260;
-// Série do Excel para 19/11/2026 16:48 (a data entra como número, a hora como fração: o leitor converte).
-const SERIE_DATA = Date.UTC(2026, 10, 19) / 86400000 + 25569;
-const SERIE_HORA = (16 * 60 + 48) / 1440;
+// Série do Excel para 01/01/2000 08:00 (fictícia) (a data entra como número, a hora como fração: o leitor converte).
+const SERIE_DATA = Date.UTC(2000, 0, 1) / 86400000 + 25569;
+const SERIE_HORA = (8 * 60) / 1440;
 function linhaFicticia(i) {
   const [cidade, filial] = FILIAIS_FICT[i % 4];
   const n = String(i).padStart(4, '0');
@@ -825,7 +825,7 @@ const crc32 = (b) => { let c = 0xffffffff; for (const x of b) c = TAB_CRC[(c ^ x
 function zipar(arquivos) {
   const locais = []; const centrais = []; let off = 0;
   for (const [nome, texto] of Object.entries(arquivos)) {
-    const cru = Buffer.from(texto, 'utf8'); const comp = zlib.deflateRawSync(cru); const n = Buffer.from(nome);
+    const cru = Buffer.isBuffer(texto) ? texto : Buffer.from(texto, 'utf8'); const comp = zlib.deflateRawSync(cru); const n = Buffer.from(nome);
     const h = Buffer.alloc(30); h.writeUInt32LE(0x04034b50, 0); h.writeUInt16LE(20, 4); h.writeUInt16LE(8, 8);
     h.writeUInt32LE(crc32(cru), 14); h.writeUInt32LE(comp.length, 18); h.writeUInt32LE(cru.length, 22); h.writeUInt16LE(n.length, 26);
     const c = Buffer.alloc(46); c.writeUInt32LE(0x02014b50, 0); c.writeUInt16LE(20, 4); c.writeUInt16LE(20, 6); c.writeUInt16LE(8, 10);
@@ -866,8 +866,26 @@ function xlsxFicticio(linhas = LINHAS_FICT) {
 let FONTE;
 before(async () => {
   const xlsx = xlsxFicticio();
+  // Zip-bomba: duas partes, cada uma ABAIXO do limite, que juntas passam do limite TOTAL de descompressão.
+  const metade = Buffer.alloc(Math.ceil(DESCOMPACTADO_MAX / 2) + 1024, 0x20);
+  const bomba = zipar({
+    'xl/workbook.xml': '<workbook/>',
+    'xl/sharedStrings.xml': Buffer.concat([Buffer.from('<sst>'), metade, Buffer.from('</sst>')]),
+    'xl/worksheets/sheet1.xml': Buffer.concat([Buffer.from('<worksheet><sheetData>'), metade, Buffer.from('</sheetData></worksheet>')]),
+  });
+  const MB = Buffer.alloc(1024 * 1024, 0x41);
   const srv = http.createServer((req, res) => {
+    res.on('error', () => {});
     if (req.url === '/ESTOQUE_BAP.xlsx') return res.writeHead(200, { 'Content-Length': xlsx.length }).end(xlsx);
+    if (req.url === '/bomba.xlsx') return res.writeHead(200, { 'Content-Length': bomba.length }).end(bomba);
+    // Sem Content-Length (chunked), 51 MB: o serviço tem de parar ao passar de 50 MB.
+    if (req.url === '/sem-tamanho.xlsx') {
+      res.writeHead(200);
+      let n = 0;
+      const mandar = () => { while (n < 51 && !res.destroyed) { n++; if (!res.write(MB)) return res.once('drain', mandar); } if (!res.destroyed) res.end(); };
+      req.socket.on('close', () => { n = 99; });
+      return mandar();
+    }
     if (req.url === '/quebrado.xlsx') return res.writeHead(200).end('isto-nao-e-um-zip');
     res.writeHead(404).end();
   });
@@ -987,7 +1005,7 @@ test('estoque: o admin recebe as 23 colunas na ordem, com os valores crus (T-003
   assert.equal(l.PPEDIDO, 9101.01);
   assert.equal(l.MARKUP_CAPITAL, 94.0123);
   assert.equal(typeof l.PRECO_CAPITAL, 'number');
-  assert.deepEqual(r.json.posicao, { data: '19/11/2026', hora: '16:48' });
+  assert.deepEqual(r.json.posicao, { data: '01/01/2000', hora: '08:00' });
   assert.equal(r.json.total, N_ESTOQUE);
   assert.deepEqual(r.json.filiais, [
     { numero: '90000005', nome: 'Belém' }, { numero: '90000002', nome: 'Manaus' },
@@ -1101,4 +1119,59 @@ test('estoque: /api/eu e /api/usuarios mostram o campo; só o admin muda; usuár
     [['admin', true], ['bap.vendedor', true], ['loja.exemplo', false], ['vend.dois', false], ['vend.exemplo', false]]);
   // O admin pode tirar a permissão do bap.vendedor: o campo gravado (false) passa a valer.
   assert.equal((await s2.pedir('/api/usuarios/bap.vendedor', { metodo: 'PATCH', cookie: adm, corpo: { estoque: false } })).json.estoque, false);
+});
+
+test('estoque: limites contra planilha ruim (descompressão total, linhas, XML sem fechamento) (T-0034)', () => {
+  // Limite TOTAL: duas partes de 600 KB passam de um limite de 1 MB, mesmo cada uma estando abaixo dele.
+  const parte = Buffer.alloc(600 * 1024, 0x20);
+  const duas = zipar({ 'xl/sharedStrings.xml': Buffer.concat([Buffer.from('<sst>'), parte, Buffer.from('</sst>')]),
+    'xl/worksheets/sheet1.xml': Buffer.concat([Buffer.from('<worksheet><sheetData>'), parte, Buffer.from('</sheetData></worksheet>')]) });
+  assert.throws(() => lerXlsx(duas, { descompactadoMax: 1024 * 1024 }));
+  assert.doesNotThrow(() => lerXlsx(duas, { descompactadoMax: 2 * 1024 * 1024 }));
+  // Teto de linhas (o padrão é 200 mil): 11 linhas com teto de 10 dão erro.
+  assert.equal(LINHAS_MAX, 200000);
+  const onze = xlsxFicticio(LINHAS_FICT.slice(0, 10));
+  assert.throws(() => lerXlsx(onze, { linhasMax: 10 }));
+  assert.equal(lerXlsx(onze, { linhasMax: 11 }).length, 11);
+  // XML sem fechamento: erro rápido (varredura linear, sem retrocesso), nunca trava.
+  const aberto = '<worksheet><sheetData>' + '<row r="1"><c r="A1" t="n"><v>1'.repeat(200000);
+  const t0 = Date.now();
+  assert.throws(() => lerXlsx(zipar({ 'xl/worksheets/sheet1.xml': aberto })));
+  assert.ok(Date.now() - t0 < 2000, 'a leitura do XML sem fechamento demorou demais');
+  // Coluna fora do limite do Excel: erro (não cria um array gigante).
+  assert.throws(() => lerXlsx(zipar({ 'xl/worksheets/sheet1.xml': '<worksheet><sheetData><row r="1"><c r="ZZZ1" t="n"><v>1</v></c></row></sheetData></worksheet>' })));
+});
+
+test('estoque: xlsx que estoura a descompressão total e resposta sem Content-Length acima do limite dão 503 só na aba (T-0034)', async () => {
+  for (const rota of ['/bomba.xlsx', '/sem-tamanho.xlsx']) {
+    const s = await subir({ estoqueUrl: FONTE + rota });
+    const adm = await adminPronto(s);
+    const r = await s.pedir('/api/estoque', { cookie: adm });
+    assert.equal(r.status, 503, rota);
+    assert.deepEqual(r.json, { erro: 'Estoque indisponível no momento.' });
+    assert.equal((await s.pedir('/', { cookie: adm, accept: 'text/html' })).status, 200, 'o catálogo segue no ar: ' + rota);
+    assert.ok(s.logs.includes('estoque indisponivel'), rota);
+  }
+});
+
+test('estoque: contorno de caminho (codificado, "..", barra dupla ou invertida, byte nulo, maiúscula) sem a permissão dá 404 (T-0034)', async () => {
+  const { s, cli, vend } = await comEstoque();
+  const rotas = [
+    '/%65stoque', '/%65stoque/', '/estoque%2f', '/estoque%2F', '/estoque%2findex.html', '//estoque', '//estoque/',
+    '/x/../estoque', '/x/..%2festoque', '/%2e%2e/estoque', '/%2E%2E/estoque/', '/./estoque', '/.%2festoque', '/%2e/estoque',
+    '/estoque/./index.html', '/estoque/../estoque/', '/estoque\\index.html', '/estoque%5cindex.html', '\\estoque',
+    '/estoque%00', '/estoque/%00', '/estoque%00/index.html', '/Estoque', '/ESTOQUE', '/ESTOQUE/', '/Estoque/index.html',
+    '/ESTOQUE/index.html', '/estoque/INDEX.HTML', '/EsToQuE/estoque.js', '/estoque/index.html?x=1', '/estoque#x',
+  ];
+  for (const rota of rotas) {
+    for (const accept of ['text/html', 'application/json']) {
+      let r;
+      // Alvo que o HTTP não aceita (ex.: sem "/" no início): o Node fecha a conexão; também não serve nada.
+      try { r = await s.pedir(rota, { cookie: cli, accept }); } catch (e) { assert.equal(e.code, 'ECONNRESET', rota); continue; }
+      assert.ok([400, 404].includes(r.status), `${rota} (${accept}) deu ${r.status}`);
+      assert.ok(!r.texto.includes('<title>estoque</title>') && !r.texto.includes('console.log("estoque")'), 'serviu a página: ' + rota);
+    }
+  }
+  // O controle: com a permissão, o caminho normal abre.
+  assert.equal((await s.pedir('/estoque', { cookie: vend, accept: 'text/html' })).status, 200);
 });
