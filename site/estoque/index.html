@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estoque · Catálogo online BAP</title>
+<meta name="robots" content="noindex">
+<!-- T-0034 · aba Estoque (interna). O servidor de login entrega esta página só ao admin e a quem tem a permissão
+     "Pode ver o estoque"; os outros recebem 404. A página não traz dado nenhum: tudo vem de GET /api/estoque. -->
+<link rel="icon" href="/assets/logo_escuro.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/entrar/entrar.css">
+<link rel="stylesheet" href="/admin/admin.css">
+<link rel="stylesheet" href="/estoque/estoque.css">
+</head>
+<body class="pg-conta">
+<header class="topo">
+  <div class="topo-in">
+    <a href="/#/" class="marca" aria-label="Catálogo online BAP: início"><img src="/assets/logo_branco.png" alt="bap componentes de qualidade"><span>Catálogo <br class="so-cel">online</span></a>
+    <div class="topo-dir">
+      <nav class="menu" aria-label="Menu">
+        <a href="/#/">Início</a>
+        <a href="/#/busca">Produtos</a>
+        <a href="/#/sobre">Sobre a BAP</a>
+      </nav>
+      <div class="conta" id="conta" hidden></div>
+    </div>
+  </div>
+</header>
+<main id="app" tabindex="-1">
+<div class="pg-cab"><div class="pg-cab-in">
+  <p class="trilha"><a href="/#/">Catálogo</a> › Estoque</p>
+  <h1>Estoque</h1>
+  <p class="est-posicao" id="est-posicao" hidden>Posição de <b id="est-data"></b> às <b id="est-hora"></b></p>
+</div></div>
+<div class="pg pg-larga">
+  <div class="us-barra est-barra">
+    <div class="campo"><label for="est-busca">Buscar</label><input id="est-busca" type="search" placeholder="Código, fornecedor ou descrição" autocomplete="off"></div>
+    <div class="campo est-filial"><label for="est-filial">Filial</label>
+      <select id="est-filial"><option value="">Todas</option></select></div>
+    <label class="opcao est-com"><input id="est-com" type="checkbox">Somente produtos com estoque</label>
+  </div>
+  <p class="us-total" id="est-total" aria-live="polite"></p>
+  <div id="est-lista"><div class="carregando">Carregando o estoque…</div></div>
+  <div class="est-mais" id="est-mais" hidden><button type="button" class="bt bt-claro" id="est-mais-bt">Mostrar mais 50</button></div>
+</div>
+</main>
+<footer class="rodape">
+  <div class="rodape-in">
+    <div class="rodape-txt">
+      <p class="rodape-copy">© 2026 - BAP AUTOPARTS - Componentes de qualidade - Todos os direitos reservados.</p>
+      <p class="mini">As fotos são ilustrativas.<span class="rodape-confira"> Confira sempre a aplicação antes da compra.</span></p>
+    </div>
+    <button type="button" class="rodape-topo" aria-label="Voltar ao topo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+  </div>
+</footer>
+<script src="/entrar/comum.js"></script>
+<script src="/conta.js"></script>
+<script src="/entrar/entrar.js"></script>
+<script src="/estoque/estoque.js"></script>
+</body>
+</html>

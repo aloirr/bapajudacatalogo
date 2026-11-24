@@ -23,6 +23,9 @@ table.us tr.off td { color: var(--texto-2); } /* desativado: o texto apagado; a 
 .us-acoes .tag { margin-right: 4px; }
 .us-acoes .bt { height: 44px; padding: 0 12px; font-size: 13px; }
 .us-sit { display: flex; flex-wrap: wrap; gap: 4px; }
+/* caixa de marcar com o texto ao lado (T-0034: "Pode ver o estoque" e "Somente produtos com estoque"), 44 px de toque */
+.opcao { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; color: var(--texto); cursor: pointer; }
+.opcao input { accent-color: var(--verde-esc); width: 18px; height: 18px; flex: none; margin: 0; }
 @media (max-width: 900px) {
   /* celular e tablet: cada usuário vira um cartão com rótulos */
   table.us, table.us tbody, table.us tr, table.us td { display: block; width: 100%; }

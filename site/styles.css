@@ -362,6 +362,7 @@ body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
   :root { --alto-topo: 76px; }
   .menu { gap: 2px; }
   .menu a { font-size: 13px; white-space: nowrap; padding-inline: 6px; } /* 3 itens (op4e): o "Sobre a BAP" aparece também no celular; o "Início" com 44 px de largura (43 px com 5 px) */
+  .menu .menu-estoque { display: none; } /* o "Estoque" (T-0034) fica só no menu da conta: aqui cabem 3 itens */
   .marca img { height: 38px; }
   .marca { gap: 8px; min-height: 44px; } /* toque com 44 px (o logo tem 38 a 40 px) */
   .marca span { font-size: 10px; line-height: 1.2; letter-spacing: .1em; padding-left: 8px; } /* "Catálogo online" em 2 linhas (T-0018) */
