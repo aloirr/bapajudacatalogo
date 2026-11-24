@@ -166,7 +166,18 @@ async function contexto(s, usuario, larg, alt) {
   return { ctx, page };
 }
 // página inteira; a janela (dialog modal) só na tela visível: na página inteira ela fica por cima do fim da lista
-const print = (page, nome, inteira = true) => page.screenshot({ path: path.join(PRINTS, nome + ".png"), fullPage: inteira });
+const print = async (page, nome, inteira = true) => {
+  await semTemplate(page, nome);
+  return page.screenshot({ path: path.join(PRINTS, nome + ".png"), fullPage: inteira });
+};
+// nenhum texto visível com "${" (modelo de texto que não foi preenchido): conferido em cada print e onde mais for chamado
+const comTemplate = [];
+let telasTemplate = 0;
+async function semTemplate(page, onde) {
+  telasTemplate++;
+  const achado = await page.evaluate(() => { const t = document.body.innerText; const i = t.indexOf("${"); return i < 0 ? null : t.slice(Math.max(0, i - 20), i + 30); }).catch(() => null);
+  if (achado) comTemplate.push(`${onde}: "${achado.replace(/\s+/g, " ")}"`);
+}
 const larguraOk = async (page) => page.evaluate(() => document.documentElement.scrollWidth);
 async function abrirEstoque(page, base) {
   await page.goto(base + "/estoque", { waitUntil: "networkidle" });
@@ -196,7 +207,7 @@ const comEstoqueN = LINHAS.filter((l) => l.ESTOQUE != null && l.ESTOQUE !== 0).l
 
 // rodapé de cada tela (texto) e a fonte do filtro Filial (conferidos no passo 7c)
 const rodape = (page) => page.$eval("footer.rodape", (f) => f.innerText).catch(() => null);
-const rodapes = { inicio: null, estoque: null, usuarios: null };
+const rodapes = { estoque: null };
 let fonteFilial = { sel: "", busca: "" };
 
 try {
@@ -205,7 +216,6 @@ try {
     const { ctx, page } = await contexto(S, "cli.teste", 1366, 768);
     await page.waitForSelector("#conta .conta-bt", { timeout: 15000 });
     const cima = await menuCima(page);
-    rodapes.inicio = await rodape(page);
     const conta = await menuConta(page);
     page.esperados.push(404);
     await page.goto(S.base + "/estoque", { waitUntil: "networkidle" });
@@ -275,16 +285,37 @@ try {
     await abrirEstoque(a.page, S.base);
     const w = await larguraOk(a.page);
     await print(a.page, "admin-390");
+    // o texto do botão de cada cartão, exatamente: "+ Detalhes" fechado e "− Menos detalhes" aberto
+    const textosBt = (de, ate) => a.page.$$eval("table.est tbody tr .est-bt-mais", (bs, [i, j]) => bs.slice(i, j).map((b) => b.textContent.trim()), [de, ate]);
+    const antes1 = await textosBt(0, 50);
     await a.page.click("table.est tbody tr:first-child .est-bt-mais");
     const rotA = await larguraRotulo(a.page);
     const aberto = await a.page.$eval("table.est tbody tr:first-child", (tr) => ({ cls: tr.classList.contains("aberta"), bt: tr.querySelector(".est-bt-mais").textContent.trim(), extras: [...tr.querySelectorAll("td.est-extra")].filter((t) => getComputedStyle(t).display !== "none").length }));
     const w2 = await larguraOk(a.page);
     await print(a.page, "admin-390-detalhes", false);
+    await a.page.click("table.est tbody tr:first-child .est-bt-mais");
+    const fechado1 = (await textosBt(0, 1))[0];
+    // um cartão que chegou pelo "Mostrar mais"
+    await a.page.click("#est-mais-bt");
+    await a.page.waitForFunction(() => document.querySelectorAll("table.est tbody tr").length > 50, null, { timeout: 10000 });
+    await a.page.waitForLoadState("networkidle");
+    const antes2 = await textosBt(50, 100);
+    await a.page.click("table.est tbody tr:nth-child(51) .est-bt-mais");
+    const aberto51 = (await textosBt(50, 51))[0];
+    await a.page.click("table.est tbody tr:nth-child(51) .est-bt-mais");
+    const fechado51 = (await textosBt(50, 51))[0];
+    await semTemplate(a.page, "admin 390 depois do Mostrar mais");
+    await a.page.evaluate(() => window.scrollTo(0, 0));
     const conta = await menuConta(a.page);
     await print(a.page, "menu-conta-admin-390", false);
     await a.ctx.close();
-    res("admin 390: sem rolar de lado e \"+ Detalhes\" abre", w <= 390 && w2 <= 390 && aberto.cls && aberto.extras === 18 && /Menos detalhes/.test(aberto.bt),
+    res("admin 390: sem rolar de lado e \"+ Detalhes\" abre", w <= 390 && w2 <= 390 && aberto.cls && aberto.extras === 18 && aberto.bt === "− Menos detalhes",
       `scrollWidth ${w} (aberto ${w2}); cartão aberto com ${aberto.extras} campos a mais, botão "${aberto.bt}"`);
+    const todos = (l, t) => l.length === 50 && l.every((x) => x === t);
+    res("admin 390: texto exato do botão do cartão (antes e depois do clique, também no \"Mostrar mais\")",
+      todos(antes1, "+ Detalhes") && aberto.bt === "− Menos detalhes" && fechado1 === "+ Detalhes"
+        && todos(antes2, "+ Detalhes") && aberto51 === "− Menos detalhes" && fechado51 === "+ Detalhes",
+      `1ª página: ${antes1.length} botões, textos [${[...new Set(antes1)].join(" | ")}]; 1º cartão: "${aberto.bt}" aberto, "${fechado1}" fechado de novo; depois do "Mostrar mais": ${antes2.length} botões novos, textos [${[...new Set(antes2)].join(" | ")}]; 51º cartão: "${aberto51}" aberto, "${fechado51}" fechado de novo`);
     res("admin: Estoque no menu da conta (390)", conta[0] === "Estoque", `[${conta.join(", ")}]`);
     res("admin 390: rótulo do cartão com 142 px", rotA.base === "142px", `flex-basis do rótulo ${rotA.base}`);
   }
@@ -464,7 +495,6 @@ try {
     await page.waitForLoadState("networkidle");
     const cliApi2 = (await pedir(S.base, "/api/estoque", { cookie: cli })).status;
     await print(page, "criar-usuarios-lista-1366");
-    rodapes.usuarios = await rodape(page);
     await ctx.close();
     // o novo usuário entra, troca a senha e vê o Estoque nos menus
     S.senhas["novo.vend"] = s1;
@@ -511,16 +541,17 @@ try {
       `scrollWidth lista ${w}, janela ${w2}; caixa "${caixa.rot}" dentro da tela: ${caixa.dentro} (altura ${caixa.alt} px); "Vê o estoque" em ${tag.join(", ")}`);
   }
 
-  // ---- 7c. rodapé e fonte do filtro: no /estoque sai "As fotos são ilustrativas…" (a aba não tem foto); nas outras fica ----
+  // ---- 7c. rodapé e fonte do filtro: no /estoque sai "As fotos são ilustrativas…" (a aba não tem foto) ----
   {
     const tem = (t) => /fotos s[aã]o ilustrativas/i.test(t);
     const ok = rodapes.estoque !== null && !tem(rodapes.estoque) && /BAP AUTOPARTS/.test(rodapes.estoque)
-      && tem(rodapes.inicio || "") && tem(rodapes.usuarios || "") && fonteFilial.sel === fonteFilial.busca && fonteFilial.sel !== "";
-    res("rodapé do /estoque sem \"fotos ilustrativas\" (as outras com) e o filtro com a fonte da página", ok,
-      `/estoque: "${(rodapes.estoque || "").replace(/\s+/g, " ").trim()}"; início (catálogo) com a frase: ${tem(rodapes.inicio || "")}; Criar usuários com a frase: ${tem(rodapes.usuarios || "")}; fonte do select Filial "${fonteFilial.sel}", do campo Buscar "${fonteFilial.busca}"`);
+      && fonteFilial.sel === fonteFilial.busca && fonteFilial.sel !== "";
+    res("rodapé do /estoque sem \"fotos ilustrativas\" e o filtro com a fonte da página", ok,
+      `/estoque: "${(rodapes.estoque || "").replace(/\s+/g, " ").trim()}"; fonte do select Filial "${fonteFilial.sel}", do campo Buscar "${fonteFilial.busca}"`);
   }
 
-  // ---- 8. console e log ----
+  // ---- 8. console, "${" e log ----
+  res("nenhum texto visível com \"${\"", !comTemplate.length, comTemplate.length ? comTemplate.join(" | ") : `${telasTemplate} telas conferidas (cada print e o admin 390 depois do "Mostrar mais")`);
   res("console sem erro inesperado", !errosConsole.length, errosConsole.length ? errosConsole.join(" | ") : "0 erro (404 do cliente e 503 da fonte quebrada esperados e descontados)");
   const logs = [...S.logs, ...S503.logs].join("\n");
   const vaz = [...Object.values(S.senhas), ...Object.values(S503.senhas)].some((s) => logs.includes(s)) || /ZZT\d|TESTE|127\.0\.0\.1/.test(logs);
