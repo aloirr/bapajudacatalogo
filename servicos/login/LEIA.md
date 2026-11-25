@@ -70,14 +70,15 @@ Fonte: o `ESTOQUE_BAP.xlsx` da BAP Central (`https://raw.githubusercontent.com/a
 - **Permissão "pode ver o estoque"** (regra única, `podeVerEstoque` no `server.mjs`): o admin **sempre** pode; os outros, pelo campo `estoque: true|false` do registro. Usuário antigo sem o campo vale `false`, menos o **`bap.vendedor`**, que começa com `true` enquanto não tiver o campo gravado. O campo `estoque` das rotas (seção **Rotas**) já segue essa regra (o admin aparece com `estoque: true`).
   - `PATCH /api/usuarios/<u>` com `{"estoque": true|false}` e `POST /api/usuarios` com `"estoque"` (opcional; padrão `false`): só o admin; valor que não é booleano → 400. A mudança vale no pedido seguinte, sem derrubar a sessão.
 - **`GET /estoque`** (e `/estoque/`, que servem `site/estoque/index.html`): sem sessão, como as outras páginas (302 para o `/entrar`); sem a permissão, **404** (a página simples "Não encontrado."); com a permissão, a página. Tudo em `site/estoque/` segue a mesma regra e vai com `Cache-Control: no-store`. A conferência do caminho não diferencia maiúscula (`/ESTOQUE/` também exige a permissão).
-- **`GET /api/estoque?q=&filial=&com_estoque=1&desde=0&limite=50`** (sem sessão: 401; sem a permissão: 404; só GET; `Cache-Control: no-store`):
+- **`GET /api/estoque?q=&filial=&com_estoque=1&categoria=&sistema=&familia=&desde=0&limite=50`** (sem sessão: 401; sem a permissão: 404; só GET; `Cache-Control: no-store`):
 
 ```
 { "posicao": {"data": "01/01/2000", "hora": "08:00"},
   "colunas": [{"campo": "CIDADE", "rotulo": "Filial", "tipo": "texto"}, ...],
   "total": 1234, "desde": 0, "limite": 50,
   "linhas": [{"CIDADE": "Mato Grosso", "FILIAL_BAP": "90000001", ...}],
-  "filiais": [{"numero": "90000005", "nome": "Belém"}, ...] }
+  "filiais": [{"numero": "90000005", "nome": "Belém"}, ...],
+  "opcoes": { "categorias": ["FREIO", "MOTOR", ...], "sistemas": [...], "familias": [...] } }
 (valores fictícios)
 ```
 
@@ -89,6 +90,12 @@ Fonte: o `ESTOQUE_BAP.xlsx` da BAP Central (`https://raw.githubusercontent.com/a
   - `filial`: o número da filial (igual). `com_estoque=1`: esconde estoque 0 ou vazio.
   - `desde` (padrão 0) e `limite` (padrão 50, de 1 a 200; fora disso, vale o mais perto). Valor que não é número: o padrão. A ordem é a da planilha. `total` é o número de linhas achadas.
   - `filiais`: todas as filiais da planilha, em ordem alfabética do nome de exibição (para o filtro).
+  - **Filtros de classificação (T-0035)**: `categoria`, `sistema` e `familia` (colunas CATEGORIA, SISTEMA e FAMILIA da planilha). Cada valor é o texto exato de uma opção de `opcoes`, comparado sem caixa e sem acento (até 200 caracteres); vazio ou ausente = "Todas". Somam com `q`, `filial`, `com_estoque` e a paginação. Valem para o admin e para o vendedor; o vendedor **só filtra**: as colunas dele não mudam.
+  - `opcoes` (são nomes de classificação, não valores): listas de texto, como estão na planilha, em ordem alfabética, sem vazio e sem repetição, montadas **em cascata** a partir da planilha **inteira** (não dependem de `q`, `filial` nem `com_estoque`):
+    - `categorias`: todas;
+    - `sistemas`: os da categoria escolhida (ou todos, sem categoria);
+    - `familias`: as da categoria e do sistema escolhidos (o que estiver escolhido).
+  - Filtro **incoerente** [SUPOSIÇÃO, contrato da T-0035]: valor que não existe no seu nível da cascata (categoria que não há na planilha, sistema que não pertence à categoria, família que não pertence à categoria e ao sistema) é **ignorado junto com os níveis abaixo dele**, e as `opcoes` vêm coerentes com o que valeu. Ex.: `categoria=MOTOR&sistema=HIDRAULICO&familia=CILINDRO`, com HIDRÁULICO só em FREIO: vale só a categoria; `sistemas` e `familias` são os de MOTOR.
 - Testes (`login.test.mjs`, sem rede): um xlsx **sintético**, com valores fictícios, montado por `xlsx-ficticio.mjs` (só de teste; o `testes/estoque-t0034.mjs` usa o mesmo), servido por um servidor local (também uma zip-bomba e uma resposta de 51 MB sem `Content-Length`); a fonte entra por `criarServico({ estoqueUrl })` (`null` = sem fonte, o padrão dos testes). A recarga (T-0036) usa relógio e `setTimeout` falsos (`criarServico({ agendar })`), e a fonte local troca de conteúdo entre uma carga e outra.
 
 ## Segurança (resumo)
