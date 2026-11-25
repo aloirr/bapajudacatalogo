@@ -11,7 +11,8 @@
                        código e por referência; os produtos que saíram da busca com ano). Sem ele, essas comparações
                        ficam de fora (aparecem como "não conferido").
      --prints <pasta>  onde gravar os prints (padrão: testes/prints/ultima-t0033). deviceScaleFactor 2.
-     --so <lista>      roda só as conferências da lista, separadas por vírgula: restricoes (f) e aviso (g).
+     --so <lista>      roda só as conferências da lista, separadas por vírgula: restricoes (f), aviso (g) e contagens
+                       (as contagens fixas: digitadas e pela faixa, em 1366, só com o JSON da medida).
    Saída: 0 se passou e 1 se falhou.
 
    Regras conferidas (pedidos R-20261124-152047-po e R-20261124-152425-po):
@@ -76,7 +77,7 @@ const op = { site: path.join(RAIZ, "site"), antes: "", prints: path.join(RAIZ, "
 for (let i = 2; i < process.argv.length; i++) {
   const a = process.argv[i], v = () => { const x = process.argv[++i]; if (!x) { console.error(`[ERRO] ${a} precisa de um valor`); process.exit(1); } return path.resolve(process.cwd(), x); };
   if (a === "--site") op.site = v(); else if (a === "--antes") op.antes = v(); else if (a === "--prints") op.prints = v();
-  else if (a === "--so") { op.so = (process.argv[++i] || "").split(","); if (!op.so.length || op.so.some((x) => !["restricoes", "aviso"].includes(x))) { console.error(`[ERRO] --so aceita "restricoes", "aviso" ou "restricoes,aviso"`); process.exit(1); } }
+  else if (a === "--so") { op.so = (process.argv[++i] || "").split(","); if (!op.so.length || op.so.some((x) => !["restricoes", "aviso", "contagens"].includes(x))) { console.error(`[ERRO] --so aceita "restricoes", "aviso" e "contagens", separados por vírgula`); process.exit(1); } }
   else { console.error(`[ERRO] opção desconhecida: ${a}`); process.exit(1); }
 }
 
@@ -391,7 +392,7 @@ function linhaTemTermo(linha, nucleo) {
   const pal = pals(linha), alvo = pals(nucleo.join(" "));
   return alvo.every((x) => pal.includes(x)) || pal.includes(alvo.join(""));
 }
-const PRINTS_RESTR = ["CXD13090", "AMT7050", "POL1678", "CIL8528"];
+const PRINTS_RESTR = ["CXD13090", "AMT7050", "AMT7134", "POL1678", "CIL8528"];
 const PRINTS = []; // os prints das conferências f) e g)
 async function conferirRestricoes(browser, prods) {
   const alvo = prods.filter((p) => restricoesDoTexto(p.a).length);
@@ -465,6 +466,15 @@ async function conferirAvisoTipo(browser, prods) {
   }
 }
 
+// as contagens fixas (rodada curta): as digitadas e as da faixa, em 1366
+async function conferirContagens(browser, mesmoJson, digital) {
+  const D = await abrirSite(browser, op.site, LARGURAS[0], "contagens");
+  const med = (m, n) => (mesmoJson ? m === n : null), txt = (m) => (mesmoJson ? `medido: ${m}` : `JSON diferente do da medida (${digital}): ${m}. Remeça.`);
+  for (const [q, n] of Object.entries(CONT_DIGITADAS)) { const m = numTotal((await lista(D, "#/busca?q=" + encodeURIComponent(q))).total); conta(`digitada "${q}" = ${n}`, med(m, n), txt(m)); }
+  for (const [k, n] of Object.entries(CONTAGENS)) { const v = VEIC[k], m = numTotal((await lista(D, hashVei(v))).total); conta(`contagem ${v.vmo} ${v.va} = ${n}`, med(m, n), txt(m)); }
+  await D.fechar();
+}
+
 // ---------- principal ----------
 async function main() {
   const { chromium } = require("playwright");
@@ -483,6 +493,7 @@ async function main() {
   try {
     if (!op.so || op.so.includes("restricoes")) await conferirRestricoes(browser, prods);
     if (!op.so || op.so.includes("aviso")) await conferirAvisoTipo(browser, prods);
+    if (op.so && op.so.includes("contagens")) await conferirContagens(browser, mesmoJson, digital);
     if (!op.so) for (const tam of LARGURAS) {
       const [w] = tam;
       const D = await abrirSite(browser, op.site, tam, "depois");
