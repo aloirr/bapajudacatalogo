@@ -13,6 +13,7 @@ import { pipeline } from 'node:stream';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { criarEstoque, FONTE_ESTOQUE, LIMITE_PADRAO, LIMITE_MAX } from './estoque.mjs';
+import { agendarRecarga } from './recarga.mjs';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const RAIZ = path.resolve(AQUI, '..', '..');
@@ -429,9 +430,12 @@ export async function criarServico(opcoes = {}) {
     }
   }
 
-  // Aba Estoque (T-0034): baixa a fonte uma vez, no início, só para a memória. Falhou: só a aba dá 503.
+  // Aba Estoque (T-0034): baixa a fonte no início, só para a memória. Falhou: só a aba dá 503.
   // opcoes.estoqueUrl troca a fonte nos testes (null = sem fonte); nunca vem de variável nem do pedido.
   const estoque = criarEstoque({ url: opcoes.estoqueUrl === undefined ? FONTE_ESTOQUE : opcoes.estoqueUrl, log, agora });
+  // Recarga diária às 06:00 de Manaus, sem reiniciar (T-0036). opcoes.agendar: só os testes trocam o setTimeout.
+  const recarga = agendarRecarga({ recarregar: estoque.recarregar, falhou: () => estoque.estado() === 'falhou',
+    depoisDe: estoque.pronto, agora, ...(opcoes.agendar ? { agendar: opcoes.agendar } : {}) });
 
   // ---------- sessão: cookie assinado (HMAC-SHA256) ----------
   const assinar = (corpo) => crypto.createHmac('sha256', segredo).update(corpo).digest('base64url');
@@ -914,7 +918,7 @@ export async function criarServico(opcoes = {}) {
     });
   });
   srv.on('clientError', (_e, sock) => sock.destroy());
-  srv.on('close', () => clearInterval(faxina));
+  srv.on('close', () => { clearInterval(faxina); recarga.parar(); });
   srv.estoquePronto = estoque.pronto; // os testes esperam a carga; carregar() nunca rejeita
   srv.requestTimeout = 30000;
   srv.headersTimeout = 10000;

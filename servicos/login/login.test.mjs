@@ -8,8 +8,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { criarServico, caminhoLogico, tipoDaImagem, voltaSegura, podeVerEstoque, SESSAO_MS, JANELA_ERROS_MS } from './server.mjs';
-import { lerXlsx, DESCOMPACTADO_MAX, LINHAS_MAX } from './estoque.mjs';
+import { lerXlsx, criarEstoque, DESCOMPACTADO_MAX, LINHAS_MAX } from './estoque.mjs';
 import { zipar, xlsxFicticio } from './xlsx-ficticio.mjs';
+import { proximaRecarga, agendarRecarga } from './recarga.mjs';
+import { execFile } from 'node:child_process';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const ORIGEM = 'https://catalogo.exemplo.invalid';
@@ -117,7 +119,8 @@ before(() => {
 const vivos = [];
 after(() => { for (const s of vivos) s.close(); });
 // estoqueUrl: a fonte da aba Estoque (T-0034). Padrão null: nenhum teste vai à rede.
-async function subir({ env = {}, dados = pastaTemp('login-dados-'), raiz = 'falsa', pdfs, estoqueUrl = null } = {}) {
+// agendar: troca o setTimeout da recarga diária do estoque (T-0036); padrão: o de verdade (com unref).
+async function subir({ env = {}, dados = pastaTemp('login-dados-'), raiz = 'falsa', pdfs, estoqueUrl = null, agendar } = {}) {
   const logs = [];
   const rel = { t: Date.UTC(2026, 10, 22, 12, 0, 0) };
   const base = {
@@ -129,6 +132,7 @@ async function subir({ env = {}, dados = pastaTemp('login-dados-'), raiz = 'fals
     agora: () => rel.t,
     log: (m) => logs.push(m),
     estoqueUrl,
+    agendar,
   };
   if (raiz === 'falsa') { opc.pastaSite = path.join(RAIZ_FALSA, 'site'); opc.pastaPdfs = path.join(RAIZ_FALSA, 'entregas'); }
   if (pdfs) opc.pastaPdfs = pdfs;
@@ -1143,4 +1147,200 @@ test('estoque: contorno de caminho (codificado, "..", barra dupla ou invertida, 
   }
   // O controle: com a permissão, o caminho normal abre.
   assert.equal((await s.pedir('/estoque', { cookie: vend, accept: 'text/html' })).status, 200);
+});
+
+// ---------- recarga diária do estoque (T-0036): relógio e setTimeout falsos, nada espera o relógio de verdade ----------
+// Fonte local que troca de conteúdo: atual.corpo (Buffer) ou atual.status (404). Conta os pedidos.
+async function fonteVariavel() {
+  const atual = { corpo: null, status: 200, pedidos: 0, segurar: null };
+  const srv = http.createServer(async (req, res) => {
+    res.on('error', () => {});
+    atual.pedidos++;
+    if (atual.segurar) await atual.segurar;
+    if (atual.status !== 200 || !atual.corpo) return res.writeHead(404).end();
+    res.writeHead(200, { 'Content-Length': atual.corpo.length }).end(atual.corpo);
+  });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  vivos.push(srv);
+  return { atual, url: `http://127.0.0.1:${srv.address().port}/ESTOQUE_BAP.xlsx` };
+}
+// Posição em texto (dd/mm/aaaa, hh:mm), como a BAP Central também pode mandar.
+const xlsxPosicao = (data, hora, n) => xlsxEstoque(LINHAS_FICT.slice(0, n).map((l) => ({ ...l, DATA: data, HORA: hora })));
+// setTimeout falso: guarda [função, ms] e devolve um objeto com unref() que registra a chamada.
+function agendadorFalso() {
+  const chamadas = [];
+  const agendar = (fn, ms) => { const h = { fn, ms, unref() { h.solto = true; return h; } }; chamadas.push(h); return h; };
+  return { chamadas, agendar, ultima: () => chamadas[chamadas.length - 1] };
+}
+const tique = () => new Promise((r) => setImmediate(r));
+
+test('recarga: a próxima 06:00 de Manaus (antes e depois das 06:00, na hora exata, virada de dia, mês e ano) (T-0036)', () => {
+  const Z = (...a) => Date.UTC(...a); // 06:00 em Manaus = 10:00 UTC
+  assert.equal(proximaRecarga(Z(2026, 10, 25, 9, 30)), Z(2026, 10, 25, 10, 0), '05:30 -> hoje 06:00');
+  assert.equal(proximaRecarga(Z(2026, 10, 25, 9, 59, 59, 999)), Z(2026, 10, 25, 10, 0));
+  assert.equal(proximaRecarga(Z(2026, 10, 25, 10, 0)), Z(2026, 10, 26, 10, 0), 'na hora exata: amanhã');
+  assert.equal(proximaRecarga(Z(2026, 10, 25, 11, 0)), Z(2026, 10, 26, 10, 0), '07:00 -> amanhã 06:00');
+  // 21:00 de Manaus já é o dia seguinte em UTC: continua valendo o dia de Manaus.
+  assert.equal(proximaRecarga(Z(2026, 10, 26, 1, 0)), Z(2026, 10, 26, 10, 0), '25/11 21:00 -> 26/11 06:00');
+  assert.equal(proximaRecarga(Z(2026, 11, 1, 3, 30)), Z(2026, 11, 1, 10, 0), '30/11 23:30 -> 01/12 06:00');
+  assert.equal(proximaRecarga(Z(2027, 0, 1, 2, 0)), Z(2027, 0, 1, 10, 0), '31/12 22:00 -> 01/01 06:00');
+  assert.equal(proximaRecarga(Z(2026, 10, 25, 4, 0)), Z(2026, 10, 25, 10, 0), '25/11 00:00 -> 25/11 06:00');
+});
+
+test('recarga: agenda a 06:00, reagenda depois de cada tentativa (com sucesso ou não), solta o timer e para (T-0036)', async () => {
+  const rel = { t: Date.UTC(2026, 10, 25, 12, 0) }; // 08:00 de Manaus
+  const ag = agendadorFalso();
+  let falhou = false;
+  let chamadas = 0;
+  const recarregar = async () => { chamadas++; if (chamadas === 2) throw new Error('x'); };
+  const r = agendarRecarga({ recarregar, falhou: () => falhou, agora: () => rel.t, agendar: ag.agendar, cancelar: () => {} });
+  await tique();
+  assert.equal(ag.chamadas.length, 1);
+  assert.equal(ag.ultima().ms, 22 * 3600000, '08:00 -> 06:00 do dia seguinte');
+  assert.equal(ag.ultima().solto, true, 'unref() chamado');
+  assert.equal(r.proxima(), Date.UTC(2026, 10, 26, 10, 0));
+  // Dispara (um pouco antes da hora, como um timer pode fazer): recarrega e agenda a 06:00 SEGUINTE, não a mesma.
+  rel.t = Date.UTC(2026, 10, 26, 9, 59, 59, 990);
+  await ag.ultima().fn();
+  assert.equal(chamadas, 1);
+  assert.equal(r.proxima(), Date.UTC(2026, 10, 27, 10, 0));
+  assert.equal(ag.chamadas.length, 2);
+  // Recarga que rejeita: o agendamento segue.
+  rel.t = Date.UTC(2026, 10, 27, 10, 0);
+  await ag.ultima().fn();
+  assert.equal(chamadas, 2);
+  assert.equal(r.proxima(), Date.UTC(2026, 10, 28, 10, 0));
+  // Aba em 503: nova tentativa em 1 h, até voltar.
+  falhou = true;
+  rel.t = Date.UTC(2026, 10, 28, 10, 0);
+  await ag.ultima().fn();
+  assert.equal(ag.ultima().ms, 3600000);
+  falhou = false;
+  rel.t += 3600000;
+  await ag.ultima().fn();
+  assert.equal(r.proxima(), Date.UTC(2026, 10, 29, 10, 0), 'voltou: só a 06:00');
+  // parar(): cancela e não agenda mais.
+  const antes = ag.chamadas.length;
+  r.parar();
+  await ag.ultima().fn();
+  assert.equal(ag.chamadas.length, antes);
+  assert.equal(r.proxima(), null);
+});
+
+test('recarga: com sucesso troca as linhas e a posição; com falha (404, quebrado, acima do limite, sem colunas, vazia) mantém a anterior (T-0036)', async () => {
+  const { atual, url } = await fonteVariavel();
+  atual.corpo = xlsxPosicao('24/11/2026', '06:00', 10);
+  const logs = [];
+  const est = criarEstoque({ url, log: (m) => logs.push(m), limites: { linhasMax: 50 } });
+  await est.pronto;
+  const c1 = est.consultar({ admin: true });
+  assert.deepEqual(c1.posicao, { data: '24/11/2026', hora: '06:00' });
+  assert.equal(c1.total, 10);
+  // Planilha nova válida: troca tudo.
+  atual.corpo = xlsxPosicao('25/11/2026', '06:05', 20);
+  await est.recarregar();
+  const c2 = est.consultar({ admin: true });
+  assert.deepEqual(c2.posicao, { data: '25/11/2026', hora: '06:05' });
+  assert.equal(c2.total, 20);
+  assert.equal(est.estado(), 'ok');
+  // Falhas: a posição e as linhas ficam as de antes; a aba não cai.
+  const semColuna = xlsxFicticio(CAB_ESTOQUE.filter((c) => c !== 'ESTOQUE'), LINHAS_FICT.slice(0, 5));
+  const ruins = [['404', null], ['quebrado', Buffer.from('isto-nao-e-um-zip')], ['acima do limite', xlsxPosicao('26/11/2026', '06:00', 60)],
+    ['sem coluna', semColuna], ['vazia', xlsxFicticio(CAB_ESTOQUE, [])]];
+  for (const [nome, corpo] of ruins) {
+    atual.corpo = corpo;
+    atual.status = corpo ? 200 : 404;
+    logs.length = 0;
+    await est.recarregar();
+    const c = est.consultar({ admin: true });
+    assert.deepEqual(c.posicao, { data: '25/11/2026', hora: '06:05' }, nome);
+    assert.equal(c.total, 20, nome);
+    assert.equal(est.estado(), 'ok', nome);
+    assert.deepEqual(logs, ['estoque recarga falhou, mantida a anterior'], nome);
+  }
+});
+
+test('recarga: a partida falhou (503) e a recarga seguinte põe a aba no ar (T-0036)', async () => {
+  const { atual, url } = await fonteVariavel();
+  atual.status = 404;
+  const est = criarEstoque({ url });
+  await est.pronto;
+  assert.equal(est.estado(), 'falhou');
+  assert.equal(est.consultar({}), null);
+  atual.status = 200;
+  atual.corpo = xlsxPosicao('25/11/2026', '07:00', 3);
+  await est.recarregar();
+  assert.equal(est.estado(), 'ok');
+  assert.deepEqual(est.consultar({}).posicao, { data: '25/11/2026', hora: '07:00' });
+});
+
+test('recarga: duas ao mesmo tempo viram uma só; a consulta durante a recarga vê a base anterior inteira (T-0036)', async () => {
+  const { atual, url } = await fonteVariavel();
+  atual.corpo = xlsxPosicao('24/11/2026', '06:00', 10);
+  const est = criarEstoque({ url });
+  await est.pronto;
+  assert.equal(atual.pedidos, 1);
+  let soltar;
+  atual.segurar = new Promise((r) => { soltar = r; });
+  atual.corpo = xlsxPosicao('25/11/2026', '06:00', 30);
+  const p1 = est.recarregar();
+  const p2 = est.recarregar();
+  assert.equal(p1, p2, 'a mesma promessa');
+  while (atual.pedidos < 2) await tique();
+  const meio = est.consultar({ admin: true, limite: 200 });
+  assert.deepEqual(meio.posicao, { data: '24/11/2026', hora: '06:00' });
+  assert.equal(meio.total, 10);
+  assert.equal(meio.linhas.length, 10);
+  atual.segurar = null;
+  soltar();
+  await Promise.all([p1, p2]);
+  assert.equal(atual.pedidos, 2, 'um download só');
+  assert.equal(est.consultar({}).total, 30);
+  // Acabou: a próxima chamada é uma recarga nova.
+  await est.recarregar();
+  assert.equal(atual.pedidos, 3);
+});
+
+test('recarga no serviço: às 06:00 a aba passa a mostrar a planilha nova; se a nova falha, segue a anterior (T-0036)', async () => {
+  const { atual, url } = await fonteVariavel();
+  atual.corpo = xlsxPosicao('21/11/2026', '06:00', 12);
+  const ag = agendadorFalso();
+  const s = await subir({ estoqueUrl: url, agendar: ag.agendar });
+  await tique();
+  // O relógio do teste está em 22/11 12:00 UTC (08:00 de Manaus): a próxima é 23/11 06:00, daqui a 22 h.
+  assert.equal(ag.chamadas.length, 1);
+  assert.equal(ag.ultima().ms, 22 * 3600000);
+  const adm = await adminPronto(s);
+  const antes = (await s.pedir('/api/estoque', { cookie: adm })).json;
+  assert.deepEqual(antes.posicao, { data: '21/11/2026', hora: '06:00' });
+  assert.equal(antes.total, 12);
+  // O disparo é o timer falso (o relógio do teste fica parado: a sessão do admin vence em 5 h).
+  atual.corpo = xlsxPosicao('23/11/2026', '05:50', 25);
+  await ag.ultima().fn();
+  const depois = (await s.pedir('/api/estoque', { cookie: adm })).json;
+  assert.deepEqual(depois.posicao, { data: '23/11/2026', hora: '05:50' });
+  assert.equal(depois.total, 25);
+  assert.equal(ag.chamadas.length, 2, 'reagendou');
+  atual.status = 404;
+  await ag.ultima().fn();
+  const r = await s.pedir('/api/estoque', { cookie: adm });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.json.posicao, { data: '23/11/2026', hora: '05:50' });
+  assert.ok(s.logs.includes('estoque recarga falhou, mantida a anterior'));
+  assert.ok(!s.logs.join('\n').includes('127.0.0.1'), 'o log não leva a fonte');
+  // Fechar o serviço para o agendamento.
+  const n = ag.chamadas.length;
+  await new Promise((res) => s.srv.close(res));
+  await ag.ultima().fn();
+  assert.equal(ag.chamadas.length, n);
+});
+
+test('recarga: o timer de verdade não segura o processo (T-0036)', async () => {
+  // Um processo que só tem o agendamento (inclusive a nova tentativa de 1 h) termina sozinho.
+  const modulo = new URL('./recarga.mjs', import.meta.url).href;
+  const codigo = `const { agendarRecarga } = await import(${JSON.stringify(modulo)});
+    agendarRecarga({ recarregar: async () => {}, falhou: () => true });`;
+  await new Promise((resolve, reject) => {
+    execFile(process.execPath, ['--input-type=module', '-e', codigo], { timeout: 10000 }, (e) => (e ? reject(e) : resolve()));
+  });
 });
