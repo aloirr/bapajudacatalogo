@@ -424,7 +424,7 @@ function linhaTemTermo(linha, nucleo) {
   const pal = pals(linha), alvo = pals(nucleo.join(" "));
   return alvo.every((x) => pal.includes(x)) || pal.includes(alvo.join(""));
 }
-const PRINTS_RESTR = ["CXD13090", "AMT7050", "AMT7134", "POL1678", "CIL8528", "BDA50041"];
+const PRINTS_RESTR = ["CXD13090", "AMT7050", "AMT7134", "POL1678", "CIL8528", "BDA50041", "CUB60120", "CUB60181", "PIV5099"];
 const PRINTS = []; // os prints das conferências f) e g)
 async function conferirRestricoes(browser, prods) {
   const alvo = prods.filter((p) => restricoesDoTexto(p.a, p.ve).length);
@@ -494,12 +494,15 @@ async function conferirAvisoTipo(browser, prods) {
   }
 }
 
+// uma contagem fixa: medida m e esperada n. Valem só no JSON da medida (DIGITAL_MEDIDA); com outro, viram aviso (RD-0665)
+const JSON_DIA = { mesmo: false, digital: "" }; // preenchido no main()
+const confereContagem = (rot, m, n) => conta(`${rot} = ${n}`, JSON_DIA.mesmo ? m === n : null,
+  JSON_DIA.mesmo ? `medido: ${m}` : `JSON diferente do da medida (${JSON_DIA.digital}; medida em ${DIGITAL_MEDIDA}): ${m}. Remeça.`);
 // as contagens fixas (rodada curta): as digitadas e as da faixa, em 1366
-async function conferirContagens(browser, mesmoJson, digital) {
+async function conferirContagens(browser) {
   const D = await abrirSite(browser, op.site, LARGURAS[0], "contagens");
-  const med = (m, n) => (mesmoJson ? m === n : null), txt = (m) => (mesmoJson ? `medido: ${m}` : `JSON diferente do da medida (${digital}): ${m}. Remeça.`);
-  for (const [q, n] of Object.entries(CONT_DIGITADAS)) { const m = numTotal((await lista(D, "#/busca?q=" + encodeURIComponent(q))).total); conta(`digitada "${q}" = ${n}`, med(m, n), txt(m)); }
-  for (const [k, n] of Object.entries(CONTAGENS)) { const v = VEIC[k], m = numTotal((await lista(D, hashVei(v))).total); conta(`contagem ${v.vmo} ${v.va} = ${n}`, med(m, n), txt(m)); }
+  for (const [q, n] of Object.entries(CONT_DIGITADAS)) confereContagem(`digitada "${q}"`, numTotal((await lista(D, "#/busca?q=" + encodeURIComponent(q))).total), n);
+  for (const [k, n] of Object.entries(CONTAGENS)) { const v = VEIC[k]; confereContagem(`contagem ${v.vmo} ${v.va}`, numTotal((await lista(D, hashVei(v))).total), n); }
   await D.fechar();
 }
 
@@ -511,6 +514,7 @@ async function main() {
   for (const p of prods) for (const v of p.ve || []) MODELOS_CAT.add(semSinal(v[1]));
   const digital = `${prods.length} produtos / ${prods.reduce((a, p) => a + (p.ve || []).length, 0)} veículos`;
   const mesmoJson = digital === DIGITAL_MEDIDA;
+  Object.assign(JSON_DIA, { mesmo: mesmoJson, digital });
   if (op.antes) {
     const a = fs.readFileSync(path.join(op.antes, "data", "produtos.json")), d = fs.readFileSync(path.join(op.site, "data", "produtos.json"));
     const h = (b) => createHash("sha256").update(b).digest("hex");
@@ -521,7 +525,7 @@ async function main() {
   try {
     if (!op.so || op.so.includes("restricoes")) await conferirRestricoes(browser, prods);
     if (!op.so || op.so.includes("aviso")) await conferirAvisoTipo(browser, prods);
-    if (op.so && op.so.includes("contagens")) await conferirContagens(browser, mesmoJson, digital);
+    if (op.so && op.so.includes("contagens")) await conferirContagens(browser);
     if (!op.so) for (const tam of LARGURAS) {
       const [w] = tam;
       const D = await abrirSite(browser, op.site, tam, "depois");
@@ -597,7 +601,7 @@ async function main() {
       for (const [q, dentro] of DIGITADAS) conta(`digitada "${q}": ${ALVO} ${dentro ? "dentro" : "fora"}`, dig[q].cods.includes(ALVO) === dentro, `${dig[q].total}; ${ALVO} ${dig[q].cods.includes(ALVO) ? "presente" : "ausente"}`);
       for (const [q, n] of Object.entries(CONT_DIGITADAS)) {
         const m = numTotal(dig[q].total);
-        conta(`digitada "${q}" = ${n}`, mesmoJson ? m === n : null, mesmoJson ? `medido: ${m}` : `JSON diferente do da medida: ${m}. Remeça.`);
+        confereContagem(`digitada "${q}"`, m, n);
       }
       if (A) for (const q of DIGITADAS_IGUAIS) {
         const lA = await lista(A, "#/busca?q=" + encodeURIComponent(q));
@@ -643,8 +647,7 @@ async function main() {
         listas[k] = l;
         const n = numTotal(l.total);
         if (n !== l.cods.length) conta(`${v.vmo} ${v.va}: total = cartões`, false, `total "${l.total}" e ${l.cods.length} cartões`);
-        if (mesmoJson) conta(`contagem ${v.vmo} ${v.va} = ${CONTAGENS[k]}`, n === CONTAGENS[k], `medido: ${n}`);
-        else conta(`contagem ${v.vmo} ${v.va} = ${CONTAGENS[k]}`, null, `JSON diferente do da medida (${digital}; medida em ${DIGITAL_MEDIDA}): ${n}. Remeça.`);
+        confereContagem(`contagem ${v.vmo} ${v.va}`, n, CONTAGENS[k]);
       }
       for (const k of ["polo2026", "gol2010", "strada2020"]) {
         const v = VEIC[k], sem = [];
