@@ -39,6 +39,7 @@ Atualizado em 24/11/2026 22:35 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0034](tarefas/T-0034.md) | Aba de estoque (ESTOQUE_BAP.xlsx da BAP Central) para o admin e o bap.vendedor | integracao-placas | web-site, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 24/11 19:27) | #194, #195, #196 |
 | [T-0035](tarefas/T-0035.md) | Filtros por sistema, família e categoria na aba Estoque | web-site | integracao-placas, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 24/11 22:30) | #202, #203, #204 |
 | [T-0036](tarefas/T-0036.md) | Atualizar o estoque a cada 24 horas | integracao-placas | testes | CONCLUÍDA (no ar em 24/11 22:06) | #201 |
+| [T-0038](tarefas/T-0038.md) | Onboarding do Vendedor atualizado, com os 10 passos da visita | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes | EM ANDAMENTO | — |
 
 ## Fila
 Main a7d2712 (#204).
