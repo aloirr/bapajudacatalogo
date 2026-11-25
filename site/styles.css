@@ -700,10 +700,11 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .conta-nome { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; max-width: 190px; }
 .conta-nome b { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .conta-nome small { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* .seta: o chevron de 18 px (BAP.seta, /entrar/comum.js) dos botões que abrem e fecham (a conta e o "Filtros" do Estoque) */
-.seta { flex: none; transition: transform .15s; }
-[aria-expanded="true"] .seta { transform: rotate(180deg); }
-@media (prefers-reduced-motion: reduce) { .seta { transition: none; } }
+/* svg.seta: o chevron de 18 px (BAP.seta, /entrar/comum.js) dos botões que abrem e fecham (a conta e o "Filtros" do
+   Estoque). Só o SVG: o <span class="seta">▾</span> dos grupos de filtro do catálogo (.filtro-bt) fica como está */
+svg.seta { flex: none; transition: transform .15s; }
+[aria-expanded="true"] svg.seta { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { svg.seta { transition: none; } }
 /* aberto: "disclosure" (botão com aria-expanded e uma lista de links; o Esc fecha), não role="menu" */
 .conta-menu { position: absolute; right: 0; top: calc(100% + 8px); width: 300px; background: var(--branco); color: var(--texto);
   border-radius: var(--raio); box-shadow: var(--sombra-janela); padding: 8px; z-index: 40; }
