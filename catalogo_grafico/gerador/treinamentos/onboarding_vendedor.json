@@ -22,7 +22,7 @@
     "2": "A semana do time de vendas, os 10 passos da visita e o fechamento em 3 etapas",
     "3": "Equipe Comercial Externa  ·  Novembro de 2026"
    },
-   "notas": "MENSAGEM-CHAVE\nEste é o primeiro material do vendedor que chega à BAP AUTOPARTS: como a semana funciona e como cada visita acontece, do check-in ao check-out.\n\nCOMO CONDUZIR\nDê boas-vindas e diga a duração prevista (cerca de 1h30 com perguntas). Explique que o roteiro é o mesmo para todo o time: os 10 passos da visita, com as falas e o \"feito quando\" de cada um.\n\nPERGUNTE AO TIME\nQuem já trabalhou com um roteiro de visita? O que funcionava e o que não funcionava?"
+   "notas": "MENSAGEM-CHAVE\nEste é o primeiro material do vendedor que chega à BAP AUTOPARTS: como a semana funciona e como cada visita acontece, do check-in ao check-out.\n\nCOMO CONDUZIR\nDê boas-vindas. Explique que o roteiro é o mesmo para todo o time: os 10 passos da visita, com as falas e o \"feito quando\" de cada um.\n\nPERGUNTE AO TIME\nQuem já trabalhou com um roteiro de visita? O que funcionava e o que não funcionava?"
   },
   {
    "molde": 2,
@@ -333,7 +333,7 @@
    "t": {
     "0": "01",
     "1": "A semana do vendedor",
-    "2": "RPS, capacitação, análise de mercado e Dia Foco"
+    "2": "Os compromissos fixos e a linha de cada dia"
    },
    "notas": "MENSAGEM-CHAVE\nA semana do time de vendas tem compromissos fixos: segunda, quarta e todo dia.\n\nCOMO CONDUZIR\nDiga que a rotina vale para todo o time de vendas, supervisores e vendedores.\n\nPERGUNTE AO TIME\nQue dia da semana é o mais difícil na rota?"
   },
@@ -353,7 +353,7 @@
     "22": "Pesquisa dos itens do Dia Foco do dia",
     "26": "RPS: agenda de rota da semana e performance por vendedor, categoria, família e Top 30 clientes",
     "30": "Supervisores e vendedores juntos",
-    "34": "Lançada no BAP Ajuda"
+    "34": "Registro: no BAP Ajuda quando o botão for publicado; até lá, com o supervisor"
    },
    "icone": {
     "13": "FaChartLine",
@@ -370,7 +370,7 @@
    "t": {
     "0": "MÓDULO 01 · DIA FOCO",
     "1": "Dia Foco em ciclo de 3 semanas",
-    "7": "Depois da semana 3, o ciclo volta para a semana 1.",
+    "7": "Distribuição das linhas proposta pelo analista. Depois da semana 3, o ciclo volta para a semana 1.",
     "11": "DICA DE CAMPO  |Antes de sair para a rota, confira o Dia Foco: é a linha que você apresenta no passo 2 e pesquisa no passo 9."
    },
    "tirar_coluna": {
@@ -475,14 +475,14 @@
      "0,1": "tx1"
     }
    },
-   "notas": "MENSAGEM-CHAVE\nCada dia da semana tem uma linha em foco, num ciclo de 3 semanas que se repete.\n\nCOMO CONDUZIR\nSegunda e terça são iguais nas 3 semanas (baterias e lubrificantes; linha moto). De quarta a sexta, a linha muda conforme a semana do ciclo. Pergunte ao supervisor em que semana do ciclo estamos.\n\nPERGUNTE AO TIME\nQual linha do Dia Foco vocês acham mais fácil de apresentar? E a mais difícil?"
+   "notas": "MENSAGEM-CHAVE\nCada dia da semana tem uma linha em foco, num ciclo de 3 semanas que se repete.\n\nCOMO CONDUZIR\nSegunda e terça são iguais nas 3 semanas (baterias e lubrificantes; linha moto). De quarta a sexta, a linha muda conforme a semana do ciclo. Pergunte ao supervisor em que semana do ciclo estamos. A distribuição das linhas é uma proposta do analista.\n\nPERGUNTE AO TIME\nQual linha do Dia Foco vocês acham mais fácil de apresentar? E a mais difícil?"
   },
   {
    "molde": 5,
    "t": {
     "0": "02",
     "1": "Os 10 passos da visita",
-    "2": "Do check-in ao check-out, na mesma ordem em todo cliente"
+    "2": "A mesma ordem em todo cliente"
    },
    "notas": "MENSAGEM-CHAVE\nToda visita segue os mesmos 10 passos, na mesma ordem.\n\nCOMO CONDUZIR\nDiga que a ordem e as falas são as de 27/10/2026 e que o supervisor acompanha cada passo em campo.\n\nPERGUNTE AO TIME\nQuantos passos vocês acham que já fazem hoje sem perceber?"
   },
@@ -513,8 +513,7 @@
    "t": {
     "0": "MÓDULO 02 · OS 10 PASSOS",
     "1": "Os 10 passos da visita (1 de 2)",
-    "7": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026.",
-    "11": "DICA DE CAMPO  |No passo 5, a amostra na mão do cliente é o \"feito quando\": sem amostra, o passo não terminou."
+    "7": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026."
    },
    "tirar_coluna": {
     "*": [
@@ -629,15 +628,20 @@
    "notas": "MENSAGEM-CHAVE\nPassos 1 a 5: chegar, perguntar do giro, anotar o share, sondar a perda e oferecer com amostra.\n\nCOMO CONDUZIR\nLeia cada linha em voz alta: passo, pergunta-chave e \"feito quando\". Peça a um vendedor que repita a fala do passo 2 e a do passo 4 com as palavras exatas.\n\nPERGUNTE AO TIME\nNo passo 4, que motivos de perda de venda vocês mais escutam?",
    "respiro": {
     "6": 0.08
-   }
+   },
+   "apagar": [
+    8,
+    9,
+    10,
+    11
+   ]
   },
   {
    "molde": 14,
    "t": {
     "0": "MÓDULO 02 · OS 10 PASSOS",
     "1": "Os 10 passos da visita (2 de 2)",
-    "7": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026.",
-    "11": "DICA DE CAMPO  |Sem pedido no passo 6, o motivo é anotado. O check-out só vem depois da pergunta do Indicou, ganhou."
+    "7": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026. Passo 9: o botão “Pesquisa de mercado” do BAP Ajuda ainda não foi publicado; até lá, com o supervisor."
    },
    "tirar_coluna": {
     "*": [
@@ -749,7 +753,7 @@
      0.3
     ]
    },
-   "notas": "MENSAGEM-CHAVE\nPassos 6 a 10: fechar, fazer o merchandising, reforçar o material de apoio, enviar a análise de mercado e pedir a indicação.\n\nCOMO CONDUZIR\nReforce que o passo 6 é sem oferta de expositor e que o \"feito quando\" é pedido ou motivo. No passo 7, a foto do cartazete é a prova. O passo 9 é a análise de mercado diária, com os itens do Dia Foco, no BAP Ajuda.\n\nPERGUNTE AO TIME\nQual destes passos é o mais fácil de esquecer no fim da visita?",
+   "notas": "MENSAGEM-CHAVE\nPassos 6 a 10: fechar, fazer o merchandising, reforçar o material de apoio, enviar a análise de mercado e pedir a indicação.\n\nCOMO CONDUZIR\nLeia cada linha em voz alta: passo, pergunta-chave e \"feito quando\".\n\nPERGUNTE AO TIME\nQual destes passos é o mais fácil de esquecer no fim da visita?",
    "italico": {
     "3": [
      "0,2"
@@ -760,14 +764,20 @@
     "5": [
      "0,2"
     ]
-   }
+   },
+   "apagar": [
+    8,
+    9,
+    10,
+    11
+   ]
   },
   {
    "molde": 5,
    "t": {
     "0": "03",
     "1": "As falas da visita",
-    "2": "As perguntas-chave e os passos de campo"
+    "2": "As palavras exatas de cada passo"
    },
    "notas": "MENSAGEM-CHAVE\nAs falas são iguais para todo o time: é o que faz a visita BAP ser reconhecida.\n\nCOMO CONDUZIR\nDiga que neste módulo vamos treinar as falas em voz alta.\n\nPERGUNTE AO TIME\nQuem topa ser o cliente no role-play?"
   },
@@ -814,9 +824,7 @@
     "30": "10 · Check-out",
     "31": "depois da pergunta da indicação",
     "43": "Feito quando",
-    "44": "é a prova de que o passo foi cumprido. Sem a prova, o passo não conta.",
-    "45": "Foto",
-    "46": "do cartazete: a prova do passo 7, em todo cliente visitado.",
+    "44": "é o que mostra que o passo foi cumprido. Na ficha, o supervisor dá nota 3, 2 ou 1 a cada passo.",
     "47": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026."
    },
    "icone": {
@@ -833,6 +841,12 @@
      5.2,
      7.9,
      0.4
+    ],
+    "42": [
+     null,
+     null,
+     null,
+     3.45
     ]
    },
    "apagar": [
@@ -845,9 +859,11 @@
     38,
     39,
     40,
-    41
+    41,
+    45,
+    46
    ],
-   "notas": "MENSAGEM-CHAVE\nSeis momentos da visita não têm pergunta ao cliente, mas têm uma prova: o \"feito quando\".\n\nCOMO CONDUZIR\nPasse card a card. No passo 7, cartazete, adesivo de visita de rota e, para quem já tem expositor, o status e a meta de giro do expositor. No passo 8, tire as dúvidas do catálogo com o time do cliente e cheque se estão usando. No passo 9, a análise de mercado é dos itens do Dia Foco do dia.\n\nPERGUNTE AO TIME\nQual destas provas vocês acham mais difícil de registrar na correria da rota?",
+   "notas": "MENSAGEM-CHAVE\nSeis momentos da visita não têm pergunta ao cliente, mas têm um \"feito quando\".\n\nCOMO CONDUZIR\nPasse card a card e peça a um vendedor que diga como registra cada prova.\n\nPERGUNTE AO TIME\nQual destas provas vocês acham mais difícil de registrar na correria da rota?",
    "cor_texto": {
     "43": "accent1"
    }
@@ -857,7 +873,7 @@
    "t": {
     "0": "04",
     "1": "Fechamento",
-    "2": "As 3 etapas, o acompanhamento e o Indicou, ganhou"
+    "2": "Do pedido ao acompanhamento do supervisor"
    },
    "notas": "MENSAGEM-CHAVE\nToda visita tem um passo 6: termina em pedido ou em motivo anotado.\n\nCOMO CONDUZIR\nDiga que o fechamento é sem oferta de expositor: o foco é o pedido dos itens apresentados.\n\nPERGUNTE AO TIME\nO que vocês costumam fazer quando o cliente diz \"hoje não\"?"
   },
@@ -867,11 +883,11 @@
     "0": "MÓDULO 04 · FECHAMENTO",
     "1": "Fechamento em 3 etapas",
     "6": "“Fechamos com esses itens?”",
-    "7": "Direto, logo depois da amostra e das aplicações. Não espere o cliente pedir.",
+    "7": "Direto, logo depois da amostra e das aplicações.",
     "12": "“O que falta pra fechar hoje?”",
-    "13": "Escute até o fim. O motivo cai num destes 5: preço, prazo ou limite, disponibilidade, já tem fornecedor ou sem necessidade.",
+    "13": "Escute até o fim: o motivo é um dos 5 da faixa abaixo.",
     "18": "“Se eu resolver isso, fechamos?”",
-    "19": "Só se for algo que você resolve. Esta fala é de treinamento e matinal: não vai no card.",
+    "19": "Só se for algo que você resolve.",
     "21": "Sem pedido? Anote o motivo:  |preço · prazo ou limite · disponibilidade · já tem fornecedor · sem necessidade",
     "25": "DICA DE CAMPO  |O passo 6 é sem oferta de expositor: o pedido é dos itens que o cliente viu na amostra e nas aplicações."
    },
@@ -893,22 +909,16 @@
     "6": "Feedback",
     "7": "do supervisor durante a rota, entre um cliente e outro",
     "9": "Segunda",
-    "10": "os motivos de não fechar da semana vão para a RPS",
-    "14": "A ficha de acompanhamento de campo é uma só",
-    "18": "No passo 6, o motivo de não fechar fica marcado",
-    "22": "O supervisor soma os motivos da semana",
-    "26": "Na RPS, os motivos entram no follow-up dos planos de ação",
-    "30": "O \"feito quando\" de cada passo orienta a nota",
-    "34": "Use o feedback já na próxima visita",
+    "10": "os motivos somados da semana viram plano de ação na RPS",
+    "14": "O \"feito quando\" de cada passo orienta a nota",
+    "18": "Use o feedback já na próxima visita",
+    "22": "No passo 6, o motivo de não fechar fica marcado",
     "36": "NA PRÁTICA"
    },
    "icone": {
-    "13": "FaClipboardCheck",
-    "17": "FaCircleQuestion",
-    "21": "FaChartLine",
-    "25": "FaCalendarDays",
-    "29": "FaCircleCheck",
-    "33": "FaArrowsRotate"
+    "13": "FaCircleCheck",
+    "17": "FaArrowsRotate",
+    "21": "FaCircleQuestion"
    },
    "notas": "MENSAGEM-CHAVE\nO supervisor acompanha a visita com uma ficha única: nota 3, 2 ou 1 em cada passo e o motivo de não fechar marcado no passo 6.\n\nCOMO CONDUZIR\nExplique que o acompanhamento é para ajudar: o feedback vem durante a rota. Os motivos de não fechar somados na semana vão para a RPS de segunda, onde viram plano de ação.\n\nPERGUNTE AO TIME\nQue tipo de feedback ajuda mais vocês: na hora ou no fim do dia?",
    "copiar": [
@@ -1065,7 +1075,21 @@
      null,
      null
     ]
-   }
+   },
+   "apagar": [
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ]
   },
   {
    "molde": 6,
@@ -1076,25 +1100,11 @@
     "3": "Se o indicado se cadastrar e comprar, quem indicou ganha uma mochila exclusiva BAP.",
     "4": "10",
     "5": "é o passo da indicação, antes do check-out",
-    "6": "Mochila",
-    "7": "exclusiva BAP para quem indicou",
     "10": "A indicação conta como prospecção?",
     "11": "Não. Só conta quando o vendedor vai ao indicado e registra no formulário de prospecção.",
     "15": "DICA DE CAMPO  |“Conhece alguém que trabalha com a linha de produtos que te apresentei e ainda não compra BAP?”"
    },
    "mover": {
-    "6": [
-     3.6,
-     null,
-     3.5,
-     null
-    ],
-    "7": [
-     3.6,
-     null,
-     3.4,
-     null
-    ],
     "8": [
      null,
      null,
@@ -1115,19 +1125,18 @@
     ]
    },
    "apagar": [
+    6,
+    7,
     9
    ],
-   "notas": "MENSAGEM-CHAVE\nToda visita termina com a pergunta do Indicou, ganhou e o check-out.\n\nCOMO CONDUZIR\nLeia a regra: o prêmio sai quando o indicado se cadastra e compra. Deixe claro que a indicação, sozinha, não conta como prospecção: conta quando o vendedor vai ao indicado e registra no formulário de prospecção.\n\nPERGUNTE AO TIME\nComo vocês apresentariam o Indicou, ganhou para um cliente que compra há anos?",
-   "cor_texto": {
-    "6": "tx2"
-   }
+   "notas": "MENSAGEM-CHAVE\nToda visita termina com a pergunta do Indicou, ganhou e o check-out.\n\nCOMO CONDUZIR\nLeia a regra: o prêmio sai quando o indicado se cadastra e compra. Deixe claro que a indicação, sozinha, não conta como prospecção: conta quando o vendedor vai ao indicado e registra no formulário de prospecção.\n\nPERGUNTE AO TIME\nComo vocês apresentariam o Indicou, ganhou para um cliente que compra há anos?"
   },
   {
    "molde": 5,
    "t": {
     "0": "05",
     "1": "Ferramentas na rota",
-    "2": "O catálogo online e o BAP Ajuda em cada passo da visita"
+    "2": "O que abrir no celular em cada passo"
    },
    "notas": "MENSAGEM-CHAVE\nO catálogo online e o BAP Ajuda são as ferramentas do vendedor na visita.\n\nCOMO CONDUZIR\nPeça que cada um abra o catálogo no celular agora, com o login.\n\nPERGUNTE AO TIME\nQuem já usou o catálogo numa visita esta semana?"
   },
@@ -1146,7 +1155,7 @@
     "18": "Leve também: o item que vai com a peça",
     "22": "Copiar código e Salvar em PDF na ficha do produto",
     "26": "Cada usuário com o seu login; o cliente também tem o dele",
-    "30": "A aba de disponibilidade fica no menu da sua conta; o acesso é liberado pelo admin na tela de usuários",
+    "30": "Disponibilidade: no menu da conta, acima de Trocar senha; o admin libera na tela de usuários",
     "34": "Sem preço: só a ficha do produto vai ao cliente",
     "36": "NA PRÁTICA"
    },
@@ -1158,7 +1167,7 @@
     "29": "FaBoxesStacked",
     "33": "FaEye"
    },
-   "notas": "MENSAGEM-CHAVE\nNo catálogo online, o vendedor acha a peça pela placa ou pelo veículo, pelo código (BAP, referência cruzada ou código de barras) ou num campo só, por descrição e aplicação.\n\nCOMO CONDUZIR\nFaça ao vivo uma busca por placa, uma por veículo do Dia Foco de hoje e uma por referência. Abra a ficha e mostre a aplicação em tabela, o Leve também, o Copiar código e o Salvar em PDF. Lembre a regra: a ficha não tem preço e pode ir para a tela do cliente, que também tem o login dele; a aba de disponibilidade fica no menu da conta, só para o vendedor consultar antes de ofertar; quem libera o acesso é o admin, na tela de usuários.\n\nPERGUNTE AO TIME\nQual busca vocês mais vão usar no balcão: por placa, por veículo ou por código?",
+   "notas": "MENSAGEM-CHAVE\nNo catálogo online, o vendedor acha a peça pela placa ou pelo veículo, pelo código (BAP, referência cruzada ou código de barras) ou num campo só, por descrição e aplicação.\n\nCOMO CONDUZIR\nFaça ao vivo uma busca por placa, uma por veículo do Dia Foco de hoje e uma por referência. Abra a ficha e mostre a aplicação em tabela, o Leve também, o Copiar código e o Salvar em PDF.\n\nPERGUNTE AO TIME\nQual busca vocês mais vão usar no balcão: por placa, por veículo ou por código?",
    "copiar": [
     {
      "molde": 6,
@@ -1329,10 +1338,10 @@
     "15": "Passo 8",
     "17": "Tirar as dúvidas do catálogo com o time do cliente\nChecar se estão usando",
     "19": "Passo 9",
-    "21": "Análise de mercado dos itens do Dia Foco, no BAP Ajuda",
-    "25": "DICA DE CAMPO  |O catálogo também é material de apoio do cliente: no passo 8, o \"feito quando\" é o time do cliente usando o catálogo."
+    "21": "Análise de mercado dos itens do Dia Foco: no BAP Ajuda quando o botão for publicado; até lá, com o supervisor",
+    "25": "DICA DE CAMPO  |O catálogo também é material de apoio do cliente."
    },
-   "notas": "MENSAGEM-CHAVE\nO catálogo online entra antes da visita e nos passos 5, 6 e 8; o BAP Ajuda entra no passo 9.\n\nCOMO CONDUZIR\nPercorra as colunas da esquerda para a direita. Reforce que a análise de mercado é lançada no BAP Ajuda todo dia, com os itens do Dia Foco.\n\nPERGUNTE AO TIME\nQual destas ferramentas vocês ainda não usam? O que falta para começar?",
+   "notas": "MENSAGEM-CHAVE\nO catálogo online entra antes da visita e nos passos 5, 6 e 8; a análise de mercado entra no passo 9.\n\nCOMO CONDUZIR\nPercorra as colunas da esquerda para a direita. No passo 9, o botão do BAP Ajuda ainda não foi publicado: até lá, a análise de mercado é registrada com o supervisor.\n\nPERGUNTE AO TIME\nQual destas ferramentas vocês ainda não usam? O que falta para começar?",
    "preencher": {
     "14": "accent1"
    }

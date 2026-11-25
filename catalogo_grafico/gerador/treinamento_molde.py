@@ -758,14 +758,18 @@ def montar(nome, saida=None):
                 v = base.expandir(v)
                 base.conferir(v, onde)
                 escrever(tab.cell(i, j).text_frame._txBody, v)
-        for k, cels in spec.get('italico', {}).items():   # trechos depois do 1.º de cada parágrafo da célula em itálico
+        for k, cels in spec.get('italico', {}).items():
             tab = formas[int(k)].table
             for rc in cels:
                 i, j = (int(x) for x in rc.split(','))
                 for p in tab.cell(i, j).text_frame._txBody.findall(A + 'p'):
                     for r in p.findall(A + 'r')[1:]:
-                        r.find(A + 'rPr').set('i', '1')
-        for k, m in spec.get('respiro', {}).items():   # margem de cima e de baixo das células, em polegadas
+                        rpr = r.find(A + 'rPr')
+                        if rpr is None:
+                            rpr = etree.Element(A + 'rPr')
+                            r.insert(0, rpr)
+                        rpr.set('i', '1')
+        for k, m in spec.get('respiro', {}).items():
             for tcpr in formas[int(k)]._element.iter(A + 'tcPr'):
                 tcpr.set('marT', str(int(Inches(m))))
                 tcpr.set('marB', str(int(Inches(m))))
