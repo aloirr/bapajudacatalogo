@@ -1,6 +1,6 @@
 // Aba Estoque (T-0034). Node 20+, sem dependências: o xlsx é lido só com zlib.
-// A fonte é o ESTOQUE_BAP.xlsx da BAP Central (repositório público, leitura sem chave), baixado uma vez a cada
-// publicação e guardado SÓ na memória. Nada daqui vai para o disco, para o site/ nem para o log.
+// A fonte é o ESTOQUE_BAP.xlsx da BAP Central (repositório público, leitura sem chave), baixado na partida e
+// de novo todo dia (T-0036, recarga.mjs) e guardado SÓ na memória. Nada daqui vai para o disco, para o site/ nem para o log.
 // O corte das colunas é feito aqui, no servidor, por lista branca: o vendedor nunca recebe custo, preço nem markup.
 import zlib from 'node:zlib';
 
@@ -278,23 +278,29 @@ async function baixar(url, max = DOWNLOAD_MAX) {
 
 // Estado da aba: 'carregando' -> 'ok' | 'falhou'. carregar() nunca rejeita (o catálogo segue no ar).
 // limites: só os testes trocam ({ downloadMax, descompactadoMax, linhasMax }).
+// Recarga diária (T-0036, agendada por recarga.mjs): a base nova é montada à parte e entra numa única atribuição;
+// se falhar, a anterior fica (consultar() é síncrono: nunca vê um estado pela metade).
 export function criarEstoque({ url = FONTE_ESTOQUE, log = () => {}, agora = Date.now, limites = {} } = {}) {
   let base = null;
   let estado = 'carregando';
+  let emCurso = null;
   async function carregar() {
     const t0 = agora();
     try {
       if (!url) throw new Error('sem fonte');
-      base = montarBase(lerXlsx(await baixar(url, limites.downloadMax), limites));
+      const nova = montarBase(lerXlsx(await baixar(url, limites.downloadMax), limites));
+      base = nova;
       estado = 'ok';
       log(`estoque ok ${base.linhas.length} linhas ${agora() - t0}ms`);
     } catch {
-      base = null;
+      if (base) { log('estoque recarga falhou, mantida a anterior'); return; }
       estado = 'falhou';
       log('estoque indisponivel');
     }
   }
-  const pronto = carregar();
+  // Uma carga por vez: quem chamar durante uma carga recebe a mesma promessa.
+  const recarregar = () => emCurso ?? (emCurso = carregar().finally(() => { emCurso = null; }));
+  const pronto = recarregar();
 
   // Consulta. admin = true: as 23 colunas; senão, só a lista branca do vendedor.
   function consultar({ q = '', filial = '', comEstoque = false, desde = 0, limite = LIMITE_PADRAO, admin = false }) {
@@ -322,5 +328,5 @@ export function criarEstoque({ url = FONTE_ESTOQUE, log = () => {}, agora = Date
       filiais: base.filiais.map((f) => ({ ...f })),
     };
   }
-  return { pronto, consultar, estado: () => estado, tamanho: () => (base ? base.linhas.length : 0) };
+  return { pronto, recarregar, consultar, estado: () => estado, tamanho: () => (base ? base.linhas.length : 0) };
 }
