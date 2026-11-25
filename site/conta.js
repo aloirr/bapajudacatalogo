@@ -1,6 +1,8 @@
 /* Botão do canto (T-0022): a conta de quem entrou no catálogo, lida de GET /api/eu (serviço de login).
    Mostra a logo da empresa (ou a da BAP, sem logo ou com 404), o nome e a empresa; aberto, "Trocar senha" e "Sair" e,
    para o admin, o grupo Administração ("Criar usuários" e "Catálogos, materiais e treinamentos").
+   Com "estoque: true" no /api/eu (o admin sempre; T-0034), o "Estoque" entra no alto do menu da conta, fora do grupo
+   Administração, e no menu de cima.
    A segurança é toda do servidor: o navegador não decide acesso e aqui não há segredo. Sem o serviço (site aberto com
    http.server, /api/eu responde 404), o botão não aparece e o catálogo funciona como antes.
    Um 401 (sessão vencida: ela vale 5 h desde o login) leva a /entrar?expirou=1, com a volta para a mesma tela: quem cuida
@@ -12,6 +14,7 @@
   const IC = {
     usuarios: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M19 8v6M16 11h6"/>'),
     pdf: svg('<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 12v6M9 15l3 3 3-3"/>'),
+    estoque: svg('<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>'),
     chave: svg('<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>'),
     sair: svg('<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"/>'),
   };
@@ -66,6 +69,8 @@
       <div class="conta-menu" id="conta-menu" hidden>
         <div class="conta-cab">${logoHtml(eu, altLogo)}<div><b>${esc(eu.nome)}</b><span>${esc(eu.empresa)}</span><span>Usuário: ${esc(eu.usuario)}</span>${eu.admin ? '<span class="tag tag-escura">Admin</span>' : ""}</div></div>
         <ul>
+          ${eu.estoque === true ? `${item("/estoque", IC.estoque, "Estoque")}
+          <li class="sep" role="separator"></li>` : ""}
           ${eu.admin ? `<li class="rot-grupo" aria-hidden="true">Administração</li>
           ${item("/admin/usuarios", IC.usuarios, "Criar usuários")}
           ${item("/admin/pdfs", IC.pdf, "Catálogos, materiais e treinamentos")}
@@ -76,6 +81,13 @@
       </div>`;
     caixa.hidden = false;
     document.body.classList.add("logado");
+    // "Estoque" no menu de cima, antes do "Sobre a BAP" (o CSS tira no celular)
+    const nav = document.querySelector(".topo .menu");
+    if (eu.estoque === true && nav && !nav.querySelector(".menu-estoque")) {
+      const a = Object.assign(document.createElement("a"), { href: "/estoque", className: "menu-estoque", textContent: "Estoque" });
+      if (aqui === "/estoque") a.setAttribute("aria-current", "page");
+      nav.insertBefore(a, nav.lastElementChild);
+    }
 
     const bt = caixa.querySelector(".conta-bt");
     const menu = caixa.querySelector(".conta-menu");

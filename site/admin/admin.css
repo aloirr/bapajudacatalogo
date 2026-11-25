@@ -1,16 +1,8 @@
 /* Páginas do admin (T-0022, T-0024): "Criar usuários" e "Catálogos, materiais e treinamentos". Vem depois do /styles.css e do /entrar/entrar.css
    e usa só as variáveis do :root. */
 
-/* ---------- lista de usuários ---------- */
-.us-barra { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin: 0 0 14px; }
-.us-barra .campo { flex: 1 1 260px; max-width: 420px; }
+/* ---------- lista de usuários (a barra, a table.us e o cartão até 900 px estão no /styles.css: o Estoque também usa) ---------- */
 .us-barra .bt { margin-left: auto; }
-.us-total { font-size: 14px; color: var(--texto-2); margin: 0 0 10px; }
-table.us { width: 100%; border-collapse: collapse; background: var(--branco); border-radius: var(--raio); overflow: hidden; box-shadow: var(--sombra); }
-/* o rótulo das colunas (computador) e o de cada linha do cartão (celular) */
-table.us th, table.us td[data-rot]::before { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--texto-2); }
-table.us th { text-align: left; background: var(--fundo-filtros); padding: 10px 14px; }
-table.us td { padding: 12px 14px; border-top: 1px solid var(--linha); vertical-align: middle; font-size: 14px; }
 table.us td[data-rot="Último acesso"] { white-space: nowrap; }
 table.us tr.off td { color: var(--texto-2); } /* desativado: o texto apagado; a logo não muda (MC-0003) */
 .us-emp { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -24,19 +16,11 @@ table.us tr.off td { color: var(--texto-2); } /* desativado: o texto apagado; a 
 .us-acoes .bt { height: 44px; padding: 0 12px; font-size: 13px; }
 .us-sit { display: flex; flex-wrap: wrap; gap: 4px; }
 @media (max-width: 900px) {
-  /* celular e tablet: cada usuário vira um cartão com rótulos */
-  table.us, table.us tbody, table.us tr, table.us td { display: block; width: 100%; }
-  table.us { background: none; box-shadow: none; border-radius: 0; }
-  table.us thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  table.us tr { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); margin: 0 0 12px; padding: 12px 14px; }
-  table.us td { border: 0; padding: 4px 0; display: flex; gap: 10px; min-width: 0; }
-  table.us td[data-rot]::before { content: attr(data-rot); flex: 0 0 104px; padding-top: 2px; }
   table.us td.us-td-emp { padding-bottom: 8px; border-bottom: 1px solid var(--linha); margin-bottom: 6px; }
   .us-acoes { justify-content: flex-start; flex-wrap: wrap; padding-top: 8px; }
   table.us td.us-td-acoes { display: block; padding: 0; }
   .us-acoes .bt { flex: 1 1 auto; justify-content: center; }
   .us-barra .bt { margin-left: 0; width: 100%; justify-content: center; }
-  .us-barra .campo { max-width: none; }
 }
 
 /* ---------- janelas (dialog.janela dlg): criar, editar, trocar a senha e desativar ----------

@@ -1,4 +1,4 @@
-// Testes do serviço de login (T-0022, T-0024). Só valores claramente falsos; nada de senha ou chave real.
+// Testes do serviço de login (T-0022, T-0024, T-0034). Só valores claramente falsos; nada de senha ou chave real.
 // Rodam no próprio processo, com relógio injetável e um site/ falso numa pasta temporária.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
@@ -7,7 +7,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { criarServico, caminhoLogico, tipoDaImagem, voltaSegura, SESSAO_MS, JANELA_ERROS_MS } from './server.mjs';
+import { criarServico, caminhoLogico, tipoDaImagem, voltaSegura, podeVerEstoque, SESSAO_MS, JANELA_ERROS_MS } from './server.mjs';
+import { lerXlsx, DESCOMPACTADO_MAX, LINHAS_MAX } from './estoque.mjs';
+import { zipar, xlsxFicticio } from './xlsx-ficticio.mjs';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const ORIGEM = 'https://catalogo.exemplo.invalid';
@@ -96,6 +98,8 @@ before(() => {
   escrever('site/trocar-senha/index.html', '<!doctype html><title>trocar</title>');
   escrever('site/admin/usuarios/index.html', '<!doctype html><title>usuarios</title>');
   escrever('site/admin/pdfs/index.html', '<!doctype html><title>pdfs</title>');
+  escrever('site/estoque/index.html', '<!doctype html><title>estoque</title>');
+  escrever('site/estoque/estoque.js', 'console.log("estoque")');
   escrever('site/.oculto.json', '{"oculto":true}');
   escrever('dados/BASE.xlsx', XLSX);
   escrever('dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx', XLSX);
@@ -112,7 +116,8 @@ before(() => {
 // ---------- sobe o serviço no próprio processo ----------
 const vivos = [];
 after(() => { for (const s of vivos) s.close(); });
-async function subir({ env = {}, dados = pastaTemp('login-dados-'), raiz = 'falsa', pdfs } = {}) {
+// estoqueUrl: a fonte da aba Estoque (T-0034). Padrão null: nenhum teste vai à rede.
+async function subir({ env = {}, dados = pastaTemp('login-dados-'), raiz = 'falsa', pdfs, estoqueUrl = null } = {}) {
   const logs = [];
   const rel = { t: Date.UTC(2026, 10, 22, 12, 0, 0) };
   const base = {
@@ -123,10 +128,12 @@ async function subir({ env = {}, dados = pastaTemp('login-dados-'), raiz = 'fals
     env: Object.fromEntries(Object.entries({ ...base, ...env }).filter(([, v]) => v !== undefined)),
     agora: () => rel.t,
     log: (m) => logs.push(m),
+    estoqueUrl,
   };
   if (raiz === 'falsa') { opc.pastaSite = path.join(RAIZ_FALSA, 'site'); opc.pastaPdfs = path.join(RAIZ_FALSA, 'entregas'); }
   if (pdfs) opc.pastaPdfs = pdfs;
   const srv = await criarServico(opc);
+  await srv.estoquePronto;
   await new Promise((r) => srv.listen(0, '127.0.0.1', r));
   vivos.push(srv);
   const porta = srv.address().port;
@@ -259,10 +266,10 @@ test('login do admin: troca obrigatória no 1º acesso, cookie seguro', async ()
   const eu = await s.pedir('/api/eu', { cookie: a.cookie });
   assert.equal(eu.status, 200);
   assert.deepEqual(eu.json, {
-    usuario: 'admin', nome: 'Administrador', empresa: 'BAP AUTOPARTS', admin: true, temLogo: false,
+    usuario: 'admin', nome: 'Administrador', empresa: 'BAP AUTOPARTS', admin: true, estoque: true, temLogo: false,
     trocarSenha: true, expiraEm: new Date(s.rel.t + SESSAO_MS).toISOString(),
   });
-  assert.deepEqual(Object.keys(eu.json), ['usuario', 'nome', 'empresa', 'admin', 'temLogo', 'trocarSenha', 'expiraEm']);
+  assert.deepEqual(Object.keys(eu.json), ['usuario', 'nome', 'empresa', 'admin', 'estoque', 'temLogo', 'trocarSenha', 'expiraEm']);
 
   // Regras da senha nova.
   const curta = await s.pedir('/api/trocar-senha', { metodo: 'POST', cookie: a.cookie, corpo: { senhaNova: 'x'.repeat(7) } });
@@ -603,7 +610,7 @@ test('cadastro: validação, 409 para usuário repetido, lista sem hash', async 
   ]) assert.equal((await criar(ruim)).status, 400, JSON.stringify(ruim).slice(0, 60));
   const c = await criar(ok);
   assert.equal(c.status, 201);
-  assert.deepEqual(c.json, { usuario: 'oficina_1', nome: 'João Exemplo', empresa: 'Oficina Exemplo', admin: false, ativo: true, temLogo: false, trocarSenha: true, ultimoAcesso: null });
+  assert.deepEqual(c.json, { usuario: 'oficina_1', nome: 'João Exemplo', empresa: 'Oficina Exemplo', admin: false, estoque: false, ativo: true, temLogo: false, trocarSenha: true, ultimoAcesso: null });
   assert.equal((await criar(ok)).status, 409);
   assert.equal((await criar({ ...ok, usuario: '__proto__' })).status, 201, 'nome estranho não quebra nada');
   const lista = await s.pedir('/api/usuarios', { cookie: adm });
@@ -781,4 +788,359 @@ test('o log não leva senha, hash, cookie, segredo, chave, usuário, caminho nem
   assert.match(log, /entrar 200 \d+ms/);
   assert.match(log, /entrar 401 \d+ms/);
   assert.match(log, /interno 401 \d+ms/);
+});
+
+// ---------- aba Estoque (T-0034): xlsx SINTÉTICO, montado aqui, com valores fictícios ----------
+// Nada aqui é dado da BAP. Os campos internos (custo, preço, markup, tabela, sucata, origem) levam marcas
+// fáceis de achar ("SECRET", 91xx, 92xx...): a resposta ao vendedor não pode ter nenhuma delas.
+const CAB_ESTOQUE = ['DATA', 'HORA', 'CIDADE', 'FILIAL_BAP', 'ID_PRODUTO', 'COD_FORNECEDOR', 'FORNECEDOR', 'COD_PRODUTO',
+  'DESCRICAO_PRODUTO', 'ESTOQUE', 'FILIAL_CD', 'PPEDIDO', 'ORIGEM_CUSTO', 'TABELA_CAPITAL', 'PRECO_CAPITAL', 'TABELA_INTERIOR',
+  'PRECO_INTERIOR', 'MARKUP_CAPITAL', 'MARKUP_INTERIOR', 'CATEGORIA', 'SISTEMA', 'FAMILIA', 'LINHA', 'SUCATA', 'CUSTO_TOTAL'];
+const FILIAIS_FICT = [['MANAUS', '90000002'], ['MATOGROSSO', '90000001'], ['SÃO LUIS', '90000006'], ['BELÉM', '90000005']];
+const N_ESTOQUE = 260;
+// Série do Excel para 01/01/2000 08:00 (fictícia) (a data entra como número, a hora como fração: o leitor converte).
+const SERIE_DATA = Date.UTC(2000, 0, 1) / 86400000 + 25569;
+const SERIE_HORA = (8 * 60) / 1440;
+function linhaFicticia(i) {
+  const [cidade, filial] = FILIAIS_FICT[i % 4];
+  const n = String(i).padStart(4, '0');
+  return {
+    DATA: SERIE_DATA, HORA: SERIE_HORA, CIDADE: cidade, FILIAL_BAP: filial, ID_PRODUTO: `IDFICT${n}`, COD_FORNECEDOR: `CF${n}`,
+    FORNECEDOR: i % 2 ? 'FORNECEDOR ALFA' : 'FORNECEDOR BETA', COD_PRODUTO: `FICT-${n}`,
+    DESCRICAO_PRODUTO: i % 3 ? `PEÇA FICTÍCIA ${n} ROLAMENTO` : `ÓLEO FICTÍCIO ${n} 5W30`,
+    ESTOQUE: i % 7 === 0 ? null : i % 5 === 0 ? 0 : i, FILIAL_CD: String(i % 4),
+    PPEDIDO: 9101 + i / 100, ORIGEM_CUSTO: 'ORIGEM-SECRET', TABELA_CAPITAL: 'TABCAP-SECRET', PRECO_CAPITAL: 9201 + i / 100,
+    TABELA_INTERIOR: 'TABINT-SECRET', PRECO_INTERIOR: 9301 + i / 100, MARKUP_CAPITAL: 94.0123, MARKUP_INTERIOR: 95.0123,
+    CATEGORIA: 'CATEGORIA FICTÍCIA', SISTEMA: 'SISTEMA FICTÍCIO', FAMILIA: 'FAMÍLIA FICTÍCIA', LINHA: 'LEVE',
+    SUCATA: 9601 + i / 100, CUSTO_TOTAL: 9701 + i / 100,
+  };
+}
+const LINHAS_FICT = Array.from({ length: N_ESTOQUE }, (_, i) => linhaFicticia(i + 1));
+const MARCAS_INTERNAS = ['SECRET', '9101', '9201', '9301', '94.01', '95.01', '9601', '9701'];
+const CHAVES_INTERNAS = /PPEDIDO|CUSTO|PRECO|PREÇO|MARKUP|TABELA|SUCATA|ORIGEM/i;
+
+// O xlsx sintético vem de xlsx-ficticio.mjs (o mesmo do testes/estoque-t0034.mjs, RD-0593).
+// Texto em sharedStrings; a descrição em inlineStr (os dois jeitos do Excel); vazio: célula autofechada.
+const xlsxEstoque = (linhas = LINHAS_FICT) => xlsxFicticio(CAB_ESTOQUE, linhas, { inline: ['DESCRICAO_PRODUTO'] });
+
+// Fonte local (127.0.0.1): /ESTOQUE_BAP.xlsx responde o xlsx fictício, /quebrado.xlsx bytes sem sentido, o resto 404.
+let FONTE;
+before(async () => {
+  const xlsx = xlsxEstoque();
+  // Zip-bomba: duas partes, cada uma ABAIXO do limite, que juntas passam do limite TOTAL de descompressão.
+  const metade = Buffer.alloc(Math.ceil(DESCOMPACTADO_MAX / 2) + 1024, 0x20);
+  const bomba = zipar({
+    'xl/workbook.xml': '<workbook/>',
+    'xl/sharedStrings.xml': Buffer.concat([Buffer.from('<sst>'), metade, Buffer.from('</sst>')]),
+    'xl/worksheets/sheet1.xml': Buffer.concat([Buffer.from('<worksheet><sheetData>'), metade, Buffer.from('</sheetData></worksheet>')]),
+  });
+  const MB = Buffer.alloc(1024 * 1024, 0x41);
+  const srv = http.createServer((req, res) => {
+    res.on('error', () => {});
+    if (req.url === '/ESTOQUE_BAP.xlsx') return res.writeHead(200, { 'Content-Length': xlsx.length }).end(xlsx);
+    if (req.url === '/bomba.xlsx') return res.writeHead(200, { 'Content-Length': bomba.length }).end(bomba);
+    // Sem Content-Length (chunked), 51 MB: o serviço tem de parar ao passar de 50 MB.
+    if (req.url === '/sem-tamanho.xlsx') {
+      res.writeHead(200);
+      let n = 0;
+      const mandar = () => { while (n < 51 && !res.destroyed) { n++; if (!res.write(MB)) return res.once('drain', mandar); } if (!res.destroyed) res.end(); };
+      req.socket.on('close', () => { n = 99; });
+      return mandar();
+    }
+    if (req.url === '/quebrado.xlsx') return res.writeHead(200).end('isto-nao-e-um-zip');
+    res.writeHead(404).end();
+  });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  vivos.push(srv);
+  FONTE = `http://127.0.0.1:${srv.address().port}`;
+});
+async function comEstoque(extra = {}) {
+  const s = await subir({ estoqueUrl: `${FONTE}/ESTOQUE_BAP.xlsx`, ...extra });
+  const adm = await adminPronto(s);
+  const vend = await clientePronto(s, adm, 'vend.exemplo');
+  const pat = await s.pedir('/api/usuarios/vend.exemplo', { metodo: 'PATCH', cookie: adm, corpo: { estoque: true } });
+  assert.equal(pat.status, 200);
+  assert.equal(pat.json.estoque, true);
+  const cli = await clientePronto(s, adm, 'loja.exemplo');
+  return { s, adm, vend, cli };
+}
+// Todas as chaves de um JSON, em qualquer profundidade.
+const chavesDe = (v, acc = []) => {
+  if (Array.isArray(v)) v.forEach((x) => chavesDe(x, acc));
+  else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) { acc.push(k); chavesDe(x, acc); }
+  return acc;
+};
+
+test('leitor de xlsx: sharedStrings, inlineStr, número, célula vazia e data/hora do Excel (T-0034)', () => {
+  const t = lerXlsx(xlsxEstoque(LINHAS_FICT.slice(0, 3)));
+  assert.equal(t.length, 4);
+  assert.deepEqual(t[0], CAB_ESTOQUE);
+  assert.equal(t[1][2], 'MATOGROSSO');
+  assert.equal(t[1][8], 'PEÇA FICTÍCIA 0001 ROLAMENTO');
+  assert.equal(t[1][9], 1);
+  assert.equal(t[1][0], SERIE_DATA);
+  assert.throws(() => lerXlsx(Buffer.from('isto-nao-e-um-zip')));
+  // A aba é achada pelo workbook.xml e pelo .rels, mesmo com outro nome de arquivo.
+  const outra = lerXlsx(zipar({
+    'xl/workbook.xml': '<workbook xmlns:r="r"><sheets><sheet name="X" sheetId="1" r:id="rId7"/></sheets></workbook>',
+    'xl/_rels/workbook.xml.rels': '<Relationships><Relationship Id="rId1" Target="worksheets/sheet1.xml"/><Relationship Id="rId7" Target="worksheets/aba.xml"/></Relationships>',
+    'xl/worksheets/sheet1.xml': '<worksheet><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>ERRADA</t></is></c></row></sheetData></worksheet>',
+    'xl/worksheets/aba.xml': '<worksheet><sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>CERTA &amp; ok</t></is></c></row></sheetData></worksheet>',
+  }));
+  assert.deepEqual(outra, [['CERTA & ok']]);
+});
+
+test('permissão do estoque: admin sempre; os outros pelo campo; antigo sem o campo = false, menos o bap.vendedor (T-0034)', () => {
+  assert.equal(podeVerEstoque('admin', { admin: true }), true);
+  assert.equal(podeVerEstoque('admin', { admin: true, estoque: false }), true);
+  assert.equal(podeVerEstoque('loja.exemplo', { admin: false }), false);
+  assert.equal(podeVerEstoque('loja.exemplo', { admin: false, estoque: true }), true);
+  assert.equal(podeVerEstoque('bap.vendedor', { admin: false }), true);
+  assert.equal(podeVerEstoque('bap.vendedor', { admin: false, estoque: false }), false);
+  assert.equal(podeVerEstoque('x', null), false);
+});
+
+test('estoque: cliente sem a permissão recebe 404 na página e na API; sem sessão, como as outras (T-0034)', async () => {
+  const { s, cli, vend } = await comEstoque();
+  for (const rota of ['/estoque', '/estoque/', '/estoque/index.html', '/estoque/estoque.js']) {
+    const p = await s.pedir(rota, { cookie: cli, accept: 'text/html' });
+    assert.equal(p.status, 404, rota);
+    assert.match(p.texto, /Não encontrado\./);
+    assert.ok(!p.texto.includes('estoque'), 'o 404 não mostra a página: ' + rota);
+  }
+  const api = await s.pedir('/api/estoque', { cookie: cli });
+  assert.equal(api.status, 404);
+  assert.deepEqual(api.json, { erro: 'Não encontrado.' });
+  assert.equal((await s.pedir('/api/estoque?q=FICT', { cookie: cli })).texto.includes('FICT-'), false);
+  // Sem sessão: a página leva ao /entrar (com a volta); a API dá 401.
+  const semP = await s.pedir('/estoque', { accept: 'text/html' });
+  assert.equal(semP.status, 302);
+  assert.equal(semP.headers.location, '/entrar?volta=%2Festoque');
+  assert.equal((await s.pedir('/api/estoque')).status, 401);
+  // Com a permissão: a página abre, sem cache.
+  for (const rota of ['/estoque', '/estoque/']) {
+    const ok = await s.pedir(rota, { cookie: vend, accept: 'text/html' });
+    assert.equal(ok.status, 200, rota);
+    assert.match(ok.texto, /<title>estoque<\/title>/);
+    assert.equal(ok.headers['cache-control'], 'no-store');
+  }
+});
+
+test('estoque: o vendedor recebe só a lista branca; nenhuma chave nem valor de custo, preço, markup, tabela, sucata ou origem (T-0034)', async () => {
+  const { s, vend } = await comEstoque();
+  for (const q of ['', '?limite=200', '?limite=200&desde=200', '?q=secret', '?q=9101', '?com_estoque=1&limite=200']) {
+    const r = await s.pedir('/api/estoque' + q, { cookie: vend });
+    assert.equal(r.status, 200, q);
+    assert.equal(r.headers['cache-control'], 'no-store');
+    assert.deepEqual(r.json.colunas.map((c) => c.campo), ['CIDADE', 'FILIAL_BAP', 'COD_PRODUTO', 'DESCRICAO_PRODUTO', 'FORNECEDOR', 'ESTOQUE']);
+    assert.deepEqual(r.json.colunas.map((c) => c.rotulo), ['Filial', 'Nº filial', 'Código', 'Descrição', 'Fornecedor', 'Estoque']);
+    // A resposta inteira: nenhuma chave interna, em nenhum nível; nenhum valor interno, em nenhum lugar.
+    const chaves = chavesDe(r.json);
+    assert.deepEqual(chaves.filter((k) => CHAVES_INTERNAS.test(k)), [], q);
+    for (const c of r.json.colunas) assert.ok(!CHAVES_INTERNAS.test(c.campo) && !CHAVES_INTERNAS.test(c.rotulo), c.campo);
+    for (const m of MARCAS_INTERNAS) assert.ok(!r.texto.includes(m), `vazou ${m} em ${q}`);
+    for (const l of r.json.linhas) assert.deepEqual(Object.keys(l), ['CIDADE', 'FILIAL_BAP', 'COD_PRODUTO', 'DESCRICAO_PRODUTO', 'FORNECEDOR', 'ESTOQUE']);
+    assert.deepEqual(Object.keys(r.json).sort(), ['colunas', 'desde', 'filiais', 'limite', 'linhas', 'posicao', 'total']);
+  }
+  // "secret" e "9101" estão só nos campos internos: a busca do vendedor não acha nada por eles.
+  assert.equal((await s.pedir('/api/estoque?q=secret', { cookie: vend })).json.total, 0);
+  assert.equal((await s.pedir('/api/estoque?q=9101', { cookie: vend })).json.total, 0);
+});
+
+test('estoque: o admin recebe as 23 colunas na ordem, com os valores crus (T-0034)', async () => {
+  const { s, adm } = await comEstoque();
+  const r = await s.pedir('/api/estoque?limite=1', { cookie: adm });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.json.colunas.map((c) => c.campo), [
+    'CIDADE', 'FILIAL_BAP', 'COD_PRODUTO', 'DESCRICAO_PRODUTO', 'ESTOQUE', 'PPEDIDO', 'CUSTO_TOTAL', 'PRECO_CAPITAL', 'PRECO_INTERIOR',
+    'MARKUP_CAPITAL', 'MARKUP_INTERIOR', 'FORNECEDOR', 'TABELA_CAPITAL', 'TABELA_INTERIOR', 'SUCATA', 'ORIGEM_CUSTO',
+    'ID_PRODUTO', 'COD_FORNECEDOR', 'FILIAL_CD', 'CATEGORIA', 'SISTEMA', 'FAMILIA', 'LINHA']);
+  assert.equal(r.json.colunas.length, 23);
+  assert.deepEqual(r.json.colunas.slice(0, 11).map((c) => c.rotulo), ['Filial', 'Nº filial', 'Código', 'Descrição', 'Estoque',
+    'Custo do produto', 'Custo total', 'Preço capital', 'Preço interior', 'Markup capital', 'Markup interior']);
+  assert.deepEqual(Object.fromEntries(r.json.colunas.map((c) => [c.campo, c.tipo])), {
+    CIDADE: 'texto', FILIAL_BAP: 'texto', COD_PRODUTO: 'texto', DESCRICAO_PRODUTO: 'texto', ESTOQUE: 'numero', PPEDIDO: 'dinheiro',
+    CUSTO_TOTAL: 'dinheiro', PRECO_CAPITAL: 'dinheiro', PRECO_INTERIOR: 'dinheiro', MARKUP_CAPITAL: 'markup', MARKUP_INTERIOR: 'markup',
+    FORNECEDOR: 'texto', TABELA_CAPITAL: 'texto', TABELA_INTERIOR: 'texto', SUCATA: 'dinheiro', ORIGEM_CUSTO: 'texto',
+    ID_PRODUTO: 'texto', COD_FORNECEDOR: 'texto', FILIAL_CD: 'texto', CATEGORIA: 'texto', SISTEMA: 'texto', FAMILIA: 'texto', LINHA: 'texto',
+  });
+  assert.ok(!r.json.colunas.some((c) => c.campo === 'DATA' || c.campo === 'HORA'));
+  const l = r.json.linhas[0];
+  assert.deepEqual(Object.keys(l), r.json.colunas.map((c) => c.campo));
+  assert.equal(l.CIDADE, 'Mato Grosso');
+  assert.equal(l.FILIAL_BAP, '90000001');
+  assert.equal(l.COD_PRODUTO, 'FICT-0001');
+  assert.equal(l.ESTOQUE, 1);
+  assert.equal(l.PPEDIDO, 9101.01);
+  assert.equal(l.MARKUP_CAPITAL, 94.0123);
+  assert.equal(typeof l.PRECO_CAPITAL, 'number');
+  assert.deepEqual(r.json.posicao, { data: '01/01/2000', hora: '08:00' });
+  assert.equal(r.json.total, N_ESTOQUE);
+  assert.deepEqual(r.json.filiais, [
+    { numero: '90000005', nome: 'Belém' }, { numero: '90000002', nome: 'Manaus' },
+    { numero: '90000001', nome: 'Mato Grosso' }, { numero: '90000006', nome: 'São Luís' }]);
+});
+
+test('estoque: busca palavra por palavra, filial, com_estoque e paginação (T-0034)', async () => {
+  const { s, vend } = await comEstoque();
+  const q = async (qs) => (await s.pedir('/api/estoque?' + qs, { cookie: vend })).json;
+  const porFilial = (f) => LINHAS_FICT.filter((l) => l.FILIAL_BAP === f).length;
+  // Sem acento e sem caixa; "matogrosso" e "mato grosso" acham os dois jeitos.
+  assert.equal((await q('q=matogrosso')).total, porFilial('90000001'));
+  assert.equal((await q('q=Mato%20Grosso')).total, porFilial('90000001'));
+  assert.equal((await q('q=sao%20luis')).total, porFilial('90000006'));
+  assert.equal((await q('q=BELEM')).total, porFilial('90000005'));
+  assert.equal((await q('q=90000002')).total, porFilial('90000002'));
+  // Código, código do fornecedor, ID, descrição e fornecedor.
+  assert.equal((await q('q=fict-0042')).linhas[0].COD_PRODUTO, 'FICT-0042');
+  assert.equal((await q('q=cf0042')).total, 1);
+  assert.equal((await q('q=idfict0042')).total, 1);
+  const oleo = LINHAS_FICT.filter((l) => l.DESCRICAO_PRODUTO.startsWith('ÓLEO')).length;
+  assert.equal((await q('q=oleo')).total, oleo);
+  assert.equal((await q('q=oleo%20alfa')).total, LINHAS_FICT.filter((l) => l.DESCRICAO_PRODUTO.startsWith('ÓLEO') && l.FORNECEDOR.endsWith('ALFA')).length);
+  assert.equal((await q('q=oleo%20rolamento')).total, 0, 'todas as palavras');
+  // Filial (número) e com_estoque (esconde 0 e vazio).
+  const f = await q('filial=90000006&limite=200');
+  assert.equal(f.total, porFilial('90000006'));
+  assert.ok(f.linhas.every((l) => l.FILIAL_BAP === '90000006' && l.CIDADE === 'São Luís'));
+  assert.equal((await q('filial=99999999')).total, 0);
+  const com = await q('com_estoque=1&limite=200');
+  assert.equal(com.total, LINHAS_FICT.filter((l) => l.ESTOQUE).length);
+  assert.ok(com.linhas.every((l) => typeof l.ESTOQUE === 'number' && l.ESTOQUE !== 0));
+  assert.ok((await q('limite=200')).linhas.some((l) => l.ESTOQUE === null), 'sem o filtro, o vazio vem como null');
+  assert.equal((await q('filial=90000002&com_estoque=1&q=rolamento')).total,
+    LINHAS_FICT.filter((l) => l.FILIAL_BAP === '90000002' && l.ESTOQUE && l.DESCRICAO_PRODUTO.includes('ROLAMENTO')).length);
+  // Paginação: 50 por padrão, no máximo 200; desde segue a ordem da planilha.
+  const p1 = await q('');
+  assert.equal(p1.limite, 50); assert.equal(p1.desde, 0); assert.equal(p1.linhas.length, 50); assert.equal(p1.total, N_ESTOQUE);
+  const p2 = await q('desde=50');
+  assert.equal(p2.linhas[0].COD_PRODUTO, 'FICT-0051');
+  const grande = await q('limite=5000');
+  assert.equal(grande.limite, 200); assert.equal(grande.linhas.length, 200);
+  const fim = await q('desde=250&limite=50');
+  assert.equal(fim.linhas.length, N_ESTOQUE - 250);
+  assert.equal((await q('desde=9999')).linhas.length, 0);
+  for (const ruim of ['limite=-3', 'limite=abc', 'desde=-1', 'limite=0']) {
+    const r = await q(ruim);
+    assert.ok(r.limite >= 1 && r.limite <= 200 && r.desde >= 0, ruim);
+  }
+  // Só GET.
+  const post = await s.pedir('/api/estoque', { metodo: 'POST', cookie: vend, corpo: {} });
+  assert.equal(post.status, 405);
+});
+
+test('estoque: falha no download (404, arquivo quebrado ou sem fonte) dá 503 só na aba; o catálogo segue (T-0034)', async () => {
+  for (const estoqueUrl of [`${FONTE}/falta.xlsx`, `${FONTE}/quebrado.xlsx`, null]) {
+    const s = await subir({ estoqueUrl });
+    const adm = await adminPronto(s);
+    const r = await s.pedir('/api/estoque', { cookie: adm });
+    assert.equal(r.status, 503, String(estoqueUrl));
+    assert.deepEqual(r.json, { erro: 'Estoque indisponível no momento.' });
+    assert.equal(r.headers['cache-control'], 'no-store');
+    assert.equal((await s.pedir('/', { cookie: adm, accept: 'text/html' })).status, 200, 'o catálogo segue no ar');
+    assert.equal((await s.pedir('/saude')).status, 200);
+    assert.ok(s.logs.includes('estoque indisponivel'));
+    assert.ok(!s.logs.join('\n').includes('127.0.0.1'), 'o log não leva a fonte');
+  }
+  const ok = await subir({ estoqueUrl: `${FONTE}/ESTOQUE_BAP.xlsx` });
+  assert.ok(ok.logs.some((m) => new RegExp(`^estoque ok ${N_ESTOQUE} linhas \\d+ms$`).test(m)));
+});
+
+test('estoque: /api/eu e /api/usuarios mostram o campo; só o admin muda; usuário antigo sem o campo (T-0034)', async () => {
+  const { s, adm, vend, cli } = await comEstoque();
+  assert.equal((await s.pedir('/api/eu', { cookie: adm })).json.estoque, true);
+  assert.equal((await s.pedir('/api/eu', { cookie: vend })).json.estoque, true);
+  assert.equal((await s.pedir('/api/eu', { cookie: cli })).json.estoque, false);
+  const lista = (await s.pedir('/api/usuarios', { cookie: adm })).json;
+  assert.deepEqual(lista.map((u) => [u.usuario, u.estoque]), [['admin', true], ['loja.exemplo', false], ['vend.exemplo', true]]);
+  // Só o admin muda: o próprio vendedor (com a permissão) e o cliente recebem 404.
+  for (const c of [vend, cli]) {
+    const r = await s.pedir('/api/usuarios/loja.exemplo', { metodo: 'PATCH', cookie: c, corpo: { estoque: true } });
+    assert.equal(r.status, 404);
+  }
+  assert.equal((await s.pedir('/api/eu', { cookie: cli })).json.estoque, false);
+  // Valor que não é booleano: 400.
+  for (const v of ['sim', 1, null]) {
+    assert.equal((await s.pedir('/api/usuarios/loja.exemplo', { metodo: 'PATCH', cookie: adm, corpo: { estoque: v } })).status, 400);
+  }
+  // O admin dá e tira; vale no pedido seguinte, sem derrubar a sessão.
+  assert.equal((await s.pedir('/api/usuarios/loja.exemplo', { metodo: 'PATCH', cookie: adm, corpo: { estoque: true } })).json.estoque, true);
+  assert.equal((await s.pedir('/api/estoque', { cookie: cli })).status, 200);
+  assert.equal((await s.pedir('/api/usuarios/vend.exemplo', { metodo: 'PATCH', cookie: adm, corpo: { estoque: false } })).json.estoque, false);
+  assert.equal((await s.pedir('/api/estoque', { cookie: vend })).status, 404);
+  assert.equal((await s.pedir('/estoque', { cookie: vend, accept: 'text/html' })).status, 404);
+  assert.equal((await s.pedir('/api/eu', { cookie: vend })).json.estoque, false);
+  // Criação com o campo (só o admin cria); valor errado: 400.
+  const novo = await s.pedir('/api/usuarios', { metodo: 'POST', cookie: adm, corpo: { usuario: 'vend.dois', nome: 'Vendedor Exemplo', senha: falsa('vend-1'), estoque: true } });
+  assert.equal(novo.status, 201);
+  assert.equal(novo.json.estoque, true);
+  assert.equal((await s.pedir('/api/usuarios', { metodo: 'POST', cookie: adm, corpo: { usuario: 'vend.tres', nome: 'X', senha: falsa('vend-1'), estoque: 'sim' } })).status, 400);
+  assert.equal((await s.pedir('/api/usuarios', { metodo: 'POST', cookie: cli, corpo: { usuario: 'vend.quatro', nome: 'X', senha: falsa('vend-1'), estoque: true } })).status, 404);
+  // Usuário antigo (usuarios.json sem o campo): false; o bap.vendedor sem o campo começa com true.
+  const arq = path.join(s.dados, 'usuarios.json');
+  const j = JSON.parse(fs.readFileSync(arq, 'utf8'));
+  for (const u of j.usuarios) delete u.estoque;
+  j.usuarios.push({ ...j.usuarios.find((u) => u.usuario === 'loja.exemplo'), usuario: 'bap.vendedor' });
+  fs.writeFileSync(arq, JSON.stringify(j));
+  const s2 = await subir({ dados: s.dados });
+  const l2 = (await s2.pedir('/api/usuarios', { cookie: adm })).json;
+  assert.deepEqual(l2.map((u) => [u.usuario, u.estoque]),
+    [['admin', true], ['bap.vendedor', true], ['loja.exemplo', false], ['vend.dois', false], ['vend.exemplo', false]]);
+  // O admin pode tirar a permissão do bap.vendedor: o campo gravado (false) passa a valer.
+  assert.equal((await s2.pedir('/api/usuarios/bap.vendedor', { metodo: 'PATCH', cookie: adm, corpo: { estoque: false } })).json.estoque, false);
+});
+
+test('estoque: limites contra planilha ruim (descompressão total, linhas, XML sem fechamento) (T-0034)', () => {
+  // Limite TOTAL: duas partes de 600 KB passam de um limite de 1 MB, mesmo cada uma estando abaixo dele.
+  const parte = Buffer.alloc(600 * 1024, 0x20);
+  const duas = zipar({ 'xl/sharedStrings.xml': Buffer.concat([Buffer.from('<sst>'), parte, Buffer.from('</sst>')]),
+    'xl/worksheets/sheet1.xml': Buffer.concat([Buffer.from('<worksheet><sheetData>'), parte, Buffer.from('</sheetData></worksheet>')]) });
+  assert.throws(() => lerXlsx(duas, { descompactadoMax: 1024 * 1024 }));
+  assert.doesNotThrow(() => lerXlsx(duas, { descompactadoMax: 2 * 1024 * 1024 }));
+  // Teto de linhas (o padrão é 200 mil): 11 linhas com teto de 10 dão erro.
+  assert.equal(LINHAS_MAX, 200000);
+  const onze = xlsxEstoque(LINHAS_FICT.slice(0, 10));
+  assert.throws(() => lerXlsx(onze, { linhasMax: 10 }));
+  assert.equal(lerXlsx(onze, { linhasMax: 11 }).length, 11);
+  // XML sem fechamento: erro rápido (varredura linear, sem retrocesso), nunca trava.
+  const aberto = '<worksheet><sheetData>' + '<row r="1"><c r="A1" t="n"><v>1'.repeat(200000);
+  const t0 = Date.now();
+  assert.throws(() => lerXlsx(zipar({ 'xl/worksheets/sheet1.xml': aberto })));
+  assert.ok(Date.now() - t0 < 2000, 'a leitura do XML sem fechamento demorou demais');
+  // Coluna fora do limite do Excel: erro (não cria um array gigante).
+  assert.throws(() => lerXlsx(zipar({ 'xl/worksheets/sheet1.xml': '<worksheet><sheetData><row r="1"><c r="ZZZ1" t="n"><v>1</v></c></row></sheetData></worksheet>' })));
+});
+
+test('estoque: xlsx que estoura a descompressão total e resposta sem Content-Length acima do limite dão 503 só na aba (T-0034)', async () => {
+  for (const rota of ['/bomba.xlsx', '/sem-tamanho.xlsx']) {
+    const s = await subir({ estoqueUrl: FONTE + rota });
+    const adm = await adminPronto(s);
+    const r = await s.pedir('/api/estoque', { cookie: adm });
+    assert.equal(r.status, 503, rota);
+    assert.deepEqual(r.json, { erro: 'Estoque indisponível no momento.' });
+    assert.equal((await s.pedir('/', { cookie: adm, accept: 'text/html' })).status, 200, 'o catálogo segue no ar: ' + rota);
+    assert.ok(s.logs.includes('estoque indisponivel'), rota);
+  }
+});
+
+test('estoque: contorno de caminho (codificado, "..", barra dupla ou invertida, byte nulo, maiúscula) sem a permissão dá 404 (T-0034)', async () => {
+  const { s, cli, vend } = await comEstoque();
+  const rotas = [
+    '/%65stoque', '/%65stoque/', '/estoque%2f', '/estoque%2F', '/estoque%2findex.html', '//estoque', '//estoque/',
+    '/x/../estoque', '/x/..%2festoque', '/%2e%2e/estoque', '/%2E%2E/estoque/', '/./estoque', '/.%2festoque', '/%2e/estoque',
+    '/estoque/./index.html', '/estoque/../estoque/', '/estoque\\index.html', '/estoque%5cindex.html', '\\estoque',
+    '/estoque%00', '/estoque/%00', '/estoque%00/index.html', '/Estoque', '/ESTOQUE', '/ESTOQUE/', '/Estoque/index.html',
+    '/ESTOQUE/index.html', '/estoque/INDEX.HTML', '/EsToQuE/estoque.js', '/estoque/index.html?x=1', '/estoque#x',
+  ];
+  for (const rota of rotas) {
+    for (const accept of ['text/html', 'application/json']) {
+      let r;
+      // Alvo que o HTTP não aceita (ex.: sem "/" no início): o Node fecha a conexão; também não serve nada.
+      try { r = await s.pedir(rota, { cookie: cli, accept }); } catch (e) { assert.equal(e.code, 'ECONNRESET', rota); continue; }
+      assert.ok([400, 404].includes(r.status), `${rota} (${accept}) deu ${r.status}`);
+      assert.ok(!r.texto.includes('<title>estoque</title>') && !r.texto.includes('console.log("estoque")'), 'serviu a página: ' + rota);
+    }
+  }
+  // O controle: com a permissão, o caminho normal abre.
+  assert.equal((await s.pedir('/estoque', { cookie: vend, accept: 'text/html' })).status, 200);
 });
