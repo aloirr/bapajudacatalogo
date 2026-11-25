@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0640** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0645** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -454,7 +454,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - Reteste final no `d413f8b`: corrigidos o RD-0637 e o RD-0638; RD-0639 atualizado (aviso sem "até lá, com o supervisor"), segue MANTIDO. LIBERADO, sem achado em aberto. Fila: RD-0630 e RD-0631.
 - Reteste no `263ff9f` (chave `nota_base` e trava nova): novos RD-0643 (doc) e RD-0644 (código), baixa, seguram. VOLTA PARA AJUSTE. O RD-0640 ao RD-0642 são da T-0033.
 - Reteste no `821c5ca`: corrigidos o RD-0643 e o RD-0644. LIBERADO, sem achado em aberto. Fila: RD-0630 e RD-0631.
-- Numeração: a partir do próximo livre no `main` (`75fdfd8`). O `corretor-redundancias/T-0033-busca-ano` vai até o RD-0638; quem fizer o merge por último renumera.
+- Numeração: a partir do próximo livre no `main` (`75fdfd8`). Esta entrega usa o RD-0624 ao RD-0639, o RD-0643 e o RD-0644. O branch `corretor-redundancias/T-0033-busca-ano` usa o RD-0624 ao RD-0638 (sobreposto, com achados diferentes) e o RD-0640 ao RD-0642. A T-0033 é quem renumera quando entrar, porque a numeração da T-0038 já está citada nos commits do `main` (#209).
 
 ### T-0035, filtros Categoria, Sistema e Família no Estoque, 24/11/2026 (antes dos PRs)
 - RD-0612 ao RD-0622: branches `integracao-placas/T-0035-filtros` (`f19931f`), `web-site/T-0035-filtros` (`4670213`) e `testes/T-0035-filtros` (`d35c766`). Relatório: `T-0035.md`. VOLTA PARA AJUSTE: seguram o RD-0612 ao RD-0618 (todos baixa); não segura o RD-0619 (só comentário); MANTIDOS: RD-0620 ao RD-0622. Fila: nenhum.
