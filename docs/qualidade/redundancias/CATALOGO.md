@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0612** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0624** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -415,8 +415,25 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0609 | baixa | código (comentário) | servicos/login/server.mjs:433 × :436 | "baixa a fonte uma vez, no início" contradiz a recarga diária (não segura) | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
 | RD-0610 | — | teste | servicos/login/login.test.mjs:1305-1337 × :1191-1229 e :1231-1262 | o teste "recarga no serviço" repete o 22 h, o reagendamento e o 404 | T-0036 | integracao-placas | MANTIDO (`manter?`: único que prova a ligação no `server.mjs`, a `/api/estoque` e o log sem a fonte) |
 | RD-0611 | baixa | doc | servicos/login/LEIA.md:68 × :60 | o item Memória da recarga repete a medida da carga da partida (167/165 MB × "pico de ~150 a 190 MB" da :60); fica só o da recarga (257 MB de pico, ~230 MB depois) | T-0036 | integracao-placas | CORRIGIDO (31ceb02) |
+| RD-0612 | baixa | código (CSS) | site/estoque/estoque.css:59, :60, :93 × site/styles.css:703-705 | o CSS da seta (transição, giro de 180° e `prefers-reduced-motion`) copiado da `.conta-seta` (vira a classe comum `.seta`) | T-0035 | web-site | CORRIGIDO (4402200) |
+| RD-0613 | baixa | código (CSS) | site/estoque/estoque.css:21 × site/styles.css:409 | `select:disabled` com as mesmas 2 declarações do `.mv-campo select:disabled` | T-0035 | web-site | CORRIGIDO (4402200) |
+| RD-0614 | baixa | código (CSS) | site/estoque/estoque.css:17 e :20 | 2 regras `[hidden]` novas na mesma barra (vira `.est-barra [hidden]`) | T-0035 | web-site | CORRIGIDO (4402200) |
+| RD-0615 | baixa | código | site/estoque/estoque.js:173 × :158; :100 × :22 | a caixa refaz o `recarregar`; o `vazio()` remonta `[cat, sis, fam]`, que o `CASCATA` já tem | T-0035 | web-site | CORRIGIDO (4402200) |
+| RD-0616 | baixa | doc | servicos/login/LEIA.md:85 × :86; :90 × site/estoque/estoque.js:6-7 | "admin e vendedor" 2 vezes em itens seguidos; o LEIA do serviço descreve a volta da tela para "Todas" | T-0035 | integracao-placas | CORRIGIDO (e106f45) |
+| RD-0617 | baixa | print e teste | testes/prints/T-0035/admin-390-filtros-aberto.png = vendedor-390-filtros-aberto.png; testes/estoque-t0035.mjs:170 | os 2 prints são o mesmo arquivo (blob `7cee29f`), e o laço do 390 refaz o fluxo do painel para os 2 usuários (sai o print do admin; o painel fica só no vendedor) | T-0035 | testes | CORRIGIDO (e476fe8) |
+| RD-0618 | baixa | código (teste) | testes/estoque-t0035.mjs:18; testes/estoque-comum.mjs:24, :126, :175 | `larguraOk` importado sem uso; `export` de `RAIZ`, `errosConsole` e `comTemplate` sem quem importe | T-0035 | testes | CORRIGIDO (e476fe8) |
+| RD-0619 | baixa | código (comentário) | site/app.js:47 × :70 | 2 comentários dizem que o `bonito` vem do comum.js (não segura) | T-0035 | web-site | CORRIGIDO (4402200) |
+| RD-0620 | — | código | site/estoque/estoque.js:160-161 e :75 × estoque.mjs `cascata()` | 3 guardas para a coerência da cascata | T-0035 | web-site; integracao-placas | MANTIDO (`manter?`: cada uma cobre um caso; a cascata é calculada só no servidor) |
+| RD-0621 | — | teste | login.test.mjs (`norm`) e testes/estoque-comum.mjs:26 (`sem`) × estoque.mjs:62 (`normalizar`) | normalização sem acento copiada nos testes | T-0035 | integracao-placas; testes | MANTIDO (`manter?`: oráculo independente) |
+| RD-0622 | — | teste | testes/estoque-t0035.mjs passo 2 × login.test.mjs e estoque-t0034.mjs | o vendedor "6 colunas, sem R$" de novo | T-0035 | testes | MANTIDO (`manter?`: é a tela do vendedor com filtro, que os outros não olham) |
+| RD-0623 | — | teste | testes/estoque-t0035.mjs `escolher`/`buscar` × `print` (estoque-comum.mjs) | o `semTemplate` roda 2 vezes na mesma tela quando um print vem logo depois de uma troca de filtro | T-0035 | testes | MANTIDO (`manter?`: custa uma leitura do texto; tirar exigiria o `print` saber se a tela já foi conferida) |
 
 ## Notas
+
+### T-0035, filtros Categoria, Sistema e Família no Estoque, 24/11/2026 (antes dos PRs)
+- RD-0612 ao RD-0622: branches `integracao-placas/T-0035-filtros` (`f19931f`), `web-site/T-0035-filtros` (`4670213`) e `testes/T-0035-filtros` (`d35c766`). Relatório: `T-0035.md`. VOLTA PARA AJUSTE: seguram o RD-0612 ao RD-0618 (todos baixa); não segura o RD-0619 (só comentário); MANTIDOS: RD-0620 ao RD-0622. Fila: nenhum.
+- Reteste nos heads `e106f45` (integracao-placas, rebaseado no main `d0fadae`), `4402200` (web-site) e `e476fe8` (testes): RD-0612 ao RD-0619 corrigidos; o `semTemplate` passou a ser chamado a cada troca de filtro e de busca. MANTIDO, novo: RD-0623. LIBERADO.
+- Numeração: este branch foi rebaseado sobre o `corretor-redundancias/T-0036-recarga` (RD-0603 ao RD-0611), e a sequência fica contínua.
 
 ### T-0036, recarga diária do estoque, 24/11/2026 (antes do PR)
 - RD-0603 ao RD-0610: branch `integracao-placas/T-0036-recarga`, head `6e4a1ed`. Relatório: `T-0036.md`. VOLTA PARA AJUSTE: seguram o RD-0603 ao RD-0608 (todos baixa, do `integracao-placas`); não segura o RD-0609 (só comentário); MANTIDO: RD-0610. Fila: nenhum.
