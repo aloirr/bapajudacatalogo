@@ -317,8 +317,18 @@
   }
   // o produto serve no modelo e ano digitados: com "ve", a regra da busca por veículo; sem "ve", o modelo escrito na
   // aplicação e o ano dela batendo (sem o modelo ou sem ano, não serve)
-  const serveNoDigitado = (e, vd) => (veDe(e) ? vd.mods.some(([vm, vmo]) => serveNoAno(e, { vm, vmo, va: vd.ano }))
-    : vd.mods.some(([, vmo]) => temPalavra(e.apl, vmo)) && casaAno(e, vd.ano) === 1);
+  // sem "ve": o ano do trecho do modelo digitado (anosPorModelo, com os modelos do catálogo inteiro como fronteira)
+  let TODOS_MODELOS = null;
+  const ANOS_SEM_VE = new Map();
+  function anosSemVe(p) {
+    if (!ANOS_SEM_VE.has(p)) {
+      if (!TODOS_MODELOS) { modelosDigitados([]); TODOS_MODELOS = [...new Set([...MODELOS_TXT.values()].flat().map(([, mo]) => mo))]; }
+      ANOS_SEM_VE.set(p, anosPorModelo(p.a, TODOS_MODELOS));
+    }
+    return ANOS_SEM_VE.get(p);
+  }
+  const serveNoDigitado = (e, vd) => (veDe(e) ? vd.mods.some(([vm, vmo]) => veDe(e).some((x) => x[0] === vm && x[1] === vmo) && serveNoAno(e, { vm, vmo, va: vd.ano }))
+    : vd.mods.some(([, vmo]) => (anosSemVe(e.p).get(vmo) || []).some(([de, ate]) => vd.ano >= de && vd.ano <= ate))); // "F-1000" = "F1000"
   // nota da peça no produto, ou 0; "parcial" = só casou como pedaço de código
   function casaPeca(e, k, livreAno, anoDigitado) {
     let nota = 0, parcial = false;
@@ -1142,23 +1152,32 @@
   // da marca ("Fiat / Alfa Romeo") não fica entre dois modelos e não conta. Vale na tabela e na rede de segurança.
   const dividemAno = (entre) => /^\s*\/\s*$/.test(entre);
   const ANOS_TEXTO = new Map();
-  function anosNoTexto(p) {
-    if (ANOS_TEXTO.has(p)) return ANOS_TEXTO.get(p);
-    const up = semAcento(String(p.a || "")).toUpperCase(), out = new Map();
-    const mods = [...new Set(p.ve.map((x) => x[1]))].filter((m) => norm(m).replace(/[\s-]/g, "").length >= 2);
+  // A leitura comum do ano por modelo (tabela à parte): para cada modelo de "mods" (com 2 ou mais letras), as faixas do
+  // trecho depois do nome até o próximo modelo de "mods" ou o ";", com o grupo "/" (dividemAno). Devolve
+  // Map(modelo de "mods" → faixas). Serve à rede de segurança (os modelos do "ve") e à busca digitada no produto sem
+  // "ve" (os modelos do catálogo inteiro: "Polo 2007 · Polo 2018" não dá 2026 ao Polo; "Pollo" não é Polo).
+  const RX_MODELO_TXT = new Map();
+  const rxModeloTxt = (m) => { if (!RX_MODELO_TXT.has(m)) RX_MODELO_TXT.set(m, new RegExp("(?<![A-Z0-9])" + [...norm(m).replace(/[\s-]/g, "")].map(reEsc).join("[\\s-]?") + "(?![A-Z0-9])", "g")); const r = RX_MODELO_TXT.get(m); r.lastIndex = 0; return r; };
+  function anosPorModelo(texto, mods) {
+    const up = semAcento(String(texto || "")).toUpperCase(), out = new Map(), compacto = up.replace(/[\s-]/g, "");
     const ocs = [];
     for (const m of mods) {
-      const rx = new RegExp("(?<![A-Z0-9])" + [...norm(m).replace(/[\s-]/g, "")].map(reEsc).join("[\\s-]?") + "(?![A-Z0-9])", "g");
-      for (const r of up.matchAll(rx)) ocs.push({ m, ini: r.index, fim: r.index + r[0].length });
+      const c = norm(m).replace(/[\s-]/g, "");
+      if (c.length < 2 || !compacto.includes(c)) continue; // o modelo só casa se está no texto sem espaço e hífen
+      for (const r of up.matchAll(rxModeloTxt(m))) ocs.push({ m, ini: r.index, fim: r.index + r[0].length });
     }
     const boas = ocs.filter((o, i) => !ocs.some((x, j) => j !== i && x.ini <= o.ini && x.fim >= o.fim && x.fim - x.ini > o.fim - o.ini)).sort((a, b) => a.ini - b.ini);
     const prox = boas.map((o, i) => boas.findIndex((x, j) => j > i && x.ini >= o.fim));
     const fxs = boas.map((o, i) => faixasDoTexto(up.slice(o.fim, prox[i] >= 0 ? boas[prox[i]].ini : up.length).split(";")[0]));
     for (let i = boas.length - 1; i >= 0; i--) // do fim para o começo: "Gol / Saveiro / Parati 1997>" passa o ano a todos
       if (!fxs[i].length && prox[i] >= 0 && dividemAno(up.slice(boas[i].fim, boas[prox[i]].ini))) fxs[i] = fxs[prox[i]];
-    boas.forEach((o, i) => {
-      for (const [fab, mo] of p.ve) if (mo === o.m && fxs[i].length) { const k = norm(fab) + "|" + norm(mo); out.set(k, (out.get(k) || []).concat(fxs[i])); }
-    });
+    boas.forEach((o, i) => { if (fxs[i].length) out.set(o.m, (out.get(o.m) || []).concat(fxs[i])); });
+    return out;
+  }
+  function anosNoTexto(p) {
+    if (ANOS_TEXTO.has(p)) return ANOS_TEXTO.get(p);
+    const porModelo = anosPorModelo(p.a, [...new Set(p.ve.map((x) => x[1]))]), out = new Map();
+    for (const [fab, mo] of p.ve) if (porModelo.has(mo)) { const k = norm(fab) + "|" + norm(mo); if (!out.has(k)) out.set(k, porModelo.get(mo)); }
     ANOS_TEXTO.set(p, out);
     return out;
   }
