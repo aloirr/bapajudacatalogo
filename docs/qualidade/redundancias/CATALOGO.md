@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0664** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0666** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -463,10 +463,12 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0657 | baixa | código | site/app.js:1110 | `ANO_HOJE = 2026` fixo, ao lado do ano do relógio | T-0033 (fila) | web-site | CORRIGIDO (a73d931) |
 | RD-0658 | — | código | site/app.js:1690 × :1111 | 7 palavras de carroceria no `RX_CARROCERIA` e no `PARA_FORA` | T-0033 | web-site | MANTIDO (`manter?`: papéis diferentes; juntar quebraria "Palio Weekend") |
 | RD-0659 | — | teste | testes/t0033_busca_ano.mjs:101-107 × site/app.js | o teste lê o modelo e o ano por conta própria | T-0033 | testes | MANTIDO (`manter?`: oráculo independente) |
-| RD-0660 | baixa | código | site/app.js:1795 × :1812 | o corte do "DETALHE: …" escrito 2 vezes (`comDetalhe` e `versaoSemDetalhe`) | T-0033 | web-site | ABERTO |
-| RD-0661 | baixa | código | site/app.js:1992 × :2000 | `dentro` e `contida` repetem a mesma marca/modelo/cilindrada e a faixa dentro de outra | T-0033 | web-site | ABERTO |
-| RD-0662 | baixa | código | site/app.js:1990 × :1638 | "Não serve" escrito 3 vezes, sem constante | T-0033 | web-site | ABERTO |
-| RD-0663 | baixa | teste | testes/t0033_busca_ano.mjs:434-476 × scripts/testar_site.mjs:714-736 | o aviso de tipo sem peça ("bomba combustivel polo 2026", "polo 2026"), o `ehBomba` e a leitura do texto visível nos 2 testes | T-0033 | testes | ABERTO |
+| RD-0660 | baixa | código | site/app.js:1795 × :1812 | o corte do "DETALHE: …" escrito 2 vezes (`comDetalhe` e `versaoSemDetalhe`) | T-0033 | web-site | CORRIGIDO (587b8f3) |
+| RD-0661 | baixa | código | site/app.js:1992 × :2000 | `dentro` e `contida` repetem a mesma marca/modelo/cilindrada e a faixa dentro de outra | T-0033 | web-site | CORRIGIDO (587b8f3) |
+| RD-0662 | baixa | código | site/app.js:1990 × :1638 | "Não serve" escrito 3 vezes, sem constante | T-0033 | web-site | CORRIGIDO (587b8f3) |
+| RD-0663 | baixa | teste | testes/t0033_busca_ano.mjs:434-476 × scripts/testar_site.mjs:714-736 | o aviso de tipo sem peça ("bomba combustivel polo 2026", "polo 2026"), o `ehBomba` e a leitura do texto visível nos 2 testes | T-0033 | testes | CORRIGIDO (0700981) |
+| RD-0664 | baixa | código | site/app.js:1811 × :1805 e :1809 | o `FIM_CONDICAO` reescreve `exc.\|exceto` (do `NEGA`) e `somente\|apenas` (do `RX_RESTR`) | T-0033 | web-site | ABERTO |
+| RD-0665 | baixa | teste | testes/t0033_busca_ano.mjs:498-503 × :600 e :646-647 | as `conta` das contagens fixas escritas 2 vezes (rodada curta e inteira) | T-0033 | testes | ABERTO |
 
 ## Notas
 
@@ -474,6 +476,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
 - Reteste nos heads `a73d931` (web-site) e `5f0afd7` (testes): RD-0645 ao RD-0654 corrigidos, e também RD-0656 e RD-0657 (fila). Novos: RD-0640 e RD-0641 (baixa, seguram); MANTIDO: RD-0642. Fila: RD-0655. VOLTA PARA AJUSTE até o RD-0640 e o RD-0641.
 - Reteste nos heads `c790587` (web-site) e `cfc011c` (testes): RD-0640 e RD-0641 corrigidos. Novos: RD-0660 ao RD-0662 (web-site) e RD-0663 (testes), baixa, seguram. VOLTA PARA AJUSTE.
+- Reteste nos heads `587b8f3` (web-site) e `0700981` (testes): RD-0660 ao RD-0663 corrigidos. O `FIM_CONDICAO` do site e o `FIM_SEM` do teste não são cópia (oráculo independente). Novos: RD-0664 (web-site) e RD-0665 (testes), baixa, seguram. VOLTA PARA AJUSTE.
 - Numeração (25/11/2026): a 1ª rodada usou o RD-0624 ao RD-0638, que a T-0038 já tinha usado no `main` (#209). Os achados da T-0033 viraram o RD-0645 ao RD-0659 (o número antigo + 21); o RD-0640 ao RD-0642 ficam.
 
 ### T-0038, Onboarding do Vendedor, 25/11/2026 (antes dos PRs)
