@@ -353,7 +353,7 @@
     "22": "Pesquisa dos itens do Dia Foco do dia",
     "26": "RPS: agenda de rota da semana e performance por vendedor, categoria, família e Top 30 clientes",
     "30": "Supervisores e vendedores juntos",
-    "34": "Registro: no BAP Ajuda quando o botão for publicado; até lá, com o supervisor"
+    "34": "Registro: no BAP Ajuda, botão ainda não publicado"
    },
    "icone": {
     "13": "FaChartLine",
@@ -475,7 +475,7 @@
      "0,1": "tx1"
     }
    },
-   "notas": "MENSAGEM-CHAVE\nCada dia da semana tem uma linha em foco, num ciclo de 3 semanas que se repete.\n\nCOMO CONDUZIR\nSegunda e terça são iguais nas 3 semanas (baterias e lubrificantes; linha moto). De quarta a sexta, a linha muda conforme a semana do ciclo. Pergunte ao supervisor em que semana do ciclo estamos. A distribuição das linhas é uma proposta do analista.\n\nPERGUNTE AO TIME\nQual linha do Dia Foco vocês acham mais fácil de apresentar? E a mais difícil?"
+   "notas": "MENSAGEM-CHAVE\nCada dia da semana tem uma linha em foco, num ciclo de 3 semanas que se repete.\n\nCOMO CONDUZIR\nSegunda e terça são iguais nas 3 semanas (baterias e lubrificantes; linha moto). De quarta a sexta, a linha muda conforme a semana do ciclo. Pergunte ao supervisor em que semana do ciclo estamos.\n\nPERGUNTE AO TIME\nQual linha do Dia Foco vocês acham mais fácil de apresentar? E a mais difícil?"
   },
   {
    "molde": 5,
@@ -641,7 +641,7 @@
    "t": {
     "0": "MÓDULO 02 · OS 10 PASSOS",
     "1": "Os 10 passos da visita (2 de 2)",
-    "7": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026. Passo 9: o botão “Pesquisa de mercado” do BAP Ajuda ainda não foi publicado; até lá, com o supervisor."
+    "7": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026. Passo 9: o botão “Pesquisa de mercado” do BAP Ajuda ainda não foi publicado."
    },
    "tirar_coluna": {
     "*": [
@@ -824,7 +824,7 @@
     "30": "10 · Check-out",
     "31": "depois da pergunta da indicação",
     "43": "Feito quando",
-    "44": "é o que mostra que o passo foi cumprido. Na ficha, o supervisor dá nota 3, 2 ou 1 a cada passo.",
+    "44": "É o que mostra que o passo foi cumprido.",
     "47": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026."
    },
    "icone": {
@@ -1338,10 +1338,10 @@
     "15": "Passo 8",
     "17": "Tirar as dúvidas do catálogo com o time do cliente\nChecar se estão usando",
     "19": "Passo 9",
-    "21": "Análise de mercado dos itens do Dia Foco: no BAP Ajuda quando o botão for publicado; até lá, com o supervisor",
+    "21": "Análise de mercado dos itens do Dia Foco: no BAP Ajuda, botão ainda não publicado",
     "25": "DICA DE CAMPO  |O catálogo também é material de apoio do cliente."
    },
-   "notas": "MENSAGEM-CHAVE\nO catálogo online entra antes da visita e nos passos 5, 6 e 8; a análise de mercado entra no passo 9.\n\nCOMO CONDUZIR\nPercorra as colunas da esquerda para a direita. No passo 9, o botão do BAP Ajuda ainda não foi publicado: até lá, a análise de mercado é registrada com o supervisor.\n\nPERGUNTE AO TIME\nQual destas ferramentas vocês ainda não usam? O que falta para começar?",
+   "notas": "MENSAGEM-CHAVE\nO catálogo online entra antes da visita e nos passos 5, 6 e 8; a análise de mercado entra no passo 9.\n\nCOMO CONDUZIR\nPercorra as colunas da esquerda para a direita.\n\nPERGUNTE AO TIME\nQual destas ferramentas vocês ainda não usam? O que falta para começar?",
    "preencher": {
     "14": "accent1"
    }
