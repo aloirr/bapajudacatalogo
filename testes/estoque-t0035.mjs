@@ -175,7 +175,7 @@ try {
     const vis = (id) => { const e = document.getElementById(id); return !!(e && e.offsetParent); };
     const tr = document.querySelector("table.est tbody tr");
     return {
-      bt: bt.innerText.replace(/\s+/g, " ").trim(), n: document.getElementById("est-n-filtros").textContent, exp: bt.getAttribute("aria-expanded"),
+      bt: bt.innerText.replace(/\s+/g, " ").trim(), n: document.getElementById("est-n-filtros").textContent.trim(), exp: bt.getAttribute("aria-expanded"),
       filtros: ["est-filial", "est-categoria", "est-sistema", "est-familia"].map(vis), busca: vis("est-busca"), caixa: vis("est-com"),
       topoLista: tr ? Math.round(tr.getBoundingClientRect().top + window.scrollY) : null, largura: document.documentElement.scrollWidth,
     };
@@ -191,9 +191,9 @@ try {
     await abrirEstoque(page, S.base);
     const fechado = await estado(page);
     // a seta do "Filtros": conferida pelo estado final (espera o fim da transição), não pelo meio da animação
-    const giro = () => page.$eval("#est-bt-filtros svg.est-seta", (svg) => { const m = new DOMMatrix(getComputedStyle(svg).transform); return Math.round(Math.atan2(m.b, m.a) * 180 / Math.PI); }).catch(() => null);
+    const giro = () => page.$eval("#est-bt-filtros svg.seta", (svg) => { const m = new DOMMatrix(getComputedStyle(svg).transform); return Math.round(Math.atan2(m.b, m.a) * 180 / Math.PI); }).catch(() => null);
     const esperarGiro = (graus) => page.waitForFunction((g) => {
-      const svg = document.querySelector("#est-bt-filtros svg.est-seta");
+      const svg = document.querySelector("#est-bt-filtros svg.seta");
       if (!svg) return false;
       const m = new DOMMatrix(getComputedStyle(svg).transform);
       return Math.abs(Math.abs(Math.round(Math.atan2(m.b, m.a) * 180 / Math.PI)) - g) < 1;
@@ -208,6 +208,8 @@ try {
     const um = await estado(page);
     await escolher(page, "est-sistema", "ARREFECIMENTO");
     const dois = await estado(page);
+    // o nome acessível (o que o leitor de tela lê): um só botão chamado exatamente "Filtros (2)"
+    const nome2 = await page.getByRole("button", { name: "Filtros (2)", exact: true }).count();
     const tabAberto = await ordemTab(page, 7);
     await print(page, "vendedor-390-filtros-aberto", false);
     await escolher(page, "est-filial", "90000002");
@@ -228,9 +230,9 @@ try {
       `fechado ${seta0.graus}°, aberto ${seta1.graus}°, fechado de novo ${seta2.graus}° (lidos depois do fim da transição)`);
     res("390 vendedor: \"Filtros (N)\" com o N certo e os filtros só quando aberto",
       fechado.bt === "Filtros" && fechadoOk(fechado) && aberto0.exp === "true" && aberto0.filtros.every(Boolean)
-        && um.n === "(1)" && dois.n === "(2)" && /^Filtros ?\(2\)$/.test(dois.bt) && tres.n === "(3)"
+        && um.n === "(1)" && dois.n === "(2)" && dois.bt === "Filtros (2)" && nome2 === 1 && tres.n === "(3)"
         && fechadoOk(fechado3) && fechado3.n === "(3)" && tot3 === ESP3 && limpo.n === "" && limpo.bt === "Filtros",
-      `fechado: botão "${fechado.bt}", aria-expanded ${fechado.exp}, filtros à vista ${fechado.filtros.filter(Boolean).length} de 4, busca e caixa à vista ${fechado.busca && fechado.caixa}; aberto: ${aberto0.filtros.filter(Boolean).length} de 4; MOTOR "${um.bt}"; + ARREFECIMENTO "${dois.bt}"; + Filial Manaus "${tres.bt}"; fechado de novo "${fechado3.bt}" com ${tot3} linhas (esperado ${ESP3}); "Limpar filtros" → "${limpo.bt}"`);
+      `fechado: botão "${fechado.bt}", aria-expanded ${fechado.exp}, filtros à vista ${fechado.filtros.filter(Boolean).length} de 4, busca e caixa à vista ${fechado.busca && fechado.caixa}; aberto: ${aberto0.filtros.filter(Boolean).length} de 4; MOTOR "${um.bt}"; + ARREFECIMENTO "${dois.bt}" (nome acessível "Filtros (2)": ${nome2} botão); + Filial Manaus "${tres.bt}"; fechado de novo "${fechado3.bt}" com ${tot3} linhas (esperado ${ESP3}); "Limpar filtros" → "${limpo.bt}"`);
     res("390 vendedor: a lista na 1ª tela e sem rolar de lado",
       fechado.topoLista !== null && fechado.topoLista < 844 && [fechado, aberto0, dois, tres, fechado3, limpo].every((e) => e.largura <= 390),
       `1º cartão em y=${fechado.topoLista} px com os filtros fechados (y=${dois.topoLista} px aberto com 2 filtros); scrollWidth ${larguras([fechado, aberto0, dois, tres, fechado3, limpo])}`);
@@ -251,7 +253,7 @@ try {
     await ctx.close();
     const esp2 = contar({ cat: "MOTOR", sis: "ARREFECIMENTO" });
     res("390 admin: \"Filtros (N)\" fechado, a lista na 1ª tela e sem rolar de lado",
-      fechado.bt === "Filtros" && fechadoOk(fechado) && fechadoOk(fechado2) && /^Filtros ?\(2\)$/.test(fechado2.bt) && tot2 === esp2
+      fechado.bt === "Filtros" && fechadoOk(fechado) && fechadoOk(fechado2) && fechado2.bt === "Filtros (2)" && tot2 === esp2
         && fechado.topoLista !== null && fechado.topoLista < 844 && fechado.largura <= 390 && fechado2.largura <= 390,
       `sem filtro: "${fechado.bt}", filtros à vista ${fechado.filtros.filter(Boolean).length} de 4, 1º cartão em y=${fechado.topoLista} px; com MOTOR › ARREFECIMENTO e o painel fechado: "${fechado2.bt}", ${tot2} linhas (esperado ${esp2}); scrollWidth ${larguras([fechado, fechado2])}`);
   }
