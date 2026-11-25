@@ -1558,8 +1558,18 @@
   const fmtFaixas = (fx) => [...new Set(fx.filter(([de, ate], i) => !fx.some(([d2, a2], j) => j !== i && d2 <= de && ate <= a2 && (d2 < de || ate < a2)))
     .sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(fmtFaixa))].join(SEP_FAIXAS);
   // a marca pelo nome ou apelido ("VW" é VOLKSWAGEN, "GM" é CHEVROLET), sem acento e em maiúsculas
-  const MARCA_DO_APELIDO = new Map(Object.entries(APELIDOS).reverse().flatMap(([m, a]) => a.split(" ").map((x) => [x, m])));
-  const marcaDe = (x) => { const n = norm(x); return n ? MARCA_DO_APELIDO.get(n) || n : ""; };
+  const MARCA_DO_APELIDO = new Map(Object.entries(APELIDOS).reverse().flatMap(([m, a]) => a.split(" ").map((x) => [x, m]))
+    .concat([["GENERAL MOTORS", "CHEVROLET"], ["MERCEDES", "MERCEDES-BENZ"], ["MERCEDES BENZ", "MERCEDES-BENZ"], ["VOLKS", "VOLKSWAGEN"]]));
+  // a Marca da tabela só pode ser montadora de algum "ve" do catálogo, com os apelidos ("General Motors" e "GM" são
+  // Chevrolet); outro texto ("Fora da Frota Brasileira", "Motos", "Belina", "Classe A") não é marca: ""
+  let MARCAS_VE = null;
+  const marcaDe = (x) => {
+    if (!MARCAS_VE) MARCAS_VE = new Set(BASE.produtos.flatMap((p) => (p.ve || []).map((v) => norm(v[0]))));
+    const n = norm(x), m = MARCA_DO_APELIDO.get(n) || n;
+    return MARCAS_VE.has(m) ? m : "";
+  };
+  // "Fiat / Alfa Romeo", "Ford/Mb/VW": as marcas do texto; com uma que não é montadora, nenhuma
+  const marcasDoTexto = (x) => { const ms = String(x).split(/\s*\/\s*/).map(marcaDe); return ms.every(Boolean) ? [...new Set(ms)] : []; };
   let RX_MARCA_INI = null; // a marca na frente do modelo ("Renault Sandero", "VW Kombi")
   const rxMarcaIni = () => RX_MARCA_INI || (RX_MARCA_INI = new RegExp(String.raw`^(${altMarcas()})\s*[:–-]?\s+`, "i"));
   // os modelos do "ve" de todo o catálogo, por marca, do mais longo ao mais curto ("Palio Weekend" antes de "Palio")
@@ -1587,11 +1597,12 @@
   const carroceria = (x) => RX_CARROCERIA.test(norm(x));
   const TECNICO = new Set([...PARA_FORA, "FLEX", "GAS", "GASOLINA", "ALCOOL", "ETANOL", "DIESEL", "ABS", "MANUAL", "AUTOMATICO", "DIANTEIRO",
     "DIANTEIRA", "TRASEIRO", "TRASEIRA", "DIREITO", "DIREITA", "ESQUERDO", "ESQUERDA", "RODA", "RODAS", "LADO", "AMBOS", "HIDRAULICA", "HIDRAULICO",
-    "ELETRICA", "ELETRICO", "MECANICA", "MECANICO", "ASSIST", "SISTEMA", "INCLUSIVE", "EXCETO", "OPCIONAL", "ORIGINAL", "PARA", "MODELO", "CONVENCIONAL"]);
+    "ELETRICA", "ELETRICO", "MECANICA", "MECANICO", "ASSIST", "SISTEMA", "INCLUSIVE", "EXCETO", "OPCIONAL", "ORIGINAL", "PARA", "MODELO", "CONVENCIONAL",
+    "ADVENTURE", "LOCKER", "DUALOGIC", "ATTRACTIVE", "ESSENCE", "SPORTING", "TREKKING", "FIRE", "MILLE", "DETALHE", "UNIVERSAL", "ARO"]); // versão e técnica
   // o nome de modelo fora do catálogo: até 3 palavras com maiúscula, a 1ª com letra, sem "/" e sem ano; não é
   // carroceria, palavra técnica nem código de versão ("G2", "T4")
   const RX_NOME = /^[A-ZÀ-Ý][\wÀ-ÿ-]*(?:\s+(?!(?:19|20)\d{2}(?!\d)|\d{2}\/)[A-ZÀ-Ý0-9][\wÀ-ÿ-]*){0,2}(?=[\s(,]|$)/;
-  const nomeFora = (x) => { const m = RX_NOME.exec(x); return m && !carroceria(m[0]) && !TECNICO.has(norm(m[0]).split(/[^A-Z0-9]/)[0]) && !/^[A-Z]{1,2}\d{1,2}$/i.test(m[0]) ? m[0] : ""; };
+  const nomeFora = (x) => { const m = RX_NOME.exec(x); return m && !carroceria(m[0]) && !TECNICO.has(norm(m[0]).split(/[^A-Z0-9]/)[0]) && !/^[A-Z]{1,2}\d{1,2}$/i.test(m[0]) && !marcaDe(m[0]) ? m[0] : ""; };
   // o nome solto depois de vírgula, sem ano nem número com ponto ("Escort, Versailes, Royale"): veículo da lista
   const nomeSolto = (x) => nomeFora(x) === x;
   // os veículos da linha, no texto original (o semAcento tem o mesmo tamanho), sem a marca do começo do bloco. Começa
@@ -1606,7 +1617,7 @@
       const x = t.slice(de, a).trim();
       const virgula = sep.includes(",");
       if (x && out.length && !modeloNoInicio(x.replace(rxMarcaIni(), ""), modelos) && !veiculoComAno(x, virgula) && !(virgula && nomeSolto(x))
-        && !(carroceria(x) && faixasDoTexto(x).length)) out[out.length - 1] = t.slice(ini, a).trim();
+        && !(carroceria(x) && faixasDoTexto(x).length) && !marcaDe(x)) out[out.length - 1] = t.slice(ini, a).trim(); // a marca sozinha ("/ Scania") também separa
       else if (x) { out.push(x); ini = de; }
       sep = t.slice(a, b);
       de = b;
@@ -1619,11 +1630,12 @@
   const limparVersao = (x) => prepCil(x).replace(RX_CIL, " ").replace(RX_FAIXA_APL, " ").replace(/[>→+»]|\bem diante\b/gi, " ")
     .replace(/(?:^|[\s/])[.,]\d\b/g, " ").replace(/\(\s*\)/g, " ").replace(/\/(?:\s*\/)+/g, "/").replace(/\s+/g, " ")
     .replace(/^[\s,;:/·–—.-]+|[\s,;:/·–—-]+$/g, "");
-  const comDetalhe = (r, d) => { r[3] = r[3] ? r[3] + " · " + d : d; };
+  // o "DETALHE: …" do texto não entra na Versão (fica na "Aplicação completa" da ficha)
+  const comDetalhe = (r, d) => { d = d.replace(/\bDETALHE\s*:.*$/i, "").trim(); if (d) r[3] = r[3] ? r[3] + " · " + d : d; };
   // a Versão na tela (U3, MC-0036): sem "todos" sozinho, sem os parênteses em volta dela inteira, sem parêntese sem par
   // e com as siglas em maiúsculas ("mpi" é MPI)
   function versaoTela(v) {
-    let x = String(v || "").trim();
+    let x = String(v || "").replace(/(?:[·|]\s*)?\bDETALHE\s*:.*$/i, "").trim();
     if (/^\(?\s*(?:tod[oa]s(?:\s+os\s+modelos)?|e|ou)\s*\)?$/i.test(x)) return "";
     if (/^\([^()]*\)$/.test(x)) x = x.slice(1, -1).trim();
     const abre = [], fora = new Set();
@@ -1643,19 +1655,24 @@
     const cabe = (r, n) => k(r[0]) === k(n[0]) && k(r[1]) === k(n[1]) && [2, 3, 4].every((c) => !r[c] || k(r[c]) === k(n[c]) || (c === 2 && cils(r[2]).every((x) => cils(n[2]).includes(x))));
     let ultimas = null; // as linhas do veículo de antes (o dono do detalhe)
     for (const bloco of String(p.a || "").split(BLOCO_APL)) {
-      const mb = RX_MARCA_BLOCO.exec(norm(bloco)), vmBloco = mb ? marcaDe(mb[0].replace(/\s-\s$/, "")) : "";
-      const modelos = locais.concat(...(vmBloco ? [vmBloco] : marcasTab).map((vm) => modelosDaMarca(vm).map((m) => [m, vm]))).sort((a, b) => b[0].length - a[0].length);
+      // a marca do começo do bloco: uma montadora (vmBloco), várias ("Fiat / Alfa Romeo": cada modelo com a dele) ou
+      // nenhuma conhecida (o modelo fora do catálogo não entra)
+      const mb = RX_MARCA_BLOCO.exec(norm(bloco)), vmsBloco = mb ? marcasDoTexto(mb[0].replace(/\s-\s$/, "")) : [];
+      const vmBloco = vmsBloco.length === 1 ? vmsBloco[0] : "", vmSem = !mb && marcasTab.length === 1 ? marcasTab[0] : "";
+      let vmAqui = ""; // a marca citada sozinha no meio do bloco ("PEUGEOT - 106 · 206 · Citroën · C3") vale para o que vem depois
+      const modelos = locais.concat(...(vmsBloco.length ? vmsBloco : marcasTab).map((vm) => modelosDaMarca(vm).map((m) => [m, vm]))).sort((a, b) => b[0].length - a[0].length);
       for (const l of linhasAplic(bloco)) {
         const coberta = linhaCoberta(l, tab);
         if (coberta) { ultimas = coberta; continue; }
         for (const v of l.split(/\s*;\s*|\n/).flatMap((x) => veiculosDaLinha(x, modelos))) { // o ";" colado e a quebra de linha também separam
           const cob = linhaCoberta(v, tab);
           if (cob) { ultimas = cob; continue; }
-          const mi = rxMarcaIni().exec(v), vm = mi ? marcaDe(mi[1]) : vmBloco || (marcasTab.length === 1 ? marcasTab[0] : "");
+          if (marcaDe(v)) { vmAqui = marcaDe(v); continue; }
+          const mi0 = rxMarcaIni().exec(v), vmi = mi0 ? marcaDe(mi0[1]) : "", mi = vmi ? mi0 : null, vm = vmi || vmAqui || vmBloco || vmSem;
           let resto = (mi ? v.slice(mi[0].length) : v).replace(RX_APOS, " $1> ");
           const mods = [];
           for (let m = modeloNoInicio(resto, modelos); m; m = modeloNoInicio(resto, modelos)) { // a lista colada: "Santana/Quantum"
-            mods.push([m[0], vm || m[2]]);
+            mods.push([m[0], m[2] || vm]); // o modelo do catálogo fica com a marca dele
             resto = resto.slice(m[1]);
             if (!/^\s*\/\s*/.test(resto)) break;
             resto = resto.replace(/^\s*\/\s*/, "");
