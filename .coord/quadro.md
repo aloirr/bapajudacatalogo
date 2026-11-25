@@ -37,6 +37,7 @@ Atualizado em 24/11/2026 21:10 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0031](tarefas/T-0031.md) | Aplicações suspeitas da Linha Pesada (base v28) | catalogo-dados | web-site, testes | CONCLUÍDA | #175, #176, #177 |
 | T-0032 | 7 portfólios por linha, melhorias do Portfólio e treinamentos (Mecânica Básica, 3 atualizados e 10 de sistema) | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes, web-site | ONDA 1 CONCLUÍDA (o #186 entra antes deste registro); ONDA 2 PAUSADA | #185, #186, #187, #188 |
 | [T-0034](tarefas/T-0034.md) | Aba de estoque (ESTOQUE_BAP.xlsx da BAP Central) para o admin e o bap.vendedor | integracao-placas | web-site, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 24/11 19:27) | #194, #195, #196 |
+| [T-0035](tarefas/T-0035.md) | Filtros por sistema, família e categoria na aba Estoque | web-site | integracao-placas, testes, designer-ux, design-de-marca | EM ANDAMENTO | — |
 
 ## Fila
 Main 7b4ccfd (#196).
