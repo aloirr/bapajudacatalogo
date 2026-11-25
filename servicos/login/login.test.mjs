@@ -805,6 +805,20 @@ const N_ESTOQUE = 260;
 // Série do Excel para 01/01/2000 08:00 (fictícia) (a data entra como número, a hora como fração: o leitor converte).
 const SERIE_DATA = Date.UTC(2000, 0, 1) / 86400000 + 25569;
 const SERIE_HORA = (8 * 60) / 1440;
+// Classificação fictícia (T-0035), pela linha (i % 10): três categorias; ELÉTRICO e SENSOR aparecem em duas
+// categorias (a cascata não pode misturar); "Motor Ficticio" é a mesma categoria com outra caixa e sem acento; 0 = vazio.
+const CLASSES_FICT = [
+  [null, null, null],
+  ['MOTOR FICTÍCIO', 'ARREFECIMENTO', "BOMBA D'ÁGUA"],
+  ['MOTOR FICTÍCIO', 'ARREFECIMENTO', 'RADIADOR'],
+  ['MOTOR FICTÍCIO', 'LUBRIFICAÇÃO', 'FILTRO'],
+  ['Motor Ficticio', 'ELÉTRICO', 'SENSOR'],
+  ['FREIO FICTÍCIO', 'HIDRÁULICO', 'CILINDRO'],
+  ['FREIO FICTÍCIO', 'ELÉTRICO', 'SENSOR'],
+  ['FREIO FICTÍCIO', 'ELÉTRICO', 'CHICOTE'],
+  ['SUSPENSÃO FICTÍCIA', 'DIANTEIRA', 'AMORTECEDOR'],
+  ['SUSPENSÃO FICTÍCIA', 'TRASEIRA', 'AMORTECEDOR'],
+];
 function linhaFicticia(i) {
   const [cidade, filial] = FILIAIS_FICT[i % 4];
   const n = String(i).padStart(4, '0');
@@ -815,7 +829,7 @@ function linhaFicticia(i) {
     ESTOQUE: i % 7 === 0 ? null : i % 5 === 0 ? 0 : i, FILIAL_CD: String(i % 4),
     PPEDIDO: 9101 + i / 100, ORIGEM_CUSTO: 'ORIGEM-SECRET', TABELA_CAPITAL: 'TABCAP-SECRET', PRECO_CAPITAL: 9201 + i / 100,
     TABELA_INTERIOR: 'TABINT-SECRET', PRECO_INTERIOR: 9301 + i / 100, MARKUP_CAPITAL: 94.0123, MARKUP_INTERIOR: 95.0123,
-    CATEGORIA: 'CATEGORIA FICTÍCIA', SISTEMA: 'SISTEMA FICTÍCIO', FAMILIA: 'FAMÍLIA FICTÍCIA', LINHA: 'LEVE',
+    CATEGORIA: CLASSES_FICT[i % 10][0], SISTEMA: CLASSES_FICT[i % 10][1], FAMILIA: CLASSES_FICT[i % 10][2], LINHA: 'LEVE',
     SUCATA: 9601 + i / 100, CUSTO_TOTAL: 9701 + i / 100,
   };
 }
@@ -932,7 +946,8 @@ test('estoque: cliente sem a permissão recebe 404 na página e na API; sem sess
 
 test('estoque: o vendedor recebe só a lista branca; nenhuma chave nem valor de custo, preço, markup, tabela, sucata ou origem (T-0034)', async () => {
   const { s, vend } = await comEstoque();
-  for (const q of ['', '?limite=200', '?limite=200&desde=200', '?q=secret', '?q=9101', '?com_estoque=1&limite=200']) {
+  for (const q of ['', '?limite=200', '?limite=200&desde=200', '?q=secret', '?q=9101', '?com_estoque=1&limite=200',
+    '?categoria=freio%20ficticio&sistema=eletrico&familia=sensor&limite=200', '?categoria=MOTOR%20FICT%C3%8DCIO&sistema=HIDRAULICO']) {
     const r = await s.pedir('/api/estoque' + q, { cookie: vend });
     assert.equal(r.status, 200, q);
     assert.equal(r.headers['cache-control'], 'no-store');
@@ -944,7 +959,10 @@ test('estoque: o vendedor recebe só a lista branca; nenhuma chave nem valor de 
     for (const c of r.json.colunas) assert.ok(!CHAVES_INTERNAS.test(c.campo) && !CHAVES_INTERNAS.test(c.rotulo), c.campo);
     for (const m of MARCAS_INTERNAS) assert.ok(!r.texto.includes(m), `vazou ${m} em ${q}`);
     for (const l of r.json.linhas) assert.deepEqual(Object.keys(l), ['CIDADE', 'FILIAL_BAP', 'COD_PRODUTO', 'DESCRICAO_PRODUTO', 'FORNECEDOR', 'ESTOQUE']);
-    assert.deepEqual(Object.keys(r.json).sort(), ['colunas', 'desde', 'filiais', 'limite', 'linhas', 'posicao', 'total']);
+    assert.deepEqual(Object.keys(r.json).sort(), ['colunas', 'desde', 'filiais', 'limite', 'linhas', 'opcoes', 'posicao', 'total']);
+    // As opções (T-0035) são só nomes de classificação: listas de texto, sem nenhum valor interno.
+    assert.deepEqual(Object.keys(r.json.opcoes), ['categorias', 'sistemas', 'familias']);
+    for (const lista of Object.values(r.json.opcoes)) assert.ok(lista.every((x) => typeof x === 'string'));
   }
   // "secret" e "9101" estão só nos campos internos: a busca do vendedor não acha nada por eles.
   assert.equal((await s.pedir('/api/estoque?q=secret', { cookie: vend })).json.total, 0);
@@ -1031,6 +1049,95 @@ test('estoque: busca palavra por palavra, filial, com_estoque e paginação (T-0
   // Só GET.
   const post = await s.pedir('/api/estoque', { metodo: 'POST', cookie: vend, corpo: {} });
   assert.equal(post.status, 405);
+});
+
+test('estoque: filtros Categoria, Sistema e Família, em cascata, somados à busca, à filial e ao com_estoque (T-0035)', async () => {
+  const { s, vend, adm } = await comEstoque();
+  const q = async (qs, cookie = vend) => (await s.pedir('/api/estoque?' + qs, { cookie })).json;
+  const norm = (x) => String(x ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const conta = (f) => LINHAS_FICT.filter(f).length;
+  const de = (l, cat, sis, fam) => (!cat || norm(l.CATEGORIA) === norm(cat)) && (!sis || norm(l.SISTEMA) === norm(sis))
+    && (!fam || norm(l.FAMILIA) === norm(fam));
+  const enc = encodeURIComponent;
+  const CATS = ['FREIO FICTÍCIO', 'MOTOR FICTÍCIO', 'SUSPENSÃO FICTÍCIA'];
+  const SISTEMAS = ['ARREFECIMENTO', 'DIANTEIRA', 'ELÉTRICO', 'HIDRÁULICO', 'LUBRIFICAÇÃO', 'TRASEIRA'];
+  const FAMILIAS = ['AMORTECEDOR', "BOMBA D'ÁGUA", 'CHICOTE', 'CILINDRO', 'FILTRO', 'RADIADOR', 'SENSOR'];
+
+  // Sem filtro: todas as opções, em ordem, sem vazio e sem repetição ("Motor Ficticio" é a mesma de "MOTOR FICTÍCIO").
+  const todas = await q('');
+  assert.deepEqual(todas.opcoes, { categorias: CATS, sistemas: SISTEMAS, familias: FAMILIAS });
+  assert.equal(todas.total, N_ESTOQUE);
+  // O admin recebe as mesmas opções; as colunas dele seguem as 23.
+  const a = await q('categoria=' + enc('FREIO FICTÍCIO') + '&limite=200', adm);
+  assert.equal(a.colunas.length, 23);
+  assert.deepEqual(a.opcoes.sistemas, ['ELÉTRICO', 'HIDRÁULICO']);
+  assert.ok(a.linhas.length > 0 && a.linhas.every((l) => l.CATEGORIA === 'FREIO FICTÍCIO'));
+
+  // Cada filtro sozinho (texto exato da opção; sem caixa e sem acento também vale).
+  for (const [qs, f] of [
+    ['categoria=' + enc('MOTOR FICTÍCIO'), (l) => de(l, 'MOTOR FICTÍCIO')],
+    ['categoria=motor%20ficticio', (l) => de(l, 'MOTOR FICTÍCIO')],
+    ['sistema=' + enc('ELÉTRICO'), (l) => de(l, null, 'ELÉTRICO')],
+    ['sistema=eletrico', (l) => de(l, null, 'ELÉTRICO')],
+    ['familia=AMORTECEDOR', (l) => de(l, null, null, 'AMORTECEDOR')],
+    ['familia=' + enc("bomba d'agua"), (l) => de(l, null, null, "BOMBA D'ÁGUA")],
+  ]) {
+    const r = await q(qs + '&limite=200');
+    assert.equal(r.total, conta(f), qs);
+    assert.ok(r.total > 0 && r.total < N_ESTOQUE, qs);
+    assert.ok(r.linhas.every((l) => Object.keys(l).length === 6), 'o vendedor segue com as 6 colunas: ' + qs);
+  }
+  // A categoria pega também as linhas com outra caixa e sem acento ("Motor Ficticio").
+  assert.ok(conta((l) => l.CATEGORIA === 'Motor Ficticio') > 0);
+  assert.equal((await q('categoria=' + enc('MOTOR FICTÍCIO'))).total,
+    conta((l) => l.CATEGORIA === 'MOTOR FICTÍCIO' || l.CATEGORIA === 'Motor Ficticio'));
+
+  // Cascata: as opções mudam conforme a escolha.
+  const motor = await q('categoria=' + enc('MOTOR FICTÍCIO'));
+  assert.deepEqual(motor.opcoes, { categorias: CATS, sistemas: ['ARREFECIMENTO', 'ELÉTRICO', 'LUBRIFICAÇÃO'],
+    familias: ["BOMBA D'ÁGUA", 'FILTRO', 'RADIADOR', 'SENSOR'] });
+  const freioEl = await q('categoria=' + enc('FREIO FICTÍCIO') + '&sistema=' + enc('ELÉTRICO'));
+  assert.deepEqual(freioEl.opcoes, { categorias: CATS, sistemas: ['ELÉTRICO', 'HIDRÁULICO'], familias: ['CHICOTE', 'SENSOR'] });
+  assert.equal(freioEl.total, conta((l) => de(l, 'FREIO FICTÍCIO', 'ELÉTRICO')));
+  // Só o sistema: as famílias dele em todas as categorias; os sistemas seguem todos.
+  const el = await q('sistema=' + enc('ELÉTRICO'));
+  assert.deepEqual(el.opcoes, { categorias: CATS, sistemas: SISTEMAS, familias: ['CHICOTE', 'SENSOR'] });
+  // Os três: o SENSOR de FREIO/ELÉTRICO não traz o SENSOR de MOTOR/ELÉTRICO.
+  const sensor = await q('categoria=' + enc('FREIO FICTÍCIO') + '&sistema=' + enc('ELÉTRICO') + '&familia=SENSOR&limite=200');
+  assert.equal(sensor.total, conta((l) => de(l, 'FREIO FICTÍCIO', 'ELÉTRICO', 'SENSOR')));
+  assert.ok(sensor.total > 0 && sensor.total < conta((l) => de(l, null, 'ELÉTRICO', 'SENSOR')));
+  assert.deepEqual(sensor.opcoes, freioEl.opcoes, 'a família escolhida não estreita a própria lista');
+
+  // As opções vêm da planilha inteira: a busca, a filial e o com_estoque não mudam as listas.
+  for (const extra of ['q=FICT-0001', 'filial=90000006', 'com_estoque=1', 'q=nada-acha-isto']) {
+    assert.deepEqual((await q(extra + '&categoria=' + enc('MOTOR FICTÍCIO'))).opcoes, motor.opcoes, extra);
+  }
+
+  // Somados com a busca, a filial e o com_estoque (e a paginação).
+  const soma = await q('categoria=' + enc('SUSPENSÃO FICTÍCIA') + '&familia=AMORTECEDOR&filial=90000002&com_estoque=1&q=rolamento&limite=200');
+  const esperado = LINHAS_FICT.filter((l) => de(l, 'SUSPENSÃO FICTÍCIA', null, 'AMORTECEDOR') && l.FILIAL_BAP === '90000002' && l.ESTOQUE
+    && l.DESCRICAO_PRODUTO.includes('ROLAMENTO'));
+  assert.ok(esperado.length > 0);
+  assert.equal(soma.total, esperado.length);
+  assert.deepEqual(soma.linhas.map((l) => l.COD_PRODUTO), esperado.map((l) => l.COD_PRODUTO));
+  const pag = await q('categoria=' + enc('MOTOR FICTÍCIO') + '&limite=10&desde=10');
+  const todosMotor = LINHAS_FICT.filter((l) => de(l, 'MOTOR FICTÍCIO'));
+  assert.equal(pag.total, todosMotor.length);
+  assert.deepEqual(pag.linhas.map((l) => l.COD_PRODUTO), todosMotor.slice(10, 20).map((l) => l.COD_PRODUTO));
+
+  // Incoerente: ignorado junto com os níveis abaixo; as opções vêm coerentes com o que valeu.
+  const r1 = await q('categoria=' + enc('MOTOR FICTÍCIO') + '&sistema=' + enc('HIDRÁULICO') + '&familia=CILINDRO');
+  assert.equal(r1.total, todosMotor.length, 'vale só a categoria');
+  assert.deepEqual(r1.opcoes, motor.opcoes);
+  const r2 = await q('categoria=INEXISTENTE&sistema=' + enc('ELÉTRICO'));
+  assert.equal(r2.total, N_ESTOQUE, 'categoria que não existe: nada filtra');
+  assert.deepEqual(r2.opcoes, todas.opcoes);
+  const r3 = await q('categoria=' + enc('FREIO FICTÍCIO') + '&sistema=' + enc('ELÉTRICO') + '&familia=AMORTECEDOR');
+  assert.equal(r3.total, freioEl.total, 'família de outra categoria: valem a categoria e o sistema');
+  assert.deepEqual(r3.opcoes, freioEl.opcoes);
+  // Vazio = Todas; espaço em volta não atrapalha.
+  assert.equal((await q('categoria=&sistema=&familia=')).total, N_ESTOQUE);
+  assert.equal((await q('familia=%20amortecedor%20')).total, conta((l) => de(l, null, null, 'AMORTECEDOR')));
 });
 
 test('estoque: falha no download (404, arquivo quebrado ou sem fonte) dá 503 só na aba; o catálogo segue (T-0034)', async () => {

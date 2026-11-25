@@ -14,6 +14,7 @@ export const LIMITE_PADRAO = 50;
 export const LIMITE_MAX = 200;
 const BUSCA_MAX = 200;                      // caracteres da busca
 const TERMOS_MAX = 20;
+const FILTRO_MAX = 200;                     // caracteres de cada filtro de classificação (T-0035)
 
 // Rótulos e tipos (iguais aos da simulação aprovada, f92b7b6). tipo: texto | numero | dinheiro | markup.
 const COLUNAS = {
@@ -52,6 +53,8 @@ export const COLUNAS_ADMIN = [
 ];
 // Sem estas a aba não tem sentido: a carga falha (503). As outras, se sumirem da planilha, vão como null.
 const OBRIGATORIAS = ['DATA', 'HORA', 'CIDADE', 'FILIAL_BAP', 'COD_PRODUTO', 'DESCRICAO_PRODUTO', 'ESTOQUE'];
+// Colunas dos filtros em cascata (T-0035), nesta ordem. Só filtram: a lista branca do vendedor não muda.
+const CLASSIFICACAO = ['CATEGORIA', 'SISTEMA', 'FAMILIA'];
 const NUMERICAS = new Set(Object.keys(COLUNAS).filter((c) => COLUNAS[c][1] !== 'texto'));
 
 // Nome de exibição das cidades (mapa da simulação; "Mato Grosso": R-20261124-213943-alexandre).
@@ -232,6 +235,9 @@ export function montarBase(tabela) {
   if (faltam.length) throw new Error('colunas');
   const linhas = [];
   const indice = [];
+  const classes = [];                       // por linha: [categoria, sistema, família] normalizados (T-0035)
+  const trios = new Map();                  // combinações distintas, para montar as opções em cascata
+  const nomes = new Map();                  // normalizado -> 1º texto visto na planilha (o que vai para a tela)
   const filiais = new Map();
   let posicao = null;
   for (let r = 1; r < tabela.length; r++) {
@@ -248,12 +254,42 @@ export function montarBase(tabela) {
     indice.push(normalizar([val('COD_PRODUTO'), val('COD_FORNECEDOR'), val('ID_PRODUTO'), val('DESCRICAO_PRODUTO'),
       val('FORNECEDOR'), cidadeBruta, linha[0], val('FILIAL_BAP')].filter((x) => x != null).join(' ')));
     if (val('FILIAL_BAP') != null && !filiais.has(val('FILIAL_BAP'))) filiais.set(val('FILIAL_BAP'), linha[0]);
+    const classe = CLASSIFICACAO.map((c) => {
+      const v = val(c);
+      if (v == null) return '';
+      const n = normalizar(v);
+      if (!nomes.has(n)) nomes.set(n, v);
+      return n;
+    });
+    classes.push(classe);
+    trios.set(classe.join('\u0000'), classe);
     linhas.push(linha);
   }
   if (!linhas.length) throw new Error('vazia');
   const listaFiliais = [...filiais].map(([numero, nome]) => ({ numero, nome }))
     .sort((a, b) => String(a.nome).localeCompare(String(b.nome), 'pt-BR') || a.numero.localeCompare(b.numero));
-  return { posicao, linhas, indice, filiais: listaFiliais };
+  return { posicao, linhas, indice, classes, trios: [...trios.values()], nomes, filiais: listaFiliais };
+}
+
+// ---------- filtros de classificação em cascata (T-0035) ----------
+// Categoria -> Sistema -> Família. As opções vêm da planilha INTEIRA (não dependem de q, filial nem com_estoque).
+// escolha: [categoria, sistema, família] já normalizados ('' = Todas). Um valor que não existe no seu nível
+// (ex.: sistema de outra categoria) é IGNORADO junto com os níveis abaixo dele [SUPOSIÇÃO, contrato T-0035].
+// Devolve os filtros que valem e as listas de opções (texto da planilha, ordem alfabética, sem vazio nem repetição).
+function cascata(base, escolha) {
+  const valem = ['', '', ''];
+  const listas = [];
+  let trios = base.trios;
+  let segue = true;
+  for (let k = 0; k < CLASSIFICACAO.length; k++) {
+    const nivel = new Set(trios.map((t) => t[k]).filter(Boolean));
+    listas.push([...nivel].map((n) => base.nomes.get(n)).sort((a, b) => a.localeCompare(b, 'pt-BR')));
+    if (!segue || !escolha[k]) continue;
+    if (!nivel.has(escolha[k])) { segue = false; continue; }
+    valem[k] = escolha[k];
+    trios = trios.filter((t) => t[k] === escolha[k]);
+  }
+  return { valem, opcoes: { categorias: listas[0], sistemas: listas[1], familias: listas[2] } };
 }
 
 // Baixa a fonte (com limite de tamanho e de tempo). Erro: exceção sem dado nenhum da resposta.
@@ -303,19 +339,24 @@ export function criarEstoque({ url = FONTE_ESTOQUE, log = () => {}, agora = Date
   const pronto = recarregar();
 
   // Consulta. admin = true: as 23 colunas; senão, só a lista branca do vendedor.
-  function consultar({ q = '', filial = '', comEstoque = false, desde = 0, limite = LIMITE_PADRAO, admin = false }) {
+  // categoria, sistema, familia: o texto da opção (sem caixa e sem acento); '' = Todas (T-0035).
+  function consultar({ q = '', filial = '', comEstoque = false, categoria = '', sistema = '', familia = '',
+    desde = 0, limite = LIMITE_PADRAO, admin = false }) {
     if (!base) return null;
     const campos = admin ? COLUNAS_ADMIN : COLUNAS_VENDEDOR;
     const idx = campos.map((c) => COLUNAS_ADMIN.indexOf(c));
     const iFilial = COLUNAS_ADMIN.indexOf('FILIAL_BAP');
     const iEstoque = COLUNAS_ADMIN.indexOf('ESTOQUE');
     const termos = normalizar(String(q).slice(0, BUSCA_MAX)).split(/\s+/).filter(Boolean).slice(0, TERMOS_MAX);
+    const { valem, opcoes } = cascata(base, [categoria, sistema, familia].map((v) => normalizar(String(v).slice(0, FILTRO_MAX)).trim()));
     const achadas = [];
     for (let i = 0; i < base.linhas.length; i++) {
       const l = base.linhas[i];
       if (filial && l[iFilial] !== filial) continue;
       if (comEstoque && (l[iEstoque] == null || l[iEstoque] === 0)) continue;
       if (termos.length && !termos.every((t) => base.indice[i].includes(t))) continue;
+      const c = base.classes[i];
+      if ((valem[0] && c[0] !== valem[0]) || (valem[1] && c[1] !== valem[1]) || (valem[2] && c[2] !== valem[2])) continue;
       achadas.push(l);
     }
     return {
@@ -326,6 +367,7 @@ export function criarEstoque({ url = FONTE_ESTOQUE, log = () => {}, agora = Date
       limite,
       linhas: achadas.slice(desde, desde + limite).map((l) => Object.fromEntries(campos.map((c, k) => [c, l[idx[k]]]))),
       filiais: base.filiais.map((f) => ({ ...f })),
+      opcoes,
     };
   }
   return { pronto, recarregar, consultar, estado: () => estado, tamanho: () => (base ? base.linhas.length : 0) };
