@@ -430,7 +430,7 @@ export async function criarServico(opcoes = {}) {
     }
   }
 
-  // Aba Estoque (T-0034): baixa a fonte uma vez, no início, só para a memória. Falhou: só a aba dá 503.
+  // Aba Estoque (T-0034): baixa a fonte no início, só para a memória. Falhou: só a aba dá 503.
   // opcoes.estoqueUrl troca a fonte nos testes (null = sem fonte); nunca vem de variável nem do pedido.
   const estoque = criarEstoque({ url: opcoes.estoqueUrl === undefined ? FONTE_ESTOQUE : opcoes.estoqueUrl, log, agora });
   // Recarga diária às 06:00 de Manaus, sem reiniciar (T-0036). opcoes.agendar: só os testes trocam o setTimeout.

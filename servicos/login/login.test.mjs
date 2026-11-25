@@ -8,9 +8,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { criarServico, caminhoLogico, tipoDaImagem, voltaSegura, podeVerEstoque, SESSAO_MS, JANELA_ERROS_MS } from './server.mjs';
-import { lerXlsx, DESCOMPACTADO_MAX, LINHAS_MAX } from './estoque.mjs';
+import { lerXlsx, criarEstoque, DESCOMPACTADO_MAX, LINHAS_MAX } from './estoque.mjs';
 import { zipar, xlsxFicticio } from './xlsx-ficticio.mjs';
-import { criarEstoque } from './estoque.mjs';
 import { proximaRecarga, agendarRecarga } from './recarga.mjs';
 import { execFile } from 'node:child_process';
 
@@ -1337,10 +1336,6 @@ test('recarga no serviço: às 06:00 a aba passa a mostrar a planilha nova; se a
 });
 
 test('recarga: o timer de verdade não segura o processo (T-0036)', async () => {
-  const r = agendarRecarga({ recarregar: async () => {} });
-  await tique();
-  assert.equal(r.timer().hasRef(), false);
-  r.parar();
   // Um processo que só tem o agendamento (inclusive a nova tentativa de 1 h) termina sozinho.
   const modulo = new URL('./recarga.mjs', import.meta.url).href;
   const codigo = `const { agendarRecarga } = await import(${JSON.stringify(modulo)});

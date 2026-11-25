@@ -5,16 +5,16 @@
 
 const HORA_MS = 3600000;
 const DIA_MS = 24 * HORA_MS;
-export const HORA_RECARGA = 6;        // 06:00 no horário de Manaus
-export const FUSO_MANAUS_H = -4;      // UTC−4 o ano todo
-export const RETENTAR_MS = HORA_MS;   // só enquanto a aba está em 503
+const HORA_RECARGA = 6;        // 06:00 no horário de Manaus
+const FUSO_MANAUS_H = -4;      // UTC−4 o ano todo
+const RETENTAR_MS = HORA_MS;   // só enquanto a aba está em 503
 
-// Próximo instante (ms UTC) com hora:00 no fuso dado, ESTRITAMENTE depois de t.
-export function proximaRecarga(t, { hora = HORA_RECARGA, fusoH = FUSO_MANAUS_H } = {}) {
-  const local = t + fusoH * HORA_MS;
-  let alvo = Math.floor(local / DIA_MS) * DIA_MS + hora * HORA_MS;
+// Próximo instante (ms UTC) com HORA_RECARGA:00 no fuso de Manaus, ESTRITAMENTE depois de t.
+export function proximaRecarga(t) {
+  const local = t + FUSO_MANAUS_H * HORA_MS;
+  let alvo = Math.floor(local / DIA_MS) * DIA_MS + HORA_RECARGA * HORA_MS;
   if (alvo <= local) alvo += DIA_MS;
-  return alvo - fusoH * HORA_MS;
+  return alvo - FUSO_MANAUS_H * HORA_MS;
 }
 
 // recarregar: () => Promise (nunca rejeita; se rejeitar, a falha é engolida e o agendamento segue).
@@ -24,7 +24,6 @@ export function proximaRecarga(t, { hora = HORA_RECARGA, fusoH = FUSO_MANAUS_H }
 export function agendarRecarga({
   recarregar, falhou = () => false, depoisDe = Promise.resolve(),
   agora = Date.now, agendar = setTimeout, cancelar = clearTimeout,
-  hora = HORA_RECARGA, fusoH = FUSO_MANAUS_H, retentarMs = RETENTAR_MS,
 } = {}) {
   let timer = null;
   let parado = false;
@@ -33,8 +32,8 @@ export function agendarRecarga({
     if (parado) return;
     const t = agora();
     // A partir do alvo anterior também: se o timer disparar um pouco antes da hora, não repete a mesma 06:00.
-    alvo = proximaRecarga(Math.max(t, alvo ?? t), { hora, fusoH });
-    if (falhou()) alvo = Math.min(alvo, t + retentarMs);
+    alvo = proximaRecarga(Math.max(t, alvo ?? t));
+    if (falhou()) alvo = Math.min(alvo, t + RETENTAR_MS);
     timer = agendar(disparar, Math.max(0, alvo - t));
     if (timer && typeof timer.unref === 'function') timer.unref();
   }
@@ -48,6 +47,5 @@ export function agendarRecarga({
   return {
     parar() { parado = true; if (timer) cancelar(timer); timer = null; },
     proxima: () => (parado ? null : alvo),
-    timer: () => timer,
   };
 }
