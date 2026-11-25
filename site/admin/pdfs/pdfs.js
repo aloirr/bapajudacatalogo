@@ -25,6 +25,7 @@
     "treinamento-baterias": "Tecnologias, teste, garantia e venda.",
     "treinamento-linha-moto": "Pneus, câmaras, óleo, velas e rolamentos.",
     "treinamento-lubrificantes": "Óleos ProActive, Shiftease e Effitech e os químicos.",
+    "treinamento-onboarding-vendedor": "Os 10 passos da visita, o fechamento e a rotina do time.",
   };
   const NOME_TIPO = { pdf: "PDF", pptx: "PowerPoint" }; // o tipo vem da lista do serviço; sem ele, é PDF
   const IC_BAIXAR = window.BAPConta.IC.pdf;
