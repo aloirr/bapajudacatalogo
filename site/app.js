@@ -132,7 +132,7 @@
         // referência com a marca na frente ("TRW 16900255S" → "TRW16900255S")
         mcods: [...new Set((p.r || []).filter((x) => normCod(x.m)).flatMap((x) => partes(x).filter((c) => c.length >= 3).map((c) => normCod(x.m) + c)))],
         eans: (p.x || []).filter(([k]) => k === "Código de barras").map(([, v]) => normCod(v)).filter(Boolean), // EAN: x["Código de barras"]
-        faixas: faixasDoTexto(p.a || ""),                                    // anos da aplicação
+        faixas: faixasNoTexto(textoDeAno(p.a || "", true), true),            // anos da aplicação (a leitura de antes: textoDeAno)
       };
       // montadora com o outro nome ("vw gol" acha o Gol da VOLKSWAGEN, como a antiga aba Veículo): vale a montadora
       // do campo mo e também a escrita como palavra na aplicação ou na descrição ("VOLKSWAGEN GOL 1.6")
@@ -181,13 +181,18 @@
   const ano2 = (s) => { const n = +s; return n <= 35 ? 2000 + n : 1900 + n; };
   const anoOk = (n) => n >= ANO_MIN && n <= ANO_MAX;
   // o texto como a leitura do ano o vê: sem acento, em maiúsculas, com o ano colado depois de vírgula ("Hdi
-  // 150,2007–2013"), a faixa com ponto ("2015.2019") e o mês-ano com hífen ("01-2020", "12-2023") (T-0033)
-  const textoDeAno = (texto) => norm(texto).replace(/(\d{2}\/(?:19|20)\d{2})(?=\d{2}\/(?:19|20)\d{2})/g, "$1 ")
+  // 150,2007–2013"), a faixa com ponto ("2015.2019"), o mês-ano com hífen ("01-2020") ou ponto ("08.1998") e o "após
+  // 2017", "a partir de 2017" e "desde 2017", que é 2017 em diante [SUPOSIÇÃO] (T-0033)
+  // "antiga": a leitura de antes da T-0033, só para a busca de texto sem modelo ("2026", "filtro 2010"), que fica como
+  // era (e.faixas no carregar e casaAno)
+  const textoDeAno = (texto, antiga) => antiga ? norm(texto).replace(/(\d{2}\/(?:19|20)\d{2})(?=\d{2}\/(?:19|20)\d{2})/g, "$1 ") : norm(texto).replace(/(\d{2}\/(?:19|20)\d{2})(?=\d{2}\/(?:19|20)\d{2})/g, "$1 ")
     .replace(/(\d),(?=(?:19|20)\d{2}(?!\d))/g, "$1, ").replace(/(?<![\d.])((?:19|20)\d{2})\.((?:19|20)\d{2})(?![\d.])/g, "$1-$2")
-    .replace(RX_MES_ANO_HIFEN, "$1/$2");
+    .replace(RX_MES_ANO_HIFEN, "$1/$2").replace(/(?<![\d.,])(0[1-9]|1[0-2])\.((?:19|20)\d{2})\/(?![\d.])/g, "$1/$2>") // "08.1998/": 1998 em diante
+    .replace(/(?<![\d.,])(0[1-9]|1[0-2])\.((?:19|20)\d{2})(?![\d.])/g, "$1/$2")
+    .replace(/\b(?:APOS|A PARTIR DE|DESDE)\s+((?:\d{2}\/)?(?:19|20)\d{2})(?!\d)/g, "$1>");
   const faixasDoTexto = (texto) => faixasNoTexto(textoDeAno(texto));
   // as faixas do texto já preparado (textoDeAno), cada uma com a posição (.i) da 1ª data no texto
-  function faixasNoTexto(s) {
+  function faixasNoTexto(s, antiga) {
     const datas = []; // { i, f, de, ate }
     const re = /(?<!\d|\d[.,])(?:(\d{1,2})\/)?((?:19|20)\d{2})(?!\d|[.,]\d)|(?<!\d|\d[.,\/])(\d{2})\/(\d{2})(?!\d|[.,\/]\d|\s*(?:"|''|POL))|(?<![\d.,\/-])(\d{2})-(\d{2})(?![\d.,\/-])|(?:\.{2,}|…)\s*\/\s*(\d{2})(?!\d)|(?<![\d.,\/-])(\d{2})-(\d{2})\/(\d{2})-(\d{2})(?![\d.,\/-])/g;
     let m;
@@ -208,7 +213,8 @@
     }
     const faixas = [];
     const SEP = /^[\s·]*(?:-|–|—|A|AO|ATE|\/|>|→)?[\s·]*$/;
-    const ABERTO = /^\s*(?:>|\+|→|EM DIANTE|\/\s*(?:\.{2,}|…)|…|\.{3}|ATE(?![\s·]*\d))/;
+    const ABERTO = antiga ? /^\s*(?:>|\+|→|EM DIANTE|\/\s*(?:\.{2,}|…)|…|\.{3}|ATE(?![\s·]*\d))/
+      : /^\s*(?:>|\+|→|EM DIANTE|\/\s*\.(?![\d.])|\/\s*(?:\.{2,}|…)|…|\.{2,}|ATE(?![\s·]*\d))/; // "2012/.", "1996 / .", "2019..", "2007>"; "2011 / Punto" não
     const SEM_COMECO = /(?:\.{2,}|…)\s*\/?\s*$/;
     for (let k = 0; k < datas.length; k++) {
       const d = datas[k], prox = datas[k + 1];
@@ -221,6 +227,7 @@
         }
       }
       if (!d.faixa && ABERTO.test(s.slice(d.f))) poe(d.de, SEM_FIM);
+      else if (!antiga && !d.faixa && /\bATE\s*$/.test(s.slice(Math.max(0, d.i - 8), d.i))) poe(SEM_INICIO, d.ate); // "até 2008", "(até 1989)"
       else if (!d.faixa && SEM_COMECO.test(s.slice(Math.max(0, d.i - 5), d.i))) poe(SEM_INICIO, d.ate);
       else poe(d.dupla || d.de, d.ate);
     }
@@ -1511,7 +1518,8 @@
       let fim = Math.min(apl.length, i + 120);
       // o fim é o próximo modelo; o nome curto dentro do longo ("Palio" em "Palio Weekend") não corta o trecho do longo
       const longo = (o, j) => modelos.some((x) => x !== o && x.includes(o) && up.startsWith(x, j));
-      for (const o of modelos) if (o !== m && !o.includes(m)) { let j = achar(o, i + m.length); while (j > 0 && longo(o, j)) j = achar(o, j + o.length); if (j > i && j < fim) fim = j; }
+      // o modelo mais longo que contém este também fecha o trecho, depois do começo dele ("Gol (G5…), Golf (após 2000)")
+      for (const o of modelos) if (o !== m) { let j = achar(o, i + m.length); while (j > 0 && longo(o, j)) j = achar(o, j + o.length); if (j > i && j < fim) fim = j; }
       if (fim === i + 120 && /[\p{L}\d]{2}/u.test(apl.slice(fim - 1, fim + 1))) cortado.add(m); // cortado no limite, no meio de uma palavra ou número
       trecho.set(m, apl.slice(i, fim));
     }
@@ -1751,7 +1759,7 @@
   // a cilindrada colada ("1.6mpi") e as duas válvulas ("1.6 8V/16V": "1.6 8V / 1.6 16V")
   const prepCil = (x) => x.replace(/(\d[.,]\d)(?=[A-Za-z]{2})/g, "$1 ").replace(/(\d[.,]\d)\s*(\d{1,2})\s?V\s*\/\s*(\d{1,2})\s?V\b/gi, "$1 $2V / $1 $3V");
   // o texto sem o ano ("01-2020" é mês-ano), sem o "em diante" e sem os parênteses vazios; "mais": outros sinais a tirar
-  const tirarAno = (x, mais = "") => x.replace(RX_MES_ANO_HIFEN, "$1/$2").replace(RX_FAIXA_APL, " ").replace(new RegExp("[>→»" + mais + "]|\\bem diante\\b", "gi"), " ")
+  const tirarAno = (x, mais = "") => x.replace(RX_MES_ANO_HIFEN, "$1/$2").replace(/\b(?:ap[oó]s|a partir de|desde)\b/gi, " ").replace(RX_FAIXA_APL, " ").replace(new RegExp("[>→»" + mais + "]|\\bem diante\\b", "gi"), " ")
     .replace(/\(\s*\)/g, " ").replace(/\s+/g, " ");
   const semPontas = (x) => x.replace(/^[\s,;:/·–—.-]+|[\s,;:/·–—.-]+$/g, "");
   // a Versão é o que sobra do nome sem a cilindrada e o ano ("Saveiro .0/1.6/1.8/2.0 Mi 1997>" fica "Mi"; "c/ ABS" fica)
@@ -1762,8 +1770,6 @@
   // o detalhe vai para a Versão da linha, depois de " · "; o "DETALHE: …" do texto nunca entra (fica na "Aplicação
   // completa" da ficha)
   const comDetalhe = (r, d) => { d = d.replace(/\bDETALHE\s*:.*$/i, "").trim(); if (d) r[3] = r[3] ? r[3] + " · " + d : d; };
-  // "após 2005", "a partir de 2005", "desde 2005": 2005 em diante [SUPOSIÇÃO]
-  const RX_APOS = /\(?\s*(?:ap[oó]s|a partir de|desde)\s+((?:\d{2}\/)?(?:19|20)\d{2})\s*\)?/gi;
   // lado e posição, que a ficha já mostra (MC-0040): saem da Versão quando o produto tem Lado ou Posição
   const RX_LADO_POSICAO = /\b(?:ambos\s+os\s+lados|lado\s+roda|lados?|roda\s+(?:diant\.?|dianteira|tras\.?|traseira)|dir(?:eit[oa])?\.?|esq(?:uerd[oa])?\.?|diant(?:eir[oa])?\.?|tras(?:eir[oa])?\.?|inferior|superior)(?![\wÀ-ÿ])/gi;
   // A Versão na tela (U3, MC-0036, R1/MC-0038): sem "DETALHE: …", sem "todos"/"todas" sozinho, sem parênteses, sem
@@ -1873,12 +1879,14 @@
         if (cob) { ultimas = cob; return ""; }
         if (marcaDe(v)) { vmAqui = marcaDe(v); return "marca"; }
         const mi0 = rxMarcaIni().exec(v), vmi = mi0 ? marcaDe(mi0[1]) : "", mi = vmi ? mi0 : null, vm = vmi || vmAqui || vmBloco || vmSem;
-        const { mods, resto } = modelosDoVeiculo((mi ? v.slice(mi[0].length) : v).replace(RX_APOS, " $1> "), vm, modelos, ultimas && ultimas[ultimas.length - 1]);
+        const { mods, resto } = modelosDoVeiculo((mi ? v.slice(mi[0].length) : v), vm, modelos, ultimas && ultimas[ultimas.length - 1]);
         // sem modelo: detalhe do veículo de antes (B11, T-0018: "Motores 1.0 / 1.3", "Dianteiro - Esq"). Com ano, o pedaço
-        // só de ano ("Palio 1.8R · 11/2005–12/2010") e o detalhe que não cita outro modelo ("Nova Ecosport · ... Duratec
-        // 2012/.") dão o ano à coluna Ano do veículo de antes; o ano não fica na Versão
+        // só de ano ("Palio 1.8R · 11/2005–12/2010") e o detalhe que não cita outro modelo dão o ano à coluna Ano do
+        // veículo de antes; o ano não fica na Versão. Sem veículo antes no bloco ("Caminhões: 1318 (1996–2012) …"), o
+        // texto não vai para linha nenhuma (fica na "Aplicação completa")
         if (!mods.length) {
-          const donos = ultimas && ultimas.length ? ultimas : tab.slice(0, 1), fx = faixasDoTexto(v);
+          if (!ultimas || !ultimas.length) return "";
+          const donos = ultimas, fx = faixasDoTexto(v);
           const outro = donos.some((r) => modelos.some(([m]) => compacto(m).length >= 2 && k(m) !== k(r[1]) && rxPalavra(k(m)).test(k(v))));
           if (fx.length && !outro) donos.forEach((r) => { r[4] = comAnos(r[4], fx); const d = semAno(v.trim()); if (d) comDetalhe(r, d); });
           else donos.forEach((r) => comDetalhe(r, v.trim()));
