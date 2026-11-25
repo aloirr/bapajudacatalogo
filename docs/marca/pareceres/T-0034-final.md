@@ -69,3 +69,7 @@ avisar que a fonte do print não é a do site.]
 
 - O MC-0031 pode entrar neste PR (1 linha). O MC-0032 vai para a fila, junto das outras buscas do site.
 - Depois do merge, confiro no ar (1366 e 390 px) a Poppins na aba Estoque e no menu da conta.
+
+## 6. Situação (25/11/2026)
+
+- MC-0031 feito; MC-0032 na fila; Poppins a conferir no ar; entrega nos PRs #194, #195 e #196 (main `7b4ccfd`).
