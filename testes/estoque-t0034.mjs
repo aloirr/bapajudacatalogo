@@ -5,205 +5,30 @@
      node testes/estoque-t0034.mjs [--prints testes/prints/T-0034-final]
    Saída: 0 se tudo passou, 1 se algo falhou.
 
-   O que faz:
-     - monta, com o xlsxFicticio do servicos/login/xlsx-ficticio.mjs, um ESTOQUE_BAP.xlsx SINTÉTICO (120 linhas, 6 filiais, estoque 0 e vazio em algumas; custo, preço, markup,
-       tabela, sucata e origem FICTÍCIOS) e serve em 127.0.0.1 (também um /quebrado.xlsx para o 503);
-     - sobe o serviço de login de verdade (criarServico do servicos/login/server.mjs, com o site/ real) numa porta livre,
-       com PASTA_DADOS temporária e senhas falsas geradas aqui a cada rodada (nunca impressas, nunca gravadas);
+   O que faz (a fonte sintética, o serviço, o navegador e o relatório vêm do testes/estoque-comum.mjs):
      - cria admin, vendedor (estoque: true) e cliente (sem a permissão) e confere no Chromium o que é da tela: menus
        e página 404 do cliente, colunas e texto visível do vendedor, 23 colunas do admin, busca, filtro, caixa,
        "Mostrar mais N", vazio, a mensagem do 503 e do outro erro, a caixa "Pode ver o estoque" da Criar usuários,
        390 px sem rolar de lado e o console. As regras da API (404, lista branca do JSON, 503 e log do estoque) são
        dos testes do serviço (servicos/login/login.test.mjs);
      - prints com deviceScaleFactor 2, em 1366 × 768 e 390 × 844 (página inteira; menu aberto, cartão aberto e janela
-       só na área visível).
-   Nada aqui é dado da BAP. Nenhuma rede de fora: as fontes do Google e o serviço de placas são respondidos no teste. */
+       só na área visível). */
 
-import crypto from "node:crypto";
-import fs from "node:fs";
-import http from "node:http";
-import os from "node:os";
-import path from "node:path";
-import { createRequire } from "node:module";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import { xlsxFicticio } from "../servicos/login/xlsx-ficticio.mjs";
-import { entrarUI } from "./login.mjs";
+import {
+  res, sem, porCidade, comEstoqueN, COLS_VENDEDOR, COLS_ADMIN, RX_TELA_INTERNA, pedir, falsa, criarUsuario, iniciar,
+  contexto, print, semTemplate, larguraOk, abrirEstoque, cabecalhos, totalTxt, esperarLista, menuConta, menuCima, fechar,
+} from "./estoque-comum.mjs";
 
-const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const arg = (n, p) => { const i = process.argv.indexOf(n); return i > 0 ? process.argv[i + 1] : p; };
-const PRINTS = path.resolve(RAIZ, arg("--prints", "testes/prints/T-0034-final"));
-fs.mkdirSync(PRINTS, { recursive: true });
-
-const falsa = (rot) => `${rot}-falsa-de-teste-${crypto.randomBytes(6).toString("hex")}`;
-const resultados = [];
-const res = (nome, ok, det) => { resultados.push({ nome, ok, det }); };
-const sem = (s) => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-
-// ---------- xlsx sintético ----------
-const CAB = ["DATA", "HORA", "CIDADE", "FILIAL_BAP", "ID_PRODUTO", "COD_FORNECEDOR", "FORNECEDOR", "COD_PRODUTO",
-  "DESCRICAO_PRODUTO", "ESTOQUE", "FILIAL_CD", "PPEDIDO", "ORIGEM_CUSTO", "TABELA_CAPITAL", "PRECO_CAPITAL", "TABELA_INTERIOR",
-  "PRECO_INTERIOR", "MARKUP_CAPITAL", "MARKUP_INTERIOR", "CATEGORIA", "SISTEMA", "FAMILIA", "LINHA", "SUCATA", "CUSTO_TOTAL"];
-const FILIAIS = [["MANAUS", "90000002"], ["MATOGROSSO", "90000001"], ["BELÉM", "90000005"], ["SÃO LUIS", "90000006"], ["BOA VISTA", "90000003"], ["SANTARÉM", "90000004"]];
-const PECAS = ["AMORTECEDOR DIANTEIRO TESTE", "PASTILHA DE FREIO TESTE", "ROLAMENTO DE RODA TESTE", "BIELETA TESTE", "TERMINAL DE DIREÇÃO TESTE"];
-const N = 120;
-const SERIE_DATA = Date.UTC(2026, 10, 24) / 86400000 + 25569;
-const SERIE_HORA = (9 * 60 + 30) / 1440;
-function linha(i) {
-  const [cidade, filial] = FILIAIS[i % FILIAIS.length];
-  const n = String(i).padStart(4, "0");
-  return {
-    DATA: SERIE_DATA, HORA: SERIE_HORA, CIDADE: cidade, FILIAL_BAP: filial, ID_PRODUTO: `ID-TESTE-${n}`, COD_FORNECEDOR: `CFT${n}`,
-    FORNECEDOR: i % 2 ? "FORNECEDOR TESTE ALFA" : "FORNECEDOR TESTE BETA", COD_PRODUTO: `ZZT${n}`,
-    DESCRICAO_PRODUTO: `${PECAS[i % PECAS.length]} ${n}`,
-    ESTOQUE: i % 11 === 0 ? null : i % 4 === 0 ? 0 : (i * 7) % 90 + 1, FILIAL_CD: String(i % 3),
-    PPEDIDO: 11 + i / 10, ORIGEM_CUSTO: "ORIGEM TESTE", TABELA_CAPITAL: "TAB TESTE C", PRECO_CAPITAL: 22 + i / 10,
-    TABELA_INTERIOR: "TAB TESTE I", PRECO_INTERIOR: 23 + i / 10, MARKUP_CAPITAL: 1.5, MARKUP_INTERIOR: 1.75,
-    CATEGORIA: "CATEGORIA TESTE", SISTEMA: "SISTEMA TESTE", FAMILIA: "FAMÍLIA TESTE", LINHA: "LEVE",
-    SUCATA: i % 9 === 0 ? 3.25 : null, CUSTO_TOTAL: 12 + i / 10,
-  };
-}
-const LINHAS = Array.from({ length: N }, (_, k) => linha(k + 1));
-
-// ---------- utilidades HTTP ----------
-const portaLivre = () => new Promise((r) => { const s = http.createServer(); s.listen(0, "127.0.0.1", () => { const p = s.address().port; s.close(() => r(p)); }); });
-function pedir(base, caminho, { metodo = "GET", corpo, cookie, accept = "application/json" } = {}) {
-  return new Promise((resolve, reject) => {
-    const u = new URL(caminho, base);
-    const h = { Accept: accept };
-    if (cookie) h.Cookie = cookie;
-    if (metodo !== "GET") h.Origin = base;
-    let b = null;
-    if (corpo !== undefined) { b = Buffer.from(JSON.stringify(corpo)); h["Content-Type"] = "application/json"; h["Content-Length"] = b.length; }
-    const req = http.request({ host: u.hostname, port: u.port, path: u.pathname + u.search, method: metodo, headers: h }, (r) => {
-      const partes = []; r.on("data", (x) => partes.push(x));
-      r.on("end", () => { const texto = Buffer.concat(partes).toString("utf8"); let json = null; try { json = JSON.parse(texto); } catch { /* não é JSON */ } resolve({ status: r.statusCode, headers: r.headers, texto, json }); });
-    });
-    req.on("error", reject); if (b) req.write(b); req.end();
-  });
-}
-const cookieDe = (r) => { const sc = r.headers["set-cookie"] || []; const l = sc.find((x) => x.startsWith("bap_sessao=")); return l ? l.split(";")[0] : null; };
-
-async function subirServico(estoqueUrl, nomePasta) {
-  const mod = await import(pathToFileURL(path.join(RAIZ, "servicos", "login", "server.mjs")).href);
-  const porta = await portaLivre();
-  const base = `http://127.0.0.1:${porta}`;
-  const pasta = fs.mkdtempSync(path.join(os.tmpdir(), nomePasta));
-  const senhaAdmin0 = falsa("admin0");
-  const logs = [];
-  const srv = await mod.criarServico({
-    env: { PASTA_DADOS: pasta, ADMIN_USUARIO: "admin", ADMIN_SENHA_INICIAL: senhaAdmin0, SESSAO_SEGREDO: falsa("segredo"), CHAVE_INTERNA: falsa("chave"), ORIGEM_SITE: base },
-    log: (m) => logs.push(m), estoqueUrl,
-  });
-  await srv.estoquePronto;
-  await new Promise((r) => srv.listen(porta, "127.0.0.1", r));
-  // admin com a senha já trocada
-  const e = await pedir(base, "/api/entrar", { metodo: "POST", corpo: { usuario: "admin", senha: senhaAdmin0 } });
-  const senhaAdmin = falsa("admin1");
-  const t = await pedir(base, "/api/trocar-senha", { metodo: "POST", cookie: cookieDe(e), corpo: { senhaNova: senhaAdmin } });
-  if (t.status !== 204) throw new Error(`troca do admin respondeu ${t.status}`);
-  return { srv, base, pasta, logs, adm: cookieDe(t), senhas: { admin: senhaAdmin } };
-}
-async function criarUsuario(s, usuario, estoque) {
-  const s1 = falsa("ini"), s2 = falsa("fim");
-  const corpo = { usuario, nome: `Pessoa ${usuario}`, empresa: "Empresa Teste", senha: s1 };
-  if (estoque !== undefined) corpo.estoque = estoque;
-  const c = await pedir(s.base, "/api/usuarios", { metodo: "POST", cookie: s.adm, corpo });
-  if (c.status !== 201) throw new Error(`criar ${usuario}: ${c.status}`);
-  const e = await pedir(s.base, "/api/entrar", { metodo: "POST", corpo: { usuario, senha: s1 } });
-  const t = await pedir(s.base, "/api/trocar-senha", { metodo: "POST", cookie: cookieDe(e), corpo: { senhaNova: s2 } });
-  if (t.status !== 204) throw new Error(`troca de ${usuario}: ${t.status}`);
-  s.senhas[usuario] = s2;
-  return cookieDe(t);
-}
-const COLS_VENDEDOR = ["Filial", "Nº filial", "Código", "Descrição", "Fornecedor", "Estoque"];
-// admin: as 23 colunas, nesta ordem
-const COLS_ADMIN = ["Filial", "Nº filial", "Código", "Descrição", "Estoque", "Custo do produto", "Custo total", "Preço capital", "Preço interior",
-  "Markup capital", "Markup interior", "Fornecedor", "Tabela capital", "Tabela interior", "Sucata", "Origem do custo", "ID do produto",
-  "Cód. fornecedor", "Filial CD", "Categoria", "Sistema", "Família", "Linha"];
-const RX_TELA_INTERNA = /custo|preco|markup|tabela|sucata|origem|r\$/; // sobre o texto sem acento e minúsculo
-
-// ---------- rodada ----------
-const fonte = xlsxFicticio(CAB, LINHAS);
-const srvFonte = http.createServer((req, r) => {
-  if (req.url === "/ESTOQUE_BAP.xlsx") return r.writeHead(200, { "Content-Length": fonte.length }).end(fonte);
-  if (req.url === "/quebrado.xlsx") return r.writeHead(200).end("isto-nao-e-um-zip");
-  r.writeHead(404).end();
-});
-await new Promise((r) => srvFonte.listen(0, "127.0.0.1", r));
-const FONTE = `http://127.0.0.1:${srvFonte.address().port}`;
-
-const S = await subirServico(`${FONTE}/ESTOQUE_BAP.xlsx`, "t0034-ok-");
-const S503 = await subirServico(`${FONTE}/quebrado.xlsx`, "t0034-503-");
+const { S, S503 } = await iniciar({ printsPadrao: "testes/prints/T-0034-final", com503: true });
 await criarUsuario(S, "vend.teste", true);
 const cli = await criarUsuario(S, "cli.teste");
 
-const { chromium } = createRequire(import.meta.url)("playwright");
-const browser = await chromium.launch();
-const errosConsole = [];
-async function contexto(s, usuario, larg, alt) {
-  const ctx = await browser.newContext({ viewport: { width: larg, height: alt }, deviceScaleFactor: 2 });
-  await ctx.route((u) => !String(u.href).startsWith(s.base), (rota) => {
-    const u = rota.request().url();
-    if (/fonts\.googleapis\.com/.test(u)) return rota.fulfill({ status: 200, contentType: "text/css", body: "" });
-    if (/placas/.test(u)) return rota.fulfill({ status: 503, contentType: "application/json", body: '{"erro":"teste"}' });
-    return rota.fulfill({ status: 204, body: "" });
-  });
-  const page = await ctx.newPage();
-  page.esperados = []; // códigos de status que o passo atual provoca de propósito (404 do cliente, 503)
-  const rot = `${usuario} ${larg}`;
-  page.on("console", (m) => {
-    if (m.type() !== "error") return;
-    const t = m.text();
-    if (page.esperados.some((c) => t.includes(`status of ${c}`))) return;
-    if (/placas/.test((m.location() || {}).url || "")) return;
-    errosConsole.push(`${rot}: ${t.slice(0, 140)}`);
-  });
-  page.on("pageerror", (e) => errosConsole.push(`${rot}: erro de script: ${e.message.slice(0, 140)}`));
-  if (usuario) {
-    await page.goto(s.base + "/entrar", { waitUntil: "networkidle" });
-    await entrarUI(page, usuario, s.senhas[usuario]);
-  }
-  return { ctx, page };
-}
-// página inteira; a janela (dialog modal) só na tela visível: na página inteira ela fica por cima do fim da lista
-const print = async (page, nome, inteira = true) => {
-  await semTemplate(page, nome);
-  return page.screenshot({ path: path.join(PRINTS, nome + ".png"), fullPage: inteira });
-};
-// nenhum texto visível com "${" (modelo de texto que não foi preenchido): conferido em cada print e onde mais for chamado
-const comTemplate = [];
-let telasTemplate = 0;
-async function semTemplate(page, onde) {
-  telasTemplate++;
-  const achado = await page.evaluate(() => { const t = document.body.innerText; const i = t.indexOf("${"); return i < 0 ? null : t.slice(Math.max(0, i - 20), i + 30); }).catch(() => null);
-  if (achado) comTemplate.push(`${onde}: "${achado.replace(/\s+/g, " ")}"`);
-}
-const larguraOk = async (page) => page.evaluate(() => document.documentElement.scrollWidth);
-async function abrirEstoque(page, base) {
-  await page.goto(base + "/estoque", { waitUntil: "networkidle" });
-  await page.waitForSelector("table.est, .est-nada, .est-erro", { timeout: 15000 });
-}
 // celular: a largura do rótulo (::before) do Fornecedor no 1º cartão e quantas linhas o valor ocupa
 const larguraRotulo = (page) => page.$eval("table.est tbody tr:first-child td.est-c-fornecedor", (td) => {
   const r = document.createRange(); r.selectNodeContents(td);
   const tops = new Set([...r.getClientRects()].filter((x) => x.width > 0).map((x) => Math.round(x.top)));
   return { base: getComputedStyle(td, "::before").flexBasis, linhasFornecedor: tops.size, fornecedor: td.textContent.trim() };
 });
-const cabecalhos = (page) => page.$$eval("table.est thead th", (ths) => ths.map((t) => t.textContent.trim()));
-const totalTxt = (page) => page.$eval("#est-total", (e) => e.textContent.trim());
-async function esperarLista(page) {
-  await page.waitForFunction(() => !document.querySelector(".est-lista-carregando") && document.querySelector("table.est, .est-nada, .est-erro"), null, { timeout: 15000 });
-  await page.waitForLoadState("networkidle");
-}
-async function menuConta(page) {
-  await page.waitForSelector("#conta .conta-bt", { timeout: 10000 });
-  await page.click("#conta .conta-bt");
-  await page.waitForSelector("#conta-menu:not([hidden])", { timeout: 5000 });
-  return page.$$eval("#conta-menu a, #conta-menu button", (as) => as.map((a) => a.textContent.trim()));
-}
-const menuCima = (page) => page.$$eval(".topo .menu a", (as) => as.filter((a) => getComputedStyle(a).display !== "none").map((a) => a.textContent.trim()));
-const porCidade = (cidade) => LINHAS.filter((l) => l.CIDADE === cidade).length;
-const comEstoqueN = LINHAS.filter((l) => l.ESTOQUE != null && l.ESTOQUE !== 0).length;
 
 // rodapé de cada tela (texto) e a fonte do filtro Filial (conferidos no passo 7c)
 const rodape = (page) => page.$eval("footer.rodape", (f) => f.innerText).catch(() => null);
@@ -550,22 +375,7 @@ try {
       `/estoque: "${(rodapes.estoque || "").replace(/\s+/g, " ").trim()}"; fonte do select Filial "${fonteFilial.sel}", do campo Buscar "${fonteFilial.busca}"`);
   }
 
-  // ---- 8. console, "${" e log ----
-  res("nenhum texto visível com \"${\"", !comTemplate.length, comTemplate.length ? comTemplate.join(" | ") : `${telasTemplate} telas conferidas (cada print e o admin 390 depois do "Mostrar mais")`);
-  res("console sem erro inesperado", !errosConsole.length, errosConsole.length ? errosConsole.join(" | ") : "0 erro (404 do cliente e 503 da fonte quebrada esperados e descontados)");
-  const logs = [...S.logs, ...S503.logs].join("\n");
-  const vaz = [...Object.values(S.senhas), ...Object.values(S503.senhas)].some((s) => logs.includes(s)) || /ZZT\d|TESTE|127\.0\.0\.1/.test(logs);
-  res("log do serviço sem dado nem senha", !vaz, (S.logs.find((l) => l.startsWith("estoque")) || "") + "; " + (S503.logs.find((l) => l.startsWith("estoque")) || ""));
 } catch (e) {
-  res("execução", false, e.stack.split("\n").slice(0, 4).join(" / "));
-} finally {
-  await browser.close();
-  S.srv.close(); S503.srv.close(); srvFonte.close();
-  for (const p of [S.pasta, S503.pasta]) fs.rmSync(p, { recursive: true, force: true });
+  await fechar(e);
 }
-
-for (const r of resultados) console.log(`${(r.nome + " ").padEnd(62, ".")} ${r.ok ? "PASSOU" : "FALHOU"}\n    ${r.det}`);
-console.log(`prints: ${path.relative(RAIZ, PRINTS)}/`);
-const falhas = resultados.filter((r) => !r.ok).length;
-console.log(falhas ? `Resultado: FALHOU (${falhas})` : "Resultado: PASSOU");
-process.exit(falhas ? 1 : 0);
+await fechar(null, "0 erro (404 do cliente e 503 da fonte quebrada esperados e descontados)");
