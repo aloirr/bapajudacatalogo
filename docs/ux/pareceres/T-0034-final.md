@@ -7,6 +7,7 @@
 | O que foi revisto | Tela: `origin/web-site/T-0034-estoque`, `7a4a9df` (`site/estoque/index.html`, `estoque.css`, `estoque.js`; `site/conta.js`; `site/admin/usuarios/usuarios.js`; as regras de `table.us`, `.us-barra` e `.opcao` levadas do `admin.css` para o `styles.css`). Servidor: `origin/integracao-placas/T-0034-estoque`, `ced89ab` (`servicos/login/estoque.mjs`: rótulos, ordem das colunas, nomes das cidades). Prints: `origin/testes/T-0034-estoque`, `cee5ec9`, `testes/prints/T-0034-final/` (14, com dados sintéticos) |
 | Base | Parecer da simulação (`docs/ux/pareceres/T-0034-simulacao.md`, achados B1 a B9) e a aprovação do Alexandre com duas mudanças: Filial e Nº filial em colunas separadas; caixa "Somente produtos com estoque", que começa desmarcada |
 | Resultado | **LIBERADO COM AJUSTES**: nenhum 🔴; 4 🟡 pequenos (F1 a F4) e 1 pedido de print (F5). B1 a B9 atendidos |
+| Desfecho (25/11/2026) | F1 recusado pelo gerente: a ordem das colunas é decisão do Alexandre. F2 a F5 feitos. Entrega no ar nos #194, #195 e #196 |
 
 **Exceção autorizada de "sem estoque":** a aba é interna, com o "autorizo" do Alexandre (24/11 17:20). Os prints usam dados sintéticos (`ZZT…`, "TESTE"). Este parecer não repete nenhum valor de estoque, preço, custo ou markup.
 
