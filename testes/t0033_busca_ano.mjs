@@ -27,15 +27,21 @@
      Contagens medidas (Polo 2026 = 24, Gol 2010 = 45, Strada 2020 = 63; antes do "após": 21, 43 e 60): valem só para o produtos.json em que foram
      medidas (impressão digital abaixo). Com outro JSON, viram aviso para remedir, e as conferências linha a linha
      continuam valendo.
-     d) perdas (escrito pelo testes, sem o código do site): numa amostra fixa de 500 produtos com "ve" (um a cada N, na
-        ordem do JSON, e a TER5593103), para cada (marca, modelo) do "ve" em que o texto da aplicação dá ano ao modelo
-        (o 1º ano entre 1950 e 2029 depois do nome do modelo com 2 ou mais letras, antes do próximo modelo do "ve" ou do ";"), o produto tem
-        de aparecer na busca q=<código> com essa marca, modelo e ano. Com --antes, o caso que já não aparecia antes vira
-        aviso (não é perda da T-0033). E toda Marca da tabela, em todos os produtos com "ve", é uma montadora dos "ve".
+     d) acréscimos e perdas (R do revisor, achado 7): com --antes, o mapa da busca pela faixa dos dois sites, main e
+        branch: para cada produto com "ve", cada (marca, modelo) do "ve" e cada ano de 1980 a 2026, se ele entra. O mapa
+        vem da própria função buscar() de cada site (o teste só a expõe em window, sem mudar a regra). A justificativa é
+        do testes e é outra que a do site (justifica()): com "an" no produto, o "an" decide (vale primeiro); sem ele, o
+        nome do modelo aparece no texto (fora do nome de um modelo mais longo: "Palio" em "Palio Weekend") e, até 40
+        caracteres depois dele (sem partir número), sem outro modelo do "ve" nem ";" no meio, há um
+        ano ou uma faixa com esse ano (AAAA, AAAA–AAAA, AAAA>, AAAA+, após/a partir de/desde AAAA, até AAAA, MM/AA e
+        MM/AA MM/AA). Modelo de 1 letra ("L", "R" da Scania) não se confere pelo texto (aviso). ACRÉSCIMO (entra só no branch) sem justificativa = FALHA; PERDA (entra só no main) com
+        justificativa = FALHA. Os dois listam todos os casos. E toda Marca da tabela é uma montadora dos "ve".
+        Casos do revisor: EMB6126R fora de F-4000 2013, VEL7539 fora de Del Rey 2008, TER55302 fora de D10 2014 e
+        VEL7533 fora de Xantia 1994 (o "an" 1996–2003 vale primeiro).
      e) 3b (aprovado pelo Alexandre): a regra do ano vale na busca digitada. "polo 2026" e "bomba combustivel polo 2026"
         sem a BCE3001, "strada 2020" com ela; cada resultado de "polo 2026" tem o Polo com 2026 (tabela ou texto); "polo" e
         "filtro 2010" iguais às de antes; AMT7005 em Gol 2007 ("Gol / Saveiro 01/1980–12/2009": a "/" divide o ano), pela
-        faixa e em "AMORTECEDOR GOL 2007 KYB 441126" com todas as palavras; código e referência com 4 dígitos ("LAM 2010",
+        faixa (a busca digitada "AMORTECEDOR GOL 2007 KYB 441126" é do testar_site.mjs; RD-0632); código e referência com 4 dígitos ("LAM 2010",
         "AXIOS 2025") iguais às de antes.
      E: 390 px sem rolar de lado, console sem erro, busca sem ano e por código/referência iguais às de antes. */
 
@@ -96,53 +102,76 @@ const TEM = [
 ];
 const NAO_TEM = [[ALVO, 'Modelo "Sedan"', (l) => norm(l[1]) === "SEDAN"], ["CXD13022", 'Modelo "Pick Up"', (l) => /^PICK[- ]?UP$/.test(norm(l[1]))]];
 const parOk = (s) => { let n = 0; for (const ch of s) { if (ch === "(") n++; else if (ch === ")" && --n < 0) return false; } return n === 0; };
-// d) perdas: os casos (código, marca, modelo, ano) tirados do texto da aplicação
-const N_PERDAS = 500;
+// d) acréscimos e perdas: a justificativa do testes, escrita sem o código do site
 const semSinal = (s) => norm(s).replace(/[\s-]/g, "");
 const rxModeloTxt = (m) => new RegExp("(?<![A-Z0-9])" + [...semSinal(m)].map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s-]?") + "(?![A-Z0-9])", "g");
-const RX_ANO_TXT = /(?<!\d)(19[5-9]\d|20[0-2]\d)(?!\d)/;
-// as faixas de ano de um pedaço do texto (sem acento, maiúsculas): "1996–2005", "01/2020 - 12-2023", "1996>", "1996+",
-// "APOS 2005", "ATE 2005", "2012/." e o ano sozinho
-const RX_FAIXA_TXT = /(?:(APOS|A PARTIR DE|DESDE|ATE)\s+)?(?:\d{2}[\/-])?(19[5-9]\d|20[0-2]\d)(?!\d)(?:\s*(?:–|—|-|\bA\b|\bATE\b)\s*(?:\d{2}[\/-])?(19[5-9]\d|20[0-2]\d)(?!\d)|\s*(>|\+|EM DIANTE|\/\.|\.{2,}|…))?/g;
-const faixasDoPedaco = (t) => [...t.matchAll(RX_FAIXA_TXT)].map((m) => m[3] ? [+m[2], +m[3]] : m[4] || /APOS|A PARTIR|DESDE/.test(m[1] || "") ? [+m[2], 9999] : m[1] === "ATE" ? [0, +m[2]] : [+m[2], +m[2]]);
-// as ocorrências dos modelos no texto, cada uma com o pedaço até o próximo modelo (ou o ";") e as faixas dele. Modelos
-// unidos por "/" ("Gol / Saveiro 1980–2009", "Santana/Quantum 1996>") dividem as faixas do último (decisão do gerente,
-// 4ª rodada); na lista com vírgula, não (decisão 1a). O modelo de 1 letra ("L" da Scania, que casa com o "L" de litro)
-// fica de fora.
-function ocorrencias(p, extra = []) {
-  const txt = norm(p.a || ""), mods = [...new Set([...(p.ve || []).map((v) => v[1]), ...extra])].filter((m) => semSinal(m).length >= 2);
-  const ocs = [];
-  for (const m of mods) for (const r of txt.matchAll(rxModeloTxt(m))) ocs.push({ m, ini: r.index, fim: r.index + r[0].length });
-  ocs.sort((a, b) => a.ini - b.ini || b.fim - a.fim);
-  // o mais longo vence no mesmo trecho ("Palio Weekend" e não "Palio")
-  const boas = ocs.filter((o, i) => !ocs.some((x, j) => j !== i && x.ini <= o.ini && x.fim >= o.fim && x.fim - x.ini > o.fim - o.ini));
-  for (const [i, o] of boas.entries()) {
-    const prox = boas.slice(i + 1).find((x) => x.ini >= o.fim);
-    const ate = prox ? prox.ini : txt.length, pv = txt.indexOf(";", o.fim);
-    o.pedaco = txt.slice(o.fim, pv >= 0 && pv < ate ? pv : ate);
-    o.prox = pv >= 0 && pv < ate ? null : prox;
-    o.faixas = faixasDoPedaco(o.pedaco);
-  }
-  for (let i = boas.length - 1; i >= 0; i--) {
-    const o = boas[i];
-    if (!o.faixas.length && o.prox && /^\s*\/\s*$/.test(o.pedaco)) { o.faixas = o.prox.faixas; o.barra = o.prox; }
-  }
-  return boas;
+// as marcas de ano da janela, em ordem: { ano, ini, fim } (AAAA entre 1950 e 2029, com ou sem "MM/" na frente; MM/AA
+// com mês de 01 a 12: AA > 30 é 19AA, senão 20AA)
+function anosDaJanela(t) {
+  const out = [];
+  for (const m of t.matchAll(/(?<![0-9])(?:(0[1-9]|1[0-2])[\/-])?(19[5-9][0-9]|20[0-2][0-9])(?![0-9])/g)) out.push({ ano: +m[2], ini: m.index, fim: m.index + m[0].length });
+  for (const m of t.matchAll(/(?<![0-9\/])(0[1-9]|1[0-2])\/([0-9]{2})(?![0-9\/])/g)) if (!out.some((o) => m.index >= o.ini && m.index < o.fim)) out.push({ ano: +m[2] > 30 ? 1900 + +m[2] : 2000 + +m[2], ini: m.index, fim: m.index + m[0].length });
+  return out.sort((a, b) => a.ini - b.ini);
 }
-function casosDoTexto(p) {
-  const casos = new Map();
-  for (const o of ocorrencias(p)) {
-    if (!o.faixas.length) continue;
-    for (const [vm, vmo] of p.ve.filter((v) => v[1] === o.m).map((v) => [v[0], v[1]])) {
-      const [de0, ate0] = o.faixas[0], k = vm + "|" + vmo, va = de0 > 0 ? de0 : ate0; // "até 2008": 2008
-      const trecho = (o.m + (o.barra ? " /" + " " + o.barra.m + o.barra.pedaco : o.pedaco)).slice(0, 60).trim();
-      if (!casos.has(k)) casos.set(k, { c: p.c, vm, vmo, va, trecho, barra: !!o.barra });
-    }
+// as faixas da janela: duas marcas ligadas por espaço, "-", "–", "A" ou "ATE" fazem uma faixa; ">", "+", "EM DIANTE",
+// "..." ou "/." depois, ou "APOS", "A PARTIR DE", "DESDE" antes, abrem a faixa; "ATE" antes fecha; o resto é o ano só
+function faixasDaJanela(t) {
+  const anos = anosDaJanela(t), out = [];
+  for (let i = 0; i < anos.length; i++) {
+    const a = anos[i], b = anos[i + 1], antes = t.slice(Math.max(0, a.ini - 12), a.ini), depois = t.slice(a.fim, a.fim + 10);
+    if (b && /^\s*(?:[-–—]|\bA\b|\bATE\b)?\s*$/.test(t.slice(a.fim, b.ini)) && b.ano >= a.ano) { out.push([a.ano, b.ano]); i++; continue; }
+    if (/^\s*(?:>|\+|EM DIANTE|\.{2,}|…|\/\.)/.test(depois) || /(?:APOS|A PARTIR DE|DESDE)\s*$/.test(antes)) out.push([a.ano, 9999]);
+    else if (/\bATE\s*$/.test(antes)) out.push([0, a.ano]);
+    else out.push([a.ano, a.ano]);
   }
-  return [...casos.values()];
+  return out;
 }
-// o texto dá o ano ao modelo (pela faixa de alguma ocorrência dele)
-const textoServe = (p, modelo, ano) => ocorrencias(p, [modelo]).some((o) => semSinal(o.m) === semSinal(modelo) && o.faixas.some(([de, a]) => ano >= de && ano <= a));
+// o produto serve no modelo e no ano? (ver o cabeçalho, item d). null: não dá para dizer pelo texto (modelo de 1 letra,
+// "L" da Scania, "R" da Scania, que casa com o "L" de litro e o "R" de "R$"... ): vira aviso, nunca PASSOU por ele
+function justifica(p, modelo, ano) {
+  if (p.an && (p.an[0] || p.an[1])) return ano >= (p.an[0] || 0) && ano <= (p.an[1] || 9999);
+  const txt = norm(p.a || ""), alvo = semSinal(modelo);
+  if (alvo.length < 2) return null;
+  const outros = [...new Set((p.ve || []).map((v) => v[1]))].filter((m) => semSinal(m) !== alvo && semSinal(m).length >= 2);
+  // o trecho de um modelo mais longo que contém este ("PALIO" em "PALIO WEEKEND", "SIENA" em "GRAND SIENA") não conta
+  const longos = outros.filter((m) => semSinal(m).length > alvo.length).flatMap((m) => [...txt.matchAll(rxModeloTxt(m))].map((x) => [x.index, x.index + x[0].length]));
+  for (const r of txt.matchAll(rxModeloTxt(modelo))) {
+    const fim = r.index + r[0].length;
+    if (longos.some(([i, f]) => i <= r.index && f >= fim)) continue;
+    // 40 caracteres, sem partir um número no fim ("12/19|96")
+    let jan = txt.slice(fim, fim + 40) + (/^[0-9\/]*/.exec(txt.slice(fim + 40)) || [""])[0];
+    const pv = jan.indexOf(";"); if (pv >= 0) jan = jan.slice(0, pv);
+    for (const m of outros) { const o = rxModeloTxt(m).exec(jan); if (o) jan = jan.slice(0, o.index); }
+    if (faixasDaJanela(jan).some(([de, ate]) => ano >= de && ano <= ate)) return true;
+  }
+  return false;
+}
+const ANOS_MAPA = [1980, 2026];
+// o mapa da busca pela faixa de um site: "código|marca|modelo" -> anos em que o produto entra. O app.js é servido com
+// uma linha a mais no fim ("window.__t33buscar = buscar"), só para o teste chamar a busca da tela sem a tela.
+async function mapaFaixa(browser, dir, pares) {
+  const { srv, base } = await subir(dir);
+  const ctx = await browser.newContext();
+  await ctx.route((u) => u.pathname.endsWith("/app.js"), async (rota) => {
+    const r = await rota.fetch(); const js = await r.text();
+    const i = js.lastIndexOf("})();");
+    await rota.fulfill({ response: r, body: js.slice(0, i) + "window.__t33buscar = buscar;\n" + js.slice(i) });
+  });
+  const page = await ctx.newPage();
+  page.setDefaultTimeout(0);
+  await page.goto(base + "#/", { waitUntil: "networkidle" });
+  await page.waitForFunction(() => window.__t33buscar && window.__t33buscar(new URLSearchParams("")).length > 0, null, { timeout: 30000 });
+  const mapa = await page.evaluate(([pares, [de, ate]]) => {
+    const m = {};
+    for (const [vm, vmo] of pares) for (let a = de; a <= ate; a++)
+      for (const p of window.__t33buscar(new URLSearchParams({ vm, vmo, va: String(a) }))) (m[p.c + "|" + vm + "|" + vmo] ||= []).push(a);
+    return m;
+  }, [pares, ANOS_MAPA]);
+  await ctx.close(); srv.close();
+  return mapa;
+}
+// os anos em faixas, para a lista ficar curta ("1996–2003, 2005")
+const faixasTxt = (anos) => { const o = []; for (const a of [...anos].sort((x, y) => x - y)) { const u = o[o.length - 1]; if (u && a === u[1] + 1) u[1] = a; else o.push([a, a]); } return o.map(([a, b]) => (a === b ? `${a}` : `${a}–${b}`)).join(", "); };
 
 const LARGURAS = [[1366, 768], [390, 844]];
 
@@ -329,7 +358,6 @@ async function main() {
       }
       const lOnix = await lista(D, hashVei(VEIC.onix2021, "TER5593103"));
       prints.push(await print(D, `depois-${w}-busca-TER5593103-onix-2021`));
-      if (A) { await lista(A, hashVei(VEIC.onix2021, "TER5593103")); prints.push(await print(A, `antes-${w}-busca-TER5593103-onix-2021`)); }
       conta(`TER5593103 dentro de ONIX 2021 (${w})`, lOnix.cods.includes("TER5593103"), lOnix.cods.length ? `veio: ${lOnix.cods.join(", ")}` : lOnix.vazio);
       if (w === 1366) for (const c of JANELAS_1366) { await abrirJanela(D, c); prints.push(await print(D, `depois-${w}-janela-${c}`, { janela: true })); }
 
@@ -383,20 +411,24 @@ async function main() {
         await D.ir("#/produto/" + encodeURIComponent(c));
         const ls = (await linhasTabela(D.page, "#app")) || [];
         const pelaTabela = ls.some((l) => /^POLO\b/.test(norm(l[1])) && l[4].some(([de, ate]) => de !== "?" && 2026 >= de && 2026 <= ate));
-        if (!pelaTabela && !textoServe(POR_COD.get(c), "Polo", 2026)) semPolo.push(`${c} (${ls.filter((l) => /^POLO\b/.test(norm(l[1]))).map((l) => l[1] + " " + (l[5] || "sem ano")).join(", ") || "sem linha Polo"})`);
+        if (!pelaTabela && !justifica(POR_COD.get(c), "Polo", 2026)) semPolo.push(`${c} (${ls.filter((l) => /^POLO\b/.test(norm(l[1]))).map((l) => l[1] + " " + (l[5] || "sem ano")).join(", ") || "sem linha Polo"})`);
       }
       conta('digitada "polo 2026": todo resultado tem o Polo com 2026 (tabela ou texto)', !semPolo.length, semPolo.length ? semPolo.join("; ") : `${dig["polo 2026"].cods.length} produtos conferidos`);
-      // AMT7005 em Gol 2007 ("Gol / Saveiro 01/1980–12/2009"), pela faixa e digitada com todas as palavras
+      // AMT7005 em Gol 2007 ("Gol / Saveiro 01/1980–12/2009"), pela faixa (a digitada é do testar_site.mjs)
       const lAmt = await lista(D, hashVei({ vm: "VOLKSWAGEN", vmo: "GOL", va: 2007 }, "AMT7005"));
       conta("AMT7005 em Volkswagen Gol 2007 (faixa)", lAmt.cods.includes("AMT7005"), lAmt.cods.length ? `veio: ${lAmt.cods.join(", ")}` : lAmt.vazio);
-      const lAmtD = await lista(D, "#/busca?q=" + encodeURIComponent("AMORTECEDOR GOL 2007 KYB 441126"));
-      conta('"AMORTECEDOR GOL 2007 KYB 441126" → AMT7005 com todas as palavras', lAmtD.cods[0] === "AMT7005" && !lAmtD.proximos, `1º = ${lAmtD.cods[0] || "nada"} (${lAmtD.total})${lAmtD.proximos ? '; com o aviso "mais próximos"' : "; todas as palavras"}`);
 
       // 3. os outros casos da BCE3001
       for (const [k, dentro, cod = ALVO] of [["ka2015", false], ["strada2020", true], ["escort2000", true], ["onix2021", true, "TER5593103"]]) {
         const l = await lista(D, hashVei(VEIC[k], cod));
         const v = VEIC[k];
         conta(`${cod} ${dentro ? "dentro de" : "fora de"} ${v.vmo} ${v.va}`, l.cods.includes(cod) === dentro, l.cods.length ? `veio: ${l.cods.join(", ")}` : l.vazio);
+      }
+
+      // 3b. os casos do revisor (achado 7): fora pela faixa
+      for (const [cod, vm, vmo, va] of [["EMB6126R", "FORD", "F-4000", 2013], ["VEL7539", "FORD", "Del Rey", 2008], ["TER55302", "CHEVROLET", "D10", 2014], ["VEL7533", "CITROËN", "Xantia", 1994]]) {
+        const l = await lista(D, hashVei({ vm, vmo, va }, cod));
+        conta(`${cod} fora de ${vmo} ${va}`, !l.cods.includes(cod), l.cods.length ? `veio: ${l.cods.join(", ")}` : l.vazio);
       }
 
       // 4. contagens e, produto a produto, a linha que o fez entrar
@@ -475,21 +507,31 @@ async function main() {
         }
       } else conta("Polo sem ano igual à de antes", null, `sem --antes: não conferido (depois ${sD.total})`);
 
-      // 8. d) perdas e as Marcas da tabela
+      // 8. d) acréscimos e perdas (o mapa dos dois sites) e as Marcas da tabela
       const comVe = prods.filter((p) => p.ve && p.ve.length);
-      const passo = Math.max(1, Math.floor(comVe.length / N_PERDAS));
-      const amostra = [...new Set([...comVe.filter((_, i) => i % passo === 0).slice(0, N_PERDAS), comVe.find((p) => p.c === "TER5593103")].filter(Boolean))];
-      const casos = amostra.flatMap(casosDoTexto);
-      const achou = async (S, x) => { const l = await lista(S, hashVei(x, x.c)); return l.cods.includes(x.c); };
-      const perdidos = [], jaAntes = [];
-      for (const x of casos) {
-        if (await achou(D, x)) continue;
-        if (A && !(await achou(A, x))) jaAntes.push(x); else perdidos.push(x);
-      }
-      const fmtC = (x) => `${x.c} ${x.vm} ${x.vmo} ${x.va} («${x.trecho}»)`;
-      conta(`perdas: ${casos.length} casos (marca, modelo, ano do texto) em ${amostra.length} produtos`, !perdidos.length,
-        perdidos.length ? `${perdidos.length} perdido(s): ${perdidos.slice(0, 15).map(fmtC).join("; ")}` : `0 perdido (${casos.filter((x) => x.barra).length} casos "Modelo1 / Modelo2 ano")${casos.some((x) => x.c === "TER5593103" && x.vmo === "Onix") ? " (TER5593103 Onix incluída)" : ""}`);
-      if (jaAntes.length) conta("perdas: casos que já não apareciam antes", null, `${jaAntes.length}: ${jaAntes.slice(0, 5).map(fmtC).join("; ")}`);
+      if (A) {
+        const pares = [...new Map(comVe.flatMap((p) => p.ve.map((v) => [v[0] + "|" + v[1], [v[0], v[1]]]))).values()];
+        const [mA, mD] = [await mapaFaixa(browser, op.antes, pares), await mapaFaixa(browser, op.site, pares)];
+        const POR_C = new Map(prods.map((p) => [p.c, p]));
+        const acres = [], perdas = [], indet = [];
+        let nAcres = 0, nPerdas = 0;
+        for (const k of new Set([...Object.keys(mA), ...Object.keys(mD)])) {
+          const [c, vm, vmo] = k.split("|"), p = POR_C.get(c), sa = new Set(mA[k] || []), sd = new Set(mD[k] || []);
+          const so = [...sd].filter((a) => !sa.has(a)), sai = [...sa].filter((a) => !sd.has(a));
+          nAcres += so.length; nPerdas += sai.length;
+          const semJust = so.filter((a) => justifica(p, vmo, a) === false), comJust = sai.filter((a) => justifica(p, vmo, a) === true);
+          const ind = so.filter((a) => justifica(p, vmo, a) === null);
+          if (ind.length) indet.push(`${c} ${vmo} ${faixasTxt(ind)}`);
+          if (semJust.length) acres.push(`${c} ${vmo} ${faixasTxt(semJust)}`);
+          if (comJust.length) perdas.push(`${c} ${vmo} ${faixasTxt(comJust)}`);
+        }
+        const nCasos = Object.values(mD).reduce((a, x) => a + x.length, 0);
+        conta(`acréscimos sem justificativa (${pares.length} marca/modelo × ${ANOS_MAPA[0]}–${ANOS_MAPA[1]}; ${nAcres} (produto, modelo, ano) só no branch)`, !acres.length,
+          acres.length ? `${acres.length} produto/modelo:\n        ${acres.join("\n        ")}` : `todos os ${nAcres} justificados; ${nCasos} entradas no branch`);
+        conta(`perdas com justificativa (${nPerdas} (produto, modelo, ano) só no main)`, !perdas.length,
+          perdas.length ? `${perdas.length} produto/modelo:\n        ${perdas.join("\n        ")}` : `nenhuma das ${nPerdas} saídas tem o ano no texto (nem no "an")`);
+        if (indet.length) conta("acréscimos de modelo de 1 letra (não conferidos pelo texto)", null, indet.join("; "));
+      } else conta("acréscimos e perdas", null, "sem --antes: não conferido");
       const montadoras = new Set(comVe.flatMap((p) => p.ve.map((v) => semSinal(v[0]))));
       const fora = [];
       for (const p of comVe) {
