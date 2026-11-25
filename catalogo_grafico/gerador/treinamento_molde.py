@@ -19,7 +19,7 @@ O deck novo é montado DUPLICANDO os slides do treinamento original de Baterias 
          "respiro": {"6": 0.08},                   # margem de cima e de baixo das células da tabela (polegadas)
          "notas": "MENSAGEM-CHAVE\\n..."}],
      "negrito_uma_coluna": true,                   # corpo da tabela com negrito só na 1.ª coluna que não é só número
-     "nota_base": false}                           # sem o bloco BASE nas notas do slide 1 (deck sem código da base)
+     "nota_base": false}                           # ver Travas
 
 Texto: "\\n" separa parágrafos e "|" separa trechos (runs); o trecho k herda a formatação do trecho k do modelo
 (ex.: "DICA DE CAMPO  |texto"). Índices = ordem das formas do slide-modelo (python inv. em LEIA_GERADOR.md).
@@ -28,7 +28,7 @@ Macros no texto e nas notas: {{cod:AMT7004}} (confere na base e escreve o códig
 da base), {{prod:Cubo de Roda}} (confere o PRODUTO), {{n_itens}}, {{n_produtos}}, {{n_sistemas}}, {{versao_base}}.
 
 Travas ([PARADO]): código fora da base ou não ATIVO; "estoque" ou "R$" em qualquer texto ou nota; foto de código
-inexistente; slide sem notas.
+inexistente; slide sem notas; bloco BASE num deck sem código (use "nota_base": false).
 
 Uso (dentro de catalogo_grafico/gerador/, com PYTHONHASHSEED=0):
     python treinamento_molde.py mecanica_basica                  # gera saidas/<arquivo>.pptx
@@ -688,6 +688,7 @@ def montar(nome, saida=None):
     outros = {}
     contagem = {}
     nao_codigo = set(cfg.get('nao_codigo', []))
+    nota_base = cfg.get('nota_base', True)
     icones = indice_icones()
     tmp = tempfile.mkdtemp(prefix='trein_')
     imgs = Imagens(base, molde_ref, tmp)
@@ -797,7 +798,7 @@ def montar(nome, saida=None):
                 notas = formatar_notas(notas)
         if not notas:
             parar(f'{onde} sem notas')
-        if n == 1 and cfg.get('nota_base', True):
+        if n == 1 and nota_base:
             notas = re.sub(r'\n*BASE\n.*$', '', notas, flags=re.S)
             notas += f'\n\nBASE\nCódigos e "Ofereça junto" conferidos na base unificada {base.vars["versao_base"]}.'
         s.notes_slide.notes_text_frame.text = notas
@@ -819,7 +820,7 @@ def montar(nome, saida=None):
     for a, _ in cfg.get('trocar', []):
         if not contagem.get(a):
             parar(f'troca global sem efeito: {a!r}')
-    if cfg.get('nota_base', True) and not base.citados:
+    if nota_base and not base.citados:
         parar('o bloco BASE da capa diz "códigos conferidos", mas o deck não cita código; use "nota_base": false')
 
     # tira os slides do original

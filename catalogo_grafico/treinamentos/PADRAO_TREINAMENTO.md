@@ -41,7 +41,7 @@ Ordem fixa, igual nos 3 originais:
 - COMO CONDUZIR;
 - PERGUNTE AO TIME ou INSIGHT PARA O CAMPO;
 - no quiz, RESPOSTAS;
-- na capa, BASE: a versão da base unificada lida na geração. O gerador escreve sozinho (S11). Exceção: o deck sem código da base usa `"nota_base": false` e fica sem o bloco BASE.
+- na capa, BASE: a versão da base unificada lida na geração. O gerador escreve sozinho (S11).
 
 ## 2. Tipos de slide
 
@@ -139,7 +139,7 @@ Ordem fixa, igual nos 3 originais:
 | S8 | **Remissão entre treinamentos.** | Elétrica remete a Baterias; Freio e Arrefecimento remetem a Lubrificantes (fluido e aditivo); Rodagem remete à Linha Moto (pneus e câmaras). Evita repetir conteúdo. |
 | S9 | **PDF de apoio saindo do mesmo .pptx** (LibreOffice), para o `/admin/pdfs/`. | As notas de Lubrificantes prometem o "Material de Apoio em PDF". |
 | S10 | **Verde do padrão.** A recomendação da marca é **manter o `#59BA61`**, que é o verde do logo (medido nos 4 arquivos de logo), com o `#2F7D36` para o texto. A outra opção é o `#62BB47` do catálogo. A escolha final é do Alexandre. | Pela decisão de 20/11, o verde oficial é o do logo. Com qualquer dos dois, o texto verde sobre fundo claro usa o `#2F7D36`. |
-| S11 | **Versão da base nas notas da capa** (bloco BASE, com a versão da base do dia, escrita pelo gerador) ou no rodapé do Obrigado. Não vai na capa. Deck sem código da base: `"nota_base": false`, sem o bloco BASE; a trava `[PARADO]` impede o bloco BASE num deck sem código. | Mostra de que base vieram os códigos. O vendedor não precisa dela para agir. |
+| S11 | **Versão da base nas notas da capa** (bloco BASE, com a versão da base do dia, escrita pelo gerador) ou no rodapé do Obrigado. Não vai na capa. Deck sem código da base: `"nota_base": false`, sem o bloco BASE. | Mostra de que base vieram os códigos. O vendedor não precisa dela para agir. |
 | S12 | **"uso interno" no rodapé** de todos os treinamentos: "Treinamento X BAP \| Equipe Comercial Externa · uso interno". | Sugestão da marca. Mesmo só no admin, o slide pode ser mostrado ao cliente. A capa da Linha Moto já faz assim. |
 
 ## 5. Estrutura proposta dos treinamentos
