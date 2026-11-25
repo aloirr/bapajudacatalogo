@@ -1136,6 +1136,11 @@
   // "H-100" é H100), até o próximo modelo do "ve" ou o ";", lido pelo faixasDoTexto (a mesma leitura da tabela:
   // "2011", "06/2011", "11/2005–12/2010", "1996>", "2012/"). Sem ano no trecho, o modelo não ganha ano por aqui
   // (BCE3001: "Polo – todos," fica sem ano e fora de Polo 2026). Feito uma vez por produto.
+  // Grupo com "/" (decisão do gerente, T-0033): modelos unidos só por "/" ("Gol / Saveiro 01/1980–12/2009",
+  // "Palio/Siena 1996+") dividem o ano que vem depois; na lista com vírgula ("Ka, Fiesta, Courier 1993+", decisão 1a do
+  // Alexandre), o ano é só do último. A barra da cilindrada ("1.6 8V/16V"), da versão ("i/Mi"), da data (MM/AAAA) e
+  // da marca ("Fiat / Alfa Romeo") não fica entre dois modelos e não conta. Vale na tabela e na rede de segurança.
+  const dividemAno = (entre) => /^\s*\/\s*$/.test(entre);
   const ANOS_TEXTO = new Map();
   function anosNoTexto(p) {
     if (ANOS_TEXTO.has(p)) return ANOS_TEXTO.get(p);
@@ -1147,10 +1152,12 @@
       for (const r of up.matchAll(rx)) ocs.push({ m, ini: r.index, fim: r.index + r[0].length });
     }
     const boas = ocs.filter((o, i) => !ocs.some((x, j) => j !== i && x.ini <= o.ini && x.fim >= o.fim && x.fim - x.ini > o.fim - o.ini)).sort((a, b) => a.ini - b.ini);
+    const prox = boas.map((o, i) => boas.findIndex((x, j) => j > i && x.ini >= o.fim));
+    const fxs = boas.map((o, i) => faixasDoTexto(up.slice(o.fim, prox[i] >= 0 ? boas[prox[i]].ini : up.length).split(";")[0]));
+    for (let i = boas.length - 1; i >= 0; i--) // do fim para o começo: "Gol / Saveiro / Parati 1997>" passa o ano a todos
+      if (!fxs[i].length && prox[i] >= 0 && dividemAno(up.slice(boas[i].fim, boas[prox[i]].ini))) fxs[i] = fxs[prox[i]];
     boas.forEach((o, i) => {
-      const prox = boas.slice(i + 1).find((x) => x.ini >= o.fim);
-      const fx = faixasDoTexto(up.slice(o.fim, prox ? prox.ini : up.length).split(";")[0]);
-      for (const [fab, mo] of p.ve) if (mo === o.m && fx.length) { const k = norm(fab) + "|" + norm(mo); out.set(k, (out.get(k) || []).concat(fx)); }
+      for (const [fab, mo] of p.ve) if (mo === o.m && fxs[i].length) { const k = norm(fab) + "|" + norm(mo); out.set(k, (out.get(k) || []).concat(fxs[i])); }
     });
     ANOS_TEXTO.set(p, out);
     return out;
@@ -1686,11 +1693,11 @@
       const virgula = sep.includes(",");
       if (x && out.length && !modeloNoInicio(x.replace(rxMarcaIni(), ""), modelos) && !veiculoComAno(x, virgula) && !(virgula && nomeSolto(x))
         && !(carroceria(x) && faixasDoTexto(x).length) && !marcaDe(x)) out[out.length - 1] = t.slice(ini, a).trim(); // a marca sozinha ("/ Scania") também separa
-      else if (x) { out.push(x); ini = de; }
+      else if (x) { out.push(x); (out.seps || (out.seps = [])).push(sep); ini = de; }
       sep = t.slice(a, b);
       de = b;
     }
-    return out;
+    return out; // out.seps: o separador antes de cada veículo ("" no 1º)
   }
   // a cilindrada colada ("1.6mpi") e as duas válvulas ("1.6 8V/16V": "1.6 8V / 1.6 16V")
   const prepCil = (x) => x.replace(/(\d[.,]\d)(?=[A-Za-z]{2})/g, "$1 ").replace(/(\d[.,]\d)\s*(\d{1,2})\s?V\s*\/\s*(\d{1,2})\s?V\b/gi, "$1 $2V / $1 $3V");
@@ -1733,13 +1740,25 @@
       const vmBloco = vmsBloco.length === 1 ? vmsBloco[0] : "", vmSem = !mb && marcasTab.length === 1 ? marcasTab[0] : "";
       let vmAqui = ""; // a marca citada sozinha no meio do bloco ("PEUGEOT - 106 · 206 · Citroën · C3") vale para o que vem depois
       const modelos = locais.concat(...(vmsBloco.length ? vmsBloco : marcasTab).map((vm) => modelosDaMarca(vm).map((m) => [m, vm]))).sort((a, b) => b[0].length - a[0].length);
+      let grupo = []; // as linhas dos veículos sem ano unidos por "/" ao de agora (dividemAno)
       for (const l of linhasAplic(bloco)) {
         const coberta = linhaCoberta(l, tab);
-        if (coberta) { ultimas = coberta; continue; }
-        for (const v of l.split(/\s*;\s*|\n/).flatMap((x) => veiculosDaLinha(x, modelos))) { // o ";" colado e a quebra de linha também separam
+        // a linha coberta e sem ano passa veículo por veículo: pode abrir um grupo com "/" que ganha o ano depois
+        if (coberta && faixasDoTexto(l).length) { // coberta e com ano: o pedaço só de ano do começo ainda fecha o grupo de antes
+          const p0 = veiculosDaLinha(l, modelos)[0];
+          if (grupo.length && p0 && SO_ANO.test(p0.trim())) grupo.forEach((r) => { r[4] = comAnos(r[4], faixasDoTexto(p0)); });
+          ultimas = coberta; grupo = []; continue;
+        }
+        for (const [v, sepV] of l.split(/\s*;\s*|\n/).flatMap((x, j) => { const vs = veiculosDaLinha(x, modelos); return vs.map((y, i) => [y, i ? vs.seps[i] : j ? ";" : "·"]); })) { // o ";" colado e a quebra de linha também separam
+          // o grupo continua no "/" e no pedaço só de ano da linha seguinte ("Gol / Saveiro / Voyage G5 · (2008>)")
+          if (!dividemAno(sepV) && !(sepV === "·" && SO_ANO.test(v.trim()))) grupo = [];
+          const fxV = faixasDoTexto(v);
+          // o veículo com ano dá o ano aos do grupo; o sem ano entra no grupo (depois de processado, abaixo)
+          const fim = () => { if (fxV.length) { grupo.forEach((r) => { r[4] = comAnos(r[4], fxV); }); grupo = []; } else if (ultimas) grupo.push(...ultimas); };
+          const umVeiculo = () => {
           const cob = linhaCoberta(v, tab);
-          if (cob) { ultimas = cob; continue; }
-          if (marcaDe(v)) { vmAqui = marcaDe(v); continue; }
+          if (cob) { ultimas = cob; return ""; }
+          if (marcaDe(v)) { vmAqui = marcaDe(v); return "marca"; }
           const mi0 = rxMarcaIni().exec(v), vmi = mi0 ? marcaDe(mi0[1]) : "", mi = vmi ? mi0 : null, vm = vmi || vmAqui || vmBloco || vmSem;
           let resto = (mi ? v.slice(mi[0].length) : v).replace(RX_APOS, " $1> ");
           const mods = [];
@@ -1768,7 +1787,7 @@
             const outro = donos.some((r) => modelos.some(([m]) => norm(m).replace(/[\s-]/g, "").length >= 2 && k(m) !== k(r[1]) && rxPalavra(k(m)).test(k(v))));
             if (fx.length && !outro) donos.forEach((r) => { r[4] = comAnos(r[4], fx); const d = semAno(v.trim()); if (d) comDetalhe(r, d); });
             else donos.forEach((r) => comDetalhe(r, v.trim()));
-            continue;
+            return outro ? "outro" : "";
           }
           const ver = limparVersao(resto), cil = [...new Set(cilDe(prepCil(resto)))].join(" / "), ano = fmtFaixas(faixasDoTexto(resto));
           ultimas = [];
@@ -1785,6 +1804,10 @@
             cheia.add(n);
             ultimas.push(n);
           }
+          return "";
+          };
+          const tipo = umVeiculo();
+          if (tipo === "marca" || tipo === "outro") grupo = []; else fim();
         }
       }
     }
