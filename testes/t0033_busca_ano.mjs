@@ -95,7 +95,7 @@ const VEIC = {
 const CONTAGENS = { polo2026: 24, gol2010: 55, strada2020: 64 }; // web-site a73d931 (o "até 2014" da CXD13051 vale; "após AAAA" é AAAA+; "Gol / Saveiro ano" dá o ano aos dois)
 // 3b (aprovado pelo Alexandre): a regra do ano vale na busca digitada. [texto, BCE3001 dentro?]; contagens medidas no f4e1a0e (sem "ve": só o ano do trecho do modelo)
 const DIGITADAS = [["polo 2026", false], ["bomba combustivel polo 2026", false], ["strada 2020", true]];
-const CONT_DIGITADAS = { "polo 2026": 27, "gol 2010": 71, "strada 2020": 70, polo: 156, "filtro 2010": 241 }; // web-site d336bcd (o "an" vale primeiro)
+const CONT_DIGITADAS = { "polo 2026": 27, "gol 2010": 71, "strada 2020": 70, polo: 156, "filtro 2010": 241, BCE3001: 1 }; // web-site d336bcd (o "an" vale primeiro)
 const DIGITADAS_IGUAIS = ["polo", "filtro 2010"]; // sem ano de veículo: iguais às de antes
 const DIGITAL_MEDIDA = "4419 produtos / 12158 veículos"; // total e soma do "ve" do JSON das medidas (base v28)
 // 30 dos 3.089 produtos que mostravam "Outros veículos e detalhes" no origin/main 75fdfd8 (um a cada 103, na ordem do JSON)
@@ -391,6 +391,8 @@ function linhaTemTermo(linha, nucleo) {
   const pal = pals(linha), alvo = pals(nucleo.join(" "));
   return alvo.every((x) => pal.includes(x)) || pal.includes(alvo.join(""));
 }
+const PRINTS_RESTR = ["CXD13090", "AMT7050", "POL1678", "CIL8528"];
+const PRINTS = []; // os prints das conferências f) e g)
 async function conferirRestricoes(browser, prods) {
   const alvo = prods.filter((p) => restricoesDoTexto(p.a).length);
   for (const tam of LARGURAS) {
@@ -406,6 +408,7 @@ async function conferirRestricoes(browser, prods) {
         if (!sec) return null;
         return { texto: txt(sec), linhas: [...sec.querySelectorAll("tbody tr, .lista-veiculos li")].filter(vis).map(txt) };
       });
+      if (PRINTS_RESTR.includes(p.c)) PRINTS.push(await print(D, `depois-${w}-produto-${p.c}`));
       if (!tela) { escondidas.push(`${p.c} (sem a seção Aplicação)`); continue; }
       const vis = norm(tela.texto), linhas = tela.linhas.map(norm);
       const rs = restricoesDoTexto(p.a);
@@ -447,6 +450,7 @@ async function conferirAvisoTipo(browser, prods) {
       }));
       const av = RX_AVISO.exec(fora), trecho = av ? fora.slice(av.index, av.index + 140) : "";
       await D.semRolar(`digitada "${q}"`);
+      PRINTS.push(await print(D, `depois-${w}-aviso-${q.replace(/\s+/g, "-")}`));
       if (comAviso) {
         const ok = !!av && /\bPOLO\b/.test(trecho) && /\b2026\b/.test(trecho) && /BOMBA/.test(trecho);
         conta(`aviso: "${q}" mostra "Nenhuma ${tipo} para Polo 2026" (${w})`, ok, av ? `«${trecho.slice(0, 110)}»` : `sem aviso na tela (${l.total || l.vazio})`);
@@ -475,7 +479,7 @@ async function main() {
     if (h(a) !== h(d)) conta("mesmo produtos.json antes e depois", false, "o produtos.json do --antes é diferente do de --site: a comparação não vale");
   }
   const browser = await chromium.launch();
-  const prints = [];
+  const prints = PRINTS;
   try {
     if (!op.so || op.so.includes("restricoes")) await conferirRestricoes(browser, prods);
     if (!op.so || op.so.includes("aviso")) await conferirAvisoTipo(browser, prods);

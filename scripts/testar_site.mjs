@@ -709,6 +709,32 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         if (!r.itens.length) falha("palavra2", N_PAL2, "literal:" + q, `"${q}": lista vazia (a diretriz manda mostrar os mais próximos)`);
         conferirConsole("busca-diretriz-mahle");
       }
+      // aviso de tipo sem peça no ano (T-0033, decisão do Alexandre): a busca digitada com tipo + modelo + ano em que
+      // nenhuma peça do tipo serve mostra, fora da lista, "Nenhuma <tipo> para <Modelo> <ano>"; com peça do tipo, não mostra
+      const N_AVT = "aviso de tipo sem peça no ano";
+      const avisoTipo = () => page.evaluate(() => {
+        const o = [], tw = document.createTreeWalker(document.querySelector("#app"), NodeFilter.SHOW_TEXT);
+        for (let n; (n = tw.nextNode()); ) { const e = n.parentElement; if (e && !e.closest(".lista .item, [data-cod], .so-impressao") && e.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) o.push(n.nodeValue); }
+        const t = o.join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
+        const m = /(?<![A-Za-z])Nenhum[a]?\b[^.!]{0,120}?\bpara\b[^.!;]{0,60}/i.exec(t);
+        return m ? m[0].trim() : "";
+      });
+      const ehBomba = (p) => /BOMBA/.test(norm(`${p.p} ${p.d}`)) && /COMBUST/.test(norm(`${p.p} ${p.d} ${p.fa}`));
+      const avt = [];
+      for (const [q, esperado] of [["bomba combustivel polo 2026", /^NENHUMA BOMBA DE COMBUSTIVEL PARA POLO 2026\b/], ["polo 2026", null], ["bomba combustivel onix 2015", null]]) {
+        await abrir("busca-aviso-tipo", "#/busca?q=" + encodeURIComponent(q));
+        const r = await listaTodos(), av = await avisoTipo();
+        if (esperado && !esperado.test(norm(av))) falha("avisotipo", N_AVT, q, `"${q}": ${av ? `aviso diferente: "${cortar(av, 90)}"` : "sem o aviso"} (esperado "Nenhuma bomba de combustível para Polo 2026")`);
+        if (!esperado && av) falha("avisotipo", N_AVT, q, `"${q}": aviso indevido "${cortar(av, 90)}"`);
+        const bombas = r.itens.map((i) => porCod.get(normCod(i.c))).filter((p) => p && ehBomba(p)).map((p) => p.c);
+        if (esperado && bombas.length) falha("avisotipo", N_AVT, q + ":bomba", `"${q}": com o aviso, a lista tem bomba: ${bombas.join(", ")}`);
+        if (q.includes("onix") && existe("BCE3002") && !bombas.includes("BCE3002")) falha("avisotipo", N_AVT, q + ":BCE3002", `"${q}": sem a BCE3002 (que serve no Onix 2015)`);
+        avt.push(`"${q}" = ${r.itens.length}${av ? ` com "${cortar(av, 60)}"` : ", sem aviso"}`);
+        if (esperado) { await page.evaluate(() => window.scrollTo(0, 0)); await print("busca-aviso-tipo"); }
+        conferirConsole("busca-aviso-tipo");
+      }
+      detalhe("avisotipo", N_AVT, avt.join("; "));
+
       // código exato em 1º (decisão 4a): código BAP e EAN
       const exatos = [["CL14", "CL14"]];
       if (ean) exatos.push([ean, "TER551011"]);
