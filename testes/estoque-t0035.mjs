@@ -15,7 +15,7 @@
    Prints (deviceScaleFactor 2): 1366 em página inteira; 390 só na área visível (o que importa é a 1ª tela). */
 
 import {
-  res, sem, LINHAS, N, COLS_VENDEDOR, RX_TELA_INTERNA, criarUsuario, iniciar, contexto, print, larguraOk, abrirEstoque,
+  res, sem, LINHAS, N, COLS_VENDEDOR, RX_TELA_INTERNA, criarUsuario, iniciar, contexto, print, semTemplate, abrirEstoque,
   cabecalhos, totalTxt, esperarLista, fechar,
 } from "./estoque-comum.mjs";
 
@@ -58,8 +58,9 @@ const TAB_1366 = ["est-filial", "est-categoria", "est-sistema", "est-familia", "
 const valor = (page, id) => page.$eval(`#${id}`, (s) => s.value);
 // o total achado: "50 de 120" → 120; vazio → 0
 const total = async (page) => { const t = await totalTxt(page); const m = /de ([\d.]+)$/.exec(t); return m ? Number(m[1].replace(/\./g, "")) : 0; };
-async function escolher(page, id, v) { await page.selectOption(`#${id}`, v); await esperarLista(page); }
-async function buscar(page, t) { await page.fill("#est-busca", t); await page.waitForTimeout(450); await esperarLista(page); }
+// cada troca de filtro ou de busca é uma tela nova: confere também que nenhum "${" ficou à vista
+async function escolher(page, id, v) { await page.selectOption(`#${id}`, v); await esperarLista(page); await semTemplate(page, `${id}=${v}`); }
+async function buscar(page, t) { await page.fill("#est-busca", t); await page.waitForTimeout(450); await esperarLista(page); await semTemplate(page, `busca "${t}"`); }
 const iguais = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const lista = (l) => `[${l.join(", ")}]`;
 
@@ -128,6 +129,7 @@ try {
 
     // "Limpar filtros": zera Filial, Categoria, Sistema e Família; a busca e a caixa ficam
     await page.click("#est-limpar"); await esperarLista(page);
+    await semTemplate(page, "admin 1366 depois do Limpar filtros");
     const depois = { vals: await Promise.all(["est-filial", "est-categoria", "est-sistema", "est-familia"].map((id) => valor(page, id))),
       q: await page.inputValue("#est-busca"), caixa: await page.isChecked("#est-com"), tot: await total(page), limpar: await page.isVisible("#est-limpar") };
     const espLimpo = contar({ q: "alfa", comEstoque: true });
@@ -166,21 +168,28 @@ try {
       `colunas ${lista(cab2)}; Categoria ${lista(opCat)}; SUSPENSÃO › DIANTEIRA = ${tot} (esperado ${contar({ cat: "SUSPENSÃO", sis: "DIANTEIRA" })}); ${achado ? `achei "${achado[0]}" na tela` : "texto da página sem nenhuma dessas palavras"}`);
   }
 
-  // ---- 3. 390 px: o botão "Filtros (N)", admin e vendedor ----
-  for (const [usuario, nome] of [["admin", "admin"], ["vend.teste", "vendedor"]]) {
-    const { ctx, page } = await contexto(S, usuario, 390, 844);
+  // ---- 3. 390 px: o fluxo do painel "Filtros" no vendedor; o admin confere o "Filtros (N)" fechado ----
+  // o estado da barra: texto do botão, N, aria-expanded, o que está à vista, onde começa a lista e a largura
+  const estado = (page) => page.evaluate(() => {
+    const bt = document.getElementById("est-bt-filtros");
+    const vis = (id) => { const e = document.getElementById(id); return !!(e && e.offsetParent); };
+    const tr = document.querySelector("table.est tbody tr");
+    return {
+      bt: bt.innerText.replace(/\s+/g, " ").trim(), n: document.getElementById("est-n-filtros").textContent, exp: bt.getAttribute("aria-expanded"),
+      filtros: ["est-filial", "est-categoria", "est-sistema", "est-familia"].map(vis), busca: vis("est-busca"), caixa: vis("est-com"),
+      topoLista: tr ? Math.round(tr.getBoundingClientRect().top + window.scrollY) : null, largura: document.documentElement.scrollWidth,
+    };
+  });
+  const nada = (l) => l.every((v) => !v);
+  const fechadoOk = (e) => e.exp === "false" && nada(e.filtros) && e.busca && e.caixa;
+  const larguras = (l) => [...new Set(l.map((e) => e.largura))].join("/");
+  const ESP3 = contar({ cat: "MOTOR", sis: "ARREFECIMENTO", filial: "90000002" });
+
+  // vendedor: o painel inteiro (seta, Tab, N de 1 a 3, fechar, "Limpar filtros")
+  {
+    const { ctx, page } = await contexto(S, "vend.teste", 390, 844);
     await abrirEstoque(page, S.base);
-    const estado = () => page.evaluate(() => {
-      const bt = document.getElementById("est-bt-filtros");
-      const vis = (id) => { const e = document.getElementById(id); return !!(e && e.offsetParent); };
-      const tr = document.querySelector("table.est tbody tr");
-      return {
-        bt: bt.innerText.replace(/\s+/g, " ").trim(), n: document.getElementById("est-n-filtros").textContent, exp: bt.getAttribute("aria-expanded"),
-        filtros: ["est-filial", "est-categoria", "est-sistema", "est-familia"].map(vis), busca: vis("est-busca"), caixa: vis("est-com"),
-        topoLista: tr ? Math.round(tr.getBoundingClientRect().top + window.scrollY) : null, largura: document.documentElement.scrollWidth,
-      };
-    });
-    const fechado = await estado();
+    const fechado = await estado(page);
     // a seta do "Filtros": conferida pelo estado final (espera o fim da transição), não pelo meio da animação
     const giro = () => page.$eval("#est-bt-filtros svg.est-seta", (svg) => { const m = new DOMMatrix(getComputedStyle(svg).transform); return Math.round(Math.atan2(m.b, m.a) * 180 / Math.PI); }).catch(() => null);
     const esperarGiro = (graus) => page.waitForFunction((g) => {
@@ -191,42 +200,60 @@ try {
     }, graus, { timeout: 3000 }).then(() => true).catch(() => false);
     const seta0 = { ok: await esperarGiro(0), graus: await giro() };
     const tabFechado = await ordemTab(page, 2);
-    await print(page, `${nome}-390-filtros-fechado`, false);
+    await print(page, "vendedor-390-filtros-fechado", false);
     await page.click("#est-bt-filtros");
     const seta1 = { ok: await esperarGiro(180), graus: await giro() };
-    const aberto0 = await estado();
+    const aberto0 = await estado(page);
     await escolher(page, "est-categoria", "MOTOR");
-    const um = await estado();
+    const um = await estado(page);
     await escolher(page, "est-sistema", "ARREFECIMENTO");
-    const dois = await estado();
+    const dois = await estado(page);
     const tabAberto = await ordemTab(page, 7);
-    await print(page, `${nome}-390-filtros-aberto`, false);
+    await print(page, "vendedor-390-filtros-aberto", false);
     await escolher(page, "est-filial", "90000002");
-    const tres = await estado();
+    const tres = await estado(page);
     await page.click("#est-bt-filtros");
     const seta2 = { ok: await esperarGiro(0), graus: await giro() };
-    const fechado3 = await estado();
+    const fechado3 = await estado(page);
     const tot3 = await total(page);
     await page.click("#est-limpar"); await esperarLista(page);
-    const limpo = await estado();
+    await semTemplate(page, "vendedor 390 depois do Limpar filtros");
+    const limpo = await estado(page);
     await ctx.close();
-    const nada = (l) => l.every((v) => !v);
     const TAB_390 = ["est-bt-filtros", "est-filial", "est-categoria", "est-sistema", "est-familia", "est-com", "est-limpar"];
-    res(`390 ${nome}: ordem do Tab (busca > Filtros > Filial > Categoria > Sistema > Família > caixa > Limpar)`,
-      iguais(tabAberto, TAB_390) && iguais(tabFechado.slice(0, 2), ["est-bt-filtros", "est-com"]),
-      `aberto, com 2 filtros: ${tabAberto.join(" > ")}; fechado, sem filtro (o "Limpar" escondido): ${tabFechado.slice(0, 2).join(" > ")}`);
-    res(`390 ${nome}: a seta do "Filtros" gira ao abrir e volta ao fechar`, seta0.ok && seta1.ok && seta2.ok,
+    res("390 vendedor: ordem do Tab (busca > Filtros > Filial > Categoria > Sistema > Família > caixa > Limpar)",
+      iguais(tabAberto, TAB_390) && iguais(tabFechado, ["est-bt-filtros", "est-com"]),
+      `aberto, com 2 filtros: ${tabAberto.join(" > ")}; fechado, sem filtro (o "Limpar" escondido): ${tabFechado.join(" > ")}`);
+    res("390 vendedor: a seta do \"Filtros\" gira ao abrir e volta ao fechar", seta0.ok && seta1.ok && seta2.ok,
       `fechado ${seta0.graus}°, aberto ${seta1.graus}°, fechado de novo ${seta2.graus}° (lidos depois do fim da transição)`);
-    res(`390 ${nome}: "Filtros (N)" com o N certo e os filtros só quando aberto`,
-      fechado.bt === "Filtros" && fechado.exp === "false" && nada(fechado.filtros) && fechado.busca && fechado.caixa
-        && aberto0.exp === "true" && aberto0.filtros.every(Boolean)
+    res("390 vendedor: \"Filtros (N)\" com o N certo e os filtros só quando aberto",
+      fechado.bt === "Filtros" && fechadoOk(fechado) && aberto0.exp === "true" && aberto0.filtros.every(Boolean)
         && um.n === "(1)" && dois.n === "(2)" && /^Filtros ?\(2\)$/.test(dois.bt) && tres.n === "(3)"
-        && fechado3.exp === "false" && nada(fechado3.filtros) && fechado3.n === "(3)" && tot3 === contar({ cat: "MOTOR", sis: "ARREFECIMENTO", filial: "90000002" })
-        && limpo.n === "" && limpo.bt === "Filtros",
-      `fechado: botão "${fechado.bt}", aria-expanded ${fechado.exp}, filtros à vista ${fechado.filtros.filter(Boolean).length} de 4, busca e caixa à vista ${fechado.busca && fechado.caixa}; aberto: ${aberto0.filtros.filter(Boolean).length} de 4; MOTOR "${um.bt}"; + ARREFECIMENTO "${dois.bt}"; + Filial Manaus "${tres.bt}"; fechado de novo "${fechado3.bt}" com ${tot3} linhas (esperado ${contar({ cat: "MOTOR", sis: "ARREFECIMENTO", filial: "90000002" })}); "Limpar filtros" → "${limpo.bt}"`);
-    res(`390 ${nome}: a lista na 1ª tela e sem rolar de lado`,
+        && fechadoOk(fechado3) && fechado3.n === "(3)" && tot3 === ESP3 && limpo.n === "" && limpo.bt === "Filtros",
+      `fechado: botão "${fechado.bt}", aria-expanded ${fechado.exp}, filtros à vista ${fechado.filtros.filter(Boolean).length} de 4, busca e caixa à vista ${fechado.busca && fechado.caixa}; aberto: ${aberto0.filtros.filter(Boolean).length} de 4; MOTOR "${um.bt}"; + ARREFECIMENTO "${dois.bt}"; + Filial Manaus "${tres.bt}"; fechado de novo "${fechado3.bt}" com ${tot3} linhas (esperado ${ESP3}); "Limpar filtros" → "${limpo.bt}"`);
+    res("390 vendedor: a lista na 1ª tela e sem rolar de lado",
       fechado.topoLista !== null && fechado.topoLista < 844 && [fechado, aberto0, dois, tres, fechado3, limpo].every((e) => e.largura <= 390),
-      `1º cartão em y=${fechado.topoLista} px com os filtros fechados (y=${dois.topoLista} px aberto com 2 filtros); scrollWidth ${[...new Set([fechado, aberto0, dois, tres, fechado3, limpo].map((e) => e.largura))].join("/")}`);
+      `1º cartão em y=${fechado.topoLista} px com os filtros fechados (y=${dois.topoLista} px aberto com 2 filtros); scrollWidth ${larguras([fechado, aberto0, dois, tres, fechado3, limpo])}`);
+  }
+
+  // admin: só o "Filtros (N)" fechado (sem filtro e com 2 filtros), a lista na 1ª tela e a largura
+  {
+    const { ctx, page } = await contexto(S, "admin", 390, 844);
+    await abrirEstoque(page, S.base);
+    const fechado = await estado(page);
+    await print(page, "admin-390-filtros-fechado", false);
+    await page.click("#est-bt-filtros");
+    await escolher(page, "est-categoria", "MOTOR");
+    await escolher(page, "est-sistema", "ARREFECIMENTO");
+    await page.click("#est-bt-filtros");
+    const fechado2 = await estado(page);
+    const tot2 = await total(page);
+    await ctx.close();
+    const esp2 = contar({ cat: "MOTOR", sis: "ARREFECIMENTO" });
+    res("390 admin: \"Filtros (N)\" fechado, a lista na 1ª tela e sem rolar de lado",
+      fechado.bt === "Filtros" && fechadoOk(fechado) && fechadoOk(fechado2) && /^Filtros ?\(2\)$/.test(fechado2.bt) && tot2 === esp2
+        && fechado.topoLista !== null && fechado.topoLista < 844 && fechado.largura <= 390 && fechado2.largura <= 390,
+      `sem filtro: "${fechado.bt}", filtros à vista ${fechado.filtros.filter(Boolean).length} de 4, 1º cartão em y=${fechado.topoLista} px; com MOTOR › ARREFECIMENTO e o painel fechado: "${fechado2.bt}", ${tot2} linhas (esperado ${esp2}); scrollWidth ${larguras([fechado, fechado2])}`);
   }
 } catch (e) {
   await fechar(e);

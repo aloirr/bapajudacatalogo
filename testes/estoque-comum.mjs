@@ -21,7 +21,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { xlsxFicticio } from "../servicos/login/xlsx-ficticio.mjs";
 import { entrarUI } from "./login.mjs";
 
-export const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const falsa = (rot) => `${rot}-falsa-de-teste-${crypto.randomBytes(6).toString("hex")}`;
 export const sem = (s) => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const resultados = [];
@@ -123,7 +123,7 @@ export async function criarUsuario(s, usuario, estoque) {
 // ---------- rodada: fonte, serviços e navegador ----------
 let PRINTS, browser, srvFonte;
 const servicos = [];
-export const errosConsole = [];
+const errosConsole = [];
 // printsPadrao: a pasta dos prints (troca com --prints); com503: sobe também o serviço com a fonte quebrada
 export async function iniciar({ printsPadrao, com503 = false }) {
   const i = process.argv.indexOf("--prints");
@@ -172,7 +172,7 @@ export async function contexto(s, usuario, larg, alt) {
   return { ctx, page };
 }
 // nenhum texto visível com "${" (modelo de texto que não foi preenchido): conferido em cada print e onde mais for chamado
-export const comTemplate = [];
+const comTemplate = [];
 let telasTemplate = 0;
 export async function semTemplate(page, onde) {
   telasTemplate++;
