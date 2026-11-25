@@ -10,7 +10,7 @@ Exportado em 20/10/2026 da conversa **AGENTE - CATALOGO BAP** (claude.ai).
 | `claude/recados/` | 4 recados enviados pelo `catalogo` que ainda não estavam no projeto. |
 | `historico/HISTORICO_CATALOGO_BAP.md` | Resumo completo da conversa: linha do tempo, decisões, entregas, pendências e lições. |
 | `historico/transcricao_parte1_ate_15-10.txt` | Transcrição bruta da primeira parte da conversa (até 15/10). |
-| `entregas/` | Arquivos finais: catálogos impresso e digital, base v9 (e v8), apresentação comercial, encartelados e listas. T-0032 (23/11/2026): os 8 portfólios (`portfolio.py`) e os 4 treinamentos de vendedor, uso interno, em .pptx e .pdf (`treinamento_molde.py`). Os de Baterias e Lubrificantes têm o nome de um original de `originais/treinamentos/`: o de `entregas/` é o novo. |
+| `entregas/` | Arquivos finais: catálogos impresso e digital, base v9 (e v8), apresentação comercial, encartelados e listas. T-0032 (23/11/2026): os 8 portfólios (`portfolio.py`) e os treinamentos de vendedor (4 na T-0032 e o Onboarding do Vendedor na T-0038), uso interno, em .pptx e .pdf (`treinamento_molde.py`). Os de Baterias e Lubrificantes têm o nome de um original de `originais/treinamentos/`: o de `entregas/` é o novo. |
 | `gerador/` | Scripts que geram os catálogos, a base v9 e a apresentação, com imagens, fontes e entradas. |
 | `originais/treinamentos/` | Os 3 treinamentos originais (.pptx de Baterias, Linha Moto e Lubrificantes, out/2026), modelo do padrão (T-0032). Não editar: os novos saem pelo gerador. |
 | `treinamentos/` | `PADRAO_TREINAMENTO.md` (guia do padrão de treinamento, T-0032) e `referencia/` (tipos de slide dos originais). |
