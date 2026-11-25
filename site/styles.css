@@ -287,6 +287,7 @@ a.item-rel:hover { background: var(--fundo); }
 @media (max-width: 640px) { .rel, .itens-rel { grid-template-columns: minmax(0, 1fr); } } /* celular: título em cima e um cartão por linha, sem rolar de lado */
 .aviso { font-size: max(var(--min), calc(12.5px * var(--t))); color: var(--texto-2); margin-top: 8px; }
 .restr-fora { font-size: max(var(--min), calc(13px * var(--t))); margin-top: 8px; overflow-wrap: anywhere; } /* a restrição do texto que a tabela não mostra (T-0033) */
+.aviso.proximos { margin: 0 0 14px; font-size: 14px; } /* os avisos acima da lista da busca ("mais próximos" e tipo sem peça) */
 
 /* janela do produto (T-0014): no computador e no celular */
 html.com-janela { overflow: hidden; }

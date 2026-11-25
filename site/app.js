@@ -999,8 +999,8 @@
       <div class="etiquetas" role="group" aria-label="Filtros da pesquisa" hidden></div>
       <div class="res-topo"><h1>${pr.get("q") ? "Resultados" : "Todos os produtos"}</h1>
         <span class="total" aria-live="polite">${todos.length ? nProd(todos.length) : ""}</span></div>
-      ${todos.semTipo ? `<p class="aviso proximos" role="status" style="margin:0 0 14px;font-size:14px"><b>${esc(nenhum(todos.semTipo.tipo))} para ${esc(todos.semTipo.modelo)} ${todos.semTipo.ano}</b>; veja outras peças do ${esc(todos.semTipo.modelo)}.</p>`
-        : todos.length && todos.casaram < todos.palavras ? `<p class="aviso proximos" role="status" style="margin:0 0 14px;font-size:14px"><b>Nenhum produto tem todas as palavras.</b> Estes são os mais próximos: casam com ${fmt(todos.casaram)} de ${fmt(todos.palavras)} palavras${todos.faltam.length ? `. Não casou: ${todos.faltam.map((t) => `“${esc(t.toLowerCase())}”`).join(", ")}` : ""}.</p>` : ""}
+      ${todos.semTipo ? `<p class="aviso proximos" role="status"><b>${esc(nenhum(todos.semTipo.tipo))} para ${esc(todos.semTipo.modelo)} ${todos.semTipo.ano}.</b> Veja outras peças do ${esc(todos.semTipo.modelo)}.</p>`
+        : todos.length && todos.casaram < todos.palavras ? `<p class="aviso proximos" role="status"><b>Nenhum produto tem todas as palavras.</b> Estes são os mais próximos: casam com ${fmt(todos.casaram)} de ${fmt(todos.palavras)} palavras${todos.faltam.length ? `. Não casou: ${todos.faltam.map((t) => `“${esc(t.toLowerCase())}”`).join(", ")}` : ""}.</p>` : ""}
       <div class="lista"></div><div class="mais"></div></div>`;
     montarBusca(document.getElementById("busca-topo"), pr);
     montarFiltros(pr, todos);
@@ -1635,7 +1635,7 @@
     // lado, só com o que veio ("Cilindrada 1.6 · Ano 2017–", "Ano 2017–" ou "Cilindrada 1.6"; sem os dois, só o nome)
     return `<div class="tab-rola"><table class="t tab-veiculos"><thead><tr><th scope="col">Marca</th><th scope="col">Modelo</th><th scope="col">Cilindrada</th><th scope="col">Versão</th><th scope="col">Ano</th></tr></thead>
       <tbody>${linhas.map((l) => `<tr>${l.map((c, i) => `<td>${c ? (i === 4 ? anoHtml(c) : i === 2 ? cilHtml(c) : esc(c)) : traco}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
-      <ul class="lista-veiculos">${linhas.map(([ma, mo, ci, ve, an]) => `<li><b>${esc([ma, mo, ve].filter(Boolean).join(" "))}</b>${ci || an
+      <ul class="lista-veiculos">${linhas.map(([ma, mo, ci, ve, an]) => `<li><b>${esc([ma, mo].join(" ") + (ve ? (/^Não serve\b/.test(ve) ? " · " : " ") + ve : ""))}</b>${ci || an
         ? `<span>${[ci && `Cilindrada ${esc(ci)}`, an && `Ano ${anoHtml(an)}`].filter(Boolean).join(" · ")}</span>` : ""}</li>`).join("")}</ul>`;
   }
   // Cilindradas do texto, com a válvula quando vem junto ("2.0 L 16V" → "2.0 16V", "1.8 8v" → "1.8 8V"): a coluna
@@ -1801,6 +1801,7 @@
   // Focus). "s/ ABS", "sem ar" e "após chassi 10310" (RX_CONDICAO) ficam na Versão comum e, quando ela sai, sozinhos.
   const NEGA = String.raw`n[ãa]o\s+(?:se\s+)?(?:aplica|serve)|exc\.|exceto|excluindo`;
   const fimRestr = String.raw`(?![\wÀ-ÿ])[^·;|),]*`;
+  const RX_NEGA_INI = new RegExp(String.raw`^(?:${NEGA})\s*`, "i");
   const RX_NEGA = new RegExp(String.raw`(?<![\wÀ-ÿ])(?:${NEGA})${fimRestr}`, "gi");
   const RX_RESTR = new RegExp(String.raw`(?<![\wÀ-ÿ])(?:${NEGA}|somente|apenas)${fimRestr}`, "gi");
   const RX_CONDICAO = /(?<![\wÀ-ÿ])(?:(?:ap[oó]s|at[ée]|desde|a\s+partir\s+d[oa])\s+chassis?\s+[\w.]+|chassis?\s+(?:longo|curto)|(?:s\/\s|sem\s)\s*[\wÀ-ÿ]+(?:\/[\wÀ-ÿ]+)?)/gi; // "S/SC/SCV" é versão
@@ -1984,7 +1985,9 @@
     const cita = (m, x) => rxPalavra(norm(m)).test(norm(x)) || rxPalavra(compacto(m)).test(compacto(x)); // "HB20X" e "HB20 X"
     for (const r of tab) {
       const nega = r[1] && !cita(r[1], fora) && negas.find((x) => cita(r[1], x));
-      if (nega) { r[3] = `Não serve (${limparRestr(nega, p)})`; soRestr.delete(r); }
+      // só "Não serve" quando a restrição só repete o modelo da linha ("exc. HB20 X" na linha do HB20X)
+      const resto = nega && limparRestr(nega, p).replace(RX_NEGA_INI, "");
+      if (nega) { r[3] = compacto(resto) === compacto(r[1]) ? "Não serve" : `Não serve (${limparRestr(nega, p)})`; soRestr.delete(r); }
     }
     const dentro = (r, o) => k(r[0]) === k(o[0]) && k(r[1]) === k(o[1]) && (!r[2] || k(r[2]) === k(o[2]))
       && (!r[4] || (!!o[4] && fx(r).every(([a, b]) => fx(o).some(([c, d]) => c <= a && b <= d))));
@@ -2030,7 +2033,7 @@
     // não sumirem do material do cliente
     const tab = tabelaVeiculos(tabelaDe(p)), fora = tab ? restricoesFora(p, tabelaDe(p)) : [];
     const miolo = tab
-      ? tab + (fora.length ? `<p class="restr-fora">Restrições da aplicação: ${esc(fora.join(" · "))}</p>` : "") + (p.a ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
+      ? tab + (fora.length ? `<p class="restr-fora"><b>${fora.length > 1 ? "Restrições" : "Restrição"} da aplicação:</b> ${esc(fora.join(" · "))}</p>` : "") + (p.a ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
       : p.a ? aplicacoes : "";
     const secApl = miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
     const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
