@@ -185,11 +185,14 @@
   // 2017", "a partir de 2017" e "desde 2017", que é 2017 em diante [SUPOSIÇÃO] (T-0033)
   // "antiga": a leitura de antes da T-0033, só para a busca de texto sem modelo ("2026", "filtro 2010"), que fica como
   // era (e.faixas no carregar e casaAno)
-  const textoDeAno = (texto, antiga) => antiga ? norm(texto).replace(/(\d{2}\/(?:19|20)\d{2})(?=\d{2}\/(?:19|20)\d{2})/g, "$1 ") : norm(texto).replace(/(\d{2}\/(?:19|20)\d{2})(?=\d{2}\/(?:19|20)\d{2})/g, "$1 ")
-    .replace(/(\d),(?=(?:19|20)\d{2}(?!\d))/g, "$1, ").replace(/(?<![\d.])((?:19|20)\d{2})\.((?:19|20)\d{2})(?![\d.])/g, "$1-$2")
-    .replace(RX_MES_ANO_HIFEN, "$1/$2").replace(/(?<![\d.,])(0[1-9]|1[0-2])\.((?:19|20)\d{2})\/(?![\d.])/g, "$1/$2>") // "08.1998/": 1998 em diante
-    .replace(/(?<![\d.,])(0[1-9]|1[0-2])\.((?:19|20)\d{2})(?![\d.])/g, "$1/$2")
-    .replace(/\b(?:APOS|A PARTIR DE|DESDE)\s+((?:\d{2}\/)?(?:19|20)\d{2})(?!\d)/g, "$1>");
+  const textoDeAno = (texto, antiga) => {
+    const t = norm(texto).replace(/(\d{2}\/(?:19|20)\d{2})(?=\d{2}\/(?:19|20)\d{2})/g, "$1 ");
+    return antiga ? t : t
+      .replace(/(\d),(?=(?:19|20)\d{2}(?!\d))/g, "$1, ").replace(/(?<![\d.])((?:19|20)\d{2})\.((?:19|20)\d{2})(?![\d.])/g, "$1-$2")
+      .replace(RX_MES_ANO_HIFEN, "$1/$2").replace(/(?<![\d.,])(0[1-9]|1[0-2])\.((?:19|20)\d{2})\/(?![\d.])/g, "$1/$2>") // "08.1998/": 1998 em diante
+      .replace(/(?<![\d.,])(0[1-9]|1[0-2])\.((?:19|20)\d{2})(?![\d.])/g, "$1/$2")
+      .replace(/\b(?:APOS|A PARTIR DE|DESDE)\s+((?:\d{2}\/)?(?:19|20)\d{2})(?!\d)/g, "$1>");
+  };
   const faixasDoTexto = (texto) => faixasNoTexto(textoDeAno(texto));
   // as faixas do texto já preparado (textoDeAno), cada uma com a posição (.i) da 1ª data no texto
   function faixasNoTexto(s, antiga) {
@@ -479,7 +482,7 @@
       const f = bn[2 * n] > bn[2 * n + 1] || (bn[2 * n] === bn[2 * n + 1] && bnota[2 * n] >= bnota[2 * n + 1]) ? 2 * n : 2 * n + 1;
       return { n: bn[f], nota: bnota[f], bits: bbits[f], exato };
     }
-    return { palavras, total, testar };
+    return { palavras, total, testar, vd };
   }
 
   // A busca da tela: as palavras (casador) e os filtros (linha, categoria, sistema, família e as medidas, que tiram da lista).
@@ -516,9 +519,28 @@
       let alguma = 0;
       for (const r of out) alguma |= r[3];
       cs.palavras.forEach((t, i) => { if (!(alguma & (1 << Math.min(i, 30)))) lista.faltam.push(t); });
+      lista.semTipo = cs.vd && semTipoNoVeiculo(lista.faltam, cs.vd);
     }
     return lista;
   }
+
+  // T-0033 (opção a do Alexandre): modelo e ano digitados com um tipo de peça (as palavras que não casaram) e nenhuma
+  // peça desse tipo serve no modelo e ano: o nome do tipo, como está no PRODUTO (p) ou na FAMILIA (fa) do produto, para
+  // o aviso acima da lista. Sem produto desse tipo, ou com um que sirva, null.
+  function semTipoNoVeiculo(faltam, vd) {
+    if (!faltam.length) return null;
+    const nomes = new Map(), doTipo = (x) => x && faltam.every((w) => temPalavra(norm(x), w));
+    for (const e of INDICE) {
+      const nome = doTipo(e.p.p) ? e.p.p : doTipo(e.p.fa) ? e.p.fa : "";
+      if (!nome) continue;
+      if (serveNoDigitado(e, vd)) return null;
+      nomes.set(nome, (nomes.get(nome) || 0) + 1);
+    }
+    const nome = [...nomes].sort((a, b) => b[1] - a[1])[0];
+    return nome ? { tipo: nome[0], modelo: bonito(vd.mods[0][1]), ano: vd.ano } : null;
+  }
+  // "Nenhuma bomba de combustível", "Nenhum filtro de óleo": o feminino pela 1ª palavra [SUPOSIÇÃO]
+  const nenhum = (tipo) => (/^\S*(?:a|agem|ção|dade)(?=\s|$)/i.test(tipo) ? "Nenhuma " : "Nenhum ") + tipo.toLowerCase();
 
   // Links antigos (aba Veículo e aba Código, até a T-0011) viram a busca nova: #/busca?mo=VOLKSWAGEN&modelo=Gol&ano=2018
   // → #/busca?q=Volkswagen Gol 2018; #/busca?cod=AMT7115 → #/busca?q=AMT7115. Sistema e filtros continuam.
@@ -977,7 +999,8 @@
       <div class="etiquetas" role="group" aria-label="Filtros da pesquisa" hidden></div>
       <div class="res-topo"><h1>${pr.get("q") ? "Resultados" : "Todos os produtos"}</h1>
         <span class="total" aria-live="polite">${todos.length ? nProd(todos.length) : ""}</span></div>
-      ${todos.length && todos.casaram < todos.palavras ? `<p class="aviso proximos" role="status" style="margin:0 0 14px;font-size:14px"><b>Nenhum produto tem todas as palavras.</b> Estes são os mais próximos: casam com ${fmt(todos.casaram)} de ${fmt(todos.palavras)} palavras${todos.faltam.length ? `. Não casou: ${todos.faltam.map((t) => `“${esc(t.toLowerCase())}”`).join(", ")}` : ""}.</p>` : ""}
+      ${todos.semTipo ? `<p class="aviso proximos" role="status" style="margin:0 0 14px;font-size:14px"><b>${esc(nenhum(todos.semTipo.tipo))} para ${esc(todos.semTipo.modelo)} ${todos.semTipo.ano}</b>; veja outras peças do ${esc(todos.semTipo.modelo)}.</p>`
+        : todos.length && todos.casaram < todos.palavras ? `<p class="aviso proximos" role="status" style="margin:0 0 14px;font-size:14px"><b>Nenhum produto tem todas as palavras.</b> Estes são os mais próximos: casam com ${fmt(todos.casaram)} de ${fmt(todos.palavras)} palavras${todos.faltam.length ? `. Não casou: ${todos.faltam.map((t) => `“${esc(t.toLowerCase())}”`).join(", ")}` : ""}.</p>` : ""}
       <div class="lista"></div><div class="mais"></div></div>`;
     montarBusca(document.getElementById("busca-topo"), pr);
     montarFiltros(pr, todos);
@@ -1586,7 +1609,7 @@
         const r = rxPalavra(m, "g"), tu = semAcento(t).toUpperCase(); r.lastIndex = m.length; const x = r.exec(tu);
         if (x) { t = t.slice(0, x.index + x[1].length); repetido = true; }
       }
-      const cil = cilDe(t)[0] || "";
+      const cil = cilDe(t.replace(RX_NEGA, " "))[0] || ""; // o "Exceto 2.4" não dá cilindrada
       // só as faixas das entradas puras (doModelo); uma faixa no trecho e nenhuma pura: ela, como antes; várias e nenhuma pura: "—"
       // no trecho cortado no meio de uma palavra ou número no limite dos 120, o ano não lê o último pedaço, que está
       // partido ("Worker 17-25" de "17-250", "2015 até 20"); a cilindrada lê o trecho inteiro, como antes (testes, PR #54)
@@ -1706,15 +1729,15 @@
     "DIANTEIRA", "TRASEIRO", "TRASEIRA", "DIREITO", "DIREITA", "ESQUERDO", "ESQUERDA", "RODA", "RODAS", "LADO", "AMBOS", "HIDRAULICA", "HIDRAULICO",
     "ELETRICA", "ELETRICO", "MECANICA", "MECANICO", "ASSIST", "SISTEMA", "INCLUSIVE", "EXCETO", "OPCIONAL", "ORIGINAL", "PARA", "MODELO", "CONVENCIONAL",
     "ADVENTURE", "LOCKER", "DUALOGIC", "ATTRACTIVE", "ESSENCE", "SPORTING", "TREKKING", "FIRE", "MILLE", "DETALHE", "UNIVERSAL", "ARO"]); // versão e técnica
-  const NUNCA_MODELO = new Set(["GUERRA", "ARGENTINA", "BRASIL", "EUROPA", "MOTORS", "MOTORES", "MULTI", "ELETRODO", "CAMBIO", "CAMBIOS", "TRATOR",
-    "TRATORES", "MOTO", "MOTOS", "CAMINHAO", "CAMINHOES", "ONIBUS", "CARRETA", "CARRETAS", "RANDON", "LEVE", "LEVES", "PESADA", "PESADAS", "PESADO",
-    "PESADOS", "EXTRAPESADOS", "NACIONAL", "NACIONAIS", "IMPORTADO", "IMPORTADOS", "AGRICOLA", "AGRICOLAS", "MAQUINA", "MAQUINAS", "EMPILHADEIRA",
+  const NUNCA_MODELO = new Set(["GUERRA", "ARGENTINA", "BRASIL", "EUROPA", "MOTORS", "MOTORES", "MULTI", "ELETRODO", "CAMBIO", "CAMBIOS",
+    "TRATORES", "MOTO", "MOTOS", "CAMINHOES", "CARRETA", "CARRETAS", "RANDON", "LEVE", "LEVES", "PESADA", "PESADAS", "PESADO",
+    "PESADOS", "EXTRAPESADOS", "NACIONAL", "NACIONAIS", "IMPORTADO", "IMPORTADOS", "AGRICOLAS", "MAQUINA", "MAQUINAS", "EMPILHADEIRA",
     "EMPILHADEIRAS", "ESTACIONARIO", "GERADOR", "GERADORES", "ALTERNADOR", "ALTERNADORES", "VARIOS", "DIVERSOS", "GERAL", "FROTA", "FORA", "OUTROS",
     "DEMAIS", "VEICULO", "VEICULOS", "CARRO", "CARROS", "UTILITARIOS", "LINHAS", "PECA", "PECAS", "KIT", "JOGO", "CONJUNTO", "PARTIDA", "BOMBA",
-    "FILTRO", "OLEO", "AR", "COMBUSTIVEL", "INJECAO", "CARBURADO", "CARBURADOR", "ELETRONICA", "ELETRONICO", "MOTOR", "EIXO", "DIFERENCIAL", "CUBO",
-    "ROLAMENTO", "CORREIA", "TENSOR", "VELA", "VELAS", "CABO", "CABOS", "SENSOR", "BOBINA", "ADAPTADOR", "TODAS", "TODOS", "SUPERIOR", "INFERIOR",
+    "FILTRO", "OLEO", "AR", "COMBUSTIVEL", "INJECAO", "CARBURADO", "CARBURADOR", "ELETRONICA", "ELETRONICO", "EIXO", "DIFERENCIAL", "CUBO",
+    "ROLAMENTO", "CORREIA", "TENSOR", "VELA", "VELAS", "CABO", "CABOS", "SENSOR", "BOBINA", "ADAPTADOR", "SUPERIOR", "INFERIOR",
     "COMPLETO", "NEW", "FULL", "WAY", "PLUGUE", "TERMINAL", "CILINDRO", "AUXILIAR", "EMBREAGEM", "PNEUMATICA", "EIXOS", "MERITOR", "FACCHINI", "NOMA",
-    "ESPECIFICACAO", "DIMENSIONAL", "PROPRIA", "PINO", "ESTENDIDA", "CHASSI", "LONGO", "EASY", "HARD", "WORKING", "PLUS", "SUPER", "STREET", "HOBBY",
+    "ESPECIFICACAO", "DIMENSIONAL", "PROPRIA", "PINO", "ESTENDIDA", "LONGO", "EASY", "HARD", "WORKING", "PLUS", "SUPER", "STREET", "HOBBY",
     "LASER", "PLATINUM", "INTENSE", "ULTIMATE", "TRENDLINE", "YOUNG", "FURGONETA", "BUSINESS", "PACK", "MINIBUS", "ECOTEC", "ROCAM", "MAX", "E85",
     "VVT", "SOHC", "DOHC", "MPFI", "TORQ", "MASSEY", "FERGUSON", "VALTRA", "MAN", "OPEL", "DAIHATSU", "SKODA", "IVECO", "MWM", "CUMMINS"]);
   // o nome de modelo fora do catálogo: até 3 palavras com maiúscula, a 1ª com letra, sem "/" e sem ano; nenhuma
@@ -1772,13 +1795,45 @@
   const comDetalhe = (r, d) => { d = d.replace(/\bDETALHE\s*:.*$/i, "").trim(); if (d) r[3] = r[3] ? r[3] + " · " + d : d; };
   // lado e posição, que a ficha já mostra (MC-0040): saem da Versão quando o produto tem Lado ou Posição
   const RX_LADO_POSICAO = /\b(?:ambos\s+os\s+lados|lado\s+roda|lados?|roda\s+(?:diant\.?|dianteira|tras\.?|traseira)|dir(?:eit[oa])?\.?|esq(?:uerd[oa])?\.?|diant(?:eir[oa])?\.?|tras(?:eir[oa])?\.?|inferior|superior)(?![\wÀ-ÿ])/gi;
+  // A restrição do texto nunca some da tela (T-0033, revisão do PR): "exc. …", "exceto …", "não aplica …", "somente …"
+  // e "apenas …" vão até o fim do trecho (" · ", ";", "|", ")" ou ",") e ficam inteiros na Versão; o que está depois de
+  // "exc."/"não aplica" (RX_NEGA) não dá cilindrada nem modelo à linha ("Não aplica no Focus 1.6" não põe 1.6 no
+  // Focus). "s/ ABS", "sem ar" e "após chassi 10310" (RX_CONDICAO) ficam na Versão comum e, quando ela sai, sozinhos.
+  const NEGA = String.raw`n[ãa]o\s+(?:se\s+)?(?:aplica|serve)|exc\.|exceto|excluindo`;
+  const fimRestr = String.raw`(?![\wÀ-ÿ])[^·;|),]*`;
+  const RX_NEGA = new RegExp(String.raw`(?<![\wÀ-ÿ])(?:${NEGA})${fimRestr}`, "gi");
+  const RX_RESTR = new RegExp(String.raw`(?<![\wÀ-ÿ])(?:${NEGA}|somente|apenas)${fimRestr}`, "gi");
+  const RX_CONDICAO = /(?<![\wÀ-ÿ])(?:(?:ap[oó]s|at[ée]|desde|a\s+partir\s+d[oa])\s+chassis?\s+[\w.]+|chassis?\s+(?:longo|curto)|(?:s\/\s|sem\s)\s*[\wÀ-ÿ]+(?:\/[\wÀ-ÿ]+)?)/gi; // "S/SC/SCV" é versão
+  // o texto da aplicação sem o "DETALHE: …" (texto de venda, não é restrição), compactado
+  const aplSemDetalhe = (p) => String(p.a || "").replace(/\bDETALHE\s*:[^|;]*/gi, " ");
+  const SEM_DETALHE = new WeakMap();
+  const textoRestr = (p) => SEM_DETALHE.get(p) || SEM_DETALHE.set(p, compacto(aplSemDetalhe(p))).get(p);
+  const versaoSemDetalhe = (v) => String(v || "").replace(/(?:[·|]\s*)?\bDETALHE\s*:.*$/i, "");
+  // [o texto sem as restrições, as restrições]; comRestr: f no texto sem elas, que voltam no fim, inteiras, depois de " · "
+  const partirRestr = (x, p) => { const rs = []; return [x.replace(RX_RESTR, (m) => (textoRestr(p).includes(compacto(m)) ? (rs.push(m.trim()), " ") : m)), rs]; };
+  const comRestr = (x, f, p) => { const [resto, rs] = partirRestr(x, p); return [f(resto), ...rs].filter(Boolean).join(" · "); };
+  const siglas = (x) => x.replace(/\b(?:mpi|spi|tdi|tsi|gti|gli|abs)\b/gi, (w) => w.toUpperCase());
+  // a restrição como a tela mostra: sem parênteses e, quando a ficha tem Lado ou Posição, sem o lado do fim ("Exceto Si -
+  // Dianteiro - Dir" fica "Exceto Si"); a palavra logo depois do "exc." fica sempre
+  const limparRestr = (x, p) => {
+    const ps = semPontas(x.replace(/[()]/g, " ").replace(/\s+/g, " ").trim()).split(/(\s+[-–]\s+|\s*\/\s*|\s+)/);
+    while ((p.la || p.po) && ps.length > 3 && !ps[ps.length - 1].replace(RX_LADO_POSICAO, "").trim()) ps.splice(-2);
+    return siglas(semPontas(ps.join("")));
+  };
   // A Versão na tela (U3, MC-0036, R1/MC-0038): sem "DETALHE: …", sem "todos"/"todas" sozinho, sem parênteses, sem
   // pontuação solta ou no fim, com as siglas em maiúsculas ("mpi" é MPI); sem lado e posição quando a ficha os tem;
-  // vazia quando cita outro modelo do catálogo, passa de 60 letras ou é a aplicação inteira (o texto continua na
-  // "Aplicação completa" da ficha)
+  // o resto sai quando cita outro modelo do catálogo, passa de 60 letras ou é a aplicação inteira (aí ficam só o
+  // "s/ …"/"sem …"); a restrição (RX_RESTR) fica sempre
   function versaoTela(v, r, p) {
+    const x0 = versaoSemDetalhe(v);
+    const conds = (x) => (x.match(RX_CONDICAO) || []).filter((c) => textoRestr(p).includes(compacto(c))).map((c) => limparRestr(c, p)).join(" · ");
+    const [resto, rs] = partirRestr(x0, p);
+    const ps = [versaoLivre(resto, r, p) || conds(resto), ...rs.map((m) => limparRestr(m, p))].join(" · ").split(" · ").filter(Boolean); // sem repetir o pedaço ("V50 · V50")
+    return [...new Map(ps.map((x) => [compacto(x), x])).values()].join(" · ");
+  }
+  function versaoLivre(v, r, p) {
     // a cilindrada já tem a coluna dela: sai da Versão ("1.6 16V Torque" fica "Torque")
-    let x = String(v || "").replace(/(?:[·|]\s*)?\bDETALHE\s*:.*$/i, "").replace(/[()]/g, " ").replace(/(?<![\d.])\d[.,]\d(?:\s*L\b)?(?:\s*\d{1,2}\s?V\b)?/gi, " ");
+    let x = v.replace(/[()]/g, " ").replace(/(?<![\d.])\d[.,]\d(?:\s*L\b)?(?:\s*\d{1,2}\s?V\b)?/gi, " ");
     if (p.la || p.po) x = x.replace(RX_LADO_POSICAO, " ");
     x = semPontas(x.replace(/(^|\s)[!?.,;:]+(?=\s|$)/g, " ").replace(/(?:\s*[\/·–-]\s*){2,}/g, " / ").replace(/\s+/g, " ").trim());
     if (/^(?:tod[oa]s(?:\s+os\s+modelos)?|e|ou)$/i.test(x) || x.length > 60 || compacto(x) === compacto(p.a)) return "";
@@ -1791,7 +1846,7 @@
       const c = ws.slice(i, i + n).join("");
       if (c.length >= 3 && c !== proprio && !versoes.has(c) && !TECNICO.has(c) && !carroceria(c) && (porCompacto.has(c) || numericos.has(c))) return "";
     }
-    return x.replace(/\b(?:mpi|spi|tdi|tsi|gti|gli|abs)\b/gi, (w) => w.toUpperCase());
+    return siglas(x);
   }
   function juntarNaTabela(p, tab) {
     const k = chaveApl, cils = (c) => String(c || "").split(" / ").filter(Boolean);
@@ -1888,16 +1943,15 @@
           if (!ultimas || !ultimas.length) return "";
           const donos = ultimas, fx = faixasDoTexto(v);
           const outro = donos.some((r) => modelos.some(([m]) => compacto(m).length >= 2 && k(m) !== k(r[1]) && rxPalavra(k(m)).test(k(v))));
-          if (fx.length && !outro) donos.forEach((r) => { r[4] = comAnos(r[4], fx); const d = semAno(v.trim()); if (d) comDetalhe(r, d); });
+          if (fx.length && !outro) donos.forEach((r) => { r[4] = comAnos(r[4], fx); const d = comRestr(v.trim(), semAno, p); if (d) comDetalhe(r, d); });
           else donos.forEach((r) => comDetalhe(r, v.trim()));
           return outro ? "outro" : "";
         }
         // na lista com vírgula, o qualificador com " - " ("Uno, Palio, …, 145/146 - 1984 a 2014 - … (Fiasa / Fire) - Roda
         // Dianteira") vale para a lista toda: não fica só num modelo (R1/MC-0038; o texto continua na "Aplicação
         // completa"); o "(s/ ABS)" do Doblò fica nele
-        let ver = limparVersao(resto.split("|")[0]);
-        if (lista && /\s-\s/.test(ver)) ver = "";
-        const cil = [...new Set(cilDe(prepCil(resto)))].join(" / "), ano = fmtFaixas(faixasDoTexto(resto));
+        const ver = comRestr(resto.split("|")[0], (x) => { const y = limparVersao(x); return lista && /\s-\s/.test(y) ? "" : y; }, p);
+        const cil = [...new Set(cilDe(prepCil(resto.replace(RX_NEGA, " "))))].join(" / "), ano = fmtFaixas(faixasDoTexto(resto));
         ultimas = [];
         for (const [mod, vmm] of mods) {
           const dono = tab.find((r) => k(r[1]) === k(mod) && (!vmm || marcaDe(r[0]) === vmm));
@@ -1915,7 +1969,30 @@
   // na ordem em que a marca e o modelo aparecem (U2)
   function arrumar(p, tab) {
     const k = chaveApl, base = anoDaBase(p), fx = (r) => faixasDaCelula(r[4]).map(faixaDaCelula).filter(Boolean);
-    for (const r of tab) { if (base) r[4] = base; r[3] = versaoTela(r[3], r, p); }
+    // a linha que antes ficava sem Versão e agora só tem a restrição (T-0033) não vira veículo novo: a Versão dela vai
+    // para a linha do mesmo modelo, sem Versão, que a contém (como a cópia que saía antes)
+    const soRestr = new Set();
+    for (const r of tab) {
+      if (base) r[4] = base;
+      const antes = versaoLivre(versaoSemDetalhe(r[3]), r, p);
+      r[3] = versaoTela(r[3], r, p);
+      if (r[3] && !antes) soRestr.add(r);
+    }
+    // o modelo do "ve" que o texto só cita dentro do "exc. …"/"não aplica …" ("exc. HB20 X", "exc. Stepway"): a linha
+    // fica (a busca acha o produto por ele), mas a Versão diz que não serve, com a restrição do texto
+    const t = aplSemDetalhe(p), negas = [...t.matchAll(RX_NEGA)].map((m) => m[0]), fora = t.replace(RX_NEGA, " ");
+    const cita = (m, x) => rxPalavra(norm(m)).test(norm(x)) || rxPalavra(compacto(m)).test(compacto(x)); // "HB20X" e "HB20 X"
+    for (const r of tab) {
+      const nega = r[1] && !cita(r[1], fora) && negas.find((x) => cita(r[1], x));
+      if (nega) { r[3] = `Não serve (${limparRestr(nega, p)})`; soRestr.delete(r); }
+    }
+    const dentro = (r, o) => k(r[0]) === k(o[0]) && k(r[1]) === k(o[1]) && (!r[2] || k(r[2]) === k(o[2]))
+      && (!r[4] || (!!o[4] && fx(r).every(([a, b]) => fx(o).some(([c, d]) => c <= a && b <= d))));
+    for (const r of soRestr) {
+      const o = tab.find((x) => x !== r && !x[3] && !soRestr.has(x) && dentro(r, x));
+      if (o) { o[3] = r[3]; r[3] = null; }
+    }
+    tab = tab.filter((r) => r[3] !== null);
     tab = tab.filter((r, i) => !tab.slice(0, i).some((x) => x.every((c, j) => k(c) === k(r[j]))));
     const contida = (r, o) => r !== o && k(r[0]) === k(o[0]) && k(r[1]) === k(o[1]) && k(r[3]) === k(o[3]) && (!r[2] || k(r[2]) === k(o[2]))
       && !!o[4] && (!r[4] || fx(r).every(([a, b]) => fx(o).some(([c, d]) => c <= a && b <= d)));
@@ -1927,6 +2004,12 @@
   }
   // a tabela de cada produto (as linhas do "ve" e as que vinham do bloco), feita uma vez: a tela e a busca com ano
   const TABELA = new Map();
+  // a restrição do texto (RX_RESTR, RX_CONDICAO; sem o "DETALHE: …") que a tabela não mostra: vai numa linha abaixo dela
+  const restricoesFora = (p, tab) => {
+    const t = aplSemDetalhe(p), naTab = compacto(tab.map((r) => r.join(" ")).join(" "));
+    const rs = [...t.matchAll(RX_RESTR), ...t.matchAll(RX_CONDICAO)].map((m) => limparRestr(m[0], p));
+    return [...new Set(rs.filter((x) => x && !naTab.includes(compacto(x))))];
+  };
   const tabelaDe = (p) => { if (!TABELA.has(p)) { const tv = linhasVeiculos(p); TABELA.set(p, tv.length && p.a ? juntarNaTabela(p, tv) : tv); } return TABELA.get(p); };
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
@@ -1945,9 +2028,9 @@
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900), com o que o texto tem a mais (T-0033: juntarNaTabela);
     // no PDF, o texto inteiro vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
     // não sumirem do material do cliente
-    const tab = tabelaVeiculos(tabelaDe(p));
+    const tab = tabelaVeiculos(tabelaDe(p)), fora = tab ? restricoesFora(p, tabelaDe(p)) : [];
     const miolo = tab
-      ? tab + (p.a ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
+      ? tab + (fora.length ? `<p class="restr-fora">Restrições da aplicação: ${esc(fora.join(" · "))}</p>` : "") + (p.a ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
       : p.a ? aplicacoes : "";
     const secApl = miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
     const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
