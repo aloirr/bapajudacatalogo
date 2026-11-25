@@ -32,10 +32,11 @@
         vem da própria função buscar() de cada site (o teste só a expõe em window, sem mudar a regra). A justificativa é
         do testes e é outra que a do site (justifica()): com "an" no produto, o "an" decide (vale primeiro); sem ele, o
         nome do modelo aparece no texto (fora do nome de um modelo mais longo: "Palio" em "Palio Weekend") e, no trecho
-        dele (até o próximo modelo do "ve" ou o ";", sem limite de tamanho; o " · " não é fronteira; em "Modelo1 / Modelo2
+        dele (até o próximo modelo do "ve", o ";" ou o próximo item "/ Nome … ano" da lista, sem limite de tamanho; o " · " não é fronteira; em "Modelo1 / Modelo2
         ano", só com barras entre modelos do "ve", o trecho é o do último do grupo: decisões do gerente), há um
         ano ou uma faixa com esse ano (AAAA, AAAA–AAAA, AAAA>AAAA, AAAA/AAAA, AAAA>, AAAA+, AAAA.., AAAA/.,
-        MM.AAAA/, após/a partir de/desde AAAA, até AAAA (≤ AAAA), MM/AA e MM/AA MM/AA). Modelo de 1 letra ("L", "R" da Scania) não se confere pelo texto (aviso). ACRÉSCIMO (entra só no branch) sem justificativa = FALHA; PERDA (entra só no main) com
+        MM.AAAA/ (a "/" seguida de nome é separador, não abre a faixa), após/a partir de/desde AAAA, até AAAA (≤ AAAA,
+        vem primeiro), MM/AA e MM/AA MM/AA). Modelo de 1 letra ("L", "R" da Scania) não se confere pelo texto (aviso). ACRÉSCIMO (entra só no branch) sem justificativa = FALHA; PERDA (entra só no main) com
         justificativa = FALHA. Os dois listam todos os casos. E toda Marca da tabela é uma montadora dos "ve".
         Casos do revisor: EMB6126R fora de F-4000 2013, VEL7539 fora de Del Rey 2008, TER55302 fora de D10 2014 e
         VEL7533 fora de Xantia 1994 (o "an" 1996–2003 vale primeiro).
@@ -76,10 +77,10 @@ const VEIC = {
   polo: { vm: "VOLKSWAGEN", vmo: "POLO" },
 };
 // medidas pelo web-site e conferidas pelo testes no JSON abaixo
-const CONTAGENS = { polo2026: 24, gol2010: 54, strada2020: 64 }; // web-site ac79a65 ("após AAAA" é AAAA+; "Gol / Saveiro ano" dá o ano aos dois)
+const CONTAGENS = { polo2026: 24, gol2010: 55, strada2020: 64 }; // web-site a73d931 (o "até 2014" da CXD13051 vale; "após AAAA" é AAAA+; "Gol / Saveiro ano" dá o ano aos dois)
 // 3b (aprovado pelo Alexandre): a regra do ano vale na busca digitada. [texto, BCE3001 dentro?]; contagens medidas no f4e1a0e (sem "ve": só o ano do trecho do modelo)
 const DIGITADAS = [["polo 2026", false], ["bomba combustivel polo 2026", false], ["strada 2020", true]];
-const CONT_DIGITADAS = { "polo 2026": 27, "gol 2010": 69, "strada 2020": 70, polo: 156, "filtro 2010": 241 }; // web-site d336bcd (o "an" vale primeiro)
+const CONT_DIGITADAS = { "polo 2026": 27, "gol 2010": 71, "strada 2020": 70, polo: 156, "filtro 2010": 241 }; // web-site d336bcd (o "an" vale primeiro)
 const DIGITADAS_IGUAIS = ["polo", "filtro 2010"]; // sem ano de veículo: iguais às de antes
 const DIGITAL_MEDIDA = "4419 produtos / 12158 veículos"; // total e soma do "ve" do JSON das medidas (base v28)
 // 30 dos 3.089 produtos que mostravam "Outros veículos e detalhes" no origin/main 75fdfd8 (um a cada 103, na ordem do JSON)
@@ -117,13 +118,15 @@ function anosDaJanela(t) {
 }
 // as faixas da janela: duas marcas ligadas por espaço, "-", "–", ">" ("1992>2002"), "/" ("1999/2002"), "A" ou "ATE" fazem
 // uma faixa; ">", "+", "EM DIANTE", ".." ou "/" sem número depois ("2016/.", "08.1998/"), ou "APOS", "A PARTIR DE", "DESDE" antes, abrem a faixa; "ATE" antes fecha; o resto é o ano só
-function faixasDaJanela(t) {
-  const anos = anosDaJanela(t), out = [];
+function faixasDaJanela(t, limite = Infinity) {
+  const anos = anosDaJanela(t).filter((x) => x.ini < limite), out = [];
   for (let i = 0; i < anos.length; i++) {
     const a = anos[i], b = anos[i + 1], antes = t.slice(Math.max(0, a.ini - 12), a.ini), depois = t.slice(a.fim, a.fim + 10);
     if (b && /^\s*(?:[-–—>\/]|\bA\b|\bATE\b)?\s*$/.test(t.slice(a.fim, b.ini)) && b.ano >= a.ano) { out.push([a.ano, b.ano]); i++; continue; }
-    if (/^\s*(?:>|\+|EM DIANTE|\.{2,}|…|\/(?!\s*[0-9]))/.test(depois) || /(?:APOS|A PARTIR DE|DESDE)\s*$/.test(antes)) out.push([a.ano, 9999]);
-    else if (/\bATE\s*$/.test(antes)) out.push([0, a.ano]);
+    // o "ATE" antes vem primeiro ("Parati até 2008 / Voyage": ≤ 2008). A "/" só abre a faixa em "AAAA/." , "AAAA/" no
+    // fim ou antes de "-" ou ")" ("08.1998/ - AUDI"); "AAAA / Modelo" é separador de lista e vale só o ano
+    if (/\bATE\s*$/.test(antes)) out.push([0, a.ano]);
+    else if (/^\s*(?:>|\+|EM DIANTE|\.{2,}|…|\/\s*(?:\.|$|[-–—)]))/.test(depois) || /(?:APOS|A PARTIR DE|DESDE)\s*$/.test(antes)) out.push([a.ano, 9999]);
     else out.push([a.ano, a.ano]);
   }
   return out;
@@ -148,14 +151,26 @@ function justifica(p, modelo, ano) {
       if (!fins.length) break;
       fim = Math.max(...fins);
     }
-    // o trecho do modelo vai até o próximo modelo do "ve" ou o ";" (decisão do gerente: sem limite de tamanho; o " · " não é fronteira)
+    // o trecho do modelo vai até o próximo modelo do "ve" ou o ";" (decisão do gerente: sem limite de tamanho; o " · " não é
+    // fronteira). O texto depois do limite só serve para ler o que vem colado ao ano ("2018 / Palio": a "/" é separador)
     let jan = txt.slice(fim);
     const pv = jan.indexOf(";"); if (pv >= 0) jan = jan.slice(0, pv);
-    for (const m of outros) { const o = rxModeloTxt(m).exec(jan); if (o) jan = jan.slice(0, o.index); }
-    if (faixasDaJanela(jan).some(([de, ate]) => ano >= de && ano <= ate)) return true;
+    let lim = jan.length;
+    for (const m of outros) { const o = rxModeloTxt(m).exec(jan); if (o) lim = Math.min(lim, o.index); }
+    // e no próximo item "/ Nome ano" da lista quando o Nome é um modelo de qualquer produto do catálogo ou um código de
+    // veículo ("C 70", "V50"): o ano dele não vale para este ("S40 03/... / V50 03/... / C 70 06/13")
+    for (const x of jan.slice(0, lim).matchAll(/\s\/\s*(?=[A-Z])/g)) {
+      const resto = jan.slice(x.index + x[0].length), peca = resto.slice(0, (resto.search(/\s\//) + 1 || resto.length + 1) - 1); // até a próxima " /" (não a de "06/13")
+      const nome = /^[A-Z][A-Z0-9-]*(?:\s[0-9]{2,4}\b)?/.exec(peca)[0];
+      if (/^(?:ATE|APOS|DESDE|A PARTIR|EM)\b/.test(peca)) continue; // "98 / até 2003": é o ano, não um item da lista
+      if (anosDaJanela(peca).length && (MODELOS_CAT.has(semSinal(nome.split(" ")[0])) || /^[A-Z]{1,3}\s?[0-9]{2,4}$/.test(nome))) { lim = Math.min(lim, x.index); break; }
+    }
+    if (faixasDaJanela(jan, lim).some(([de, ate]) => ano >= de && ano <= ate)) return true;
   }
   return false;
 }
+// os modelos do "ve" de todo o catálogo (sem sinal), preenchidos no main()
+const MODELOS_CAT = new Set();
 const ANOS_MAPA = [1980, 2026];
 // o mapa da busca pela faixa de um site: "código|marca|modelo" -> anos em que o produto entra. O app.js é servido com
 // uma linha a mais no fim ("window.__t33buscar = buscar"), só para o teste chamar a busca da tela sem a tela.
@@ -324,6 +339,7 @@ async function main() {
   const { chromium } = require("playwright");
   const jsonDepois = JSON.parse(fs.readFileSync(path.join(op.site, "data", "produtos.json"), "utf8"));
   const prods = jsonDepois.produtos;
+  for (const p of prods) for (const v of p.ve || []) MODELOS_CAT.add(semSinal(v[1]));
   const digital = `${prods.length} produtos / ${prods.reduce((a, p) => a + (p.ve || []).length, 0)} veículos`;
   const mesmoJson = digital === DIGITAL_MEDIDA;
   if (op.antes) {
