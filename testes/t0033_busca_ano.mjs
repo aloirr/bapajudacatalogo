@@ -45,21 +45,24 @@
      e) 3b (aprovado pelo Alexandre): a regra do ano vale na busca digitada. "polo 2026" e "bomba combustivel polo 2026"
         sem a BCE3001, "strada 2020" com ela; cada resultado de "polo 2026" tem o Polo com 2026 (tabela ou texto); "polo" e
         "filtro 2010" iguais às de antes; AMT7005 em Gol 2007 ("Gol / Saveiro 01/1980–12/2009": a "/" divide o ano), pela
-        faixa (a busca digitada "AMORTECEDOR GOL 2007 KYB 441126" é do testar_site.mjs; RD-0632); código e referência com 4 dígitos ("LAM 2010",
+        faixa (a busca digitada "AMORTECEDOR GOL 2007 KYB 441126" é do testar_site.mjs; RD-0653); código e referência com 4 dígitos ("LAM 2010",
         "AXIOS 2025") iguais às de antes.
      f) restrições da aplicação (achado do revisor sobre o web-site a73d931): todo produto cujo texto de aplicação tem
-        "não aplica", "não serve", "exc."/"exceto", "somente", "apenas" ou "s/ X" mostra a restrição na tela do produto,
+        "não aplica", "não serve", "exc."/"exceto", "somente", "apenas", "s/ X" ou "sem X" mostra a restrição na tela do produto,
         em 1366 e em 390 px: texto visível na seção "Aplicação" (na tabela ou abaixo dela), nunca só em elemento escondido
         ou .so-impressao. Visível = uma marca da mesma família ("exc", "exceto", "não", "s/", "sem"... para a negativa;
         "somente", "apenas", "só", "exclusivo" para a positiva) seguida, em até 80 letras, do termo (a 1ª palavra depois da
         marca, sem "no/na/em..."; com a 2ª quando ela tem número ou é uma letra só: "Focus 1.6", "HB20 X"). E, para
         "não aplica"/"não serve"/"exc.": nenhuma linha da tabela (ou da lista do celular) tem o termo sem uma marca negativa
-        na mesma linha (o caso CXD13090: "Não aplica no Focus 1.6" e a linha "Focus | 2.0 / 1.6"). A regra é do testes,
+        na mesma linha (o caso CXD13090: "Não aplica no Focus 1.6" e a linha "Focus | 2.0 / 1.6"). Para "sem"/"s/" (achado
+        4 do revisor), a tela mostra a restrição inteira depois de um "s/" ou "sem": até o próximo " · ", ";", "|", ")",
+        "," ou o fim, e também " - ", " + ", " / ", "(", o próximo "sem"/"com", a 1ª palavra com número e as palavras de
+        posição, lado, combustível e medida ("Roda", "Diant.", "Gasolina", "Aro": têm campo próprio), e o "e" antes de
+        uma marca ou modelo do "ve" ("s/ ABS e Alfa 145"). O "| DETALHE: …" (descrição) fica de fora. BDA50041: "SEM POLIA ELETROMAGNETICA E AC", não só "SEM POLIA". A regra é do testes,
         escrita sem o código do site. Só esta conferência: --so restricoes.
-     g) aviso de tipo sem peça no ano (decisão do Alexandre): "bomba combustivel polo 2026" mostra, fora da lista, um aviso
-        visível "Nenhum(a) ... para ... Polo ... 2026" e nenhuma peça da lista é bomba de combustível (pelo "p"/"d" do
-        JSON: "BOMBA" e "COMBUST"); "polo 2026" e "amortecedor gol 2010" (tem amortecedor no ano) não mostram aviso, e a
-        de amortecedor tem ao menos um amortecedor. Só esta conferência: --so aviso (ou --so restricoes,aviso).
+     g) aviso de tipo sem peça no ano (decisão do Alexandre): o aviso de "bomba combustivel polo 2026" e a falta dele em
+        "polo 2026" são do testar_site.mjs (avisotipo; RD-0663); aqui ficam os prints dessas buscas e "amortecedor gol 2010"
+        (tem amortecedor no ano): sem aviso e com ao menos um amortecedor. Só esta conferência: --so aviso.
      E: 390 px sem rolar de lado, console sem erro, busca sem ano e por código/referência iguais às de antes. */
 
 import { createRequire } from "node:module";
@@ -352,15 +355,20 @@ async function print(s, nome, { janela = false } = {}) {
 
 // ---------- f) restrições da aplicação (regra do testes, sem o código do site) ----------
 // "S/" só como "sem": "s/ ar", "s/ ABS" (com espaço) ou "S/ABS" colado; "S/SC/SCV" e "S/SV/SL" são versões
-const RX_RESTR = /(?<![A-Z0-9])(NAO APLICA|NAO SERVE|EXCETO|EXC\b\.?|SOMENTE|APENAS|S\/(?=\s[A-Z0-9]{2,}|(?:ABS|AR|AC)\b))/g;
+const RX_RESTR = /(?<![A-Z0-9])(NAO APLICA|NAO SERVE|EXCETO|EXC\b\.?|SOMENTE|APENAS|S\/(?=\s[A-Z0-9]{2,}|(?:ABS|AR|AC)\b)|SEM(?=\s[A-Z0-9]{2,}))/g;
 const RX_PREP = /^(?:(?:NO|NA|NOS|NAS|EM|O|A|AO|AOS|PARA|P\/|DO|DA|DOS|DAS|MODELO|MODELOS|VERSAO|VERSOES|VEICULO|VEICULOS|:)\s+)+/;
 const MARCA_NEG = /(?<![A-Z0-9])(?:(?:NAO|EXC[A-Z]*|SEM)(?![A-Z0-9])|S\/)/g;
 const MARCA_POS = /(?<![A-Z0-9])(?:SOMENTE|APENAS|SO|EXCLUSIV[A-Z]*|UNICAMENTE)(?![A-Z0-9])/g;
 const ehData = (x) => /[\/–-]/.test(x) || /^(?:19[5-9]|20[0-2])[0-9]\b/.test(x) || /^[0-9]{2}$/.test(x);
 const LIGA = new Set(["E", "OU", "A", "O", "C/", "S/", "COM", "SEM"]);
 // as restrições do texto: [{ marca, fam: "neg"|"pos", contra, termo (até a data, até 4 palavras), nucleo }]
-function restricoesDoTexto(a) {
-  const t = norm(a), out = [];
+// palavras de posição, lado, combustível e medida: têm campo próprio e fecham o trecho do "sem …"
+const FIM_SEM = new Set(["RODA", "DIANT", "DIANTEIRO", "DIANTEIRA", "TRAS", "TRASEIRO", "TRASEIRA", "DIR", "ESQ", "DIREITO", "DIREITA",
+  "ESQUERDO", "ESQUERDA", "LADO", "CAMBIO", "GASOLINA", "DIESEL", "DS", "FLEX", "ARO", "MANUAL", "AUTOMATICO"]);
+function restricoesDoTexto(a, ve = []) {
+  // o "| DETALHE: …" é a descrição do produto ("sem falhas"), não a aplicação
+  const t = norm(a).split(/\|\s*DETALHE\b/)[0], out = [];
+  const nomesVe = new Set(ve.flatMap((v) => [v[0], v[1]]).flatMap((x) => norm(x).split(/[\s-]+/)));
   for (const m of t.matchAll(RX_RESTR)) {
     const marca = m[1].replace(/\.$/, ""), fam = /^(?:SOMENTE|APENAS)$/.test(marca) ? "pos" : "neg";
     let resto = t.slice(m.index + m[0].length).replace(/^[\s.:]+/, "");
@@ -368,18 +376,42 @@ function restricoesDoTexto(a) {
     const tk = [];
     for (const x of resto.split(/\s+/).map((y) => y.replace(/\.+$/, "")).filter(Boolean)) { if (ehData(x) || LIGA.has(x) || tk.length === 4) break; tk.push(x); }
     if (!tk.length) continue;
-    // "c/ ABS / s/ ABS" ou "s/ ABS ou c/ ABS": serve nos dois, não é restrição
-    const x0 = tk[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    if (marca === "S/" && new RegExp(`C\\/\\s?${x0}\\s*(?:\\/|OU|E)\\s*S\\/|S\\/\\s?${x0}\\s*(?:\\/|OU|E)\\s*C\\/\\s?${x0}`).test(t)) continue;
+    // "c/ ABS / s/ ABS", "s/ ABS ou c/ ABS" ou "com AC / sem AC": serve nos dois, não é restrição
+    const x0 = tk[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), C = "(?:C\\/|COM\\s)", S = "(?:S\\/|SEM\\s)";
+    const semCom = marca === "S/" || marca === "SEM";
+    if (semCom && new RegExp(`${C}\\s?${x0}\\s*(?:\\/|OU|E)\\s*${S}|${S}\\s?${x0}\\s*(?:\\/|OU|E)\\s*${C}\\s?${x0}`).test(t)) continue;
+    // "sem …"/"s/ …": a restrição inteira, até o próximo separador: " · ", ";", "|", ")", "," ou o fim (achado 4 do
+    // revisor) e também " - ", " + ", " / ", "(" e o próximo "sem"/"s/"/"com"/"c/", que no texto da base separam outra
+    // informação; e até a 1ª palavra com número (ano, motor, medida: vão para as colunas Ano e Cilindrada)
+    let inteiro = "";
+    if (semCom) {
+      const tr = t.slice(m.index + m[0].length).split(/ · |[;|),(]| [-–+] | \/ |(?<![A-Z0-9])(?:SEM|COM)\s|(?<![A-Z0-9])[SC]\//)[0];
+      const pal = [];
+      const ws = tr.trim().split(/\s+/).filter(Boolean);
+      for (let k = 0; k < ws.length; k++) {
+        const x = ws[k], limpo = x.replace(/[.\/]+$/, "");
+        if (/[0-9]/.test(x) || FIM_SEM.has(limpo)) break;
+        if (x === "E" && nomesVe.has(ws[k + 1])) break; // "s/ ABS e Alfa 145": o "e" abre o próximo veículo
+        pal.push(x);
+      }
+      inteiro = pal.join(" ").replace(/[.\/-]+$/, "");
+    }
     // o núcleo: a 1ª palavra e, se a 2ª é uma letra só ou um número de motor ("HB20 X", "Focus 1.6"), ela também
     const nucleo = tk.length > 1 && (/^[A-Z]$/.test(tk[1]) || /^[0-9]+(?:\.[0-9]+)?[A-Z]*$/.test(tk[1])) ? tk.slice(0, 2) : tk.slice(0, 1);
-    out.push({ marca, fam, contra: fam === "neg" && marca !== "S/", termo: tk.join(" "), nucleo });
+    out.push({ marca, fam, contra: fam === "neg" && !semCom, termo: tk.join(" "), nucleo, inteiro });
   }
   return out;
 }
 // a restrição aparece no texto visível: uma marca da família e, até 80 letras antes ou depois dela, o núcleo do termo
 // (a tabela pode pôr o "2.4" na Cilindrada e o "Exceto" na Versão)
 function restricaoVisivel(r, vis) {
+  // "sem …"/"s/ …": depois de um "s/" ou "sem" da tela vem a restrição inteira ("SEM POLIA" não basta para
+  // "SEM POLIA ELETROMAGNETICA E AC")
+  if (r.inteiro) {
+    const alvo = semSinal(r.inteiro);
+    for (const m of vis.matchAll(/(?<![A-Z0-9])(?:S\/|SEM(?![A-Z0-9]))/g)) if (semSinal(vis.slice(m.index + m[0].length, m.index + m[0].length + r.inteiro.length + 40)).replace(/^[.:]+/, "").startsWith(alvo)) return true;
+    return false;
+  }
   for (const m of vis.matchAll(r.fam === "pos" ? MARCA_POS : MARCA_NEG)) {
     const jan = vis.slice(Math.max(0, m.index - 80), m.index + m[0].length + 80);
     if (linhaTemTermo(jan, r.nucleo)) return true;
@@ -392,10 +424,10 @@ function linhaTemTermo(linha, nucleo) {
   const pal = pals(linha), alvo = pals(nucleo.join(" "));
   return alvo.every((x) => pal.includes(x)) || pal.includes(alvo.join(""));
 }
-const PRINTS_RESTR = ["CXD13090", "AMT7050", "AMT7134", "POL1678", "CIL8528"];
+const PRINTS_RESTR = ["CXD13090", "AMT7050", "AMT7134", "POL1678", "CIL8528", "BDA50041"];
 const PRINTS = []; // os prints das conferências f) e g)
 async function conferirRestricoes(browser, prods) {
-  const alvo = prods.filter((p) => restricoesDoTexto(p.a).length);
+  const alvo = prods.filter((p) => restricoesDoTexto(p.a, p.ve).length);
   for (const tam of LARGURAS) {
     const [w] = tam;
     const D = await abrirSite(browser, op.site, tam, "restrições");
@@ -412,9 +444,9 @@ async function conferirRestricoes(browser, prods) {
       if (PRINTS_RESTR.includes(p.c)) PRINTS.push(await print(D, `depois-${w}-produto-${p.c}`));
       if (!tela) { escondidas.push(`${p.c} (sem a seção Aplicação)`); continue; }
       const vis = norm(tela.texto), linhas = tela.linhas.map(norm);
-      const rs = restricoesDoTexto(p.a);
+      const rs = restricoesDoTexto(p.a, p.ve);
       const falta = rs.filter((r) => !restricaoVisivel(r, vis));
-      if (falta.length) escondidas.push(`${p.c} («${falta.map((r) => r.marca + " " + r.termo).join("», «")}»)`);
+      if (falta.length) escondidas.push(`${p.c} («${falta.map((r) => r.marca + " " + (r.inteiro || r.termo)).join("», «")}»)`);
       for (const r of rs.filter((x) => x.contra)) {
         const ruins = linhas.filter((l) => linhaTemTermo(l, r.termo.split(" ")) && !new RegExp(MARCA_NEG.source).test(l));
         if (ruins.length) contra.push(`${p.c} (${r.marca} ${r.termo} x linha «${ruins[0].slice(0, 70)}»)`);
@@ -432,7 +464,8 @@ async function conferirRestricoes(browser, prods) {
 }
 
 // ---------- g) aviso de tipo sem peça no ano (regra do testes, sem o código do site) ----------
-const ehBomba = (p) => /BOMBA/.test(norm(`${p.p} ${p.d}`)) && /COMBUST/.test(norm(`${p.p} ${p.d} ${p.fa}`));
+// "bomba combustivel polo 2026" (com aviso e sem bomba) e "polo 2026" (sem aviso) são conferidos pelo testar_site.mjs
+// (avisotipo; RD-0663): aqui só os prints deles e o caso "amortecedor gol 2010"
 const ehAmortecedor = (p) => /AMORTECEDOR/.test(norm(`${p.p} ${p.d}`));
 const RX_AVISO = /(?<![A-Z])NENHUM[A]?\b[^.!]{0,120}?\bPARA\b/;
 async function conferirAvisoTipo(browser, prods) {
@@ -440,8 +473,11 @@ async function conferirAvisoTipo(browser, prods) {
   for (const tam of LARGURAS) {
     const [w] = tam;
     const D = await abrirSite(browser, op.site, tam, "aviso");
-    for (const [q, comAviso, tipo, ehTipo] of [["bomba combustivel polo 2026", true, "bomba de combustível", ehBomba], ["polo 2026", false], ["amortecedor gol 2010", false, "amortecedor", ehAmortecedor]]) {
+    for (const q of ["bomba combustivel polo 2026", "polo 2026", "amortecedor gol 2010"]) {
       const l = await lista(D, "#/busca?q=" + encodeURIComponent(q));
+      await D.semRolar(`digitada "${q}"`);
+      PRINTS.push(await print(D, `depois-${w}-aviso-${q.replace(/\s+/g, "-")}`));
+      if (q !== "amortecedor gol 2010") continue;
       // o texto visível da tela de busca fora dos cartões da lista
       const fora = norm(await D.page.evaluate(() => {
         const vis = (el) => el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) && !el.closest(".so-impressao");
@@ -449,18 +485,10 @@ async function conferirAvisoTipo(browser, prods) {
         for (let n; (n = tw.nextNode()); ) { const pe = n.parentElement; if (pe && vis(pe) && !pe.closest(".lista .item, [data-cod]")) o.push(n.nodeValue); }
         return o.join(" ");
       }));
-      const av = RX_AVISO.exec(fora), trecho = av ? fora.slice(av.index, av.index + 140) : "";
-      await D.semRolar(`digitada "${q}"`);
-      PRINTS.push(await print(D, `depois-${w}-aviso-${q.replace(/\s+/g, "-")}`));
-      if (comAviso) {
-        const ok = !!av && /\bPOLO\b/.test(trecho) && /\b2026\b/.test(trecho) && /BOMBA/.test(trecho);
-        conta(`aviso: "${q}" mostra "Nenhuma ${tipo} para Polo 2026" (${w})`, ok, av ? `«${trecho.slice(0, 110)}»` : `sem aviso na tela (${l.total || l.vazio})`);
-        const tipos = l.cods.filter((c) => POR.get(c) && ehTipo(POR.get(c)));
-        conta(`aviso: "${q}": nenhuma peça da lista é ${tipo} (${w})`, !tipos.length, tipos.length ? `na lista: ${tipos.join(", ")}` : `${l.cods.length} peças, nenhuma ${tipo}`);
-      } else {
-        conta(`aviso: "${q}" sem aviso (${w})`, !av, av ? `aviso indevido: «${trecho.slice(0, 110)}»` : "sem aviso");
-        if (ehTipo) { const n = l.cods.filter((c) => POR.get(c) && ehTipo(POR.get(c))).length; conta(`aviso: "${q}" tem ${tipo} na lista (${w})`, n > 0, `${n} de ${l.cods.length}`); }
-      }
+      const av = RX_AVISO.exec(fora);
+      conta(`aviso: "${q}" sem aviso (${w})`, !av, av ? `aviso indevido: «${fora.slice(av.index, av.index + 110)}»` : "sem aviso");
+      const n = l.cods.filter((c) => POR.get(c) && ehAmortecedor(POR.get(c))).length;
+      conta(`aviso: "${q}" tem amortecedor na lista (${w})`, n > 0, `${n} de ${l.cods.length}`);
     }
     await D.fechar();
   }
