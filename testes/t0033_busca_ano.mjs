@@ -32,7 +32,8 @@
         vem da própria função buscar() de cada site (o teste só a expõe em window, sem mudar a regra). A justificativa é
         do testes e é outra que a do site (justifica()): com "an" no produto, o "an" decide (vale primeiro); sem ele, o
         nome do modelo aparece no texto (fora do nome de um modelo mais longo: "Palio" em "Palio Weekend") e, até 40
-        caracteres depois dele (sem partir número), sem outro modelo do "ve" nem ";" no meio, há um
+        caracteres depois dele (sem partir número; em "Modelo1 / Modelo2 ano", só com barras entre modelos do "ve", depois
+        do último do grupo: decisão do gerente), sem outro modelo do "ve" nem ";" no meio, há um
         ano ou uma faixa com esse ano (AAAA, AAAA–AAAA, AAAA>, AAAA+, após/a partir de/desde AAAA, até AAAA, MM/AA e
         MM/AA MM/AA). Modelo de 1 letra ("L", "R" da Scania) não se confere pelo texto (aviso). ACRÉSCIMO (entra só no branch) sem justificativa = FALHA; PERDA (entra só no main) com
         justificativa = FALHA. Os dois listam todos os casos. E toda Marca da tabela é uma montadora dos "ve".
@@ -136,8 +137,16 @@ function justifica(p, modelo, ano) {
   // o trecho de um modelo mais longo que contém este ("PALIO" em "PALIO WEEKEND", "SIENA" em "GRAND SIENA") não conta
   const longos = outros.filter((m) => semSinal(m).length > alvo.length).flatMap((m) => [...txt.matchAll(rxModeloTxt(m))].map((x) => [x.index, x.index + x[0].length]));
   for (const r of txt.matchAll(rxModeloTxt(modelo))) {
-    const fim = r.index + r[0].length;
+    let fim = r.index + r[0].length;
     if (longos.some(([i, f]) => i <= r.index && f >= fim)) continue;
+    // decisão do gerente: em "Modelo1 / Modelo2 ano" (só barras entre modelos do "ve"), o ano vale para o grupo todo;
+    // a janela começa depois do último modelo do grupo
+    for (let b; (b = /^\s*\/\s*/.exec(txt.slice(fim))); ) {
+      const ini = fim + b[0].length;
+      const fins = outros.map((m) => { const x = new RegExp(rxModeloTxt(m).source, "y"); x.lastIndex = ini; return x.exec(txt) ? x.lastIndex : -1; }).filter((x) => x > 0);
+      if (!fins.length) break;
+      fim = Math.max(...fins);
+    }
     // 40 caracteres, sem partir um número no fim ("12/19|96")
     let jan = txt.slice(fim, fim + 40) + (/^[0-9\/]*/.exec(txt.slice(fim + 40)) || [""])[0];
     const pv = jan.indexOf(";"); if (pv >= 0) jan = jan.slice(0, pv);
