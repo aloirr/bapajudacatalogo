@@ -2,7 +2,10 @@
    o usuário e já corta as colunas (o vendedor nem recebe as de valor). Aqui não há lista de colunas: a tela desenha as
    que chegarem, na ordem em que chegarem, e formata pelo "tipo" (texto, numero, dinheiro ou markup).
    Resposta: { posicao:{data,hora}, colunas:[{campo,rotulo,tipo}], total, desde, limite, linhas:[{campo:valor}],
-   filiais:[{numero,nome}] }. 50 linhas por vez, com o "Mostrar mais N" (N: o que falta, até 50).
+   filiais:[{numero,nome}], opcoes:{categorias,sistemas,familias} }.
+   T-0035: filtros Categoria, Sistema e Família (categoria=, sistema=, familia=), em cascata: as opções vêm na resposta,
+   já limitadas pelo que está escolhido; um valor fora da cascata o servidor ignora (e a tela volta para "Todas").
+   No celular eles e a Filial ficam atrás do botão "Filtros (N)"; N conta os quatro. 50 linhas por vez, com o "Mostrar mais N" (N: o que falta, até 50).
    Celular: o cartão fechado mostra as colunas até a do estoque; as que vêm depois dela ficam no "+ Detalhes". */
 (function () {
   "use strict";
@@ -13,6 +16,10 @@
   const ESPERA = 300; // ms entre a última tecla e a busca
 
   const busca = $("#est-busca"), sel = $("#est-filial"), com = $("#est-com");
+  const cat = $("#est-categoria"), sis = $("#est-sistema"), fam = $("#est-familia");
+  const barra = $(".est-barra"), btFiltros = $("#est-bt-filtros"), nFiltros = $("#est-n-filtros"), limpar = $("#est-limpar");
+  const CASCATA = [[cat, "categoria", "categorias"], [sis, "sistema", "sistemas"], [fam, "familia", "familias"]];
+  const SELECTS = [sel, cat, sis, fam];
   const lista = $("#est-lista"), total = $("#est-total"), mais = $("#est-mais"), maisBt = $("#est-mais-bt");
 
   const inteiro = new Intl.NumberFormat("pt-BR");
@@ -55,6 +62,26 @@
     if (sel.options.length > 1 || !Array.isArray(fs)) return; // monta uma vez; a escolha fica
     fs.forEach((f) => sel.insertAdjacentHTML("beforeend", `<option value="${esc(f.numero)}" data-nome="${esc(f.nome || f.numero)}">${esc(f.nome ? `${f.nome} · ${f.numero}` : f.numero)}</option>`));
   }
+  // remonta as opções de cada filtro pela resposta; a escolha fica se ainda existe, senão volta para "Todas"
+  function opcoes(o) {
+    CASCATA.forEach(([s, , chave]) => {
+      const vals = o && Array.isArray(o[chave]) ? o[chave].filter((v) => v != null && v !== "").map(String) : null;
+      s.closest(".campo").hidden = !vals; // servidor sem os filtros: o campo some
+      if (!vals) { s.value = ""; return; }
+      const atual = s.value;
+      s.length = 1; // fica o "Todas"
+      s.insertAdjacentHTML("beforeend", vals.map((v) => `<option value="${esc(v)}">${esc(v)}</option>`).join(""));
+      s.value = vals.includes(atual) ? atual : "";
+      s.disabled = !vals.length;
+    });
+    ativos();
+  }
+  // "Filtros (N)" no celular e o "Limpar filtros"
+  function ativos() {
+    const n = SELECTS.filter((s) => s.value).length;
+    nFiltros.textContent = n ? `(${n})` : ""; // o espaço é o gap do .bt
+    limpar.hidden = !n;
+  }
   function posicao(p) {
     if (!p || !p.data) return;
     $("#est-data").textContent = p.data;
@@ -69,7 +96,9 @@
   function vazio() {
     const termo = busca.value.trim();
     const onde = sel.value ? sel.options[sel.selectedIndex].dataset.nome : "";
-    const txt = termo ? `Nada encontrado para “${termo}”${onde ? ` em ${onde}` : ""}.` : onde ? `Nada encontrado em ${onde}.` : "Nada encontrado.";
+    const filtros = [cat, sis, fam].some((s) => s.value) ? " com os filtros escolhidos" : "";
+    const txt = termo ? `Nada encontrado para “${termo}”${onde ? ` em ${onde}` : ""}${filtros}.`
+      : onde ? `Nada encontrado em ${onde}${filtros}.` : `Nada encontrado${filtros}.`;
     lista.innerHTML = `<p class="est-nada">${esc(txt)}</p>`;
   }
   function erro(r) {
@@ -87,6 +116,7 @@
     const n = ++pedido;
     const p = new URLSearchParams({ q: busca.value.trim(), filial: sel.value, desde: String(continuar ? mostradas : 0), limite: String(LIMITE) });
     if (com.checked) p.set("com_estoque", "1");
+    CASCATA.forEach(([s, nome]) => { if (s.value) p.set(nome, s.value); });
     if (continuar) { maisBt.disabled = true; maisBt.textContent = "Carregando…"; }
     else lista.innerHTML = '<div class="carregando est-lista-carregando">Carregando o estoque…</div>';
     const r = await api("GET", "/api/estoque?" + p.toString());
@@ -96,6 +126,7 @@
     if (r.status !== 200 || !d || !Array.isArray(d.linhas)) { erro(r); return; }
     posicao(d.posicao);
     filiais(d.filiais);
+    if (!continuar) opcoes(d.opcoes);
     totalAtual = Number(d.total) || 0;
     const corpo = continuar && lista.querySelector("table.est tbody");
     if (corpo) {
@@ -123,7 +154,20 @@
   });
   let espera = null;
   busca.addEventListener("input", () => { clearTimeout(espera); espera = setTimeout(() => carregar(false), ESPERA); });
-  sel.addEventListener("change", () => { clearTimeout(espera); carregar(false); });
+  const recarregar = () => { clearTimeout(espera); ativos(); carregar(false); };
+  sel.addEventListener("change", recarregar);
+  cat.addEventListener("change", () => { sis.value = ""; fam.value = ""; recarregar(); }); // a cascata recomeça
+  sis.addEventListener("change", () => { fam.value = ""; recarregar(); });
+  fam.addEventListener("change", recarregar);
+  limpar.addEventListener("click", () => {
+    SELECTS.forEach((s) => { s.value = ""; });
+    recarregar();
+    (btFiltros.offsetParent ? btFiltros : sel).focus(); // o botão some: o foco vai para o "Filtros" (celular) ou a Filial
+  });
+  btFiltros.addEventListener("click", () => {
+    const aberto = barra.classList.toggle("est-aberta");
+    btFiltros.setAttribute("aria-expanded", String(aberto));
+  });
   com.addEventListener("change", () => { clearTimeout(espera); carregar(false); });
   maisBt.addEventListener("click", () => carregar(true));
   carregar(false);

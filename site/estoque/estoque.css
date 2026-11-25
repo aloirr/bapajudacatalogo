@@ -7,9 +7,21 @@
 .pg-larga { max-width: 1200px; } /* poucas colunas: a largura das outras páginas do admin */
 body.est-larga .pg-larga, body.est-larga .pg-cab-in { max-width: var(--largura); } /* o título alinha com a busca e a tabela */
 
-/* ---------- busca, filial e "Somente produtos com estoque" ---------- */
-.est-barra .est-filial { flex: 0 1 260px; }
+/* ---------- busca, filtros (T-0035) e "Somente produtos com estoque" ----------
+   Computador: .est-filtros e .est-acoes somem da árvore (display: contents) e tudo corre na .us-barra, numa linha ou
+   em duas: busca, Filial, Categoria, Sistema, Família, a caixa e o "Limpar filtros". O botão "Filtros" só existe no celular. */
+.est-barra .est-q { flex: 1 1 320px; } /* o texto de exemplo cabe inteiro */
+.est-barra .est-filial { flex: 0 1 220px; }
+.est-barra .est-sel { flex: 1 1 180px; max-width: 280px; }
 .est-barra .est-com { flex: none; }
+.est-barra .campo[hidden] { display: none; }
+.est-filtros, .est-acoes { display: contents; }
+.est-barra .est-filial, .est-barra .est-sel { order: 1; }
+.est-barra .est-com { order: 2; }
+.est-barra .est-acoes > * { order: 3; }
+.est-bt-filtros { display: none; }
+.est-limpar[hidden] { display: none; }
+.est-barra select:disabled { background: var(--fundo); color: var(--texto-2); }
 
 /* ---------- tabela ---------- */
 .est-rolar { overflow-x: auto; border-radius: var(--raio); box-shadow: var(--sombra); background: var(--branco); }
@@ -44,7 +56,17 @@ table.est td.est-c-estoque b { font-size: 16px; color: var(--escuro); }
    estoque lado a lado, depois a descrição. 3 colunas: filial | nº filial (e o código embaixo) | estoque */
 @media (max-width: 900px) {
   .est-rolar { overflow: visible; box-shadow: none; background: none; border-radius: 0; }
-  .est-barra .est-filial, .est-barra .est-com { flex: 1 1 100%; }
+  /* celular e tablet: busca e caixa sempre à vista; Filial, Categoria, Sistema e Família atrás do "Filtros (N)" */
+  .est-barra .est-com { flex: 1 1 100%; }
+  .est-acoes { display: flex; flex: 1 1 100%; align-items: center; gap: 12px; order: 3; }
+  .est-barra .est-acoes > * { order: 0; }
+  .est-bt-filtros { display: inline-flex; height: 44px; padding: 0 18px; font-size: 14px; }
+  .est-bt-filtros::after { content: ""; width: 8px; height: 8px; margin: -4px 0 0 4px; border: solid currentColor;
+    border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .15s; }
+  .est-aberta .est-bt-filtros::after { margin-top: 4px; transform: rotate(-135deg); }
+  .est-filtros { display: none; order: 4; flex: 1 1 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .est-aberta .est-filtros { display: grid; }
+  .est-barra .est-filtros .campo { max-width: none; }
   table.est tr { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 12px; }
   table.est td { grid-column: 1 / -1; }
   body.est-larga table.est td[data-rot]::before { flex-basis: 142px; } /* admin: "Custo do produto" cabe numa linha e os valores alinham; no vendedor fica o de 104 px, e o Fornecedor não quebra */
@@ -71,3 +93,7 @@ table.est td.est-c-estoque b { font-size: 16px; color: var(--escuro); }
   .est-bt-mais:hover { background: var(--verde-claro); border-color: var(--borda-campo); color: var(--verde-txt); }
   .est-mais .bt { width: 100%; justify-content: center; }
 }
+@media (max-width: 599px) {
+  .est-filtros { grid-template-columns: minmax(0, 1fr); } /* 390 px: um filtro por linha, o nome inteiro à vista */
+}
+@media (prefers-reduced-motion: reduce) { .est-bt-filtros::after { transition: none; } }
