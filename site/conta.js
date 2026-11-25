@@ -18,7 +18,7 @@
     chave: svg('<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>'),
     sair: svg('<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"/>'),
   };
-  const SETA = '<svg class="conta-seta" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  const SETA = window.BAP.seta("conta-seta"); // o chevron comum (/entrar/comum.js)
 
   // o aviso do site todo (o catálogo também usa): entra vazio, com role="status", e o texto vem depois (assim o leitor
   // de tela anuncia); com uma janela aberta (showModal), ele entra nela, senão ficaria escondido atrás. Quem fecha a

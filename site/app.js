@@ -44,6 +44,7 @@
   const norm = (s) => semAcento(String(s || "")).toUpperCase().replace(/\s+/g, " ").trim();
   const normCod = (s) => semAcento(String(s || "")).toUpperCase().replace(/[^A-Z0-9]/g, "");
   const esc = window.BAP.esc; // /entrar/comum.js (T-0022), que vem antes no index.html
+  const bonito = window.BAP.bonito; // a exibição sem caixa alta: fica no /entrar/comum.js, que o Estoque também usa (T-0035)
   // Ano sem fim na tela, na aplicação e na descrição (T-0018, R-20261120-195900 e R-20261120-201100-alexandre):
   // "2015>", "2015 →", "2015->", "2015 em Diante" e "2015–" sem o ano final aparecem como "2015+"; o leitor de tela
   // ouve "2015 em diante" (o "+" fica escondido dele e o EM_DIANTE vai na .vh). A faixa com fim não muda. Só o
@@ -66,7 +67,7 @@
   const anoMaisTxt = (s, fim = "+") => String(s == null ? "" : s) // o title e o título da aba ("+"); o alt (EM_DIANTE)
     .replace(RX_ANO_ABERTO, (x, ano, i, t) => ano + fim + espacoDepois(t, i + x.length));
   const MINUSC = new Set(["e", "de", "da", "do", "das", "dos", "com", "sem", "para", "p/", "c/", "s/"]);
-  const titulo = (s) => bonito(s); // um nome sem caixa alta só (bonito, mais abaixo)
+  const titulo = (s) => bonito(s);
   const fmt = (n) => Number(n).toLocaleString("pt-BR");
   const toast = (msg) => window.BAPConta.toast(msg); // o aviso do site todo (conta.js, T-0022)
 
@@ -752,21 +753,6 @@
       bruto: { mo: montadora, modelo, ano: anoModelo, cil: /^\d+[.,]\d$/.test(cil) ? cil.replace(",", ".") : "", versao: norm(versao) }, // para as listas do veículo
     };
   }
-  // Exibição sem caixa alta ("Honda Civic", "Volkswagen Gol", "Mercedes-Benz Atego"); siglas ficam: VW, GM, BMW...,
-  // palavra com número (HB20, 16V, 208), pedaço curto com hífen (CR-V) e, na versão, as de 2 a 4 letras (LXS, HX, GLI).
-  // Só para mostrar: a busca continua com o texto da base.
-  const SIGLAS = new Set(["VW", "GM", "BMW", "BYD", "JAC", "GWM", "MG", "DS", "RAM", "CAOA", "JCB", "DAF", "MAN", "AGCO"]);
-  const LIGA = new Set(["E", "DE", "DA", "DO", "DAS", "DOS", "COM", "SEM", "PARA"]); // "Amortecedores e Kits"
-  function bonito(txt, versao) {
-    return String(txt || "").toUpperCase().replace(/\s+/g, " ").trim().replace(/[A-ZÀ-Ý0-9.]+/g, (w, i, todo) => {
-      if (SIGLAS.has(w) || /\d/.test(w)) return w;
-      if (!versao && i > 0 && LIGA.has(w) && todo[i - 1] === " ") return w.toLowerCase();
-      if (versao && w.length <= 4) return w;
-      if (w.length <= 2 && (todo[i - 1] === "-" || todo[i + w.length] === "-")) return w;
-      return w.charAt(0) + w.slice(1).toLowerCase();
-    });
-  }
-
   // ---------- telas ----------
   // Início (T-0018, opção 4c aprovada e op4d, R-20261120-143900): cabeçalho integrado à faixa da marca, "+4.400 produtos
   // no portfólio", a busca geral e, ao lado, a placa Mercosul; embaixo, a lista tabelada de 8 peças (2 colunas no
