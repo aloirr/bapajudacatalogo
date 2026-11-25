@@ -35,7 +35,7 @@ Abra http://localhost:10000/ (leva a `/entrar`). Testes: `node --test servicos/l
 - **API** (JSON; erro sempre `{"erro": "..."}`): `POST /api/entrar`, `POST /api/sair`, `GET /api/eu`, `GET /api/eu/logo`, `POST /api/trocar-senha`, `GET|POST /api/usuarios`, `PATCH /api/usuarios/<u>`, `POST /api/usuarios/<u>/senha`, `GET|PUT|DELETE /api/usuarios/<u>/logo`, `GET /api/pdfs`, `GET /api/estoque`. Detalhes no contrato da T-0022. Cada usuário da lista (`GET /api/usuarios`) traz `usuario, nome, empresa, admin, estoque, ativo, temLogo, trocarSenha, ultimoAcesso`; o `GET /api/eu` traz `usuario, nome, empresa, admin, estoque, temLogo, trocarSenha, expiraEm`.
 - **Interna:** `GET /interno/codigos` com o cabeçalho `X-Chave-Interna` → `{"total": n, "codigos": [...]}`; sem a chave certa, 401.
 
-## Arquivos do admin (T-0024, T-0032)
+## Arquivos do admin (T-0024, T-0032, T-0038)
 
 Lista **fixa** `PDFS` no `server.mjs` (id, título, arquivo por regex ancorada, tipo, grupo e par), só de `catalogo_grafico/entregas/`, na ordem da tela. O navegador manda só o `id`; o nome do arquivo nunca vem do pedido.
 

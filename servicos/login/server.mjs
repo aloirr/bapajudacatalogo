@@ -108,6 +108,9 @@ const PDFS = [
   { id: 'lubrificantes-pptx', titulo: 'Lubrificantes e Químicos', grupo: 'materiais', tipo: 'pptx', par: 'lubrificantes', re: /^BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial\.pptx$/ },
   { id: 'kit-filtros', titulo: 'Kit Filtros', grupo: 'materiais', tipo: 'pdf', re: /^Kit_Filtros_BAP\.pdf$/ },
   // T-0032: os treinamentos dos vendedores, cada um em PDF e PowerPoint (o mesmo "par": um cartão só, o PDF é o principal).
+  // T-0038: o Onboarding do Vendedor no topo dos treinamentos (o primeiro que o vendedor novo vê).
+  { id: 'treinamento-onboarding-vendedor-pdf', titulo: 'Treinamento · Onboarding do Vendedor', grupo: 'treinamentos', tipo: 'pdf', par: 'treinamento-onboarding-vendedor', re: /^Treinamento_Onboarding_Vendedor_BAP_Vendedores\.pdf$/ },
+  { id: 'treinamento-onboarding-vendedor-pptx', titulo: 'Treinamento · Onboarding do Vendedor', grupo: 'treinamentos', tipo: 'pptx', par: 'treinamento-onboarding-vendedor', re: /^Treinamento_Onboarding_Vendedor_BAP_Vendedores\.pptx$/ },
   { id: 'treinamento-mecanica-basica-pdf', titulo: 'Treinamento · Mecânica Básica', grupo: 'treinamentos', tipo: 'pdf', par: 'treinamento-mecanica-basica', re: /^Treinamento_Mecanica_Basica_BAP_Vendedores\.pdf$/ },
   { id: 'treinamento-mecanica-basica-pptx', titulo: 'Treinamento · Mecânica Básica', grupo: 'treinamentos', tipo: 'pptx', par: 'treinamento-mecanica-basica', re: /^Treinamento_Mecanica_Basica_BAP_Vendedores\.pptx$/ },
   { id: 'treinamento-baterias-pdf', titulo: 'Treinamento · Baterias', grupo: 'treinamentos', tipo: 'pdf', par: 'treinamento-baterias', re: /^Treinamento_Baterias_BAP_Vendedores\.pdf$/ },
