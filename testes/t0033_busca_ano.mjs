@@ -31,11 +31,11 @@
         branch: para cada produto com "ve", cada (marca, modelo) do "ve" e cada ano de 1980 a 2026, se ele entra. O mapa
         vem da própria função buscar() de cada site (o teste só a expõe em window, sem mudar a regra). A justificativa é
         do testes e é outra que a do site (justifica()): com "an" no produto, o "an" decide (vale primeiro); sem ele, o
-        nome do modelo aparece no texto (fora do nome de um modelo mais longo: "Palio" em "Palio Weekend") e, até 40
-        caracteres depois dele (sem partir número; em "Modelo1 / Modelo2 ano", só com barras entre modelos do "ve", depois
-        do último do grupo: decisão do gerente), sem outro modelo do "ve" nem ";" no meio, há um
-        ano ou uma faixa com esse ano (AAAA, AAAA–AAAA, AAAA>, AAAA+, após/a partir de/desde AAAA, até AAAA, MM/AA e
-        MM/AA MM/AA). Modelo de 1 letra ("L", "R" da Scania) não se confere pelo texto (aviso). ACRÉSCIMO (entra só no branch) sem justificativa = FALHA; PERDA (entra só no main) com
+        nome do modelo aparece no texto (fora do nome de um modelo mais longo: "Palio" em "Palio Weekend") e, no trecho
+        dele (até o próximo modelo do "ve" ou o ";", sem limite de tamanho; o " · " não é fronteira; em "Modelo1 / Modelo2
+        ano", só com barras entre modelos do "ve", o trecho é o do último do grupo: decisões do gerente), há um
+        ano ou uma faixa com esse ano (AAAA, AAAA–AAAA, AAAA>AAAA, AAAA/AAAA, AAAA>, AAAA+, AAAA.., AAAA/.,
+        MM.AAAA/, após/a partir de/desde AAAA, até AAAA (≤ AAAA), MM/AA e MM/AA MM/AA). Modelo de 1 letra ("L", "R" da Scania) não se confere pelo texto (aviso). ACRÉSCIMO (entra só no branch) sem justificativa = FALHA; PERDA (entra só no main) com
         justificativa = FALHA. Os dois listam todos os casos. E toda Marca da tabela é uma montadora dos "ve".
         Casos do revisor: EMB6126R fora de F-4000 2013, VEL7539 fora de Del Rey 2008, TER55302 fora de D10 2014 e
         VEL7533 fora de Xantia 1994 (o "an" 1996–2003 vale primeiro).
@@ -106,22 +106,23 @@ const parOk = (s) => { let n = 0; for (const ch of s) { if (ch === "(") n++; els
 // d) acréscimos e perdas: a justificativa do testes, escrita sem o código do site
 const semSinal = (s) => norm(s).replace(/[\s-]/g, "");
 const rxModeloTxt = (m) => new RegExp("(?<![A-Z0-9])" + [...semSinal(m)].map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s-]?") + "(?![A-Z0-9])", "g");
-// as marcas de ano da janela, em ordem: { ano, ini, fim } (AAAA entre 1950 e 2029, com ou sem "MM/" na frente; MM/AA
+// as marcas de ano da janela, em ordem: { ano, ini, fim } (AAAA entre 1950 e 2029, com ou sem "MM/", "MM-" ou "MM." na
+// frente; MM/AA
 // com mês de 01 a 12: AA > 30 é 19AA, senão 20AA)
 function anosDaJanela(t) {
   const out = [];
-  for (const m of t.matchAll(/(?<![0-9])(?:(0[1-9]|1[0-2])[\/-])?(19[5-9][0-9]|20[0-2][0-9])(?![0-9])/g)) out.push({ ano: +m[2], ini: m.index, fim: m.index + m[0].length });
+  for (const m of t.matchAll(/(?<![0-9])(?:(0[1-9]|1[0-2])[\/.-])?(19[5-9][0-9]|20[0-2][0-9])(?![0-9])/g)) out.push({ ano: +m[2], ini: m.index, fim: m.index + m[0].length });
   for (const m of t.matchAll(/(?<![0-9\/])(0[1-9]|1[0-2])\/([0-9]{2})(?![0-9\/])/g)) if (!out.some((o) => m.index >= o.ini && m.index < o.fim)) out.push({ ano: +m[2] > 30 ? 1900 + +m[2] : 2000 + +m[2], ini: m.index, fim: m.index + m[0].length });
   return out.sort((a, b) => a.ini - b.ini);
 }
-// as faixas da janela: duas marcas ligadas por espaço, "-", "–", ">" ("1992>2002"), "A" ou "ATE" fazem uma faixa; ">", "+", "EM DIANTE",
-// "..." ou "/." depois, ou "APOS", "A PARTIR DE", "DESDE" antes, abrem a faixa; "ATE" antes fecha; o resto é o ano só
+// as faixas da janela: duas marcas ligadas por espaço, "-", "–", ">" ("1992>2002"), "/" ("1999/2002"), "A" ou "ATE" fazem
+// uma faixa; ">", "+", "EM DIANTE", ".." ou "/" sem número depois ("2016/.", "08.1998/"), ou "APOS", "A PARTIR DE", "DESDE" antes, abrem a faixa; "ATE" antes fecha; o resto é o ano só
 function faixasDaJanela(t) {
   const anos = anosDaJanela(t), out = [];
   for (let i = 0; i < anos.length; i++) {
     const a = anos[i], b = anos[i + 1], antes = t.slice(Math.max(0, a.ini - 12), a.ini), depois = t.slice(a.fim, a.fim + 10);
-    if (b && /^\s*(?:[-–—>]|\bA\b|\bATE\b)?\s*$/.test(t.slice(a.fim, b.ini)) && b.ano >= a.ano) { out.push([a.ano, b.ano]); i++; continue; }
-    if (/^\s*(?:>|\+|EM DIANTE|\.{2,}|…|\/\.)/.test(depois) || /(?:APOS|A PARTIR DE|DESDE)\s*$/.test(antes)) out.push([a.ano, 9999]);
+    if (b && /^\s*(?:[-–—>\/]|\bA\b|\bATE\b)?\s*$/.test(t.slice(a.fim, b.ini)) && b.ano >= a.ano) { out.push([a.ano, b.ano]); i++; continue; }
+    if (/^\s*(?:>|\+|EM DIANTE|\.{2,}|…|\/(?!\s*[0-9]))/.test(depois) || /(?:APOS|A PARTIR DE|DESDE)\s*$/.test(antes)) out.push([a.ano, 9999]);
     else if (/\bATE\s*$/.test(antes)) out.push([0, a.ano]);
     else out.push([a.ano, a.ano]);
   }
@@ -147,8 +148,8 @@ function justifica(p, modelo, ano) {
       if (!fins.length) break;
       fim = Math.max(...fins);
     }
-    // 40 caracteres, sem partir um número no fim ("12/19|96")
-    let jan = txt.slice(fim, fim + 40) + (/^[0-9\/]*/.exec(txt.slice(fim + 40)) || [""])[0];
+    // o trecho do modelo vai até o próximo modelo do "ve" ou o ";" (decisão do gerente: sem limite de tamanho; o " · " não é fronteira)
+    let jan = txt.slice(fim);
     const pv = jan.indexOf(";"); if (pv >= 0) jan = jan.slice(0, pv);
     for (const m of outros) { const o = rxModeloTxt(m).exec(jan); if (o) jan = jan.slice(0, o.index); }
     if (faixasDaJanela(jan).some(([de, ate]) => ano >= de && ano <= ate)) return true;
