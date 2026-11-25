@@ -440,15 +440,16 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0634 | baixa | texto (PDF) | Onboarding, slides 2 a 5, 8, 12, 15 e 19 | os 5 divisores repetem os tópicos do slide 3; "RPS, capacitação, análise de mercado e Dia Foco" 3 vezes, "Do check-in ao check-out" 4 vezes | T-0038 | catalogo-grafico | CORRIGIDO (bdc1030) |
 | RD-0635 | baixa | código (comentário) | catalogo_grafico/gerador/treinamento_molde.py:761 e :768 × :18-19 (no 36b9c9b) | os comentários do `italico` e do `respiro` repetem a docstring (não segura) | T-0038 | catalogo-grafico | CORRIGIDO (bdc1030) |
 | RD-0636 | — | texto (PDF) | Onboarding, slide 13 × 10 e 11; 22 e 23; DICA do 18; "Fonte" no 10, 11 e 14 | as falas, o checklist, o teste e a fonte repetem o deck | T-0038 | catalogo-grafico | MANTIDO (`manter?`: role-play, fixação e fonte oficial) |
-| RD-0637 | baixa | texto (PDF) | Onboarding, slide 14 × slide 17 (no bdc1030) | "Na ficha, o supervisor dá nota 3, 2 ou 1 a cada passo." no painel "Feito quando" repete o 3·2·1 do slide 17 | T-0038 | catalogo-grafico | ABERTO |
-| RD-0638 | baixa | texto (notas) | Onboarding, notas dos slides 7 e 21 (no bdc1030) | as notas repetem a nota do analista (7) e o aviso do botão do BAP Ajuda da coluna Passo 9 (21) | T-0038 | catalogo-grafico | ABERTO |
-| RD-0639 | — | texto (PDF) | Onboarding, slides 6, 11 e 21 (no bdc1030) | o aviso "no BAP Ajuda quando o botão for publicado; até lá, com o supervisor" em 3 slides | T-0038 | catalogo-grafico | MANTIDO (`manter?`: cada slide cita o BAP Ajuda; as 3 trocas saem juntas quando o botão for publicado) |
+| RD-0637 | baixa | texto (PDF) | Onboarding, slide 14 × slide 17 (no bdc1030) | "Na ficha, o supervisor dá nota 3, 2 ou 1 a cada passo." no painel "Feito quando" repete o 3·2·1 do slide 17 | T-0038 | catalogo-grafico | CORRIGIDO (d413f8b; a frase saiu, o painel diz só "É o que mostra que o passo foi cumprido.") |
+| RD-0638 | baixa | texto (notas) | Onboarding, notas dos slides 7 e 21 (no bdc1030) | as notas repetem a nota do analista (7) e o aviso do botão do BAP Ajuda da coluna Passo 9 (21) | T-0038 | catalogo-grafico | CORRIGIDO (d413f8b) |
+| RD-0639 | — | texto (PDF) | Onboarding, slides 6, 11 e 21 (no d413f8b) | o aviso "botão ainda não publicado" do BAP Ajuda, uma vez em cada um dos 3 slides ("até lá, com o supervisor" saiu por decisão do revisor; a 4.ª ocorrência, nas notas do 21, saiu com o RD-0638) | T-0038 | catalogo-grafico | MANTIDO (`manter?`: cada slide cita o BAP Ajuda; as 3 trocas saem juntas quando o botão for publicado) |
 
 ## Notas
 
 ### T-0038, Onboarding do Vendedor, 25/11/2026 (antes dos PRs)
 - RD-0624 ao RD-0636: os branches `catalogo-grafico/T-0038-onboarding` (`36b9c9b`), `integracao-placas/T-0038-onboarding` (`e53ad3c`) e `web-site/T-0038-onboarding` (`c4a8e45`). Relatório: `T-0038.md`. VOLTA PARA AJUSTE: seguram o RD-0624 ao RD-0629 e o RD-0632 ao RD-0634, todos do `catalogo-grafico`; não segura o RD-0635 (só comentário); na fila, com dispensa do `po`: RD-0630 e RD-0631. Os branches do `integracao-placas` e do `web-site` não têm achado.
 - Reteste no `catalogo-grafico/T-0038-onboarding` em `bdc1030`: corrigidos o RD-0624 ao RD-0629 e o RD-0632 ao RD-0635. Novos: RD-0637 e RD-0638 (baixa, seguram); MANTIDO: RD-0639. VOLTA PARA AJUSTE até o RD-0638. Fila: RD-0630 e RD-0631, que o gerente leva ao `po`.
+- Reteste final no `d413f8b`: corrigidos o RD-0637 e o RD-0638; RD-0639 atualizado (aviso sem "até lá, com o supervisor"), segue MANTIDO. LIBERADO, sem achado em aberto. Fila: RD-0630 e RD-0631.
 - Numeração: a partir do próximo livre no `main` (`75fdfd8`). O `corretor-redundancias/T-0033-busca-ano` vai até o RD-0638; quem fizer o merge por último renumera.
 
 ### T-0035, filtros Categoria, Sistema e Família no Estoque, 24/11/2026 (antes dos PRs)
