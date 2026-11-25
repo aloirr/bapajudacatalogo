@@ -70,9 +70,9 @@ const VEIC = {
 };
 // medidas pelo web-site e conferidas pelo testes no JSON abaixo
 const CONTAGENS = { polo2026: 24, gol2010: 54, strada2020: 64 }; // web-site ac79a65 ("após AAAA" é AAAA+; "Gol / Saveiro ano" dá o ano aos dois)
-// 3b (aprovado pelo Alexandre): a regra do ano vale na busca digitada. [texto, BCE3001 dentro?]; contagens medidas no ac79a65
+// 3b (aprovado pelo Alexandre): a regra do ano vale na busca digitada. [texto, BCE3001 dentro?]; contagens medidas no f4e1a0e (sem "ve": só o ano do trecho do modelo)
 const DIGITADAS = [["polo 2026", false], ["bomba combustivel polo 2026", false], ["strada 2020", true]];
-const CONT_DIGITADAS = { "polo 2026": 37, "gol 2010": 77, "strada 2020": 74, polo: 156, "filtro 2010": 241 };
+const CONT_DIGITADAS = { "polo 2026": 27, "gol 2010": 67, "strada 2020": 69, polo: 156, "filtro 2010": 241 }; // web-site f4e1a0e
 const DIGITADAS_IGUAIS = ["polo", "filtro 2010"]; // sem ano de veículo: iguais às de antes
 const DIGITAL_MEDIDA = "4419 produtos / 12158 veículos"; // total e soma do "ve" do JSON das medidas (base v28)
 // 30 dos 3.089 produtos que mostravam "Outros veículos e detalhes" no origin/main 75fdfd8 (um a cada 103, na ordem do JSON)
@@ -134,7 +134,7 @@ function casosDoTexto(p) {
   for (const o of ocorrencias(p)) {
     if (!o.faixas.length) continue;
     for (const [vm, vmo] of p.ve.filter((v) => v[1] === o.m).map((v) => [v[0], v[1]])) {
-      const k = vm + "|" + vmo, va = Math.max(o.faixas[0][0], 1950);
+      const [de0, ate0] = o.faixas[0], k = vm + "|" + vmo, va = de0 > 0 ? de0 : ate0; // "até 2008": 2008
       const trecho = (o.m + (o.barra ? " /" + " " + o.barra.m + o.barra.pedaco : o.pedaco)).slice(0, 60).trim();
       if (!casos.has(k)) casos.set(k, { c: p.c, vm, vmo, va, trecho, barra: !!o.barra });
     }
