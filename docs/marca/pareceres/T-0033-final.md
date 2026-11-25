@@ -47,3 +47,45 @@
 - O MC-0038 e o MC-0039 neste PR, com print novo da ROL0015E e da TER5593103 (1366 e 390 px). São do mesmo tipo do
   MC-0035: a tabela afirma um dado errado com cara de dado certo.
 - O MC-0040 neste PR ou logo depois. O MC-0041 e o MC-0037 vão para a fila do `catalogo-dados`.
+
+---
+
+## Rodada 2 (25/11/2026, Manaus): restrição na tabela e aviso "Nenhuma … para …"
+
+| Campo | Valor |
+|---|---|
+| O que foi visto | `origin/web-site/T-0033-busca-ano` em `28b3b3a87c5cec4fc3e90bfe008eef1116bab6b2`: diff de `site/app.js` e `site/styles.css` contra o `origin/main`. Prints em 1366 e 390 px de AMT7014, AMT7050, AMT7134, CXD13090, JUH70244, POL1678 e da busca "bomba combustivel polo 2026" (scratchpad do `gerente-projetos`, pasta `t33restr/`) |
+| Elementos novos | (1) a restrição na Versão, depois de " · " ("Motor Duratec SISTEMA ELETRO HIDRAULICO · Não aplica no Focus 1.6 - Motor Sigma", CXD13090); (2) a Versão "Não serve (exc. Triton)" (AMT7134); (3) a linha "Restrições da aplicação: Somente para o motor EW10J4" abaixo da tabela (POL1678); (4) o aviso "**Nenhuma bomba de combustível para Polo 2026**; veja outras peças do Polo." |
+| Parecer | **LIBERADO.** Nenhuma cor, fonte, peso ou token novo; os quatro elementos usam os estilos que já existem. Dois achados baixos de voz (MC-0046 e MC-0047), recomendados e não bloqueiam |
+
+### O que está certo
+
+- **Cor:** a `.restr-fora` (`site/styles.css`, nova) não define cor: herda o `--texto` do cartão, sem hex solto. O aviso
+  usa a `.aviso.proximos` dos "mais próximos" (`--texto-2`, frase em negrito), igual à mensagem que já existe.
+  Nada de vermelho ou laranja para "Não serve" e "Não aplica": o aviso de restrição não vira alarme, e o `--erro`
+  continua só na caixa de erro (decisão 8 a).
+- **Tipografia:** Poppins nos prints, nos pesos de sempre. A restrição na Versão tem o peso da célula (400 na tabela de
+  1366 px; 600 no título da linha no cartão de 390 px, como o resto do nome do veículo). A linha "Restrições da
+  aplicação:" a 13 px, um pouco acima da frase "Confira sempre…" (12,5 px), na mesma família: lê-se como dado da
+  aplicação, e não como rodapé. O aviso a 14 px, como o dos "mais próximos".
+- **Separador " · ":** é o mesmo do catálogo (Versão "Adventure · c/ ABS…", Ficha "Diant. · Gás"). Sem caractere novo.
+- **Tom de voz:** "Não aplica no…", "Somente para o motor…", "exc. …" são o texto da base, como dado; a BAP não reescreve
+  restrição técnica, e está certo não reescrever. "Nenhuma bomba de combustível para Polo 2026; veja outras peças do
+  Polo." é direto, diz o que falta e o que fazer, no tom do balcão. O feminino ("Nenhuma bomba", "Nenhum filtro") e o
+  acento ("combustivel" digitado → "combustível" na tela) estão certos no print.
+- **Marca de terceiros:** Ford, Mitsubishi, Mercedes-Benz, Citroën, Volvo só em texto, na fonte e na cor do catálogo.
+- **Preço e estoque:** nenhum. Logo, topo e rodapé iguais.
+
+### Achados
+
+| ID | Onde | Tipo | Fere | Gravidade | Correção | Dono |
+|---|---|---|---|---|---|---|
+| MC-0046 | Aviso da busca, 1366 e 390 px (`busca-bomba-polo-2026-*.png`); `site/app.js:1002` | voz | manual a aprovar (voz: mensagens do site no mesmo padrão) | baixa | A mensagem irmã fecha a frase em negrito com ponto ("**Nenhum produto tem todas as palavras.** Estes são os mais próximos…"); a nova usa ponto e vírgula. Antes → depois: "**Nenhuma bomba de combustível para Polo 2026.** Veja outras peças do Polo." (o ponto entra dentro do `<b>`, e o "veja" vira "Veja") | `web-site` |
+| MC-0047 | Janela da AMT7134, 390 px (`AMT7134-390.png`): "**Mitsubishi Triton Não serve (exc. Triton)**"; `site/app.js:1638` (lista do celular junta marca, modelo e versão com espaço) e `:1987` | voz | manual a aprovar (voz: clareza da aplicação) | baixa | No celular, "Não serve" cola no nome do modelo, no mesmo negrito, e parece parte do nome. Na tabela de 1366 px a coluna separa e lê bem. Antes → depois, só quando a Versão começa com "Não serve": "Mitsubishi Triton · Não serve (exc. Triton)", com o " · " que o catálogo já usa para a restrição. O resto da lista ("Volvo S40 V50 / C 70") fica como está. Quem decide a forma na tela é o `designer-ux` | `web-site` (forma: `designer-ux`) |
+
+### Achados da rodada 1
+
+Não reconferidos nesta rodada (os prints são das peças com restrição). Observação para o `testes`: no `dif.txt` da
+rodada, a ROL0015E ainda dá a cilindrada "1.0 / 1.3 / 1.4 / 1.5 / 1.6 8V" só ao Alfa Romeo 145 e 146, e não aos Fiat
+(MC-0038, parte 2) [SUPOSIÇÃO: o "D" do `dif.txt` é a tela em `28b3b3a`]. Os MC-0038 a MC-0041 seguem como no
+item 4.
