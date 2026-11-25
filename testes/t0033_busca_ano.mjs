@@ -32,6 +32,11 @@
         (o 1º ano entre 1950 e 2029 depois do nome do modelo com 2 ou mais letras, antes do próximo modelo do "ve" ou do ";"), o produto tem
         de aparecer na busca q=<código> com essa marca, modelo e ano. Com --antes, o caso que já não aparecia antes vira
         aviso (não é perda da T-0033). E toda Marca da tabela, em todos os produtos com "ve", é uma montadora dos "ve".
+     e) 3b (aprovado pelo Alexandre): a regra do ano vale na busca digitada. "polo 2026" e "bomba combustivel polo 2026"
+        sem a BCE3001, "strada 2020" com ela; cada resultado de "polo 2026" tem o Polo com 2026 (tabela ou texto); "polo" e
+        "filtro 2010" iguais às de antes; AMT7005 em Gol 2007 ("Gol / Saveiro 01/1980–12/2009": a "/" divide o ano), pela
+        faixa e em "AMORTECEDOR GOL 2007 KYB 441126" com todas as palavras; código e referência com 4 dígitos ("LAM 2010",
+        "AXIOS 2025") iguais às de antes.
      E: 390 px sem rolar de lado, console sem erro, busca sem ano e por código/referência iguais às de antes. */
 
 import { createRequire } from "node:module";
@@ -64,14 +69,20 @@ const VEIC = {
   polo: { vm: "VOLKSWAGEN", vmo: "POLO" },
 };
 // medidas pelo web-site e conferidas pelo testes no JSON abaixo
-const CONTAGENS = { polo2026: 24, gol2010: 45, strada2020: 63 }; // web-site 346ce3f ("após AAAA" conta como AAAA+)
+const CONTAGENS = { polo2026: 24, gol2010: 54, strada2020: 64 }; // web-site ac79a65 ("após AAAA" é AAAA+; "Gol / Saveiro ano" dá o ano aos dois)
+// 3b (aprovado pelo Alexandre): a regra do ano vale na busca digitada. [texto, BCE3001 dentro?]; contagens medidas no ac79a65
+const DIGITADAS = [["polo 2026", false], ["bomba combustivel polo 2026", false], ["strada 2020", true]];
+const CONT_DIGITADAS = { "polo 2026": 37, "gol 2010": 77, "strada 2020": 74, polo: 156, "filtro 2010": 241 };
+const DIGITADAS_IGUAIS = ["polo", "filtro 2010"]; // sem ano de veículo: iguais às de antes
 const DIGITAL_MEDIDA = "4419 produtos / 12158 veículos"; // total e soma do "ve" do JSON das medidas (base v28)
 // 30 dos 3.089 produtos que mostravam "Outros veículos e detalhes" no origin/main 75fdfd8 (um a cada 103, na ordem do JSON)
 const AMOSTRA_BLOCO = ["CXD13062", "CXD13078", "TER555185", "TER5599208", "ROL6304-2Z", "AMT7003", "AMT7151", "AMT7320", "AMT7477",
   "BOL40013", "KB28", "BOR11117", "KAC11928", "KHC129420", "SFR30057", "BIE20093", "JUH70018", "FAC6218", "FAR6127", "TAX10652",
   "JUH70175", "JUH70281", "CUB60101", "CUB60206", "PIV5082", "POL1674", "PAF1346", "INT16512", "ABS4541", "BAN14548DP"];
 // código e referência: o 1º resultado
-const BUSCAS_COD = [["CXD13062", "CXD13062"], ["CXD 13062", "CXD13062"], ["CXD-13062", "CXD13062"], ["TRW 16900255S", "CXD13062"], ["GI3103", ALVO], ["F000.TE0.103", ALVO]];
+const BUSCAS_COD = [["CXD13062", "CXD13062"], ["CXD 13062", "CXD13062"], ["CXD-13062", "CXD13062"], ["TRW 16900255S", "CXD13062"], ["GI3103", ALVO], ["F000.TE0.103", ALVO],
+  // código e referência com 4 dígitos que parecem ano: iguais às de antes (null: só a comparação)
+  ["LAM2010", "LAM2010"], ["LAM 2010", null], ["AXIOS 2025", "KAP11227"], ["AXIOS 2018", null], ["2026", null]];
 // U4 da UX: detalhe longo na Versão ("Roda Dir/Esq", "(Inclusive Adventure)") e "s/ ABS"; janelas só do depois em 1366
 const U4 = ["JUH70013", "ROL0015E"];
 const JANELAS_1366 = ["CXD13022", "INT16530", "TER5593103", "TER5599085", "JUH70041"];
@@ -90,28 +101,48 @@ const N_PERDAS = 500;
 const semSinal = (s) => norm(s).replace(/[\s-]/g, "");
 const rxModeloTxt = (m) => new RegExp("(?<![A-Z0-9])" + [...semSinal(m)].map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s-]?") + "(?![A-Z0-9])", "g");
 const RX_ANO_TXT = /(?<!\d)(19[5-9]\d|20[0-2]\d)(?!\d)/;
-function casosDoTexto(p) {
-  // o modelo de 1 letra ("L" da Scania) casa com o "L" de litro: fica de fora
-  const txt = norm(p.a || ""), mods = [...new Set(p.ve.map((v) => v[1]))].filter((m) => semSinal(m).length >= 2);
-  // todas as ocorrências de todos os modelos (o mais longo vence no mesmo começo: "Palio Weekend" e não "Palio")
+// as faixas de ano de um pedaço do texto (sem acento, maiúsculas): "1996–2005", "01/2020 - 12-2023", "1996>", "1996+",
+// "APOS 2005", "ATE 2005", "2012/." e o ano sozinho
+const RX_FAIXA_TXT = /(?:(APOS|A PARTIR DE|DESDE|ATE)\s+)?(?:\d{2}[\/-])?(19[5-9]\d|20[0-2]\d)(?!\d)(?:\s*(?:–|—|-|\bA\b|\bATE\b)\s*(?:\d{2}[\/-])?(19[5-9]\d|20[0-2]\d)(?!\d)|\s*(>|\+|EM DIANTE|\/\.|\.{2,}|…))?/g;
+const faixasDoPedaco = (t) => [...t.matchAll(RX_FAIXA_TXT)].map((m) => m[3] ? [+m[2], +m[3]] : m[4] || /APOS|A PARTIR|DESDE/.test(m[1] || "") ? [+m[2], 9999] : m[1] === "ATE" ? [0, +m[2]] : [+m[2], +m[2]]);
+// as ocorrências dos modelos no texto, cada uma com o pedaço até o próximo modelo (ou o ";") e as faixas dele. Modelos
+// unidos por "/" ("Gol / Saveiro 1980–2009", "Santana/Quantum 1996>") dividem as faixas do último (decisão do gerente,
+// 4ª rodada); na lista com vírgula, não (decisão 1a). O modelo de 1 letra ("L" da Scania, que casa com o "L" de litro)
+// fica de fora.
+function ocorrencias(p, extra = []) {
+  const txt = norm(p.a || ""), mods = [...new Set([...(p.ve || []).map((v) => v[1]), ...extra])].filter((m) => semSinal(m).length >= 2);
   const ocs = [];
   for (const m of mods) for (const r of txt.matchAll(rxModeloTxt(m))) ocs.push({ m, ini: r.index, fim: r.index + r[0].length });
   ocs.sort((a, b) => a.ini - b.ini || b.fim - a.fim);
+  // o mais longo vence no mesmo trecho ("Palio Weekend" e não "Palio")
   const boas = ocs.filter((o, i) => !ocs.some((x, j) => j !== i && x.ini <= o.ini && x.fim >= o.fim && x.fim - x.ini > o.fim - o.ini));
-  const casos = new Map();
   for (const [i, o] of boas.entries()) {
     const prox = boas.slice(i + 1).find((x) => x.ini >= o.fim);
-    let pedaco = txt.slice(o.fim, prox ? prox.ini : txt.length);
-    pedaco = pedaco.split(";")[0];
-    const y = RX_ANO_TXT.exec(pedaco);
-    if (!y) continue;
+    const ate = prox ? prox.ini : txt.length, pv = txt.indexOf(";", o.fim);
+    o.pedaco = txt.slice(o.fim, pv >= 0 && pv < ate ? pv : ate);
+    o.prox = pv >= 0 && pv < ate ? null : prox;
+    o.faixas = faixasDoPedaco(o.pedaco);
+  }
+  for (let i = boas.length - 1; i >= 0; i--) {
+    const o = boas[i];
+    if (!o.faixas.length && o.prox && /^\s*\/\s*$/.test(o.pedaco)) { o.faixas = o.prox.faixas; o.barra = o.prox; }
+  }
+  return boas;
+}
+function casosDoTexto(p) {
+  const casos = new Map();
+  for (const o of ocorrencias(p)) {
+    if (!o.faixas.length) continue;
     for (const [vm, vmo] of p.ve.filter((v) => v[1] === o.m).map((v) => [v[0], v[1]])) {
-      const k = vm + "|" + vmo;
-      if (!casos.has(k)) casos.set(k, { c: p.c, vm, vmo, va: +y[1], trecho: (o.m + pedaco).slice(0, 60).trim() });
+      const k = vm + "|" + vmo, va = Math.max(o.faixas[0][0], 1950);
+      const trecho = (o.m + (o.barra ? " /" + " " + o.barra.m + o.barra.pedaco : o.pedaco)).slice(0, 60).trim();
+      if (!casos.has(k)) casos.set(k, { c: p.c, vm, vmo, va, trecho, barra: !!o.barra });
     }
   }
   return [...casos.values()];
 }
+// o texto dá o ano ao modelo (pela faixa de alguma ocorrência dele)
+const textoServe = (p, modelo, ano) => ocorrencias(p, [modelo]).some((o) => semSinal(o.m) === semSinal(modelo) && o.faixas.some(([de, a]) => ano >= de && ano <= a));
 
 const LARGURAS = [[1366, 768], [390, 844]];
 
@@ -197,6 +228,7 @@ async function lista(s, hash) {
     total: (document.querySelector(".total") || {}).textContent || "",
     cods: [...document.querySelectorAll(".lista .item")].map((x) => x.dataset.cod),
     vazio: ((document.querySelector(".vazio") || {}).innerText || "").replace(/\s+/g, " ").trim(),
+    proximos: !!document.querySelector(".aviso.proximos"),
   }));
 }
 const numTotal = (t) => +String(t).replace(/\D/g, "") || 0;
@@ -318,7 +350,47 @@ async function main() {
         conta(`antes: Polo 2026 tinha ${ALVO} (${w})`, lpA.cods.includes(ALVO) && lbA.cods.includes(ALVO), `antes ${lpA.total}, depois ${lpD.total}`);
       }
 
+      // busca DIGITADA "polo 2026" (3b): sem a BCE3001; prints de antes e depois
+      const QD = "#/busca?q=" + encodeURIComponent("polo 2026");
+      const ldD = await lista(D, QD);
+      await D.semRolar('digitada "polo 2026"');
+      prints.push(await print(D, `depois-${w}-digitada-polo-2026`));
+      conta(`digitada "polo 2026": ${ALVO} fora (${w})`, !ldD.cods.includes(ALVO), `${ldD.total}; ${ALVO} ${ldD.cods.includes(ALVO) ? "PRESENTE" : "ausente"}`);
+      if (A) {
+        const ldA = await lista(A, QD);
+        prints.push(await print(A, `antes-${w}-digitada-polo-2026`));
+        conta(`antes: digitada "polo 2026" (${w})`, null, `antes ${ldA.total} (${ALVO} ${ldA.cods.includes(ALVO) ? "presente" : "ausente"}), depois ${ldD.total}`);
+      }
+
       if (w !== 1366) { await D.fechar(); if (A) await A.fechar(); continue; }
+
+      // 9. busca digitada (3b)
+      const POR_COD = new Map(prods.map((p) => [p.c, p]));
+      const dig = {};
+      for (const q of new Set([...DIGITADAS.map((x) => x[0]), ...Object.keys(CONT_DIGITADAS)])) dig[q] = await lista(D, "#/busca?q=" + encodeURIComponent(q));
+      for (const [q, dentro] of DIGITADAS) conta(`digitada "${q}": ${ALVO} ${dentro ? "dentro" : "fora"}`, dig[q].cods.includes(ALVO) === dentro, `${dig[q].total}; ${ALVO} ${dig[q].cods.includes(ALVO) ? "presente" : "ausente"}`);
+      for (const [q, n] of Object.entries(CONT_DIGITADAS)) {
+        const m = numTotal(dig[q].total);
+        conta(`digitada "${q}" = ${n}`, mesmoJson ? m === n : null, mesmoJson ? `medido: ${m}` : `JSON diferente do da medida: ${m}. Remeça.`);
+      }
+      if (A) for (const q of DIGITADAS_IGUAIS) {
+        const lA = await lista(A, "#/busca?q=" + encodeURIComponent(q));
+        conta(`digitada "${q}" igual à de antes`, lA.cods.join() === dig[q].cods.join(), `antes ${lA.total}, depois ${dig[q].total}`);
+      }
+      // cada resultado de "polo 2026": o Polo tem o ano 2026 pela tabela (Modelo Polo...) ou pelo texto da aplicação
+      const semPolo = [];
+      for (const c of dig["polo 2026"].cods) {
+        await D.ir("#/produto/" + encodeURIComponent(c));
+        const ls = (await linhasTabela(D.page, "#app")) || [];
+        const pelaTabela = ls.some((l) => /^POLO\b/.test(norm(l[1])) && l[4].some(([de, ate]) => de !== "?" && 2026 >= de && 2026 <= ate));
+        if (!pelaTabela && !textoServe(POR_COD.get(c), "Polo", 2026)) semPolo.push(`${c} (${ls.filter((l) => /^POLO\b/.test(norm(l[1]))).map((l) => l[1] + " " + (l[5] || "sem ano")).join(", ") || "sem linha Polo"})`);
+      }
+      conta('digitada "polo 2026": todo resultado tem o Polo com 2026 (tabela ou texto)', !semPolo.length, semPolo.length ? semPolo.join("; ") : `${dig["polo 2026"].cods.length} produtos conferidos`);
+      // AMT7005 em Gol 2007 ("Gol / Saveiro 01/1980–12/2009"), pela faixa e digitada com todas as palavras
+      const lAmt = await lista(D, hashVei({ vm: "VOLKSWAGEN", vmo: "GOL", va: 2007 }, "AMT7005"));
+      conta("AMT7005 em Volkswagen Gol 2007 (faixa)", lAmt.cods.includes("AMT7005"), lAmt.cods.length ? `veio: ${lAmt.cods.join(", ")}` : lAmt.vazio);
+      const lAmtD = await lista(D, "#/busca?q=" + encodeURIComponent("AMORTECEDOR GOL 2007 KYB 441126"));
+      conta('"AMORTECEDOR GOL 2007 KYB 441126" → AMT7005 com todas as palavras', lAmtD.cods[0] === "AMT7005" && !lAmtD.proximos, `1º = ${lAmtD.cods[0] || "nada"} (${lAmtD.total})${lAmtD.proximos ? '; com o aviso "mais próximos"' : "; todas as palavras"}`);
 
       // 3. os outros casos da BCE3001
       for (const [k, dentro, cod = ALVO] of [["ka2015", false], ["strada2020", true], ["escort2000", true], ["onix2021", true, "TER5593103"]]) {
@@ -373,14 +445,14 @@ async function main() {
       // 6. busca por código e por referência
       for (const [q, esp] of BUSCAS_COD) {
         const lD = await lista(D, "#/busca?q=" + encodeURIComponent(q));
-        let ok = lD.cods[0] === esp, txt = `1º = ${lD.cods[0] || "nada"} (${lD.total})`;
+        let ok = esp === null || lD.cods[0] === esp, txt = `1º = ${lD.cods[0] || "nada"} (${lD.total})`;
         if (A) {
           const lA = await lista(A, "#/busca?q=" + encodeURIComponent(q));
           const igual = lA.cods.join() === lD.cods.join();
           ok = ok && igual;
           txt += igual ? "; igual à de antes" : `; DIFERENTE da de antes (${lA.cods.slice(0, 5).join(", ")}…)`;
         }
-        conta(`busca "${q}" → ${esp}`, ok, txt);
+        conta(`busca "${q}"${esp ? " → " + esp : " igual à de antes"}`, A || esp ? ok : null, A || esp ? txt : `sem --antes: ${txt}`);
       }
 
       // 7. sem ano: igual à de antes; e, com --antes, o que saiu de Polo 2026 / Gol 2010 / Strada 2020 não tem a linha
@@ -416,7 +488,7 @@ async function main() {
       }
       const fmtC = (x) => `${x.c} ${x.vm} ${x.vmo} ${x.va} («${x.trecho}»)`;
       conta(`perdas: ${casos.length} casos (marca, modelo, ano do texto) em ${amostra.length} produtos`, !perdidos.length,
-        perdidos.length ? `${perdidos.length} perdido(s): ${perdidos.slice(0, 15).map(fmtC).join("; ")}` : `0 perdido${casos.some((x) => x.c === "TER5593103" && x.vmo === "Onix") ? " (TER5593103 Onix incluída)" : ""}`);
+        perdidos.length ? `${perdidos.length} perdido(s): ${perdidos.slice(0, 15).map(fmtC).join("; ")}` : `0 perdido (${casos.filter((x) => x.barra).length} casos "Modelo1 / Modelo2 ano")${casos.some((x) => x.c === "TER5593103" && x.vmo === "Onix") ? " (TER5593103 Onix incluída)" : ""}`);
       if (jaAntes.length) conta("perdas: casos que já não apareciam antes", null, `${jaAntes.length}: ${jaAntes.slice(0, 5).map(fmtC).join("; ")}`);
       const montadoras = new Set(comVe.flatMap((p) => p.ve.map((v) => semSinal(v[0]))));
       const fora = [];
