@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0611** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0612** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -406,19 +406,21 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0600 | — | código | servicos/login/estoque.mjs:261-277 (`baixar`) × server.mjs:317-331 (`lerCorpo`) | leitura em pedaços com limite de tamanho nos 2 | T-0034 | integracao-placas | MANTIDO (`manter?`: stream web do `fetch` × `IncomingMessage`; o caso do RD-0334) |
 | RD-0601 | baixa | teste | testes/estoque-t0034.mjs, passo 7c (no 83814e6) | o teste exige a frase "As fotos são ilustrativas…" no início e na Criar usuários, que o RD-0598 manda tirar (fica só a conferência do rodapé do /estoque) | T-0034 | testes | CORRIGIDO (f6a0c26) |
 | RD-0602 | baixa | código (teste) | servicos/login/login.test.mjs:9 (no 332aec3) | `import zlib` sem uso depois do `xlsx-ficticio.mjs` (sai) | T-0034 | integracao-placas | CORRIGIDO (fd76490) |
-| RD-0603 | baixa | doc | servicos/login/LEIA.md:57 × :62; :58 × :65 | "todo dia às 06:00" na Carga e na Recarga diária; a lista de causas do "Falhou" da carga copiada no da recarga | T-0036 | integracao-placas | ABERTO |
-| RD-0604 | baixa | doc | servicos/login/LEIA.md:61 × :106 | as linhas de log do estoque nas 2 partes (a nova entrou nas 2; na :106, entre as "de partida") | T-0036 | integracao-placas | ABERTO |
-| RD-0605 | baixa | doc | servicos/login/LEIA.md:70 × :93 | 2 itens "Testes (`login.test.mjs`…)" na mesma seção Aba Estoque (funde na :93) | T-0036 | integracao-placas | ABERTO |
-| RD-0606 | baixa | código (teste) | servicos/login/login.test.mjs:11 × :13 | 2 `import` do mesmo `./estoque.mjs` (vira 1) | T-0036 | integracao-placas | ABERTO |
-| RD-0607 | baixa | código | servicos/login/recarga.mjs:8-10, :13, :27 | `export` sem quem importe (`HORA_RECARGA`, `FUSO_MANAUS_H`, `RETENTAR_MS`) e parâmetros `hora`, `fusoH`, `retentarMs` sem chamador (a regra fica só nas constantes) | T-0036 | integracao-placas | ABERTO |
-| RD-0608 | baixa | teste | servicos/login/login.test.mjs:1340-1343 × :1344-1350 | o `hasRef()` no processo repete o que o processo filho já prova (sai o `hasRef`) | T-0036 | integracao-placas | ABERTO |
-| RD-0609 | baixa | código (comentário) | servicos/login/server.mjs:433 × :436 | "baixa a fonte uma vez, no início" contradiz a recarga diária (não segura) | T-0036 | integracao-placas | ABERTO (não segura; pode ir junto) |
+| RD-0603 | baixa | doc | servicos/login/LEIA.md:57 × :62; :58 × :65 | "todo dia às 06:00" na Carga e na Recarga diária; a lista de causas do "Falhou" da carga copiada no da recarga | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
+| RD-0604 | baixa | doc | servicos/login/LEIA.md:61 × :106 | as linhas de log do estoque nas 2 partes (a nova entrou nas 2; na :106, entre as "de partida") | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
+| RD-0605 | baixa | doc | servicos/login/LEIA.md:70 × :93 | 2 itens "Testes (`login.test.mjs`…)" na mesma seção Aba Estoque (funde na :93) | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
+| RD-0606 | baixa | código (teste) | servicos/login/login.test.mjs:11 × :13 | 2 `import` do mesmo `./estoque.mjs` (vira 1) | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
+| RD-0607 | baixa | código | servicos/login/recarga.mjs:8-10, :13, :27 | `export` sem quem importe (`HORA_RECARGA`, `FUSO_MANAUS_H`, `RETENTAR_MS`) e parâmetros `hora`, `fusoH`, `retentarMs` sem chamador (a regra fica só nas constantes) | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
+| RD-0608 | baixa | teste | servicos/login/login.test.mjs:1340-1343 × :1344-1350 | o `hasRef()` no processo repete o que o processo filho já prova (sai o `hasRef`) | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
+| RD-0609 | baixa | código (comentário) | servicos/login/server.mjs:433 × :436 | "baixa a fonte uma vez, no início" contradiz a recarga diária (não segura) | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
 | RD-0610 | — | teste | servicos/login/login.test.mjs:1305-1337 × :1191-1229 e :1231-1262 | o teste "recarga no serviço" repete o 22 h, o reagendamento e o 404 | T-0036 | integracao-placas | MANTIDO (`manter?`: único que prova a ligação no `server.mjs`, a `/api/estoque` e o log sem a fonte) |
+| RD-0611 | baixa | doc | servicos/login/LEIA.md:68 × :60 | o item Memória da recarga repete a medida da carga da partida (167/165 MB × "pico de ~150 a 190 MB" da :60); fica só o da recarga (257 MB de pico, ~230 MB depois) | T-0036 | integracao-placas | ABERTO |
 
 ## Notas
 
 ### T-0036, recarga diária do estoque, 24/11/2026 (antes do PR)
 - RD-0603 ao RD-0610: branch `integracao-placas/T-0036-recarga`, head `6e4a1ed`. Relatório: `T-0036.md`. VOLTA PARA AJUSTE: seguram o RD-0603 ao RD-0608 (todos baixa, do `integracao-placas`); não segura o RD-0609 (só comentário); MANTIDO: RD-0610. Fila: nenhum.
+- Reteste no head `e6551de`: RD-0603 ao RD-0609 corrigidos. Novo: RD-0611 (baixa, doc, LEIA do estoque). VOLTA PARA AJUSTE até o RD-0611.
 
 ### T-0034, aba Estoque, 24/11/2026 (antes dos PRs)
 - RD-0585 ao RD-0602: os branches `integracao-placas/T-0034-estoque` (`12bf90b`), `web-site/T-0034-estoque` (`06c9596`) e `testes/T-0034-estoque` (`dbac2c0`), primeira rodada. Relatório: `T-0034.md`. LIBERADO COM AJUSTES: seguram o RD-0585 ao RD-0596; não segura o RD-0597 (só comentário); fila: RD-0598; MANTIDOS: RD-0599 e RD-0600.
