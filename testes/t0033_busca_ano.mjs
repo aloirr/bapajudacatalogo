@@ -20,7 +20,11 @@
         que o fez entrar é procurada na tabela (e, com --antes, o que saiu não tem essa linha).
      b) nenhum "Outros veículos e detalhes" na janela da BCE3001 nem em 30 produtos que tinham o bloco (amostra fixa,
         tirada do origin/main 75fdfd8 com a base v28); a linha "Kadet 1996+" na tabela da BCE3001.
-     Contagens medidas (Polo 2026 = 21, Gol 2010 = 43, Strada 2020 = 60): valem só para o produtos.json em que foram
+     c) a tabela (web-site 346ce3f): não inventa modelo nem marca. BCE3001: sem Modelo "Sedan", "Escort ... Sedan 1997+" e
+        "Versailes" como linha; CXD13022: sem Modelo "Pick Up", "147 | Pick Up | 1985–1988"; INT16530: "Citroën Saxo" e
+        "Fiat Ducato 2005+" ("após 2005"); em toda a amostra: Versão sem parêntese sem par, Marca sem "/" e sem
+        "General Motors" (é Chevrolet). TER5593103 ("GENERAL MOTORS - ... Onix 01/2020 - 12/2023") em Chevrolet Onix 2021.
+     Contagens medidas (Polo 2026 = 24, Gol 2010 = 45, Strada 2020 = 63; antes do "após": 21, 43 e 60): valem só para o produtos.json em que foram
      medidas (impressão digital abaixo). Com outro JSON, viram aviso para remedir, e as conferências linha a linha
      continuam valendo.
      E: 390 px sem rolar de lado, console sem erro, busca sem ano e por código/referência iguais às de antes. */
@@ -48,13 +52,14 @@ const ALVO = "BCE3001";
 const VEIC = {
   polo2026: { vm: "VOLKSWAGEN", vmo: "POLO", va: 2026 },
   ka2015: { vm: "FORD", vmo: "KA", va: 2015 },
+  onix2021: { vm: "CHEVROLET", vmo: "ONIX", va: 2021 },
   strada2020: { vm: "FIAT", vmo: "STRADA", va: 2020 },
   escort2000: { vm: "FORD", vmo: "ESCORT", va: 2000 },
   gol2010: { vm: "VOLKSWAGEN", vmo: "GOL", va: 2010 },
   polo: { vm: "VOLKSWAGEN", vmo: "POLO" },
 };
 // medidas pelo web-site e conferidas pelo testes no JSON abaixo
-const CONTAGENS = { polo2026: 21, gol2010: 43, strada2020: 60 };
+const CONTAGENS = { polo2026: 24, gol2010: 45, strada2020: 63 }; // web-site 346ce3f ("após AAAA" conta como AAAA+)
 const DIGITAL_MEDIDA = "4419 produtos / 12158 veículos"; // total e soma do "ve" do JSON das medidas (base v28)
 // 30 dos 3.089 produtos que mostravam "Outros veículos e detalhes" no origin/main 75fdfd8 (um a cada 103, na ordem do JSON)
 const AMOSTRA_BLOCO = ["CXD13062", "CXD13078", "TER555185", "TER5599208", "ROL6304-2Z", "AMT7003", "AMT7151", "AMT7320", "AMT7477",
@@ -62,6 +67,19 @@ const AMOSTRA_BLOCO = ["CXD13062", "CXD13078", "TER555185", "TER5599208", "ROL63
   "JUH70175", "JUH70281", "CUB60101", "CUB60206", "PIV5082", "POL1674", "PAF1346", "INT16512", "ABS4541", "BAN14548DP"];
 // código e referência: o 1º resultado
 const BUSCAS_COD = [["CXD13062", "CXD13062"], ["CXD 13062", "CXD13062"], ["CXD-13062", "CXD13062"], ["TRW 16900255S", "CXD13062"], ["GI3103", ALVO], ["F000.TE0.103", ALVO]];
+// U4 da UX: detalhe longo na Versão ("Roda Dir/Esq", "(Inclusive Adventure)") e "s/ ABS"; janelas só do depois em 1366
+const U4 = ["JUH70013", "ROL0015E"];
+const JANELAS_1366 = ["CXD13022", "INT16530"];
+// c) linhas que a tabela tem de ter: [código, descrição, (linha) => bool]; e as que não pode ter
+const TEM = [
+  [ALVO, 'Ford Escort, Versão Sedan, 1997+', (l) => norm(l[0]) === "FORD" && norm(l[1]) === "ESCORT" && /\bSEDAN\b/.test(norm(l[3])) && /^1997\+/.test(l[5])],
+  [ALVO, 'Ford Versailes (linha própria)', (l) => norm(l[0]) === "FORD" && norm(l[1]) === "VERSAILES"],
+  ["CXD13022", 'Fiat 147, Versão Pick Up, 1985–1988', (l) => norm(l[0]) === "FIAT" && norm(l[1]) === "147" && /^PICK[- ]?UP$/.test(norm(l[3])) && l[5] === "1985–1988"],
+  ["INT16530", 'Citroën Saxo (linha própria)', (l) => norm(l[0]) === "CITROEN" && norm(l[1]) === "SAXO"],
+  ["INT16530", 'Fiat Ducato 2005+', (l) => norm(l[0]) === "FIAT" && norm(l[1]) === "DUCATO" && /^2005\+/.test(l[5])],
+];
+const NAO_TEM = [[ALVO, 'Modelo "Sedan"', (l) => norm(l[1]) === "SEDAN"], ["CXD13022", 'Modelo "Pick Up"', (l) => /^PICK[- ]?UP$/.test(norm(l[1]))]];
+const parOk = (s) => { let n = 0; for (const ch of s) { if (ch === "(") n++; else if (ch === ")" && --n < 0) return false; } return n === 0; };
 const LARGURAS = [[1366, 768], [390, 844]];
 
 const hashVei = (v, q) => "#/busca?" + new URLSearchParams({ ...(q ? { q } : {}), vm: v.vm, vmo: v.vmo, ...(v.va ? { va: String(v.va) } : {}) });
@@ -238,6 +256,14 @@ async function main() {
         prints.push(await print(A, `antes-${w}-janela-${ALVO}`, { janela: true }));
       }
 
+      // U4 da UX e as janelas da CXD13022 e da INT16530
+      for (const c of U4) {
+        await abrirJanela(D, c); await D.semRolar("janela " + c);
+        prints.push(await print(D, `depois-${w}-janela-${c}`, { janela: true }));
+        if (A) { await abrirJanela(A, c); prints.push(await print(A, `antes-${w}-janela-${c}`, { janela: true })); }
+      }
+      if (w === 1366) for (const c of JANELAS_1366) { await abrirJanela(D, c); prints.push(await print(D, `depois-${w}-janela-${c}`, { janela: true })); }
+
       // 2. Polo 2026 e BCE3001 com Polo 2026
       const lpD = await lista(D, hashVei(VEIC.polo2026));
       await D.semRolar("Polo 2026");
@@ -258,10 +284,10 @@ async function main() {
       if (w !== 1366) { await D.fechar(); if (A) await A.fechar(); continue; }
 
       // 3. os outros casos da BCE3001
-      for (const [k, dentro] of [["ka2015", false], ["strada2020", true], ["escort2000", true]]) {
-        const l = await lista(D, hashVei(VEIC[k], ALVO));
+      for (const [k, dentro, cod = ALVO] of [["ka2015", false], ["strada2020", true], ["escort2000", true], ["onix2021", true, "TER5593103"]]) {
+        const l = await lista(D, hashVei(VEIC[k], cod));
         const v = VEIC[k];
-        conta(`${ALVO} ${dentro ? "dentro de" : "fora de"} ${v.vmo} ${v.va}`, l.cods.includes(ALVO) === dentro, l.cods.length ? `veio: ${l.cods.join(", ")}` : l.vazio);
+        conta(`${cod} ${dentro ? "dentro de" : "fora de"} ${v.vmo} ${v.va}`, l.cods.includes(cod) === dentro, l.cods.length ? `veio: ${l.cods.join(", ")}` : l.vazio);
       }
 
       // 4. contagens e, produto a produto, a linha que o fez entrar
@@ -293,6 +319,20 @@ async function main() {
       }
       conta(`nenhum "Outros veículos e detalhes" (amostra de ${AMOSTRA_BLOCO.length})`, !comBloco.length, comBloco.length ? `com o bloco: ${comBloco.join(", ")}` : `${AMOSTRA_BLOCO.length} páginas sem o bloco`);
 
+      // 5c. c) a tabela não inventa modelo nem marca; parêntese com par
+      const tabs = new Map();
+      for (const c of [...new Set([ALVO, ...JANELAS_1366, ...U4, "TER5593103", ...AMOSTRA_BLOCO])]) {
+        await D.ir("#/produto/" + encodeURIComponent(c));
+        tabs.set(c, (await linhasTabela(D.page, "#app")) || []);
+      }
+      const fmtL = (l) => `${l.slice(0, 4).join(" | ")} | ${l[5]}`;
+      for (const [c, txt, f] of TEM) { const ls = tabs.get(c).filter(f); conta(`${c}: linha ${txt}`, ls.length > 0, ls.length ? fmtL(ls[0]) : `não achada; linhas: ${tabs.get(c).map((l) => l[1] + " " + l[3]).join("; ")}`); }
+      for (const [c, txt, f] of NAO_TEM) { const ls = tabs.get(c).filter(f); conta(`${c}: nenhum ${txt}`, !ls.length, ls.length ? ls.map(fmtL).join("; ") : "nenhum"); }
+      const regra = (nome, f) => { const ruins = [...tabs].flatMap(([c, ls]) => ls.filter(f).map((l) => `${c}: ${fmtL(l)}`)); conta(`${nome} (${tabs.size} produtos)`, !ruins.length, ruins.length ? `${ruins.length} linha(s): ${ruins.slice(0, 4).join("; ")}` : "nenhuma"); };
+      regra("nenhuma Versão com parêntese sem par", (l) => !parOk(l[3]) || !parOk(l[1]));
+      regra('nenhuma Marca com "/" (marca inventada)', (l) => l[0].includes("/"));
+      regra('nenhuma Marca "General Motors" (é Chevrolet)', (l) => norm(l[0]) === "GENERAL MOTORS");
+
       // 6. busca por código e por referência
       for (const [q, esp] of BUSCAS_COD) {
         const lD = await lista(D, "#/busca?q=" + encodeURIComponent(q));
@@ -320,8 +360,9 @@ async function main() {
             const ls = await linhasTabela(D.page, "#app");
             if (ls && linhaServe(ls, v).length) indevidos.push(c);
           }
-          conta(`${v.vmo} ${v.va}: o que saiu não tem a linha com o ano`, !indevidos.length && !entraram.length,
-            `antes ${lA.cods.length}, depois ${listas[k].cods.length}; saíram ${sairam.length}${entraram.length ? `; ENTRARAM ${entraram.join(", ")}` : ""}${indevidos.length ? `; saíram COM a linha: ${indevidos.join(", ")}` : ""}`);
+          // o que entrou (ex.: "após 2005") já foi conferido na tabela no item 4
+          conta(`${v.vmo} ${v.va}: o que saiu não tem a linha com o ano`, !indevidos.length,
+            `antes ${lA.cods.length}, depois ${listas[k].cods.length}; saíram ${sairam.length}${entraram.length ? `; entraram ${entraram.join(", ")}` : ""}${indevidos.length ? `; saíram COM a linha: ${indevidos.join(", ")}` : ""}`);
         }
       } else conta("Polo sem ano igual à de antes", null, `sem --antes: não conferido (depois ${sD.total})`);
       await D.fechar(); if (A) await A.fechar();
