@@ -286,8 +286,41 @@
       rxApl: null, // com os derivados, montado na 1ª vez que precisa
     };
   }
+  // T-0033 3b (R-20261125-095112-po): na busca digitada com um modelo de algum "ve" e um ano (4 dígitos de 1950 ao
+  // ano atual + 1), vale a regra do ano da busca por veículo (serveNoAno: a tabela da aplicação ou a rede de
+  // segurança). O modelo é a palavra (ou as até 3 palavras vizinhas juntas: "palio weekend") igual a um modelo do
+  // "ve", sem os só de número ("2008", "147": viram ano ou código); em mais de uma montadora ("ka"), vale qualquer uma
+  // [SUPOSIÇÃO]. Sem modelo ou sem ano, a busca fica como antes.
+  let MODELOS_TXT = null; // modelo sem espaço e hífen → [[marca, modelo], ...] (sem acento e em maiúsculas)
+  function modelosDigitados(ps) {
+    if (!MODELOS_TXT) {
+      MODELOS_TXT = new Map();
+      for (const p of BASE.produtos) for (const [f, m] of p.ve || []) {
+        const c = norm(m).replace(/[\s-]/g, "");
+        if (c.length < 2 || /^\d+$/.test(c)) continue;
+        if (!MODELOS_TXT.has(c)) MODELOS_TXT.set(c, []);
+        if (!MODELOS_TXT.get(c).some(([a, b]) => a === norm(f) && b === norm(m))) MODELOS_TXT.get(c).push([norm(f), norm(m)]);
+      }
+    }
+    const ws = ps.map((w) => w.replace(/-/g, "")), out = [];
+    for (let i = 0; i < ws.length; i++) for (let n = Math.min(3, ws.length - i); n >= 1; n--) {
+      const c = ws.slice(i, i + n).join("");
+      if (MODELOS_TXT.has(c)) { out.push(...MODELOS_TXT.get(c)); i += n - 1; break; }
+    }
+    return out;
+  }
+  const ANO_DIGITADO_MAX = new Date().getFullYear() + 1;
+  function veiculoDigitado(ps) {
+    const anos = ps.filter((w) => /^\d{4}$/.test(w) && +w >= ANO_MIN && +w <= ANO_DIGITADO_MAX).map(Number);
+    const mods = anos.length ? modelosDigitados(ps.filter((w) => !anos.includes(+w))) : [];
+    return mods.length ? { mods, ano: anos[0] } : null;
+  }
+  // o produto serve no modelo e ano digitados: com "ve", a regra da busca por veículo; sem "ve", o modelo escrito na
+  // aplicação e o ano dela batendo (sem o modelo ou sem ano, não serve)
+  const serveNoDigitado = (e, vd) => (veDe(e) ? vd.mods.some(([vm, vmo]) => serveNoAno(e, { vm, vmo, va: vd.ano }))
+    : vd.mods.some(([, vmo]) => temPalavra(e.apl, vmo)) && casaAno(e, vd.ano) === 1);
   // nota da peça no produto, ou 0; "parcial" = só casou como pedaço de código
-  function casaPeca(e, k, livreAno) {
+  function casaPeca(e, k, livreAno, anoDigitado) {
     let nota = 0, parcial = false;
     if (k.pc.length >= 2 && e.codsTxt.includes(k.pc)) { // codsTxt: teste rápido (todos os códigos juntos)
       if (e.cods[0] === k.pc) nota = 1000;
@@ -300,6 +333,7 @@
     }
     let txt = 0;
     if (k.limpo === MARCA_PRODUTO) txt = 30;
+    else if (k.ano && anoDigitado != null && k.ano === anoDigitado.ano) txt = anoDigitado.ok ? 40 : 0; // T-0033 3b
     else if (k.ano) {
       const r = casaAno(e, k.ano);
       // a aplicação não diz o ano, mas outra palavra casou com ela ("gol 2018" e "Gol G1 a G4 todos"): entra no fim
@@ -331,6 +365,7 @@
     // cada palavra digitada é uma palavra (B1: nada é juntado antes; as peças de palavras vizinhas, abaixo, já
     // cobrem "33 000" e "TRW 16900255S", e a ordem das palavras não muda a lista)
     const toks = ps.map((t) => ({ t, w: 1 }));
+    const vd = veiculoDigitado(ps); // T-0033 3b: modelo e ano digitados
     const n = toks.length;
     const palavras = toks.map((x) => x.t);
     // Peça = palavras vizinhas juntas. Com mais de 6 palavras, só sozinhas (como na T-0008). Letra solta (1 caractere)
@@ -364,6 +399,7 @@
     const res = pecas.map((lin) => new Array(lin.length));
     function testar(e) {
       let algum = false, aplOutra = false;
+      const anoDigitado = vd ? { ano: vd.ano, ok: serveNoDigitado(e, vd) } : null;
       for (let x = 0; x < agulhas.length; x++) {
         tem[x] = agulhas[x] && e.tudo.includes(agulhas[x]) ? 1 : 0;
         if (tem[x]) algum = true;
@@ -372,7 +408,7 @@
       for (let i = 0; i < n; i++) for (let x = 0; x < pecas[i].length; x++) {
         const q = pecas[i][x];
         let r = null;
-        if (!(q.curta && !soltaVale) && (tem[q.ag] || q.livre || (q.k.pc.length >= 2 && e.codsTxt.includes(q.k.pc)))) r = casaPeca(e, q.k, aplOutra);
+        if (!(q.curta && !soltaVale) && (tem[q.ag] || q.livre || (q.k.pc.length >= 2 && e.codsTxt.includes(q.k.pc)))) r = casaPeca(e, q.k, aplOutra, anoDigitado);
         res[i][x] = r;
         if (r) algum = true;
       }
@@ -381,6 +417,8 @@
       // quando é a única palavra: em "gol 2018", a referência AXIOS 2018 não passa na frente.
       let exato = false;
       for (let i = 0; i < n; i++) for (let x = 0; x < pecas[i].length; x++) if (res[i][x] && res[i][x].nota >= 800 && (n === 1 || !pecas[i][x].k.ano)) exato = true;
+      // T-0033 3b: com modelo e ano digitados, o produto sem o ano batendo nesse modelo não entra (o código exato, sim)
+      if (anoDigitado && !anoDigitado.ok && !exato) return { n: 0, nota: 0, bits: 0, exato: false };
       // melhor caminho: mais palavras que casaram, depois a nota. Dois pedaços de código vizinhos não valem
       // ("16900 255S" é um código digitado com espaço).
       bn.fill(-1); bn[0] = 0; bnota[0] = 0; bbits[0] = 0;
