@@ -80,7 +80,7 @@
   // "Filtros (N)" no celular e o "Limpar filtros"
   function ativos() {
     const n = SELECTS.filter((s) => s.value).length;
-    nFiltros.textContent = n ? `(${n})` : ""; // o espaço é o gap do .bt
+    nFiltros.textContent = n ? ` (${n})` : ""; // o espaço fica no nome acessível ("Filtros (2)"); na tela, o gap do .bt
     limpar.hidden = !n;
   }
   function posicao(p) {
@@ -97,7 +97,7 @@
   function vazio() {
     const termo = busca.value.trim();
     const onde = sel.value ? sel.options[sel.selectedIndex].dataset.nome : "";
-    const filtros = [cat, sis, fam].some((s) => s.value) ? " com os filtros escolhidos" : "";
+    const filtros = CASCATA.some(([s]) => s.value) ? " com os filtros escolhidos" : "";
     const txt = termo ? `Nada encontrado para “${termo}”${onde ? ` em ${onde}` : ""}${filtros}.`
       : onde ? `Nada encontrado em ${onde}${filtros}.` : `Nada encontrado${filtros}.`;
     lista.innerHTML = `<p class="est-nada">${esc(txt)}</p>`;
@@ -165,12 +165,12 @@
     recarregar();
     (btFiltros.offsetParent ? btFiltros : sel).focus(); // o botão some: o foco vai para o "Filtros" (celular) ou a Filial
   });
-  btFiltros.insertAdjacentHTML("beforeend", seta("est-seta"));
+  btFiltros.insertAdjacentHTML("beforeend", seta());
   btFiltros.addEventListener("click", () => {
     const aberto = barra.classList.toggle("est-aberta");
     btFiltros.setAttribute("aria-expanded", String(aberto));
   });
-  com.addEventListener("change", () => { clearTimeout(espera); carregar(false); });
+  com.addEventListener("change", recarregar);
   maisBt.addEventListener("click", () => carregar(true));
   carregar(false);
 })();

@@ -67,7 +67,7 @@
   const anoMaisTxt = (s, fim = "+") => String(s == null ? "" : s) // o title e o título da aba ("+"); o alt (EM_DIANTE)
     .replace(RX_ANO_ABERTO, (x, ano, i, t) => ano + fim + espacoDepois(t, i + x.length));
   const MINUSC = new Set(["e", "de", "da", "do", "das", "dos", "com", "sem", "para", "p/", "c/", "s/"]);
-  const titulo = (s) => bonito(s); // um nome sem caixa alta só (bonito, do comum.js)
+  const titulo = (s) => bonito(s);
   const fmt = (n) => Number(n).toLocaleString("pt-BR");
   const toast = (msg) => window.BAPConta.toast(msg); // o aviso do site todo (conta.js, T-0022)
 
