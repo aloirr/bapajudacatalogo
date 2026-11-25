@@ -27,6 +27,11 @@
      Contagens medidas (Polo 2026 = 24, Gol 2010 = 45, Strada 2020 = 63; antes do "após": 21, 43 e 60): valem só para o produtos.json em que foram
      medidas (impressão digital abaixo). Com outro JSON, viram aviso para remedir, e as conferências linha a linha
      continuam valendo.
+     d) perdas (escrito pelo testes, sem o código do site): numa amostra fixa de 500 produtos com "ve" (um a cada N, na
+        ordem do JSON, e a TER5593103), para cada (marca, modelo) do "ve" em que o texto da aplicação dá ano ao modelo
+        (o 1º ano entre 1950 e 2029 depois do nome do modelo com 2 ou mais letras, antes do próximo modelo do "ve" ou do ";"), o produto tem
+        de aparecer na busca q=<código> com essa marca, modelo e ano. Com --antes, o caso que já não aparecia antes vira
+        aviso (não é perda da T-0033). E toda Marca da tabela, em todos os produtos com "ve", é uma montadora dos "ve".
      E: 390 px sem rolar de lado, console sem erro, busca sem ano e por código/referência iguais às de antes. */
 
 import { createRequire } from "node:module";
@@ -69,7 +74,7 @@ const AMOSTRA_BLOCO = ["CXD13062", "CXD13078", "TER555185", "TER5599208", "ROL63
 const BUSCAS_COD = [["CXD13062", "CXD13062"], ["CXD 13062", "CXD13062"], ["CXD-13062", "CXD13062"], ["TRW 16900255S", "CXD13062"], ["GI3103", ALVO], ["F000.TE0.103", ALVO]];
 // U4 da UX: detalhe longo na Versão ("Roda Dir/Esq", "(Inclusive Adventure)") e "s/ ABS"; janelas só do depois em 1366
 const U4 = ["JUH70013", "ROL0015E"];
-const JANELAS_1366 = ["CXD13022", "INT16530"];
+const JANELAS_1366 = ["CXD13022", "INT16530", "TER5593103"];
 // c) linhas que a tabela tem de ter: [código, descrição, (linha) => bool]; e as que não pode ter
 const TEM = [
   [ALVO, 'Ford Escort, Versão Sedan, 1997+', (l) => norm(l[0]) === "FORD" && norm(l[1]) === "ESCORT" && /\bSEDAN\b/.test(norm(l[3])) && /^1997\+/.test(l[5])],
@@ -80,6 +85,34 @@ const TEM = [
 ];
 const NAO_TEM = [[ALVO, 'Modelo "Sedan"', (l) => norm(l[1]) === "SEDAN"], ["CXD13022", 'Modelo "Pick Up"', (l) => /^PICK[- ]?UP$/.test(norm(l[1]))]];
 const parOk = (s) => { let n = 0; for (const ch of s) { if (ch === "(") n++; else if (ch === ")" && --n < 0) return false; } return n === 0; };
+// d) perdas: os casos (código, marca, modelo, ano) tirados do texto da aplicação
+const N_PERDAS = 500;
+const semSinal = (s) => norm(s).replace(/[\s-]/g, "");
+const rxModeloTxt = (m) => new RegExp("(?<![A-Z0-9])" + [...semSinal(m)].map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s-]?") + "(?![A-Z0-9])", "g");
+const RX_ANO_TXT = /(?<!\d)(19[5-9]\d|20[0-2]\d)(?!\d)/;
+function casosDoTexto(p) {
+  // o modelo de 1 letra ("L" da Scania) casa com o "L" de litro: fica de fora
+  const txt = norm(p.a || ""), mods = [...new Set(p.ve.map((v) => v[1]))].filter((m) => semSinal(m).length >= 2);
+  // todas as ocorrências de todos os modelos (o mais longo vence no mesmo começo: "Palio Weekend" e não "Palio")
+  const ocs = [];
+  for (const m of mods) for (const r of txt.matchAll(rxModeloTxt(m))) ocs.push({ m, ini: r.index, fim: r.index + r[0].length });
+  ocs.sort((a, b) => a.ini - b.ini || b.fim - a.fim);
+  const boas = ocs.filter((o, i) => !ocs.some((x, j) => j !== i && x.ini <= o.ini && x.fim >= o.fim && x.fim - x.ini > o.fim - o.ini));
+  const casos = new Map();
+  for (const [i, o] of boas.entries()) {
+    const prox = boas.slice(i + 1).find((x) => x.ini >= o.fim);
+    let pedaco = txt.slice(o.fim, prox ? prox.ini : txt.length);
+    pedaco = pedaco.split(";")[0];
+    const y = RX_ANO_TXT.exec(pedaco);
+    if (!y) continue;
+    for (const [vm, vmo] of p.ve.filter((v) => v[1] === o.m).map((v) => [v[0], v[1]])) {
+      const k = vm + "|" + vmo;
+      if (!casos.has(k)) casos.set(k, { c: p.c, vm, vmo, va: +y[1], trecho: (o.m + pedaco).slice(0, 60).trim() });
+    }
+  }
+  return [...casos.values()];
+}
+
 const LARGURAS = [[1366, 768], [390, 844]];
 
 const hashVei = (v, q) => "#/busca?" + new URLSearchParams({ ...(q ? { q } : {}), vm: v.vm, vmo: v.vmo, ...(v.va ? { va: String(v.va) } : {}) });
@@ -262,6 +295,10 @@ async function main() {
         prints.push(await print(D, `depois-${w}-janela-${c}`, { janela: true }));
         if (A) { await abrirJanela(A, c); prints.push(await print(A, `antes-${w}-janela-${c}`, { janela: true })); }
       }
+      const lOnix = await lista(D, hashVei(VEIC.onix2021, "TER5593103"));
+      prints.push(await print(D, `depois-${w}-busca-TER5593103-onix-2021`));
+      if (A) { await lista(A, hashVei(VEIC.onix2021, "TER5593103")); prints.push(await print(A, `antes-${w}-busca-TER5593103-onix-2021`)); }
+      conta(`TER5593103 dentro de ONIX 2021 (${w})`, lOnix.cods.includes("TER5593103"), lOnix.cods.length ? `veio: ${lOnix.cods.join(", ")}` : lOnix.vazio);
       if (w === 1366) for (const c of JANELAS_1366) { await abrirJanela(D, c); prints.push(await print(D, `depois-${w}-janela-${c}`, { janela: true })); }
 
       // 2. Polo 2026 e BCE3001 com Polo 2026
@@ -365,6 +402,29 @@ async function main() {
             `antes ${lA.cods.length}, depois ${listas[k].cods.length}; saíram ${sairam.length}${entraram.length ? `; entraram ${entraram.join(", ")}` : ""}${indevidos.length ? `; saíram COM a linha: ${indevidos.join(", ")}` : ""}`);
         }
       } else conta("Polo sem ano igual à de antes", null, `sem --antes: não conferido (depois ${sD.total})`);
+
+      // 8. d) perdas e as Marcas da tabela
+      const comVe = prods.filter((p) => p.ve && p.ve.length);
+      const passo = Math.max(1, Math.floor(comVe.length / N_PERDAS));
+      const amostra = [...new Set([...comVe.filter((_, i) => i % passo === 0).slice(0, N_PERDAS), comVe.find((p) => p.c === "TER5593103")].filter(Boolean))];
+      const casos = amostra.flatMap(casosDoTexto);
+      const achou = async (S, x) => { const l = await lista(S, hashVei(x, x.c)); return l.cods.includes(x.c); };
+      const perdidos = [], jaAntes = [];
+      for (const x of casos) {
+        if (await achou(D, x)) continue;
+        if (A && !(await achou(A, x))) jaAntes.push(x); else perdidos.push(x);
+      }
+      const fmtC = (x) => `${x.c} ${x.vm} ${x.vmo} ${x.va} («${x.trecho}»)`;
+      conta(`perdas: ${casos.length} casos (marca, modelo, ano do texto) em ${amostra.length} produtos`, !perdidos.length,
+        perdidos.length ? `${perdidos.length} perdido(s): ${perdidos.slice(0, 15).map(fmtC).join("; ")}` : `0 perdido${casos.some((x) => x.c === "TER5593103" && x.vmo === "Onix") ? " (TER5593103 Onix incluída)" : ""}`);
+      if (jaAntes.length) conta("perdas: casos que já não apareciam antes", null, `${jaAntes.length}: ${jaAntes.slice(0, 5).map(fmtC).join("; ")}`);
+      const montadoras = new Set(comVe.flatMap((p) => p.ve.map((v) => semSinal(v[0]))));
+      const fora = [];
+      for (const p of comVe) {
+        await D.ir("#/produto/" + encodeURIComponent(p.c));
+        for (const l of (await linhasTabela(D.page, "#app")) || []) if (!montadoras.has(semSinal(l[0]))) fora.push(`${p.c}: ${l[0]} | ${l[1]}`);
+      }
+      conta(`toda Marca da tabela é montadora dos "ve" (${comVe.length} produtos)`, !fora.length, fora.length ? `${fora.length} linha(s): ${fora.slice(0, 6).join("; ")}` : `0 fora das ${montadoras.size} montadoras`);
       await D.fechar(); if (A) await A.fechar();
     }
   } finally { await browser.close(); }
