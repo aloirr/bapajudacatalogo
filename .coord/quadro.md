@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 23/11/2026 20:15 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 24/11/2026 21:10 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -41,7 +41,7 @@ Atualizado em 23/11/2026 20:15 (Manaus). Como usar: `.coord/README.md`. Uma linh
 ## Fila
 Main 7b4ccfd (#196).
 
-**PAUSA geral** a pedido do Alexandre (R-20261123-184932-po): nenhuma tarefa, ronda ou subagente até o PO chamar. Exceção: o PR #190, a trava do graphify (R-20261124-000759-po); depois do merge dele, as sessões são reiniciadas e a nova sessão do gerente continua deste ponto.
+**PAUSA geral** a pedido do Alexandre (R-20261123-184932-po): nenhuma tarefa, ronda ou subagente até o PO chamar. A T-0034 saiu da pausa pela decisão 5a (R-20261124-211906-alexandre) e está no ar (#194, #195, #196). Na volta, a próxima é a T-0033 (R-20261124-152047-po e R-20261124-152425-po), com simulação de tela antes.
 
 0. **T-0032, onda 2: PAUSADA** a pedido do Alexandre ("Após o termino da Onda 1, pause as atividades. quero economizar token"). Retomar só quando o PO chamar.
    - Branch catalogo-grafico/T-0032-onda2, head 7e393401168f73092538bc91c56ae26b48040068, sem PR e sem pareceres.
