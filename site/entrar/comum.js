@@ -27,5 +27,23 @@
     return { status: r.status, dados };
   }
 
-  window.BAP = { esc, expirou, api, LOGO_BAP };
+  // Exibição sem caixa alta ("Honda Civic", "Volkswagen Gol", "Mercedes-Benz Atego"); siglas ficam: VW, GM, BMW...,
+  // palavra com número (HB20, 16V, 208), pedaço curto com hífen (CR-V) e, na versão, as de 2 a 4 letras (LXS, HX, GLI).
+  // Só para mostrar: a busca e os filtros continuam com o texto da base. Do catálogo (app.js) e do Estoque (T-0035).
+  const SIGLAS = new Set(["VW", "GM", "BMW", "BYD", "JAC", "GWM", "MG", "DS", "RAM", "CAOA", "JCB", "DAF", "MAN", "AGCO"]);
+  const LIGA = new Set(["E", "DE", "DA", "DO", "DAS", "DOS", "COM", "SEM", "PARA"]); // "Amortecedores e Kits"
+  function bonito(txt, versao) {
+    return String(txt || "").toUpperCase().replace(/\s+/g, " ").trim().replace(/[A-ZÀ-Ý0-9.]+/g, (w, i, todo) => {
+      if (SIGLAS.has(w) || /\d/.test(w)) return w;
+      if (!versao && i > 0 && LIGA.has(w) && todo[i - 1] === " ") return w.toLowerCase();
+      if (versao && w.length <= 4) return w;
+      if (w.length <= 2 && (todo[i - 1] === "-" || todo[i + w.length] === "-")) return w;
+      return w.charAt(0) + w.slice(1).toLowerCase();
+    });
+  }
+
+  // a seta (chevron) de 18 px dos botões que abrem e fecham: a conta e o "Filtros" do Estoque (T-0035); o CSS gira 180°
+  const seta = (classe) => `<svg class="${classe}" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
+
+  window.BAP = { esc, expirou, api, LOGO_BAP, bonito, seta };
 })();

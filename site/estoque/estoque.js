@@ -5,11 +5,12 @@
    filiais:[{numero,nome}], opcoes:{categorias,sistemas,familias} }.
    T-0035: filtros Categoria, Sistema e Família (categoria=, sistema=, familia=), em cascata: as opções vêm na resposta,
    já limitadas pelo que está escolhido; um valor fora da cascata o servidor ignora (e a tela volta para "Todas").
+   O texto da opção vem sem caixa alta (bonito, o mesmo do catálogo); o value fica o da planilha, que vai ao servidor.
    No celular eles e a Filial ficam atrás do botão "Filtros (N)"; N conta os quatro. 50 linhas por vez, com o "Mostrar mais N" (N: o que falta, até 50).
    Celular: o cartão fechado mostra as colunas até a do estoque; as que vêm depois dela ficam no "+ Detalhes". */
 (function () {
   "use strict";
-  const { esc, api } = window.BAP; // o api leva o 401 ao login
+  const { esc, api, bonito, seta } = window.BAP; // o api leva o 401 ao login; bonito e seta: os mesmos do catálogo e da conta
   const F = window.BAPForm;
   const $ = (s) => document.querySelector(s);
   const LIMITE = 50;
@@ -70,7 +71,7 @@
       if (!vals) { s.value = ""; return; }
       const atual = s.value;
       s.length = 1; // fica o "Todas"
-      s.insertAdjacentHTML("beforeend", vals.map((v) => `<option value="${esc(v)}">${esc(v)}</option>`).join(""));
+      s.insertAdjacentHTML("beforeend", vals.map((v) => `<option value="${esc(v)}">${esc(bonito(v))}</option>`).join(""));
       s.value = vals.includes(atual) ? atual : "";
       s.disabled = !vals.length;
     });
@@ -164,6 +165,7 @@
     recarregar();
     (btFiltros.offsetParent ? btFiltros : sel).focus(); // o botão some: o foco vai para o "Filtros" (celular) ou a Filial
   });
+  btFiltros.insertAdjacentHTML("beforeend", seta("est-seta"));
   btFiltros.addEventListener("click", () => {
     const aberto = barra.classList.toggle("est-aberta");
     btFiltros.setAttribute("aria-expanded", String(aberto));

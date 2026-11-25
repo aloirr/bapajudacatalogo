@@ -38,12 +38,9 @@
 <div class="pg pg-larga">
   <div class="us-barra est-barra">
     <div class="campo est-q"><label for="est-busca">Buscar</label><input id="est-busca" type="search" placeholder="Código, fornecedor ou descrição" autocomplete="off"></div>
-    <label class="opcao est-com"><input id="est-com" type="checkbox">Somente produtos com estoque</label>
-    <!-- T-0035: no celular, Filial, Categoria, Sistema e Família ficam atrás do botão "Filtros (N)"; no computador, sempre à vista -->
-    <div class="est-acoes">
-      <button type="button" class="bt bt-claro est-bt-filtros" id="est-bt-filtros" aria-expanded="false" aria-controls="est-filtros">Filtros<span id="est-n-filtros"></span></button>
-      <button type="button" class="limpar-tudo est-limpar" id="est-limpar" hidden>Limpar filtros</button>
-    </div>
+    <!-- T-0035: no celular, Filial, Categoria, Sistema e Família ficam atrás do botão "Filtros (N)"; no computador, sempre à vista.
+         O HTML segue a ordem da tela (o Tab também): busca, "Filtros", os quatro filtros, a caixa e o "Limpar filtros" -->
+    <button type="button" class="bt bt-claro est-bt-filtros" id="est-bt-filtros" aria-expanded="false" aria-controls="est-filtros">Filtros<span id="est-n-filtros"></span></button>
     <div class="est-filtros" id="est-filtros">
       <div class="campo est-filial"><label for="est-filial">Filial</label>
         <select id="est-filial"><option value="">Todas</option></select></div>
@@ -54,6 +51,8 @@
       <div class="campo est-sel"><label for="est-familia">Família</label>
         <select id="est-familia"><option value="">Todas</option></select></div>
     </div>
+    <label class="opcao est-com"><input id="est-com" type="checkbox">Somente produtos com estoque</label>
+    <button type="button" class="limpar-tudo est-limpar" id="est-limpar" hidden>Limpar filtros</button>
   </div>
   <p class="us-total" id="est-total" aria-live="polite"></p>
   <div id="est-lista"><div class="carregando">Carregando o estoque…</div></div>
