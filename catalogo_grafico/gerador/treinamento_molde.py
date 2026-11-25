@@ -18,7 +18,8 @@ O deck novo é montado DUPLICANDO os slides do treinamento original de Baterias 
          "italico": {"4": ["0,2"]},                # na célula, os trechos depois do 1.º ficam em itálico
          "respiro": {"6": 0.08},                   # margem de cima e de baixo das células da tabela (polegadas)
          "notas": "MENSAGEM-CHAVE\\n..."}],
-     "negrito_uma_coluna": true}                   # corpo da tabela com negrito só na 1.ª coluna que não é só número
+     "negrito_uma_coluna": true,                   # corpo da tabela com negrito só na 1.ª coluna que não é só número
+     "nota_base": false}                           # sem o bloco BASE nas notas do slide 1 (deck sem código da base)
 
 Texto: "\\n" separa parágrafos e "|" separa trechos (runs); o trecho k herda a formatação do trecho k do modelo
 (ex.: "DICA DE CAMPO  |texto"). Índices = ordem das formas do slide-modelo (python inv. em LEIA_GERADOR.md).
@@ -796,7 +797,7 @@ def montar(nome, saida=None):
                 notas = formatar_notas(notas)
         if not notas:
             parar(f'{onde} sem notas')
-        if n == 1:
+        if n == 1 and cfg.get('nota_base', True):
             notas = re.sub(r'\n*BASE\n.*$', '', notas, flags=re.S)
             notas += f'\n\nBASE\nCódigos e "Ofereça junto" conferidos na base unificada {base.vars["versao_base"]}.'
         s.notes_slide.notes_text_frame.text = notas
@@ -818,6 +819,8 @@ def montar(nome, saida=None):
     for a, _ in cfg.get('trocar', []):
         if not contagem.get(a):
             parar(f'troca global sem efeito: {a!r}')
+    if cfg.get('nota_base', True) and not base.citados:
+        parar('o bloco BASE da capa diz "códigos conferidos", mas o deck não cita código; use "nota_base": false')
 
     # tira os slides do original
     lista = prs.slides._sldIdLst
