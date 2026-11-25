@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0624** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0637** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -427,8 +427,25 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0621 | — | teste | login.test.mjs (`norm`) e testes/estoque-comum.mjs:26 (`sem`) × estoque.mjs:62 (`normalizar`) | normalização sem acento copiada nos testes | T-0035 | integracao-placas; testes | MANTIDO (`manter?`: oráculo independente) |
 | RD-0622 | — | teste | testes/estoque-t0035.mjs passo 2 × login.test.mjs e estoque-t0034.mjs | o vendedor "6 colunas, sem R$" de novo | T-0035 | testes | MANTIDO (`manter?`: é a tela do vendedor com filtro, que os outros não olham) |
 | RD-0623 | — | teste | testes/estoque-t0035.mjs `escolher`/`buscar` × `print` (estoque-comum.mjs) | o `semTemplate` roda 2 vezes na mesma tela quando um print vem logo depois de uma troca de filtro | T-0035 | testes | MANTIDO (`manter?`: custa uma leitura do texto; tirar exigiria o `print` saber se a tela já foi conferida) |
+| RD-0624 | média | rotina | catalogo_grafico/simulacoes/T-0038/ (25 PNG, 6,9 MB; no 36b9c9b) | os 24 slides e o mosaico no main, iguais ao PDF de entregas/ (o caso do RD-0559: vão para os anexos dos recados) | T-0038 | catalogo-grafico | ABERTO |
+| RD-0625 | média | texto (PDF) | Onboarding, slide 16 | os 5 motivos 2 vezes no slide (cartão 2 e faixa); "Esta fala é de treinamento e matinal: não vai no card." repete as notas | T-0038 | catalogo-grafico | ABERTO |
+| RD-0626 | média | layout (PDF) | Onboarding, slide 14 | o bloco "Foto do cartazete: a prova do passo 7" repete o cartão 7 do mesmo slide (sai) | T-0038 | catalogo-grafico | ABERTO |
+| RD-0627 | média | texto (PDF) | Onboarding, slide 17 | os motivos da semana indo para a RPS 3 vezes (destaque Segunda e 2 cartões); a ficha 2 vezes (3·2·1 e "é uma só") | T-0038 | catalogo-grafico | ABERTO |
+| RD-0628 | média | layout (PDF) | Onboarding, slide 18 | "mochila exclusiva BAP" 3 vezes (título, A REGRA e o destaque "Mochila", que sai) | T-0038 | catalogo-grafico | ABERTO |
+| RD-0629 | média | texto (PDF) | Onboarding, slides 11 e 21, DICA DE CAMPO | a dica repete a coluna "Feito quando" (11) e a coluna Passo 8 (21) do mesmo slide | T-0038 | catalogo-grafico | ABERTO |
+| RD-0630 | baixa | layout (PDF) | Onboarding, slide 7 | "Baterias e lubrificantes" e "Linha moto" 3 vezes na linha (Simule: célula mesclada; pede código novo) | T-0038 | catalogo-grafico | ABERTO (fila, com simulação; pede dispensa ao po) |
+| RD-0631 | alta | texto (PDF) | Onboarding slide 16 × Mecânica Básica slide 41 (T-0032) | o mesmo slide "Fechamento em 3 etapas" com 2 listas de motivos ("prazo ou limite, disponibilidade, já tem fornecedor" × "prazo, aplicação, fornecedor"); a fonte é a rotina de 27/10 | T-0038 | catalogo-grafico | ABERTO (fila do Alexandre, com simulação; deck da T-0032) |
+| RD-0632 | baixa | texto (notas) | Onboarding, notas dos slides 11, 14 e 20 | COMO CONDUZIR lê de novo a tabela e os cartões | T-0038 | catalogo-grafico | ABERTO |
+| RD-0633 | baixa | doc | catalogo_grafico/gerador/LEIA_GERADOR.md:48; catalogo_grafico/LEIA-ME.md:13 (no 36b9c9b) | o resumo do deck e a pasta da simulação no LEIA_GERADOR (o caso do RD-0557); o arquivo de entregas/ pelo nome, com os slides, no LEIA-ME (o caso do RD-0558) | T-0038 | catalogo-grafico | ABERTO |
+| RD-0634 | baixa | texto (PDF) | Onboarding, slides 2 a 5, 8, 12, 15 e 19 | os 5 divisores repetem os tópicos do slide 3; "RPS, capacitação, análise de mercado e Dia Foco" 3 vezes, "Do check-in ao check-out" 4 vezes | T-0038 | catalogo-grafico | ABERTO |
+| RD-0635 | baixa | código (comentário) | catalogo_grafico/gerador/treinamento_molde.py:761 e :768 × :18-19 (no 36b9c9b) | os comentários do `italico` e do `respiro` repetem a docstring (não segura) | T-0038 | catalogo-grafico | ABERTO |
+| RD-0636 | — | texto (PDF) | Onboarding, slide 13 × 10 e 11; 22 e 23; DICA do 18; "Fonte" no 10, 11 e 14 | as falas, o checklist, o teste e a fonte repetem o deck | T-0038 | catalogo-grafico | MANTIDO (`manter?`: role-play, fixação e fonte oficial) |
 
 ## Notas
+
+### T-0038, Onboarding do Vendedor, 25/11/2026 (antes dos PRs)
+- RD-0624 ao RD-0636: os branches `catalogo-grafico/T-0038-onboarding` (`36b9c9b`), `integracao-placas/T-0038-onboarding` (`e53ad3c`) e `web-site/T-0038-onboarding` (`c4a8e45`). Relatório: `T-0038.md`. VOLTA PARA AJUSTE: seguram o RD-0624 ao RD-0629 e o RD-0632 ao RD-0634, todos do `catalogo-grafico`; não segura o RD-0635 (só comentário); na fila, com dispensa do `po`: RD-0630 e RD-0631. Os branches do `integracao-placas` e do `web-site` não têm achado.
+- Numeração: a partir do próximo livre no `main` (`75fdfd8`). O `corretor-redundancias/T-0033-busca-ano` vai até o RD-0638; quem fizer o merge por último renumera.
 
 ### T-0035, filtros Categoria, Sistema e Família no Estoque, 24/11/2026 (antes dos PRs)
 - RD-0612 ao RD-0622: branches `integracao-placas/T-0035-filtros` (`f19931f`), `web-site/T-0035-filtros` (`4670213`) e `testes/T-0035-filtros` (`d35c766`). Relatório: `T-0035.md`. VOLTA PARA AJUSTE: seguram o RD-0612 ao RD-0618 (todos baixa); não segura o RD-0619 (só comentário); MANTIDOS: RD-0620 ao RD-0622. Fila: nenhum.
