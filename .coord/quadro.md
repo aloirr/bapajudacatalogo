@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 23/11/2026 20:15 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 24/11/2026 21:10 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -36,11 +36,12 @@ Atualizado em 23/11/2026 20:15 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0030](tarefas/T-0030.md) | Rótulos "Ah" e "CCA" na ficha da bateria (MC-0016) | web-site | testes, designer-ux, design-de-marca | CONCLUÍDA | #173, #174 |
 | [T-0031](tarefas/T-0031.md) | Aplicações suspeitas da Linha Pesada (base v28) | catalogo-dados | web-site, testes | CONCLUÍDA | #175, #176, #177 |
 | T-0032 | 7 portfólios por linha, melhorias do Portfólio e treinamentos (Mecânica Básica, 3 atualizados e 10 de sistema) | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes, web-site | ONDA 1 CONCLUÍDA (o #186 entra antes deste registro); ONDA 2 PAUSADA | #185, #186, #187, #188 |
+| [T-0034](tarefas/T-0034.md) | Aba de estoque (ESTOQUE_BAP.xlsx da BAP Central) para o admin e o bap.vendedor | integracao-placas | web-site, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 24/11 19:27) | #194, #195, #196 |
 
 ## Fila
-Main d9330f4 (#189).
+Main 7b4ccfd (#196).
 
-**PAUSA geral** a pedido do Alexandre (R-20261123-184932-po): nenhuma tarefa, ronda ou subagente até o PO chamar. Exceção: o PR #190, a trava do graphify (R-20261124-000759-po); depois do merge dele, as sessões são reiniciadas e a nova sessão do gerente continua deste ponto.
+**PAUSA geral** a pedido do Alexandre (R-20261123-184932-po): nenhuma tarefa, ronda ou subagente até o PO chamar. A T-0034 saiu da pausa pela decisão 5a (R-20261124-211906-alexandre) e está no ar (#194, #195, #196). Na volta, a próxima é a T-0033 (R-20261124-152047-po e R-20261124-152425-po), com simulação de tela antes.
 
 0. **T-0032, onda 2: PAUSADA** a pedido do Alexandre ("Após o termino da Onda 1, pause as atividades. quero economizar token"). Retomar só quando o PO chamar.
    - Branch catalogo-grafico/T-0032-onda2, head 7e393401168f73092538bc91c56ae26b48040068, sem PR e sem pareceres.

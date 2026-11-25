@@ -6,6 +6,7 @@
 | 2 | Publicar no Render: Blueprint do `render.yaml`, depois domínio (ex.: `catalogo.bapautoparts.com.br`) [SUPOSIÇÃO] | Render **feito** (T-0003); domínio a fazer |
 | 3 | **Consulta por placa (API PLACAS)** | **Feito** (T-0005, em uso desde 20/11 11:29). Detalhe abaixo. |
 | 4 | Fotos que faltam (lista no `site/data/produtos.json`: produtos sem `i`). Busca por medida (pneus, rolamentos, baterias). | A fazer |
+| 4b | **Aba Estoque** (interna: admin e quem tem a permissão; ESTOQUE_BAP.xlsx da BAP Central, sem preço para o vendedor) | **Feito** (T-0034, no ar em 24/11 19:27) |
 | 5 | BAP Ajuda 2.0 como aplicativo, lendo os mesmos dados deste repositório | Planejar |
 
 ## Fase 3 em detalhe: a consulta por placa
