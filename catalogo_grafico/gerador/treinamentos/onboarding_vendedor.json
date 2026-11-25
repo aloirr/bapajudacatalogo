@@ -1,5 +1,5 @@
 {
- "arquivo": "Onboarding_Vendedor_BAP.pptx",
+ "arquivo": "Treinamento_Onboarding_Vendedor_BAP_Vendedores.pptx",
  "rodape": "Onboarding do Vendedor BAP  |  Equipe Comercial Externa · uso interno",
  "titulo": "Onboarding do Vendedor",
  "mosaico": [
@@ -9,8 +9,8 @@
   10,
   11,
   16,
-  19,
-  21
+  18,
+  20
  ],
  "negrito_uma_coluna": true,
  "slides": [
@@ -53,26 +53,253 @@
     "18": "As falas da visita",
     "19": "Perguntas-chave e passos de campo",
     "24": "Fechamento",
-    "25": "3 etapas, os 5 motivos e o acompanhamento",
-    "30": "Indicou, ganhou",
-    "31": "A indicação no fim de toda visita",
-    "36": "Catálogo online",
-    "37": "A ferramenta da visita, sem preço na tela",
-    "42": "Ferramentas na rota",
-    "43": "Catálogo e BAP Ajuda em cada passo",
+    "25": "3 etapas, acompanhamento e Indicou, ganhou",
+    "30": "Ferramentas na rota",
+    "31": "Catálogo online e BAP Ajuda em cada passo",
     "48": "Encerramento",
-    "49": "Checklist do vendedor e teste de conhecimentos"
+    "49": "Checklist do vendedor e teste de conhecimentos",
+    "27": "05"
    },
    "icone": {
     "5": "FaCalendarDays",
     "11": "FaListCheck",
     "17": "FaComments",
     "23": "FaHandshake",
-    "29": "FaUser",
-    "35": "FaMagnifyingGlass",
-    "41": "FaBookOpen"
+    "29": "FaBookOpen"
    },
-   "notas": "MENSAGEM-CHAVE\nO onboarding tem 7 módulos e termina com o checklist e o teste.\n\nCOMO CONDUZIR\nMostre que o centro do material são os módulos 02 a 04: os 10 passos, as falas e o fechamento. Os módulos 01, 05, 06 e 07 dão o ritmo da semana e as ferramentas.\n\nPERGUNTE AO TIME\nQual destes tópicos vocês acham que vai mudar mais a sua visita?"
+   "notas": "MENSAGEM-CHAVE\nO onboarding tem 5 módulos e termina com o checklist e o teste.\n\nCOMO CONDUZIR\nMostre que o centro do material são os módulos 02 a 04: os 10 passos, as falas e o fechamento, que termina com o Indicou, ganhou. O módulo 01 dá o ritmo da semana e o 05, as ferramentas.\n\nPERGUNTE AO TIME\nQual destes tópicos vocês acham que vai mudar mais a sua visita?",
+   "apagar": [
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43
+   ],
+   "mover": {
+    "2": [
+     0.6,
+     1.7,
+     3.943,
+     2.35
+    ],
+    "3": [
+     0.85,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "4": [
+     3.793,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "5": [
+     3.913,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "6": [
+     0.85,
+     2.65,
+     3.443,
+     0.6
+    ],
+    "7": [
+     0.85,
+     3.2,
+     3.443,
+     0.7
+    ],
+    "8": [
+     4.693,
+     1.7,
+     3.943,
+     2.35
+    ],
+    "9": [
+     4.943,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "10": [
+     7.887,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "11": [
+     8.007,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "12": [
+     4.943,
+     2.65,
+     3.443,
+     0.6
+    ],
+    "13": [
+     4.943,
+     3.2,
+     3.443,
+     0.7
+    ],
+    "14": [
+     8.787,
+     1.7,
+     3.943,
+     2.35
+    ],
+    "15": [
+     9.037,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "16": [
+     11.98,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "17": [
+     12.1,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "18": [
+     9.037,
+     2.65,
+     3.443,
+     0.6
+    ],
+    "19": [
+     9.037,
+     3.2,
+     3.443,
+     0.7
+    ],
+    "20": [
+     0.6,
+     4.3,
+     3.943,
+     2.35
+    ],
+    "21": [
+     0.85,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "22": [
+     3.793,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "23": [
+     3.913,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "24": [
+     0.85,
+     5.25,
+     3.443,
+     0.6
+    ],
+    "25": [
+     0.85,
+     5.8,
+     3.443,
+     0.7
+    ],
+    "26": [
+     4.693,
+     4.3,
+     3.943,
+     2.35
+    ],
+    "27": [
+     4.943,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "28": [
+     7.887,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "29": [
+     8.007,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "30": [
+     4.943,
+     5.25,
+     3.443,
+     0.6
+    ],
+    "31": [
+     4.943,
+     5.8,
+     3.443,
+     0.7
+    ],
+    "44": [
+     8.787,
+     4.3,
+     3.943,
+     2.35
+    ],
+    "45": [
+     9.037,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "46": [
+     11.98,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "47": [
+     12.1,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "48": [
+     9.037,
+     5.25,
+     3.443,
+     0.6
+    ],
+    "49": [
+     9.037,
+     5.8,
+     3.443,
+     0.7
+    ]
+   }
   },
   {
    "molde": 4,
@@ -630,7 +857,7 @@
    "t": {
     "0": "04",
     "1": "Fechamento",
-    "2": "As 3 etapas, os 5 motivos e o acompanhamento do supervisor"
+    "2": "As 3 etapas, o acompanhamento e o Indicou, ganhou"
    },
    "notas": "MENSAGEM-CHAVE\nToda visita tem um passo 6: termina em pedido ou em motivo anotado.\n\nCOMO CONDUZIR\nDiga que o fechamento é sem oferta de expositor: o foco é o pedido dos itens apresentados.\n\nPERGUNTE AO TIME\nO que vocês costumam fazer quando o cliente diz \"hoje não\"?"
   },
@@ -841,18 +1068,9 @@
    }
   },
   {
-   "molde": 5,
-   "t": {
-    "0": "05",
-    "1": "Indicou, ganhou",
-    "2": "A indicação no fim de toda visita"
-   },
-   "notas": "MENSAGEM-CHAVE\nO passo 10 transforma o cliente satisfeito em porta para um cliente novo.\n\nCOMO CONDUZIR\nDiga que a pergunta é feita em toda visita, antes do check-out.\n\nPERGUNTE AO TIME\nQuem aqui já ganhou um cliente por indicação?"
-  },
-  {
    "molde": 6,
    "t": {
-    "0": "MÓDULO 05 · INDICOU, GANHOU",
+    "0": "MÓDULO 04 · INDICOU, GANHOU",
     "1": "Indicou, ganhou: a mochila exclusiva BAP",
     "2": "A REGRA",
     "3": "Se o indicado se cadastrar e comprar, quem indicou ganha uma mochila exclusiva BAP.",
@@ -907,16 +1125,16 @@
   {
    "molde": 5,
    "t": {
-    "0": "06",
-    "1": "Catálogo online",
-    "2": "A ferramenta da visita, com login e sem preço na tela"
+    "0": "05",
+    "1": "Ferramentas na rota",
+    "2": "O catálogo online e o BAP Ajuda em cada passo da visita"
    },
-   "notas": "MENSAGEM-CHAVE\nO catálogo online da BAP AUTOPARTS é a ferramenta do vendedor na visita.\n\nCOMO CONDUZIR\nPeça que cada um abra o catálogo no celular agora, com o login.\n\nPERGUNTE AO TIME\nQuem já usou o catálogo numa visita esta semana?"
+   "notas": "MENSAGEM-CHAVE\nO catálogo online e o BAP Ajuda são as ferramentas do vendedor na visita.\n\nCOMO CONDUZIR\nPeça que cada um abra o catálogo no celular agora, com o login.\n\nPERGUNTE AO TIME\nQuem já usou o catálogo numa visita esta semana?"
   },
   {
    "molde": 36,
    "t": {
-    "0": "MÓDULO 06 · CATÁLOGO ONLINE",
+    "0": "MÓDULO 05 · CATÁLOGO ONLINE",
     "1": "O catálogo online na visita",
     "3": "Placa",
     "4": "ou veículo: Marca, Modelo, Ano, Motor e Versão",
@@ -928,7 +1146,7 @@
     "18": "Leve também: o item que vai com a peça",
     "22": "Copiar código e Salvar em PDF na ficha do produto",
     "26": "Cada usuário com o seu login; o cliente também tem o dele",
-    "30": "Disponibilidade: consulte no menu da sua conta, no catálogo, antes de ofertar",
+    "30": "A aba de disponibilidade fica no menu da sua conta; o acesso é liberado pelo admin na tela de usuários",
     "34": "Sem preço: só a ficha do produto vai ao cliente",
     "36": "NA PRÁTICA"
    },
@@ -940,7 +1158,7 @@
     "29": "FaBoxesStacked",
     "33": "FaEye"
    },
-   "notas": "MENSAGEM-CHAVE\nNo catálogo online, o vendedor acha a peça pela placa ou pelo veículo, pelo código (BAP, referência cruzada ou código de barras) ou num campo só, por descrição e aplicação.\n\nCOMO CONDUZIR\nFaça ao vivo uma busca por placa, uma por veículo do Dia Foco de hoje e uma por referência. Abra a ficha e mostre a aplicação em tabela, o Leve também, o Copiar código e o Salvar em PDF. Lembre a regra: a ficha não tem preço e pode ir para a tela do cliente, que também tem o login dele; a disponibilidade fica no menu da conta, só para o vendedor consultar antes de ofertar.\n\nPERGUNTE AO TIME\nQual busca vocês mais vão usar no balcão: por placa, por veículo ou por código?",
+   "notas": "MENSAGEM-CHAVE\nNo catálogo online, o vendedor acha a peça pela placa ou pelo veículo, pelo código (BAP, referência cruzada ou código de barras) ou num campo só, por descrição e aplicação.\n\nCOMO CONDUZIR\nFaça ao vivo uma busca por placa, uma por veículo do Dia Foco de hoje e uma por referência. Abra a ficha e mostre a aplicação em tabela, o Leve também, o Copiar código e o Salvar em PDF. Lembre a regra: a ficha não tem preço e pode ir para a tela do cliente, que também tem o login dele; a aba de disponibilidade fica no menu da conta, só para o vendedor consultar antes de ofertar; quem libera o acesso é o admin, na tela de usuários.\n\nPERGUNTE AO TIME\nQual busca vocês mais vão usar no balcão: por placa, por veículo ou por código?",
    "copiar": [
     {
      "molde": 6,
@@ -1098,18 +1316,9 @@
    }
   },
   {
-   "molde": 5,
-   "t": {
-    "0": "07",
-    "1": "Ferramentas na rota",
-    "2": "Catálogo online e BAP Ajuda em cada passo da visita"
-   },
-   "notas": "MENSAGEM-CHAVE\nCada ferramenta tem o seu passo.\n\nCOMO CONDUZIR\nLigue as ferramentas aos passos da visita.\n\nPERGUNTE AO TIME\nEm que passo vocês mais precisam do celular?"
-  },
-  {
    "molde": 38,
    "t": {
-    "0": "MÓDULO 07 · FERRAMENTAS",
+    "0": "MÓDULO 05 · FERRAMENTAS",
     "1": "Onde cada ferramenta entra na visita",
     "3": "Antes",
     "5": "Conferir o Dia Foco do dia\nVer as aplicações da linha no catálogo",
