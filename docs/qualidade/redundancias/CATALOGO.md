@@ -467,8 +467,8 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0661 | baixa | código | site/app.js:1992 × :2000 | `dentro` e `contida` repetem a mesma marca/modelo/cilindrada e a faixa dentro de outra | T-0033 | web-site | CORRIGIDO (587b8f3) |
 | RD-0662 | baixa | código | site/app.js:1990 × :1638 | "Não serve" escrito 3 vezes, sem constante | T-0033 | web-site | CORRIGIDO (587b8f3) |
 | RD-0663 | baixa | teste | testes/t0033_busca_ano.mjs:434-476 × scripts/testar_site.mjs:714-736 | o aviso de tipo sem peça ("bomba combustivel polo 2026", "polo 2026"), o `ehBomba` e a leitura do texto visível nos 2 testes | T-0033 | testes | CORRIGIDO (0700981) |
-| RD-0664 | baixa | código | site/app.js:1811 × :1805 e :1809 | o `FIM_CONDICAO` reescreve `exc.\|exceto` (do `NEGA`) e `somente\|apenas` (do `RX_RESTR`) | T-0033 | web-site | ABERTO |
-| RD-0665 | baixa | teste | testes/t0033_busca_ano.mjs:498-503 × :600 e :646-647 | as `conta` das contagens fixas escritas 2 vezes (rodada curta e inteira) | T-0033 | testes | ABERTO |
+| RD-0664 | baixa | código | site/app.js:1811 × :1805 e :1809 | o `FIM_CONDICAO` reescreve `exc.\|exceto` (do `NEGA`) e `somente\|apenas` (do `RX_RESTR`) | T-0033 | web-site | CORRIGIDO (22bc129) |
+| RD-0665 | baixa | teste | testes/t0033_busca_ano.mjs:498-503 × :600 e :646-647 | as `conta` das contagens fixas escritas 2 vezes (rodada curta e inteira) | T-0033 | testes | CORRIGIDO (716e2d1) |
 
 ## Notas
 
@@ -477,6 +477,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - Reteste nos heads `a73d931` (web-site) e `5f0afd7` (testes): RD-0645 ao RD-0654 corrigidos, e também RD-0656 e RD-0657 (fila). Novos: RD-0640 e RD-0641 (baixa, seguram); MANTIDO: RD-0642. Fila: RD-0655. VOLTA PARA AJUSTE até o RD-0640 e o RD-0641.
 - Reteste nos heads `c790587` (web-site) e `cfc011c` (testes): RD-0640 e RD-0641 corrigidos. Novos: RD-0660 ao RD-0662 (web-site) e RD-0663 (testes), baixa, seguram. VOLTA PARA AJUSTE.
 - Reteste nos heads `587b8f3` (web-site) e `0700981` (testes): RD-0660 ao RD-0663 corrigidos. O `FIM_CONDICAO` do site e o `FIM_SEM` do teste não são cópia (oráculo independente). Novos: RD-0664 (web-site) e RD-0665 (testes), baixa, seguram. VOLTA PARA AJUSTE.
+- Reteste final nos heads `22bc129` (web-site) e `716e2d1` (testes): RD-0664 e RD-0665 corrigidos. LIBERADO (fila: RD-0655; mantidos: RD-0642, RD-0658 e RD-0659).
 - Numeração (25/11/2026): a 1ª rodada usou o RD-0624 ao RD-0638, que a T-0038 já tinha usado no `main` (#209). Os achados da T-0033 viraram o RD-0645 ao RD-0659 (o número antigo + 21); o RD-0640 ao RD-0642 ficam.
 
 ### T-0038, Onboarding do Vendedor, 25/11/2026 (antes dos PRs)
