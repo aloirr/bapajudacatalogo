@@ -15,7 +15,11 @@ O deck novo é montado DUPLICANDO os slides do treinamento original de Baterias 
          "apagar": [9, 10],
          "copiar": [{"formas": [32, 33], "dy": 1.2}],   # cópias entram no fim (índices seguintes); "molde": N copia
                                                        # de outro slide do original
-         "notas": "MENSAGEM-CHAVE\\n..."}]}
+         "italico": {"4": ["0,2"]},                # na célula, os trechos depois do 1.º ficam em itálico
+         "respiro": {"6": 0.08},                   # margem de cima e de baixo das células da tabela (polegadas)
+         "notas": "MENSAGEM-CHAVE\\n..."}],
+     "negrito_uma_coluna": true,                   # corpo da tabela com negrito só na 1.ª coluna que não é só número
+     "nota_base": false}                           # ver Travas
 
 Texto: "\\n" separa parágrafos e "|" separa trechos (runs); o trecho k herda a formatação do trecho k do modelo
 (ex.: "DICA DE CAMPO  |texto"). Índices = ordem das formas do slide-modelo (python inv. em LEIA_GERADOR.md).
@@ -24,7 +28,7 @@ Macros no texto e nas notas: {{cod:AMT7004}} (confere na base e escreve o códig
 da base), {{prod:Cubo de Roda}} (confere o PRODUTO), {{n_itens}}, {{n_produtos}}, {{n_sistemas}}, {{versao_base}}.
 
 Travas ([PARADO]): código fora da base ou não ATIVO; "estoque" ou "R$" em qualquer texto ou nota; foto de código
-inexistente; slide sem notas.
+inexistente; slide sem notas; bloco BASE num deck sem código (use "nota_base": false).
 
 Uso (dentro de catalogo_grafico/gerador/, com PYTHONHASHSEED=0):
     python treinamento_molde.py mecanica_basica                  # gera saidas/<arquivo>.pptx
@@ -407,6 +411,22 @@ def tirar_coluna(forma, j):
         tr.remove(tr.findall(A + 'tc')[j])
 
 
+def negrito_uma_coluna(formas):
+    """Negrito no corpo da tabela numa coluna só: a 1.ª que não é só número (T-0038, O6). O cabeçalho (linha 0 da
+    1.ª tabela do slide) fica como está. Vale para o slide inteiro, que pode ter uma tabela por linha."""
+    tabs = [f for f in formas if getattr(f, 'has_table', False) and f.has_table]
+    if not tabs:
+        return
+    corpo = [(t, i) for n, t in enumerate(tabs) for i in range(len(t.table.rows)) if n or i]
+    ncol = len(tabs[0].table.columns)
+    alvo = next((j for j in range(ncol)
+                 if not all(re.fullmatch(r'\d*', t.table.cell(i, j).text_frame.text.strip()) for t, i in corpo)), 0)
+    for t, i in corpo:
+        for j in range(ncol):
+            for rpr in t.table.cell(i, j).text_frame._txBody.iter(A + 'rPr'):
+                rpr.set('b', '1' if j == alvo else '0')
+
+
 def trocar_textos(elemento, pares, onde, contagem):
     """Troca trechos de texto (dentro de um mesmo trecho de formatação) em todos os a:t do elemento."""
     for t in elemento.iter(A + 't'):
@@ -668,6 +688,7 @@ def montar(nome, saida=None):
     outros = {}
     contagem = {}
     nao_codigo = set(cfg.get('nao_codigo', []))
+    nota_base = cfg.get('nota_base', True)
     icones = indice_icones()
     tmp = tempfile.mkdtemp(prefix='trein_')
     imgs = Imagens(base, molde_ref, tmp)
@@ -739,6 +760,23 @@ def montar(nome, saida=None):
                 v = base.expandir(v)
                 base.conferir(v, onde)
                 escrever(tab.cell(i, j).text_frame._txBody, v)
+        for k, cels in spec.get('italico', {}).items():
+            tab = formas[int(k)].table
+            for rc in cels:
+                i, j = (int(x) for x in rc.split(','))
+                for p in tab.cell(i, j).text_frame._txBody.findall(A + 'p'):
+                    for r in p.findall(A + 'r')[1:]:
+                        rpr = r.find(A + 'rPr')
+                        if rpr is None:
+                            rpr = etree.Element(A + 'rPr')
+                            r.insert(0, rpr)
+                        rpr.set('i', '1')
+        for k, m in spec.get('respiro', {}).items():
+            for tcpr in formas[int(k)]._element.iter(A + 'tcPr'):
+                tcpr.set('marT', str(int(Inches(m))))
+                tcpr.set('marB', str(int(Inches(m))))
+        if cfg.get('negrito_uma_coluna'):
+            negrito_uma_coluna(formas)
         for k in spec.get('link_por_palavra', []):
             link_por_palavra(formas[int(k)].text_frame._txBody)
         for k, cor in spec.get('cor_texto', {}).items():
@@ -760,7 +798,7 @@ def montar(nome, saida=None):
                 notas = formatar_notas(notas)
         if not notas:
             parar(f'{onde} sem notas')
-        if n == 1:
+        if n == 1 and nota_base:
             notas = re.sub(r'\n*BASE\n.*$', '', notas, flags=re.S)
             notas += f'\n\nBASE\nCódigos e "Ofereça junto" conferidos na base unificada {base.vars["versao_base"]}.'
         s.notes_slide.notes_text_frame.text = notas
@@ -782,6 +820,8 @@ def montar(nome, saida=None):
     for a, _ in cfg.get('trocar', []):
         if not contagem.get(a):
             parar(f'troca global sem efeito: {a!r}')
+    if nota_base and not base.citados:
+        parar('o bloco BASE da capa diz "códigos conferidos", mas o deck não cita código; use "nota_base": false')
 
     # tira os slides do original
     lista = prs.slides._sldIdLst

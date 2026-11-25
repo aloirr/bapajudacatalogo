@@ -1,0 +1,1394 @@
+{
+ "arquivo": "Treinamento_Onboarding_Vendedor_BAP_Vendedores.pptx",
+ "rodape": "Onboarding do Vendedor BAP  |  Equipe Comercial Externa · uso interno",
+ "titulo": "Onboarding do Vendedor",
+ "mosaico": [
+  1,
+  3,
+  7,
+  10,
+  11,
+  16,
+  18,
+  20
+ ],
+ "negrito_uma_coluna": true,
+ "nota_base": false,
+ "slides": [
+  {
+   "molde": 1,
+   "t": {
+    "0": "ONBOARDING COMERCIAL",
+    "1": "Onboarding do Vendedor BAP",
+    "2": "A semana do time de vendas, os 10 passos da visita e o fechamento em 3 etapas",
+    "3": "Equipe Comercial Externa  ·  Novembro de 2026"
+   },
+   "notas": "MENSAGEM-CHAVE\nEste é o primeiro material do vendedor que chega à BAP AUTOPARTS: como a semana funciona e como cada visita acontece, do check-in ao check-out.\n\nCOMO CONDUZIR\nDê boas-vindas. Explique que o roteiro é o mesmo para todo o time: os 10 passos da visita, com as falas e o \"feito quando\" de cada um.\n\nPERGUNTE AO TIME\nQuem já trabalhou com um roteiro de visita? O que funcionava e o que não funcionava?"
+  },
+  {
+   "molde": 2,
+   "t": {
+    "2": "Hoje você sai daqui sabendo |organizar a semana, conduzir a visita e fechar| — do check-in ao check-out, com as mesmas falas do time inteiro.",
+    "3": "Visita com roteiro é visita que se repete com qualidade: o cliente reconhece o vendedor BAP e o supervisor sabe onde ajudar.",
+    "7": "ORGANIZAR",
+    "8": "A rotina do time: RPS, capacitação, análise de mercado e Dia Foco",
+    "12": "VISITAR",
+    "13": "Os 10 passos da visita, com a pergunta-chave e o \"feito quando\"",
+    "17": "FECHAR",
+    "18": "Fechamento em 3 etapas, motivos de não fechar e Indicou, ganhou"
+   },
+   "icone": {
+    "6": "FaCalendarDays",
+    "11": "FaStore"
+   },
+   "notas": "MENSAGEM-CHAVE\nTrês pilares: organizar a semana, visitar com os 10 passos e fechar em 3 etapas.\n\nCOMO CONDUZIR\nApresente os pilares como uma jornada: a semana dá o ritmo (Dia Foco), a visita segue os 10 passos e todo passo 6 termina em pedido ou em motivo anotado.\n\nPERGUNTE AO TIME\nNuma visita comum, em que momento vocês costumam perder o cliente?"
+  },
+  {
+   "molde": 3,
+   "t": {
+    "1": "Tópicos do onboarding",
+    "6": "A semana",
+    "7": "RPS, capacitação, análise de mercado e Dia Foco",
+    "12": "Os 10 passos",
+    "13": "Do check-in ao check-out, passo a passo",
+    "18": "As falas da visita",
+    "19": "Perguntas-chave e passos de campo",
+    "24": "Fechamento",
+    "25": "3 etapas, acompanhamento e Indicou, ganhou",
+    "30": "Ferramentas na rota",
+    "31": "Catálogo online e BAP Ajuda em cada passo",
+    "48": "Encerramento",
+    "49": "Checklist do vendedor e teste de conhecimentos",
+    "27": "05"
+   },
+   "icone": {
+    "5": "FaCalendarDays",
+    "11": "FaListCheck",
+    "17": "FaComments",
+    "23": "FaHandshake",
+    "29": "FaBookOpen"
+   },
+   "notas": "MENSAGEM-CHAVE\nO onboarding tem 5 módulos e termina com o checklist e o teste.\n\nCOMO CONDUZIR\nMostre que o centro do material são os módulos 02 a 04: os 10 passos, as falas e o fechamento, que termina com o Indicou, ganhou. O módulo 01 dá o ritmo da semana e o 05, as ferramentas.\n\nPERGUNTE AO TIME\nQual destes tópicos vocês acham que vai mudar mais a sua visita?",
+   "apagar": [
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43
+   ],
+   "mover": {
+    "2": [
+     0.6,
+     1.7,
+     3.943,
+     2.35
+    ],
+    "3": [
+     0.85,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "4": [
+     3.793,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "5": [
+     3.913,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "6": [
+     0.85,
+     2.65,
+     3.443,
+     0.6
+    ],
+    "7": [
+     0.85,
+     3.2,
+     3.443,
+     0.7
+    ],
+    "8": [
+     4.693,
+     1.7,
+     3.943,
+     2.35
+    ],
+    "9": [
+     4.943,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "10": [
+     7.887,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "11": [
+     8.007,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "12": [
+     4.943,
+     2.65,
+     3.443,
+     0.6
+    ],
+    "13": [
+     4.943,
+     3.2,
+     3.443,
+     0.7
+    ],
+    "14": [
+     8.787,
+     1.7,
+     3.943,
+     2.35
+    ],
+    "15": [
+     9.037,
+     1.9,
+     1.2,
+     0.65
+    ],
+    "16": [
+     11.98,
+     1.95,
+     0.5,
+     0.5
+    ],
+    "17": [
+     12.1,
+     2.07,
+     0.26,
+     0.26
+    ],
+    "18": [
+     9.037,
+     2.65,
+     3.443,
+     0.6
+    ],
+    "19": [
+     9.037,
+     3.2,
+     3.443,
+     0.7
+    ],
+    "20": [
+     0.6,
+     4.3,
+     3.943,
+     2.35
+    ],
+    "21": [
+     0.85,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "22": [
+     3.793,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "23": [
+     3.913,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "24": [
+     0.85,
+     5.25,
+     3.443,
+     0.6
+    ],
+    "25": [
+     0.85,
+     5.8,
+     3.443,
+     0.7
+    ],
+    "26": [
+     4.693,
+     4.3,
+     3.943,
+     2.35
+    ],
+    "27": [
+     4.943,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "28": [
+     7.887,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "29": [
+     8.007,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "30": [
+     4.943,
+     5.25,
+     3.443,
+     0.6
+    ],
+    "31": [
+     4.943,
+     5.8,
+     3.443,
+     0.7
+    ],
+    "44": [
+     8.787,
+     4.3,
+     3.943,
+     2.35
+    ],
+    "45": [
+     9.037,
+     4.5,
+     1.2,
+     0.65
+    ],
+    "46": [
+     11.98,
+     4.55,
+     0.5,
+     0.5
+    ],
+    "47": [
+     12.1,
+     4.67,
+     0.26,
+     0.26
+    ],
+    "48": [
+     9.037,
+     5.25,
+     3.443,
+     0.6
+    ],
+    "49": [
+     9.037,
+     5.8,
+     3.443,
+     0.7
+    ]
+   }
+  },
+  {
+   "molde": 4,
+   "t": {
+    "1": "Ao final deste onboarding, você estará preparado para",
+    "5": "Organizar",
+    "6": "a semana pelo Dia Foco e pela rotina do time",
+    "10": "Conduzir",
+    "11": "os 10 passos da visita, na ordem, do check-in ao check-out",
+    "15": "Perguntar",
+    "16": "com as falas de cada passo: giro, perda, procura e indicação",
+    "20": "Fechar",
+    "21": "em 3 etapas e, sem pedido, anotar o motivo",
+    "25": "Registrar",
+    "26": "o share do giro, a foto do cartazete e a análise de mercado",
+    "30": "Usar",
+    "31": "o catálogo online na visita, sem mostrar preço ao cliente"
+   },
+   "icone": {
+    "4": "FaCalendarDays",
+    "9": "FaListCheck",
+    "14": "FaComments",
+    "19": "FaHandshake",
+    "24": "FaClipboardCheck",
+    "29": "FaMagnifyingGlass"
+   },
+   "notas": "MENSAGEM-CHAVE\nSeis verbos que o vendedor vai praticar a partir de amanhã.\n\nCOMO CONDUZIR\nLeia os verbos e diga que cada um vira um item do checklist no fim do onboarding.\n\nPERGUNTE AO TIME\nQual destes verbos vocês já fazem em toda visita?"
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "01",
+    "1": "A semana do vendedor",
+    "2": "Os compromissos fixos e a linha de cada dia"
+   },
+   "notas": "MENSAGEM-CHAVE\nA semana do time de vendas tem compromissos fixos: segunda, quarta e todo dia.\n\nCOMO CONDUZIR\nDiga que a rotina vale para todo o time de vendas, supervisores e vendedores.\n\nPERGUNTE AO TIME\nQue dia da semana é o mais difícil na rota?"
+  },
+  {
+   "molde": 36,
+   "t": {
+    "0": "MÓDULO 01 · ROTINA",
+    "1": "A rotina do time de vendas",
+    "3": "Segunda",
+    "4": "13:00–15:00 · RPS do gerente com os supervisores",
+    "6": "Quarta",
+    "7": "16:00–18:00 · capacitação contínua",
+    "9": "Todo dia",
+    "10": "análise de mercado (passo 9 da visita)",
+    "14": "RPS: Resultado D-1 e follow-up dos planos de ação dos indicadores",
+    "18": "Pedidos do dia transmitidos antes das 16:00",
+    "22": "Pesquisa dos itens do Dia Foco do dia",
+    "26": "RPS: agenda de rota da semana e performance por vendedor, categoria, família e Top 30 clientes",
+    "30": "Supervisores e vendedores juntos",
+    "34": "Registro: no BAP Ajuda, botão ainda não publicado"
+   },
+   "icone": {
+    "13": "FaChartLine",
+    "25": "FaRoad",
+    "17": "FaClock",
+    "29": "FaUser",
+    "21": "FaMagnifyingGlass",
+    "33": "FaClipboardCheck"
+   },
+   "notas": "MENSAGEM-CHAVE\nA semana tem três marcos: a RPS de segunda, a capacitação de quarta e a análise de mercado de todo dia.\n\nCOMO CONDUZIR\nA RPS é do gerente com os supervisores: o vendedor sente o efeito dela na agenda de rota e nos planos de ação. Na quarta, a capacitação começa às 16:00, por isso os pedidos do dia saem antes. A análise de mercado diária substituiu a pesquisa de quinta e é o passo 9 de toda visita.\n\nPERGUNTE AO TIME\nO que muda na sua quarta-feira com os pedidos transmitidos antes das 16:00?"
+  },
+  {
+   "molde": 14,
+   "t": {
+    "0": "MÓDULO 01 · DIA FOCO",
+    "1": "Dia Foco em ciclo de 3 semanas",
+    "7": "Distribuição das linhas proposta pelo analista. Depois da semana 3, o ciclo volta para a semana 1.",
+    "11": "DICA DE CAMPO  |Antes de sair para a rota, confira o Dia Foco: é a linha que você apresenta no passo 2 e pesquisa no passo 9."
+   },
+   "tirar_coluna": {
+    "*": [
+     4
+    ]
+   },
+   "tabela": {
+    "2": [
+     [
+      "Dia",
+      "Semana 1",
+      "Semana 2",
+      "Semana 3"
+     ],
+     [
+      "Segunda",
+      "Baterias e lubrificantes",
+      "Baterias e lubrificantes",
+      "Baterias e lubrificantes"
+     ]
+    ],
+    "3": [
+     [
+      "Terça",
+      "Linha moto",
+      "Linha moto",
+      "Linha moto"
+     ]
+    ],
+    "4": [
+     [
+      "Quarta",
+      "Freio",
+      "Arrefecimento",
+      "Dia do motor"
+     ]
+    ],
+    "5": [
+     [
+      "Quinta",
+      "Direção e transmissão",
+      "Suspensão",
+      "Dia da rodagem"
+     ]
+    ],
+    "6": [
+     [
+      "Sexta",
+      "Elétrica + linha pesada (kit 2)",
+      "Filtros + linha pesada (kit 1)",
+      "Palhetas e acessórios"
+     ]
+    ]
+   },
+   "larguras": {
+    "2": [
+     2.0,
+     3.377,
+     3.377,
+     3.376
+    ],
+    "3": [
+     2.0,
+     3.377,
+     3.377,
+     3.376
+    ],
+    "4": [
+     2.0,
+     3.377,
+     3.377,
+     3.376
+    ],
+    "5": [
+     2.0,
+     3.377,
+     3.377,
+     3.376
+    ],
+    "6": [
+     2.0,
+     3.377,
+     3.377,
+     3.376
+    ]
+   },
+   "cor_celulas": {
+    "2": {
+     "1,1": "tx1"
+    },
+    "3": {
+     "0,1": "tx1"
+    },
+    "4": {
+     "0,1": "tx1"
+    },
+    "5": {
+     "0,1": "tx1"
+    },
+    "6": {
+     "0,1": "tx1"
+    }
+   },
+   "notas": "MENSAGEM-CHAVE\nCada dia da semana tem uma linha em foco, num ciclo de 3 semanas que se repete.\n\nCOMO CONDUZIR\nSegunda e terça são iguais nas 3 semanas (baterias e lubrificantes; linha moto). De quarta a sexta, a linha muda conforme a semana do ciclo. Pergunte ao supervisor em que semana do ciclo estamos.\n\nPERGUNTE AO TIME\nQual linha do Dia Foco vocês acham mais fácil de apresentar? E a mais difícil?"
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "02",
+    "1": "Os 10 passos da visita",
+    "2": "A mesma ordem em todo cliente"
+   },
+   "notas": "MENSAGEM-CHAVE\nToda visita segue os mesmos 10 passos, na mesma ordem.\n\nCOMO CONDUZIR\nDiga que a ordem e as falas são as de 27/10/2026 e que o supervisor acompanha cada passo em campo.\n\nPERGUNTE AO TIME\nQuantos passos vocês acham que já fazem hoje sem perceber?"
+  },
+  {
+   "molde": 38,
+   "t": {
+    "0": "MÓDULO 02 · ROTEIRO",
+    "1": "A visita em 5 blocos",
+    "3": "Chegar",
+    "5": "1 · Check-in\n2 · Apresentar\n3 · Verificar o giro",
+    "7": "Sondar",
+    "9": "4 · Sondar oportunidade",
+    "11": "Oferecer",
+    "13": "5 · Vende quem oferece",
+    "15": "Fechar",
+    "17": "6 · Fechamento (sem oferta de expositor)",
+    "19": "Fortalecer",
+    "21": "7 · Merchandising\n8 · Reforço material de apoio\n9 · Análise de mercado\n10 · Indicou, ganhou",
+    "25": "DICA DE CAMPO  |Nenhum passo é pulado: cada um tem o seu \"feito quando\", que mostra que ele foi cumprido."
+   },
+   "notas": "MENSAGEM-CHAVE\nOs 10 passos se agrupam em 5 blocos: chegar, sondar, oferecer, fechar e fortalecer.\n\nCOMO CONDUZIR\nUse os blocos para memorizar a ordem. O bloco Fortalecer acontece depois do pedido (ou do motivo anotado) e termina com a indicação e o check-out. Os nomes dos blocos são só um apoio de memória; os 10 passos são os da tabela.\n\nPERGUNTE AO TIME\nEm qual bloco vocês gastam mais tempo hoje?",
+   "preencher": {
+    "14": "tx2"
+   }
+  },
+  {
+   "molde": 14,
+   "t": {
+    "0": "MÓDULO 02 · OS 10 PASSOS",
+    "1": "Os 10 passos da visita (1 de 2)",
+    "7": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026."
+   },
+   "tirar_coluna": {
+    "*": [
+     4
+    ]
+   },
+   "tabela": {
+    "2": [
+     [
+      "#",
+      "Passo",
+      "Pergunta-chave",
+      "Feito quando"
+     ],
+     [
+      "1",
+      "Check-in",
+      "—",
+      "check-in a 100 m"
+     ]
+    ],
+    "3": [
+     [
+      "2",
+      "Apresentar",
+      "“Qual produto ou linha tem mais girado essa semana?”",
+      "pergunta do giro feita"
+     ]
+    ],
+    "4": [
+     [
+      "3",
+      "Verificar o giro",
+      "—",
+      "share anotado"
+     ]
+    ],
+    "5": [
+     [
+      "4",
+      "Sondar oportunidade",
+      "“Em quais produtos ou linhas você tem perdido venda, e por quê?”",
+      "perda e motivo"
+     ]
+    ],
+    "6": [
+     [
+      "5",
+      "Vende quem oferece",
+      "“Como tem sido a procura por esta linha e pela nossa marca BAP em seu estabelecimento?” e “Tenho disponíveis as aplicações dos veículos que mais vendem. Vamos completar seu mix com elas?”",
+      "cliente pegou a amostra"
+     ]
+    ]
+   },
+   "larguras": {
+    "2": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ],
+    "3": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ],
+    "4": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ],
+    "5": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ],
+    "6": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ]
+   },
+   "cor_celulas": {
+    "2": {
+     "1,1": "tx1"
+    },
+    "3": {
+     "0,1": "tx1"
+    },
+    "4": {
+     "0,1": "tx1"
+    },
+    "5": {
+     "0,1": "tx1"
+    },
+    "6": {
+     "0,1": "tx1"
+    }
+   },
+   "mover": {
+    "7": [
+     0.6,
+     5.62,
+     12.13,
+     0.3
+    ]
+   },
+   "notas": "MENSAGEM-CHAVE\nPassos 1 a 5: chegar, perguntar do giro, anotar o share, sondar a perda e oferecer com amostra.\n\nCOMO CONDUZIR\nLeia cada linha em voz alta: passo, pergunta-chave e \"feito quando\". Peça a um vendedor que repita a fala do passo 2 e a do passo 4 com as palavras exatas.\n\nPERGUNTE AO TIME\nNo passo 4, que motivos de perda de venda vocês mais escutam?",
+   "respiro": {
+    "6": 0.08
+   },
+   "apagar": [
+    8,
+    9,
+    10,
+    11
+   ]
+  },
+  {
+   "molde": 14,
+   "t": {
+    "0": "MÓDULO 02 · OS 10 PASSOS",
+    "1": "Os 10 passos da visita (2 de 2)",
+    "7": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026. Passo 9: o botão “Pesquisa de mercado” do BAP Ajuda ainda não foi publicado."
+   },
+   "tirar_coluna": {
+    "*": [
+     4
+    ]
+   },
+   "tabela": {
+    "2": [
+     [
+      "#",
+      "Passo",
+      "Pergunta-chave",
+      "Feito quando"
+     ],
+     [
+      "6",
+      "Fechamento (sem oferta de expositor)",
+      "“Fechamos com esses itens?” e, se não fechar, “O que falta pra fechar hoje?”",
+      "pedido ou motivo"
+     ]
+    ],
+    "3": [
+     [
+      "7",
+      "Merchandising",
+      "— |(cartazete, adesivo de visita de rota, status e meta de giro do expositor de quem já tem)",
+      "foto do cartazete"
+     ]
+    ],
+    "4": [
+     [
+      "8",
+      "Reforço material de apoio",
+      "— |(tirar dúvidas do catálogo com o time e checar se estão usando)",
+      "time usando o catálogo"
+     ]
+    ],
+    "5": [
+     [
+      "9",
+      "Análise de mercado",
+      "— |(itens do Dia Foco, todo dia, no BAP Ajuda)",
+      "pesquisa enviada"
+     ]
+    ],
+    "6": [
+     [
+      "10",
+      "Indicou, ganhou",
+      "“Conhece alguém que trabalha com a linha de produtos que te apresentei e ainda não compra BAP?”",
+      "indicação + check-out"
+     ]
+    ]
+   },
+   "larguras": {
+    "2": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ],
+    "3": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ],
+    "4": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ],
+    "5": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ],
+    "6": [
+     0.62,
+     2.38,
+     6.4,
+     2.73
+    ]
+   },
+   "cor_celulas": {
+    "2": {
+     "1,1": "tx1"
+    },
+    "3": {
+     "0,1": "tx1"
+    },
+    "4": {
+     "0,1": "tx1"
+    },
+    "5": {
+     "0,1": "tx1"
+    },
+    "6": {
+     "0,1": "tx1"
+    }
+   },
+   "mover": {
+    "7": [
+     0.6,
+     5.5,
+     12.13,
+     0.3
+    ]
+   },
+   "notas": "MENSAGEM-CHAVE\nPassos 6 a 10: fechar, fazer o merchandising, reforçar o material de apoio, enviar a análise de mercado e pedir a indicação.\n\nCOMO CONDUZIR\nLeia cada linha em voz alta: passo, pergunta-chave e \"feito quando\".\n\nPERGUNTE AO TIME\nQual destes passos é o mais fácil de esquecer no fim da visita?",
+   "italico": {
+    "3": [
+     "0,2"
+    ],
+    "4": [
+     "0,2"
+    ],
+    "5": [
+     "0,2"
+    ]
+   },
+   "apagar": [
+    8,
+    9,
+    10,
+    11
+   ]
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "03",
+    "1": "As falas da visita",
+    "2": "As palavras exatas de cada passo"
+   },
+   "notas": "MENSAGEM-CHAVE\nAs falas são iguais para todo o time: é o que faz a visita BAP ser reconhecida.\n\nCOMO CONDUZIR\nDiga que neste módulo vamos treinar as falas em voz alta.\n\nPERGUNTE AO TIME\nQuem topa ser o cliente no role-play?"
+  },
+  {
+   "molde": 37,
+   "t": {
+    "0": "MÓDULO 03 · PERGUNTAS-CHAVE",
+    "1": "As perguntas que abrem a venda",
+    "4": "2",
+    "5": "Apresentar",
+    "6": "O giro",
+    "7": "“Qual produto ou linha tem mais girado essa semana?”",
+    "10": "4",
+    "11": "Sondar",
+    "12": "A perda",
+    "13": "“Em quais produtos ou linhas você tem perdido venda, e por quê?”",
+    "16": "5",
+    "17": "Oferecer",
+    "18": "A procura e o mix",
+    "19": "“Como tem sido a procura por esta linha e pela nossa marca BAP em seu estabelecimento?”\n“Tenho disponíveis as aplicações dos veículos que mais vendem. Vamos completar seu mix com elas?”",
+    "22": "10",
+    "23": "Indicar",
+    "24": "A indicação",
+    "25": "“Conhece alguém que trabalha com a linha de produtos que te apresentei e ainda não compra BAP?”",
+    "29": "DICA DE CAMPO  |Use as palavras exatas: a mesma fala em todo cliente deixa o vendedor seguro e facilita o acompanhamento do supervisor."
+   },
+   "notas": "MENSAGEM-CHAVE\nQuatro passos têm pergunta-chave falada ao cliente: 2, 4, 5 e 10. A do passo 6 está no módulo de fechamento.\n\nCOMO CONDUZIR\nFaça role-play em duplas: um faz o cliente, outro o vendedor. Cada dupla treina as 4 falas na ordem, sem ler.\n\nPERGUNTE AO TIME\nQual destas perguntas soa mais natural para vocês? E qual precisa de mais treino?"
+  },
+  {
+   "molde": 31,
+   "t": {
+    "0": "MÓDULO 03 · PASSOS DE CAMPO",
+    "1": "Os passos sem fala: o que fazer e a prova",
+    "5": "1 · Check-in",
+    "6": "feito: check-in a 100 m",
+    "10": "3 · Verificar o giro",
+    "11": "feito: share anotado",
+    "15": "7 · Merchandising",
+    "16": "cartazete, adesivo e expositor; feito: foto do cartazete",
+    "20": "8 · Material de apoio",
+    "21": "dúvidas do catálogo; feito: time usando o catálogo",
+    "25": "9 · Análise de mercado",
+    "26": "itens do Dia Foco; feito: pesquisa enviada",
+    "30": "10 · Check-out",
+    "31": "depois da pergunta da indicação",
+    "43": "Feito quando",
+    "44": "É o que mostra que o passo foi cumprido.",
+    "47": "Fonte: os 10 passos da visita, ordem e falas de 27/10/2026."
+   },
+   "icone": {
+    "4": "FaStore",
+    "9": "FaChartLine",
+    "14": "FaEye",
+    "19": "FaBookOpen",
+    "24": "FaMagnifyingGlass",
+    "29": "FaCircleCheck"
+   },
+   "mover": {
+    "47": [
+     0.6,
+     5.2,
+     7.9,
+     0.4
+    ],
+    "42": [
+     null,
+     null,
+     null,
+     3.45
+    ]
+   },
+   "apagar": [
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    45,
+    46
+   ],
+   "notas": "MENSAGEM-CHAVE\nSeis momentos da visita não têm pergunta ao cliente, mas têm um \"feito quando\".\n\nCOMO CONDUZIR\nPasse card a card e peça a um vendedor que diga como registra cada prova.\n\nPERGUNTE AO TIME\nQual destas provas vocês acham mais difícil de registrar na correria da rota?",
+   "cor_texto": {
+    "43": "accent1"
+   }
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "04",
+    "1": "Fechamento",
+    "2": "Do pedido ao acompanhamento do supervisor"
+   },
+   "notas": "MENSAGEM-CHAVE\nToda visita tem um passo 6: termina em pedido ou em motivo anotado.\n\nCOMO CONDUZIR\nDiga que o fechamento é sem oferta de expositor: o foco é o pedido dos itens apresentados.\n\nPERGUNTE AO TIME\nO que vocês costumam fazer quando o cliente diz \"hoje não\"?"
+  },
+  {
+   "molde": 43,
+   "t": {
+    "0": "MÓDULO 04 · FECHAMENTO",
+    "1": "Fechamento em 3 etapas",
+    "6": "“Fechamos com esses itens?”",
+    "7": "Direto, logo depois da amostra e das aplicações.",
+    "12": "“O que falta pra fechar hoje?”",
+    "13": "Escute até o fim: o motivo é um dos 5 da faixa abaixo.",
+    "18": "“Se eu resolver isso, fechamos?”",
+    "19": "Só se for algo que você resolve.",
+    "21": "Sem pedido? Anote o motivo:  |preço · prazo ou limite · disponibilidade · já tem fornecedor · sem necessidade",
+    "25": "DICA DE CAMPO  |O passo 6 é sem oferta de expositor: o pedido é dos itens que o cliente viu na amostra e nas aplicações."
+   },
+   "notas": "MENSAGEM-CHAVE\nFechar é pedir: três frases, e sem pedido o motivo é anotado.\n\nCOMO CONDUZIR\nLeia as três frases em voz alta e peça para o time repetir. A terceira (\"Se eu resolver isso, fechamos?\") é usada só quando o motivo é algo que o vendedor resolve; ela é treinada aqui e na matinal, mas não está no card dos 10 passos. Reforce a faixa escura: os motivos anotados vão para o supervisor.\n\nPERGUNTE AO TIME\nQual dos 5 motivos vocês mais escutam? Como responderiam a ele?",
+   "preencher": {
+    "15": "tx1"
+   },
+   "cor_texto": {
+    "17": "tx2"
+   }
+  },
+  {
+   "molde": 36,
+   "t": {
+    "0": "MÓDULO 04 · ACOMPANHAMENTO",
+    "1": "O supervisor acompanha os 10 passos",
+    "3": "3 · 2 · 1",
+    "4": "nota de cada passo na ficha de acompanhamento de campo",
+    "6": "Feedback",
+    "7": "do supervisor durante a rota, entre um cliente e outro",
+    "9": "Segunda",
+    "10": "os motivos somados da semana viram plano de ação na RPS",
+    "14": "O \"feito quando\" de cada passo orienta a nota",
+    "18": "Use o feedback já na próxima visita",
+    "22": "No passo 6, o motivo de não fechar fica marcado",
+    "36": "NA PRÁTICA"
+   },
+   "icone": {
+    "13": "FaCircleCheck",
+    "17": "FaArrowsRotate",
+    "21": "FaCircleQuestion"
+   },
+   "notas": "MENSAGEM-CHAVE\nO supervisor acompanha a visita com uma ficha única: nota 3, 2 ou 1 em cada passo e o motivo de não fechar marcado no passo 6.\n\nCOMO CONDUZIR\nExplique que o acompanhamento é para ajudar: o feedback vem durante a rota. Os motivos de não fechar somados na semana vão para a RPS de segunda, onde viram plano de ação.\n\nPERGUNTE AO TIME\nQue tipo de feedback ajuda mais vocês: na hora ou no fim do dia?",
+   "copiar": [
+    {
+     "molde": 6,
+     "formas": [
+      2
+     ],
+     "dy": 1.77
+    }
+   ],
+   "mover": {
+    "11": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "12": [
+     null,
+     4.17,
+     null,
+     null
+    ],
+    "13": [
+     null,
+     4.3100000000000005,
+     null,
+     null
+    ],
+    "14": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "15": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "16": [
+     null,
+     4.17,
+     null,
+     null
+    ],
+    "17": [
+     null,
+     4.3100000000000005,
+     null,
+     null
+    ],
+    "18": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "19": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "20": [
+     null,
+     4.17,
+     null,
+     null
+    ],
+    "21": [
+     null,
+     4.3100000000000005,
+     null,
+     null
+    ],
+    "22": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "23": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "24": [
+     null,
+     5.5200000000000005,
+     null,
+     null
+    ],
+    "25": [
+     null,
+     5.66,
+     null,
+     null
+    ],
+    "26": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "27": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "28": [
+     null,
+     5.5200000000000005,
+     null,
+     null
+    ],
+    "29": [
+     null,
+     5.66,
+     null,
+     null
+    ],
+    "30": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "31": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "32": [
+     null,
+     5.5200000000000005,
+     null,
+     null
+    ],
+    "33": [
+     null,
+     5.66,
+     null,
+     null
+    ],
+    "34": [
+     null,
+     5.2,
+     null,
+     null
+    ]
+   },
+   "apagar": [
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34
+   ]
+  },
+  {
+   "molde": 6,
+   "t": {
+    "0": "MÓDULO 04 · INDICOU, GANHOU",
+    "1": "Indicou, ganhou: a mochila exclusiva BAP",
+    "2": "A REGRA",
+    "3": "Se o indicado se cadastrar e comprar, quem indicou ganha uma mochila exclusiva BAP.",
+    "4": "10",
+    "5": "é o passo da indicação, antes do check-out",
+    "10": "A indicação conta como prospecção?",
+    "11": "Não. Só conta quando o vendedor vai ao indicado e registra no formulário de prospecção.",
+    "15": "DICA DE CAMPO  |“Conhece alguém que trabalha com a linha de produtos que te apresentei e ainda não compra BAP?”"
+   },
+   "mover": {
+    "8": [
+     null,
+     null,
+     null,
+     2.25
+    ],
+    "10": [
+     7.6,
+     1.9,
+     4.9,
+     0.6
+    ],
+    "11": [
+     7.6,
+     2.55,
+     4.9,
+     1.1
+    ]
+   },
+   "apagar": [
+    6,
+    7,
+    9
+   ],
+   "notas": "MENSAGEM-CHAVE\nToda visita termina com a pergunta do Indicou, ganhou e o check-out.\n\nCOMO CONDUZIR\nLeia a regra: o prêmio sai quando o indicado se cadastra e compra. Deixe claro que a indicação, sozinha, não conta como prospecção: conta quando o vendedor vai ao indicado e registra no formulário de prospecção.\n\nPERGUNTE AO TIME\nComo vocês apresentariam o Indicou, ganhou para um cliente que compra há anos?"
+  },
+  {
+   "molde": 5,
+   "t": {
+    "0": "05",
+    "1": "Ferramentas na rota",
+    "2": "O que abrir no celular em cada passo"
+   },
+   "notas": "MENSAGEM-CHAVE\nO catálogo online e o BAP Ajuda são as ferramentas do vendedor na visita.\n\nCOMO CONDUZIR\nPeça que cada um abra o catálogo no celular agora, com o login.\n\nPERGUNTE AO TIME\nQuem já usou o catálogo numa visita esta semana?"
+  },
+  {
+   "molde": 36,
+   "t": {
+    "0": "MÓDULO 05 · CATÁLOGO ONLINE",
+    "1": "O catálogo online na visita",
+    "3": "Placa",
+    "4": "ou veículo: Marca, Modelo, Ano, Motor e Versão",
+    "6": "Código",
+    "7": "código BAP, referência cruzada ou código de barras",
+    "9": "Descrição",
+    "10": "e aplicação num campo só: “gol 2007 amortecedor”",
+    "14": "Aplicação em tabela: marca, modelo, cilindrada, versão e ano",
+    "18": "Leve também: o item que vai com a peça",
+    "22": "Copiar código e Salvar em PDF na ficha do produto",
+    "26": "Cada usuário com o seu login; o cliente também tem o dele",
+    "30": "Disponibilidade: no menu da conta, acima de Trocar senha; o admin libera na tela de usuários",
+    "34": "Sem preço: só a ficha do produto vai ao cliente",
+    "36": "NA PRÁTICA"
+   },
+   "icone": {
+    "13": "FaRuler",
+    "17": "FaLink",
+    "21": "FaFileSignature",
+    "25": "FaLock",
+    "29": "FaBoxesStacked",
+    "33": "FaEye"
+   },
+   "notas": "MENSAGEM-CHAVE\nNo catálogo online, o vendedor acha a peça pela placa ou pelo veículo, pelo código (BAP, referência cruzada ou código de barras) ou num campo só, por descrição e aplicação.\n\nCOMO CONDUZIR\nFaça ao vivo uma busca por placa, uma por veículo do Dia Foco de hoje e uma por referência. Abra a ficha e mostre a aplicação em tabela, o Leve também, o Copiar código e o Salvar em PDF.\n\nPERGUNTE AO TIME\nQual busca vocês mais vão usar no balcão: por placa, por veículo ou por código?",
+   "copiar": [
+    {
+     "molde": 6,
+     "formas": [
+      2
+     ],
+     "dy": 1.77
+    }
+   ],
+   "mover": {
+    "11": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "12": [
+     null,
+     4.17,
+     null,
+     null
+    ],
+    "13": [
+     null,
+     4.3100000000000005,
+     null,
+     null
+    ],
+    "14": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "15": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "16": [
+     null,
+     4.17,
+     null,
+     null
+    ],
+    "17": [
+     null,
+     4.3100000000000005,
+     null,
+     null
+    ],
+    "18": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "19": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "20": [
+     null,
+     4.17,
+     null,
+     null
+    ],
+    "21": [
+     null,
+     4.3100000000000005,
+     null,
+     null
+    ],
+    "22": [
+     null,
+     3.85,
+     null,
+     null
+    ],
+    "23": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "24": [
+     null,
+     5.5200000000000005,
+     null,
+     null
+    ],
+    "25": [
+     null,
+     5.66,
+     null,
+     null
+    ],
+    "26": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "27": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "28": [
+     null,
+     5.5200000000000005,
+     null,
+     null
+    ],
+    "29": [
+     null,
+     5.66,
+     null,
+     null
+    ],
+    "30": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "31": [
+     null,
+     5.2,
+     null,
+     null
+    ],
+    "32": [
+     null,
+     5.5200000000000005,
+     null,
+     null
+    ],
+    "33": [
+     null,
+     5.66,
+     null,
+     null
+    ],
+    "34": [
+     null,
+     5.2,
+     null,
+     null
+    ]
+   }
+  },
+  {
+   "molde": 38,
+   "t": {
+    "0": "MÓDULO 05 · FERRAMENTAS",
+    "1": "Onde cada ferramenta entra na visita",
+    "3": "Antes",
+    "5": "Conferir o Dia Foco do dia\nVer as aplicações da linha no catálogo",
+    "7": "Passo 5",
+    "9": "Mostrar as aplicações dos veículos que mais vendem\nEntregar a amostra",
+    "11": "Passo 6",
+    "13": "Conferir aplicação, posição e lado antes do pedido\nConsultar a disponibilidade",
+    "15": "Passo 8",
+    "17": "Tirar as dúvidas do catálogo com o time do cliente\nChecar se estão usando",
+    "19": "Passo 9",
+    "21": "Análise de mercado dos itens do Dia Foco: no BAP Ajuda, botão ainda não publicado",
+    "25": "DICA DE CAMPO  |O catálogo também é material de apoio do cliente."
+   },
+   "notas": "MENSAGEM-CHAVE\nO catálogo online entra antes da visita e nos passos 5, 6 e 8; a análise de mercado entra no passo 9.\n\nCOMO CONDUZIR\nPercorra as colunas da esquerda para a direita.\n\nPERGUNTE AO TIME\nQual destas ferramentas vocês ainda não usam? O que falta para começar?",
+   "preencher": {
+    "14": "accent1"
+   }
+  },
+  {
+   "molde": 45,
+   "t": {
+    "0": "ENCERRAMENTO",
+    "1": "Checklist do vendedor BAP",
+    "5": "Conferi o Dia Foco antes de sair",
+    "9": "Fiz o check-in a 100 m do cliente",
+    "13": "Perguntei qual produto ou linha mais girou",
+    "17": "Anotei o share do giro",
+    "21": "Perguntei onde o cliente perde venda, e por quê",
+    "25": "Mostrei as aplicações e deixei a amostra",
+    "29": "Pedi o pedido; sem pedido, anotei o motivo",
+    "33": "Fiz o merchandising e a foto do cartazete",
+    "37": "Tirei as dúvidas do catálogo com o time",
+    "41": "Enviei a análise de mercado do Dia Foco",
+    "45": "Pedi uma indicação (Indicou, ganhou)",
+    "49": "Fiz o check-out"
+   },
+   "notas": "MENSAGEM-CHAVE\nO checklist resume a visita em 12 atitudes: o Dia Foco antes de sair e os 10 passos, até o check-out.\n\nCOMO CONDUZIR\nVolte ao slide \"Ao final deste onboarding\" e mostre que cada verbo virou um item. Peça para cada um marcar os itens que já faz e escolher um para começar amanhã.\n\nPERGUNTE AO TIME\nQual item faria mais diferença na sua próxima visita?"
+  },
+  {
+   "molde": 46,
+   "t": {
+    "0": "ENCERRAMENTO",
+    "1": "Teste seus conhecimentos",
+    "5": "Qual é a pergunta-chave do passo 2 (Apresentar)?",
+    "9": "Qual é o \"feito quando\" do passo 5 (Vende quem oferece)?",
+    "13": "Quais são as 3 etapas do fechamento, com as falas?",
+    "17": "Sem pedido, quais são os 5 motivos que o vendedor anota?",
+    "21": "No Indicou, ganhou, quando a indicação conta como prospecção?",
+    "25": "Em que dia e horário acontece a capacitação contínua do time?"
+   },
+   "notas": "MENSAGEM-CHAVE\nO teste fixa os pontos principais. Faça em duplas ou em voz alta, sem consultar.\n\nCOMO CONDUZIR\nLeia uma pergunta por vez e peça a resposta a alguém diferente a cada pergunta.\n\nRESPOSTAS\n1. “Qual produto ou linha tem mais girado essa semana?”\n2. O cliente pegou a amostra.\n3. Peça (“Fechamos com esses itens?”); não fechou (“O que falta pra fechar hoje?”); você resolve (“Se eu resolver isso, fechamos?”).\n4. Preço, prazo ou limite, disponibilidade, já tem fornecedor e sem necessidade.\n5. Só quando o vendedor vai ao indicado e registra no formulário de prospecção.\n6. Na quarta, das 16:00 às 18:00 (pedidos do dia transmitidos antes das 16:00)."
+  },
+  {
+   "molde": 47,
+   "t": {
+    "0": "ONBOARDING DO VENDEDOR BAP",
+    "1": "Obrigado!",
+    "2": "Bem-vindo ao time. Agora é levar os 10 passos para a rota."
+   },
+   "notas": "MENSAGEM-CHAVE\nA visita BAP é a mesma em todo cliente: 10 passos, do check-in ao check-out.\n\nCOMO CONDUZIR\nAbra para dúvidas. Lembre que os treinamentos de produto (Mecânica Básica, Baterias, Lubrificantes, Linha Moto) aprofundam o que se apresenta no passo 5.\n\nPERGUNTE AO TIME\nQual passo você vai caprichar já na primeira visita de amanhã?"
+  }
+ ]
+}

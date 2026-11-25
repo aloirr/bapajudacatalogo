@@ -51,7 +51,7 @@ const SETE = [
   ['lubrificantes-pptx', 'BAP_Lubrificantes_e_Quimicos_Apresentacao_Comercial.pptx', 'PK-pptx-lubri-falso', 'pptx', 'materiais', 'lubrificantes', 'Lubrificantes e Químicos'],
   ['kit-filtros', 'Kit_Filtros_BAP.pdf', '%PDF-kit-falso', 'pdf', 'materiais', null, 'Kit Filtros'],
 ];
-// Os da T-0032: o portfólio por linha (materiais) e os treinamentos (PDF e PowerPoint, em par).
+// Os da T-0032 e T-0038: o portfólio por linha (materiais) e os treinamentos (PDF e PowerPoint, em par).
 const NOVOS = [
   ['portfolio-leve', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Leve.pdf', '%PDF-port-leve-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Leve'],
   ['portfolio-pesada', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Pesada.pdf', '%PDF-port-pesada-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Pesada'],
@@ -60,6 +60,9 @@ const NOVOS = [
   ['portfolio-acessorios', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Acessorios.pdf', '%PDF-port-acess-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Acessórios'],
   ['portfolio-baterias', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Baterias.pdf', '%PDF-port-bat-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Baterias'],
   ['portfolio-autocenter', 'Portfolio_Produtos_BAP_AUTOPARTS_Linha_Autocenter.pdf', '%PDF-port-auto-falso', 'pdf', 'materiais', null, 'Portfólio · Linha Autocenter'],
+  // T-0038: o Onboarding do Vendedor, no topo dos treinamentos.
+  ['treinamento-onboarding-vendedor-pdf', 'Treinamento_Onboarding_Vendedor_BAP_Vendedores.pdf', '%PDF-trein-onb-falso', 'pdf', 'treinamentos', 'treinamento-onboarding-vendedor', 'Treinamento · Onboarding do Vendedor'],
+  ['treinamento-onboarding-vendedor-pptx', 'Treinamento_Onboarding_Vendedor_BAP_Vendedores.pptx', 'PK-pptx-trein-onb-falso', 'pptx', 'treinamentos', 'treinamento-onboarding-vendedor', 'Treinamento · Onboarding do Vendedor'],
   ['treinamento-mecanica-basica-pdf', 'Treinamento_Mecanica_Basica_BAP_Vendedores.pdf', '%PDF-trein-mec-falso', 'pdf', 'treinamentos', 'treinamento-mecanica-basica', 'Treinamento · Mecânica Básica'],
   ['treinamento-mecanica-basica-pptx', 'Treinamento_Mecanica_Basica_BAP_Vendedores.pptx', 'PK-pptx-trein-mec-falso', 'pptx', 'treinamentos', 'treinamento-mecanica-basica', 'Treinamento · Mecânica Básica'],
   ['treinamento-baterias-pdf', 'Treinamento_Baterias_BAP_Vendedores.pdf', '%PDF-trein-bat-falso', 'pdf', 'treinamentos', 'treinamento-baterias', 'Treinamento · Baterias'],
