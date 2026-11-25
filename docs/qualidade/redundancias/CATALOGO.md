@@ -414,13 +414,14 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0608 | baixa | teste | servicos/login/login.test.mjs:1340-1343 × :1344-1350 | o `hasRef()` no processo repete o que o processo filho já prova (sai o `hasRef`) | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
 | RD-0609 | baixa | código (comentário) | servicos/login/server.mjs:433 × :436 | "baixa a fonte uma vez, no início" contradiz a recarga diária (não segura) | T-0036 | integracao-placas | CORRIGIDO (e6551de) |
 | RD-0610 | — | teste | servicos/login/login.test.mjs:1305-1337 × :1191-1229 e :1231-1262 | o teste "recarga no serviço" repete o 22 h, o reagendamento e o 404 | T-0036 | integracao-placas | MANTIDO (`manter?`: único que prova a ligação no `server.mjs`, a `/api/estoque` e o log sem a fonte) |
-| RD-0611 | baixa | doc | servicos/login/LEIA.md:68 × :60 | o item Memória da recarga repete a medida da carga da partida (167/165 MB × "pico de ~150 a 190 MB" da :60); fica só o da recarga (257 MB de pico, ~230 MB depois) | T-0036 | integracao-placas | ABERTO |
+| RD-0611 | baixa | doc | servicos/login/LEIA.md:68 × :60 | o item Memória da recarga repete a medida da carga da partida (167/165 MB × "pico de ~150 a 190 MB" da :60); fica só o da recarga (257 MB de pico, ~230 MB depois) | T-0036 | integracao-placas | CORRIGIDO (31ceb02) |
 
 ## Notas
 
 ### T-0036, recarga diária do estoque, 24/11/2026 (antes do PR)
 - RD-0603 ao RD-0610: branch `integracao-placas/T-0036-recarga`, head `6e4a1ed`. Relatório: `T-0036.md`. VOLTA PARA AJUSTE: seguram o RD-0603 ao RD-0608 (todos baixa, do `integracao-placas`); não segura o RD-0609 (só comentário); MANTIDO: RD-0610. Fila: nenhum.
 - Reteste no head `e6551de`: RD-0603 ao RD-0609 corrigidos. Novo: RD-0611 (baixa, doc, LEIA do estoque). VOLTA PARA AJUSTE até o RD-0611.
+- Reteste final no head `31ceb02`: RD-0611 corrigido. LIBERADO (nenhum achado em aberto; MANTIDO: RD-0610).
 
 ### T-0034, aba Estoque, 24/11/2026 (antes dos PRs)
 - RD-0585 ao RD-0602: os branches `integracao-placas/T-0034-estoque` (`12bf90b`), `web-site/T-0034-estoque` (`06c9596`) e `testes/T-0034-estoque` (`dbac2c0`), primeira rodada. Relatório: `T-0034.md`. LIBERADO COM AJUSTES: seguram o RD-0585 ao RD-0596; não segura o RD-0597 (só comentário); fila: RD-0598; MANTIDOS: RD-0599 e RD-0600.
