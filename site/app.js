@@ -1800,14 +1800,16 @@
   // e "apenas …" vão até o fim do trecho (" · ", ";", "|", ")" ou ",") e ficam inteiros na Versão; o que está depois de
   // "exc."/"não aplica" (RX_NEGA) não dá cilindrada nem modelo à linha ("Não aplica no Focus 1.6" não põe 1.6 no
   // Focus). "s/ ABS", "sem ar" e "após chassi 10310" (RX_CONDICAO) ficam na Versão comum e, quando ela sai, sozinhos;
-  // o "sem"/"s/" leva as palavras seguidas ("SEM POLIA ELETROMAGNETICA E AC", "s/ Barra Estab.") até a cilindrada, o
-  // número, o " - ", o "/" ou o fim do trecho ("S/SC/SCV", sem espaço depois da barra, é versão).
+  // o "sem"/"s/" leva as palavras seguidas ("SEM POLIA ELETROMAGNETICA E AC", "s/ Barra Estab.", "Sem Rolamento Aro 15")
+  // até a cilindrada, o número, o " - ", o "/", o fim do trecho ou o FIM_CONDICAO ("S/SC/SCV" é versão).
   const NEGA = String.raw`n[ãa]o\s+(?:se\s+)?(?:aplica|serve)|exc\.|exceto|excluindo`;
   const fimRestr = String.raw`(?![\wÀ-ÿ])[^·;|),]*`;
   const RX_NEGA_INI = new RegExp(String.raw`^(?:${NEGA})\s*`, "i");
   const RX_NEGA = new RegExp(String.raw`(?<![\wÀ-ÿ])(?:${NEGA})${fimRestr}`, "gi");
   const RX_RESTR = new RegExp(String.raw`(?<![\wÀ-ÿ])(?:${NEGA}|somente|apenas)${fimRestr}`, "gi");
-  const RX_CONDICAO = /(?<![\wÀ-ÿ])(?:(?:ap[oó]s|at[ée]|desde|a\s+partir\s+d[oa])\s+chassis?\s+[\w.]+|chassis?\s+(?:longo|curto)|(?:s\/\s|sem\s)\s*[\wÀ-ÿ]+(?:\/[\wÀ-ÿ]+)?(?:\s+(?=([A-Za-zÀ-ÿ][\wÀ-ÿ.]*))\1(?!\/))*)/gi;
+  // o "sem …" para antes de outra condição ("Sem ABS Sem Rolamento" são duas) e do combustível ("Sem ABS Gasolina")
+  const FIM_CONDICAO = String.raw`(?:sem|com|exc\.|exceto|somente|apenas|gasolina|diesel|flex|[áa]lcool|gnv)(?![\wÀ-ÿ])`;
+  const RX_CONDICAO = new RegExp(String.raw`(?<![\wÀ-ÿ])(?:(?:ap[oó]s|at[ée]|desde|a\s+partir\s+d[oa])\s+chassis?\s+[\w.]+|chassis?\s+(?:longo|curto)|(?:s\/\s|sem\s)\s*[\wÀ-ÿ]+(?:\/[\wÀ-ÿ]+)?(?:\s+(?:aro\s+\d+(?!\d)|(?!${FIM_CONDICAO})(?=([A-Za-zÀ-ÿ][\wÀ-ÿ.]*))\1(?!\/)))*)`, "gi");
   // o texto da aplicação sem o "DETALHE: …" (texto de venda, não é restrição), compactado
   const aplSemDetalhe = (p) => String(p.a || "").replace(/\bDETALHE\s*:[^|;]*/gi, " ");
   const SEM_DETALHE = new WeakMap();
