@@ -30,7 +30,8 @@
   // Exibição sem caixa alta ("Honda Civic", "Volkswagen Gol", "Mercedes-Benz Atego"); siglas ficam: VW, GM, BMW...,
   // palavra com número (HB20, 16V, 208), pedaço curto com hífen (CR-V) e, na versão, as de 2 a 4 letras (LXS, HX, GLI).
   // Só para mostrar: a busca e os filtros continuam com o texto da base. Do catálogo (app.js) e do Estoque (T-0035).
-  const SIGLAS = new Set(["VW", "GM", "BMW", "BYD", "JAC", "GWM", "MG", "DS", "RAM", "CAOA", "JCB", "DAF", "MAN", "AGCO"]);
+  const SIGLAS = new Set(["VW", "GM", "BMW", "BYD", "JAC", "GWM", "MG", "DS", "RAM", "CAOA", "JCB", "DAF", "MAN", "AGCO",
+    "DOT"]); // DOT: fluido de freio (T-0035, nomes do ESTOQUE_BAP)
   const LIGA = new Set(["E", "DE", "DA", "DO", "DAS", "DOS", "COM", "SEM", "PARA"]); // "Amortecedores e Kits"
   function bonito(txt, versao) {
     return String(txt || "").toUpperCase().replace(/\s+/g, " ").trim().replace(/[A-ZÀ-Ý0-9.]+/g, (w, i, todo) => {
