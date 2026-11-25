@@ -286,6 +286,8 @@ a.item-rel:hover { background: var(--fundo); }
 .item-rel.fora .rel-txt span { color: var(--texto-2); }
 @media (max-width: 640px) { .rel, .itens-rel { grid-template-columns: minmax(0, 1fr); } } /* celular: título em cima e um cartão por linha, sem rolar de lado */
 .aviso { font-size: max(var(--min), calc(12.5px * var(--t))); color: var(--texto-2); margin-top: 8px; }
+.restr-fora { font-size: max(var(--min), calc(13px * var(--t))); margin-top: 8px; overflow-wrap: anywhere; } /* a restrição do texto que a tabela não mostra (T-0033) */
+.aviso.proximos { margin: 0 0 14px; font-size: 14px; } /* os avisos acima da lista da busca ("mais próximos" e tipo sem peça) */
 
 /* janela do produto (T-0014): no computador e no celular */
 html.com-janela { overflow: hidden; }
@@ -319,7 +321,7 @@ table.tab-veiculos thead th { border-bottom: 1px solid var(--linha); }
 /* a tabela nunca rola para o lado (revisão do designer-ux no PR #50): Marca, Modelo e Versão quebram a linha;
    Cilindrada não quebra; o Ano quebra só entre as faixas, na ", ", nunca dentro de uma (R-20261120-165900-alexandre) */
 table.tab-veiculos td { white-space: normal; overflow-wrap: normal; } /* quebra entre palavras ("Volkswagen" inteiro) */
-table.tab-veiculos td:nth-child(3), .tab-veiculos .faixa, .lista-veiculos .faixa { white-space: nowrap; }
+.tab-veiculos .cil, .tab-veiculos .faixa, .lista-veiculos .faixa { white-space: nowrap; } /* a cilindrada e a faixa inteiras; a quebra só entre elas (T-0033) */
 /* o Ano com a largura de uma faixa (revisão do designer-ux no PR #54): a Marca e o Modelo não perdem espaço; sem o
    espaço à direita, a vírgula da faixa ("2003–2005,") cabe na janela de 1024 px sem rolar de lado */
 table.tab-veiculos th:nth-child(5), table.tab-veiculos td:nth-child(5) { width: 1%; padding-right: 0; }
@@ -332,8 +334,6 @@ table.tab-veiculos th:nth-child(5), table.tab-veiculos td:nth-child(5) { width: 
   .lista-veiculos li b { display: block; font-weight: 600; color: var(--escuro); }
   .lista-veiculos li > span { display: block; color: var(--texto-2); }
 }
-.apl-resto { margin-top: 12px; } /* "Outros veículos e detalhes": o que a tabela não cobre, aberto */
-.apl-dono { font-weight: 600; } /* B11 (T-0018): o veículo dono do detalhe em "Outros veículos e detalhes" */
 
 /* rodapé (T-0018 op4e): --escuro, a linha --verde e o padrão de ícones automotivos (SVG inline, traço branco a 7%) */
 .rodape { position: relative; margin-top: 56px; color: var(--branco); border-top: 3px solid var(--verde); background-color: var(--escuro);
