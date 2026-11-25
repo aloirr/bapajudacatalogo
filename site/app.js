@@ -1635,7 +1635,7 @@
     // lado, só com o que veio ("Cilindrada 1.6 · Ano 2017–", "Ano 2017–" ou "Cilindrada 1.6"; sem os dois, só o nome)
     return `<div class="tab-rola"><table class="t tab-veiculos"><thead><tr><th scope="col">Marca</th><th scope="col">Modelo</th><th scope="col">Cilindrada</th><th scope="col">Versão</th><th scope="col">Ano</th></tr></thead>
       <tbody>${linhas.map((l) => `<tr>${l.map((c, i) => `<td>${c ? (i === 4 ? anoHtml(c) : i === 2 ? cilHtml(c) : esc(c)) : traco}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
-      <ul class="lista-veiculos">${linhas.map(([ma, mo, ci, ve, an]) => `<li><b>${esc([ma, mo].join(" ") + (ve ? (/^Não serve\b/.test(ve) ? " · " : " ") + ve : ""))}</b>${ci || an
+      <ul class="lista-veiculos">${linhas.map(([ma, mo, ci, ve, an]) => `<li><b>${esc([ma, mo].join(" ") + (ve ? (ve.startsWith(NAO_SERVE) ? " · " : " ") + ve : ""))}</b>${ci || an
         ? `<span>${[ci && `Cilindrada ${esc(ci)}`, an && `Ano ${anoHtml(an)}`].filter(Boolean).join(" · ")}</span>` : ""}</li>`).join("")}</ul>`;
   }
   // Cilindradas do texto, com a válvula quando vem junto ("2.0 L 16V" → "2.0 16V", "1.8 8v" → "1.8 8V"): a coluna
@@ -1792,24 +1792,26 @@
   const comAnos = (cel, fx) => fmtFaixas(faixasDaCelula(cel).map(faixaDaCelula).filter(Boolean).concat(fx));
   // o detalhe vai para a Versão da linha, depois de " · "; o "DETALHE: …" do texto nunca entra (fica na "Aplicação
   // completa" da ficha)
-  const comDetalhe = (r, d) => { d = d.replace(/\bDETALHE\s*:.*$/i, "").trim(); if (d) r[3] = r[3] ? r[3] + " · " + d : d; };
+  const versaoSemDetalhe = (v) => String(v || "").replace(/(?:[·|]\s*)?\bDETALHE\s*:.*$/i, "");
+  const comDetalhe = (r, d) => { d = versaoSemDetalhe(d).trim(); if (d) r[3] = r[3] ? r[3] + " · " + d : d; };
   // lado e posição, que a ficha já mostra (MC-0040): saem da Versão quando o produto tem Lado ou Posição
   const RX_LADO_POSICAO = /\b(?:ambos\s+os\s+lados|lado\s+roda|lados?|roda\s+(?:diant\.?|dianteira|tras\.?|traseira)|dir(?:eit[oa])?\.?|esq(?:uerd[oa])?\.?|diant(?:eir[oa])?\.?|tras(?:eir[oa])?\.?|inferior|superior)(?![\wÀ-ÿ])/gi;
   // A restrição do texto nunca some da tela (T-0033, revisão do PR): "exc. …", "exceto …", "não aplica …", "somente …"
   // e "apenas …" vão até o fim do trecho (" · ", ";", "|", ")" ou ",") e ficam inteiros na Versão; o que está depois de
   // "exc."/"não aplica" (RX_NEGA) não dá cilindrada nem modelo à linha ("Não aplica no Focus 1.6" não põe 1.6 no
-  // Focus). "s/ ABS", "sem ar" e "após chassi 10310" (RX_CONDICAO) ficam na Versão comum e, quando ela sai, sozinhos.
+  // Focus). "s/ ABS", "sem ar" e "após chassi 10310" (RX_CONDICAO) ficam na Versão comum e, quando ela sai, sozinhos;
+  // o "sem"/"s/" leva as palavras seguidas ("SEM POLIA ELETROMAGNETICA E AC", "s/ Barra Estab.") até a cilindrada, o
+  // número, o " - ", o "/" ou o fim do trecho ("S/SC/SCV", sem espaço depois da barra, é versão).
   const NEGA = String.raw`n[ãa]o\s+(?:se\s+)?(?:aplica|serve)|exc\.|exceto|excluindo`;
   const fimRestr = String.raw`(?![\wÀ-ÿ])[^·;|),]*`;
   const RX_NEGA_INI = new RegExp(String.raw`^(?:${NEGA})\s*`, "i");
   const RX_NEGA = new RegExp(String.raw`(?<![\wÀ-ÿ])(?:${NEGA})${fimRestr}`, "gi");
   const RX_RESTR = new RegExp(String.raw`(?<![\wÀ-ÿ])(?:${NEGA}|somente|apenas)${fimRestr}`, "gi");
-  const RX_CONDICAO = /(?<![\wÀ-ÿ])(?:(?:ap[oó]s|at[ée]|desde|a\s+partir\s+d[oa])\s+chassis?\s+[\w.]+|chassis?\s+(?:longo|curto)|(?:s\/\s|sem\s)\s*[\wÀ-ÿ]+(?:\/[\wÀ-ÿ]+)?)/gi; // "S/SC/SCV" é versão
+  const RX_CONDICAO = /(?<![\wÀ-ÿ])(?:(?:ap[oó]s|at[ée]|desde|a\s+partir\s+d[oa])\s+chassis?\s+[\w.]+|chassis?\s+(?:longo|curto)|(?:s\/\s|sem\s)\s*[\wÀ-ÿ]+(?:\/[\wÀ-ÿ]+)?(?:\s+(?=([A-Za-zÀ-ÿ][\wÀ-ÿ.]*))\1(?!\/))*)/gi;
   // o texto da aplicação sem o "DETALHE: …" (texto de venda, não é restrição), compactado
   const aplSemDetalhe = (p) => String(p.a || "").replace(/\bDETALHE\s*:[^|;]*/gi, " ");
   const SEM_DETALHE = new WeakMap();
   const textoRestr = (p) => SEM_DETALHE.get(p) || SEM_DETALHE.set(p, compacto(aplSemDetalhe(p))).get(p);
-  const versaoSemDetalhe = (v) => String(v || "").replace(/(?:[·|]\s*)?\bDETALHE\s*:.*$/i, "");
   // [o texto sem as restrições, as restrições]; comRestr: f no texto sem elas, que voltam no fim, inteiras, depois de " · "
   const partirRestr = (x, p) => { const rs = []; return [x.replace(RX_RESTR, (m) => (textoRestr(p).includes(compacto(m)) ? (rs.push(m.trim()), " ") : m)), rs]; };
   const comRestr = (x, f, p) => { const [resto, rs] = partirRestr(x, p); return [f(resto), ...rs].filter(Boolean).join(" · "); };
@@ -1819,7 +1821,7 @@
   const limparRestr = (x, p) => {
     const ps = semPontas(x.replace(/[()]/g, " ").replace(/\s+/g, " ").trim()).split(/(\s+[-–]\s+|\s*\/\s*|\s+)/);
     while ((p.la || p.po) && ps.length > 3 && !ps[ps.length - 1].replace(RX_LADO_POSICAO, "").trim()) ps.splice(-2);
-    return siglas(semPontas(ps.join("")));
+    return siglas(semPontas(ps.join("").replace(/\s+(?:e|ou)$/i, ""))); // "s/ ABS ou c/ ABS": sem o "ou" do fim
   };
   // A Versão na tela (U3, MC-0036, R1/MC-0038): sem "DETALHE: …", sem "todos"/"todas" sozinho, sem parênteses, sem
   // pontuação solta ou no fim, com as siglas em maiúsculas ("mpi" é MPI); sem lado e posição quando a ficha os tem;
@@ -1827,7 +1829,9 @@
   // "s/ …"/"sem …"); a restrição (RX_RESTR) fica sempre
   function versaoTela(v, r, p) {
     const x0 = versaoSemDetalhe(v);
-    const conds = (x) => (x.match(RX_CONDICAO) || []).filter((c) => textoRestr(p).includes(compacto(c))).map((c) => limparRestr(c, p)).join(" · ");
+    // o "sem …" como está no texto: a Versão já perdeu a cilindrada e o ano, então fica o começo que o texto tem
+    const noTexto = (c) => { const ws = c.split(/\s+/), tem = () => textoRestr(p).includes(compacto(ws.join(" "))); while (ws.length > 2 && !tem()) ws.pop(); return tem() ? ws.join(" ") : ""; };
+    const conds = (x) => (x.match(RX_CONDICAO) || []).map(noTexto).filter(Boolean).map((c) => limparRestr(c, p)).join(" · ");
     const [resto, rs] = partirRestr(x0, p);
     const ps = [versaoLivre(resto, r, p) || conds(resto), ...rs.map((m) => limparRestr(m, p))].join(" · ").split(" · ").filter(Boolean); // sem repetir o pedaço ("V50 · V50")
     return [...new Map(ps.map((x) => [compacto(x), x])).values()].join(" · ");
@@ -1968,6 +1972,7 @@
   // idêntica a uma de antes (TER55228) e a do mesmo modelo e versão cuja faixa está dentro da de outra, com a mesma
   // cilindrada ou sem ela (R2 UX: a cópia sem ano sai; ROL0015E); as linhas do mesmo modelo juntas, dentro da marca,
   // na ordem em que a marca e o modelo aparecem (U2)
+  const NAO_SERVE = "Não serve"; // a Versão do modelo excluído (arrumar) e a lista do celular (tabelaVeiculos)
   function arrumar(p, tab) {
     const k = chaveApl, base = anoDaBase(p), fx = (r) => faixasDaCelula(r[4]).map(faixaDaCelula).filter(Boolean);
     // a linha que antes ficava sem Versão e agora só tem a restrição (T-0033) não vira veículo novo: a Versão dela vai
@@ -1987,18 +1992,19 @@
       const nega = r[1] && !cita(r[1], fora) && negas.find((x) => cita(r[1], x));
       // só "Não serve" quando a restrição só repete o modelo da linha ("exc. HB20 X" na linha do HB20X)
       const resto = nega && limparRestr(nega, p).replace(RX_NEGA_INI, "");
-      if (nega) { r[3] = compacto(resto) === compacto(r[1]) ? "Não serve" : `Não serve (${limparRestr(nega, p)})`; soRestr.delete(r); }
+      if (nega) { r[3] = compacto(resto) === compacto(r[1]) ? NAO_SERVE : `${NAO_SERVE} (${limparRestr(nega, p)})`; soRestr.delete(r); }
     }
-    const dentro = (r, o) => k(r[0]) === k(o[0]) && k(r[1]) === k(o[1]) && (!r[2] || k(r[2]) === k(o[2]))
-      && (!r[4] || (!!o[4] && fx(r).every(([a, b]) => fx(o).some(([c, d]) => c <= a && b <= d))));
+    // mesma marca e modelo, e a cilindrada de r vazia ou igual; toda faixa de r dentro de uma de o
+    const mesmo = (r, o) => k(r[0]) === k(o[0]) && k(r[1]) === k(o[1]) && (!r[2] || k(r[2]) === k(o[2]));
+    const faixaDentro = (r, o) => fx(r).every(([a, b]) => fx(o).some(([c, d]) => c <= a && b <= d));
+    const dentro = (r, o) => mesmo(r, o) && (!r[4] || (!!o[4] && faixaDentro(r, o)));
     for (const r of soRestr) {
       const o = tab.find((x) => x !== r && !x[3] && !soRestr.has(x) && dentro(r, x));
       if (o) { o[3] = r[3]; r[3] = null; }
     }
     tab = tab.filter((r) => r[3] !== null);
     tab = tab.filter((r, i) => !tab.slice(0, i).some((x) => x.every((c, j) => k(c) === k(r[j]))));
-    const contida = (r, o) => r !== o && k(r[0]) === k(o[0]) && k(r[1]) === k(o[1]) && k(r[3]) === k(o[3]) && (!r[2] || k(r[2]) === k(o[2]))
-      && !!o[4] && (!r[4] || fx(r).every(([a, b]) => fx(o).some(([c, d]) => c <= a && b <= d)));
+    const contida = (r, o) => r !== o && mesmo(r, o) && k(r[3]) === k(o[3]) && !!o[4] && (!r[4] || faixaDentro(r, o));
     tab = tab.filter((r, i) => !tab.some((o, j) => j !== i && contida(r, o) && !(contida(o, r) && j > i)));
     const ordem = new Map();
     tab.forEach((r, i) => { for (const c of [k(r[0]), k(r[0]) + "|" + k(r[1])]) if (!ordem.has(c)) ordem.set(c, i); });
