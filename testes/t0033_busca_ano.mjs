@@ -74,7 +74,7 @@ const AMOSTRA_BLOCO = ["CXD13062", "CXD13078", "TER555185", "TER5599208", "ROL63
 const BUSCAS_COD = [["CXD13062", "CXD13062"], ["CXD 13062", "CXD13062"], ["CXD-13062", "CXD13062"], ["TRW 16900255S", "CXD13062"], ["GI3103", ALVO], ["F000.TE0.103", ALVO]];
 // U4 da UX: detalhe longo na Versão ("Roda Dir/Esq", "(Inclusive Adventure)") e "s/ ABS"; janelas só do depois em 1366
 const U4 = ["JUH70013", "ROL0015E"];
-const JANELAS_1366 = ["CXD13022", "INT16530", "TER5593103"];
+const JANELAS_1366 = ["CXD13022", "INT16530", "TER5593103", "TER5599085", "JUH70041"];
 // c) linhas que a tabela tem de ter: [código, descrição, (linha) => bool]; e as que não pode ter
 const TEM = [
   [ALVO, 'Ford Escort, Versão Sedan, 1997+', (l) => norm(l[0]) === "FORD" && norm(l[1]) === "ESCORT" && /\bSEDAN\b/.test(norm(l[3])) && /^1997\+/.test(l[5])],
