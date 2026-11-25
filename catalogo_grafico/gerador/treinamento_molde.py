@@ -15,7 +15,10 @@ O deck novo é montado DUPLICANDO os slides do treinamento original de Baterias 
          "apagar": [9, 10],
          "copiar": [{"formas": [32, 33], "dy": 1.2}],   # cópias entram no fim (índices seguintes); "molde": N copia
                                                        # de outro slide do original
-         "notas": "MENSAGEM-CHAVE\\n..."}]}
+         "italico": {"4": ["0,2"]},                # na célula, os trechos depois do 1.º ficam em itálico
+         "respiro": {"6": 0.08},                   # margem de cima e de baixo das células da tabela (polegadas)
+         "notas": "MENSAGEM-CHAVE\\n..."}],
+     "negrito_uma_coluna": true}                   # corpo da tabela com negrito só na 1.ª coluna que não é só número
 
 Texto: "\\n" separa parágrafos e "|" separa trechos (runs); o trecho k herda a formatação do trecho k do modelo
 (ex.: "DICA DE CAMPO  |texto"). Índices = ordem das formas do slide-modelo (python inv. em LEIA_GERADOR.md).
@@ -407,6 +410,22 @@ def tirar_coluna(forma, j):
         tr.remove(tr.findall(A + 'tc')[j])
 
 
+def negrito_uma_coluna(formas):
+    """Negrito no corpo da tabela numa coluna só: a 1.ª que não é só número (T-0038, O6). O cabeçalho (linha 0 da
+    1.ª tabela do slide) fica como está. Vale para o slide inteiro, que pode ter uma tabela por linha."""
+    tabs = [f for f in formas if getattr(f, 'has_table', False) and f.has_table]
+    if not tabs:
+        return
+    corpo = [(t, i) for n, t in enumerate(tabs) for i in range(len(t.table.rows)) if n or i]
+    ncol = len(tabs[0].table.columns)
+    alvo = next((j for j in range(ncol)
+                 if not all(re.fullmatch(r'\d*', t.table.cell(i, j).text_frame.text.strip()) for t, i in corpo)), 0)
+    for t, i in corpo:
+        for j in range(ncol):
+            for rpr in t.table.cell(i, j).text_frame._txBody.iter(A + 'rPr'):
+                rpr.set('b', '1' if j == alvo else '0')
+
+
 def trocar_textos(elemento, pares, onde, contagem):
     """Troca trechos de texto (dentro de um mesmo trecho de formatação) em todos os a:t do elemento."""
     for t in elemento.iter(A + 't'):
@@ -739,6 +758,19 @@ def montar(nome, saida=None):
                 v = base.expandir(v)
                 base.conferir(v, onde)
                 escrever(tab.cell(i, j).text_frame._txBody, v)
+        for k, cels in spec.get('italico', {}).items():   # trechos depois do 1.º de cada parágrafo da célula em itálico
+            tab = formas[int(k)].table
+            for rc in cels:
+                i, j = (int(x) for x in rc.split(','))
+                for p in tab.cell(i, j).text_frame._txBody.findall(A + 'p'):
+                    for r in p.findall(A + 'r')[1:]:
+                        r.find(A + 'rPr').set('i', '1')
+        for k, m in spec.get('respiro', {}).items():   # margem de cima e de baixo das células, em polegadas
+            for tcpr in formas[int(k)]._element.iter(A + 'tcPr'):
+                tcpr.set('marT', str(int(Inches(m))))
+                tcpr.set('marB', str(int(Inches(m))))
+        if cfg.get('negrito_uma_coluna'):
+            negrito_uma_coluna(formas)
         for k in spec.get('link_por_palavra', []):
             link_por_palavra(formas[int(k)].text_frame._txBody)
         for k, cor in spec.get('cor_texto', {}).items():
