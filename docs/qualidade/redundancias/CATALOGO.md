@@ -443,8 +443,8 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0637 | baixa | texto (PDF) | Onboarding, slide 14 × slide 17 (no bdc1030) | "Na ficha, o supervisor dá nota 3, 2 ou 1 a cada passo." no painel "Feito quando" repete o 3·2·1 do slide 17 | T-0038 | catalogo-grafico | CORRIGIDO (d413f8b; a frase saiu, o painel diz só "É o que mostra que o passo foi cumprido.") |
 | RD-0638 | baixa | texto (notas) | Onboarding, notas dos slides 7 e 21 (no bdc1030) | as notas repetem a nota do analista (7) e o aviso do botão do BAP Ajuda da coluna Passo 9 (21) | T-0038 | catalogo-grafico | CORRIGIDO (d413f8b) |
 | RD-0639 | — | texto (PDF) | Onboarding, slides 6, 11 e 21 (no d413f8b) | o aviso "botão ainda não publicado" do BAP Ajuda, uma vez em cada um dos 3 slides ("até lá, com o supervisor" saiu por decisão do revisor; a 4.ª ocorrência, nas notas do 21, saiu com o RD-0638) | T-0038 | catalogo-grafico | MANTIDO (`manter?`: cada slide cita o BAP Ajuda; as 3 trocas saem juntas quando o botão for publicado) |
-| RD-0643 | baixa | doc | catalogo_grafico/gerador/treinamento_molde.py:22 e :29-30; LEIA_GERADOR.md:48; treinamentos/PADRAO_TREINAMENTO.md:44 e :142 (no 263ff9f) | a exceção "nota_base": false escrita 4 vezes (docstring, LEIA_GERADOR, PADRAO §1 e S11) e a trava 2 vezes (LEIA_GERADOR e S11), fora da lista de travas da docstring; fica: chave e trava na docstring, regra no S11 | T-0038 | catalogo-grafico | ABERTO |
-| RD-0644 | baixa | código | catalogo_grafico/gerador/treinamento_molde.py:800 e :822 (no 263ff9f) | `cfg.get('nota_base', True)` 2 vezes no `montar` (lê uma vez numa variável) | T-0038 | catalogo-grafico | ABERTO |
+| RD-0643 | baixa | doc | catalogo_grafico/gerador/treinamento_molde.py:22 e :29-30; LEIA_GERADOR.md:48; treinamentos/PADRAO_TREINAMENTO.md:44 e :142 (no 263ff9f) | a exceção "nota_base": false escrita 4 vezes (docstring, LEIA_GERADOR, PADRAO §1 e S11) e a trava 2 vezes (LEIA_GERADOR e S11), fora da lista de travas da docstring; fica: chave e trava na docstring, regra no S11 | T-0038 | catalogo-grafico | CORRIGIDO (821c5ca) |
+| RD-0644 | baixa | código | catalogo_grafico/gerador/treinamento_molde.py:800 e :822 (no 263ff9f) | `cfg.get('nota_base', True)` 2 vezes no `montar` (lê uma vez numa variável) | T-0038 | catalogo-grafico | CORRIGIDO (821c5ca) |
 
 ## Notas
 
@@ -453,6 +453,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - Reteste no `catalogo-grafico/T-0038-onboarding` em `bdc1030`: corrigidos o RD-0624 ao RD-0629 e o RD-0632 ao RD-0635. Novos: RD-0637 e RD-0638 (baixa, seguram); MANTIDO: RD-0639. VOLTA PARA AJUSTE até o RD-0638. Fila: RD-0630 e RD-0631, que o gerente leva ao `po`.
 - Reteste final no `d413f8b`: corrigidos o RD-0637 e o RD-0638; RD-0639 atualizado (aviso sem "até lá, com o supervisor"), segue MANTIDO. LIBERADO, sem achado em aberto. Fila: RD-0630 e RD-0631.
 - Reteste no `263ff9f` (chave `nota_base` e trava nova): novos RD-0643 (doc) e RD-0644 (código), baixa, seguram. VOLTA PARA AJUSTE. O RD-0640 ao RD-0642 são da T-0033.
+- Reteste no `821c5ca`: corrigidos o RD-0643 e o RD-0644. LIBERADO, sem achado em aberto. Fila: RD-0630 e RD-0631.
 - Numeração: a partir do próximo livre no `main` (`75fdfd8`). O `corretor-redundancias/T-0033-busca-ano` vai até o RD-0638; quem fizer o merge por último renumera.
 
 ### T-0035, filtros Categoria, Sistema e Família no Estoque, 24/11/2026 (antes dos PRs)
