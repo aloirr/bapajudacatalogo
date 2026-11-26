@@ -299,7 +299,8 @@
       t, limpo, pc: normCod(t), ano: anoOk(n) ? n : 0, pedaco: !multi || t.split("-").every(grupoDeCodigo),
       agulha: t.split("-").reduce((x, y) => (y.length > x.length ? y : x), ""), // teste rápido antes da regex
       rx: palavra(t),
-      rxIni: limpo.length >= 4 && /[A-Z]/.test(limpo) && !ehVeiculo(limpo) ? palavra(t, true) : null,
+      // T-0039 1a: nome de modelo de algum "ve" (TITAN) também não vale pelo começo: "titan" não casa "titanium"
+      rxIni: limpo.length >= 4 && /[A-Z]/.test(limpo) && !ehVeiculo(limpo) && !indiceVe().porCompacto.has(limpo) ? palavra(t, true) : null,
       rxApl: null, // com os derivados, montado na 1ª vez que precisa
     };
   }
@@ -335,13 +336,36 @@
   // juntas: "palio weekend") igual a um modelo do índice; em mais de uma montadora ("ka"), vale qualquer uma
   // [SUPOSIÇÃO]. Sem modelo ou sem ano, a busca fica como antes.
   function modelosDigitados(ps) {
-    const { porCompacto } = indiceVe(), ws = ps.map((w) => w.replace(/-/g, "")), out = [];
+    const { porCompacto } = indiceVe();
+    return modelosNaBusca(ps, (c) => porCompacto.has(c)).flatMap((c) => porCompacto.get(c));
+  }
+  // as palavras (ou até 3 vizinhas juntas: "palio weekend", "c g") que formam um modelo compacto aceito por "tem"
+  function modelosNaBusca(ps, tem) {
+    const ws = ps.map((w) => w.replace(/-/g, "")), out = [];
     for (let i = 0; i < ws.length; i++) for (let n = Math.min(3, ws.length - i); n >= 1; n--) {
       const c = ws.slice(i, i + n).join("");
-      if (porCompacto.has(c)) { out.push(...porCompacto.get(c)); i += n - 1; break; }
+      if (tem(c)) { out.push(c); i += n - 1; break; }
     }
     return out;
   }
+  // T-0039 2a: os modelos de moto do catálogo (compactos), tirados da base: o modelo de um "ve" com a montadora de
+  // moto (no "ve" ou na aplicação de um produto da LINHA MOTO) que também aparece num produto da LINHA MOTO (no "ve"
+  // ou como palavra da aplicação). Entram o Titan e o Biz da Honda; o Titan da VW, o Fox da VW (a "MVK Fox" é outra
+  // montadora) e o Cargo da Ford ficam fora.
+  const ehMoto = (p) => norm(p.li) === "MOTO";
+  let MOTO_MODELOS = null;
+  function motoModelos() {
+    if (MOTO_MODELOS) return MOTO_MODELOS;
+    const motos = INDICE.filter((e) => ehMoto(e.p)), marcas = new Set(), modelos = new Set();
+    for (const e of motos) for (const [f, m] of e.p.ve || []) { marcas.add(norm(f)); modelos.add(compacto(m)); }
+    const apl = motos.map((e) => e.apl).join(" ; ");
+    const naApl = (m) => rxModeloTxt(m).test(apl);
+    MOTO_MODELOS = new Set([...indiceVe().porCompacto].filter(([c, pares]) => /[A-Z]/.test(c) && (modelos.has(c) || naApl(c))
+      && pares.some(([vm]) => marcas.has(vm) || naApl(vm))).map(([c]) => c));
+    return MOTO_MODELOS;
+  }
+  // a busca tem um modelo de moto: a palavra, ou até 3 palavras vizinhas juntas ("c g" = CG)
+  const temModeloDeMoto = (ps) => { const mm = motoModelos(); return modelosNaBusca(ps, (c) => mm.has(c)).length > 0; };
   const ANO_DIGITADO_MAX = ANO_ATUAL + 1;
   function veiculoDigitado(ps) {
     const anos = ps.filter((w) => /^\d{4}$/.test(w) && +w >= ANO_MIN && +w <= ANO_DIGITADO_MAX).map(Number);
@@ -482,7 +506,7 @@
       const f = bn[2 * n] > bn[2 * n + 1] || (bn[2 * n] === bn[2 * n + 1] && bnota[2 * n] >= bnota[2 * n + 1]) ? 2 * n : 2 * n + 1;
       return { n: bn[f], nota: bnota[f], bits: bbits[f], exato };
     }
-    return { palavras, total, testar, vd };
+    return { palavras, total, testar, vd, moto: temModeloDeMoto(ps) };
   }
 
   // A busca da tela: as palavras (casador) e os filtros (linha, categoria, sistema, família e as medidas, que tiram da lista).
@@ -503,12 +527,13 @@
       const r = cs ? cs.testar(e) : { n: 0, nota: 0, bits: 0, exato: false };
       if (total && !r.n) continue;
       if (r.n > maxN) maxN = r.n;
-      out.push([r.n, r.nota, p, r.bits, r.exato ? 1 : 0, p.i ? 1 : 0]);
+      out.push([r.n, r.nota, p, r.bits, r.exato ? 1 : 0, p.i ? 1 : 0, cs && cs.moto && ehMoto(p) ? 1 : 0]);
     }
     // o código exato entra sempre, mesmo casando com menos palavras
     if (total) out = out.filter((x) => x[0] === maxN || x[4]);
-    // ordem: código exato, palavras que casaram, nota (o campo em que casou), com foto, código
-    out.sort((a, b) => b[4] - a[4] || b[0] - a[0] || b[1] - a[1] || b[5] - a[5] || a[2].c.localeCompare(b[2].c));
+    // ordem: código exato, palavras que casaram, LINHA MOTO quando a busca tem um modelo de moto (T-0039 2a: os
+    // outros, como o caminhão VW Titan, logo abaixo), nota (o campo em que casou), com foto, código
+    out.sort((a, b) => b[4] - a[4] || b[0] - a[0] || b[6] - a[6] || b[1] - a[1] || b[5] - a[5] || a[2].c.localeCompare(b[2].c));
     const lista = out.map((x) => x[2]);
     lista.palavras = total;
     lista.casaram = total ? maxN : 0; // menor que palavras: são os mais próximos
