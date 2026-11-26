@@ -336,10 +336,15 @@
   // juntas: "palio weekend") igual a um modelo do índice; em mais de uma montadora ("ka"), vale qualquer uma
   // [SUPOSIÇÃO]. Sem modelo ou sem ano, a busca fica como antes.
   function modelosDigitados(ps) {
-    const { porCompacto } = indiceVe(), ws = ps.map((w) => w.replace(/-/g, "")), out = [];
+    const { porCompacto } = indiceVe();
+    return modelosNaBusca(ps, (c) => porCompacto.has(c)).flatMap((c) => porCompacto.get(c));
+  }
+  // as palavras (ou até 3 vizinhas juntas: "palio weekend", "c g") que formam um modelo compacto aceito por "tem"
+  function modelosNaBusca(ps, tem) {
+    const ws = ps.map((w) => w.replace(/-/g, "")), out = [];
     for (let i = 0; i < ws.length; i++) for (let n = Math.min(3, ws.length - i); n >= 1; n--) {
       const c = ws.slice(i, i + n).join("");
-      if (porCompacto.has(c)) { out.push(...porCompacto.get(c)); i += n - 1; break; }
+      if (tem(c)) { out.push(c); i += n - 1; break; }
     }
     return out;
   }
@@ -354,17 +359,13 @@
     const motos = INDICE.filter((e) => ehMoto(e.p)), marcas = new Set(), modelos = new Set();
     for (const e of motos) for (const [f, m] of e.p.ve || []) { marcas.add(norm(f)); modelos.add(compacto(m)); }
     const apl = motos.map((e) => e.apl).join(" ; ");
-    const naApl = (m) => new RegExp("(^|[^A-Z0-9])" + corpoModelo(m) + "(?![A-Z0-9])").test(apl);
+    const naApl = (m) => rxModeloTxt(m).test(apl);
     MOTO_MODELOS = new Set([...indiceVe().porCompacto].filter(([c, pares]) => /[A-Z]/.test(c) && (modelos.has(c) || naApl(c))
       && pares.some(([vm]) => marcas.has(vm) || naApl(vm))).map(([c]) => c));
     return MOTO_MODELOS;
   }
   // a busca tem um modelo de moto: a palavra, ou até 3 palavras vizinhas juntas ("c g" = CG)
-  function temModeloDeMoto(ps) {
-    const mm = motoModelos(), ws = ps.map((w) => w.replace(/-/g, ""));
-    for (let i = 0; i < ws.length; i++) for (let n = 1; n <= Math.min(3, ws.length - i); n++) if (mm.has(ws.slice(i, i + n).join(""))) return true;
-    return false;
-  }
+  const temModeloDeMoto = (ps) => { const mm = motoModelos(); return modelosNaBusca(ps, (c) => mm.has(c)).length > 0; };
   const ANO_DIGITADO_MAX = ANO_ATUAL + 1;
   function veiculoDigitado(ps) {
     const anos = ps.filter((w) => /^\d{4}$/.test(w) && +w >= ANO_MIN && +w <= ANO_DIGITADO_MAX).map(Number);
