@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 25/11/2026 11:05 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 26/11/2026 18:10 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -40,11 +40,14 @@ Atualizado em 25/11/2026 11:05 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0035](tarefas/T-0035.md) | Filtros por sistema, família e categoria na aba Estoque | web-site | integracao-placas, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 24/11 22:30) | #202, #203, #204 |
 | [T-0036](tarefas/T-0036.md) | Atualizar o estoque a cada 24 horas | integracao-placas | testes | CONCLUÍDA (no ar em 24/11 22:06) | #201 |
 | [T-0038](tarefas/T-0038.md) | Onboarding do Vendedor atualizado, com os 10 passos da visita | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, web-site, testes | CONCLUÍDA (no ar em 25/11 10:50) | #209, #210, #211, #212 |
+| [T-0033](tarefas/T-0033.md) | Busca por veículo com ano (só o ano que bate) e fim do bloco "Outros veículos e detalhes" | web-site | catalogo-dados, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 26/11 18:03) | #217, #225, #219, #220, #221 |
+| [T-0039](tarefas/T-0039.md) | Busca "filtro titan": palavra inteira e moto primeiro | web-site | testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 26/11 18:03) | #222, #225, #223, #224, #226 |
+| [T-0037](tarefas/T-0037.md) | Veículos do texto da APLICACAO para a aba VEICULOS (base v29), com as pendências da T-0033 e da T-0039 | catalogo-dados | web-site, testes | NA FILA (junto com a T-0040) | — |
 
 ## Fila
-Main bd332c4 (#212).
+Main 0969a78 (#226).
 
-T-0038 no ar em 25/11 10:50 (#209 a #212). Na fila, do corretor: RD-0630 (baixa) e RD-0631 (alta), em docs/qualidade/redundancias/T-0038.md.
+T-0033 e T-0039 no ar em 26/11 18:03 (#217, #222). Próxima: T-0040 (anos em 100% das aplicações, com a T-0037). T-0038 no ar em 25/11 10:50 (#209 a #212). Na fila, do corretor: RD-0630 (baixa) e RD-0631 (alta), em docs/qualidade/redundancias/T-0038.md.
 
 **PAUSA geral** a pedido do Alexandre (R-20261123-184932-po): nenhuma tarefa, ronda ou subagente até o PO chamar. A T-0034, a T-0035 e a T-0036 saíram da pausa a pedido do Alexandre e estão no ar (#194 a #196, #202 a #204 e #201). Na volta, a próxima é a T-0033 (R-20261124-152047-po e R-20261124-152425-po), com simulação de tela antes.
 
