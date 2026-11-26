@@ -127,3 +127,17 @@ Não reconferi R1 e R2 (ROL0015E) nesta rodada: os prints desta rodada não traz
 | U8 | Caixa alta "SISTEMA ELETRO HIDRAULICO" e "PICASSO" (próxima versão da base) | `catalogo-dados` |
 
 Reteste depois de U5 a U7: AMT7134 e AMT7050 em 390 px, POL1678 em 1366 px. Basta o print, sem nova rodada completa.
+
+## 5. Situação no 22bc129 (entrou no main pelo #217)
+
+Conferi no código do `22bc129` (head do #217, que entrou no main em `7dd0d1b`):
+
+| Achado | Situação | Onde |
+|---|---|---|
+| U5 | 🟢 Fechado: a Versão é só `NAO_SERVE` ("Não serve") quando a restrição repete o modelo; o parêntese fica só quando diz mais. No celular, o nome leva " · Não serve" | `site/app.js:1978`, `1998` e `1638` |
+| U6 | 🟢 Fechado: "Restrição da aplicação:" ou "Restrições da aplicação:" em negrito, conforme o número | `site/app.js:2045` |
+| U7 | 🟢 Fechado: a regra `.aviso.proximos` no `styles.css`, sem `style=` no HTML | `site/styles.css:290` |
+| R1 e R2 (ROL0015E) | Vão para a fila da T-0037 (`catalogo-dados`): a correção no site estragava cerca de 20 produtos, e o certo é corrigir o texto da base | T-0037 |
+| U8 e R3 | Continuam na fila do `catalogo-dados` (próxima versão da base) | — |
+
+Nada mais segura a T-0033 do lado da UX.
