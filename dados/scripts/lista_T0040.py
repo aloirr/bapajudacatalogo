@@ -3,7 +3,8 @@
 Fonte: aba VEICULOS da base unificada (uma linha por produto x veículo, com ANO_INICIO e ANO_FIM).
   sem_ano    = ANO_INICIO e ANO_FIM vazios
   so_inicial = ANO_INICIO preenchido e ANO_FIM vazio ("1996+", "após 2003", "2012/.", ano solto "08/2022")
-Fica fora: as linhas com início e fim e as 81 só com ANO_FIM ("até 2008"), contadas à parte.
+  so_final   = ANO_FIM preenchido e ANO_INICIO vazio ("até 2008")
+Fica fora: as linhas com início e fim e os itens de LINHA UNIVERSAL (decisão do Alexandre: ficam sem ano).
 
 Saída: dados/T-0040/lista_trabalho.csv (UTF-8, ";"). id_linha = ordem das linhas da aba VEICULOS (estável enquanto a
 aba não mudar). Só campos públicos: descrição (d) e referências (r) do site/data/produtos.json, que já passaram pela
@@ -48,7 +49,7 @@ def main():
     pos = {c: i for i, c in enumerate(cab)}
     site = {p["c"]: p for p in json.loads(JSON.read_text(encoding="utf-8"))["produtos"]}
 
-    saida, so_fim = [], 0
+    saida, universal = [], 0
     for n, r in enumerate(linhas, start=1):
         cod = txt(r[pos["CODIGO_BAP"]])
         if not cod:
@@ -58,8 +59,12 @@ def main():
             tipo, ano = "sem_ano", ""
         elif fim is None:
             tipo, ano = "so_inicial", f"{int(ini)}+"
+        elif ini is None:
+            tipo, ano = "so_final", f"até {int(fim)}"
         else:
-            so_fim += ini is None
+            continue
+        if txt(prods[cod][9]) == "UNIVERSAL":
+            universal += 1
             continue
         p = site.get(cod)
         desc = p["d"] if p else txt(prods[cod][pos_p("DESCRICAO")])
@@ -84,7 +89,7 @@ def main():
         for k in ((lin[8], li[lin[1]]), (lin[8], "TOTAL")):
             tab[k][0] += 1
             tab[k][1].add(lin[1])
-    print(f"linhas: {len(saida)} | códigos: {len({l[1] for l in saida})} | só ANO_FIM (fora): {so_fim}")
+    print(f"linhas: {len(saida)} | códigos: {len({l[1] for l in saida})} | UNIVERSAL (fora): {universal}")
     for k in sorted(tab):
         print(f"  {k[0]:<11} {k[1]:<14} linhas {tab[k][0]:>5}  códigos {len(tab[k][1]):>5}")
     cods = {l[1] for l in saida}
