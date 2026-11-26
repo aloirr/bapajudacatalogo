@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0645** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0666** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -443,10 +443,42 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0637 | baixa | texto (PDF) | Onboarding, slide 14 × slide 17 (no bdc1030) | "Na ficha, o supervisor dá nota 3, 2 ou 1 a cada passo." no painel "Feito quando" repete o 3·2·1 do slide 17 | T-0038 | catalogo-grafico | CORRIGIDO (d413f8b; a frase saiu, o painel diz só "É o que mostra que o passo foi cumprido.") |
 | RD-0638 | baixa | texto (notas) | Onboarding, notas dos slides 7 e 21 (no bdc1030) | as notas repetem a nota do analista (7) e o aviso do botão do BAP Ajuda da coluna Passo 9 (21) | T-0038 | catalogo-grafico | CORRIGIDO (d413f8b) |
 | RD-0639 | — | texto (PDF) | Onboarding, slides 6, 11 e 21 (no d413f8b) | o aviso "botão ainda não publicado" do BAP Ajuda, uma vez em cada um dos 3 slides ("até lá, com o supervisor" saiu por decisão do revisor; a 4.ª ocorrência, nas notas do 21, saiu com o RD-0638) | T-0038 | catalogo-grafico | MANTIDO (`manter?`: cada slide cita o BAP Ajuda; as 3 trocas saem juntas quando o botão for publicado) |
+| RD-0640 | baixa | código | site/app.js:188 (`textoDeAno`) | os 2 lados do `antiga ? … : …` repetem o mesmo 1º `replace` | T-0033 | web-site | CORRIGIDO (c790587) |
+| RD-0641 | baixa | código | site/app.js:1709-1712 × :1705 | 8 palavras da `NUNCA_MODELO` já no `TECNICO` (TRATOR, CAMINHAO, ONIBUS, AGRICOLA, MOTOR, TODAS, TODOS, CHASSI), no mesmo `\|\|` | T-0033 | web-site | CORRIGIDO (c790587) |
+| RD-0642 | — | código | site/app.js:335-338 × :1790-1793 | a janela de até 3 palavras no `porCompacto`, no `modelosDigitados` e no `versaoTela` | T-0033 | web-site | MANTIDO (`manter?`: ordens e exceções diferentes) |
 | RD-0643 | baixa | doc | catalogo_grafico/gerador/treinamento_molde.py:22 e :29-30; LEIA_GERADOR.md:48; treinamentos/PADRAO_TREINAMENTO.md:44 e :142 (no 263ff9f) | a exceção "nota_base": false escrita 4 vezes (docstring, LEIA_GERADOR, PADRAO §1 e S11) e a trava 2 vezes (LEIA_GERADOR e S11), fora da lista de travas da docstring; fica: chave e trava na docstring, regra no S11 | T-0038 | catalogo-grafico | CORRIGIDO (821c5ca) |
 | RD-0644 | baixa | código | catalogo_grafico/gerador/treinamento_molde.py:800 e :822 (no 263ff9f) | `cfg.get('nota_base', True)` 2 vezes no `montar` (lê uma vez numa variável) | T-0038 | catalogo-grafico | CORRIGIDO (821c5ca) |
+| RD-0645 | média | código | site/app.js:294, :321, :1658, :1669 | os modelos e as marcas do `ve` do catálogo lidos 4 vezes (`MODELOS_TXT`, `TODOS_MODELOS`, `MARCAS_VE`, `MODELOS_MARCA`): vira um índice só | T-0033 | web-site | CORRIGIDO (a73d931) |
+| RD-0646 | média | código | site/app.js:1160 × :1681; :299, :1165, :1806 | a leitura do modelo com espaço ou hífen opcional em 2 regex (`rxModeloTxt`, `rxModelo`) e a forma compacta escrita 5 vezes (vira `compacto` e `corpoModelo`) | T-0033 | web-site | CORRIGIDO (a73d931) |
+| RD-0647 | média | código (regra) | site/app.js:1654-1655 × :767 e :271 | 4 apelidos de montadora (GENERAL MOTORS, MERCEDES, MERCEDES BENZ, VOLKS) repetidos do `MONTADORAS` e do `APELIDOS` no `MARCA_DO_APELIDO` | T-0033 | web-site | CORRIGIDO (a73d931) |
+| RD-0648 | baixa | código | site/app.js:1724 × :1730 | a mesma limpeza de ano no `limparVersao` e no `semAno` (vira `tirarAno`) | T-0033 | web-site | CORRIGIDO (a73d931) |
+| RD-0649 | baixa | código | site/app.js:178 × :312 | o ano atual lido 2 vezes (`ANO_MAX`, `ANO_DIGITADO_MAX`): vira `ANO_ATUAL` | T-0033 | web-site | CORRIGIDO (a73d931) |
+| RD-0650 | baixa | código | site/app.js:1815 × :1565 | `bonito(NOME_MARCA.get(…) \|\| …)` 2 vezes na tabela (vira `marcaTela`) | T-0033 | web-site | CORRIGIDO (a73d931) |
+| RD-0651 | baixa | doc | docs/DADOS_DO_SITE.md:56 (e app.js:1144); :60 × :57 | "(reprovação do testes no 52c4797)", história na regra; o grupo "/" repetido na busca digitada | T-0033 | web-site | CORRIGIDO (a73d931) |
+| RD-0652 | baixa | print | testes/prints/T-0033/antes-*-busca-TER5593103-onix-2021.png = depois-* | 2 pares de prints idênticos (blobs `ec30294` e `20cb436`); saem os 2 "antes" | T-0033 | testes | CORRIGIDO (5f0afd7) |
+| RD-0653 | baixa | teste | testes/t0033_busca_ano.mjs:392-393 × scripts/testar_site.mjs:668-673 | "AMORTECEDOR GOL 2007 KYB 441126" → AMT7005 sem os "mais próximos", que o `testar_site` já confere | T-0033 | testes | CORRIGIDO (5f0afd7) |
+| RD-0654 | baixa | código (comentário) | site/app.js:318-320; :1727-1728 | comentários empilhados em cima da função errada (`serveNoDigitado`, `comDetalhe`) (não segura) | T-0033 | web-site | CORRIGIDO (a73d931) |
+| RD-0655 | baixa | código (teste) | testes/t0033_busca_ano.mjs:162-173 × scripts/testar_site.mjs:300-301 | o servidor estático do site (`TIPOS` e o `createServer`) copiado do `testar_site` | T-0033 (fila) | testes | ABERTO (fila) |
+| RD-0656 | baixa | código | site/app.js:1203, :1293 | o caso do RD-0650 nos usos antigos | T-0033 (fila) | web-site | CORRIGIDO (a73d931) |
+| RD-0657 | baixa | código | site/app.js:1110 | `ANO_HOJE = 2026` fixo, ao lado do ano do relógio | T-0033 (fila) | web-site | CORRIGIDO (a73d931) |
+| RD-0658 | — | código | site/app.js:1690 × :1111 | 7 palavras de carroceria no `RX_CARROCERIA` e no `PARA_FORA` | T-0033 | web-site | MANTIDO (`manter?`: papéis diferentes; juntar quebraria "Palio Weekend") |
+| RD-0659 | — | teste | testes/t0033_busca_ano.mjs:101-107 × site/app.js | o teste lê o modelo e o ano por conta própria | T-0033 | testes | MANTIDO (`manter?`: oráculo independente) |
+| RD-0660 | baixa | código | site/app.js:1795 × :1812 | o corte do "DETALHE: …" escrito 2 vezes (`comDetalhe` e `versaoSemDetalhe`) | T-0033 | web-site | CORRIGIDO (587b8f3) |
+| RD-0661 | baixa | código | site/app.js:1992 × :2000 | `dentro` e `contida` repetem a mesma marca/modelo/cilindrada e a faixa dentro de outra | T-0033 | web-site | CORRIGIDO (587b8f3) |
+| RD-0662 | baixa | código | site/app.js:1990 × :1638 | "Não serve" escrito 3 vezes, sem constante | T-0033 | web-site | CORRIGIDO (587b8f3) |
+| RD-0663 | baixa | teste | testes/t0033_busca_ano.mjs:434-476 × scripts/testar_site.mjs:714-736 | o aviso de tipo sem peça ("bomba combustivel polo 2026", "polo 2026"), o `ehBomba` e a leitura do texto visível nos 2 testes | T-0033 | testes | CORRIGIDO (0700981) |
+| RD-0664 | baixa | código | site/app.js:1811 × :1805 e :1809 | o `FIM_CONDICAO` reescreve `exc.\|exceto` (do `NEGA`) e `somente\|apenas` (do `RX_RESTR`) | T-0033 | web-site | CORRIGIDO (22bc129) |
+| RD-0665 | baixa | teste | testes/t0033_busca_ano.mjs:498-503 × :600 e :646-647 | as `conta` das contagens fixas escritas 2 vezes (rodada curta e inteira) | T-0033 | testes | CORRIGIDO (716e2d1) |
 
 ## Notas
+
+### T-0033, ano na busca e fim do "Outros veículos e detalhes", 25/11/2026 (antes dos PRs)
+- RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
+- Reteste nos heads `a73d931` (web-site) e `5f0afd7` (testes): RD-0645 ao RD-0654 corrigidos, e também RD-0656 e RD-0657 (fila). Novos: RD-0640 e RD-0641 (baixa, seguram); MANTIDO: RD-0642. Fila: RD-0655. VOLTA PARA AJUSTE até o RD-0640 e o RD-0641.
+- Reteste nos heads `c790587` (web-site) e `cfc011c` (testes): RD-0640 e RD-0641 corrigidos. Novos: RD-0660 ao RD-0662 (web-site) e RD-0663 (testes), baixa, seguram. VOLTA PARA AJUSTE.
+- Reteste nos heads `587b8f3` (web-site) e `0700981` (testes): RD-0660 ao RD-0663 corrigidos. O `FIM_CONDICAO` do site e o `FIM_SEM` do teste não são cópia (oráculo independente). Novos: RD-0664 (web-site) e RD-0665 (testes), baixa, seguram. VOLTA PARA AJUSTE.
+- Reteste final nos heads `22bc129` (web-site) e `716e2d1` (testes): RD-0664 e RD-0665 corrigidos. LIBERADO (fila: RD-0655; mantidos: RD-0642, RD-0658 e RD-0659).
+- Numeração (25/11/2026): a 1ª rodada usou o RD-0624 ao RD-0638, que a T-0038 já tinha usado no `main` (#209). Os achados da T-0033 viraram o RD-0645 ao RD-0659 (o número antigo + 21); o RD-0640 ao RD-0642 ficam.
 
 ### T-0038, Onboarding do Vendedor, 25/11/2026 (antes dos PRs)
 - RD-0624 ao RD-0636: os branches `catalogo-grafico/T-0038-onboarding` (`36b9c9b`), `integracao-placas/T-0038-onboarding` (`e53ad3c`) e `web-site/T-0038-onboarding` (`c4a8e45`). Relatório: `T-0038.md`. VOLTA PARA AJUSTE: seguram o RD-0624 ao RD-0629 e o RD-0632 ao RD-0634, todos do `catalogo-grafico`; não segura o RD-0635 (só comentário); na fila, com dispensa do `po`: RD-0630 e RD-0631. Os branches do `integracao-placas` e do `web-site` não têm achado.
