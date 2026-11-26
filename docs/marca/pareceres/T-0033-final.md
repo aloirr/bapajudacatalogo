@@ -89,3 +89,22 @@ Não reconferidos nesta rodada (os prints são das peças com restrição). Obse
 rodada, a ROL0015E ainda dá a cilindrada "1.0 / 1.3 / 1.4 / 1.5 / 1.6 8V" só ao Alfa Romeo 145 e 146, e não aos Fiat
 (MC-0038, parte 2) [SUPOSIÇÃO: o "D" do `dif.txt` é a tela em `28b3b3a`]. Os MC-0038 a MC-0041 seguem como no
 item 4.
+
+---
+
+## Situação no 22bc129 (entrou no main pelo #217)
+
+Conferido no código do `main` em `7dd0d1b` (squash do #217, head `22bc129`), `site/app.js`.
+
+- **MC-0046: fechado.** O aviso termina com ponto: "**Nenhuma bomba de combustível para Polo 2026.** Veja outras peças
+  do Polo." (`app.js:1002`).
+- **MC-0047: fechado.** No celular, " · Não serve" depois do modelo (`app.js:1638`); só "Não serve", sem o parêntese,
+  quando a restrição repete o modelo da linha (`app.js:1998`).
+- **MC-0039: fechado.** `RX_MES_ANO_HIFEN` lê "01-2020" como 01/2020 (`app.js:180`, `:192`, `:1785`).
+- **MC-0038, parte 1: fechado.** O "DETALHE: …" sai da Versão (`versaoSemDetalhe`, `app.js:1795`) e do texto das
+  restrições (`aplSemDetalhe`, `:1815`).
+- **MC-0038, parte 2 (ROL0015E, cilindrada só no Alfa 145 e 146): na fila da T-0037**, do `catalogo-dados`.
+- **MC-0040: fechado no código.** `RX_LADO_POSICAO` tira lado e posição da Versão quando a ficha tem Lado ou Posição
+  (`app.js:1797`, `:1826`, `:1845`), e a Versão sai sem parênteses (`:1825`, `:1844`), o que resolve o
+  "(Inclusive Adventure)". [SUPOSIÇÃO: não reconferi em print novo da JUH70013, JUH70041, TER5593103 e TER5599085.]
+- **MC-0037 e MC-0041: continuam na fila do `catalogo-dados`.**
