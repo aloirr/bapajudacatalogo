@@ -469,10 +469,10 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0663 | baixa | teste | testes/t0033_busca_ano.mjs:434-476 × scripts/testar_site.mjs:714-736 | o aviso de tipo sem peça ("bomba combustivel polo 2026", "polo 2026"), o `ehBomba` e a leitura do texto visível nos 2 testes | T-0033 | testes | CORRIGIDO (0700981) |
 | RD-0664 | baixa | código | site/app.js:1811 × :1805 e :1809 | o `FIM_CONDICAO` reescreve `exc.\|exceto` (do `NEGA`) e `somente\|apenas` (do `RX_RESTR`) | T-0033 | web-site | CORRIGIDO (22bc129) |
 | RD-0665 | baixa | teste | testes/t0033_busca_ano.mjs:498-503 × :600 e :646-647 | as `conta` das contagens fixas escritas 2 vezes (rodada curta e inteira) | T-0033 | testes | CORRIGIDO (716e2d1) |
-| RD-0666 | média | código | site/app.js:362 e :338 | janela de até 3 palavras vizinhas escrita 2 vezes (`temModeloDeMoto` × `modelosDigitados`) → `modelosNaBusca` | T-0039 | web-site | ABERTO |
-| RD-0667 | baixa | código | site/app.js:357 e :1231 | regex do modelo como palavra inteira em `naApl` repete `rxModeloTxt` | T-0039 | web-site | ABERTO |
-| RD-0668 | média | teste | scripts/testar_site.mjs:829 | CXD13062, "CXD 13062" e 16900255S já testados em "busca código" e "busca referência" | T-0039 | testes | ABERTO |
-| RD-0669 | média | teste | scripts/testar_site.mjs:837 e testes/t0033_busca_ano.mjs:102 | contagens fixas da T-0033 (27, 71, 1, 241) em 2 arquivos | T-0039 | testes | ABERTO |
+| RD-0666 | média | código | site/app.js:362 e :338 | janela de até 3 palavras vizinhas escrita 2 vezes (`temModeloDeMoto` × `modelosDigitados`) → `modelosNaBusca` | T-0039 | web-site | CORRIGIDO (931a7e9) |
+| RD-0667 | baixa | código | site/app.js:357 e :1231 | regex do modelo como palavra inteira em `naApl` repete `rxModeloTxt` | T-0039 | web-site | CORRIGIDO (931a7e9) |
+| RD-0668 | média | teste | scripts/testar_site.mjs:829 | CXD13062, "CXD 13062" e 16900255S já testados em "busca código" e "busca referência" | T-0039 | testes | CORRIGIDO (f984887) |
+| RD-0669 | média | teste | scripts/testar_site.mjs:837 e testes/t0033_busca_ano.mjs:102 | contagens fixas da T-0033 (27, 71, 1, 241) em 2 arquivos | T-0039 | testes | CORRIGIDO (f984887) |
 
 ## Notas
 
