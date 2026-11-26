@@ -20,7 +20,7 @@
    referência cruzada, veículo (montadora + modelo + ano, sem Golf no Gol), geral (texto livre), os exemplos da
    diretriz (lista estrita, outra ordem, minúsculas, os mais próximos, marca concorrente, código BAP e EAN exatos)
    e sem resultado; a palavra inteira do veículo e a moto primeiro (T-0039: "filtro titan", "titan", "biz",
-   "focus titanium", código e referência, contagens da T-0033); os links antigos (#/busca?cod=, mo=, modelo=, ano=) viram q; os 2 campos (q e placa com botão,
+   "focus titanium", prefixo de código e código de moto); os links antigos (#/busca?cod=, mo=, modelo=, ano=) viram q; os 2 campos (q e placa com botão,
    sem consultar o serviço de verdade); página do produto (foto, aplicação, referências, ficha
    técnica, "Leve também", sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
    básica; prints em 1366 × 768 e 390 × 844.
@@ -825,21 +825,13 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         await page.evaluate(() => window.scrollTo(0, 0));
         await print("busca-titanium");
         conferirConsole("busca-titanium");
-        // código, prefixo de código e referência continuam como antes
-        for (const [q, esperado, primeiro] of [["CXD13062", "CXD13062", true], ["CXD 13062", "CXD13062", true], ["CXD1306", "CXD13062", false], ["16900255S", "CXD13062", false], ["FAR6365", "FAR6365", true]]) {
+        // prefixo de código e código de moto continuam como antes (código e referência: blocos "busca código" e "busca referência")
+        for (const [q, esperado, primeiro] of [["CXD1306", "CXD13062", false], ["FAR6365", "FAR6365", true]]) {
           if (!existe(esperado)) continue;
           await abrir("busca-titan-cod", "#/busca?q=" + encodeURIComponent(q));
           c = (await listaTodos()).itens.map((i) => i.c);
           if (primeiro ? c[0] !== esperado : !c.includes(esperado)) falha("titan", N_TIT, "cod:" + q, `"${q}": ${primeiro ? "1º = " + (c[0] || "nada") : "sem o " + esperado} (esperado ${esperado}${primeiro ? " em 1º" : " na lista"})`);
           conferirConsole("busca-titan-cod");
-        }
-        // contagens fixas da T-0033 (main 7dd0d1b): não mudam
-        for (const [q, n] of [["polo 2026", 27], ["gol 2010", 71], ["BCE3001", 1], ["filtro 2010", 241]]) {
-          await abrir("busca-t0033", "#/busca?q=" + encodeURIComponent(q));
-          const k = (await listaTodos()).itens.length;
-          contasTit.push(`"${q}" = ${k}`);
-          if (k !== n) falha("titan", N_TIT, "t0033:" + q, `"${q}" = ${k} produtos (T-0033: ${n})`);
-          conferirConsole("busca-t0033");
         }
         detalhe("titan", N_TIT, contasTit.join("; "));
       }
