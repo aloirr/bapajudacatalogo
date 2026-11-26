@@ -19,7 +19,8 @@
    a busca de um campo só (q) da T-0011, palavra por palavra: código (exato em 1º, com e sem espaço ou hífen),
    referência cruzada, veículo (montadora + modelo + ano, sem Golf no Gol), geral (texto livre), os exemplos da
    diretriz (lista estrita, outra ordem, minúsculas, os mais próximos, marca concorrente, código BAP e EAN exatos)
-   e sem resultado; os links antigos (#/busca?cod=, mo=, modelo=, ano=) viram q; os 2 campos (q e placa com botão,
+   e sem resultado; a palavra inteira do veículo e a moto primeiro (T-0039: "filtro titan", "titan", "biz",
+   "focus titanium", prefixo de código e código de moto); os links antigos (#/busca?cod=, mo=, modelo=, ano=) viram q; os 2 campos (q e placa com botão,
    sem consultar o serviço de verdade); página do produto (foto, aplicação, referências, ficha
    técnica, "Leve também", sem preço nem estoque); 390 px sem rolar de lado; console sem erro; acessibilidade
    básica; prints em 1366 × 768 e 390 × 844.
@@ -709,6 +710,32 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         if (!r.itens.length) falha("palavra2", N_PAL2, "literal:" + q, `"${q}": lista vazia (a diretriz manda mostrar os mais próximos)`);
         conferirConsole("busca-diretriz-mahle");
       }
+      // aviso de tipo sem peça no ano (T-0033, decisão do Alexandre): a busca digitada com tipo + modelo + ano em que
+      // nenhuma peça do tipo serve mostra, fora da lista, "Nenhuma <tipo> para <Modelo> <ano>"; com peça do tipo, não mostra
+      const N_AVT = "aviso de tipo sem peça no ano";
+      const avisoTipo = () => page.evaluate(() => {
+        const o = [], tw = document.createTreeWalker(document.querySelector("#app"), NodeFilter.SHOW_TEXT);
+        for (let n; (n = tw.nextNode()); ) { const e = n.parentElement; if (e && !e.closest(".lista .item, [data-cod], .so-impressao") && e.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) o.push(n.nodeValue); }
+        const t = o.join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
+        const m = /(?<![A-Za-z])Nenhum[a]?\b[^.!]{0,120}?\bpara\b[^.!;]{0,60}/i.exec(t);
+        return m ? m[0].trim() : "";
+      });
+      const ehBomba = (p) => /BOMBA/.test(norm(`${p.p} ${p.d}`)) && /COMBUST/.test(norm(`${p.p} ${p.d} ${p.fa}`));
+      const avt = [];
+      for (const [q, esperado] of [["bomba combustivel polo 2026", /^NENHUMA BOMBA DE COMBUSTIVEL PARA POLO 2026\b/], ["polo 2026", null], ["bomba combustivel onix 2015", null]]) {
+        await abrir("busca-aviso-tipo", "#/busca?q=" + encodeURIComponent(q));
+        const r = await listaTodos(), av = await avisoTipo();
+        if (esperado && !esperado.test(norm(av))) falha("avisotipo", N_AVT, q, `"${q}": ${av ? `aviso diferente: "${cortar(av, 90)}"` : "sem o aviso"} (esperado "Nenhuma bomba de combustível para Polo 2026")`);
+        if (!esperado && av) falha("avisotipo", N_AVT, q, `"${q}": aviso indevido "${cortar(av, 90)}"`);
+        const bombas = r.itens.map((i) => porCod.get(normCod(i.c))).filter((p) => p && ehBomba(p)).map((p) => p.c);
+        if (esperado && bombas.length) falha("avisotipo", N_AVT, q + ":bomba", `"${q}": com o aviso, a lista tem bomba: ${bombas.join(", ")}`);
+        if (q.includes("onix") && existe("BCE3002") && !bombas.includes("BCE3002")) falha("avisotipo", N_AVT, q + ":BCE3002", `"${q}": sem a BCE3002 (que serve no Onix 2015)`);
+        avt.push(`"${q}" = ${r.itens.length}${av ? ` com "${cortar(av, 60)}"` : ", sem aviso"}`);
+        if (esperado) { await page.evaluate(() => window.scrollTo(0, 0)); await print("busca-aviso-tipo"); }
+        conferirConsole("busca-aviso-tipo");
+      }
+      detalhe("avisotipo", N_AVT, avt.join("; "));
+
       // código exato em 1º (decisão 4a): código BAP e EAN
       const exatos = [["CL14", "CL14"]];
       if (ean) exatos.push([ean, "TER551011"]);
@@ -745,6 +772,69 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         conferirConsole("busca-geral");
       }
       detalhe("geral", N_GER, contas.join("; "));
+
+      // ---- T-0039 (25/11/2026, respostas "1) a 2) a 3) a"): palavra inteira do veículo e moto primeiro ----
+      // 1a: "titan" não casa "titanium" (FAC6227, Ford Focus Titanium, sai de "filtro titan"); 2a: com nome de modelo de
+      // moto do catálogo, os produtos de moto vêm antes e os outros logo abaixo (nada some). "De moto" aqui = o campo
+      // li (LINHA) do produtos.json igual a "MOTO", regra do teste (não a do site).
+      const N_TIT = "palavra inteira e moto primeiro (T-0039)";
+      {
+        const deMoto = (c) => norm(porCod.get(normCod(c))?.li || "") === "MOTO";
+        const VW_TITAN = ["FAR6026", "FAR6082", "FSE6117", "FSE6215", "FSE6308", "FCB6028", "FAC6194"];
+        const contasTit = [];
+        // a ordem: nenhum produto que não é de moto antes do último de moto
+        const motoPrimeiro = (q, cods) => {
+          const nM = cods.filter(deMoto).length;
+          if (!nM) { falha("titan", N_TIT, q + ":sem-moto", `"${q}": nenhum produto de moto (li = MOTO) na lista`); return; }
+          const fora = cods.slice(0, nM).filter((c) => !deMoto(c));
+          if (fora.length) falha("titan", N_TIT, q + ":ordem", `"${q}": ${nM} de moto, mas entre os ${nM} primeiros há ${fora.length} que não são de moto (${fora.slice(0, 6).join(", ")}); ordem: ${cods.slice(0, 12).join(", ")}`);
+        };
+        // "filtro titan": sem o FAC6227; FAR6365 antes dos 7 do VW 18-310 Titan; os 7 continuam
+        const qFt = "filtro titan";
+        await abrir("busca-titan", "#/busca?q=" + encodeURIComponent(qFt));
+        let c = (await listaTodos()).itens.map((i) => i.c);
+        contasTit.push(`"${qFt}" = ${c.length} (${c.join(", ")})`);
+        if (c.includes("FAC6227")) falha("titan", N_TIT, qFt + ":FAC6227", `"${qFt}" trouxe o FAC6227 (Focus Titanium): "titan" casou dentro de "titanium"`);
+        const iMoto = c.indexOf("FAR6365");
+        if (iMoto < 0) falha("titan", N_TIT, qFt + ":FAR6365", `"${qFt}" não trouxe o FAR6365 (Honda CG 150 Titan)`);
+        const sumidos = VW_TITAN.filter((x) => existe(x) && !c.includes(x));
+        if (sumidos.length) falha("titan", N_TIT, qFt + ":sumiu", `"${qFt}" perdeu ${sumidos.join(", ")} (caminhão VW Titan: tem de continuar na lista, abaixo)`);
+        const antes = VW_TITAN.filter((x) => c.includes(x) && iMoto >= 0 && c.indexOf(x) < iMoto);
+        if (antes.length) falha("titan", N_TIT, qFt + ":ordem", `"${qFt}": ${antes.join(", ")} antes do FAR6365 (posição ${iMoto + 1}); ordem: ${c.join(", ")}`);
+        motoPrimeiro(qFt, c);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await print("busca-titan");
+        conferirConsole("busca-titan");
+        // "titan" e "biz": todos os de moto antes dos que não são
+        for (const q of ["titan", "biz"]) {
+          await abrir("busca-moto", "#/busca?q=" + encodeURIComponent(q));
+          c = (await listaTodos()).itens.map((i) => i.c);
+          contasTit.push(`"${q}" = ${c.length}, ${c.filter(deMoto).length} de moto`);
+          if (c.includes("FAC6227")) falha("titan", N_TIT, q + ":FAC6227", `"${q}" trouxe o FAC6227 (Focus Titanium)`);
+          motoPrimeiro(q, c);
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await print("busca-moto-" + q);
+          conferirConsole("busca-moto");
+        }
+        // "focus titanium": a palavra inteira acha o FAC6227
+        const qFo = "focus titanium";
+        await abrir("busca-titanium", "#/busca?q=" + encodeURIComponent(qFo));
+        c = (await listaTodos()).itens.map((i) => i.c);
+        contasTit.push(`"${qFo}" = ${c.length}`);
+        if (!c.includes("FAC6227")) falha("titan", N_TIT, qFo, `"${qFo}" não trouxe o FAC6227 (${c.length} itens: ${c.slice(0, 8).join(", ")})`);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await print("busca-titanium");
+        conferirConsole("busca-titanium");
+        // prefixo de código e código de moto continuam como antes (código e referência: blocos "busca código" e "busca referência")
+        for (const [q, esperado, primeiro] of [["CXD1306", "CXD13062", false], ["FAR6365", "FAR6365", true]]) {
+          if (!existe(esperado)) continue;
+          await abrir("busca-titan-cod", "#/busca?q=" + encodeURIComponent(q));
+          c = (await listaTodos()).itens.map((i) => i.c);
+          if (primeiro ? c[0] !== esperado : !c.includes(esperado)) falha("titan", N_TIT, "cod:" + q, `"${q}": ${primeiro ? "1º = " + (c[0] || "nada") : "sem o " + esperado} (esperado ${esperado}${primeiro ? " em 1º" : " na lista"})`);
+          conferirConsole("busca-titan-cod");
+        }
+        detalhe("titan", N_TIT, contasTit.join("; "));
+      }
 
       // ---- busca sem resultado ----
       const N_VAZ = "busca sem resultado";
