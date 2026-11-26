@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0666** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0670** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -469,6 +469,10 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0663 | baixa | teste | testes/t0033_busca_ano.mjs:434-476 × scripts/testar_site.mjs:714-736 | o aviso de tipo sem peça ("bomba combustivel polo 2026", "polo 2026"), o `ehBomba` e a leitura do texto visível nos 2 testes | T-0033 | testes | CORRIGIDO (0700981) |
 | RD-0664 | baixa | código | site/app.js:1811 × :1805 e :1809 | o `FIM_CONDICAO` reescreve `exc.\|exceto` (do `NEGA`) e `somente\|apenas` (do `RX_RESTR`) | T-0033 | web-site | CORRIGIDO (22bc129) |
 | RD-0665 | baixa | teste | testes/t0033_busca_ano.mjs:498-503 × :600 e :646-647 | as `conta` das contagens fixas escritas 2 vezes (rodada curta e inteira) | T-0033 | testes | CORRIGIDO (716e2d1) |
+| RD-0666 | média | código | site/app.js:362 e :338 | janela de até 3 palavras vizinhas escrita 2 vezes (`temModeloDeMoto` × `modelosDigitados`) → `modelosNaBusca` | T-0039 | web-site | CORRIGIDO (931a7e9) |
+| RD-0667 | baixa | código | site/app.js:357 e :1231 | regex do modelo como palavra inteira em `naApl` repete `rxModeloTxt` | T-0039 | web-site | CORRIGIDO (931a7e9) |
+| RD-0668 | média | teste | scripts/testar_site.mjs:829 | CXD13062, "CXD 13062" e 16900255S já testados em "busca código" e "busca referência" | T-0039 | testes | CORRIGIDO (f984887) |
+| RD-0669 | média | teste | scripts/testar_site.mjs:837 e testes/t0033_busca_ano.mjs:102 | contagens fixas da T-0033 (27, 71, 1, 241) em 2 arquivos | T-0039 | testes | CORRIGIDO (f984887) |
 
 ## Notas
 
