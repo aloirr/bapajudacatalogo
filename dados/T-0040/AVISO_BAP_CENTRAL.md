@@ -4,12 +4,12 @@ A BAP Central lê a base unificada (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`
 
 ## O que muda
 
-- **VEICULOS, coluna ORIGEM:** valor novo **`Fraga T-0040`**. Até a v28 a coluna só tinha `automático`. Na v29 são 35.758 linhas `Fraga T-0040` e 1.992 `automático`.
+- **VEICULOS, coluna ORIGEM:** valor novo **`Fraga T-0040`** nas 25.148 linhas que entram da Fraga. As 17.296 linhas da v28 continuam todas, com `automático`, na mesma ordem; as da Fraga entram logo depois da última linha de cada código.
   - Quem filtra ou valida a ORIGEM por uma lista fechada de valores tem de aceitar o novo.
-- **VEICULOS, tamanho:** de 17.296 para 37.750 linhas de dados. Os 3.909 códigos achados pela Fraga pelo código BAP trocaram as linhas antigas pelas da Fraga: uma linha por código, montadora, modelo e motor, com o ano mínimo (ANO_INICIO) e o máximo (ANO_FIM).
-  - A VERSAO passa a trazer o motor da Fraga e, quando houver, a observação (ex.: `EA111 VHT 1.6 L 8V SOHC L4 · DIANT`).
-  - A grafia das montadoras e dos modelos é a da base quando casa sem acento e sem espaço; senão, vem da Fraga (em maiúsculas).
-- **LOG_CORRECOES, coluna TIPO:** valor novo **`VEICULO_TROCADO`** (3.909 linhas, uma por código).
+- **VEICULOS, anos das linhas `automático`:** 3.315 linhas sem ano completo receberam o ano inicial e o final da Fraga, e 751 tiveram a faixa aumentada (juntada com a da Fraga). A ORIGEM delas continua `automático`; a fonte do ano está no LOG_CORRECOES.
+- **VEICULOS, tamanho:** de 17.296 para 42.444 linhas de dados.
+  - Nas linhas da Fraga, a VERSAO traz o motor e, quando houver, a observação (ex.: `EA111 VHT 1.6 L 8V SOHC L4 · DIANT`).
+- **LOG_CORRECOES, coluna TIPO:** valores novos **`VEICULO_SOMADO`**, **`ANO_COMPLETADO`** e **`FAIXA_JUNTADA`** (uma linha por código e tipo).
 
 ## O que não muda
 
@@ -19,4 +19,4 @@ A BAP Central lê a base unificada (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`
 
 ## Situação
 
-A v29 está no branch `catalogo-dados/T-0040-v29`, **pendente do aprovado do Alexandre** (simulação 9b11dd1, corrigida em 0be92c8). Só vale depois do merge no `main`.
+A v29 está no branch `catalogo-dados/T-0040-v29`, **pendente do aprovado do Alexandre** (simulação c94772e). Só vale depois do merge no `main`.
