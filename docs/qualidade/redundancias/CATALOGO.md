@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0745** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0752** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -548,8 +548,18 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0742 | baixa | doc | docs/qualidade/redundancias/T-0040.md:447 e CATALOGO.md:567 (Notas) | como o registro foi feito e a numeração repetidos no T-0040.md, no T-0041.md e nas Notas do catálogo | T-0040 | corretor-redundancias | CORRIGIDO (registro da T-0040, #238) |
 | RD-0743 | baixa | tarefa | .coord/quadro.md:52 (#239) | parágrafo "Fila" repetia a situação e os PRs das linhas da tabela (T-0040, T-0041, T-0033/T-0039, T-0038) | T-0040 | gerente-projetos | CORRIGIDO (45d3e72, #239) |
 | RD-0744 | baixa | tarefa | .coord/tarefas/T-0040.md:84, :25 e :34 (#239) | PRs dos pareceres, "7.214/2.145" e "300/90" ditos 2 vezes | T-0040 | gerente-projetos | CORRIGIDO (45d3e72, #239) |
+| RD-0745 | média | dado | LOG_CORRECOES da v31 (VEL7520 `CORRECAO_VEICULO`, ROL15106/15250 `ANO_COMPLETADO`); base_v31.py:296-302 | MOTIVO de 227 caracteres e a SITUACAO escritos 15 vezes na mesma célula; os anos do ROL 4 vezes (a mudança comum vai uma vez, com as linhas) | T-0042 | catalogo-dados | ABERTO |
+| RD-0746 | média | código | dados/scripts/base_v31.py:403-407 × base_v30.py:541-546 | laço do `INTERNO` na planilha antes_depois copiado (vira `sem_interno` no `base_comum`; o v30 fica como rodou) | T-0042 | catalogo-dados | ABERTO |
+| RD-0747 | baixa | código | dados/scripts/base_v31.py:353 e :444-445 | `contar_duvidoso` da v30 e da base nova feito 2 vezes (o `conferir` devolve d0 e d1) | T-0042 | catalogo-dados | ABERTO |
+| RD-0748 | baixa | texto (simulação) | antes_depois_v31.xlsx, aba RESUMO, "Sem fonte"; base_v31.py:385 | SFR30034 2 vezes na lista (vira "SFR30034 (2)") | T-0042 | catalogo-dados | ABERTO |
+| RD-0749 | baixa | dado | LEIA-ME da v31, linha 2; base_v31.py:329 | rótulo "VEICULOS (correções pontuais)" e o texto "Correções pontuais com fonte…" | T-0042 | catalogo-dados | ABERTO |
+| RD-0750 | baixa | código (comentário) | dados/scripts/base_v31.py:1, :18-20, :15-16 × :344 | "SIMULAÇÃO" e "respostas dos PONTOS" velhos no docstring; as 2 etapas descritas 2 vezes (só comentário; não segura) | T-0042 | catalogo-dados | ABERTO |
+| RD-0751 | — | texto (simulação) | antes_depois_v31.xlsx, DO_SITE (SFR30034) × PONTOS_ALEXANDRE (P10) | a tela do Bongo dita nas 2 abas | T-0042 | catalogo-dados | MANTIDO (texto da pergunta respondida pelo Alexandre) |
 
 ## Notas
+
+### T-0042, correções pontuais da base (v31), 27/11/2026 (antes do PR)
+- `catalogo-dados/T-0042-v31` no `c1d7a09`: RD-0745 ao RD-0751. Relatório: `T-0042.md`. VOLTA PARA AJUSTE: seguram o RD-0745 e o RD-0746 (média) e o RD-0747 ao RD-0749 (baixa); não segura o RD-0750 (só comentário); MANTIDO: RD-0751. VEICULOS sem linha repetida. A observação do revisor sobre a P3 (Gol "sem ano na base") é exatidão, não redundância.
 
 ### T-0040, aplicação da Fraga na VEICULOS (v29), 27/11/2026 (PR #228, rascunho)
 - RD-0670 ao RD-0676: branch `catalogo-dados/T-0040-v29` (`a77a097`). Relatório: `T-0040.md`. VOLTA PARA AJUSTE: seguram o RD-0670 ao RD-0675 (3 médias, 3 baixas); MANTIDO: RD-0676. VEICULOS sem linha repetida.
