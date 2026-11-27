@@ -1823,6 +1823,11 @@
   // "Caminhões", "Guerra", "Argentina") não abrem veículo
   const RX_CARROCERIA = /^(?:SEDAN|SW|HATCH|WEEKEND|PICK[\s-]?UP|PICKUP|CABINE|CUPE|COUPE|WAGON|VAN|FURGAO|PERUA|CONVERSIVEL|SPORTBACK|VARIANT|STATION)(?![A-Z0-9])/;
   const carroceria = (x) => RX_CARROCERIA.test(norm(x));
+  // as unidades de medida: o número seguido delas é medida, não número de modelo (numModelo). No nome de veículo
+  // (nomeFora) só o mm conta: "260CV" aparece no nome de veículo de máquina ("A30D D9B-260 260CV", FCB6429)
+  const UNIDADES = "mm|cm³|cm3|cm|cv|kg";
+  const RX_MEDIDA_NOME = /Ø|\d\s*MM\b/i; // "Ø Pino 24mm"
+  const RX_NUM_MODELO = new RegExp(String.raw`\b(?!(?:19|20)\d{2}\b)\d{3,4}\b(?!\s*(?:${UNIDADES})(?![a-z]))`, "gi"); // "1634", não "1977" nem "140 mm"
   const TECNICO = new Set([...PARA_FORA, "FLEX", "GAS", "GASOLINA", "ALCOOL", "ETANOL", "DIESEL", "ABS", "MANUAL", "AUTOMATICO", "DIANTEIRO",
     "DIANTEIRA", "TRASEIRO", "TRASEIRA", "DIREITO", "DIREITA", "ESQUERDO", "ESQUERDA", "RODA", "RODAS", "LADO", "AMBOS", "HIDRAULICA", "HIDRAULICO",
     "ELETRICA", "ELETRICO", "MECANICA", "MECANICO", "ASSIST", "SISTEMA", "INCLUSIVE", "EXCETO", "OPCIONAL", "ORIGINAL", "PARA", "MODELO", "CONVENCIONAL",
@@ -1848,7 +1853,7 @@
     // na dúvida, fora: a palavra só de até 3 letras ("Zen", "Lkj"), a sigla de até 4 ("SOHC", "TSI", "GTI"), o código
     // de motor ("OM-366", "DSC12") e a medida ("Ø Pino 24mm") também não são modelo
     const curto = ws.length === 1 && !/\d/.test(m[0]) && (m[0].length <= 3 || /^[A-Z]{1,4}$/.test(m[0]));
-    return m && !curto && !carroceria(m[0]) && !/^[A-Z]{1,2}\d{1,2}$/i.test(m[0]) && !/^(?:OM|DSC|DC)[\s-]?\d/i.test(m[0]) && !/Ø|\d\s*MM\b/i.test(m[0])
+    return m && !curto && !carroceria(m[0]) && !/^[A-Z]{1,2}\d{1,2}$/i.test(m[0]) && !/^(?:OM|DSC|DC)[\s-]?\d/i.test(m[0]) && !RX_MEDIDA_NOME.test(m[0])
       && !ws.some((w) => TECNICO.has(w) || NUNCA_MODELO.has(w) || marcaDe(w)) && !marcaDe(m[0]) ? m[0] : "";
   };
   // o nome solto depois de vírgula, sem ano nem número com ponto ("Escort, Versailes, Royale"): veículo da lista
@@ -2077,7 +2082,7 @@
           // veículo sem versões de número ("311 / 415 / 515" da Sprinter) passam; o número com unidade ("140 mm", "125 cm³",
           // "150 cv", "1200 kg") é medida, não modelo
           const serieNum = donos.some((x) => /^\d{3,4}$/.test(String(x[3]).trim()));
-          const numModelo = (r, d) => r.comAnoVe && [...String(d).matchAll(/\b(?!(?:19|20)\d{2}\b)\d{3,4}\b(?!\s*(?:mm|cm³|cm3|cm|cv|kg)(?![a-z]))/gi)].some((m) => serieNum || numerosDeModelo().has(m[0]));
+          const numModelo = (r, d) => r.comAnoVe && [...String(d).matchAll(RX_NUM_MODELO)].some((m) => serieNum || numerosDeModelo().has(m[0]));
           if (fx.length && !outro) donos.forEach((r) => { somaAno(r, fx); const d = comRestr(v.trim(), semAno, p); if (d && !numModelo(r, d)) comDetalhe(r, d); });
           else donos.forEach((r) => { if (!numModelo(r, v)) comDetalhe(r, v.trim()); });
           return outro ? "outro" : "";
