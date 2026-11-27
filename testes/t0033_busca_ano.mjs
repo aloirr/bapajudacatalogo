@@ -369,6 +369,7 @@ function restricoesDoTexto(a, ve = []) {
   // o "| DETALHE: …" é a descrição do produto ("sem falhas"), não a aplicação
   const t = norm(a).split(/\|\s*DETALHE\b/)[0], out = [];
   const nomesVe = new Set(ve.flatMap((v) => [v[0], v[1]]).flatMap((x) => norm(x).split(/[\s-]+/)));
+  const modelosVe = [...new Set(ve.map((v) => norm(v[1])).filter((x) => x.length >= 2 && !/^[0-9]+$/.test(x)))];
   for (const m of t.matchAll(RX_RESTR)) {
     const marca = m[1].replace(/\.$/, ""), fam = /^(?:SOMENTE|APENAS)$/.test(marca) ? "pos" : "neg";
     let resto = t.slice(m.index + m[0].length).replace(/^[\s.:]+/, "");
@@ -398,7 +399,14 @@ function restricoesDoTexto(a, ve = []) {
     }
     // o núcleo: a 1ª palavra e, se a 2ª é uma letra só ou um número de motor ("HB20 X", "Focus 1.6"), ela também
     const nucleo = tk.length > 1 && (/^[A-Z]$/.test(tk[1]) || /^[0-9]+(?:\.[0-9]+)?[A-Z]*$/.test(tk[1])) ? tk.slice(0, 2) : tk.slice(0, 1);
-    out.push({ marca, fam, contra: fam === "neg" && !semCom, termo: tk.join(" "), nucleo, inteiro });
+    // T-0040: o modelo do "ve" que vem antes da restrição no mesmo trecho (até o "·", ";", "," ou "|" anterior):
+    // "Vectra 01/1997–12/2001 Exceto 2.4" restringe o Vectra, não a linha "Astra 2.4" (KAP11315). Sem modelo no trecho,
+    // a restrição vale para todas as linhas, como antes
+    const trecho = t.slice(0, m.index).split(/ · |[;,|]/).pop();
+    let modelo = "", onde = -1;
+    for (const mo of modelosVe) for (const x of trecho.matchAll(new RegExp(`(?<![A-Z0-9])${mo.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![A-Z0-9])`, "g")))
+      if (x.index > onde || (x.index === onde && mo.length > modelo.length)) { onde = x.index; modelo = mo; }
+    out.push({ marca, fam, contra: fam === "neg" && !semCom, termo: tk.join(" "), nucleo, inteiro, modelo });
   }
   return out;
 }
@@ -448,8 +456,9 @@ async function conferirRestricoes(browser, prods) {
       const falta = rs.filter((r) => !restricaoVisivel(r, vis));
       if (falta.length) escondidas.push(`${p.c} («${falta.map((r) => r.marca + " " + (r.inteiro || r.termo)).join("», «")}»)`);
       for (const r of rs.filter((x) => x.contra)) {
-        const ruins = linhas.filter((l) => linhaTemTermo(l, r.termo.split(" ")) && !new RegExp(MARCA_NEG.source).test(l));
-        if (ruins.length) contra.push(`${p.c} (${r.marca} ${r.termo} x linha «${ruins[0].slice(0, 70)}»)`);
+        // só as linhas do modelo da restrição (r.modelo, T-0040); sem modelo, todas
+        const ruins = linhas.filter((l) => linhaTemTermo(l, r.termo.split(" ")) && !new RegExp(MARCA_NEG.source).test(l) && (!r.modelo || linhaTemTermo(l, r.modelo.split(" "))));
+        if (ruins.length) contra.push(`${p.c} (${r.modelo ? r.modelo + " " : ""}${r.marca} ${r.termo} x linha «${ruins[0].slice(0, 70)}»)`);
       }
     }
     await D.semRolar("restrições");
