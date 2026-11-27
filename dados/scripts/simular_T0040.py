@@ -148,9 +148,11 @@ def somar(antigas: list, fraga_cod: dict, vers_cod: dict, trocar: set):
     """A VEICULOS com a Fraga somada (R-20261127-053555-po). Devolve (linhas, casos, entrou).
 
     Para cada código achado por 'bap':
-    1. linha atual sem ano ou só com um ano (sem_ano, so_inicial e so_final [SUPOSIÇÃO: o so_final como os outros]):
-       se a Fraga tem o mesmo código + montadora + modelo, recebe o ano mínimo e o máximo da Fraga (dos grupos do
-       mesmo motor/versão, se houver; senão, de todos os do modelo). ORIGEM continua "automático";
+    1. linha atual sem ano ou só com um ano (sem_ano, so_inicial e so_final): se a Fraga tem o mesmo código +
+       montadora + modelo, recebe o ano mínimo e o máximo da Fraga (dos grupos do mesmo motor/versão, se houver;
+       senão, de todos os do modelo), só se não tem ano nenhum ou se o ano que tem cai dentro da faixa da Fraga
+       (decisão do po, 27/11/2026). Se conflita (ex.: "2022+" e a Fraga 2008–2019), fica como está (CONFLITO) e os
+       grupos da Fraga entram como linhas somadas. ORIGEM continua "automático";
     2. cada grupo da Fraga: se há linha atual com ano completo do mesmo código + montadora + modelo e do mesmo motor
        ou versão, e as faixas se encostam, não entra: a atual fica, com a faixa junta (mínimo e máximo; "juntou" se
        a faixa cresceu, "já coberta" se não); faixas que não se encostam: o grupo entra como linha nova;
@@ -187,7 +189,14 @@ def somar(antigas: list, fraga_cod: dict, vers_cod: dict, trocar: set):
                 continue
             mesmos = [i for i in ids if mesmo_motor_ou_versao(r, grupos[i], vers[i])] or ids
             antes = ano(r)
-            r[4], r[5] = min(grupos[i][4] for i in mesmos), max(grupos[i][5] for i in mesmos)
+            f0, f1 = min(grupos[i][4] for i in mesmos), max(grupos[i][5] for i in mesmos)
+            tem = [a for a in (r[4], r[5]) if a is not None]
+            if any(not f0 <= a <= f1 for a in tem):     # o ano que a linha já tem fica fora da faixa da Fraga
+                casos.append([cod, n + 1, "CONFLITO", r[1], r[2], r[3], antes, antes,
+                              f"{t}: o ano atual ({antes}) fica fora da faixa da Fraga ({f0}–{f1}); a linha fica "
+                              f"como está e a Fraga entra como linha somada"])
+                continue
+            r[4], r[5] = f0, f1
             casos.append([cod, n + 1, "ANO_COMPLETADO", r[1], r[2], r[3], antes, ano(r),
                           f"{t}: anos da Fraga ({len(mesmos)} grupo(s)"
                           f"{' do mesmo motor/versão' if len(mesmos) < len(ids) else ''})"])
@@ -389,11 +398,15 @@ def main():
         resumo.append([cod, p.get("DESCRICAO"), p.get("PRODUTO"), p.get("LINHA"), len(an), len(de),
                        faixa([(r[4], r[5]) for r in an]) if an else "(sem linha)", faixa([(r[4], r[5]) for r in de]),
                        cont_csv[cod], len(novas_por_cod[cod]), cc["VEICULO_SOMADO"], cc["ANO_COMPLETADO"],
-                       cc["FAIXA_JUNTADA"], cc["JA_COBERTA"], cc["SEM_ANO_FICA"]])
+                       cc["FAIXA_JUNTADA"], cc["JA_COBERTA"], cc["SEM_ANO_FICA"], cc["CONFLITO"]])
     out.remove(out.active)
     aba("RESUMO", ["CODIGO_BAP", "DESCRICAO", "PRODUTO", "LINHA", "LINHAS_ANTES", "LINHAS_DEPOIS", "ANOS_ANTES",
                    "ANOS_DEPOIS", "LINHAS_DA_FRAGA (antes de agrupar)", "GRUPOS_DA_FRAGA", "SOMADAS", "ANO_COMPLETADO",
-                   "FAIXA_JUNTADA", "JA_COBERTA (não duplica)", "SEM_ANO_FICA"], resumo)
+                   "FAIXA_JUNTADA", "JA_COBERTA (não duplica)", "SEM_ANO_FICA", "CONFLITO"], resumo)
+    aba("CONFLITOS", ["CODIGO_BAP", "DESCRICAO", "FABRICANTE", "MODELO", "VERSAO", "LINHA_DA_V28 (dados)", "ANO_ATUAL",
+                      "FAIXA_DA_FRAGA"],
+        [[c[0], prod[c[0]].get("DESCRICAO"), c[3], c[4], c[5], c[1], c[6],
+          re.search(r"Fraga \((\d{4}–\d{4})\)", c[8]).group(1)] for c in casos if c[2] == "CONFLITO"])
     aba("CASOS", ["CODIGO_BAP", "LINHA_DA_V28 (dados)", "CASO", "FABRICANTE", "MODELO", "VERSAO", "ANO_ANTES",
                   "ANO_DEPOIS", "DETALHE"], casos)
 
