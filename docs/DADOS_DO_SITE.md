@@ -18,7 +18,7 @@
 | `sc` | fora dos produtos, uma vez no arquivo (T-0018): a tabela dos sistemas compatíveis do "Leve também", `SIS_COMPAT` do `gerar_site.py` (origem → sistemas aceitos, com o próprio; não é simétrica; sistema fora da tabela aceita só ele mesmo). Os PDFs leem a mesma tabela do `gerar_site.py` (`site_regras`), sem cópia. Ex.: `"RODAGEM": ["RODAGEM", "FREIO"]`. |
 | `i` | foto em `site/img/` |
 | `gerado_em` | data e hora da geração, em hora de Manaus (`America/Manaus`; sem os dados de fuso, UTC−4 fixo). O site mostra "base atualizada em". |
-| `ve` | veículos do filtro "Meu veículo", da aba `VEICULOS` (desde a v17, T-0017): lista de `[FABRICANTE, MODELO, VERSAO]`, a VERSAO só quando existe. Ex.: `[["VOLKSWAGEN","Gol","G5"],["VOLKSWAGEN","Saveiro"]]`. | No produto com veículos da Fraga (T-0040), cada veículo leva também os anos: `[FABRICANTE, MODELO, VERSAO, ANO_INICIO, ANO_FIM]`. Ex.: `["VOLKSWAGEN","Gol","EA111 VHT 1.6 L 8V SOHC L4",2008,2018]`. |
+| `ve` | veículos do filtro "Meu veículo", da aba `VEICULOS` (desde a v17, T-0017): lista de `[FABRICANTE, MODELO, VERSAO]`, a VERSAO só quando existe. Ex.: `[["VOLKSWAGEN","Gol","G5"],["VOLKSWAGEN","Saveiro"]]`. No produto com veículos da Fraga (T-0040), cada veículo leva também os anos: `[FABRICANTE, MODELO, VERSAO, ANO_INICIO, ANO_FIM]`. Ex.: `["VOLKSWAGEN","Gol","EA111 VHT 1.6 L 8V SOHC L4",2008,2018]`. |
 | `vt` | `1` no produto com veículos da Fraga na aba `VEICULOS` (ORIGEM "Fraga …", T-0040). A ORIGEM não vai. |
 
 **Campo `ve` (T-0017):**
@@ -32,9 +32,12 @@
 - **No site, o produto `vt`** usa só a VEICULOS para veículo:
   - a tabela da aplicação é uma linha por veículo do `ve`, sem o texto da APLICACAO (sem `juntarNaTabela`, sem "Restrição da aplicação" e sem a "Aplicação completa" na ficha impressa). Cilindrada: a da VERSAO ("EA111 VHT 1.6 L 8V SOHC L4" dá "1.6 8V"); Versão: a VERSAO sem a cilindrada ("EA111 VHT SOHC L4", com a observação depois de " · "); Ano: o `an`, se houver, senão o ANO_INICIO–ANO_FIM do veículo (ano igual: só ele; sem fim: "2015+"; sem os dois: "—");
   - a busca por veículo e a busca digitada com modelo e ano (`serveNoAno`) usam só essas linhas; a busca digitada com ano e sem modelo ("bce3001 2001") usa as faixas do `ve`. As listas Motor e Versão saem das linhas do `ve` da marca, do modelo e do ano escolhidos;
-  - a busca digitada sem ano continua achando o produto pelo texto da APLICACAO (ex.: "ka" ainda acha a BCE3001).
+  - a busca digitada (com ou sem ano) casa o veículo só pelo `ve` (marca, modelo e versão), nunca pelo texto da APLICACAO; descrição, código e referência continuam valendo (opção a do parecer de UX da T-0040: "ka" não traz mais a BCE3001);
+  - o cartão da lista mostra, no lugar do texto da APLICACAO, o resumo do `ve`: cada modelo uma vez, com a faixa do 1º ao último ano dele ("Volkswagen Gol 2008–2022 · Volkswagen Saveiro 2008–2022");
+  - a VERSAO com " | " cru aparece com " · " (MC-0049); a caixa alta da VERSAO fica como está na base ("· COM FREIO ABS", decisão de marca).
 - **Produto sem `vt`:** como antes. Só o veículo do `ve` que já traz ano (hoje nenhum fora do `vt`) usa o ano dele na tabela, depois do `an` e antes do texto, e não ganha ano da rede de segurança.
-- **Moto (T-0039, T-0040):** a palavra do nome de um modelo de moto ("TITAN" de "CG 160 TITAN") também é modelo de moto (moto primeiro na lista, e "titan" não casa "titanium"), menos a que é modelo de outra montadora (o "CARGO" do Ford Cargo).
+- **Moto (T-0039, T-0040):** a palavra do nome de um modelo de moto ("TITAN" de "CG 160 TITAN") também é modelo de moto (moto primeiro na lista, e "titan" não casa "titanium"). Fica fora a palavra que também está num modelo que não é de moto ("SPORT" do Bronco Sport, "FLY" do Volare Fly, "MAX" do Stara ST MAX, "CARGO" do Ford Cargo), a que está na descrição de uma peça que não é de moto ("START" da bateria Start-Stop) e as palavras comuns da `PALAVRA_COMUM` do `site/app.js` (TODAY, YES, NEXT, JOB, POP, FAN, GOLD, KING, SPEED, DUAL, FOUR, STORM, TIGER e outras).
+- **Celular (T-0040, parecer de UX 2.2), todos os produtos com tabela:** cada veículo da lista tem o título em negrito com marca, modelo e cilindrada ("Volkswagen Fox 1.0 8V") e, embaixo, a versão e o ano ("EA111 SOHC L4 · 2008–2013"), sem os rótulos "Cilindrada" e "Ano". Em 1366 px, as colunas não mudam.
 
 **No detalhe do produto** (o site monta a partir do JSON, sem campo novo):
 
