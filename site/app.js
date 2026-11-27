@@ -2021,7 +2021,10 @@
       else if (!mods.length && vm && (veiculoComAno(resto, true) || nomeSolto(resto.trim()))) {
         const nome = nomeFora(resto.trim()), w = /^(\S+)\s+/.exec(resto.trim()), m2 = w && modeloNoInicio(resto.trim().slice(w[0].length), modelos);
         if (m2) { mods.push([m2[0], vm || m2[2]]); resto = w[1] + " " + resto.trim().slice(w[0].length + m2[1]); }
-        else if (nome) { mods.push([nome, vm]); resto = resto.trim().slice(nome.length); }
+        // o nome que é modelo do catálogo de uma montadora só, e não da do bloco, fica com a dele ("FORD - … Passat"
+        // é Volkswagen; JUH70025)
+        else if (nome) { const donas = [...new Set((indiceVe().porCompacto.get(compacto(nome)) || []).map(([b]) => b))];
+          mods.push([nome, donas.length === 1 && donas[0] !== vm ? donas[0] : vm]); resto = resto.trim().slice(nome.length); }
       }
       return { mods, resto };
     }
@@ -2168,12 +2171,12 @@
   // - a do texto com a mesma versão e a cilindrada vazia ou igual: o ano do "ve" manda (CXD13065: "Up 2014–2021", não "2014+");
   // - a sem versão e sem cilindrada cuja faixa está dentro da dela, vinda do "ve" ou do texto (RD-0678 e RD-0686: "Elba
   //   1989–1996" e "Elba SEVEL 1.6 8V 1989–1996"; "Saveiro (08/2022)" e "Saveiro 1.6 8V EA111 VHT 2009–2022").
-  // - a do texto cujas cilindradas estão todas nas linhas do "ve" com ano do mesmo modelo e cuja versão é só número (v30,
+  // - a do texto que junta várias cilindradas, todas já nas linhas do "ve" com ano do mesmo modelo, e cuja versão é só número (v30,
   //   JUH70025: "Gol 1.6 / 1.8 / 2.0 · 88 / 10.94" ao lado de "Gol 1.6", "Gol 1.8" e "Gol 2.0" da VEICULOS).
   // Roda depois do texto, que dá o ano à linha
   const semRepetida = (tab) => { const k = chaveApl; return tab.filter((r) => { const f = !r[2] && !r[3] && faixaDaCelula(r[4]);
     const doModelo = tab.filter((o) => o !== r && o.comAnoVe && k(o[0]) === k(r[0]) && k(o[1]) === k(r[1]));
-    if (!r.comAnoVe && r[2] && r[3] && !/[A-Za-zÀ-ÿ]/.test(r[3]) && cilsDe(r[2]).every((c) => doModelo.some((o) => cilsDe(o[2]).includes(c)))) return false;
+    if (!r.comAnoVe && cilsDe(r[2]).length > 1 && r[3] && !/[A-Za-zÀ-ÿ]/.test(r[3]) && cilsDe(r[2]).every((c) => doModelo.some((o) => cilsDe(o[2]).includes(c)))) return false;
     return !tab.some((o) => o !== r && o.comAnoVe && k(o[0]) === k(r[0]) && k(o[1]) === k(r[1])
       && ((!r.comAnoVe && (!r[2] || k(r[2]) === k(o[2])) && k(r[3]) === k(o[3]))
         || (f && (o[2] || o[3]) && ((g) => g && g[0] <= f[0] && f[1] <= g[1])(faixaDaCelula(o[4]))))); }); };
