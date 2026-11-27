@@ -6,16 +6,17 @@ Fonte: aba VEICULOS da base unificada (uma linha por produto x veículo, com ANO
   so_final   = ANO_FIM preenchido e ANO_INICIO vazio ("até 2008")
 Fica fora: as linhas com início e fim e os itens de LINHA UNIVERSAL (decisão do Alexandre: ficam sem ano).
 
-Saída: dados/T-0040/lista_trabalho.csv (UTF-8, ";"). id_linha = ordem das linhas da aba VEICULOS (estável enquanto a
+Saída (UTF-8, ";"):
+- dados/T-0040/pendentes_internet.csv: a lista de trabalho (as linhas da VEICULOS ainda sem ano completo; até a v29
+  se chamava lista_trabalho.csv, RD-0696);
+- dados/T-0040/conflitos.csv: as linhas da aba CONFLITOS da simulacao/antes_depois.xlsx, com o id_linha da VEICULOS
+  de hoje e a faixa da Fraga (AAAA–AAAA) no lugar do tipo.
+id_linha = ordem das linhas da aba VEICULOS (estável enquanto a
 aba não mudar). Só campos públicos: descrição (d) e referências (r) do site/data/produtos.json, que já passaram pela
 FICHA e pela TRAVA do gerar_site; fabricante, modelo, versão e cilindrada da VEICULOS. Não copia APLICACAO (pode ter
 preço, como o TER556556). O sha256 da base é conferido antes e depois.
 
-Também grava (mesmas regras de campo e o mesmo [PARADO] de palavra interna):
-- dados/T-0040/pendentes_internet.csv: as linhas da VEICULOS ainda sem ano completo, com as colunas da lista (hoje é
-  a mesma lista);
-- dados/T-0040/conflitos.csv: as linhas da aba CONFLITOS da simulacao/antes_depois.xlsx, com o id_linha da VEICULOS
-  de hoje e a faixa da Fraga (AAAA–AAAA) no lugar do tipo.
+Os dois passam pelo mesmo [PARADO] de palavra interna.
 
 Uso: python3 dados/scripts/lista_T0040.py
 """
@@ -33,7 +34,6 @@ from base_comum import BASE, RAIZ, sha  # noqa: E402
 from simular_T0040 import AD, ORIGEM, tipo_ano  # noqa: E402
 
 JSON = RAIZ / "site" / "data" / "produtos.json"
-SAIDA = RAIZ / "dados" / "T-0040" / "lista_trabalho.csv"
 PENDENTES = RAIZ / "dados" / "T-0040" / "pendentes_internet.csv"
 CONFLITOS = RAIZ / "dados" / "T-0040" / "conflitos.csv"
 COLS_CONF = ["id_linha", "codigo_bap", "descricao", "montadora", "modelo", "versao", "motor", "ano_atual",
@@ -86,12 +86,13 @@ def main():
         if not lin or lin[1] != c[0] or lin[4] != txt(c[3]):
             sys.exit(f"[PARADO] o conflito {c[0]} {c[3]} (linha {c[5]} da v28) não está na lista de hoje")
         conf.append(lin[:8] + [c[7]] + lin[9:])
-    for arq, cols, dados in ((SAIDA, COLS, saida), (PENDENTES, COLS, saida), (CONFLITOS, COLS_CONF, conf)):
+    saidas = ((PENDENTES, COLS, saida), (CONFLITOS, COLS_CONF, conf))
+    for arq, cols, dados in saidas:
         for lin in dados:
             if any(INTERNO.search(str(c)) for c in lin):
                 sys.exit(f"[PARADO] dado interno na linha {lin[0]} ({lin[1]}) de {arq.name}")
-    SAIDA.parent.mkdir(parents=True, exist_ok=True)
-    for arq, cols, dados in ((SAIDA, COLS, saida), (PENDENTES, COLS, saida), (CONFLITOS, COLS_CONF, conf)):
+    PENDENTES.parent.mkdir(parents=True, exist_ok=True)
+    for arq, cols, dados in saidas:
         with arq.open("w", encoding="utf-8", newline="") as f:
             w = csv.writer(f, delimiter=";", quoting=csv.QUOTE_MINIMAL, lineterminator="\n")
             w.writerow(cols)

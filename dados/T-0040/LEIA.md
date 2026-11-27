@@ -1,6 +1,7 @@
 # T-0040 · Lista de trabalho dos anos: como usar
 
-Arquivo: `lista_trabalho.csv` (UTF-8, separador `;`), uma linha por aplicação (produto × veículo) da aba VEICULOS
+Arquivo: `pendentes_internet.csv` (a lista de trabalho; até o RD-0696 se chamava `lista_trabalho.csv`, com o mesmo
+conteúdo) (UTF-8, separador `;`), uma linha por aplicação (produto × veículo) da aba VEICULOS
 da base **v29** (refeita em 27/11/2026: 4.174 linhas, antes 7.293 na v28). Saíram as 3.119 linhas que receberam o ano
 da Fraga (regra 1a nova, R-20261127-053555-po); ficam as que a Fraga não cobre (o modelo não está na Fraga, os 27
 achados por referência e os 483 não achados) e as 472 em conflito (o ano atual fica fora da faixa da Fraga; aba
