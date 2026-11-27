@@ -30,11 +30,10 @@ T-0040: v30 aprovada ($RECADO)
   no LOG_CORRECOES e no LEIA-ME.
 - sai a dados/T-0040/v30/BASE_simulada_v30.xlsx (fica no histórico do branch).
 
-Agente: catalogo-dados
 Tarefa: T-0040
-
+Agente: catalogo-dados
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01QvB2SQd3z8iEh3oSYx56vn
+Claude-Session: https://claude.ai/code/session_0157qAhjP9skRpvtYmiCFtzz
 MSG
 git log --oneline -1
 echo "Falta o push: git push origin catalogo-dados/T-0040-v30"
