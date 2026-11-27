@@ -2193,9 +2193,11 @@
     }
     return TABELA.get(p);
   };
-  // v30 (respostas 4 e 7): o produto com veículo oculto ("vo") e sem nenhuma linha na tabela mostra o aviso na página,
-  // na janela e no cartão. O produto sem nada na VEICULOS e sem texto (palheta, bateria, roda: o cliente escolhe pela
-  // medida) fica sem a seção, como antes; o que só tem o texto (FLU15001, os óleos "conforme manual"), com o texto
+  // v30 (respostas 4, 7 e 19): o produto sem aplicação visível (sem tabela e sem texto, ou com todos os veículos ocultos,
+  // "vo") mostra o aviso na página, na janela e no cartão; o que só tem o texto (FLU15001, os óleos "conforme manual")
+  // fica com o texto. A palheta, a bateria e a roda (FAMILIA da base: o cliente escolhe pela medida) ficam sem a seção,
+  // como antes, sem o aviso (resposta 4)
+  const FAMILIAS_PELA_MEDIDA = new Set(["PALHETAS", "BATERIAS E TERMINAIS", "RODAS"].map(norm));
   const AVISO_SEM_APL = "Aplicação em revisão; consulte o vendedor.";
   // o texto da aplicação no cartão: no produto "vo" (com tabela), o resumo dos modelos do "ve" visível, por marca ("FORD -
   // Escort / Verona / Royale · FIAT - Palio", a marca como nos outros cartões: MC-0052), porque o texto cita os veículos
@@ -2206,7 +2208,7 @@
     for (const [f, m] of p.ve || []) { const k = String(f).toUpperCase(); if (!porMarca.has(k)) porMarca.set(k, []); if (!porMarca.get(k).includes(m)) porMarca.get(k).push(m); }
     return [...porMarca].map(([f, ms]) => f + " - " + ms.join(" / ")).join(" · ");
   };
-  const semAplicacao = (p) => !!p.vo && !tabelaDe(p).length;
+  const semAplicacao = (p) => !tabelaDe(p).length && (!p.a || !!p.vo) && !FAMILIAS_PELA_MEDIDA.has(norm(p.fa));
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
