@@ -54,6 +54,14 @@ SHA_SIM = "fd45b6197a44d72ec4e9f4b8f7df0405287d26462b26d9f937459e8e2c559688"   #
 AVISO = RAIZ / "dados" / "T-0040" / "AVISO_BAP_CENTRAL.md"
 SITUACAO_AVISO = re.compile(r"(## Situação\n\n).*\Z", re.S)
 REGRA = "decisão 1a nova, R-20261127-053555-po: a Fraga se soma"
+# decisão 2a do aprovado (R-20261127-132222-alexandre): o Gol que a APLICACAO cita entra na VEICULOS do JUH70025 e do
+# SFR30017 (as linhas Gol de antes são duvidosas e não aparecem no filtro). Cada linha vem de um trecho do texto da
+# APLICACAO, que é conferido: (montadora, modelo, VERSAO, ANO_INICIO, ANO_FIM, CILINDRADA, trecho). "AAAA>" = em diante
+# (ANO_FIM vazio, como as outras linhas 'automático'). As linhas entram no fim da aba (o id_linha dos CSVs não muda).
+GOL = {"JUH70025": [("VOLKSWAGEN", "Gol", None, 1994, None, "1.6", "Gol 1.6 L (10/1994>)"),
+                    ("VOLKSWAGEN", "Gol", None, 1982, None, "1.8", "/ 1.8 L (11/1982>)"),
+                    ("VOLKSWAGEN", "Gol", None, 1988, 1994, "2.0", "/ 2.0 L (88 / 10.94)")],
+       "SFR30017": [("VOLKSWAGEN", "Gol", "G5", 2008, None, None, "Volkswagen:Gol G5 2008>")]}
 
 def leia_me(autorizacao: str, n: dict) -> list[tuple]:
     return [
@@ -77,6 +85,9 @@ def leia_me(autorizacao: str, n: dict) -> list[tuple]:
                             "da Fraga que começa (por palavra inteira) por um modelo da base da mesma montadora vira o "
                             "da base, e o resto vai para o começo da VERSAO ('SPRINTER FURGÃO' -> Sprinter, 'FURGÃO'). "
                             "O que não casa fica como veio (T-0040, RD-0695)."),
+        ("Gol (2a)", "JUH70025 e SFR30017: +4 linhas VOLKSWAGEN Gol do texto da APLICACAO (ORIGEM 'automático', "
+                     "no fim da aba; VEICULO_NOVO no LOG); as linhas Gol duvidosas de antes ficam "
+                     "(R-20261127-132222-alexandre)."),
         ("APLICACAO", "O texto da APLICACAO na PRODUTOS não muda (campo digitado; reescrever depende de decisão do "
                       "Alexandre)."),
         ("Limpeza da Fraga", "Nas linhas da Fraga: motor sem o '1' grudado no fim ('MONOCILÍNDRICO1'); nos "
@@ -87,6 +98,15 @@ def leia_me(autorizacao: str, n: dict) -> list[tuple]:
                     f"dados/T-0040/simulacao/ ({SIM_COMMIT}). Autorização: {autorizacao}."),
         (None, None),
     ]
+
+
+def linhas_gol(aplic: dict[str, str]) -> list[tuple]:
+    """As linhas VOLKSWAGEN Gol da decisão 2a, depois de conferir cada trecho no texto da APLICACAO."""
+    erros = [f"{cod}: o trecho '{t[6]}' não está na APLICACAO" for cod, ts in GOL.items() for t in ts
+             if t[6] not in aplic.get(cod, "")]
+    parar(erros)
+    return [(cod, f, m, v, a0, a1, "automático", "separado", None, cil, None)
+            for cod, ts in GOL.items() for f, m, v, a0, a1, cil, _ in ts]
 
 
 def ler_sim() -> list[tuple]:
@@ -179,6 +199,10 @@ def main():
     if any(SUFIXO_1.search(limpo(r[3]).split(" · ")[0]) for r in novas if r[io] == ORIGEM):
         erros.append("ainda há motor com o '1' grudado na simulação")
     parar(erros)
+    aplic = {limpo(r[0]).upper(): limpo(r[2]) for r in wb["PRODUTOS"].iter_rows(min_row=2, values_only=True)
+             if limpo(r[0])}
+    gol = linhas_gol(aplic)
+    novas = novas + gol                              # a VEICULOS da simulação e, no fim, as linhas do Gol (2a)
 
     # 1. VEICULOS: os valores da simulação, com a formatação da linha 2 da v28 em cada coluna
     modelo = [copy(ws.cell(2, c)._style) for c in range(1, 12)]
@@ -219,6 +243,13 @@ def main():
                     txt = (f"VEICULOS: {len(pares)} linha(s) com a faixa junta com a da Fraga T-0040 do mesmo motor "
                            f"ou versão ({quais}); ORIGEM continua 'automático' ({REGRA}).")
             log.append([tipo, "VEICULOS", cod, None, f"{txt} {fim}"])
+    for cod, ts in GOL.items():
+        quais = "; ".join(f"Gol{' ' + t[2] if t[2] else ''}{' ' + t[5] if t[5] else ''} {ano(('',) * 4 + t[3:5])} "
+                          f"('{t[6]}')" for t in ts)
+        log.append(["VEICULO_NOVO", "VEICULOS", cod, None,
+                    f"VEICULOS: +{len(ts)} linha(s) VOLKSWAGEN Gol separada(s) do texto da APLICACAO ({quais}), "
+                    f"ORIGEM 'automático', no fim da aba; as linhas Gol duvidosas de antes ficam (decisão 2a, "
+                    f"R-20261127-132222-alexandre). {fim}"])
     ult = acrescentar_log(wb, log)
     leia_n = acrescentar_leia_me(wb, leia_me(autorizacao, n))
     print(f"  VEICULOS: {len(antigas)} linhas antes, {len(novas)} depois; {n}; códigos com mudança: {len(mud)}; "
