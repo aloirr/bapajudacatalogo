@@ -13,8 +13,7 @@ Uso (na raiz do repositório bapajudacatalogo):
 - Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (desde a v17, T-0017). Só as
   linhas SITUACAO = separado; as duvidosas ficam fora até a revisão. Sem a aba, o JSON sai como antes.
   Desde a T-0040, a linha com ANO_INICIO ou ANO_FIM leva os anos: [fab, mod, ver, ini, fim]. Desde a v30, a linha
-  sem ano nenhum na base fica fora do "ve" (oculta do site, continua na base) e vai, só com marca e modelo, no "vo" do
-  produto; a linha com ano duvidoso (ANO_DUVIDA) fica no "ve", sem os anos.
+  sem ano vai no "vo" (ver veiculos_de).
 - Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
   ou de importação, fornecedor, o nome de cada um dos FORNECEDORES e o da concorrência fora da marca da referência
   cruzada), o script PARA e não grava (ver TRAVA abaixo).
@@ -286,10 +285,8 @@ def montadora_de(extras: list[list[str]], aplicacao: str) -> str:
     return MONTADORAS.get(nome, nome)
 
 
-# Aba VEICULOS (desde a v17, T-0017): uma linha por produto x veículo. Vão para o site fabricante, modelo e versão das
-# linhas SITUACAO = separado e, desde a T-0040, o ANO_INICIO e o ANO_FIM da linha que tem ano ([fab, mod, ver, ini, fim];
-# versão vazia = "", ano ausente = 0; sem os anos quando o ANO_DUVIDA está preenchido). ORIGEM, SITUACAO, MOTIVO,
-# CILINDRADA e ANO_DUVIDA não vão.
+# Aba VEICULOS (desde a v17, T-0017): uma linha por produto x veículo; o que vai para o site está na docstring do
+# veiculos_de. ORIGEM, SITUACAO, MOTIVO, CILINDRADA e ANO_DUVIDA não vão.
 VE_SITUACAO = "separado"
 
 
@@ -337,9 +334,9 @@ def veiculos_de(wb) -> tuple[dict[str, list[list]], dict[str, list[list[str]]]]:
             sem_modelo += 1                      # separado sem fabricante ou modelo não serve ao filtro
             continue
         ini, fim = a(r, "ANO_INICIO"), a(r, "ANO_FIM")
-        if not ini and not fim:                  # sem ano nenhum na base: oculto do site (a linha com ano parcial fica)
+        if not ini and not fim:                  # sem ano nenhum: vai no vo
             if [fab, mod] not in ocultos.setdefault(cod, []):
-                ocultos[cod].append([fab, mod])  # só marca e modelo, para reconhecer modelo de moto; o site não mostra
+                ocultos[cod].append([fab, mod])
             continue
         # o ano que a base marca como duvidoso (ANO_DUVIDA: "herdado" da lista com vírgula, "ano solto") não vai, mas a
         # linha fica (resposta 1b): as decisões da T-0033 (o ano da lista é só do último; o ano solto não é faixa)
@@ -411,7 +408,7 @@ def ler_base(caminho: Path) -> list[dict]:
         if p["c"] in ve:
             p["ve"] = ve[p["c"]]
         if p["c"] in ocultos:
-            p["vo"] = ocultos[p["c"]]            # veículos ocultos (sem ano): marca e modelo, nunca mostrados no site
+            p["vo"] = ocultos[p["c"]]
     return produtos
 
 

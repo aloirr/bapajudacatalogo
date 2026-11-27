@@ -1576,9 +1576,8 @@
     ? `<section class="secao rel rel-oj"><${H2} class="secao-tit">Leve também</${H2}>${itensRelHtml(cods)}</section>` : "";
 
   // Tabela da aplicação: uma linha por veículo do "ve" (Marca, Modelo, Cilindrada, Versão, Ano). Marca, Modelo e
-  // Versão são do "ve". SIMULAÇÃO: a base ainda não tem cilindrada nem ano por veículo; aqui eles saem do trecho da
-  // aplicação onde o modelo aparece (o mesmo texto da lista Motor e do ano); o ano da base (an), se houver, vale
-  // primeiro. Sem achar: "—".
+  // Versão são do "ve"; a Cilindrada é a da VERSAO (cilDaVersao) ou a do trecho da aplicação; o Ano é o do "ve", depois
+  // o an, depois o trecho (ver linhasVeiculos). Sem achar: "—".
   const fmtFaixa = ([de, ate]) => de <= SEM_INICIO ? "até " + ate : ate >= SEM_FIM ? de + "–" : de === ate ? String(de) : de + "–" + ate;
   // o ano sem fim fica "2006–" por dentro (as comparações da célula) e aparece "2006+" (anoMaisHtml, T-0018): o leitor
   // de tela ouve "2006 em diante". Com várias faixas na célula (R-20261120-165900-alexandre), cada uma num .faixa, com
@@ -1703,6 +1702,7 @@
       const ano = anoDoVe(x) || anoBase || [...new Set(fora.sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(fmtFaixa))].join(SEP_FAIXAS);
       const r = [marcaTela(fab), mod, cil, versaoDoVe(ver), ano];
       if (faixaVe(x)) r.comAnoVe = true; // a linha do "ve" com ano (cobreVeiculo: a versão dela não precisa estar no texto)
+      if (cv !== null) r.cilDaVersao = true; // a cilindrada veio da VERSAO (cabe: o texto com mais cilindradas não entra nela)
       r.doVe = true; // a linha do "ve" (tabelaDe: a do "ve" com ano duvidoso aparece mesmo sem ano)
       return r;
     });
@@ -1988,10 +1988,10 @@
     const ehLocal = (w) => locais.some(([m]) => k(m) === k(String(w).trim()));
     const cheia = new Set(); // as linhas que já receberam dado (cada uma recebe uma vez)
     // a linha r recebe o dado da nova n: mesma marca e modelo; em cilindrada, versão e ano, r vazia, igual ou (cilindrada) contida
-    // na linha do "ve" com ano a cilindrada é a da VERSAO: o texto com mais cilindradas ("Gol 1.6 L / 1.8 L / 2.0 L") não
-    // entra nela (v30, JUH70025)
+    // na linha do "ve" com ano e com cilindrada na VERSAO, a cilindrada é a dela: o texto com mais cilindradas ("Gol 1.6 L
+    // / 1.8 L / 2.0 L") não entra nela (v30, JUH70025)
     const cabe = (r, n) => k(r[0]) === k(n[0]) && k(r[1]) === k(n[1]) && [2, 3, 4].every((c) => !r[c] || k(r[c]) === k(n[c])
-      || (c === 2 && !r.comAnoVe && cilsDe(r[2]).every((x) => cilsDe(n[2]).includes(x))));
+      || (c === 2 && !(r.comAnoVe && r.cilDaVersao) && cilsDe(r[2]).every((x) => cilsDe(n[2]).includes(x))));
     // põe a linha n (ou o dado dela na linha que cabe) e devolve a linha da tabela; a nova fica depois da última do
     // mesmo modelo (ou da mesma marca), e sem as duas, no fim
     function poeLinha(n) {
@@ -2208,7 +2208,7 @@
     for (const [f, m] of p.ve || []) { const k = String(f).toUpperCase(); if (!porMarca.has(k)) porMarca.set(k, []); if (!porMarca.get(k).includes(m)) porMarca.get(k).push(m); }
     return [...porMarca].map(([f, ms]) => f + " - " + ms.join(" / ")).join(" · ");
   };
-  const semAplicacao = (p) => !tabelaDe(p).length && (!p.a || !!p.vo) && !FAMILIAS_PELA_MEDIDA.has(norm(p.fa));
+  const semAplicacao = (p) => (!p.a || !!p.vo) && !FAMILIAS_PELA_MEDIDA.has(norm(p.fa)) && !tabelaDe(p).length;
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
@@ -2229,7 +2229,7 @@
     const tab = tabelaVeiculos(tabelaDe(p)), fora = tab ? restricoesFora(p, tabelaDe(p)) : [];
     const miolo = tab
       ? tab + (fora.length ? `<p class="restr-fora"><b>${fora.length > 1 ? "Restrições" : "Restrição"} da aplicação:</b> ${esc(fora.join(" · "))}</p>` : "") + (p.a && !p.vo ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
-      : p.a ? aplicacoes : "";
+      : p.a && !p.vo ? aplicacoes : ""; // o texto do produto "vo" cita os veículos ocultos
     const secApl = semAplicacao(p) ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}><div class="aviso">${AVISO_SEM_APL}</div></section>`
       : miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
     const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
