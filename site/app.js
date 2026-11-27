@@ -2071,12 +2071,13 @@
           const donos = ultimas, fx = faixasDoTexto(v);
           const outro = donos.some((r) => modelos.some(([m]) => compacto(m).length >= 2 && k(m) !== k(r[1]) && rxPalavra(k(m)).test(k(v))));
           // na linha do "ve" com ano, o detalhe entra sem o ano ("Com Buchas / Sem Pivô"), menos o que cita um número de
-          // modelo ("1634 (1938–1944)" é outro caminhão; numModelo)
+          // modelo (numModelo, abaixo)
           // o número que está no nome de um modelo do catálogo ("1634" de "LS 1634"), ou qualquer número de modelo quando o
           // veículo tem versões de número ("Axor 2036": o "1634 (1938–1944)" é outro caminhão); o ano ("1977") e o número do
-          // veículo sem versões de número ("311 / 415 / 515" da Sprinter) passam
+          // veículo sem versões de número ("311 / 415 / 515" da Sprinter) passam; o número com unidade ("140 mm", "125 cm³",
+          // "150 cv", "1200 kg") é medida, não modelo
           const serieNum = donos.some((x) => /^\d{3,4}$/.test(String(x[3]).trim()));
-          const numModelo = (r, d) => r.comAnoVe && [...String(d).matchAll(/\b(?!(?:19|20)\d{2}\b)\d{3,4}\b/g)].some((m) => serieNum || numerosDeModelo().has(m[0]));
+          const numModelo = (r, d) => r.comAnoVe && [...String(d).matchAll(/\b(?!(?:19|20)\d{2}\b)\d{3,4}\b(?!\s*(?:mm|cm³|cm3|cm|cv|kg)(?![a-z]))/gi)].some((m) => serieNum || numerosDeModelo().has(m[0]));
           if (fx.length && !outro) donos.forEach((r) => { somaAno(r, fx); const d = comRestr(v.trim(), semAno, p); if (d && !numModelo(r, d)) comDetalhe(r, d); });
           else donos.forEach((r) => { if (!numModelo(r, v)) comDetalhe(r, v.trim()); });
           return outro ? "outro" : "";
