@@ -186,9 +186,9 @@ const textosOk = (l) => Array.isArray(l) && l.length > 0 && l.every((t) => typeo
 // ano do "ve" (T-0040): inteiro, 0 (falta) ou de 1900 a 2100 [SUPOSIÇÃO: na v29 os anos vão de 1950 a 2026]
 const anoVeOk = (n) => Number.isInteger(n) && (n === 0 || (n >= 1900 && n <= 2100));
 // um veículo do "ve": [fab, mod] ou [fab, mod, ver] (textos não vazios), ou, com ano, [fab, mod, ver, ini, fim]: fab e mod não
-// vazios, ver texto, ini e fim inteiros (0 quando faltam), ini <= fim quando os dois existem
+// vazios, ver texto, ini e fim inteiros (0 quando faltam, mas não os dois), ini <= fim quando os dois existem
 const veAnoOk = (x) => Array.isArray(x) && x.length === 5 && textosOk(x.slice(0, 2)) && typeof x[2] === "string"
-  && anoVeOk(x[3]) && anoVeOk(x[4]) && !(x[3] && x[4] && x[3] > x[4]);
+  && anoVeOk(x[3]) && anoVeOk(x[4]) && !!(x[3] || x[4]) && !(x[3] && x[4] && x[3] > x[4]);
 const veOk = (x) => veAnoOk(x) || (textosOk(x) && (x.length === 2 || x.length === 3));
 const palavraInteira = (texto, palavra) => new RegExp(`(?<![A-Z0-9])${palavra}(?![A-Z0-9])`).test(norm(texto));
 
@@ -365,7 +365,7 @@ function testarJson(arqJson) {
     if (!("ve" in p)) continue;
     comVe++;
     const ok = Array.isArray(p.ve) && p.ve.length && p.ve.every(veOk);
-    if (!ok) veRuim.push(`${p.c}: ${cortar(JSON.stringify(p.ve.find ? p.ve.find((x) => !veOk(x)) : p.ve), 60)}`);
+    if (!ok) veRuim.push(`${p.c}: ${cortar(JSON.stringify(Array.isArray(p.ve) ? p.ve.find((x) => !veOk(x)) : p.ve), 60)}`);
     else { nVe += p.ve.length; nAno += p.ve.filter((x) => x.length === 5).length; }
   }
   if (veRuim.length) falha("campos", N_CAMPOS, "ve:formato", `"ve" fora do formato [fabricante, modelo, versão?] ou [fabricante, modelo, versão, início, fim] (anos inteiros, 0 quando faltam) em ${veRuim.length} produto(s), ex.: ${veRuim.slice(0, 3).join("; ")}`);
@@ -1068,7 +1068,7 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         // T-0040 (a Fraga soma): pelas listas, CXD13062 aparece em Volkswagen › Gol › 2015 (Gol de 2008 a 2022 no "ve");
         // BCE3001 continua em Ford › Ka (linha sem ano) e não aparece em Volkswagen › Polo › 2026 (Polo sem ano, T-0033);
         // VEL7507 tem Yamaha e KTM: aparece em Yamaha › RD e a tabela da aplicação tem as duas marcas. Só com ano no "ve"
-        // (base com a Fraga). As listas mostram as 60 marcas com mais produtos: marca de caso fora delas vira aviso
+        // (base com a Fraga). A lista Marca mostra todas as marcas: a KTM do VEL7507 tem de estar nela
         if (m0.faixa && m0.n === 5 && VT.n) {
           const casosVt = [
             ["CXD13062", [/^\s*Volkswagen\b/i, /^\s*Gol\b/i, /^\s*2015\b/], true],
@@ -1105,7 +1105,7 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
             if (!txtTab) falha("fraga", N_VT, "VEL7507:tabela", `${L}: a página do VEL7507 não mostra a tabela (ou a lista) de veículos`);
             else if (faltaTab.length) falha("fraga", N_VT, "VEL7507:tabela", `${L}: a tabela da aplicação do VEL7507 não tem ${faltaTab.join(" e ")}: ${cortar(txtTab, 80)}`);
             const naLista = await page.evaluate(async () => { location.hash = "#/busca"; await new Promise((r) => setTimeout(r, 400)); const s = window.__bapT.veiculo().listas[0]; return s ? [...s.options].map((o) => o.value) : []; });
-            if (!naLista.map(norm).includes("KTM")) aviso("fraga", N_VT, `${L}: a lista Marca não oferece a KTM (só as 60 marcas com mais produtos): o VEL7507 não é achado por KTM › EXC 250 nas listas`);
+            if (!naLista.map(norm).includes("KTM")) falha("fraga", N_VT, "VEL7507:lista", `${L}: a lista Marca não oferece a KTM: o VEL7507 não é achado por KTM › EXC 250 nas listas`);
             VT.txt.push(`${L}: VEL7507 com ${quer.filter((m) => !faltaTab.includes(m)).join(" e ") || "nenhuma das marcas"} na aplicação`);
             conferirConsole("fraga-vel7507");
           }
