@@ -53,7 +53,8 @@ F_VEL = ("APLICACAO da v8 (a faixa vale para o produto inteiro): 'FIAT/GM/VW - F
          "(Motores Fire Flex e T-Jet 1.4 Turbo) ; GM - Astra, Vectra 2.0 Flexpower / GNV ; VW - Gol/Fox 1.0 Flex GNV · "
          "2004–2020 · 1.0, 1.4, 1.8, 2.0 8V Flex / GNV / Motores Turbo · Green Plug (Sulco em V)'; aba VELAS_INTEGRADAS "
          "(cadastro master de velas, aplicação confirmada): '… VW Gol/Fox 1.0 Flex GNV - 2004 a 2020 - …'")
-F_VEL_TXT = "APLICACAO (digitada desde a v14): o mesmo modelo e a mesma faixa"
+F_VEL_V8 = "APLICACAO (digitada desde a v8): 'VW - Gol/Fox 1.0 Flex GNV · 2004–2020', o mesmo modelo e a mesma faixa"
+F_VEL_V14 = "APLICACAO (trecho que entrou na v14): o mesmo modelo e a mesma faixa"
 F_ROL = ("DADOS_ADICIONAIS do ROL15106/15250 e aba ROLAMENTOS_INTEGRADOS (cadastro master de rolamentos, aplicação "
          "confirmada): MODELOS 'Ford F-4000, F-350; GM D40, A40, C40; Iveco Daily 35.10, 49.12; Agrale 6000', "
          "ANO_INICIO 1978, ANO_FIM 2012")
@@ -86,8 +87,9 @@ for _n, _ver, _ini, _fim in ((35045, "Motores Fire Flex e T-Jet 1.4 Turbo", 2010
     CELULAS += [("VEL7520", _n, "ANO_INICIO", _ini, 2004, F_VEL, "P3"), ("VEL7520", _n, "ANO_FIM", _fim, 2020, F_VEL, "P3")]
     CELULAS += [("VEL7520", _n, "VERSAO", None, _ver, F_VEL, "P3")] if _ver else []
 for _n in (35041, 35042, 35043, 35044, 35045, 35046, 35047, 35048, 35049, 35050, 35051, 35052, 35053, 35054, 35055):
-    CELULAS += [("VEL7520", _n, "SITUACAO", "duvidoso", SEPARADO, F_VEL if _n < 35048 else F_VEL_TXT, "P3"),
-                ("VEL7520", _n, "MOTIVO", "*", None, F_VEL if _n < 35048 else F_VEL_TXT, "P3")]   # "*": o MOTIVO de hoje
+    _f = F_VEL if _n < 35048 else F_VEL_V8 if _n < 35050 else F_VEL_V14     # Gol e Fox: v8; Bravo a Captur: v14
+    CELULAS += [("VEL7520", _n, "SITUACAO", "duvidoso", SEPARADO, _f, "P3"),
+                ("VEL7520", _n, "MOTIVO", "*", None, _f, "P3")]   # "*": o MOTIVO de hoje
 
 # (código, linha do Excel, (FABRICANTE, MODELO, VERSAO, ANO_INICIO, ANO_FIM, SITUACAO) de hoje, fonte, ponto)
 REMOVIDAS: list[tuple] = [
@@ -142,6 +144,12 @@ SEM_FONTE = [
      "o texto só diz 'Bongo K-2700 1997>'; a linha 20980 da Fraga (KIA Bongo '2.7 D 2.7 L', 1997–2004) tem o 2.7, que "
      "continua na base, mas não diz K-2700",
      "um catálogo da SYL 204603 ou das outras referências com o K-2700 (ponto P10)"),
+    ("SFR30034", "KIA Besta, linha 20974: 1992–1999 na VEICULOS; o texto diz 'Besta Est/Furgão/Std … 1993–1998'. "
+                 "Qual faixa vale?",
+     "as duas faixas têm fonte: 1993–1998 é a do texto (digitado desde a v8); 1992–1999 é a junção dele com a Fraga do "
+     "mesmo motor, feita na v29 pela regra aprovada (R-20261127-132222-alexandre; LOG FAIXA_JUNTADA), e contém a do "
+     "texto. Não há uma terceira fonte para escolher uma das duas; trocar desfaria a regra aprovada sem fonte nova",
+     "um catálogo da SYL 204603 (ou das outras referências) com a Besta, para a nova pesquisa"),
     ("VEL7574", "JEEP Grand Cherokee 4.7 1998–2004 (linha 35639 da Fraga e o trecho da APLICACAO que veio dela)",
      "só a Fraga traz a Grand Cherokee para esta vela, com 1998–2004; nenhuma base antiga, linha da VEICULOS deste "
      "código ou referência cruzada (NGK BKR7EIX e as outras) dá o 4.7 de 2005 em diante. As linhas Grand Cherokee 4.7 "
@@ -167,11 +175,13 @@ DO_SITE = [
      "Mercedes-Benz (marcaDe; o MONTADORAS do gerar_site também não tem 'MBENZ')"),
     ("CRU5280", "sem a linha nova (P6): 'VW 31-310 (2007>) entre eixos 6X4' não vira linha (só sai na impressão)",
      "app.js, juntarNaTabela: o trecho do texto não vira linha da tabela"),
-    ("SFR30034", "o 'K-2400' do Bongo não aparece na Versão, nem com a Versão 'K-2400' na VEICULOS (a v31 simulada "
-                 "já põe); o 'T' do fim de 'Besta Est 2.7 1993–1998 T' vai para a Versão ('Est T', 'Furgão T', "
+    ("SFR30034", "o 'K-2400' do Bongo não aparece: a linha 'Kia Bongo 2.4 1993–1997' fica com a Versão '—', mesmo "
+                 "com a Versão 'K-2400' na VEICULOS (P10, a v31 simulada já põe); a linha K-2700 da P10 aparece com "
+                 "a cilindrada '2.7', que vem do site e não da base (a cilindrada dela fica vazia); o 'T' do fim de 'Besta Est 2.7 1993–1998 T' vai para a Versão ('Est T', 'Furgão T', "
                  "'Std T'); a linha Besta da VEICULOS (cilindrada '2.2 / 2.7') aparece só com 2.7",
-     "app.js: versaoTela/versaoLivre tira o 'K-2400' [SUPOSIÇÃO: lido como número de outro modelo]; limparVersao "
-     "deixa o 'T'; juntarNaTabela/poeLinha troca a cilindrada da linha que recebe a do texto"),
+     "app.js, junção do texto com a tabela: versaoTela/versaoLivre tira o 'K-2400' [SUPOSIÇÃO: lido como número de "
+     "outro modelo]; juntarNaTabela/poeLinha põe uma cilindrada do texto na linha K-2700 e troca a cilindrada da linha "
+     "que recebe a do texto; limparVersao deixa o 'T'"),
     ("VEL7520", "as linhas que vêm do texto mostram 2004–2020 no lugar do ano do texto (Lifan 320 1.3 16V, texto "
                 "2010–2015; Bravo, Doblo, Idea, Linea, Captur enquanto as linhas deles estiverem fora do site)",
      "app.js, arrumar: o 'an' do produto (DADOS_ADICIONAIS: 2004–2020) vale primeiro para toda linha sem ano da "
@@ -193,10 +203,11 @@ PONTOS = [
                       "anos da soma da Fraga (ex.: Palio 1999–2019), o Astra não tem ano, e as 15 linhas do texto estão "
                       "fora do site pela revisão da P12 (por causa da LIFAN e da VOLVO sem modelo). O texto da v8 e o "
                       "cadastro master dão 2004–2020 para o produto inteiro (Fire Flex, T-Jet, Flexpower).",
-     "a) a opção a) TROCA os anos da soma da Fraga, aprovados na v29 (R-20261127-132222-alexandre), pela faixa do "
-     "produto no cadastro: Uno, Palio, Siena e Strada 'Fire Flex', Punto 'Motores Fire Flex e T-Jet 1.4 Turbo', Astra "
-     "e Vectra '2.0 Flexpower / GNV', todos 2004–2020 e de volta ao site (as linhas próprias da Fraga ficam); e as 8 "
-     "linhas com o ano igual ao texto (Gol, Fox, Bravo, Doblo, Grand Siena, Idea, Linea, Captur) de volta ao site",
+     "a) TROCA os anos da soma da Fraga, aprovados na v29 (R-20261127-132222-alexandre), pela faixa do produto no "
+     "cadastro: Uno, Palio, Siena e Strada 'Fire Flex', Punto 'Motores Fire Flex e T-Jet 1.4 Turbo', Astra, sem "
+     "Versão, e Vectra '2.0 Flexpower / GNV', todos 2004–2020 e de volta ao site (as linhas próprias da Fraga ficam); "
+     "e as 8 linhas com o ano igual ao texto (Gol, Fox, Bravo, Doblo, Grand Siena, Idea, Linea, Captur) de volta ao "
+     "site (o Gol, linha 35048, volta sem ano: o ANO_DUVIDA 'herdado' dele fica)",
      "b) só o Palio 'Fire Flex' 2004–2020 de volta ao site; o resto fica como está"),
     ("P4", "ROL15106/15250", "F-4000, F-350, D40 e Daily estão sem ano (ficam ocultos; o site mostra 1978–2012 pelo "
                              "cadastro); o A40 e o C40 do texto e do cadastro não têm linha (o site mostra o A-40 pelo "
@@ -224,7 +235,10 @@ PONTOS = [
     ("P10", "SFR30034", "A linha KIA Bongo 20976 (1993–1997) junta o K-2400 e o K-2700 (sem Versão, cilindrada "
                         "'2.4 / 2.7'); o ano 1993–1997 é o do K-2400 (texto e pesquisa da T-0040). O 'Bongo K-2700 "
                         "1997>' do texto não tem linha própria; o 2.7 continua na linha 20980 da Fraga (Bongo 2.7 D, "
-                        "1997–2004).",
+                        "1997–2004). Na tela, até o web-site corrigir a junção do texto com a tabela (DO_SITE), o "
+                        "print do 'depois' NÃO mostra o K-2400: a linha 'Kia Bongo 2.4 1993–1997' continua com a "
+                        "Versão '—', e a linha K-2700 aparece com a cilindrada '2.7', que é o site que põe (a base "
+                        "deixa a cilindrada dela vazia).",
      "a) a linha 20976 vira K-2400, cilindrada 2.4, e entra a linha KIA Bongo 'K-2700' 1997 em diante (sem "
      "cilindrada: o texto não dá)",
      "b) não mudar"),
