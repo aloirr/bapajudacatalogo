@@ -1981,6 +1981,8 @@
   // não vira "2008, 2016" na linha Fox EA111 da VEICULOS). O detalhe do texto ("Sem ABS", "Com Buchas") entra nela também
   // (comDetalhe), para a restrição nunca sumir
   const somaAno = (r, fx) => { if (!r.comAnoVe) r[4] = comAnos(r[4], fx); };
+  // a cilindrada de r vazia, igual ou entre as de o (cabe e contida)
+  const cilDentro = (r, o) => !r[2] || chaveApl(r[2]) === chaveApl(o[2]) || cilsDe(r[2]).every((x) => cilsDe(o[2]).includes(x));
   function juntarNaTabela(p, tab) {
     const k = chaveApl;
     const locais = [...new Map(tab.map((r) => [k(r[1]) + "|" + marcaDe(r[0]), [r[1], marcaDe(r[0])]])).values()];
@@ -1991,7 +1993,7 @@
     // na linha do "ve" com ano e com cilindrada na VERSAO, a cilindrada é a dela: o texto com mais cilindradas ("Gol 1.6 L
     // / 1.8 L / 2.0 L") não entra nela (v30, JUH70025)
     const cabe = (r, n) => k(r[0]) === k(n[0]) && k(r[1]) === k(n[1]) && [2, 3, 4].every((c) => !r[c] || k(r[c]) === k(n[c])
-      || (c === 2 && !(r.comAnoVe && r.cilDaVersao) && cilsDe(r[2]).every((x) => cilsDe(n[2]).includes(x))));
+      || (c === 2 && !(r.comAnoVe && r.cilDaVersao) && cilDentro(r, n)));
     // põe a linha n (ou o dado dela na linha que cabe) e devolve a linha da tabela; a nova fica depois da última do
     // mesmo modelo (ou da mesma marca), e sem as duas, no fim
     function poeLinha(n) {
@@ -2160,7 +2162,6 @@
     // T-0040: a linha do "ve" com ano nunca sai por estar contida numa do texto (a coberta por ela sai no semRepetida)
     // a do texto cuja cilindrada está entre as da outra também sai ("Royale 1.8 · 1993–1995" ao lado de "Royale 1.8 / 2.0 ·
     // 1992–1996", KHC12589)
-    const cilDentro = (r, o) => !r[2] || k(r[2]) === k(o[2]) || cilsDe(r[2]).every((x) => cilsDe(o[2]).includes(x));
     const contida = (r, o) => r !== o && !r.comAnoVe && k(r[0]) === k(o[0]) && k(r[1]) === k(o[1]) && cilDentro(r, o) && k(r[3]) === k(o[3]) && !!o[4] && (!r[4] || faixaDentro(r, o));
     tab = tab.filter((r, i) => !tab.some((o, j) => j !== i && contida(r, o) && !(contida(o, r) && j > i)));
     const ordem = new Map();
