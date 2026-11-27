@@ -1,8 +1,10 @@
 """T-0040 · SIMULAÇÃO da aba VEICULOS com a aplicação da Fraga (nada é gravado na base real).
 
 Decisões do Alexandre (pelo po, 27/11/2026, "1) a / 2) a / 3) a"):
-- 1a: os códigos achados pela Fraga pelo código BAP ('bap') ficam com a aplicação da Fraga na aba VEICULOS (as linhas
-  de antes desses códigos saem; as dos outros códigos ficam como estão, na mesma ordem);
+- 1a (trocada em R-20261127-053555-po): a aplicação da Fraga dos códigos achados pelo código BAP ('bap') SE SOMA à
+  atual na aba VEICULOS (somar(): a linha atual com ano completo fica; a sem ano ou só com um ano recebe os anos
+  da Fraga do mesmo modelo; os grupos da Fraga entram como linhas novas, sem duplicar a linha atual do mesmo motor ou
+  versão, e com a faixa junta quando se encostam). Aba CASOS: cada caso;
 - 2a: uma linha por código + montadora + modelo + motor, com o ano mínimo e o máximo. A observação da Fraga ('DIANT',
   'COM FREIO ABS'...) vai para a VERSAO, depois do motor;
 - 3a: os achados por referência ('ref:') NÃO trocam nada: vão à parte (aba REF da antes_depois), com o produto BAP em
@@ -84,12 +86,11 @@ def obs_limpas(obs: list[str]) -> list[str]:
 
 # pontos conferidos na Fraga (testes, 27/11/2026): código -> o que o Alexandre precisa saber
 PONTOS = {
-    "FAC6194": "Perde o modelo 'Titan Tractor': na Fraga ele é versão do Constellation ('19-320 E TITAN TRACTOR', "
-               "INTERACT 8.3 L, 2005–2012), não modelo. Na v28 o 'Titan Tractor' veio da leitura do texto "
-               "'Constellation 19-320 e Titan Tractor'. Com a Fraga fica Constellation e Worker; a APLICACAO não muda.",
-    "VEL7507": "A Fraga só tem 1 aplicação (KTM EXC 250, 0.2 L). Saem YAMAHA DT e YAMAHA RD (1980–2015), que a "
-               "APLICACAO cita ('Yamaha DT 180, RD 135, Tdr 180'). Pela decisão 1a fica só a da Fraga; se o "
-               "Alexandre quiser manter as da Yamaha, é exceção à 1a.",
+    "FAC6194": "Com a 1a nova (somar), o 'Titan Tractor' da v28 fica. Na Fraga ele é versão do Constellation "
+               "('19-320 E TITAN TRACTOR', INTERACT 8.3 L, 2005–2012), não modelo: a linha VOLKSWAGEN Titan Tractor "
+               "veio da leitura do texto 'Constellation 19-320 e Titan Tractor'. Decidir se ela fica como modelo.",
+    "VEL7507": "Com a 1a nova (somar), ficam YAMAHA DT e YAMAHA RD (1980–2015) e entra a KTM EXC 250 da Fraga (a "
+               "única aplicação dela).",
 }
 AMOSTRA_FIXA = ["BCE3001", "CXD13062"]
 N_AMOSTRA = 50
@@ -114,6 +115,139 @@ def faixa(linhas) -> str:
     t = f"{min(ais) if ais else '?'}–{max(afs) if afs else '?'}" if ais or afs else "sem ano"
     extra = [f"{sem} sem ano" for _ in [0] if sem] + [f"{so_ini} só com o inicial" for _ in [0] if so_ini]
     return t + (f" ({', '.join(extra)})" if extra else "")
+
+
+def tipo_ano(ini, fim) -> str:
+    """completa, sem_ano, so_inicial ou so_final (como na lista de trabalho)."""
+    if isinstance(ini, int) and isinstance(fim, int):
+        return "completa"
+    return "sem_ano" if ini is None and fim is None else "so_inicial" if fim is None else "so_final"
+
+
+def tokens(s) -> set[str]:
+    s = unicodedata.normalize("NFKD", limpo(s)).encode("ascii", "ignore").decode().upper()
+    return set(re.findall(r"[A-Z0-9.]+", s))
+
+
+def mesmo_motor_ou_versao(atual, fraga: list, vers: list[str]) -> bool:
+    """A linha atual e o grupo da Fraga falam do mesmo motor ou versão: a VERSAO atual está numa versão da Fraga
+    (todas as palavras), ou a CILINDRADA atual ("1.6 / 1.8") tem a do grupo. Sem VERSAO e sem CILINDRADA: não."""
+    v = tokens(atual[3])
+    if v and any(v <= tokens(x) for x in vers):
+        return True
+    cils = {c.strip() for c in limpo(atual[9]).split("/") if c.strip()}
+    return bool(cils and fraga[9] and fraga[9] in cils)
+
+
+def encostam(a0, a1, b0, b1) -> bool:
+    """As faixas se sobrepõem ou se encostam (2005–2010 e 2011–2014 se encostam)."""
+    return a0 <= b1 + 1 and b0 <= a1 + 1
+
+
+def somar(antigas: list, fraga_cod: dict, vers_cod: dict, trocar: set):
+    """A VEICULOS com a Fraga somada (R-20261127-053555-po). Devolve (linhas, casos, entrou).
+
+    Para cada código achado por 'bap':
+    1. linha atual sem ano ou só com um ano (sem_ano, so_inicial e so_final [SUPOSIÇÃO: o so_final como os outros]):
+       se a Fraga tem o mesmo código + montadora + modelo, recebe o ano mínimo e o máximo da Fraga (dos grupos do
+       mesmo motor/versão, se houver; senão, de todos os do modelo). ORIGEM continua "automático";
+    2. cada grupo da Fraga: se há linha atual com ano completo do mesmo código + montadora + modelo e do mesmo motor
+       ou versão, e as faixas se encostam, não entra: a atual fica, com a faixa junta (mínimo e máximo; "juntou" se
+       a faixa cresceu, "já coberta" se não); faixas que não se encostam: o grupo entra como linha nova;
+    3. os outros grupos entram como linha nova (ORIGEM "Fraga T-0040"), logo depois da última linha do código (os
+       códigos sem linha, no fim).
+    casos: [código, linha da v28 (ou ""), caso, montadora, modelo, VERSAO, ano antes, ano depois, detalhe].
+    entrou: {(código, índice do grupo)} dos grupos da Fraga que entraram."""
+    linhas = [list(r) for r in antigas]
+    por_cod = defaultdict(list)
+    for n, r in enumerate(linhas):
+        por_cod[limpo(r[0]).upper()].append(n)
+    casos, entrou, novas_cod = [], set(), defaultdict(list)
+
+    def ano(r):
+        return f"{r[4] if r[4] is not None else '?'}–{r[5] if r[5] is not None else '?'}" \
+            if r[4] is not None or r[5] is not None else "sem ano"
+
+    for cod in sorted(trocar):
+        grupos = fraga_cod.get(cod, [])
+        vers = vers_cod.get(cod, [])
+        mod_de = defaultdict(list)                       # (montadora, modelo) -> índices dos grupos
+        for i, g in enumerate(grupos):
+            mod_de[(chave(g[1]), chave(g[2]))].append(i)
+        # 1. completar o ano
+        for n in por_cod.get(cod, []):
+            r = linhas[n]
+            t = tipo_ano(r[4], r[5])
+            if t == "completa":
+                continue
+            ids = mod_de.get((chave(r[1]), chave(r[2])), [])
+            if not ids:
+                casos.append([cod, n + 1, "SEM_ANO_FICA", r[1], r[2], r[3], ano(r), ano(r),
+                              f"{t}: a Fraga não tem {r[1]} {r[2]}; continua na lista de trabalho"])
+                continue
+            mesmos = [i for i in ids if mesmo_motor_ou_versao(r, grupos[i], vers[i])] or ids
+            antes = ano(r)
+            r[4], r[5] = min(grupos[i][4] for i in mesmos), max(grupos[i][5] for i in mesmos)
+            casos.append([cod, n + 1, "ANO_COMPLETADO", r[1], r[2], r[3], antes, ano(r),
+                          f"{t}: anos da Fraga ({len(mesmos)} grupo(s)"
+                          f"{' do mesmo motor/versão' if len(mesmos) < len(ids) else ''})"])
+        # 2. e 3. os grupos da Fraga
+        for i, g in enumerate(grupos):
+            cobre = None
+            for n in por_cod.get(cod, []):
+                r = linhas[n]
+                if (chave(r[1]), chave(r[2])) != (chave(g[1]), chave(g[2])) or tipo_ano(r[4], r[5]) != "completa":
+                    continue
+                if mesmo_motor_ou_versao(r, g, vers[i]) and encostam(r[4], r[5], g[4], g[5]):
+                    cobre = n
+                    break
+            if cobre is None:
+                novas_cod[cod].append(g)
+                entrou.add((cod, i))
+                casos.append([cod, "", "VEICULO_SOMADO", g[1], g[2], g[3], "", ano(g), "linha nova da Fraga"])
+                continue
+            r = linhas[cobre]
+            antes = ano(r)
+            a0, a1 = min(r[4], g[4]), max(r[5], g[5])
+            if (a0, a1) != (r[4], r[5]):
+                r[4], r[5] = a0, a1
+                casos.append([cod, cobre + 1, "FAIXA_JUNTADA", r[1], r[2], r[3], antes, ano(r),
+                              f"a Fraga ({g[3]}, {ano(g)}) junta-se à faixa atual"])
+            else:
+                casos.append([cod, cobre + 1, "JA_COBERTA", r[1], r[2], r[3], antes, antes,
+                              f"a Fraga ({g[3]}, {ano(g)}) já está na faixa atual: não duplica"])
+    # montagem: as linhas da v28 na ordem; as novas logo depois da última linha do código
+    ultima = {cod: ns[-1] for cod, ns in por_cod.items()}
+    depois_de = defaultdict(list)
+    fim = []
+    for cod in sorted(novas_cod):
+        (depois_de[ultima[cod]] if cod in ultima else fim).extend(novas_cod[cod])
+    saida = []
+    for n, r in enumerate(linhas):
+        saida.append(tuple(r))
+        saida += [tuple(x) for x in depois_de.get(n, [])]
+    saida += [tuple(x) for x in fim]
+    return saida, casos, entrou
+
+
+def conferir_soma(antigas: list, novas: list, trocar: set) -> list[str]:
+    """As linhas da v28 estão todas na VEICULOS nova, na ordem; só ANO_INICIO e ANO_FIM podem mudar (e só nos
+    códigos trocados, sem apagar ano); as linhas a mais são da Fraga, dos códigos trocados."""
+    antigas = [tuple(a) for a in antigas]
+    erros, k = [], 0
+    for r in novas:
+        if k < len(antigas) and r[6] != ORIGEM and r[0] == antigas[k][0] and r[1:4] == antigas[k][1:4] \
+                and r[6:] == antigas[k][6:]:
+            a = antigas[k]
+            if r[4:6] != a[4:6] and (limpo(a[0]).upper() not in trocar or
+                                     (a[4] is not None and a[5] is not None and (r[4] > a[4] or r[5] < a[5]))):
+                erros.append(f"linha {k + 1} ({a[0]}): o ano mudou fora da regra")
+            k += 1
+        elif r[6] != ORIGEM or limpo(r[0]).upper() not in trocar:
+            erros.append(f"linha a mais que não é da Fraga: {r[:3]}")
+    if k != len(antigas):
+        erros.append(f"faltam linhas da v28: {len(antigas) - k}")
+    return erros[:20]
 
 
 def main():
@@ -179,6 +313,7 @@ def main():
         if r["versao"] and r["versao"] not in g["vers"]:
             g["vers"].append(r["versao"])
     novas_por_cod: dict[str, list[list]] = defaultdict(list)
+    vers_por_cod: dict[str, list[list[str]]] = defaultdict(list)     # as versões da Fraga de cada grupo
     bruta: dict[tuple[str, int], str] = {}          # a VERSAO sem a limpeza, para a aba LIMPEZA
     for g in sorted(grupos.values(), key=lambda g: (g["cod"], chave(g["fab"]), chave(g["mod"]), min(g["ai"]),
                                                     chave(g["motor"]))):
@@ -187,27 +322,16 @@ def main():
         ver = " · ".join([g["motor"]] + obs_limpas(g["obs"]))
         bruta[(g["cod"], len(novas_por_cod[g["cod"]]))] = " · ".join([g["motor"]] + g["obs"])
         duv = DUVIDOSAS.get(g["fab"].upper())
+        vers_por_cod[g["cod"]].append(g["vers"])
         novas_por_cod[g["cod"]].append([
             g["cod"], g["fab"], g["mod"], ver, min(g["ai"]), max(g["af"]), ORIGEM,
             "duvidoso" if duv else "separado", duv,
             cil.group(1) if cil and not moto else None,
             "a Fraga diz 'CATALOGO NÃO INFORMA ANO/MODELO'" if any("NÃO INFORMA ANO" in o for o in g["obs"]) else None])
 
-    # VEICULOS nova: as linhas dos outros códigos ficam na ordem; as dos códigos trocados entram onde o código
-    # aparecia (os que não tinham linha entram no fim)
+    # 1a nova (R-20261127-053555-po): a Fraga SE SOMA à aplicação atual (somar, abaixo)
+    nova, casos, entrou = somar(antigas, novas_por_cod, vers_por_cod, set(trocar))
     sai = set(trocar)
-    nova, postos = [], set()
-    for r in antigas:
-        cod = limpo(r[0]).upper()
-        if cod in sai:
-            if cod not in postos:
-                nova += novas_por_cod[cod]
-                postos.add(cod)
-            continue
-        nova.append(r)
-    for cod in trocar:
-        if cod not in postos:
-            nova += novas_por_cod[cod]
 
     ws.delete_rows(2, ws.max_row)
     for r in nova:
@@ -229,9 +353,7 @@ def main():
     sv = list(simw["VEICULOS"].iter_rows(values_only=True))
     if [limpo(c) for c in sv[0]] != CAB_VEICULOS:
         erros.append("cabeçalho da VEICULOS mudou")
-    if [tuple(r) for r in antigas if limpo(r[0]).upper() not in sai] != \
-            [tuple(r) for r in sv[1:] if limpo(r[0]).upper() not in sai]:
-        erros.append("VEICULOS dos códigos fora da troca mudou")
+    erros += conferir_soma(antigas, [tuple(r) for r in sv[1:]], sai)
     if erros:
         sys.exit(f"[PARADO] {erros}")
 
@@ -254,26 +376,26 @@ def main():
 
     cont_csv = Counter(r["codigo_bap"].upper() for r in bap)
 
-    def saem_entram(an, de):
-        """Modelos (montadora + modelo, das linhas separadas) que saem e que entram com a troca."""
-        def mods(ls):
-            return {(chave(r[1]), chave(r[2])): f"{limpo(r[1])} {limpo(r[2])}" for r in ls
-                    if limpo(r[7]) == "separado" and limpo(r[1]) and limpo(r[2])}
-        a_, d_ = mods(an), mods(de)
-        saem = [a_[k] for k in sorted(a_.keys() - d_.keys())]
-        return [len(saem), "; ".join(saem), len(d_.keys() - a_.keys())]
+    depois_cod = defaultdict(list)
+    for r in nova:
+        depois_cod[limpo(r[0]).upper()].append(r)
+    caso_cod = defaultdict(Counter)
+    for c in casos:
+        caso_cod[c[0]][c[2]] += 1
     resumo = []
     for cod in trocar:
-        an, de = antes_cod.get(cod, []), novas_por_cod[cod]
+        an, de, cc = antes_cod.get(cod, []), depois_cod[cod], caso_cod[cod]
         p = prod[cod]
-        resumo.append([cod, p.get("DESCRICAO"), p.get("PRODUTO"), p.get("LINHA"), len(an),
-                       sum(1 for r in an if limpo(r[7]) == "separado"), len(de),
-                       sum(1 for r in de if r[7] == "separado"), faixa([(r[4], r[5]) for r in an]) if an else "(sem linha)",
-                       faixa([(r[4], r[5]) for r in de]), cont_csv[cod]] + saem_entram(an, de))
+        resumo.append([cod, p.get("DESCRICAO"), p.get("PRODUTO"), p.get("LINHA"), len(an), len(de),
+                       faixa([(r[4], r[5]) for r in an]) if an else "(sem linha)", faixa([(r[4], r[5]) for r in de]),
+                       cont_csv[cod], len(novas_por_cod[cod]), cc["VEICULO_SOMADO"], cc["ANO_COMPLETADO"],
+                       cc["FAIXA_JUNTADA"], cc["JA_COBERTA"], cc["SEM_ANO_FICA"]])
     out.remove(out.active)
-    aba("RESUMO", ["CODIGO_BAP", "DESCRICAO", "PRODUTO", "LINHA", "LINHAS_ANTES", "SEPARADAS_ANTES", "LINHAS_DEPOIS",
-                   "SEPARADAS_DEPOIS", "ANOS_ANTES", "ANOS_DEPOIS", "LINHAS_DA_FRAGA (antes de agrupar)", "MODELOS_QUE_SAEM", "QUAIS_SAEM (montadora modelo)",
-                   "MODELOS_QUE_ENTRAM"], resumo)
+    aba("RESUMO", ["CODIGO_BAP", "DESCRICAO", "PRODUTO", "LINHA", "LINHAS_ANTES", "LINHAS_DEPOIS", "ANOS_ANTES",
+                   "ANOS_DEPOIS", "LINHAS_DA_FRAGA (antes de agrupar)", "GRUPOS_DA_FRAGA", "SOMADAS", "ANO_COMPLETADO",
+                   "FAIXA_JUNTADA", "JA_COBERTA (não duplica)", "SEM_ANO_FICA"], resumo)
+    aba("CASOS", ["CODIGO_BAP", "LINHA_DA_V28 (dados)", "CASO", "FABRICANTE", "MODELO", "VERSAO", "ANO_ANTES",
+                  "ANO_DEPOIS", "DETALHE"], casos)
 
     # amostra: as fixas, uma de moto e as outras espalhadas pela lista (passo fixo, sem sorteio)
     motos = [c for c in trocar if prod[c].get("LINHA", "").upper() == "MOTO"]
@@ -288,8 +410,8 @@ def main():
     for cod in amostra:
         for r in antes_cod.get(cod, []):
             det.append([cod, "ANTES"] + list(r[1:]))
-        for r in novas_por_cod[cod]:
-            det.append([cod, "DEPOIS"] + r[1:])
+        for r in depois_cod[cod]:
+            det.append([cod, "DEPOIS"] + list(r[1:]))
     aba("DETALHE", ["CODIGO_BAP", "ANTES_OU_DEPOIS"] + CAB_VEICULOS[1:], det)
 
     url2cod = defaultdict(set)
@@ -330,18 +452,18 @@ def main():
     aba("SUFIXO_1", ["CODIGO_BAP", "MONTADORA", "MODELO", "VERSAO_FRAGA", "MOTOR_NA_FRAGA", "MOTOR_NA_VEICULOS",
                      "ANO_INICIAL", "ANO_FINAL"], suf)
     lim = [[cod, r[1], r[2], bruta[(cod, i)], r[3]] for cod in trocar for i, r in enumerate(novas_por_cod[cod])
-           if bruta[(cod, i)] != r[3]]
+           if bruta[(cod, i)] != r[3] and (cod, i) in entrou]
     aba("LIMPEZA", ["CODIGO_BAP", "FABRICANTE", "MODELO", "VERSAO_SEM_LIMPEZA", "VERSAO_NA_VEICULOS"], lim)
     pontos = []
     for cod, txt in PONTOS.items():
-        an, de = antes_cod.get(cod, []), novas_por_cod.get(cod, [])
+        an, de = antes_cod.get(cod, []), depois_cod.get(cod, [])
         pontos.append([cod, prod[cod].get("DESCRICAO"), "; ".join(f"{limpo(r[1])} {limpo(r[2])}" for r in an),
-                       "; ".join(sorted({f"{r[1]} {r[2]}" for r in de})), cont_csv[cod], txt])
+                       "; ".join(dict.fromkeys(f"{r[1]} {r[2]}" for r in de)), cont_csv[cod], txt])
     # complementos com ano ou com outro veículo: ficam como estão; o Alexandre decide
     marcas = set(fab_base) | {chave(r["montadora"]) for r in bap}
     comp = defaultdict(set)
     for cod in trocar:
-        for r in novas_por_cod[cod]:
+        for r in (x for x in depois_cod[cod] if x[6] == ORIGEM):
             for o in limpo(r[3]).split(" · ")[1:]:
                 if ANO_NO_TEXTO.search(o) or chave(re.split(r"[\s-]", o)[0]) in marcas:
                     comp[(cod, o)].add(f"{r[1]} {r[2]}")
@@ -363,8 +485,10 @@ def main():
     print(f"  códigos trocados (bap): {len(trocar)}; linhas da Fraga: {len(bap)} -> {len(grupos)} agrupadas")
     print(f"  por referência: {len(refs)}; não achados: {len(nao)}")
     print(f"  sufixo '1' tirado do motor: {len(suf)} linhas da Fraga, {len({x[0] for x in suf})} códigos")
-    print(f"  códigos que perdem modelo: {sum(1 for l in resumo if l[11])} ({sum(l[11] for l in resumo)} modelos); "
-          f"que ganham: {sum(1 for l in resumo if l[13])} ({sum(l[13] for l in resumo)})")
+    cc = Counter(c[2] for c in casos)
+    print(f"  casos: {dict(cc)}")
+    print(f"  linhas da v28 mantidas sem mudança: {len(antigas) - cc['ANO_COMPLETADO'] - len({(c[0], c[1]) for c in casos if c[2] == 'FAIXA_JUNTADA'})}")
+    print(f"  sem ano completo na VEICULOS nova: {dict(Counter(tipo_ano(r[4], r[5]) for r in nova))}")
     print(f"  {SIM.relative_to(RAIZ)}\n  {AD.relative_to(RAIZ)}")
 
 
