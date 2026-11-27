@@ -49,9 +49,10 @@ CODIGOS = ["INT16529", "LAM2004", "CRU5280", "CRU512022", "ROL15106/15250", "INT
            "VEL7520", "POL1712", "FCB6266"]
 
 # ---------------------------------------------------------------- fontes (citadas em cada mudança e no LOG)
-F_VEL = ("APLICACAO (digitada desde a v8): 'Fiat Uno, Palio, Siena, Strada, Punto (Motores Fire Flex e T-Jet 1.4 Turbo) "
-         "… 2004–2020'; DADOS_ADICIONAIS do VEL7520 e aba VELAS_INTEGRADAS (cadastro master de velas, aplicação "
-         "confirmada): ANO_INICIO 2004, ANO_FIM 2020")
+F_VEL = ("APLICACAO da v8 (a faixa vale para o produto inteiro): 'FIAT/GM/VW - Fiat Uno, Palio, Siena, Strada, Punto "
+         "(Motores Fire Flex e T-Jet 1.4 Turbo) ; GM - Astra, Vectra 2.0 Flexpower / GNV ; VW - Gol/Fox 1.0 Flex GNV · "
+         "2004–2020 · 1.0, 1.4, 1.8, 2.0 8V Flex / GNV / Motores Turbo · Green Plug (Sulco em V)'; aba VELAS_INTEGRADAS "
+         "(cadastro master de velas, aplicação confirmada): '… VW Gol/Fox 1.0 Flex GNV - 2004 a 2020 - …'")
 F_VEL_TXT = "APLICACAO (digitada desde a v14): o mesmo modelo e a mesma faixa"
 F_ROL = ("DADOS_ADICIONAIS do ROL15106/15250 e aba ROLAMENTOS_INTEGRADOS (cadastro master de rolamentos, aplicação "
          "confirmada): MODELOS 'Ford F-4000, F-350; GM D40, A40, C40; Iveco Daily 35.10, 49.12; Agrale 6000', "
@@ -61,8 +62,8 @@ F_SFR = ("APLICACAO (digitada desde a v8): 'Bongo K-2400 2.4 1993–1997 T · Bo
 
 # (código, linha do Excel, coluna, antes, depois, fonte, ponto)
 CELULAS: list[tuple] = [
-    ("SFR30034", 20976, "VERSAO", None, "K-2400", F_SFR, ""),
-    ("SFR30034", 20976, "CILINDRADA", "2.4 / 2.7", "2.4", F_SFR, ""),             # o 2.7 é o do K-2700
+    ("SFR30034", 20976, "VERSAO", None, "K-2400", F_SFR, "P10"),
+    ("SFR30034", 20976, "CILINDRADA", "2.4 / 2.7", "2.4", F_SFR, "P10"),
 ]
 for _n in range(4674, 4678):                                          # F-4000, F-350, D40 e Daily, sem ano
     CELULAS += [("ROL15106/15250", _n, "ANO_INICIO", None, 1978, F_ROL, "P4"),
@@ -70,16 +71,23 @@ for _n in range(4674, 4678):                                          # F-4000, 
 # a Versão do texto na linha do Daily: com o ano, sem ela o site mostra o Daily duas vezes (com e sem '35.10, 49.12')
 CELULAS.append(("ROL15106/15250", 4677, "VERSAO", None, "35.10, 49.12",
                 "APLICACAO (digitada desde a v8): 'IVECO - Daily 35.10, 49.12'", "P4"))
-# VEL7520: as 4 linhas do "Fire Flex" (o ano de hoje é a soma da Fraga da v29, que tem linha própria) e as 8 linhas cujo
-# ano já é o da APLICACAO; todas marcadas na revisão da P12 pela LIFAN e pela VOLVO sem modelo (as linhas 35056 e 35057
+# VEL7520: as 7 linhas do texto da v8 (Uno, Palio, Siena, Strada, Punto, Astra e Vectra: o ano de hoje é a soma da
+# Fraga da v29, que tem linha própria, ou nenhum) recebem a faixa do produto, 2004–2020; as 8 linhas cujo ano já é o da
+# APLICACAO ficam com ele; todas marcadas na revisão da P12 pela LIFAN e pela VOLVO sem modelo (as linhas 35056 e 35057
 # continuam marcadas): a marca e o MOTIVO saem (como no item 13 da v30)
 for _n, _ini, _fim in ((35041, 1998, 2003), (35042, 1999, 2019), (35043, 2010, 2019), (35044, 2010, 2019)):
     CELULAS += [("VEL7520", _n, "VERSAO", None, "Fire Flex", F_VEL, "P3"),
                 ("VEL7520", _n, "ANO_INICIO", _ini, 2004, F_VEL, "P3"),
                 ("VEL7520", _n, "ANO_FIM", _fim, 2020, F_VEL, "P3")]
-for _n in (35041, 35042, 35043, 35044, 35048, 35049, 35050, 35051, 35052, 35053, 35054, 35055):
-    CELULAS += [("VEL7520", _n, "SITUACAO", "duvidoso", SEPARADO, F_VEL if _n < 35045 else F_VEL_TXT, "P3"),
-                ("VEL7520", _n, "MOTIVO", "*", None, F_VEL if _n < 35045 else F_VEL_TXT, "P3")]   # "*": o MOTIVO de hoje
+# Punto, Astra e Vectra: a mesma faixa do produto; a Versão é o trecho do texto que o site já põe na linha deles (com
+# outra Versão, o site mostra o Punto duas vezes)
+for _n, _ver, _ini, _fim in ((35045, "Motores Fire Flex e T-Jet 1.4 Turbo", 2010, 2017), (35046, None, None, None),
+                             (35047, "2.0 Flexpower / GNV", 2005, 2009)):
+    CELULAS += [("VEL7520", _n, "ANO_INICIO", _ini, 2004, F_VEL, "P3"), ("VEL7520", _n, "ANO_FIM", _fim, 2020, F_VEL, "P3")]
+    CELULAS += [("VEL7520", _n, "VERSAO", None, _ver, F_VEL, "P3")] if _ver else []
+for _n in (35041, 35042, 35043, 35044, 35045, 35046, 35047, 35048, 35049, 35050, 35051, 35052, 35053, 35054, 35055):
+    CELULAS += [("VEL7520", _n, "SITUACAO", "duvidoso", SEPARADO, F_VEL if _n < 35048 else F_VEL_TXT, "P3"),
+                ("VEL7520", _n, "MOTIVO", "*", None, F_VEL if _n < 35048 else F_VEL_TXT, "P3")]   # "*": o MOTIVO de hoje
 
 # (código, linha do Excel, (FABRICANTE, MODELO, VERSAO, ANO_INICIO, ANO_FIM, SITUACAO) de hoje, fonte, ponto)
 REMOVIDAS: list[tuple] = [
@@ -103,8 +111,12 @@ NOVAS: list[tuple] = [
     ("CRU512022", "MERCEDES-BENZ", "2418", "6x4", 1999, None,
      "APLICACAO (digitada desde a v8): 'Volvo FM12/ NH12/ FM10/ FM12/, MBenz 2418 6x4 1999' (o ano solto é o início, "
      "como no FM12 desde a v20; o modelo como nas outras linhas MERCEDES-BENZ 2418 da VEICULOS)", "P5"),
+    ("ROL15106/15250", "CHEVROLET", "A-40", None, 1978, 2012,
+     F_ROL + "; APLICACAO: 'GM - D40, A40, C40' (o modelo como nas outras linhas CHEVROLET A-40 da VEICULOS)", "P4"),
     ("ROL15106/15250", "CHEVROLET", "C40", None, 1978, 2012,
-     F_ROL + "; APLICACAO: 'GM - D40, A40, C40'", "P4"),
+     F_ROL + "; APLICACAO: 'GM - D40, A40, C40' (como o D40; nenhuma linha C40 na VEICULOS)", "P4"),
+    ("SFR30034", "KIA", "Bongo", "K-2700", 1997, None,
+     "APLICACAO (digitada desde a v8): 'Bongo K-2700 1997>' (só o nome e o ano: a cilindrada fica vazia)", "P10"),
 ]
 
 # (código, o que, por que fica, o que falta)
@@ -126,6 +138,18 @@ SEM_FONTE = [
     ("INT16652", "Puma, SP2 e TC (sem linha na VEICULOS) e VOLKSWAGEN TL (linha 37538, sem ano)",
      "nenhuma base antiga traz o ano; a pesquisa da T-0040 deixou o TL como nao_resolvido (id_linha 37537)",
      "os anos (ponto P9)"),
+    ("SFR30034", "Bongo K-2700: a cilindrada e o ano final",
+     "o texto só diz 'Bongo K-2700 1997>'; a linha 20980 da Fraga (KIA Bongo '2.7 D 2.7 L', 1997–2004) tem o 2.7, que "
+     "continua na base, mas não diz K-2700",
+     "um catálogo da SYL 204603 ou das outras referências com o K-2700 (ponto P10)"),
+    ("VEL7574", "JEEP Grand Cherokee 4.7 1998–2004 (linha 35639 da Fraga e o trecho da APLICACAO que veio dela)",
+     "só a Fraga traz a Grand Cherokee para esta vela, com 1998–2004; nenhuma base antiga, linha da VEICULOS deste "
+     "código ou referência cruzada (NGK BKR7EIX e as outras) dá o 4.7 de 2005 em diante. As linhas Grand Cherokee 4.7 "
+     "de outros códigos (CL21 1998–2006, JUH70209 2001–2017) são de outras peças e não valem para a vela",
+     "um catálogo da NGK BKR7EIX (ou das outras referências) com a Grand Cherokee 4.7 (pedido do designer-ux, T-0043)"),
+    ("VEL7503", "DAIHATSU Terios 1.3 16V 1998–2002 (linha 34784 da Fraga e o trecho da APLICACAO que veio dela)",
+     "só a Fraga traz o Terios para esta vela, com 1998–2002; nenhuma outra linha da VEICULOS tem o Terios",
+     "um catálogo da NGK BKR6E (ou das outras referências) com o Terios (pedido do designer-ux, T-0043)"),
 ]
 
 # (código, o que se perde ou sai errado na tela, onde está a causa no site)
@@ -165,16 +189,20 @@ PONTOS = [
     ("P2", "POL1712", "A linha AUDI A6 1998–2001 (33828) veio do 'Volare A6' do texto: não há Audi na aplicação. O "
                       "Volare A6 1998–2001 continua (linha 33834 e texto).",
      "a) tirar a linha AUDI A6", "b) manter a linha como está"),
-    ("P3", "VEL7520", "Palio Fire 2005 não acha a vela: as linhas Uno, Palio, Siena e Strada têm a soma da Fraga "
-                      "(ex.: Palio 1999–2019) e estão fora do site pela revisão da P12 (por causa da LIFAN e da VOLVO "
-                      "sem modelo). O texto e o cadastro master dizem Fire Flex 2004–2020.",
-     "a) Uno, Palio, Siena e Strada com a Versão 'Fire Flex' 2004–2020 e de volta ao site; e as 8 linhas com o ano "
-     "igual ao texto (Gol, Fox, Bravo, Doblo, Grand Siena, Idea, Linea, Captur) de volta ao site",
+    ("P3", "VEL7520", "Palio Fire 2005 não acha a vela: as linhas Uno, Palio, Siena, Strada, Punto e Vectra têm os "
+                      "anos da soma da Fraga (ex.: Palio 1999–2019), o Astra não tem ano, e as 15 linhas do texto estão "
+                      "fora do site pela revisão da P12 (por causa da LIFAN e da VOLVO sem modelo). O texto da v8 e o "
+                      "cadastro master dão 2004–2020 para o produto inteiro (Fire Flex, T-Jet, Flexpower).",
+     "a) a opção a) TROCA os anos da soma da Fraga, aprovados na v29 (R-20261127-132222-alexandre), pela faixa do "
+     "produto no cadastro: Uno, Palio, Siena e Strada 'Fire Flex', Punto 'Motores Fire Flex e T-Jet 1.4 Turbo', Astra "
+     "e Vectra '2.0 Flexpower / GNV', todos 2004–2020 e de volta ao site (as linhas próprias da Fraga ficam); e as 8 "
+     "linhas com o ano igual ao texto (Gol, Fox, Bravo, Doblo, Grand Siena, Idea, Linea, Captur) de volta ao site",
      "b) só o Palio 'Fire Flex' 2004–2020 de volta ao site; o resto fica como está"),
     ("P4", "ROL15106/15250", "F-4000, F-350, D40 e Daily estão sem ano (ficam ocultos; o site mostra 1978–2012 pelo "
-                             "cadastro) e o C40 do texto some.",
-     "a) os 4 recebem 1978–2012 do cadastro master (o Daily com a Versão '35.10, 49.12' do texto) e entra a linha "
-     "CHEVROLET C40 1978–2012",
+                             "cadastro); o A40 e o C40 do texto e do cadastro não têm linha (o site mostra o A-40 pelo "
+                             "texto e perde o C40).",
+     "a) os 4 recebem 1978–2012 do cadastro master (o Daily com a Versão '35.10, 49.12' do texto) e entram as linhas "
+     "CHEVROLET A-40 e C40 1978–2012",
      "b) não mudar"),
     ("P5", "CRU512022", "O FM10 e o 'MBenz 2418 6x4' do texto não têm linha: no site o FM10 vira Versão do NH12 e o "
                         "2418 some.",
@@ -184,8 +212,8 @@ PONTOS = [
      "a) entra VOLKSWAGEN 31-310 'entre eixos 6X4', 2007 em diante", "b) não mudar (fica só no texto)"),
     ("P7", "INT16529", "Ranger 2019–2016: a própria 3-RHO escreve assim; nenhuma fonte diz qual é a faixa certa. A "
                        "linha está fora do site; o texto mostra '(2019–2016)'.",
-     "a) ler como inversão: Ranger 2016–2019 na VEICULOS e no texto (sem fonte que confirme)",
-     "b) manter e levar para a nova pesquisa"),
+     "a) manter e levar para a nova pesquisa",
+     "b) ler como inversão: Ranger 2016–2019 na VEICULOS e no texto, sem fonte que confirme"),
     ("P8", "FCB6266", "Sprinter Van 310 D sai 1997+: o catálogo de filtros dizia '1997 até', sem o fim, e a v21 leu "
                       "como 'em diante'. Chassi e Furgão 310 D são 1997–2000 no mesmo texto.",
      "a) manter 1997+ e levar para a nova pesquisa", "b) mandar a página 63 do catálogo de filtros para conferir"),
@@ -193,12 +221,19 @@ PONTOS = [
                                   "1b não aparecem na tabela do site.",
      "a) levar os anos para a nova pesquisa (a base não muda agora)",
      "b) o site mostra o veículo do texto sem ano nesses casos (é do web-site: muda a regra 1b)"),
+    ("P10", "SFR30034", "A linha KIA Bongo 20976 (1993–1997) junta o K-2400 e o K-2700 (sem Versão, cilindrada "
+                        "'2.4 / 2.7'); o ano 1993–1997 é o do K-2400 (texto e pesquisa da T-0040). O 'Bongo K-2700 "
+                        "1997>' do texto não tem linha própria; o 2.7 continua na linha 20980 da Fraga (Bongo 2.7 D, "
+                        "1997–2004).",
+     "a) a linha 20976 vira K-2400, cilindrada 2.4, e entra a linha KIA Bongo 'K-2700' 1997 em diante (sem "
+     "cilindrada: o texto não dá)",
+     "b) não mudar"),
 ]
 
 
 def fmt(v) -> str:
     """O valor como a planilha mostra: "(vazio)" e, no lugar da marca da revisão da P12, o antes_log (R-20261120-213300)."""
-    return "(vazio)" if v in (None, "") else antes_log(v) if "duvid" in str(v).lower() else str(v)
+    return "(vazio)" if v in (None, "") else antes_log(v) if limpo(v).lower() == "duvidoso" else str(v)
 
 
 def veiculo(r) -> str:
@@ -280,7 +315,7 @@ def leia_me(autorizacao: str) -> list[tuple]:
                                           f"{len(CELULAS)} células em {n_cel} linhas (SFR30034, ROL15106/15250, "
                                           f"VEL7520), {len(REMOVIDAS)} linhas que saem (POL1712 AUDI A6, LAM2004 "
                                           f"VOLKSWAGEN Polo) e {len(NOVAS)} linhas novas no fim da aba (CRU5280, "
-                                          f"CRU512022, ROL15106/15250). A fonte de cada uma está no LOG_CORRECOES."),
+                                          f"CRU512022, ROL15106/15250, SFR30034). A fonte de cada uma está no LOG_CORRECOES."),
         ("Marca da P12", "Nas linhas do VEL7520 que voltam ao site, a marca da revisão da P12 sai com o MOTIVO (o texto "
                          "de antes fica no LOG); nenhuma marca entra (R-20261120-213300)."),
         ("APLICACAO", "O texto da APLICACAO na PRODUTOS não muda (campo digitado)."),
