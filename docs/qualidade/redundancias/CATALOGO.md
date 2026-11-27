@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0700** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0701** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -501,8 +501,9 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0695 | média | dado | VEICULOS v29 (POL1712, FCB6266, TRI90007) | VOLARE como montadora (82 linhas) e modelo da Fraga com carroceria em caixa alta (2.804 linhas) repetem o veículo da base; filtro com "Sprinter" e "SPRINTER FURGÃO" | T-0040 | catalogo-dados | CORRIGIDO (2b1df1d) |
 | RD-0696 | média | arquivo | dados/T-0040/pendentes_internet.csv, conflitos.csv; lista_T0040.py:89 e :94 | pendentes_internet.csv igual byte a byte ao lista_trabalho.csv; conflitos.csv repete a lista e a aba CONFLITOS | T-0040 | catalogo-dados | CORRIGIDO (430ef27) |
 | RD-0697 | baixa | texto | VEICULOS v29 (1.466 linhas da Fraga) | modelo em caixa alta ao lado de caixa mista, sem par na base | T-0040 | catalogo-dados | MANTIDO (decisão na aba DE_PARA) |
-| RD-0698 | baixa | código | site/app.js:2073-2077 | exemplo "1634 (1938–1944)" em 2 comentários seguidos do `numModelo` (só comentário; não segura) | T-0040 | web-site | ABERTO (próximo PR) |
+| RD-0698 | baixa | código | site/app.js:2073-2077 | exemplo "1634 (1938–1944)" em 2 comentários seguidos do `numModelo` (só comentário; não segura) | T-0040 | web-site | CORRIGIDO (1665e1f) |
 | RD-0699 | baixa | dado | VEICULOS v29: JUH70025 (22811 × 40901), SFR30017 (20860 × 40902) | Gol duvidoso e Gol separado com a mesma chave | T-0040 | catalogo-dados | MANTIDO (decisão 2a, R-20261127-132222-alexandre) |
+| RD-0700 | baixa | código | site/app.js:2080 e :1851; docs/DADOS_DO_SITE.md:35 | regra "número com unidade é medida" em 2 listas no app.js e uma 3ª no doc | T-0040 | web-site | ABERTO |
 
 ## Notas
 
@@ -517,6 +518,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - Reteste do #228 no `430ef27`: RD-0696 corrigido. LIBERADO, com a condição do RD-0670 (conferir o head do `aprovar_v29.sh` antes do merge).
 - #229 no `392e16a` (`numModelo`): LIBERADO. RD-0698 (baixa, só comentário) vai no próximo PR.
 - #228 no head aprovado `178f80d`: RD-0670 corrigido (`3337b59`, git rm). MANTIDO: RD-0699. LIBERADO.
+- #229 no `1665e1f`: RD-0698 corrigido; novo RD-0700 (baixa). VOLTA PARA AJUSTE.
 
 ### T-0033, ano na busca e fim do "Outros veículos e detalhes", 25/11/2026 (antes dos PRs)
 - RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
