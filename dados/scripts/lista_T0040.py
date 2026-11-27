@@ -11,6 +11,12 @@ aba não mudar). Só campos públicos: descrição (d) e referências (r) do sit
 FICHA e pela TRAVA do gerar_site; fabricante, modelo, versão e cilindrada da VEICULOS. Não copia APLICACAO (pode ter
 preço, como o TER556556). O sha256 da base é conferido antes e depois.
 
+Também grava (mesmas regras de campo e o mesmo [PARADO] de palavra interna):
+- dados/T-0040/pendentes_internet.csv: as linhas da VEICULOS ainda sem ano completo, com as colunas da lista (hoje é
+  a mesma lista);
+- dados/T-0040/conflitos.csv: as linhas da aba CONFLITOS da simulacao/antes_depois.xlsx, com o id_linha da VEICULOS
+  de hoje e a faixa da Fraga (AAAA–AAAA) no lugar do tipo.
+
 Uso: python3 dados/scripts/lista_T0040.py
 """
 import csv
@@ -24,10 +30,14 @@ from openpyxl import load_workbook
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from base_comum import BASE, RAIZ, sha  # noqa: E402
-from simular_T0040 import tipo_ano  # noqa: E402
+from simular_T0040 import AD, ORIGEM, tipo_ano  # noqa: E402
 
 JSON = RAIZ / "site" / "data" / "produtos.json"
 SAIDA = RAIZ / "dados" / "T-0040" / "lista_trabalho.csv"
+PENDENTES = RAIZ / "dados" / "T-0040" / "pendentes_internet.csv"
+CONFLITOS = RAIZ / "dados" / "T-0040" / "conflitos.csv"
+COLS_CONF = ["id_linha", "codigo_bap", "descricao", "montadora", "modelo", "versao", "motor", "ano_atual",
+             "faixa_fraga", "referencias_cruzadas"]
 COLS = ["id_linha", "codigo_bap", "descricao", "montadora", "modelo", "versao", "motor", "ano_atual", "tipo",
         "referencias_cruzadas"]
 INTERNO = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|R\$|BAP BOX|CUSTO|FORNECEDOR|RANKING|ANTERIOR", re.I)
@@ -46,8 +56,11 @@ def main():
     pos = {c: i for i, c in enumerate(cab)}
     site = {p["c"]: p for p in json.loads(JSON.read_text(encoding="utf-8"))["produtos"]}
 
-    saida, universal = [], 0
+    saida, universal, da_v28, k = [], 0, {}, 0
     for n, r in enumerate(linhas, start=1):
+        if r[pos["ORIGEM"]] != ORIGEM:               # as linhas da v28 ficam na ordem (a Fraga entra no meio)
+            k += 1
+            da_v28[k] = n
         cod = txt(r[pos["CODIGO_BAP"]])
         if not cod:
             continue
@@ -65,14 +78,25 @@ def main():
         saida.append([n, cod, desc, txt(r[pos["FABRICANTE"]]), txt(r[pos["MODELO"]]), txt(r[pos["VERSAO"]]),
                       txt(r[pos["CILINDRADA"]]), ano, tipo, refs])
 
-    for lin in saida:
-        if any(INTERNO.search(str(c)) for c in lin):
-            sys.exit(f"[PARADO] dado interno na linha {lin[0]} ({lin[1]})")
+    # conflitos: a linha da v28 (aba CONFLITOS) -> id_linha de hoje; a faixa da Fraga no lugar do tipo
+    por_id = {lin[0]: lin for lin in saida}
+    conf = []
+    for c in list(load_workbook(AD, read_only=True)["CONFLITOS"].iter_rows(values_only=True))[1:]:
+        lin = por_id.get(da_v28.get(c[5]))
+        if not lin or lin[1] != c[0] or lin[4] != txt(c[3]):
+            sys.exit(f"[PARADO] o conflito {c[0]} {c[3]} (linha {c[5]} da v28) não está na lista de hoje")
+        conf.append(lin[:8] + [c[7]] + lin[9:])
+    for arq, cols, dados in ((SAIDA, COLS, saida), (PENDENTES, COLS, saida), (CONFLITOS, COLS_CONF, conf)):
+        for lin in dados:
+            if any(INTERNO.search(str(c)) for c in lin):
+                sys.exit(f"[PARADO] dado interno na linha {lin[0]} ({lin[1]}) de {arq.name}")
     SAIDA.parent.mkdir(parents=True, exist_ok=True)
-    with SAIDA.open("w", encoding="utf-8", newline="") as f:
-        w = csv.writer(f, delimiter=";", quoting=csv.QUOTE_MINIMAL, lineterminator="\n")
-        w.writerow(COLS)
-        w.writerows(saida)
+    for arq, cols, dados in ((SAIDA, COLS, saida), (PENDENTES, COLS, saida), (CONFLITOS, COLS_CONF, conf)):
+        with arq.open("w", encoding="utf-8", newline="") as f:
+            w = csv.writer(f, delimiter=";", quoting=csv.QUOTE_MINIMAL, lineterminator="\n")
+            w.writerow(cols)
+            w.writerows(dados)
+        print(f"{arq.relative_to(RAIZ)}: {len(dados)} linhas")
     assert sha(BASE) == antes, "a base mudou"
 
     # contagem por LINHA
