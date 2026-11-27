@@ -42,14 +42,14 @@ Atualizado em 27/11/2026 14:19 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0038](tarefas/T-0038.md) | Onboarding do Vendedor atualizado, com os 10 passos da visita | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, web-site, testes | CONCLUÍDA (no ar em 25/11 10:50) | #209, #210, #211, #212 |
 | [T-0033](tarefas/T-0033.md) | Busca por veículo com ano (só o ano que bate) e fim do bloco "Outros veículos e detalhes" | web-site | catalogo-dados, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 26/11 18:03) | #217, #225, #219, #220, #221 |
 | [T-0039](tarefas/T-0039.md) | Busca "filtro titan": palavra inteira e moto primeiro | web-site | testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 26/11 18:03) | #222, #225, #223, #224, #226 |
-| [T-0037](tarefas/T-0037.md) | Veículos do texto da APLICACAO para a aba VEICULOS (base v29), com as pendências da T-0033 e da T-0039 | catalogo-dados | web-site, testes | NA FILA (junto com a T-0040) | — |
+| [T-0037](tarefas/T-0037.md) | Veículos do texto da APLICACAO para a aba VEICULOS (base v29), com as pendências da T-0033 e da T-0039 | catalogo-dados | web-site, testes | NA FILA | — |
 | [T-0040](tarefas/T-0040.md) | Ano inicial e final em 100% das aplicações: Fraga (v29), pesquisa (v30) e site sem veículo sem ano | catalogo-dados | web-site, testes, designer-ux, design-de-marca, revisor-codigo, corretor-redundancias | CONCLUÍDA (no ar em 27/11 ~14:20) | #228, #230, #229, #231, #232, #233, #235; pareceres #236, #237, #238 |
 | [T-0041](tarefas/T-0041.md) | Recados novos com id e criado_em no fuso de Manaus (-04:00) | alexandre | gerente-projetos, testes, revisor-codigo, corretor-redundancias | CONCLUÍDA (13535e6) | #234 |
 
 ## Fila
 Main 13535e6 (#234).
 
-T-0040 no ar em 27/11 ~14:20 (base v30 no #232, site v30 no #235); as pendências dela, no fim do T-0040.md, esperam a autorização do Alexandre. T-0041 no main em 27/11 14:09 (#234): os recados novos saem no fuso de Manaus. T-0037 continua na fila. T-0033 e T-0039 no ar em 26/11 18:03 (#217, #222). T-0038 no ar em 25/11 10:50 (#209 a #212). Na fila, do corretor: RD-0630 (baixa) e RD-0631 (alta), em docs/qualidade/redundancias/T-0038.md.
+T-0037 continua na fila. As pendências da T-0040 (fim do T-0040.md) esperam a autorização do Alexandre. Na fila, do corretor: RD-0630 (baixa) e RD-0631 (alta), em docs/qualidade/redundancias/T-0038.md.
 
 **PAUSA geral** a pedido do Alexandre (R-20261123-184932-po): nenhuma tarefa, ronda ou subagente até o PO chamar. A T-0034, a T-0035 e a T-0036 saíram da pausa a pedido do Alexandre e estão no ar (#194 a #196, #202 a #204 e #201). Na volta, a próxima é a T-0033 (R-20261124-152047-po e R-20261124-152425-po), com simulação de tela antes.
 
