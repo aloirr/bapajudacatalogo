@@ -1,5 +1,7 @@
 # Parecer de UX · T-0040 v30 · simulação do site (veículo sem ano oculto e aviso sem aplicação)
 
+**Histórico.** O parecer que vale é o `T-0040-v30.md` (head `4f98fd7`, merge `e42f936`).
+
 ## Reteste do ponto 6 · head `b86c820dbd7d57cb1a71166519d771220e043f9c` · resultado: LIBERADO
 
 **Prints conferidos** (pasta de rascunho t40v30site/prints, refeitos):
@@ -26,9 +28,7 @@
 - O resumo é mais limpo, mas não traz o ano.
 - Melhoria para outra tarefa, sem bloqueio: pôr a faixa de anos por modelo no resumo ("Ford – Ka 2008–2013 / Fiesta 2002–2014"). A tela fica mais consistente e o balconista vê o ano já no cartão.
 
-### Pendente com o Alexandre (ponto 7, não bloqueia)
-- O aviso "Aplicação em revisão; consulte o vendedor." aparece na palheta (KI20) e na roda (ROD8005), que se escolhem pela medida.
-- A recomendação continua: esconder a seção nesses casos, como no main. A pergunta vai na simulação.
+### Ponto 7: decidido pelo Alexandre (R-20261127-150417-alexandre): palheta, bateria e roda ficam sem a seção e sem o aviso.
 
 ---
 
