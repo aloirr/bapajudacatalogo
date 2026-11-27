@@ -5,11 +5,13 @@ Decisões do Alexandre (pelo po, 27/11/2026, "1) a / 2) a / 3) a"):
 - 2a: uma linha por código + montadora + modelo + motor, com o ano mínimo e o máximo;
 - 3a: os 27 achados por referência não trocam nada; os 483 não achados ficam como estão.
 A simulação é a de dados/T-0040/simulacao/ (commit 9b11dd1, dados/scripts/simular_T0040.py), com a correção do
-sufixo "1" no motor da Fraga (commit 6b32eb8: "MONOCILÍNDRICO1" -> "MONOCILÍNDRICO", 16 códigos): a VEICULOS da v29
-é, linha a linha, a da BASE_simulada_v29.xlsx.
+sufixo "1" no motor da Fraga (commit 6b32eb8: "MONOCILÍNDRICO1" -> "MONOCILÍNDRICO", 16 códigos) e com a limpeza dos
+complementos da VERSAO (commit 0be92c8, MC-0048 a MC-0050: 34 linhas, 8 produtos): a VEICULOS da v29
+é, linha a linha, a da BASE_simulada_v29.xlsx (gerada pelo simular_T0040.py; não fica no repositório depois da v29).
 
-AUTORIZAÇÃO: pendente do aprovado do Alexandre (simulação 9b11dd1). Depois do aprovado, só se troca o texto de
-AUTORIZACAO (abaixo, no LOG_CORRECOES e no LEIA-ME).
+AUTORIZAÇÃO: o padrão é "pendente do aprovado do Alexandre". Depois do aprovado, roda-se de novo com
+--refazer --autorizacao "R-…" (o texto fica "aprovado em R-…"): a base e a v29 voltam à v28 do origin/main e a v29 é gravada outra vez, igual,
+só com o texto da autorização trocado no LOG_CORRECOES, no LEIA-ME e no dados/T-0040/AVISO_BAP_CENTRAL.md.
 
 O que faz (regra 4 do CLAUDE.md):
 1. VEICULOS: as linhas dos 3.909 códigos saem e entram as da Fraga (ORIGEM "Fraga T-0040"), no lugar em que o código
@@ -20,10 +22,14 @@ O que faz (regra 4 do CLAUDE.md):
 4. compara a base nova com a v28 (base_comum.comparar, fora a VEICULOS) e a VEICULOS com a da simulação, célula a
    célula (valor e formatação), e grava a base e a cópia em dados/versoes/.
 
-Uso: python3 dados/scripts/base_v29.py
+Uso: python3 dados/scripts/base_v29.py                                    (grava, com a autorização pendente)
+     python3 dados/scripts/base_v29.py --refazer --autorizacao "R-…"      (depois do aprovado)
 """
 from __future__ import annotations
 
+import argparse
+import re
+import subprocess
 import sys
 import tempfile
 from copy import copy
@@ -34,13 +40,15 @@ import openpyxl
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from base_comum import (BASE, CAB_VEICULOS, RAIZ, acrescentar_leia_me, acrescentar_log, assinatura,  # noqa: E402
                         comparar, conferir_cabecalho, gravar, limpo, linhas_novas, parar, sha, versao)
-from simular_T0040 import faixa  # noqa: E402
+from simular_T0040 import ORIGEM, SIM, SUFIXO_1, faixa  # noqa: E402
 
-SIM = RAIZ / "dados" / "T-0040" / "simulacao" / "BASE_simulada_v29.xlsx"
-TAREFA, DATA, ORIGEM = "T-0040", "27/11/2026", "Fraga T-0040"
+TAREFA, DATA = "T-0040", "27/11/2026"
 SIM_COMMIT = "9b11dd1"
-AUTORIZACAO = f"pendente do aprovado do Alexandre (simulação {SIM_COMMIT})"
-SIM_CORRECAO = "6b32eb8"
+AUTORIZACAO = "pendente do aprovado do Alexandre"                                 # sem o --autorizacao
+SHA_SIM = "6a7f10831d2deb08ce976e533381cba314c0a89d6ab15a7cfcc36a883327732a"   # BASE_simulada_v29.xlsx (0be92c8)
+AVISO = RAIZ / "dados" / "T-0040" / "AVISO_BAP_CENTRAL.md"
+SITUACAO_AVISO = re.compile(r"(## Situação\n\n).*\Z", re.S)
+SIM_CORRECAO = "0be92c8"                                # 6b32eb8 (sufixo "1") e 0be92c8 (limpeza da VERSAO)
 N_TROCADOS = 3909
 # os 16 códigos em que a simulação 9b11dd1 tinha o motor com o "1" da Fraga (aba SUFIXO_1 da antes_depois)
 COM_SUFIXO = ["110/70-17 54S V456F", "110/90-17 60P V307", "130/70-17 62S V456R", "140/70-17 66S V456R",
@@ -48,22 +56,26 @@ COM_SUFIXO = ["110/70-17 54S V456F", "110/90-17 60P V307", "130/70-17 62S V456R"
               "90/90-18 51P V425R", "90/90-18 57P V250R", "90/90-19 52P V307", "CAR10", "FAR6365", "FLU6112",
               "ROL6004-2Z", "ROL6202-2Z"]
 SUFIXO = ("motor sem o '1' grudado no fim que vem no CSV da Fraga ('MONOCILÍNDRICO1' -> 'MONOCILÍNDRICO'; "
-          f"simulação corrigida em {SIM_CORRECAO})")
+          "simulação corrigida em 6b32eb8)")
 
-LEIA_ME = [
-    ("BASE BAP UNIFICADA v29 (27/11/2026)", None),
-    ("VEICULOS (3.909 códigos)", "A aplicação dos 3.909 códigos achados pela Fraga pelo código BAP passa a ser a da "
-                                 "Fraga: uma linha por montadora + modelo + motor, com o ano mínimo e o máximo "
-                                 "(ORIGEM 'Fraga T-0040', valor novo). Os 27 achados por referência e os 483 não "
-                                 "achados ficam como estavam (T-0040)."),
-    ("APLICACAO", "O texto da APLICACAO na PRODUTOS não muda (campo digitado; reescrever depende de decisão do "
-                  "Alexandre). O site lê a VEICULOS."),
-    ("Correção da Fraga", "Em 16 códigos (motos), o motor vem da Fraga com um '1' grudado no fim "
-                          "('MONOCILÍNDRICO1'): na VEICULOS entra sem o '1' (T-0040)."),
-    ("Formato", f"Mesmas abas e colunas da v28 (VEICULOS com 11 colunas). Uma linha por código trocado no "
-                f"LOG_CORRECOES. Simulação em dados/T-0040/simulacao/ ({SIM_COMMIT}). Autorização: {AUTORIZACAO}."),
-    (None, None),
-]
+def leia_me(autorizacao: str) -> list[tuple]:
+    return [
+        ("BASE BAP UNIFICADA v29 (27/11/2026)", None),
+        ("VEICULOS (3.909 códigos)", "A aplicação dos 3.909 códigos achados pela Fraga pelo código BAP passa a ser a da "
+                                     "Fraga: uma linha por montadora + modelo + motor, com o ano mínimo e o máximo "
+                                     "(ORIGEM 'Fraga T-0040', valor novo). Os 27 achados por referência e os 483 não "
+                                     "achados ficam como estavam (T-0040)."),
+        ("APLICACAO", "O texto da APLICACAO na PRODUTOS não muda (campo digitado; reescrever depende de decisão do "
+                      "Alexandre). O site lê a VEICULOS."),
+        ("Correção da Fraga", "Em 16 códigos (motos), o motor vem da Fraga com um '1' grudado no fim "
+                              "('MONOCILÍNDRICO1'): na VEICULOS entra sem o '1' (T-0040)."),
+        ("Limpeza da VERSAO", "Nos complementos da Fraga: sai o 'CATALOGO NÃO INFORMA ANO/MODELO' (o ANO_DUVIDA "
+                              "diz), ' | ' vira ' · ', caixa alta e sai o complemento repetido (34 linhas, 8 produtos; "
+                              "T-0040)."),
+        ("Formato", f"Mesmas abas e colunas da v28 (VEICULOS com 11 colunas). Uma linha por código trocado no "
+                    f"LOG_CORRECOES. Simulação em dados/T-0040/simulacao/ ({SIM_COMMIT}). Autorização: {autorizacao}."),
+        (None, None),
+    ]
 
 
 def ler_sim() -> tuple[list[tuple], set[str]]:
@@ -80,7 +92,44 @@ def ler_sim() -> tuple[list[tuple], set[str]]:
     return linhas[1:], trocados
 
 
+def aviso(autorizacao: str) -> str:
+    """O AVISO_BAP_CENTRAL.md com a seção Situação da autorização."""
+    if autorizacao == AUTORIZACAO:
+        sit = (f"A v29 está no branch `catalogo-dados/T-0040-v29`, **pendente do aprovado do Alexandre** (simulação "
+               f"{SIM_COMMIT}, corrigida em {SIM_CORRECAO}). Só vale depois do merge no `main`.\n")
+    else:
+        sit = (f"A v29 foi {autorizacao.replace('aprovado', 'aprovada', 1)} (simulação {SIM_COMMIT}, corrigida em "
+               f"{SIM_CORRECAO}). Vale a partir do merge no `main`.\n")
+    texto = AVISO.read_text(encoding="utf-8")
+    if not SITUACAO_AVISO.search(texto):
+        raise SystemExit("[PARADO] o AVISO_BAP_CENTRAL.md não tem a seção '## Situação' no fim")
+    return SITUACAO_AVISO.sub(lambda m: m.group(1) + sit, texto)
+
+
+def refazer() -> None:
+    """Volta a base e a v29 para a v28 do origin/main (a v29 de versoes sai), para gravar de novo."""
+    b = subprocess.run(["git", "-C", str(RAIZ), "show", "origin/main:dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx"],
+                       capture_output=True, check=True).stdout
+    BASE.write_bytes(b)
+    if sha(BASE) != sha(versao(28)):
+        raise SystemExit("[PARADO] a base do origin/main não é a v28: o main mudou, refaça a simulação")
+    versao(29).unlink(missing_ok=True)
+    print(f"  --refazer: base de volta à v28 do origin/main ({sha(BASE)}); a v29 de versoes saiu")
+
+
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--autorizacao", default=AUTORIZACAO, help="o recado do aprovado (padrão: pendente)")
+    ap.add_argument("--refazer", action="store_true", help="volta a base à v28 do origin/main e grava a v29 de novo")
+    arg = ap.parse_args()
+    if not limpo(arg.autorizacao):
+        raise SystemExit("[PARADO] --autorizacao vazia")
+    autorizacao = AUTORIZACAO if arg.autorizacao == AUTORIZACAO else f"aprovado em {limpo(arg.autorizacao)}"
+    if sha(SIM) != SHA_SIM:
+        raise SystemExit(f"[PARADO] a BASE_simulada_v29.xlsx não é a da simulação {SIM_CORRECAO} (sha256 diferente)")
+    texto_aviso = aviso(autorizacao)
+    if arg.refazer:
+        refazer()
     v28, v29 = versao(28), versao(29)
     if v29.exists():
         raise SystemExit(f"[PARADO] {v29.name} já existe: a v29 já foi gravada")
@@ -126,8 +175,8 @@ def main():
     for r in novas:
         depois_c.setdefault(limpo(r[0]).upper(), []).append(r)
     sufixo = set(COM_SUFIXO)
-    if not sufixo <= trocados or any(r[3] and "MONOCILÍNDRICO1" in r[3] for r in novas):
-        parar(["correção do sufixo '1': código fora da troca ou ainda há 'MONOCILÍNDRICO1' na simulação"])
+    if not sufixo <= trocados or any(SUFIXO_1.search(limpo(r[3]).split(" · ")[0]) for r in novas if r[io] == ORIGEM):
+        parar(["correção do sufixo '1': código fora da troca ou ainda há motor com o '1' grudado na simulação"])
     log = []
     for cod in sorted(trocados):
         an, de = antes_c.get(cod, []), depois_c[cod]
@@ -137,11 +186,11 @@ def main():
                     f"VEICULOS: {len(an)} linha(s) de antes trocada(s) por {len(de)} da Fraga ({sep} separada(s), "
                     f"{len(de) - sep} duvidosa(s)), uma por montadora + modelo + motor, com o ano mínimo e o máximo "
                     f"(decisões 1a e 2a); ORIGEM 'Fraga T-0040'; anos antes {anos_antes}, depois "
-                    f"{faixa([(r[4], r[5]) for r in de])}{'; ' + SUFIXO if cod in sufixo else ''}. APLICACAO da PRODUTOS sem mudança. Fonte: Fraga T-0040. "
-                    f"Simulação em dados/T-0040/simulacao/ ({SIM_COMMIT}). Autorização: {AUTORIZACAO}. "
+                    f"{faixa([(r[4], r[5]) for r in de])}{'; ' + SUFIXO if cod in sufixo else ''}. APLICACAO da PRODUTOS sem mudança. "
+                    f"Simulação em dados/T-0040/simulacao/ ({SIM_COMMIT}). Autorização: {autorizacao}. "
                     f"{TAREFA} (v29), {DATA}"])
     ult = acrescentar_log(wb, log)
-    leia_n = acrescentar_leia_me(wb, LEIA_ME)
+    leia_n = acrescentar_leia_me(wb, leia_me(autorizacao))
     print(f"  VEICULOS: {len(antigas)} linhas antes, {len(novas)} depois; códigos trocados: {len(trocados)}; "
           f"LOG_CORRECOES +{len(log)}; LEIA-ME +{leia_n}")
 
@@ -170,6 +219,8 @@ def main():
             dif.append("a base mudou durante a gravação")
         parar(dif)
         gravar(p, v29)
+    AVISO.write_text(texto_aviso, encoding="utf-8")
+    print(f"  autorização: {autorizacao}")
     print(f"  sha256 antes (v28): {sha_antes}")
 
 

@@ -1,6 +1,6 @@
 # Aviso para a BAP Central · base v29 (T-0040)
 
-A BAP Central lê a base unificada (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`). Na v29 o formato das abas não muda, mas a aba VEICULOS ganha um **valor novo** e mais que dobra de tamanho.
+A BAP Central lê a base unificada (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`). Na v29 a aba VEICULOS ganha um **valor novo** e mais que dobra de tamanho; abas e colunas ficam iguais (abaixo).
 
 ## O que muda
 
@@ -19,4 +19,4 @@ A BAP Central lê a base unificada (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`
 
 ## Situação
 
-A v29 está no branch `catalogo-dados/T-0040-v29`, **pendente do aprovado do Alexandre** (simulação 9b11dd1, corrigida em 6b32eb8). Só vale depois do merge no `main`.
+A v29 está no branch `catalogo-dados/T-0040-v29`, **pendente do aprovado do Alexandre** (simulação 9b11dd1, corrigida em 0be92c8). Só vale depois do merge no `main`.
