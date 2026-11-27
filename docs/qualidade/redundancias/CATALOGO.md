@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0677** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0685** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -473,18 +473,27 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0667 | baixa | código | site/app.js:357 e :1231 | regex do modelo como palavra inteira em `naApl` repete `rxModeloTxt` | T-0039 | web-site | CORRIGIDO (931a7e9) |
 | RD-0668 | média | teste | scripts/testar_site.mjs:829 | CXD13062, "CXD 13062" e 16900255S já testados em "busca código" e "busca referência" | T-0039 | testes | CORRIGIDO (f984887) |
 | RD-0669 | média | teste | scripts/testar_site.mjs:837 e testes/t0033_busca_ano.mjs:102 | contagens fixas da T-0033 (27, 71, 1, 241) em 2 arquivos | T-0039 | testes | CORRIGIDO (f984887) |
-| RD-0670 | média | arquivo | dados/T-0040/simulacao/BASE_simulada_v29.xlsx | cópia inteira da base (2,9 MB), VEICULOS igual à v29 do PR | T-0040 | catalogo-dados | ABERTO |
-| RD-0671 | média | código | dados/scripts/base_v29.py:39-40 | `ORIGEM` e caminho `SIM` repetidos do `simular_T0040.py` | T-0040 | catalogo-dados | ABERTO |
-| RD-0672 | média | código | dados/scripts/base_v29.py:129 | regra do sufixo "1" com o literal `MONOCILÍNDRICO1`, não o `SUFIXO_1` | T-0040 | catalogo-dados | ABERTO |
-| RD-0673 | baixa | código | dados/scripts/simular_T0040.py:141 e :297 | limpeza do motor escrita 2 vezes (vira `motor_limpo`) | T-0040 | catalogo-dados | ABERTO |
-| RD-0674 | baixa | texto | LOG_CORRECOES v29 e LEIA-ME (base_v29.py:42, :140) | "Fraga T-0040" e "9b11dd1" 2 vezes em cada uma das 3.909 linhas | T-0040 | catalogo-dados | ABERTO |
-| RD-0675 | baixa | doc | dados/T-0040/AVISO_BAP_CENTRAL.md:3 | "formato das abas não muda" repete a seção "O que não muda" | T-0040 | catalogo-dados | ABERTO |
+| RD-0670 | média | arquivo | dados/T-0040/simulacao/BASE_simulada_v29.xlsx | cópia inteira da base (2,9 MB), VEICULOS igual à v29 do PR | T-0040 | catalogo-dados | EM CORREÇÃO (git rm no aprovar_v29.sh) |
+| RD-0671 | média | código | dados/scripts/base_v29.py:39-40 | `ORIGEM` e caminho `SIM` repetidos do `simular_T0040.py` | T-0040 | catalogo-dados | CORRIGIDO (4c33664) |
+| RD-0672 | média | código | dados/scripts/base_v29.py:129 | regra do sufixo "1" com o literal `MONOCILÍNDRICO1`, não o `SUFIXO_1` | T-0040 | catalogo-dados | CORRIGIDO (4c33664) |
+| RD-0673 | baixa | código | dados/scripts/simular_T0040.py:141 e :297 | limpeza do motor escrita 2 vezes (vira `motor_limpo`) | T-0040 | catalogo-dados | CORRIGIDO (4c33664) |
+| RD-0674 | baixa | texto | LOG_CORRECOES v29 e LEIA-ME (base_v29.py:42, :140) | "Fraga T-0040" e "9b11dd1" 2 vezes em cada uma das 3.909 linhas | T-0040 | catalogo-dados | CORRIGIDO (4c33664) |
+| RD-0675 | baixa | doc | dados/T-0040/AVISO_BAP_CENTRAL.md:3 | "formato das abas não muda" repete a seção "O que não muda" | T-0040 | catalogo-dados | CORRIGIDO (4c33664) |
 | RD-0676 | baixa | texto | antes_depois.xlsx, PONTOS_ALEXANDRE | texto repete as colunas VEICULOS_DEPOIS e LINHAS_DA_FRAGA | T-0040 | catalogo-dados | MANTIDO (simulação já em aprovação) |
+| RD-0677 | média | dado | VEICULOS v29, linhas 41759-41764 | AMT7586/7587/7588 PEUGEOT 208 2021–2025 em 2 linhas iguais (automático + Fraga) | T-0040 | catalogo-dados | ABERTO |
+| RD-0678 | média | dado | VEICULOS v29 | 1.455 linhas automático sem versão repetidas por 1.868 da Fraga com o mesmo modelo e os mesmos anos | T-0040 | catalogo-dados | ABERTO |
+| RD-0679 | média | código | simular_T0040.py:120, lista_T0040.py:58, base_v29.py:98 | tipo de ano (sem_ano/so_inicial/so_final/completa) em 3 scripts | T-0040 | catalogo-dados | ABERTO |
+| RD-0680 | baixa | código | simular_T0040.py:167 e base_v29.py:106 | `ano()` escrita 2 vezes | T-0040 | catalogo-dados | ABERTO |
+| RD-0681 | baixa | código | lista_T0040.py:26-36 | `RAIZ`, `BASE` e `sha` repetem o base_comum | T-0040 | catalogo-dados | ABERTO |
+| RD-0682 | baixa | código | simular_T0040.py:100 e :128 | normalização NFKD 2 vezes (vira `sem_acento`) | T-0040 | catalogo-dados | ABERTO |
+| RD-0683 | baixa | texto | aprovar_v29.sh:30 | "5.100 linhas" fixo repete a contagem do LOG | T-0040 | catalogo-dados | ABERTO |
+| RD-0684 | baixa | texto | LEIA-ME v29 (base_v29.py:56) | "se soma" 2 vezes na mesma frase | T-0040 | catalogo-dados | ABERTO |
 
 ## Notas
 
 ### T-0040, aplicação da Fraga na VEICULOS (v29), 27/11/2026 (PR #228, rascunho)
 - RD-0670 ao RD-0676: branch `catalogo-dados/T-0040-v29` (`a77a097`). Relatório: `T-0040.md`. VOLTA PARA AJUSTE: seguram o RD-0670 ao RD-0675 (3 médias, 3 baixas); MANTIDO: RD-0676. VEICULOS sem linha repetida.
+- 2ª rodada no `4c33664` (a Fraga se soma): RD-0671 ao RD-0675 corrigidos; RD-0670 em correção (sai no `aprovar_v29.sh`). Novos: RD-0677 ao RD-0684 (3 médias, 5 baixas; o RD-0678 depende de decisão do Alexandre). VOLTA PARA AJUSTE. Vem outro head (aba CONFLITOS): o RD-0677 e o RD-0678 são reconferidos nele.
 
 ### T-0033, ano na busca e fim do "Outros veículos e detalhes", 25/11/2026 (antes dos PRs)
 - RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
