@@ -9,7 +9,7 @@ Fraga SE SOMA à aplicação atual (somar() do simular_T0040.py):
   Fraga; em conflito, fica como está e a Fraga entra como linha somada (aba CONFLITOS); sem o modelo na Fraga, fica e
   continua na lista de trabalho;
 - os outros grupos da Fraga entram como linhas novas (ORIGEM "Fraga T-0040").
-A simulação é a de dados/T-0040/simulacao/ (commit 9cbe958, dados/scripts/simular_T0040.py, com o sufixo "1" do motor
+A simulação é a de dados/T-0040/simulacao/ (commit cf9db10, dados/scripts/simular_T0040.py, com o sufixo "1" do motor
 e a limpeza MC-0048 a MC-0050): a VEICULOS da v29 é, linha a linha, a da BASE_simulada_v29.xlsx (gerada pelo
 simular_T0040.py; não fica no repositório depois da v29).
 
@@ -48,9 +48,9 @@ from base_comum import (BASE, CAB_VEICULOS, RAIZ, acrescentar_leia_me, acrescent
 from simular_T0040 import ORIGEM, SIM, SUFIXO_1, ano, conferir_soma, faixa, tipo_ano  # noqa: E402
 
 TAREFA, DATA = "T-0040", "27/11/2026"
-SIM_COMMIT = "9cbe958"                                  # a simulação com a 1a nova
+SIM_COMMIT = "cf9db10"                                  # a simulação com a 1a nova
 AUTORIZACAO = "pendente do aprovado do Alexandre"                                 # sem o --autorizacao
-SHA_SIM = "dce2be523b45f794125839cde01a529e0e87132b10fd8530c8130b8e8dd155e2"   # BASE_simulada_v29.xlsx (9cbe958)
+SHA_SIM = "fd45b6197a44d72ec4e9f4b8f7df0405287d26462b26d9f937459e8e2c559688"   # BASE_simulada_v29.xlsx (cf9db10)
 AVISO = RAIZ / "dados" / "T-0040" / "AVISO_BAP_CENTRAL.md"
 SITUACAO_AVISO = re.compile(r"(## Situação\n\n).*\Z", re.S)
 REGRA = "decisão 1a nova, R-20261127-053555-po: a Fraga se soma"
@@ -72,6 +72,11 @@ def leia_me(autorizacao: str, n: dict) -> list[tuple]:
                            "incompleta só recebe o ano da Fraga se não tem ano ou se o ano que tem cai na faixa da "
                            "Fraga; em conflito fica como está e a Fraga entra somada. O po e o Alexandre decidem se "
                            "mudam."),
+        ("Grafia da Fraga", "Nas linhas da Fraga, a montadora e o modelo seguem a grafia da base: VOLARE vira "
+                            "MARCOPOLO Volare e o modelo da Fraga ('A6', 'WFLY') vai para o começo da VERSAO; o modelo "
+                            "da Fraga que começa (por palavra inteira) por um modelo da base da mesma montadora vira o "
+                            "da base, e o resto vai para o começo da VERSAO ('SPRINTER FURGÃO' -> Sprinter, 'FURGÃO'). "
+                            "O que não casa fica como veio (T-0040, RD-0695)."),
         ("APLICACAO", "O texto da APLICACAO na PRODUTOS não muda (campo digitado; reescrever depende de decisão do "
                       "Alexandre)."),
         ("Limpeza da Fraga", "Nas linhas da Fraga: motor sem o '1' grudado no fim ('MONOCILÍNDRICO1'); nos "

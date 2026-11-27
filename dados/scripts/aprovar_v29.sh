@@ -9,7 +9,7 @@
 #   2. git rm da dados/T-0040/simulacao/BASE_simulada_v29.xlsx (RD-0670);
 #   3. commit com os trailers. O push fica para quem roda: git push origin catalogo-dados/T-0040-v29
 #
-# Para refazer a BASE_simulada_v29.xlsx um dia (ela fica no commit 9cbe958): com a base na v28,
+# Para refazer a BASE_simulada_v29.xlsx um dia (ela fica no commit cf9db10): com a base na v28,
 #   git show origin/po/T-0040-anos:docs/propostas/T-0040/resultado_fraga.csv > /caminho/fora/do/repo/fraga.csv
 #   python3 dados/scripts/simular_T0040.py --fraga /caminho/fora/do/repo/fraga.csv
 set -euo pipefail
@@ -29,7 +29,7 @@ T-0040: v29 aprovada ($RECADO)
 - base e versoes/v29 gravadas de novo (base_v29.py --refazer): só o texto da autorização muda,
   "pendente do aprovado do Alexandre" -> "aprovado em $RECADO", no LOG_CORRECOES,
   no LEIA-ME e no dados/T-0040/AVISO_BAP_CENTRAL.md.
-- sai a dados/T-0040/simulacao/BASE_simulada_v29.xlsx (RD-0670; fica no commit 9cbe958).
+- sai a dados/T-0040/simulacao/BASE_simulada_v29.xlsx (RD-0670; fica no commit cf9db10).
 
 Agente: catalogo-dados
 Tarefa: T-0040
