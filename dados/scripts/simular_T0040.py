@@ -96,9 +96,13 @@ AMOSTRA_FIXA = ["BCE3001", "CXD13062"]
 N_AMOSTRA = 50
 
 
+def sem_acento(s) -> str:
+    """Sem acento e em maiúsculas."""
+    return unicodedata.normalize("NFKD", limpo(s)).encode("ascii", "ignore").decode().upper()
+
+
 def chave(s: str) -> str:
-    s = unicodedata.normalize("NFKD", limpo(s)).encode("ascii", "ignore").decode().upper()
-    return re.sub(r"[^A-Z0-9]", "", s)
+    return re.sub(r"[^A-Z0-9]", "", sem_acento(s))
 
 
 def ler_fraga(p: Path) -> list[dict]:
@@ -117,6 +121,12 @@ def faixa(linhas) -> str:
     return t + (f" ({', '.join(extra)})" if extra else "")
 
 
+def ano(r) -> str:
+    """'sem ano' ou 'AAAA–AAAA' (com '?' no ano que falta) da linha da VEICULOS."""
+    return f"{r[4] if r[4] is not None else '?'}–{r[5] if r[5] is not None else '?'}" \
+        if r[4] is not None or r[5] is not None else "sem ano"
+
+
 def tipo_ano(ini, fim) -> str:
     """completa, sem_ano, so_inicial ou so_final (como na lista de trabalho)."""
     if isinstance(ini, int) and isinstance(fim, int):
@@ -125,8 +135,7 @@ def tipo_ano(ini, fim) -> str:
 
 
 def tokens(s) -> set[str]:
-    s = unicodedata.normalize("NFKD", limpo(s)).encode("ascii", "ignore").decode().upper()
-    return set(re.findall(r"[A-Z0-9.]+", s))
+    return set(re.findall(r"[A-Z0-9.]+", sem_acento(s)))
 
 
 def mesmo_motor_ou_versao(atual, fraga: list, vers: list[str]) -> bool:
@@ -156,8 +165,8 @@ def somar(antigas: list, fraga_cod: dict, vers_cod: dict, trocar: set):
     2. cada grupo da Fraga: se há linha atual com ano completo do mesmo código + montadora + modelo e do mesmo motor
        ou versão, e as faixas se encostam, não entra: a atual fica, com a faixa junta (mínimo e máximo; "juntou" se
        a faixa cresceu, "já coberta" se não); faixas que não se encostam: o grupo entra como linha nova. O grupo da
-       Fraga sem motor (VERSAO vazia) dentro da faixa de uma linha atual também sem VERSAO não entra (é a mesma
-       linha: revisor, AMT7586/7/8 PEUGEOT 208 2021–2025);
+       Fraga sem motor (VERSAO vazia) com a mesma faixa de uma linha atual também sem VERSAO não entra (é a mesma
+       linha: RD-0677, AMT7586/7/8 PEUGEOT 208 2021–2025);
     3. os outros grupos entram como linha nova (ORIGEM "Fraga T-0040"), logo depois da última linha do código (os
        códigos sem linha, no fim).
     casos: [código, linha da v28 (ou ""), caso, montadora, modelo, VERSAO, ano antes, ano depois, detalhe].
@@ -167,10 +176,6 @@ def somar(antigas: list, fraga_cod: dict, vers_cod: dict, trocar: set):
     for n, r in enumerate(linhas):
         por_cod[limpo(r[0]).upper()].append(n)
     casos, entrou, novas_cod = [], set(), defaultdict(list)
-
-    def ano(r):
-        return f"{r[4] if r[4] is not None else '?'}–{r[5] if r[5] is not None else '?'}" \
-            if r[4] is not None or r[5] is not None else "sem ano"
 
     for cod in sorted(trocar):
         grupos = fraga_cod.get(cod, [])
@@ -210,7 +215,7 @@ def somar(antigas: list, fraga_cod: dict, vers_cod: dict, trocar: set):
                 if (chave(r[1]), chave(r[2])) != (chave(g[1]), chave(g[2])) or tipo_ano(r[4], r[5]) != "completa":
                     continue
                 if (mesmo_motor_ou_versao(r, g, vers[i]) and encostam(r[4], r[5], g[4], g[5])) or \
-                        (not limpo(g[3]) and not limpo(r[3]) and r[4] <= g[4] and g[5] <= r[5]):
+                        (not limpo(g[3]) and not limpo(r[3]) and (r[4], r[5]) == (g[4], g[5])):
                     cobre = n
                     break
             if cobre is None:
