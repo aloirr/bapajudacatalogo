@@ -1379,7 +1379,7 @@
     ficar(marcas, v.vm); ficar(modelos, v.vmo); ficar(anos, v.va || 0); anos.delete(0);
     const top = (m, n) => [...m.entries()].filter(([x, q]) => q > 0 || x === v.vm || x === v.vmo).sort((a, b) => b[1] - a[1]).slice(0, n);
     return {
-      vm: top(marcas, 60).sort((a, b) => a[0].localeCompare(b[0])),
+      vm: top(marcas, marcas.size).sort((a, b) => a[0].localeCompare(b[0])), // todas as marcas (T-0040: a v29 tem 106; a KTM ficava fora das 60)
       vmo: top(modelos, 80).filter(([x, q]) => TEM_VE || q >= 2 || x === v.vmo).sort((a, b) => a[0].localeCompare(b[0])), // só no JSON antigo (modelo lido da aplicação) sai o que aparece 1 vez; com o "ve", fica (T-0018: com 1 produto, a lista ficava vazia)
       va: [...anos.entries()].filter(([x, q]) => q > 0 || x === v.va).sort((a, b) => b[0] - a[0]),
       vmt: [...motores.entries()].filter(([x, q]) => q > 0 || x === v.vmt).sort((a, b) => a[0].localeCompare(b[0])),
@@ -1941,6 +1941,9 @@
     }
     return siglas(x);
   }
+  // o ano do texto soma na célula Ano; a linha do "ve" com ano fica só com o ano dela (T-0040: o "Fox (10/2016)" do texto
+  // não vira "2008, 2016" na linha Fox EA111 da VEICULOS)
+  const somaAno = (r, fx) => { if (!r.comAnoVe) r[4] = comAnos(r[4], fx); };
   function juntarNaTabela(p, tab) {
     const k = chaveApl, cils = (c) => String(c || "").split(" / ").filter(Boolean);
     const locais = [...new Map(tab.map((r) => [k(r[1]) + "|" + marcaDe(r[0]), [r[1], marcaDe(r[0])]])).values()];
@@ -1998,7 +2001,7 @@
         // veículo por veículo (pode abrir um grupo com "/" que ganha o ano depois)
         if (coberta && faixasDoTexto(l).length) {
           const p0 = veiculosDaLinha(l, modelos)[0];
-          if (grupo.length && p0 && SO_ANO.test(p0.trim())) grupo.forEach((r) => { r[4] = comAnos(r[4], faixasDoTexto(p0)); });
+          if (grupo.length && p0 && SO_ANO.test(p0.trim())) grupo.forEach((r) => somaAno(r, faixasDoTexto(p0)));
           ultimas = coberta; grupo = []; fechado = false; continue;
         }
         // o ";" colado e a quebra de linha também separam
@@ -2017,7 +2020,7 @@
           // o ano do Palio ao Idea)
           const soNome = ultimas && ultimas.some((r) => compacto(v.replace(rxMarcaIni(), "")) === compacto(r[1]));
           if (tipo === "marca" || tipo === "outro") { grupo = []; fechado = false; }
-          else if (fxV.length) { if (!fechado || SO_ANO.test(v.trim())) grupo.forEach((r) => { r[4] = comAnos(r[4], fxV); }); grupo = []; fechado = false; }
+          else if (fxV.length) { if (!fechado || SO_ANO.test(v.trim())) grupo.forEach((r) => somaAno(r, fxV)); grupo = []; fechado = false; }
           else if (ultimas) { if (fechado) grupo = []; grupo.push(...ultimas); fechado = !soNome; }
         }
       }
@@ -2036,8 +2039,8 @@
           if (!ultimas || !ultimas.length) return "";
           const donos = ultimas, fx = faixasDoTexto(v);
           const outro = donos.some((r) => modelos.some(([m]) => compacto(m).length >= 2 && k(m) !== k(r[1]) && rxPalavra(k(m)).test(k(v))));
-          if (fx.length && !outro) donos.forEach((r) => { r[4] = comAnos(r[4], fx); const d = comRestr(v.trim(), semAno, p); if (d) comDetalhe(r, d); });
-          else donos.forEach((r) => comDetalhe(r, v.trim()));
+          if (fx.length && !outro) donos.forEach((r) => { if (r.comAnoVe) return; somaAno(r, fx); const d = comRestr(v.trim(), semAno, p); if (d) comDetalhe(r, d); });
+          else donos.forEach((r) => { if (!r.comAnoVe) comDetalhe(r, v.trim()); });
           return outro ? "outro" : "";
         }
         // na lista com vírgula, o qualificador com " - " ("Uno, Palio, …, 145/146 - 1984 a 2014 - … (Fiasa / Fire) - Roda
