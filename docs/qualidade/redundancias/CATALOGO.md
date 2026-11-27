@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0739** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0745** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -539,9 +539,10 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0733 | — | teste | scripts/testar_site.mjs | `AVISO_APL` e `FAM_MEDIDA` copiados do site/app.js | T-0040 | testes | MANTIDO (checagem independente) |
 | RD-0734 | baixa | código | scripts/coord.mjs, `idade()` | relia o `criado_em` em vez de usar o `instanteDoRecado` | T-0041 | alexandre | CORRIGIDO (24c82fa; 13535e6, #234) |
 | RD-0735 | baixa | código (comentário) | scripts/coord.mjs e JSDoc do `FUSO_DOS_RECADOS` (coord-lib.mjs) | comentários repetindo o JSDoc do `carimboDeManaus` e do `compararRecados` (só comentário) | T-0041 | alexandre | CORRIGIDO (24c82fa; 13535e6, #234) |
-| RD-0736 | baixa | teste (comentário) | scripts/testar_site.mjs:1533 | "itens 1b, 4, 5, 6 e 7" → "itens 1b e 3 a 8" (só comentário; não segura) | T-0040 | testes | ABERTO (próximo PR do testes) |
+| RD-0736 | baixa | teste (comentário) | scripts/testar_site.mjs:1532 | "itens 1b, 4, 5, 6 e 7" → "itens 1b e 3 a 8" (só comentário; não segura) | T-0040 | testes | ABERTO (próximo PR do testes) |
 | RD-0737 | baixa | código | site/app.js, `cabe` e `contida` | regra "cilindrada vazia, igual ou entre as de o" 2 vezes (vira `cilDentro`) | T-0040 | web-site | CORRIGIDO (4ad26c1; e42f936, #235) |
 | RD-0738 | média | layout (tabela) | tabela da aplicação (Mazda 626, Grand Caravan, GLE-Class "40.0", VW EOS etc.) | 19 linhas repetidas que já vinham do main (lá eram 25; o #235 tira 6) | T-0040 | web-site | ABERTO (dispensado do #235 pelo po, R-20261127-174708-po; tarefa nova, com simulação) |
+| RD-0742 | baixa | doc | docs/qualidade/redundancias/T-0040.md:447 e CATALOGO.md:567 (Notas) | como o registro foi feito e a numeração repetidos no T-0040.md, no T-0041.md e nas Notas do catálogo | T-0040 | corretor-redundancias | CORRIGIDO (registro da T-0040, #238) |
 
 ## Notas
 
@@ -564,11 +565,12 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - #231 no `40ea5ae` (só texto do `ve:formato`): LIBERADO.
 
 ### T-0040 (v30) e T-0041, 27/11/2026 (PRs #232 a #235)
-- Registro feito depois dos merges, a partir dos commits e do corpo dos PRs; os pareceres não foram gravados na hora e houve números repetidos entre as rodadas. Vale a numeração desta tabela, passada pelo gerente. Relatórios: `T-0040.md` e `T-0041.md`.
+- Registro feito depois dos merges (como foi feito: T-0040.md, "Registro final", e T-0041.md). Houve números repetidos entre as rodadas; vale a numeração desta tabela, passada pelo gerente.
 - #232 (base v30, head `25a3b37`; squash `9111f73`): RD-0703 ao RD-0720 corrigidos. LIBERADO.
 - #233 (`testar_site`, head `3edb4a5`; squash `e60eb0e`): RD-0728 ao RD-0732 corrigidos; RD-0733 MANTIDO; RD-0736 (baixa, só comentário) ABERTO, entra no próximo PR do testes. LIBERADO.
 - #234 (T-0041, governança, head `24c82fa`; squash `13535e6`): RD-0734 e RD-0735 corrigidos. LIBERADO.
 - #235 (site v30, head `4ad26c1`; squash `e42f936`): RD-0721 ao RD-0725 e RD-0737 corrigidos; RD-0726 e RD-0727 MANTIDOS (respostas 7 e 19 do Alexandre); RD-0738 ABERTO, dispensado do PR pelo po (R-20261127-174708-po), vai ao Alexandre como tarefa nova do web-site, com simulação. LIBERADO.
+- Auditoria do registro (#236 a #239): RD-0739 ao RD-0744. RD-0742 corrigido no #238. [SUPOSIÇÃO] As linhas do RD-0739 ao RD-0741, do RD-0743 e do RD-0744 entram com o texto do parecer da auditoria; os números ficam reservados.
 
 ### T-0033, ano na busca e fim do "Outros veículos e detalhes", 25/11/2026 (antes dos PRs)
 - RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
