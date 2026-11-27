@@ -12,6 +12,8 @@
 //        na home ou em BAP_RECADOS_CLONE), enviar e lido gravam com git (pull --rebase, commit com o nome do agente,
 //        push origin HEAD:main), pela integração de GitHub da sessão; nenhuma chave entra. caixa, pendencias, ler e
 //        fio leem o clone. BAP_RECADOS=local volta às pastas .coord/recados e .coord/lidos.
+//        id (R-AAAAMMDD-HHMMSS-<agente>) e criado_em (…-04:00) no fuso de Manaus (T-0041); os antigos ficam em UTC
+//        e a leitura ordena pelo instante real.
 //   node scripts/coord.mjs caixa <agente>           recados abertos/não lidos do agente
 //   node scripts/coord.mjs lido <agente> <id> [...]  marca avisos/entregas/respostas como lidos
 //   node scripts/coord.mjs ler <id>                 mostra um recado
@@ -63,6 +65,7 @@ import {
   WORKSPACE_PNPM, workspaceMudouSoEmBuilds, mudancasDeGovernanca, CAMINHOS_DE_GOVERNANCA, estadoDosRecados,
   modoDosRecados, regraDoRecadoNovo, ErroRecados, conexaoDeRecados, atualizarIndiceDeRecados, recadosDoIndice,
   lidosDoIndice, enviarRecadoNoGitHub, marcarLidosNoGitHub, ehRemetenteDeSistema, cloneDosRecados, PONTE_DO_ALEXANDRE, DOMINIO_AUTOR,
+  carimboDeManaus, compararRecados,
 } from './coord-lib.mjs';
 
 // Recados no clone anexado à sessão (gravação com git; o proxy da nuvem bloqueia a API): ver cloneDosRecados.
@@ -112,14 +115,6 @@ function opcoes(args) {
 }
 const lista = (v) => (v && v !== true ? String(v).split(',').map((s) => s.trim()).filter(Boolean) : []);
 const falhar = (m) => { console.error(`Erro: ${m}`); process.exit(1); };
-
-function agoraLocal() {
-  const d = new Date();
-  const off = -d.getTimezoneOffset();
-  const p = (n) => String(Math.abs(n)).padStart(2, '0');
-  const loc = new Date(d.getTime() + off * 60000).toISOString().slice(0, 19);
-  return { iso: `${loc}${off >= 0 ? '+' : '-'}${p(Math.trunc(off / 60))}:${p(off % 60)}`, compacto: loc.replace(/[-:]/g, '').replace('T', '-') };
-}
 
 function parse(txt) {
   const m = txt.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
@@ -176,7 +171,7 @@ function todosRecados() {
     atual.pastas.push(destino);
     vistos.set(r.meta.id, atual);
   }
-  return [...vistos.values()].sort((a, b) => String(a.meta.criado_em).localeCompare(String(b.meta.criado_em)));
+  return [...vistos.values()].sort(compararRecados); // instante real (UTC), com ids antigos em UTC e novos em Manaus
 }
 
 function encerrados(recs) {
@@ -599,7 +594,7 @@ switch (cmd) {
         ? `## Contexto\n${partes[0]}\n\n## O que preciso / o que mudou\n${partes[1]}\n\n## Pronto quando\n${partes.slice(2).join(' | ')}\n`
         : `${o.corpo}\n`;
     } else corpo = '## Contexto\n\n## O que preciso / o que mudou\n\n## Pronto quando\n';
-    const t = agoraLocal();
+    const t = carimboDeManaus(); // T-0041: id e criado_em no fuso de Manaus (-04:00), inclusive na ponte
     const gerarId = (existentes) => {
       let novo = `R-${t.compacto}-${de}`;
       for (let n = 2; existentes.has(novo); n++) novo = `R-${t.compacto}-${n}-${de}`;

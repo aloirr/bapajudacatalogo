@@ -57,6 +57,41 @@ export const ehRemetenteDeSistema = (nome) => REMETENTES_DE_SISTEMA.includes(Str
 export const TIPOS = ['pedido', 'pergunta', 'resposta', 'aviso', 'bloqueio', 'entrega', 'revisao'];
 export const TIPOS_QUE_EXIGEM_ENCERRAMENTO = ['pedido', 'pergunta', 'bloqueio', 'revisao'];
 
+/**
+ * Fuso dos recados novos (T-0041, R-20261127-172809-alexandre): America/Manaus, UTC−4 FIXO. Escolha: offset fixo, sem
+ * Intl. Manaus não tem horário de verão, e o offset fixo não depende do fuso da máquina (a nuvem roda em UTC) nem dos
+ * dados de fuso do Node (ICU); o teste confere que ele bate com o Intl 'America/Manaus'. Os recados antigos continuam
+ * como foram gravados (+00:00): a leitura ordena pelo instante real (instanteDoRecado), nunca pelo texto do id.
+ */
+export const FUSO_DOS_RECADOS = { nome: 'America/Manaus', offset: '-04:00', minutos: -240 };
+
+/**
+ * Carimbo de um recado novo no fuso de Manaus: {iso: 'AAAA-MM-DDTHH:MM:SS-04:00', compacto: 'AAAAMMDD-HHMMSS'}
+ * (o compacto entra no id R-AAAAMMDD-HHMMSS-<agente>).
+ * @param {Date} [d]
+ */
+export function carimboDeManaus(d = new Date()) {
+  const loc = new Date(d.getTime() + FUSO_DOS_RECADOS.minutos * 60000).toISOString().slice(0, 19);
+  return { iso: `${loc}${FUSO_DOS_RECADOS.offset}`, compacto: loc.replace(/[-:]/g, '').replace('T', '-') };
+}
+
+/** Instante real do recado em ms (UTC), pelo criado_em com o offset gravado (+00:00 ou -04:00); NaN se não houver. */
+export const instanteDoRecado = (meta) => Date.parse(String(meta?.criado_em ?? ''));
+
+/**
+ * Ordem dos recados (caixa, pendencias, ler e fio): pelo instante real, convertido para UTC; recado sem criado_em
+ * válido vai para o fim; empate, pelo id (ordem estável). Nunca pelo texto do id, que mistura UTC (antigos) e Manaus.
+ */
+export function compararRecados(a, b) {
+  const ta = instanteDoRecado(a?.meta);
+  const tb = instanteDoRecado(b?.meta);
+  const va = Number.isNaN(ta);
+  const vb = Number.isNaN(tb);
+  if (va !== vb) return va ? 1 : -1;
+  if (!va && ta !== tb) return ta - tb;
+  return String(a?.meta?.id ?? '').localeCompare(String(b?.meta?.id ?? ''));
+}
+
 /** Converte glob simples (*, **, ?) em RegExp. */
 export function globParaRegex(padrao) {
   let re = '';
