@@ -18,8 +18,14 @@
   --sombra-cod: 0 1px 3px rgba(21, 21, 21, .25); /* código BAP sobre a foto do cartão */
   --sombra-janela: 0 20px 60px rgba(21, 21, 21, .35); /* janela do produto */
   --contorno-neutro: inset 0 0 0 1px var(--borda-campo); /* linha neutra (opção A, R-20261120-131800): filtro marcado, etiqueta e item relacionado */
-  --t: .7; /* texto da página e da janela do produto 30% menor (T-0014), com piso de 12 px (--min) */
-  --min: 12px;
+  /* escala única de letra (T-0045, proposta do designer-ux; o "30% menor" da T-0014 entra nela, item 15 do
+     R-20261127-192108): rótulo e título pequeno de seção, cartão e tabela, texto, subtítulo, h1 das telas de trabalho */
+  --fs-rot: 12px;
+  --fs-tab: 13px;
+  --fs-txt: 15px;
+  --fs-sub: 17px;
+  --fs-h1: 20px;
+  --sombra-barra: 0 -6px 16px rgba(21, 21, 21, .10); /* barra dos botões do produto presa no fim da tela do celular */
   --zoom-fundo: rgba(21, 21, 21, .92); /* fundo da foto ampliada */
   /* foto do produto (T-0014): computador 200 px (55% menor que a de 440 px da janela);
      celular 60% menor que a de hoje (40% de min(414 px, 90% da largura útil): 129 px em 390 px) */
@@ -28,6 +34,7 @@
   /* lista: a busca usa a largura toda (R-20261120-112950); 4 cartões por linha no computador (fA2, R-20261120-141600),
      5 a partir de 1680 px, 2 no celular; foto do cartão 150 px no computador e 55 px no celular */
   --largura: 1880px;
+  --largura-janela: 1334px; /* janela do produto: a largura útil da busca em 1366 px (T-0045, proposta do designer-ux) */
   --foto-cartao: 150px;
   --foto-cartao-cel: 55px;
   --alto-topo: 84px; /* altura do cabeçalho e uma folga: scroll-padding-top e a foto do produto (76 px no celular) */
@@ -105,7 +112,7 @@ main:focus, main:focus-visible { outline: none; }
 .bt-mini { height: 38px; padding: 0 16px; font-size: 14px; }
 
 /* blocos */
-.bloco { max-width: 1200px; margin: 0 auto; padding: 48px 16px 8px; }
+.bloco { max-width: var(--largura); margin: 0 auto; padding: 48px 16px 8px; }
 .bloco h2 { font-size: 24px; margin: 0 0 6px; }
 .bloco .sub { color: var(--texto-2); margin: 0 0 22px; }
 
@@ -220,11 +227,10 @@ main:focus, main:focus-visible { outline: none; }
 .vazio b { color: var(--texto); display: block; font-size: 17px; margin-bottom: 6px; }
 
 /* produto */
-.pagina-produto { max-width: 1200px; margin: 0 auto; padding: 16px 16px 40px; }
-.produto-conteudo { font-size: max(var(--min), calc(15px * var(--t))); }
-.prod-topo { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; margin-bottom: 14px; }
-.bt-voltar { height: 44px; padding: 0 16px; font-size: 14px; }
-.trilha { font-size: max(var(--min), calc(13px * var(--t))); color: var(--texto-2); display: flex; gap: 6px; flex-wrap: wrap; }
+.pagina-produto { max-width: var(--largura); margin: 0 auto; padding: 16px 16px 40px; }
+.produto-conteudo { font-size: var(--fs-txt); }
+.prod-topo { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; min-height: 44px; margin-bottom: 10px; }
+.trilha { font-size: var(--fs-tab); color: var(--texto-2); display: flex; gap: 6px; flex-wrap: wrap; }
 .trilha a { color: var(--texto-2); text-decoration: none; }
 .trilha a:hover { color: var(--verde-txt); }
 /* foto pequena ao lado das informações (T-0014); clicar amplia (dialog.zoom) */
@@ -236,37 +242,36 @@ main:focus, main:focus-visible { outline: none; }
 .foto-zoom:hover img { transform: scale(1.04); }
 .foto-zoom img { transition: transform .15s; }
 .foto-zoom:focus-visible { outline-offset: -3px; } /* dentro da moldura (a .prod-foto corta o que sai) */
-.prod-cab h1, .prod-cab h2 { margin: 0; font-size: max(var(--min), calc(30px * var(--t))); letter-spacing: .02em; line-height: 1.2; }
-.prod-info .desc { font-size: max(var(--min), calc(17px * var(--t))); font-weight: 500; margin: 2px 0 10px; }
+.prod-cab h1, .prod-cab h2 { margin: 0; font-size: var(--fs-h1); letter-spacing: .02em; line-height: 1.2; }
+.prod-info .desc { font-size: var(--fs-sub); font-weight: 500; margin: 2px 0 10px; }
 .selos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-.selo { background: var(--fundo); border: 1px solid var(--linha); border-radius: 999px; padding: 2px 10px; font-size: max(var(--min), calc(12px * var(--t))); font-weight: 500; color: var(--texto-2); }
-.acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-.acoes .bt { height: 44px; font-size: 14px; }
-/* computador (opB2, R-20261120-141100): os 2 botões na linha do código, logo à direita dele, na página e na janela;
-   o cabeçalho fica mais baixo. Celular e PDF sem mudança (botões embaixo das etiquetas; no PDF não há botões) */
-@media screen and (min-width: 901px) {
-  .prod-cab { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; column-gap: 28px; }
-  .prod-cab > h1, .prod-cab > h2 { grid-column: 1; grid-row: 1; }
-  .prod-cab > .acoes { grid-column: 2; grid-row: 1; margin-bottom: 0; }
-  .prod-cab > .desc { margin-top: 4px; }
-  .prod-cab > .desc, .prod-cab > .selos { grid-column: 1 / -1; }
-}
-/* aplicação e, ao lado, referências e ficha técnica (T-0014) */
-.prod-dados { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 12px; align-items: start; }
-.prod-dados.um { grid-template-columns: minmax(0, 1fr); }
+.selo { background: var(--fundo); border: 1px solid var(--linha); border-radius: 999px; padding: 2px 10px; font-size: var(--fs-rot); font-weight: 500; color: var(--texto-2); }
+/* barra do produto (T-0045, UX-T45-01, 02 e 05; R-20261127-192108, item 14, no lugar da opB2 de R-20261120-141100):
+   uma barra só, no rodapé do bloco do produto, com os botões juntos: Copiar código (principal), Salvar em PDF
+   (secundário) e, por último, o Voltar (neutro; só na página). Na janela, a barra fica no rodapé da janela, fora da
+   rolagem, e o ✕ fica em cima. No celular, presa no fim da tela e com os botões lado a lado. No PDF não há botões */
+.prod-barra { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 0 0; border-top: 1px solid var(--linha); }
+.prod-barra .bt { height: 44px; padding: 0 18px; } /* letra de 15 px do .bt (--fs-txt) */
+.bt-neutro { background: var(--branco); border-color: var(--borda-campo); color: var(--texto); }
+.bt-neutro:hover { background: var(--fundo); border-color: var(--texto-2); color: var(--texto); }
+.janela > .prod-barra { flex: none; padding: 10px 20px; background: var(--branco); }
+/* Aplicação na largura toda e, embaixo, Referências cruzadas e Ficha técnica lado a lado (T-0045, UX-T45-04); com uma
+   só das duas, ela fica na largura toda; abaixo de 664 px de conteúdo, uma embaixo da outra */
+.prod-dados { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.col-tab { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 0 12px; align-items: start; }
 .col-apl:empty, .col-tab:empty { display: none; }
 .secao { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); padding: 12px 14px; margin-bottom: 12px; }
-.secao .secao-tit { font-size: max(var(--min), calc(13px * var(--t))); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 8px; color: var(--texto-2); }
+.secao .secao-tit { font-size: var(--fs-rot); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 8px; color: var(--texto-2); }
 .secao p { margin: 0; white-space: pre-line; }
 .aplic li { padding: 2px 0; border-bottom: 1px solid #F0F2F0; }
-.aplic { margin: 0; padding-left: 18px; }
-table.t { width: 100%; border-collapse: collapse; font-size: max(var(--min), calc(14px * var(--t))); }
+.aplic { margin: 0; padding-left: 18px; font-size: var(--fs-tab); }
+table.t { width: 100%; border-collapse: collapse; font-size: var(--fs-tab); }
 table.t th, table.t td { text-align: left; padding: 4px 6px; border-bottom: 1px solid #F0F2F0; vertical-align: top; overflow-wrap: anywhere; }
 table.t th { color: var(--texto-2); font-weight: 500; width: 42%; }
 table.t td { white-space: pre-line; }
 table.t td.c { font-weight: 600; font-variant-numeric: tabular-nums; }
 /* "Leve também" (era "Ofereça junto", R-20261120-141100b; opção B, R-20261120-140600): logo
-   abaixo dos botões e antes da aplicação, na largura do conteúdo, numa faixa --verde-claro. Título
+   abaixo do código e antes da aplicação, na largura do conteúdo, numa faixa --verde-claro. Título
    à esquerda no computador e em cima no celular; cartões brancos com a miniatura (até 48 px), o código e a descrição */
 @media screen {
   .rel { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; gap: 8px 12px; }
@@ -281,17 +286,17 @@ a.item-rel:hover { background: var(--fundo); }
 .rel-foto img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
 .rel-foto img.sem { width: 30px; height: auto; opacity: .35; padding: 0; }
 .rel-txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.item-rel b { font-size: max(var(--min), calc(14px * var(--t))); font-weight: 700; font-variant-numeric: tabular-nums; }
-.rel-txt span { font-size: max(var(--min), calc(13px * var(--t))); color: var(--texto); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.item-rel b { font-size: var(--fs-tab); font-weight: 700; font-variant-numeric: tabular-nums; }
+.rel-txt span { font-size: var(--fs-tab); color: var(--texto); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .item-rel.fora .rel-txt span { color: var(--texto-2); }
 @media (max-width: 640px) { .rel, .itens-rel { grid-template-columns: minmax(0, 1fr); } } /* celular: título em cima e um cartão por linha, sem rolar de lado */
-.aviso { font-size: max(var(--min), calc(12.5px * var(--t))); color: var(--texto-2); margin-top: 8px; }
-.restr-fora { font-size: max(var(--min), calc(13px * var(--t))); margin-top: 8px; overflow-wrap: anywhere; } /* a restrição do texto que a tabela não mostra (T-0033) */
+.aviso { font-size: var(--fs-rot); color: var(--texto-2); margin-top: 8px; }
+.restr-fora { font-size: var(--fs-tab); margin-top: 8px; overflow-wrap: anywhere; } /* a restrição do texto que a tabela não mostra (T-0033) */
 .aviso.proximos { margin: 0 0 14px; font-size: 14px; } /* os avisos acima da lista da busca ("mais próximos" e tipo sem peça) */
 
 /* janela do produto (T-0014): no computador e no celular */
 html.com-janela { overflow: hidden; }
-dialog.janela { width: min(1120px, calc(100vw - 48px)); max-width: none; max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: var(--raio); box-shadow: var(--sombra-janela); background: var(--fundo); color: var(--texto); }
+dialog.janela { width: min(var(--largura-janela), calc(100vw - 48px)); max-width: none; max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: var(--raio); box-shadow: var(--sombra-janela); background: var(--fundo); color: var(--texto); }
 dialog.janela[open] { display: flex; flex-direction: column; }
 dialog.janela::backdrop { background: var(--veu); }
 .janela-barra { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px 4px 20px; background: var(--branco); border-bottom: 1px solid var(--linha); flex: none; }
@@ -330,7 +335,7 @@ table.tab-veiculos th:nth-child(5), table.tab-veiculos td:nth-child(5) { width: 
 @media (max-width: 480px) {
   .tab-rola { display: none; }
   .lista-veiculos { display: block; }
-  .lista-veiculos li { padding: 8px 0; border-bottom: 1px solid var(--linha); font-size: 14px; line-height: 1.35; }
+  .lista-veiculos li { padding: 8px 0; border-bottom: 1px solid var(--linha); font-size: var(--fs-tab); line-height: 1.35; }
   .lista-veiculos li b { display: block; font-weight: 600; color: var(--escuro); }
   .lista-veiculos li > span { display: block; color: var(--texto-2); }
 }
@@ -355,9 +360,6 @@ body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
 
 .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--escuro); color: var(--branco); padding: 10px 18px; border-radius: 8px; font-size: 14px; z-index: 50; }
 
-@media (max-width: 900px) {
-  .prod-dados { grid-template-columns: minmax(0, 1fr); }
-}
 @media (max-width: 640px) {
   :root { --alto-topo: 76px; }
   .menu { gap: 2px; }
@@ -379,7 +381,6 @@ body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
   .item .foto { height: var(--foto-cartao-cel); }
   .item .sem-foto img { display: none !important; } /* celular: só o "Foto em breve", em cima, longe do código */
   .item .sem-foto { padding: 6px 4px 22px; }
-  .prod-cab h1, .prod-cab h2 { font-size: max(var(--min), calc(24px * var(--t))); }
   /* celular: foto 60% menor, ao lado do código; aplicação, referências e ficha embaixo, na largura toda */
   .prod { grid-template-columns: var(--foto-cel) minmax(0, 1fr); gap: 12px 14px; }
   .prod-info { display: contents; }
@@ -387,8 +388,15 @@ body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
   .prod-cab { grid-column: 2; grid-row: 1; min-width: 0; }
   .prod-info > :not(.prod-cab) { grid-column: 1 / -1; }
   .prod-foto img { padding: 8px; }
-  .acoes { margin-bottom: 0; gap: 8px; }
-  .acoes .bt { padding: 0 12px; }
+  /* a barra do produto presa no fim da tela (alcance do polegar), com os botões lado a lado; o Voltar só com a seta
+     (o nome continua para o leitor de tela) */
+  .pagina-produto > .prod-barra { position: sticky; bottom: 0; z-index: 5; margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--branco); box-shadow: var(--sombra-barra); }
+  .janela > .prod-barra { padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
+  .prod-barra { gap: 8px; flex-wrap: nowrap; }
+  .prod-barra .bt { flex: 1 1 0; min-width: 0; justify-content: center; padding: 0 10px; }
+  .prod-barra .bt-voltar { flex: none; width: 44px; padding: 0; }
+  .bt-voltar .bt-rot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  body:has(.pagina-produto > .prod-barra) .toast { bottom: calc(76px + env(safe-area-inset-bottom)); } /* o aviso do "Copiar" acima da barra */
   dialog.janela { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border-radius: 0; }
   .janela-corpo { padding: 14px 16px 24px; }
 }
@@ -460,7 +468,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   html, body { background: var(--branco); overflow: visible !important; }
-  .topo, .rodape, .toast, .nao-imprime, .acoes, .selos { display: none !important; }
+  .topo, .rodape, .toast, .nao-imprime, .selos { display: none !important; }
   html.com-janela main { display: none; }
   dialog.janela { position: static; display: block; width: auto; max-width: none; height: auto; max-height: none; margin: 0; padding: 0; border: 0; box-shadow: none; background: var(--branco); overflow: visible; }
   dialog.janela:not([open]) { display: none !important; } /* só o produto aberto: a janela fechada não vai para o PDF */
@@ -523,7 +531,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 /* a faixa do início e o topo da Sobre começam atrás do cabeçalho (72 px; 60 px no celular); o véu --escuro no alto garante o contraste do branco */
 .inicio-marca .marca-faixa, .sobre-marca .sb-topo { padding-top: 72px; background-image: var(--veu-topo), var(--fundo-faixa); }
 .marca-faixa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--verde); }
-.marca-faixa-in { max-width: 1200px; margin: 0 auto; padding: 26px 16px 34px; display: grid;
+.marca-faixa-in { max-width: var(--largura); margin: 0 auto; padding: 26px 16px 34px; display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); grid-template-areas: "txt foto" "busca busca"; gap: 18px 32px; align-items: center; }
 .mf-texto { grid-area: txt; }
 .marca-faixa h1 { font-size: clamp(28px, 3.3vw, 42px); line-height: 1.12; font-weight: 700; margin: 0 0 12px; }
@@ -614,11 +622,11 @@ dialog.painel-c::backdrop { background: var(--veu); }
 }
 
 /* ===== Sobre a BAP (T-0018, sobre1): texto do PDF "Empresa", fotos de produtos BAP; o fundo do topo é o da faixa do início ===== */
-.sobre { --sb-larg: 1160px; }
+.sobre { --sb-larg: var(--largura); }
 .sb-topo-in { max-width: var(--sb-larg); margin: 0 auto; padding: 56px 16px 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: 32px; align-items: center; }
 .sb-txt h1 { font-size: clamp(28px, 3.6vw, 44px); line-height: 1.12; margin: 0 0 18px; font-weight: 700; }
 .sb-txt p { margin: 0; color: var(--branco); font-size: 17px; max-width: 520px; }
-.sb-fotos { position: relative; height: 320px; }
+.sb-fotos { position: relative; height: 320px; width: 100%; max-width: 540px; justify-self: end; } /* T-0045: a coluna cresceu com o --largura; as fotos, não (sem cobrir os blocos) */
 .sb-fotos img { position: absolute; filter: drop-shadow(0 18px 24px var(--veu)); }
 .sb-fotos .sf1 { width: 62%; left: 19%; top: 0; z-index: 2; }
 .sb-fotos .sf2 { width: 36%; left: 0; bottom: 0; }
@@ -647,7 +655,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 @media (max-width: 900px) {
   .sobre-marca .sb-topo { background-image: var(--veu-topo), var(--fundo-sobre-cel); }
   .sb-topo-in { grid-template-columns: minmax(0, 1fr); padding: 36px 16px 56px; gap: 20px; }
-  .sb-fotos { height: 220px; max-width: 420px; width: 100%; margin: 0 auto; }
+  .sb-fotos { height: 220px; max-width: 420px; width: 100%; margin: 0 auto; justify-self: center; }
   .sb-hist { grid-template-columns: minmax(0, 1fr); }
   .sb-cta { grid-template-columns: minmax(0, 1fr); text-align: center; justify-items: center; padding: 24px 20px; gap: 14px; }
   .sb-cta img { width: 180px; }
@@ -673,6 +681,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .sistemas-bloco { padding-top: 0; }
 .sistemas-bloco h2 { margin: 0 0 12px; } /* sem o subtítulo (RD-0146, R-20261120-154500-alexandre) */
 .sistemas { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+@media (min-width: 1100px) { .sistemas { grid-template-columns: repeat(6, minmax(0, 1fr)); } } /* T-0045: 6 por linha (2 linhas cheias com os 12 sistemas) em qualquer largura do --largura */
 .sistema { padding: 16px; gap: 2px; } /* o resto do cartão vem do .item */
 .sistema b { font-size: 15px; color: var(--escuro); }
 .sistema span { font-size: 13px; color: var(--texto-2); }
@@ -743,14 +752,14 @@ svg.seta { flex: none; transition: transform .15s; }
 body.pg-conta { min-height: 100vh; display: flex; flex-direction: column; } /* página curta: o rodapé fica no pé da tela */
 body.pg-conta main { flex: 1; }
 .pg-cab { background: var(--g-catalogo); color: var(--branco); }
-.pg-cab-in { max-width: 1200px; margin: 0 auto; padding: 18px 16px 26px; }
+.pg-cab-in { max-width: var(--largura); margin: 0 auto; padding: 18px 16px 26px; }
 .pg-cab .trilha { align-items: center; font-size: 13px; margin: -8px 0 0; color: var(--branco); } /* o resto vem da .trilha */
 .pg-cab .trilha a { color: var(--branco); display: inline-flex; align-items: center; min-height: 44px; }
 .pg-cab h1 { margin: 0; font-size: 26px; line-height: 1.2; }
 .pg-cab p { margin: 6px 0 0; color: var(--branco); font-size: 14px; }
 .pg-cab .so-admin { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; font-weight: 600;
   color: var(--escuro); background: var(--verde); padding: 3px 10px; border-radius: 999px; }
-.pg { max-width: 1200px; margin: 0 auto; padding: 24px 16px 8px; }
+.pg { max-width: var(--largura); margin: 0 auto; padding: 24px 16px 8px; }
 .pg-estreita { max-width: 560px; }
 .painel { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); padding: 24px; }
 @media (max-width: 640px) {
