@@ -505,7 +505,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0699 | baixa | dado | VEICULOS v29: JUH70025 (22811 × 40901), SFR30017 (20860 × 40902) | Gol duvidoso e Gol separado com a mesma chave | T-0040 | catalogo-dados | MANTIDO (decisão 2a, R-20261127-132222-alexandre) |
 | RD-0700 | baixa | código | site/app.js:2080 e :1851; docs/DADOS_DO_SITE.md:35 | regra "número com unidade é medida" em 2 listas no app.js e uma 3ª no doc | T-0040 | web-site | CORRIGIDO (9e372cf) |
 | RD-0701 | baixa | teste | scripts/testar_site.mjs:1073 e :1760 | `const N_VT` escrita 2 vezes | T-0040 | testes | CORRIGIDO (aedfb33) |
-| RD-0702 | baixa | teste | scripts/testar_site.mjs:1072 e :1110 | aviso "só as 60 marcas" da KTM fica morto com o #229 | T-0040 | testes | ABERTO (fila, depois do #229) |
+| RD-0702 | baixa | teste | scripts/testar_site.mjs:1072 e :1110 | aviso "só as 60 marcas" da KTM fica morto com o #229 | T-0040 | testes | CORRIGIDO (4bb9a9c, #231) |
 
 ## Notas
 
@@ -524,6 +524,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - #229 no `9e372cf`: RD-0700 corrigido (opção 1: `UNIDADES` num lugar só; o `nomeFora` só com mm/Ø, justificado). LIBERADO.
 - #230 (`testes/T-0040`, `6bd5b93`): RD-0701 (segura) e RD-0702 (fila, depois do #229). VOLTA PARA AJUSTE.
 - #230 no `aedfb33`: RD-0701 corrigido. LIBERADO (fila: RD-0702).
+- #231 (`testes/T-0040-rd0702`, `4bb9a9c`): RD-0702 corrigido. LIBERADO.
 
 ### T-0033, ano na busca e fim do "Outros veículos e detalhes", 25/11/2026 (antes dos PRs)
 - RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
