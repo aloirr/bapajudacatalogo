@@ -207,7 +207,8 @@ PONTOS = [
      "cadastro: Uno, Palio, Siena e Strada 'Fire Flex', Punto 'Motores Fire Flex e T-Jet 1.4 Turbo', Astra, sem "
      "Versão, e Vectra '2.0 Flexpower / GNV', todos 2004–2020 e de volta ao site (as linhas próprias da Fraga ficam); "
      "e as 8 linhas com o ano igual ao texto (Gol, Fox, Bravo, Doblo, Grand Siena, Idea, Linea, Captur) de volta ao "
-     "site (o Gol, linha 35048, volta sem ano: o ANO_DUVIDA 'herdado' dele fica)",
+     "site (o Gol, linha 35048 da v30, fica sem ano na base (o ANO_DUVIDA 'herdado' dele fica), mas a tela continua "
+     "mostrando 'Gol 1.0 · 2004–2020', que vem do texto da APLICACAO)",
      "b) só o Palio 'Fire Flex' 2004–2020 de volta ao site; o resto fica como está"),
     ("P4", "ROL15106/15250", "F-4000, F-350, D40 e Daily estão sem ano (ficam ocultos; o site mostra 1978–2012 pelo "
                              "cadastro); o A40 e o C40 do texto e do cadastro não têm linha (o site mostra o A-40 pelo "
