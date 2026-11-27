@@ -53,6 +53,12 @@
        (pega o rótulo da FICHA mudado; a âncora 60D-EFB-24 também).
      - ah=60 e cca=401-500 (com e sem q=bateria): a lista igual à do JSON, a etiqueta do filtro.
      - "60ah", "60 ah", "60Ah", "60-Ah" e "bateria 60ah": as baterias de 60 Ah. "amortecedor": nenhum grupo de medida.
+
+   T-0040, v30 (27/11/2026; R-20261127-150417, itens 1 a 8): o campo "vo" (veículos ocultos, [fabricante, modelo]) no
+   JSON, e, só com o "vo" no JSON (a v29 não tem), pela tela: o aviso "Aplicação em revisão; consulte o vendedor." na
+   página e no cartão do produto sem tabela (INT16523 com "vo"; CIL8534 sem texto), sem o "vo" na seção; KI20 e ROD8005
+   sem a seção e sem o aviso; FLU15001 e FLU15002 com o texto, sem o aviso; a linha "veículo · —" da tabela só do "ve"
+   (CXD13061, CXD13170 e TER55209, que na v29 tinham a do texto; o BCE3001 mostra o "Ford Ka · —").
 */
 
 import { createRequire } from "node:module";
@@ -180,7 +186,11 @@ function palavrasSinais(v) {
 // "ss" (T-0018, R-20261121-200058): sistema da peça para o "Leve também", opcional, lista de textos não vazios
 // "ve" com ano (T-0040, Fraga soma): a linha da aba VEICULOS que tem ano vai como [FABRICANTE, MODELO, VERSAO, ANO_INICIO,
 // ANO_FIM], com a versão em texto (pode ser "") e os anos inteiros (0 na ponta que falta, ao menos um ano); sem ano, como antes. Os dois no mesmo produto
-const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "oj", "an", "i", "ve", "ss"]);
+// "ve" na v30 (R-20261127-150417, 1b e 6): a linha sem ano nenhum na base sai do "ve" (vai no "vo"); a linha com ano duvidoso
+// (ANO_DUVIDA) fica, sem os anos ([FABRICANTE, MODELO, VERSAO?], o formato de antes): o formato do "ve" não muda
+// "vo" (T-0040, v30, item 1b): os veículos ocultos, as linhas da VEICULOS sem ano nenhum, só [FABRICANTE, MODELO] (textos
+// não vazios), sem repetir no produto; opcional, nunca na tela (voOk). O JSON da v29 não tem o campo
+const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "oj", "an", "i", "ve", "ss", "vo"]);
 // lista não vazia de textos não vazios (formato do "ve" e do "ss")
 const textosOk = (l) => Array.isArray(l) && l.length > 0 && l.every((t) => typeof t === "string" && t.trim());
 // ano do "ve" (T-0040): inteiro, 0 (falta) ou de 1900 a 2100 [SUPOSIÇÃO: na v29 os anos vão de 1950 a 2026]
@@ -190,6 +200,9 @@ const anoVeOk = (n) => Number.isInteger(n) && (n === 0 || (n >= 1900 && n <= 210
 const veAnoOk = (x) => Array.isArray(x) && x.length === 5 && textosOk(x.slice(0, 2)) && typeof x[2] === "string"
   && anoVeOk(x[3]) && anoVeOk(x[4]) && !!(x[3] || x[4]) && !(x[3] && x[4] && x[3] > x[4]);
 const veOk = (x) => veAnoOk(x) || (textosOk(x) && (x.length === 2 || x.length === 3));
+// o "vo" (v30): lista não vazia de [fab, mod], 2 textos não vazios, sem o mesmo par duas vezes (o gerar_site.py não repete)
+const voOk = (l) => Array.isArray(l) && l.length > 0 && l.every((x) => textosOk(x) && x.length === 2)
+  && new Set(l.map((x) => JSON.stringify(x))).size === l.length;
 const palavraInteira = (texto, palavra) => new RegExp(`(?<![A-Z0-9])${palavra}(?![A-Z0-9])`).test(norm(texto));
 
 // ---------- serviço de placas no teste (T-0005, T-0014) ----------
@@ -378,7 +391,17 @@ function testarJson(arqJson) {
     if (!textosOk(p.ss)) ssRuim.push(`${p.c}: ${cortar(JSON.stringify(p.ss), 60)}`);
   }
   if (ssRuim.length) falha("campos", N_CAMPOS, "ss:formato", `"ss" fora do formato [sistema, ...] (textos não vazios) em ${ssRuim.length} produto(s), ex.: ${ssRuim.slice(0, 3).join("; ")}`);
-  detalhe("campos", N_CAMPOS, novos.size ? "" : `só os ${CAMPOS.size} campos conhecidos` + (comVe ? `; "ve" em ${fmt(comVe)} produtos (${fmt(nVe)} veículos) no formato [fabricante, modelo, versão?]` : `; sem "ve"`) + (nAno ? `, ${fmt(nAno)} deles com ano [fabricante, modelo, versão, início, fim]` : `; sem ano no "ve"`) + (comSs ? `; "ss" em ${fmt(comSs)} produtos` : `; sem "ss"`));
+  // formato do "vo" (T-0040, v30): quando existe, lista de [fabricante, modelo] (voOk)
+  const voRuim = [];
+  let comVo = 0, nVo = 0;
+  for (const p of prods) {
+    if (!("vo" in p)) continue;
+    comVo++;
+    if (!voOk(p.vo)) voRuim.push(`${p.c}: ${cortar(JSON.stringify(p.vo), 60)}`);
+    else nVo += p.vo.length;
+  }
+  if (voRuim.length) falha("campos", N_CAMPOS, "vo:formato", `"vo" fora do formato [[fabricante, modelo], ...] (textos não vazios, sem repetir) em ${voRuim.length} produto(s), ex.: ${voRuim.slice(0, 3).join("; ")}`);
+  detalhe("campos", N_CAMPOS, novos.size ? "" : `só os ${CAMPOS.size} campos conhecidos` + (comVe ? `; "ve" em ${fmt(comVe)} produtos (${fmt(nVe)} veículos) no formato [fabricante, modelo, versão?]` : `; sem "ve"`) + (nAno ? `, ${fmt(nAno)} deles com ano [fabricante, modelo, versão, início, fim]` : `; sem ano no "ve"`) + (comSs ? `; "ss" em ${fmt(comSs)} produtos` : `; sem "ss"`) + (comVo ? `; "vo" em ${fmt(comVo)} produtos (${fmt(nVo)} veículos ocultos, v30)` : `; sem "vo" (v29)`));
   // palavra interna: cabeçalho e cada produto
   const cab = { ...dados }; delete cab.produtos;
   for (const a of palavrasInternas(textoDe(cab)).concat(palavrasSinais(cab))) falha("palavra", N_PAL, `${a.nome}:(cabeçalho)`, `(cabeçalho do JSON) "${a.nome}": …${a.trecho}…`);
@@ -437,6 +460,7 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
   detalhe("casos", "casos do JSON", `código ${COD}; referência ${refTrw ? "TRW " + refTrw.c : "?"}${refNak ? " e " + refNak.m + " " + refNak.c : ""}; veículo VOLKSWAGEN/Gol/2018; diretriz AMT7005 (KYB 441126), CL14 e EAN ${ean || "?"} (TER551011); ` +
     `geral "amortecedor dianteiro Onix" e "15W40"; produto com foto ${comFoto ? comFoto.c : "?"}; amostra ${amostra.join(", ")}`);
 
+  const V30 = prods.some((p) => "vo" in p), V30_TXT = []; // T-0040: o JSON da v30 (com os veículos ocultos; a v29 não tem) e o que a tela mostrou
   const VT = { n: prods.reduce((n, p) => n + (p.ve || []).filter((x) => x.length === 5).length, 0), txt: [] }, N_VT = "veículo com ano (Fraga, T-0040)"; // T-0040: veículos com ano no "ve" e o que os casos acharam
   const TELAS = new Set(), FILTROS = new Set(), JANELAS = new Set(); // o que foi detectado (T-0014), nas 2 larguras
   const CARTOES = [], FILTRO_SI = {}, CAMPOS_TELA = {}, MV = [];
@@ -1506,6 +1530,106 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
       await abrir("produto-inexistente", "#/produto/ZZQ999999");
       if (!/não encontrado/.test(await page.evaluate(() => document.body.innerText))) falha("produto", N_PROD, "inexistente", `${L} #/produto/ZZQ999999 sem a mensagem "não encontrado"`);
       conferirConsole("produto-inexistente");
+
+      // ---- aplicação da v30 (T-0040, R-20261127-150417, itens 1b, 4, 5, 6 e 7): só com o "vo" no JSON (a v29 não tem) ----
+      // - o produto sem tabela, com "vo" (INT16523: o texto só cita os veículos ocultos) ou sem texto (CIL8534), mostra o
+      //   aviso na seção Aplicação da página e no cartão; o "vo" não aparece na seção (o "vo" nunca vai para a tela);
+      // - a palheta e a roda (KI20 e ROD8005, FAMILIA PALHETAS e RODAS) ficam sem a seção e sem o aviso (item 4);
+      // - os fluidos FLU15001 e FLU15002 (sem VEICULOS, com o texto "conforme manual") ficam com o texto, sem o aviso (item 5);
+      // - a linha da tabela com o Ano "—" é do "ve" (a do ano duvidoso: "Ford Ka · —" no BCE3001, item 1b); a sem ano que
+      //   vem só do texto não aparece (item 6). Casos: os que na v29 tinham essa linha (CXD13061 "Volkswagen Bora", CXD13170
+      //   "Renault EXPRESS", TER55209 "Ford F-600") e o BCE3001, que tem de mostrar o "Ford Ka · —" (a leitura funciona)
+      const N_V30 = "aplicação v30 (aviso e vo)";
+      if (!V30) detalhe("v30", N_V30, `sem "vo" no JSON (v29): as checagens da v30 não rodam`);
+      else {
+        const AVISO_APL = "Aplicação em revisão; consulte o vendedor.", RX_AVISO = /Aplica[cç][aã]o em revis[aã]o/i;
+        const FAM_MEDIDA = new Set(["PALHETAS", "BATERIAS E TERMINAIS", "RODAS"]);
+        const pv = (c) => porCod.get(normCod(c));
+        const caso = (c, ok, porque) => { const p = pv(c); if (p && ok(p)) return p;
+          falha("v30", N_V30, "caso:" + c, `o caso ${c} ${p ? porque : "não está mais no JSON"}: escolher outro no scripts/testar_site.mjs`); return null; };
+        const comAviso = [caso("INT16523", (p) => p.vo && !p.ve && !FAM_MEDIDA.has(norm(p.fa)), `não é mais "vo" sem "ve" fora de palheta, bateria e roda`),
+          caso("CIL8534", (p) => !p.vo && !p.ve && !p.a && !FAM_MEDIDA.has(norm(p.fa)), `não é mais produto sem "ve" e sem texto fora de palheta, bateria e roda`)];
+        const semSecao = ["KI20", "ROD8005"].map((c) => caso(c, (p) => !p.ve && FAM_MEDIDA.has(norm(p.fa)), `não é mais palheta, bateria ou roda sem "ve"`));
+        const soTexto = ["FLU15001", "FLU15002"].map((c) => caso(c, (p) => p.a && !p.ve && !p.vo, `não é mais produto só com o texto (sem "ve" e sem "vo")`));
+        const comTraco = ["CXD13061", "CXD13170", "TER55209", "BCE3001"].map((c) => caso(c, (p) => p.ve && p.a, `não tem mais "ve" e texto`));
+        const kaBce = comTraco[3] && comTraco[3].ve.some((x) => x.length <= 3 && norm(x[0]) === "FORD" && norm(x[1]) === "KA");
+        if (comTraco[3] && !kaBce) falha("v30", N_V30, "caso:BCE3001:ka", `o BCE3001 não tem mais o Ford Ka sem ano no "ve": escolher outro no scripts/testar_site.mjs`);
+        const rxPalavra = (t) => new RegExp(`(?<![A-Z0-9])${norm(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![A-Z0-9])`);
+        const lerPagina = () => page.evaluate(() => {
+          const h = [...document.querySelectorAll("#app .prod-info .secao h2")].find((e) => e.textContent.trim() === "Aplicação");
+          const sec = h && h.closest(".secao"), app = document.getElementById("app");
+          const linhas = [...app.querySelectorAll("table.tab-veiculos tbody tr")].map((tr) => [...tr.cells].map((td) => td.textContent.replace(/\s+/g, " ").trim()));
+          return { secao: !!sec, txtSecao: sec ? sec.innerText : "", tabela: !!(sec && sec.querySelector("table.tab-veiculos")), txtApp: app ? app.innerText : "", linhas };
+        });
+        const cartao = async (c) => {
+          await abrir("v30-cartao", "#/busca?q=" + encodeURIComponent(c));
+          return page.evaluate((cod) => { const it = [...document.querySelectorAll(".lista .item")].find((e) => window.__bapT.codDe(e) === cod);
+            return it ? ((it.querySelector(".apl") || {}).innerText || "") : null; }, c);
+        };
+        // fv: a falha da v30 (marca o caso como falho no detalhe)
+        const V = [];
+        let falhou = false;
+        const fv = (chave, txt) => { falhou = true; falha("v30", N_V30, chave, txt); };
+        for (const p of comAviso.filter(Boolean)) {
+          falhou = false;
+          await abrir("v30-aviso", "#/produto/" + encodeURIComponent(p.c));
+          const t = await lerPagina();
+          if (!t.secao) fv(p.c + ":secao", `${L} ${p.c}: sem a seção "Aplicação" (devia ter o aviso "${AVISO_APL}")`);
+          else if (!t.txtSecao.includes(AVISO_APL)) fv(p.c + ":aviso", `${L} ${p.c}: a seção "Aplicação" não tem o aviso "${AVISO_APL}": ${cortar(t.txtSecao, 90)}`);
+          if (t.tabela || t.linhas.length) fv(p.c + ":tabela", `${L} ${p.c}: o produto sem "ve" mostra a tabela de veículos (${t.linhas.length} linha(s))`);
+          const vistos = (p.vo || []).filter(([, m]) => rxPalavra(m).test(norm(t.txtSecao))).map((x) => x.join(" "));
+          if (vistos.length) fv(p.c + ":vo", `${L} ${p.c}: a seção "Aplicação" mostra veículo oculto ("vo"): ${vistos.join(", ")}`);
+          if (p.c === "INT16523") await print("produto-aviso");
+          conferirConsole("v30-aviso");
+          const ap = await cartao(p.c);
+          if (ap === null) fv(p.c + ":cartao", `${L} "${p.c}": a busca não mostra o cartão do ${p.c}`);
+          else if (!ap.includes(AVISO_APL)) fv(p.c + ":cartao-aviso", `${L} cartão do ${p.c}: sem o aviso "${AVISO_APL}" (mostra "${cortar(ap, 80)}")`);
+          conferirConsole("v30-cartao");
+          V.push(falhou ? `${p.c} FALHOU` : `${p.c} com o aviso`);
+        }
+        for (const p of semSecao.filter(Boolean)) {
+          falhou = false;
+          await abrir("v30-sem-secao", "#/produto/" + encodeURIComponent(p.c));
+          const t = await lerPagina();
+          if (t.secao) fv(p.c + ":secao", `${L} ${p.c} (${p.fa}): mostra a seção "Aplicação" (item 4: sem a seção e sem o aviso): ${cortar(t.txtSecao, 80)}`);
+          if (RX_AVISO.test(t.txtApp)) fv(p.c + ":aviso", `${L} ${p.c} (${p.fa}): mostra o aviso "${AVISO_APL}" (item 4: sem o aviso)`);
+          conferirConsole("v30-sem-secao");
+          const ap = await cartao(p.c);
+          if (ap === null) fv(p.c + ":cartao", `${L} "${p.c}": a busca não mostra o cartão do ${p.c}`);
+          else if (RX_AVISO.test(ap)) fv(p.c + ":cartao-aviso", `${L} cartão do ${p.c} (${p.fa}): mostra o aviso (item 4: sem o aviso)`);
+          conferirConsole("v30-cartao");
+          V.push(falhou ? `${p.c} FALHOU` : `${p.c} sem a seção`);
+        }
+        for (const p of soTexto.filter(Boolean)) {
+          falhou = false;
+          await abrir("v30-so-texto", "#/produto/" + encodeURIComponent(p.c));
+          const t = await lerPagina(), inicio = norm(p.a).slice(0, 30);
+          if (!t.secao) fv(p.c + ":secao", `${L} ${p.c}: sem a seção "Aplicação" (devia ter o texto)`);
+          else if (!norm(t.txtSecao).includes(inicio)) fv(p.c + ":texto", `${L} ${p.c}: a seção "Aplicação" não tem o texto ("${cortar(p.a, 40)}"): ${cortar(t.txtSecao, 80)}`);
+          if (RX_AVISO.test(t.txtApp)) fv(p.c + ":aviso", `${L} ${p.c}: mostra o aviso "${AVISO_APL}" (item 5: fica com o texto, sem o aviso)`);
+          conferirConsole("v30-so-texto");
+          const ap = await cartao(p.c);
+          if (ap === null) fv(p.c + ":cartao", `${L} "${p.c}": a busca não mostra o cartão do ${p.c}`);
+          else if (RX_AVISO.test(ap)) fv(p.c + ":cartao-aviso", `${L} cartão do ${p.c}: mostra o aviso (item 5: fica com o texto)`);
+          conferirConsole("v30-cartao");
+          V.push(falhou ? `${p.c} FALHOU` : `${p.c} com o texto`);
+        }
+        for (const p of comTraco.filter(Boolean)) {
+          falhou = false;
+          await abrir("v30-traco", "#/produto/" + encodeURIComponent(p.c));
+          const t = await lerPagina(), tracos = t.linhas.filter((r) => r[4] === "—");
+          if (!t.linhas.length) fv(p.c + ":tabela", `${L} ${p.c}: sem a tabela de veículos (o "ve" tem ${p.ve.length} veículo(s))`);
+          // a linha "—" tem de ser de um veículo sem ano do "ve" (mesma marca e modelo); a do texto não aparece (item 6)
+          const doTexto = tracos.filter((r) => !p.ve.some((x) => x.length <= 3 && norm(x[0]) === norm(r[0]) && norm(x[1]) === norm(r[1])));
+          if (doTexto.length) fv(p.c + ":traco", `${L} ${p.c}: ${doTexto.length} linha(s) "veículo · —" que não são do "ve" (sem ano, só do texto; item 6): ${cortar(doTexto.map((r) => r.slice(0, 4).filter((c) => c && c !== "—").join(" ")).join("; "), 100)}`);
+          if (p.c === "BCE3001" && kaBce && !tracos.some((r) => norm(r[0]) === "FORD" && norm(r[1]) === "KA"))
+            fv("BCE3001:ka", `${L} BCE3001: sem a linha "Ford Ka · —" (a do "ve" com ano duvidoso fica, item 1b); linhas "—": ${cortar(tracos.map((r) => r[0] + " " + r[1]).join("; "), 80) || "nenhuma"}`);
+          conferirConsole("v30-traco");
+          V.push(falhou ? `${p.c} FALHOU` : `${p.c}: ${t.linhas.length} linha(s), ${tracos.length} com "—"`);
+        }
+        V30_TXT.push(`${L}: ${V.join("; ")}`);
+        detalhe("v30", N_V30, `aviso "${AVISO_APL}" na página e no cartão; palheta e roda sem a seção e sem o aviso; fluidos com o texto; linha "—" só do "ve"; ${V30_TXT.join(" | ")}`);
+      }
 
       // ---- acessibilidade básica ----
       const N_A11Y = "acessibilidade básica";
