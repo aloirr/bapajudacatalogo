@@ -64,6 +64,8 @@ DUVIDOSAS = {"UNIVERSAL": "a Fraga diz montadora UNIVERSAL (não é veículo do 
              "NAO VEICULAR": "a Fraga diz NAO VEICULAR (não é veículo do filtro)",
              "SEM APLICAÇÃO NO CATÁLOGO": "a Fraga diz SEM APLICAÇÃO NO CATÁLOGO (não é veículo do filtro)"}
 APELIDO_FAB = {"ASIAMOTORS": "ASIA", "EFFAMOTORS": "EFFA"}
+# montadora da Fraga que na base é modelo (RD-0695): -> (montadora, modelo) da base; o modelo da Fraga vai para a VERSAO
+DE_PARA_FAB = {"VOLARE": ("MARCOPOLO", "Volare")}
 SUFIXO_1 = re.compile(r"(?<=[A-Za-zÀ-ÿ])1$")      # "MONOCILÍNDRICO1" -> "MONOCILÍNDRICO" (só no motor)
 
 
@@ -303,8 +305,24 @@ def main():
         k = chave(f)
         return fab_base.get(APELIDO_FAB.get(k, k), f)
 
-    def mod_de(f, m):
-        return mod_base.get((chave(fab_de(f)), chave(m)), m)
+    def de_para(f, m) -> tuple[str, str, str, str]:
+        """(montadora, modelo, resto para o começo da VERSAO, como casou) da Fraga na grafia da base (RD-0695):
+        'montadora' (DE_PARA_FAB), 'igual', 'prefixo' (as primeiras palavras inteiras do modelo da Fraga são um modelo
+        da base da mesma montadora: "SPRINTER FURGÃO" -> Sprinter + "FURGÃO"; "GOL" não casa com "GOLF") ou
+        'sem_casamento' (fica como veio)."""
+        if chave(f) in DE_PARA_FAB:
+            fab, mod = DE_PARA_FAB[chave(f)]
+            return fab_base.get(chave(fab), fab), mod_base.get((chave(fab), chave(mod)), mod), limpo(m), "montadora"
+        fab = fab_de(f)
+        kf = chave(fab)
+        if (kf, chave(m)) in mod_base:
+            return fab, mod_base[(kf, chave(m))], "", "igual"
+        w = limpo(m).split()
+        for i in range(len(w) - 1, 0, -1):
+            k = chave(" ".join(w[:i]))
+            if k and (kf, k) in mod_base:
+                return fab, mod_base[(kf, k)], " ".join(w[i:]), "prefixo"
+        return fab, limpo(m), "", "sem_casamento"
 
     bap = [r for r in fraga if r["achado_por"] == "bap"]
     ref = [r for r in fraga if r["achado_por"].startswith("ref:")]
@@ -316,12 +334,16 @@ def main():
 
     # 2a: código + montadora + modelo + motor, ano mínimo e máximo
     grupos: dict[tuple, dict] = {}
+    dp: dict[tuple, list] = {}                      # de-para da montadora e do modelo (aba DE_PARA)
     for r in bap:
         cod = r["codigo_bap"].upper()
         motor = motor_limpo(r["motor"])
         k = (cod, chave(r["montadora"]), chave(r["modelo"]), chave(motor))
-        g = grupos.setdefault(k, {"cod": cod, "fab": fab_de(r["montadora"]), "mod": mod_de(r["montadora"], r["modelo"]),
-                                  "motor": motor, "ai": [], "af": [], "obs": [], "vers": []})
+        fab, mod, resto, como = de_para(r["montadora"], r["modelo"])
+        dp[(r["montadora"], r["modelo"])] = [r["montadora"], r["modelo"], fab, mod, resto, como,
+                                             dp.get((r["montadora"], r["modelo"]), [0] * 7)[6] + 1]
+        g = grupos.setdefault(k, {"cod": cod, "fab": fab, "mod": mod, "resto": resto, "como": como,
+                                  "motor": motor, "ai": [], "af": [], "obs": [], "vers": [resto] if resto else []})
         g["ai"].append(int(r["ano_inicial"]))
         g["af"].append(int(r["ano_final"]))
         o = html.unescape(r["observacao"]).strip()
@@ -332,12 +354,15 @@ def main():
     novas_por_cod: dict[str, list[list]] = defaultdict(list)
     vers_por_cod: dict[str, list[list[str]]] = defaultdict(list)     # as versões da Fraga de cada grupo
     bruta: dict[tuple[str, int], str] = {}          # a VERSAO sem a limpeza, para a aba LIMPEZA
+    como_de: dict[tuple[str, int], str] = {}        # como a montadora e o modelo do grupo casaram (DE_PARA)
     for g in sorted(grupos.values(), key=lambda g: (g["cod"], chave(g["fab"]), chave(g["mod"]), min(g["ai"]),
                                                     chave(g["motor"]))):
         moto = prod[g["cod"]].get("LINHA", "").upper() == "MOTO"
         cil = re.search(r"(\d+\.\d+)\s*L\b", g["motor"])
-        ver = " · ".join([g["motor"]] + obs_limpas(g["obs"]))
-        bruta[(g["cod"], len(novas_por_cod[g["cod"]]))] = " · ".join([g["motor"]] + g["obs"])
+        pre = [g["resto"]] if g["resto"] else []
+        ver = " · ".join(x for x in pre + [g["motor"]] + obs_limpas(g["obs"]) if x)
+        bruta[(g["cod"], len(novas_por_cod[g["cod"]]))] = " · ".join(x for x in pre + [g["motor"]] + g["obs"] if x)
+        como_de[(g["cod"], len(novas_por_cod[g["cod"]]))] = g["como"]
         duv = DUVIDOSAS.get(g["fab"].upper())
         vers_por_cod[g["cod"]].append(g["vers"])
         novas_por_cod[g["cod"]].append([
@@ -474,6 +499,9 @@ def main():
                      "ANO_INICIAL", "ANO_FINAL"], suf)
     lim = [[cod, r[1], r[2], bruta[(cod, i)], r[3]] for cod in trocar for i, r in enumerate(novas_por_cod[cod])
            if bruta[(cod, i)] != r[3] and (cod, i) in entrou]
+    aba("DE_PARA", ["MONTADORA_FRAGA", "MODELO_FRAGA", "MONTADORA_NA_VEICULOS", "MODELO_NA_VEICULOS",
+                    "VAI_PARA_O_COMECO_DA_VERSAO", "COMO_CASOU", "LINHAS_DA_FRAGA"],
+        sorted(dp.values(), key=lambda x: (x[5] != "sem_casamento", -x[6])))
     aba("LIMPEZA", ["CODIGO_BAP", "FABRICANTE", "MODELO", "VERSAO_SEM_LIMPEZA", "VERSAO_NA_VEICULOS"], lim)
     pontos = []
     for cod, txt in PONTOS.items():
@@ -506,6 +534,13 @@ def main():
     print(f"  códigos trocados (bap): {len(trocar)}; linhas da Fraga: {len(bap)} -> {len(grupos)} agrupadas")
     print(f"  por referência: {len(refs)}; não achados: {len(nao)}")
     print(f"  sufixo '1' tirado do motor: {len(suf)} linhas da Fraga, {len({x[0] for x in suf})} códigos")
+    dpc = Counter()
+    for x in dp.values():
+        dpc[x[5]] += x[6]
+    print(f"  de-para (linhas da Fraga): {dict(dpc)}; pares sem casamento: "
+          f"{sum(1 for x in dp.values() if x[5] == 'sem_casamento')}")
+    mud = Counter(como_de[(c, i)] for c, i in entrou)
+    print(f"  linhas da Fraga que entraram, por de-para: {dict(mud)}")
     cc = Counter(c[2] for c in casos)
     print(f"  casos: {dict(cc)}")
     print(f"  linhas da v28 mantidas sem mudança: {len(antigas) - cc['ANO_COMPLETADO'] - len({(c[0], c[1]) for c in casos if c[2] == 'FAIXA_JUNTADA'})}")
