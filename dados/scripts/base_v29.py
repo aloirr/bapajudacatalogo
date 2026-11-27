@@ -5,9 +5,11 @@ achados por referência não trocam nada; os 483 não achados ficam como estão)
 Fraga SE SOMA à aplicação atual (somar() do simular_T0040.py):
 - a linha atual com ano completo fica; do mesmo motor ou versão e com faixa que se encosta, junta a faixa;
 - a linha atual sem ano ou só com um ano recebe os anos da Fraga do mesmo código + montadora + modelo (ORIGEM continua
-  "automático"; a fonte do ano vai para o LOG); sem o modelo na Fraga, fica e continua na lista de trabalho;
+  "automático"; a fonte do ano vai para o LOG), só se não tem ano nenhum ou se o ano que tem cai dentro da faixa da
+  Fraga; em conflito, fica como está e a Fraga entra como linha somada (aba CONFLITOS); sem o modelo na Fraga, fica e
+  continua na lista de trabalho;
 - os outros grupos da Fraga entram como linhas novas (ORIGEM "Fraga T-0040").
-A simulação é a de dados/T-0040/simulacao/ (commit c94772e, dados/scripts/simular_T0040.py, com o sufixo "1" do motor
+A simulação é a de dados/T-0040/simulacao/ (commit 9cbe958, dados/scripts/simular_T0040.py, com o sufixo "1" do motor
 e a limpeza MC-0048 a MC-0050): a VEICULOS da v29 é, linha a linha, a da BASE_simulada_v29.xlsx (gerada pelo
 simular_T0040.py; não fica no repositório depois da v29).
 
@@ -43,12 +45,12 @@ import openpyxl
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from base_comum import (BASE, CAB_VEICULOS, RAIZ, acrescentar_leia_me, acrescentar_log, assinatura,  # noqa: E402
                         comparar, conferir_cabecalho, gravar, limpo, linhas_novas, parar, sha, versao)
-from simular_T0040 import ORIGEM, SIM, SUFIXO_1, conferir_soma, faixa  # noqa: E402
+from simular_T0040 import ORIGEM, SIM, SUFIXO_1, ano, conferir_soma, faixa, tipo_ano  # noqa: E402
 
 TAREFA, DATA = "T-0040", "27/11/2026"
-SIM_COMMIT = "c94772e"                                  # a simulação com a 1a nova
+SIM_COMMIT = "9cbe958"                                  # a simulação com a 1a nova
 AUTORIZACAO = "pendente do aprovado do Alexandre"                                 # sem o --autorizacao
-SHA_SIM = "6268c1605fead8989db5d64aad29c07afa5298c1600271873395f191161ea17e"   # BASE_simulada_v29.xlsx (c94772e)
+SHA_SIM = "dce2be523b45f794125839cde01a529e0e87132b10fd8530c8130b8e8dd155e2"   # BASE_simulada_v29.xlsx (9cbe958)
 AVISO = RAIZ / "dados" / "T-0040" / "AVISO_BAP_CENTRAL.md"
 SITUACAO_AVISO = re.compile(r"(## Situação\n\n).*\Z", re.S)
 REGRA = "decisão 1a nova, R-20261127-053555-po: a Fraga se soma"
@@ -57,11 +59,19 @@ def leia_me(autorizacao: str, n: dict) -> list[tuple]:
     return [
         ("BASE BAP UNIFICADA v29 (27/11/2026)", None),
         ("VEICULOS (Fraga somada)", f"A aplicação da Fraga dos códigos achados pelo código BAP SE SOMA à atual "
-                                    f"({REGRA}): {n['somadas']} linhas novas (ORIGEM 'Fraga T-0040', valor novo), uma "
+                                    "(decisão 1a nova, R-20261127-053555-po): " f"{n['somadas']} linhas novas (ORIGEM 'Fraga T-0040', valor novo), uma "
                                     f"por montadora + modelo + motor, com o ano mínimo e o máximo; {n['completadas']} "
                                     f"linhas atuais com o ano completado pela Fraga e {n['juntadas']} com a faixa "
                                     f"junta (ORIGEM continua 'automático'). Nenhuma linha atual sai. Os 27 achados por "
                                     f"referência e os 483 não achados ficam como estavam (T-0040)."),
+        ("Regras da soma", "A linha atual que tem VERSAO ou CILINDRADA absorve a Fraga do mesmo motor quando a "
+                           "faixa cabe ou se encosta (junta a faixa); a linha atual sem VERSAO e sem CILINDRADA não "
+                           "absorve: a Fraga entra ao lado, com o detalhe do motor (por isso o Escort do BCE3001 "
+                           "absorveu e o Fox do CXD13062 não). 'Se encostam' = até 1 ano de distância (2010 e 2011). "
+                           "A linha da Fraga sem motor com a mesma faixa de uma atual sem VERSAO não entra. A linha "
+                           "incompleta só recebe o ano da Fraga se não tem ano ou se o ano que tem cai na faixa da "
+                           "Fraga; em conflito fica como está e a Fraga entra somada. O po e o Alexandre decidem se "
+                           "mudam."),
         ("APLICACAO", "O texto da APLICACAO na PRODUTOS não muda (campo digitado; reescrever depende de decisão do "
                       "Alexandre)."),
         ("Limpeza da Fraga", "Nas linhas da Fraga: motor sem o '1' grudado no fim ('MONOCILÍNDRICO1'); nos "
@@ -95,16 +105,12 @@ def mudancas(antigas: list[tuple], novas: list[tuple]) -> dict[str, dict[str, li
     m: dict[str, dict[str, list]] = {}
     for a, d in zip(antigas, velhas):
         if a[4:6] != d[4:6]:
-            t = "FAIXA_JUNTADA" if a[4] is not None and a[5] is not None else "ANO_COMPLETADO"
+            t = "FAIXA_JUNTADA" if tipo_ano(a[4], a[5]) == "completa" else "ANO_COMPLETADO"
             m.setdefault(limpo(a[0]).upper(), {}).setdefault(t, []).append((a, d))
     for d in novas:
         if d[io] == ORIGEM:
             m.setdefault(limpo(d[0]).upper(), {}).setdefault("VEICULO_SOMADO", []).append((None, d))
     return m
-
-
-def ano(r) -> str:
-    return "sem ano" if r[4] is None and r[5] is None else f"{r[4] or '?'}–{r[5] or '?'}"
 
 
 def aviso(autorizacao: str) -> str:

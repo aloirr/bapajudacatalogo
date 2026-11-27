@@ -14,26 +14,23 @@ preço, como o TER556556). O sha256 da base é conferido antes e depois.
 Uso: python3 dados/scripts/lista_T0040.py
 """
 import csv
-import hashlib
 import json
 import re
 import sys
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 
 from openpyxl import load_workbook
 
-RAIZ = Path(__file__).resolve().parents[2]
-BASE = RAIZ / "dados" / "BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from base_comum import BASE, RAIZ, sha  # noqa: E402
+from simular_T0040 import tipo_ano  # noqa: E402
+
 JSON = RAIZ / "site" / "data" / "produtos.json"
 SAIDA = RAIZ / "dados" / "T-0040" / "lista_trabalho.csv"
 COLS = ["id_linha", "codigo_bap", "descricao", "montadora", "modelo", "versao", "motor", "ano_atual", "tipo",
         "referencias_cruzadas"]
 INTERNO = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|R\$|BAP BOX|CUSTO|FORNECEDOR|RANKING|ANTERIOR", re.I)
-
-
-def sha(p):
-    return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
 def txt(v):
@@ -55,14 +52,10 @@ def main():
         if not cod:
             continue
         ini, fim = r[pos["ANO_INICIO"]], r[pos["ANO_FIM"]]
-        if ini is None and fim is None:
-            tipo, ano = "sem_ano", ""
-        elif fim is None:
-            tipo, ano = "so_inicial", f"{int(ini)}+"
-        elif ini is None:
-            tipo, ano = "so_final", f"até {int(fim)}"
-        else:
+        tipo = tipo_ano(ini, fim)
+        if tipo == "completa":
             continue
+        ano = {"sem_ano": "", "so_inicial": f"{ini}+", "so_final": f"até {fim}"}[tipo]
         if txt(prods[cod][9]) == "UNIVERSAL":
             universal += 1
             continue

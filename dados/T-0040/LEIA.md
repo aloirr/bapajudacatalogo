@@ -1,9 +1,20 @@
 # T-0040 · Lista de trabalho dos anos: como usar
 
 Arquivo: `lista_trabalho.csv` (UTF-8, separador `;`), uma linha por aplicação (produto × veículo) da aba VEICULOS
-da base **v29** (refeita em 27/11/2026: 3.978 linhas, antes 7.293 na v28). Saíram as 3.315 linhas que receberam o ano
+da base **v29** (refeita em 27/11/2026: 4.465 linhas, antes 7.293 na v28). Saíram as 2.828 linhas que receberam o ano
 da Fraga (regra 1a nova, R-20261127-053555-po); ficam as que a Fraga não cobre (o modelo não está na Fraga, os 27
-achados por referência e os 483 não achados). Refazer: `python3 dados/scripts/lista_T0040.py` (só lê a base).
+achados por referência e os 483 não achados) e as 487 em conflito (o ano atual fica fora da faixa da Fraga; aba
+CONFLITOS da `simulacao/antes_depois.xlsx`).
+
+## Regras da soma da Fraga (v29), para quem pesquisa
+
+- A linha atual que tem VERSAO ou CILINDRADA absorve a Fraga do mesmo motor quando a faixa cabe ou se encosta (junta
+  a faixa). A linha atual sem VERSAO e sem CILINDRADA não absorve: a Fraga entra ao lado, com o detalhe do motor. Por
+  isso o Escort do BCE3001 absorveu e o Fox do CXD13062 não.
+- "Se encostam" = até 1 ano de distância (ex.: 2005–2010 e 2011–2014 viram 2005–2014).
+- A linha sem ano completo só recebe o ano da Fraga se não tem ano nenhum ou se o ano que tem cai na faixa da Fraga.
+  Em conflito, fica como está (e continua nesta lista) e a Fraga entra como linha somada.
+- O po e o Alexandre decidem se essas regras mudam. Refazer: `python3 dados/scripts/lista_T0040.py` (só lê a base).
 
 - `id_linha` = número da linha de dados na aba VEICULOS (linha do Excel = id_linha + 1). Pula números: as linhas
   que já têm início e fim não entram. A resposta da pesquisa volta para a base por esse número.
