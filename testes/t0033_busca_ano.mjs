@@ -45,7 +45,7 @@
      e) 3b (aprovado pelo Alexandre): a regra do ano vale na busca digitada. "polo 2026" e "bomba combustivel polo 2026"
         sem a BCE3001, "strada 2020" com ela; cada resultado de "polo 2026" tem o Polo com 2026 (tabela ou texto); "polo" e
         "filtro 2010" iguais às de antes; AMT7005 em Gol 2007 ("Gol / Saveiro 01/1980–12/2009": a "/" divide o ano), pela
-        faixa (a busca digitada "AMORTECEDOR GOL 2007 KYB 441126" é do testar_site.mjs; RD-0653); código e referência com 4 dígitos ("LAM 2010",
+        faixa (a busca digitada "AMORTECEDOR GOL 1990 KYB 441126" é do testar_site.mjs; RD-0653; era 2007 até a T-0040); código e referência com 4 dígitos ("LAM 2010",
         "AXIOS 2025") iguais às de antes.
      f) restrições da aplicação (achado do revisor sobre o web-site a73d931): todo produto cujo texto de aplicação tem
         "não aplica", "não serve", "exc."/"exceto", "somente", "apenas", "s/ X" ou "sem X" mostra a restrição na tela do produto,
