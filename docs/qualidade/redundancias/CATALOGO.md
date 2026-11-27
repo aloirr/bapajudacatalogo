@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0692** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0695** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -481,7 +481,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0675 | baixa | doc | dados/T-0040/AVISO_BAP_CENTRAL.md:3 | "formato das abas não muda" repete a seção "O que não muda" | T-0040 | catalogo-dados | CORRIGIDO (4c33664) |
 | RD-0676 | baixa | texto | antes_depois.xlsx, PONTOS_ALEXANDRE | texto repete as colunas VEICULOS_DEPOIS e LINHAS_DA_FRAGA | T-0040 | catalogo-dados | MANTIDO (simulação já em aprovação) |
 | RD-0677 | média | dado | VEICULOS v29, linhas 41759-41764 | AMT7586/7587/7588 PEUGEOT 208 2021–2025 em 2 linhas iguais (automático + Fraga) | T-0040 | catalogo-dados | CORRIGIDO (24fd327) |
-| RD-0678 | média | dado | VEICULOS v29 | 1.455 linhas automático sem versão repetidas por 1.868 da Fraga com o mesmo modelo e os mesmos anos | T-0040 | catalogo-dados | MANTIDO na base; tela em parte no #229 (sobra no RD-0686) |
+| RD-0678 | média | dado | VEICULOS v29 | 1.455 linhas automático sem versão repetidas por 1.868 da Fraga com o mesmo modelo e os mesmos anos | T-0040 | catalogo-dados | MANTIDO na base; CORRIGIDO na tela (7e22a65) |
 | RD-0679 | média | código | simular_T0040.py:120, lista_T0040.py:58, base_v29.py:98 | tipo de ano (sem_ano/so_inicial/so_final/completa) em 3 scripts | T-0040 | catalogo-dados | CORRIGIDO (24fd327) |
 | RD-0680 | baixa | código | simular_T0040.py:167 e base_v29.py:106 | `ano()` escrita 2 vezes | T-0040 | catalogo-dados | CORRIGIDO (24fd327) |
 | RD-0681 | baixa | código | lista_T0040.py:26-36 | `RAIZ`, `BASE` e `sha` repetem o base_comum | T-0040 | catalogo-dados | CORRIGIDO (24fd327) |
@@ -489,12 +489,15 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0683 | baixa | texto | aprovar_v29.sh:30 | "5.100 linhas" fixo repete a contagem do LOG | T-0040 | catalogo-dados | CORRIGIDO (24fd327) |
 | RD-0684 | baixa | texto | LEIA-ME v29 (base_v29.py:56) | "se soma" 2 vezes na mesma frase | T-0040 | catalogo-dados | CORRIGIDO (24fd327) |
 | RD-0685 | baixa | texto | antes_depois.xlsx, CONFLITOS × CASOS | as 487 linhas CONFLITO nas 2 abas | T-0040 | catalogo-dados | MANTIDO (lista de decisão × lista completa) |
-| RD-0686 | média | layout | site/app.js:1700 (CXD13062, 1366/390/A4) | Saveiro/Voyage 2022 e Fox 2016 sem versão repetem linhas da Fraga (filtro do RD-0678 só olha o ano do ve) | T-0040 | web-site | ABERTO |
-| RD-0687 | média | layout | VEL7507 (1366) | Yamaha DT 180 e RD 135 em linha nova ao lado de DT e RD (antes ficavam dentro) | T-0040 | web-site | ABERTO |
-| RD-0688 | baixa | código | site/app.js:1692 e :1931 | troca do " \| " da VERSAO por " · " 2 vezes (vira `versaoTela`) | T-0040 | web-site | ABERTO |
-| RD-0689 | baixa | código | site/app.js:1701 e :1948 | `cils` 2 vezes (vira `cilsDe`) | T-0040 | web-site | ABERTO |
-| RD-0690 | baixa | código | site/app.js:1247 | `veDoVeiculo` refaz a `faixaVe` | T-0040 | web-site | ABERTO |
-| RD-0691 | baixa | doc | docs/DADOS_DO_SITE.md:21 e :30 | formato do `ve` com ano descrito 2 vezes | T-0040 | web-site | ABERTO |
+| RD-0686 | média | layout | site/app.js:1700 (CXD13062, 1366/390/A4) | Saveiro/Voyage 2022 e Fox 2016 sem versão repetem linhas da Fraga (filtro do RD-0678 só olha o ano do ve) | T-0040 | web-site | CORRIGIDO (7e22a65) |
+| RD-0687 | média | layout | VEL7507 (1366) | Yamaha DT 180 e RD 135 em linha nova ao lado de DT e RD (antes ficavam dentro) | T-0040 | web-site | CORRIGIDO (7e22a65) |
+| RD-0688 | baixa | código | site/app.js:1692 e :1931 | troca do " \| " da VERSAO por " · " 2 vezes (vira `versaoTela`) | T-0040 | web-site | CORRIGIDO (7e22a65) |
+| RD-0689 | baixa | código | site/app.js:1701 e :1948 | `cils` 2 vezes (vira `cilsDe`) | T-0040 | web-site | CORRIGIDO (7e22a65) |
+| RD-0690 | baixa | código | site/app.js:1247 | `veDoVeiculo` refaz a `faixaVe` | T-0040 | web-site | CORRIGIDO (7e22a65) |
+| RD-0691 | baixa | doc | docs/DADOS_DO_SITE.md:21 e :30 | formato do `ve` com ano descrito 2 vezes | T-0040 | web-site | CORRIGIDO (7e22a65) |
+| RD-0692 | baixa | código | site/app.js:1709 | `cilHtml` refaz o `split(" / ")` da `cilsDe` | T-0040 | web-site | ABERTO |
+| RD-0693 | média | código | site/app.js:325, 1249, 1727, 1735 | regra do motor em litros / abaixo de 1.0 L em 4 regex | T-0040 | web-site | ABERTO |
+| RD-0694 | baixa | código | site/app.js:2125 e :2143 | regra da linha coberta pela do `ve` com ano em 2 lugares | T-0040 | web-site | ABERTO |
 
 ## Notas
 
@@ -503,6 +506,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - 2ª rodada no `4c33664` (a Fraga se soma): RD-0671 ao RD-0675 corrigidos; RD-0670 em correção (sai no `aprovar_v29.sh`). Novos: RD-0677 ao RD-0684 (3 médias, 5 baixas; o RD-0678 depende de decisão do Alexandre). VOLTA PARA AJUSTE. Vem outro head (aba CONFLITOS): o RD-0677 e o RD-0678 são reconferidos nele.
 - 3ª rodada no `24fd327` (CONFLITOS): corrigidos o RD-0677 e o RD-0679 ao RD-0684; RD-0678 MANTIDO na base (a tela vai no PR do web-site); RD-0685 MANTIDO. LIBERADO com condição: o RD-0670 fecha no head do commit do `aprovar_v29.sh`, que precisa ser conferido antes do merge.
 - PR #229 (`web-site/T-0040-fraga`, `5bde83a`): RD-0686 ao RD-0691 (2 médias, 4 baixas). O RD-0678 fechou em parte na tela. VOLTA PARA AJUSTE.
+- Reteste no `7e22a65`: RD-0678 (tela) e RD-0686 ao RD-0691 corrigidos. Novos: RD-0692 ao RD-0694 (1 média, 2 baixas). VOLTA PARA AJUSTE.
 
 ### T-0033, ano na busca e fim do "Outros veículos e detalhes", 25/11/2026 (antes dos PRs)
 - RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
