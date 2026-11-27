@@ -1,5 +1,39 @@
 # Parecer de UX · T-0040 v30 · simulação do site (veículo sem ano oculto e aviso sem aplicação)
 
+## Reteste do ponto 6 · head `b86c820dbd7d57cb1a71166519d771220e043f9c` · resultado: LIBERADO
+
+**Prints conferidos** (pasta de rascunho t40v30site/prints, refeitos):
+- busca-ka e busca-ka-cartao (BCE3001), em 1366 e 390 px;
+- ford-ka-dobra, em 390 px;
+- KI20-aviso e ROD8005-aviso, em 390 px;
+- antes-390-BCE3001 e antes-390-KI20, agora tirados do main `601d714`.
+
+### 🟢 Ponto 6 resolvido
+- No produto `vo` com tabela, o cartão resume os modelos visíveis por marca (`aplCartao`, em `site/app.js`).
+- Na busca "ka", o cartão da BCE3001 mostra "Ford – Escort / Verona / Royale / Courier · Fiat – Fiorino / Palio / Uno /…", sem o Ka, em 1366 e em 390 px. O texto segue cortado em duas linhas, como os outros cartões.
+- O cartão e a página agora dizem a mesma coisa.
+- O `title` usa o mesmo resumo.
+
+### Correção dos prints "antes" do pacote anterior
+- Os 16 prints "antes" do pacote anterior tinham saído com o código novo, e não com o main.
+- Das conclusões do parecer anterior, só uma dependia de um "antes": a lista dos veículos ocultos da BCE3001 (Ka, Fiesta, Versailles, Parati, Logus, Polo e Palio Weekend). Conferi no `antes-390-BCE3001` refeito, do main: esses modelos estão lá e não estão no "depois". A conclusão fica de pé.
+- O `antes-390-KI20` do main **não tem** a seção Aplicação. O aviso nas palhetas, nas baterias e nas rodas é novo na v30 (KI20 e ROD8005). Isso confirma o ponto 7: antes da v30, a seção ficava escondida nesses produtos.
+
+### Observação, sem bloqueio: formato do resumo e do texto na mesma lista
+- Em "ford ka" (390 px), os cartões se alternam entre o texto da base e o resumo novo:
+  - texto: "FORD - Ka 01/2008–12/2013";
+  - resumo: "Ford – Ka / Fiesta".
+- O resumo é mais limpo, mas não traz o ano.
+- Melhoria para outra tarefa, sem bloqueio: pôr a faixa de anos por modelo no resumo ("Ford – Ka 2008–2013 / Fiesta 2002–2014"). A tela fica mais consistente e o balconista vê o ano já no cartão.
+
+### Pendente com o Alexandre (ponto 7, não bloqueia)
+- O aviso "Aplicação em revisão; consulte o vendedor." aparece na palheta (KI20) e na roda (ROD8005), que se escolhem pela medida.
+- A recomendação continua: esconder a seção nesses casos, como no main. A pergunta vai na simulação.
+
+---
+
+## Primeiro parecer da v30 · commit `e1f544a` · AJUSTAR (ponto 6 resolvido no reteste acima)
+
 - **Agente:** designer-ux · 27/11/2026 (Manaus)
 - **Revisado:** branch `web-site/T-0040-v30`, commit `e1f544a4ae155601c99caf623f2182d8d3a92074`, sobre o main `601d714`. Arquivos: `site/app.js` (`tabelaDe`, `semAplicacao`, `AVISO_SEM_APL`, `produtoHtml` e o cartão) e `docs/DADOS_DO_SITE.md`.
 - **Decisões do Alexandre (via po, R-20261127-135625):**
