@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0703** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0739** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -506,6 +506,42 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0700 | baixa | código | site/app.js:2080 e :1851; docs/DADOS_DO_SITE.md:35 | regra "número com unidade é medida" em 2 listas no app.js e uma 3ª no doc | T-0040 | web-site | CORRIGIDO (9e372cf) |
 | RD-0701 | baixa | teste | scripts/testar_site.mjs:1073 e :1760 | `const N_VT` escrita 2 vezes | T-0040 | testes | CORRIGIDO (aedfb33) |
 | RD-0702 | baixa | teste | scripts/testar_site.mjs:1072 e :1110 | aviso "só as 60 marcas" da KTM fica morto com o #229 | T-0040 | testes | CORRIGIDO (4bb9a9c, #231) |
+| RD-0703 | média | código | dados/scripts/base_v30.py × base_v29.py | `refazer`, conferência do texto novo e `aba` escritos de novo em cada script (vão ao `base_comum`) | T-0040 | catalogo-dados | CORRIGIDO (157150b; 9111f73, #232) |
+| RD-0704 | média | código | dados/scripts/base_v30.py, lista_T0040.py | regex `INTERNO` copiada (uma só, no `base_comum`) | T-0040 | catalogo-dados | CORRIGIDO (157150b; 9111f73, #232) |
+| RD-0705 | média | código | dados/scripts/base_v30.py (`produtos_site`) | filtro do site reescrito no script da base (vira `gerar_site_copia`) | T-0040 | catalogo-dados | CORRIGIDO (db804d1; 9111f73, #232) |
+| RD-0706 | média | código | dados/scripts/base_v30.py | colunas da VEICULOS por posição fixa (viram `I_*` pelo cabeçalho) | T-0040 | catalogo-dados | CORRIGIDO (db804d1; 9111f73, #232) |
+| RD-0707 | baixa | código | dados/scripts/base_v30.py | contas feitas 2 vezes; `c0`, `c1` e `regras` mortos | T-0040 | catalogo-dados | CORRIGIDO (db804d1; 9111f73, #232) |
+| RD-0708 | média | dado | LOG_CORRECOES da v30 | texto da `REGRA` repetido em 420 linhas do LOG (vira "regra do ano da v30 no LEIA-ME") | T-0040 | catalogo-dados | CORRIGIDO (db804d1; 9111f73, #232) |
+| RD-0709 | baixa | dado | LOG_CORRECOES da v30, linhas `ANO_MANTIDO` | recado de origem 2 vezes na mesma linha | T-0040 | catalogo-dados | CORRIGIDO (db804d1; 9111f73, #232) |
+| RD-0710 | média | texto (simulação) | dados/T-0040/v30/antes_depois_v30.xlsx, aba RESUMO | as regras repetidas sob DIVERGENCIAS | T-0040 | catalogo-dados | CORRIGIDO (db804d1; 9111f73, #232) |
+| RD-0711 | baixa | texto (simulação) | antes_depois_v30.xlsx, aba RESUMO | "SEM_APLICACAO: não batem" | T-0040 | catalogo-dados | CORRIGIDO (f4bc26b; 9111f73, #232) |
+| RD-0712 | média | texto (simulação) | antes_depois_v30.xlsx, aba PONTOS_ALEXANDRE | duas numerações para os mesmos pontos | T-0040 | catalogo-dados | CORRIGIDO (db804d1; 9111f73, #232) |
+| RD-0713 | baixa | código (comentário) | dados/scripts/base_v30.py (docstring) e aprovar_v30.sh | o mesmo passo descrito nos 2 (só comentário) | T-0040 | catalogo-dados | CORRIGIDO (db804d1, f4bc26b; 9111f73, #232) |
+| RD-0714 | baixa | dado | LEIA-ME da v30 | "sem MOTIVO (300)" repete o número da frase | T-0040 | catalogo-dados | CORRIGIDO (f4bc26b; 9111f73, #232) |
+| RD-0715 | baixa | dado | LEIA-ME da v30 | rótulo "INT16501 (item 17)" repete o código (vira "Item 17") | T-0040 | catalogo-dados | CORRIGIDO (f4bc26b; 9111f73, #232) |
+| RD-0716 | baixa | texto (simulação) | antes_depois_v30.xlsx, aba RESUMO | rótulo da 2a repete a descrição ao lado | T-0040 | catalogo-dados | CORRIGIDO (f4bc26b; 9111f73, #232) |
+| RD-0717 | média | doc | dados/T-0040/AVISO_BAP_CENTRAL.md | o mesmo aviso dito 2 vezes | T-0040 | catalogo-dados | CORRIGIDO (f4bc26b; 9111f73, #232) |
+| RD-0718 | baixa | código (comentário) | dados/scripts/aprovar_v30.sh e docstring do base_v30.py | o mesmo uso descrito nos 2 (só comentário) | T-0040 | catalogo-dados | CORRIGIDO (f4bc26b; 9111f73, #232) |
+| RD-0719 | baixa | texto (simulação) | antes_depois_v30.xlsx, aba PONTOS_ALEXANDRE | R-20261127-154004-po citado 3 vezes (fica só no cabeçalho) | T-0040 | catalogo-dados | CORRIGIDO (25a3b37; 9111f73, #232) |
+| RD-0720 | baixa | doc | dados/T-0040/AVISO_BAP_CENTRAL.md:16 | "440 linhas" dito 2 vezes | T-0040 | catalogo-dados | CORRIGIDO (25a3b37; 9111f73, #232) |
+| RD-0721 | média | layout (tabela) | site/app.js, `cabe` do `juntarNaTabela` | 212 linhas repetidas na tabela da aplicação (a trava `!r.comAnoVe` passa a valer só com `cilDaVersao`) | T-0040 | web-site | CORRIGIDO (15a8893, c458a72; e42f936, #235) |
+| RD-0722 | baixa | código | site/app.js, `semAplicacao` | a tabela montada antes das condições baratas (lista 2 vezes mais lenta) | T-0040 | web-site | CORRIGIDO (15a8893; e42f936, #235) |
+| RD-0723 | baixa | doc | docs/DADOS_DO_SITE.md:22, :33 e :39 | `vo` e famílias pela medida descritos em 3 lugares | T-0040 | web-site | CORRIGIDO (15a8893; e42f936, #235) |
+| RD-0724 | baixa | código (comentário) | scripts/gerar_site.py (docstring, VEICULOS, `veiculos_de`, `ler_base`) | o que vai no `vo` dito em 4 comentários (só comentário) | T-0040 | web-site | CORRIGIDO (15a8893; e42f936, #235) |
+| RD-0725 | baixa | código (comentário) | site/app.js:1579 | comentário da tabela com "SIMULAÇÃO" e a regra do ano repetida (só comentário) | T-0040 | web-site | CORRIGIDO (15a8893; e42f936, #235) |
+| RD-0726 | baixa | texto | seção Aplicação do produto sem aplicação | título "Aplicação" e o aviso "Aplicação em revisão; consulte o vendedor." | T-0040 | web-site | MANTIDO (texto do Alexandre, resposta 7) |
+| RD-0727 | média | layout | cartão do produto sem aplicação | aviso dentro do cartão (regra 2) | T-0040 | web-site | MANTIDO (respostas 7 e 19 do Alexandre) |
+| RD-0728 | média | teste | scripts/testar_site.mjs | `rxPalavra` refazia o `palavraInteira` (o escape vai nele) | T-0040 | testes | CORRIGIDO (3edb4a5; e60eb0e, #233) |
+| RD-0729 | média | teste | scripts/testar_site.mjs | abrir página e cartão repetido em 4 laços (viram `pagina` e `cartao`) | T-0040 | testes | CORRIGIDO (3edb4a5; e60eb0e, #233) |
+| RD-0730 | média | teste | scripts/testar_site.mjs | veículo sem ano no "ve" conferido 2 vezes (`kaBce`; vira `semAnoNoVe`) | T-0040 | testes | CORRIGIDO (3edb4a5; e60eb0e, #233) |
+| RD-0731 | baixa | teste (comentário) | scripts/testar_site.mjs, cabeçalho e comentário do bloco v30 | o que o bloco faz descrito 2 vezes (só comentário) | T-0040 | testes | CORRIGIDO (3edb4a5; e60eb0e, #233) |
+| RD-0732 | baixa | teste (comentário) | scripts/testar_site.mjs, comentário do `CAMPOS` | idem (só comentário) | T-0040 | testes | CORRIGIDO (3edb4a5; e60eb0e, #233) |
+| RD-0733 | — | teste | scripts/testar_site.mjs | `AVISO_APL` e `FAM_MEDIDA` copiados do site/app.js | T-0040 | testes | MANTIDO (checagem independente) |
+| RD-0734 | baixa | código | scripts/coord.mjs, `idade()` | relia o `criado_em` em vez de usar o `instanteDoRecado` | T-0041 | alexandre | CORRIGIDO (24c82fa; 13535e6, #234) |
+| RD-0735 | baixa | código (comentário) | scripts/coord.mjs e JSDoc do `FUSO_DOS_RECADOS` (coord-lib.mjs) | comentários repetindo o JSDoc do `carimboDeManaus` e do `compararRecados` (só comentário) | T-0041 | alexandre | CORRIGIDO (24c82fa; 13535e6, #234) |
+| RD-0736 | baixa | teste (comentário) | scripts/testar_site.mjs:1533 | "itens 1b, 4, 5, 6 e 7" → "itens 1b e 3 a 8" (só comentário; não segura) | T-0040 | testes | ABERTO (próximo PR do testes) |
+| RD-0737 | baixa | código | site/app.js, `cabe` e `contida` | regra "cilindrada vazia, igual ou entre as de o" 2 vezes (vira `cilDentro`) | T-0040 | web-site | CORRIGIDO (4ad26c1; e42f936, #235) |
+| RD-0738 | média | layout (tabela) | tabela da aplicação (Mazda 626, Grand Caravan, GLE-Class "40.0", VW EOS etc.) | 19 linhas repetidas que já vinham do main (lá eram 25; o #235 tira 6) | T-0040 | web-site | ABERTO (dispensado do #235 pelo po, R-20261127-174708-po; tarefa nova, com simulação) |
 
 ## Notas
 
@@ -526,6 +562,13 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - #230 no `aedfb33`: RD-0701 corrigido. LIBERADO (fila: RD-0702).
 - #231 (`testes/T-0040-rd0702`, `4bb9a9c`): RD-0702 corrigido. LIBERADO.
 - #231 no `40ea5ae` (só texto do `ve:formato`): LIBERADO.
+
+### T-0040 (v30) e T-0041, 27/11/2026 (PRs #232 a #235)
+- Registro feito depois dos merges, a partir dos commits e do corpo dos PRs; os pareceres não foram gravados na hora e houve números repetidos entre as rodadas. Vale a numeração desta tabela, passada pelo gerente. Relatórios: `T-0040.md` e `T-0041.md`.
+- #232 (base v30, head `25a3b37`; squash `9111f73`): RD-0703 ao RD-0720 corrigidos. LIBERADO.
+- #233 (`testar_site`, head `3edb4a5`; squash `e60eb0e`): RD-0728 ao RD-0732 corrigidos; RD-0733 MANTIDO; RD-0736 (baixa, só comentário) ABERTO, entra no próximo PR do testes. LIBERADO.
+- #234 (T-0041, governança, head `24c82fa`; squash `13535e6`): RD-0734 e RD-0735 corrigidos. LIBERADO.
+- #235 (site v30, head `4ad26c1`; squash `e42f936`): RD-0721 ao RD-0725 e RD-0737 corrigidos; RD-0726 e RD-0727 MANTIDOS (respostas 7 e 19 do Alexandre); RD-0738 ABERTO, dispensado do PR pelo po (R-20261127-174708-po), vai ao Alexandre como tarefa nova do web-site, com simulação. LIBERADO.
 
 ### T-0033, ano na busca e fim do "Outros veículos e detalhes", 25/11/2026 (antes dos PRs)
 - RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
