@@ -13,7 +13,7 @@ A BAP Central lê a base unificada (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`
 
 ## O que não muda
 
-- As abas, a ordem delas, as colunas e o número de linhas: a VEICULOS continua com 40.902 linhas de dados e as mesmas 11 colunas, na mesma ordem (CODIGO_BAP, FABRICANTE, MODELO, VERSAO, ANO_INICIO, ANO_FIM, ORIGEM, SITUACAO, MOTIVO, CILINDRADA, ANO_DUVIDA). Só o LOG_CORRECOES ganha 440 linhas no fim e o LEIA-ME, 8 no topo.
+- As abas, a ordem delas, as colunas e o número de linhas: a VEICULOS continua com 40.902 linhas de dados e as mesmas 11 colunas, na mesma ordem (CODIGO_BAP, FABRICANTE, MODELO, VERSAO, ANO_INICIO, ANO_FIM, ORIGEM, SITUACAO, MOTIVO, CILINDRADA, ANO_DUVIDA). Só o LOG_CORRECOES (440 linhas, acima) e o LEIA-ME (8 no topo) ganham linhas.
 - A aba PRODUTOS não muda (as 5 primeiras colunas e o texto da APLICACAO ficam como estavam).
 - Os valores da SITUACAO (`separado` e `duvidoso`), a ORIGEM e a CILINDRADA da VEICULOS.
 

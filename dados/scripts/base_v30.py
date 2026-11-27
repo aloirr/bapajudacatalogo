@@ -507,18 +507,16 @@ RESPOSTAS = [
     "ANO_DUVIDA: limpar a marca quando a pesquisa confirmou a faixa.",
     "Fonte de loja: vale igual à de fabricante.",
     "As \"manter_atual\" também entram no LOG_CORRECOES.",
-    "Ocultar só as linhas sem ano nenhum.",
+    "ANO_DUVIDA: b. Ocultar só as linhas sem ano nenhum. As linhas com ano duvidoso continuam visíveis.",
     "INT16501 (Nivus, T-Cross, Taos) com ano final 2027: passa a 2026.",
     "Faixas de um ano só (60) e de mais de 30 anos (33): entram como vieram.",
     "\"Sem aplicação\": vale a conta do site (199 produtos com o aviso).",
     "JUH70025 com \"1.6 L\", \"1.8 L\" e \"2.0 L\" na VERSAO do Gol: confirmado.",
 ]
-# a observação do time, na ordem dos PONTOS; os itens 13 e 14 seguem a leitura do po (R-20261127-154004-po), ao lado
-# do R-20261127-150417-alexandre
-OBS_PO = "leitura do po (R-20261127-154004-po): "
-OBSERVACOES = {4: OBS_PO + "a linha aplicada marcada passa a 'separado' e o MOTIVO sai com a marca, como na v26.",
-               5: OBS_PO + "'confirmou a faixa' = a faixa final é igual à pesquisada; quando o ano atual ficou e a "
-                           "pesquisa diz outro ano, a marca fica.",
+# a observação do time, na ordem dos PONTOS
+OBSERVACOES = {4: "O MOTIVO sai com a marca, como na v26.",
+               5: "'Confirmou a faixa' = a faixa final é igual à pesquisada; quando o ano atual ficou e a pesquisa diz "
+                  "outro ano, a marca fica.",
                7: "Linha ANO_MANTIDO no LOG, sem célula mudada.",
                9: "Nivus e T-Cross entram com 2026."}  # + a [SUPOSIÇÃO] do Taos (suposicoes())
 
@@ -538,7 +536,7 @@ def gravar_ad(res: dict) -> None:
                               "APLICACAO vazia na base", "linhas VEICULOS v29", "linhas com ano v30"], res["sa"])
     obs = [" ".join([OBSERVACOES.get(i, "")] + (res["sup"] if i == 9 else [])).strip() for i in range(len(PONTOS))]
     aba(wb, "PONTOS_ALEXANDRE", ["ponto", "resposta (R-20261127-150417-alexandre)",
-                                 "observação do time (itens 13 e 14: R-20261127-154004-po)"],
+                                 "observação do time (13 e 14: leitura do po, R-20261127-154004-po)"],
         list(zip(PONTOS, RESPOSTAS, obs)))
     for ws in wb.worksheets:
         for row in ws.iter_rows():
