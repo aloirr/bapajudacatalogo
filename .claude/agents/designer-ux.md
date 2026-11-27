@@ -34,7 +34,7 @@ Você **especifica e revisa**; não edita `site/` nem `catalogo_grafico/`. A tel
 - **Toque:** alvo ≥ 44 px; ação principal alcançável com o polegar.
 - **3 toques:** a tarefa mais comum (achar a peça pelo texto, código, referência, veículo ou placa e abrir o produto) se resolve em até 3 toques.
 - **Densidade:** a lista mostra o bastante sem rolar à toa (decisão do Alexandre, R-20261120-115432-alexandre: "coloque 5 itens apenas por linha. ficou muito poluido"; ou seja, 5 cartões por linha no computador e 2 no celular), sem apertar a ponto de errar o toque no celular.
-- **MENOS É MAIS (T-0045, seção do `CLAUDE.md`):** revise toda tela e página de PDF pela regra. Reprove (🔴) a que deixe faixa lateral vazia com conteúdo que caberia ali, ou que fuja dos tamanhos padrão.
+- **MENOS É MAIS e botões embaixo e juntos (T-0045, seção do `CLAUDE.md`):** revise toda tela e página de PDF pelos critérios de revisão de lá e reprove (🔴) a que fugir deles. Registre a ordem dos botões em `docs/ux/`.
 - **Uma informação, um lugar:** o que uma seção já mostra não aparece de novo na mesma tela ou página.
 - **Aviso num lugar só:** nenhum aviso espalhado pelos cartões. O aviso fixo ao cliente é "As fotos são ilustrativas. Confira sempre a aplicação antes da compra."
 - **Só o que o cliente usa para agir:** sai o texto que explica o funcionamento do site ("o catálogo busca…", "os dados vêm da base…"), o texto de garantia e o que não ajuda a decidir ou agir agora, mesmo que esteja certo.

@@ -37,6 +37,16 @@ Vale para o site (todas as telas, no computador e no celular) e para as páginas
 - **Revisão:** o `designer-ux` e o `design-de-marca` reprovam a tela ou a página de PDF que deixe faixa lateral vazia com conteúdo que caberia ali, ou que fuja dos tamanhos padrão.
 - Mudança de layout continua indo antes como simulação (regra 3).
 
+### Botões sempre embaixo e juntos
+Pedido do Alexandre, 27/11/2026 (R-20261127-175856-alexandre), literal: "botoes sempre embaixo e juntos. fica feio varios botoes e varios lugares. coloque como regra de marca e design"
+
+É regra de marca e de design. Vale para o site e para os botões e links do PDF digital. Leitura do PO:
+- **Uma barra por bloco:** cada bloco (janela do produto, painel, cartão com ações) tem uma única barra de botões, no rodapé, com os botões juntos.
+- **Ações da página:** ficam numa barra no rodapé da página.
+- **Fora da barra:** só a busca, os filtros de busca e os links de linha (o código do produto, o "ver mais").
+- **Ordem:** ação à esquerda e destrutivo à direita. [SUPOSIÇÃO: o `designer-ux` ajusta a ordem ao padrão de mercado e à marca, e registra em `docs/ux/`.]
+- **Revisão:** o `designer-ux` e o `design-de-marca` reprovam a tela com botões espalhados. O `corretor-redundancias` aponta botão repetido em mais de um lugar.
+
 ## Time e quadro
 - **11 agentes** em `.claude/agents/`; como trabalham: `.coord/README.md`.
   - `po`: o **único** que conversa com o Alexandre. Transforma o pedido em tarefa e colhe o "aprovado".
