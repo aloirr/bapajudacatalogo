@@ -25,7 +25,7 @@
   --fs-txt: 15px;
   --fs-sub: 17px;
   --fs-h1: 20px;
-  --sombra-barra: 0 -6px 16px rgba(21, 21, 21, .10); /* barra dos botões do produto presa no fim da tela do celular */
+  --sombra-barra: 0 -6px 16px rgba(21, 21, 21, .10); /* barra dos botões do produto presa no fim da tela */
   --zoom-fundo: rgba(21, 21, 21, .92); /* fundo da foto ampliada */
   /* foto do produto (T-0014): computador 200 px (55% menor que a de 440 px da janela);
      celular 60% menor que a de hoje (40% de min(414 px, 90% da largura útil): 129 px em 390 px) */
@@ -243,18 +243,23 @@ main:focus, main:focus-visible { outline: none; }
 .foto-zoom img { transition: transform .15s; }
 .foto-zoom:focus-visible { outline-offset: -3px; } /* dentro da moldura (a .prod-foto corta o que sai) */
 .prod-cab h1, .prod-cab h2 { margin: 0; font-size: var(--fs-h1); letter-spacing: .02em; line-height: 1.2; }
-.prod-info .desc { font-size: var(--fs-sub); font-weight: 500; margin: 2px 0 10px; }
+.prod-info .desc { font-size: var(--fs-txt); font-weight: 500; margin: 2px 0 10px; }
 .selos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
 .selo { background: var(--fundo); border: 1px solid var(--linha); border-radius: 999px; padding: 2px 10px; font-size: var(--fs-rot); font-weight: 500; color: var(--texto-2); }
 /* barra do produto (T-0045, UX-T45-01, 02 e 05; R-20261127-192108, item 14, no lugar da opB2 de R-20261120-141100):
    uma barra só, no rodapé do bloco do produto, com os botões juntos: Copiar código (principal), Salvar em PDF
    (secundário) e, por último, o Voltar (neutro; só na página). Na janela, a barra fica no rodapé da janela, fora da
-   rolagem, e o ✕ fica em cima. No celular, presa no fim da tela e com os botões lado a lado. No PDF não há botões */
+   rolagem, e o ✕ fica em cima. Na página, presa no fim da tela; no celular, com os botões lado a lado. No PDF não há botões */
 .prod-barra { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 0 0; border-top: 1px solid var(--linha); }
 .prod-barra .bt { height: 44px; padding: 0 18px; } /* letra de 15 px do .bt (--fs-txt) */
-.bt-neutro { background: var(--branco); border-color: var(--borda-campo); color: var(--texto); }
-.bt-neutro:hover { background: var(--fundo); border-color: var(--texto-2); color: var(--texto); }
+.bt-neutro { background: var(--branco); border-color: var(--texto-2); color: var(--texto); } /* borda 6,26:1 no branco (MC-0053) */
+.bt-neutro:hover { background: var(--fundo); border-color: var(--texto); color: var(--texto); }
 .janela > .prod-barra { flex: none; padding: 10px 20px; background: var(--branco); }
+/* na página, presa no fim da tela em todas as larguras; no fim do bloco, encosta nele. O foco e as âncoras param
+   acima dela (scroll-padding-bottom) e o aviso do "Copiar" sobe para cima dela */
+.pagina-produto > .prod-barra { position: sticky; bottom: 0; z-index: 5; margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--branco); box-shadow: var(--sombra-barra); }
+html:has(.pagina-produto > .prod-barra) { scroll-padding-bottom: calc(65px + env(safe-area-inset-bottom)); }
+body:has(.pagina-produto > .prod-barra) .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
 /* Aplicação na largura toda e, embaixo, Referências cruzadas e Ficha técnica lado a lado (T-0045, UX-T45-04); com uma
    só das duas, ela fica na largura toda; abaixo de 664 px de conteúdo, uma embaixo da outra */
 .prod-dados { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; }
@@ -388,15 +393,12 @@ body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
   .prod-cab { grid-column: 2; grid-row: 1; min-width: 0; }
   .prod-info > :not(.prod-cab) { grid-column: 1 / -1; }
   .prod-foto img { padding: 8px; }
-  /* a barra do produto presa no fim da tela (alcance do polegar), com os botões lado a lado; o Voltar só com a seta
-     (o nome continua para o leitor de tela) */
-  .pagina-produto > .prod-barra { position: sticky; bottom: 0; z-index: 5; margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--branco); box-shadow: var(--sombra-barra); }
+  /* a barra do produto com os botões lado a lado; o Voltar só com a seta (o nome continua para o leitor de tela) */
   .janela > .prod-barra { padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); }
   .prod-barra { gap: 8px; flex-wrap: nowrap; }
   .prod-barra .bt { flex: 1 1 0; min-width: 0; justify-content: center; padding: 0 10px; }
   .prod-barra .bt-voltar { flex: none; width: 44px; padding: 0; }
   .bt-voltar .bt-rot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  body:has(.pagina-produto > .prod-barra) .toast { bottom: calc(76px + env(safe-area-inset-bottom)); } /* o aviso do "Copiar" acima da barra */
   dialog.janela { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border-radius: 0; }
   .janela-corpo { padding: 14px 16px 24px; }
 }
