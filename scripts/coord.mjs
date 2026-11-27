@@ -65,7 +65,7 @@ import {
   WORKSPACE_PNPM, workspaceMudouSoEmBuilds, mudancasDeGovernanca, CAMINHOS_DE_GOVERNANCA, estadoDosRecados,
   modoDosRecados, regraDoRecadoNovo, ErroRecados, conexaoDeRecados, atualizarIndiceDeRecados, recadosDoIndice,
   lidosDoIndice, enviarRecadoNoGitHub, marcarLidosNoGitHub, ehRemetenteDeSistema, cloneDosRecados, PONTE_DO_ALEXANDRE, DOMINIO_AUTOR,
-  carimboDeManaus, compararRecados,
+  carimboDeManaus, compararRecados, instanteDoRecado,
 } from './coord-lib.mjs';
 
 // Recados no clone anexado à sessão (gravação com git; o proxy da nuvem bloqueia a API): ver cloneDosRecados.
@@ -171,7 +171,7 @@ function todosRecados() {
     atual.pastas.push(destino);
     vistos.set(r.meta.id, atual);
   }
-  return [...vistos.values()].sort(compararRecados); // instante real (UTC), com ids antigos em UTC e novos em Manaus
+  return [...vistos.values()].sort(compararRecados);
 }
 
 function encerrados(recs) {
@@ -186,7 +186,7 @@ function lidosDe(agente) {
 }
 const titulo = (r) => (r.corpo.match(/^#\s+(.+)$/m) || [null, '(sem assunto)'])[1];
 const idade = (r) => {
-  const h = (Date.now() - new Date(r.meta.criado_em).getTime()) / 36e5;
+  const h = (Date.now() - instanteDoRecado(r.meta)) / 36e5;
   return h < 24 ? `${Math.max(0, Math.round(h))}h` : `${Math.round(h / 24)}d`;
 };
 const linha = (r) =>
@@ -594,7 +594,7 @@ switch (cmd) {
         ? `## Contexto\n${partes[0]}\n\n## O que preciso / o que mudou\n${partes[1]}\n\n## Pronto quando\n${partes.slice(2).join(' | ')}\n`
         : `${o.corpo}\n`;
     } else corpo = '## Contexto\n\n## O que preciso / o que mudou\n\n## Pronto quando\n';
-    const t = carimboDeManaus(); // T-0041: id e criado_em no fuso de Manaus (-04:00), inclusive na ponte
+    const t = carimboDeManaus();
     const gerarId = (existentes) => {
       let novo = `R-${t.compacto}-${de}`;
       for (let n = 2; existentes.has(novo); n++) novo = `R-${t.compacto}-${n}-${de}`;

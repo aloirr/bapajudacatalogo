@@ -61,7 +61,7 @@ export const TIPOS_QUE_EXIGEM_ENCERRAMENTO = ['pedido', 'pergunta', 'bloqueio', 
  * Fuso dos recados novos (T-0041, R-20261127-172809-alexandre): America/Manaus, UTC−4 FIXO. Escolha: offset fixo, sem
  * Intl. Manaus não tem horário de verão, e o offset fixo não depende do fuso da máquina (a nuvem roda em UTC) nem dos
  * dados de fuso do Node (ICU); o teste confere que ele bate com o Intl 'America/Manaus'. Os recados antigos continuam
- * como foram gravados (+00:00): a leitura ordena pelo instante real (instanteDoRecado), nunca pelo texto do id.
+ * como foram gravados (+00:00): a ordem de leitura está em compararRecados.
  */
 export const FUSO_DOS_RECADOS = { nome: 'America/Manaus', offset: '-04:00', minutos: -240 };
 
