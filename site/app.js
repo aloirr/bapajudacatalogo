@@ -1963,6 +1963,9 @@
     }
     return siglas(x);
   }
+  // os números (3 ou 4 dígitos) dos nomes de modelo do catálogo ("LS 1634": 1634), feitos uma vez
+  let NUM_MODELO = null;
+  const numerosDeModelo = () => NUM_MODELO || (NUM_MODELO = new Set([...indiceVe().porMarca.values()].flat().flatMap((m) => norm(m).match(/\b\d{3,4}\b/g) || [])));
   // o ano do texto soma na célula Ano; a linha do "ve" com ano fica só com o ano dela (T-0040: o "Fox (10/2016)" do texto
   // não vira "2008, 2016" na linha Fox EA111 da VEICULOS). O detalhe do texto ("Sem ABS", "Com Buchas") entra nela também
   // (comDetalhe), para a restrição nunca sumir
@@ -2069,7 +2072,9 @@
           const outro = donos.some((r) => modelos.some(([m]) => compacto(m).length >= 2 && k(m) !== k(r[1]) && rxPalavra(k(m)).test(k(v))));
           // na linha do "ve" com ano, o detalhe entra sem o ano ("Com Buchas / Sem Pivô"), menos o que cita um número de
           // modelo ("1634 (1938–1944)" é outro caminhão; numModelo)
-          const numModelo = (r, d) => r.comAnoVe && /\b(?!(?:19|20)\d{2}\b)\d{3,4}\b/.test(d); // o ano ("1977") não é número de modelo
+          // o número que está no nome de um modelo do catálogo ("1634" de "LS 1634"); o ano ("1977") e a versão que não é nome
+          // de modelo ("311 / 415 / 515" da Sprinter) passam
+          const numModelo = (r, d) => r.comAnoVe && [...String(d).matchAll(/\b(?!(?:19|20)\d{2}\b)\d{3,4}\b/g)].some((m) => numerosDeModelo().has(m[0]));
           if (fx.length && !outro) donos.forEach((r) => { somaAno(r, fx); const d = comRestr(v.trim(), semAno, p); if (d && !numModelo(r, d)) comDetalhe(r, d); });
           else donos.forEach((r) => { if (!numModelo(r, v)) comDetalhe(r, v.trim()); });
           return outro ? "outro" : "";
@@ -2153,7 +2158,10 @@
       && ((!r.comAnoVe && (!r[2] || k(r[2]) === k(o[2])) && k(r[3]) === k(o[3]))
         || (f && (o[2] || o[3]) && ((g) => g && g[0] <= f[0] && f[1] <= g[1])(faixaDaCelula(o[4]))))); }); };
   const tabelaDe = (p) => {
-    if (!TABELA.has(p)) { CIL_MOTO = ehMoto(p); const tv = linhasVeiculos(p); TABELA.set(p, semRepetida(tv.length && p.a ? juntarNaTabela(p, tv) : tv)); CIL_MOTO = false; }
+    if (!TABELA.has(p)) {
+      CIL_MOTO = ehMoto(p);
+      try { const tv = linhasVeiculos(p); TABELA.set(p, semRepetida(tv.length && p.a ? juntarNaTabela(p, tv) : tv)); } finally { CIL_MOTO = false; }
+    }
     return TABELA.get(p);
   };
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
