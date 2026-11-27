@@ -18,6 +18,7 @@ import {
   criarClienteDeRecados, atualizarIndiceDeRecados, enviarRecadoNoGitHub, marcarLidosNoGitHub, recadosDaPastaNoGitHub,
   recadosDoIndice, idsDoIndice, lidosDoIndice, ErroRecados, MOTIVO_RECADOS_NO_GITHUB,
   AGENTES, PESSOAS, DESTINOS, REMETENTES_DE_SISTEMA, ehRemetenteDeSistema, remetenteDoRecado, classificarMudancas,
+  FUSO_DOS_RECADOS, carimboDeManaus, instanteDoRecado, compararRecados,
 } from './coord-lib.mjs';
 import { lerRecadosDoGerente, autorizacoesDeMerge } from '../.claude/hooks/guarda-merge-lib.mjs';
 
@@ -779,4 +780,146 @@ test('subir-pendentes: sobe o que falta num commit só, une os lidos, não sobre
     assert.match(r.saida, /0 recado\(s\)\/anexo\(s\) a subir, 0 arquivo\(s\) de lidos a unir \(0 linha\(s\)\), 4 já no GitHub, 1 conflito/);
     assert.equal(gh.historico().length, 3, 'rodar de novo não grava nada');
   } finally { await s.fechar(); }
+});
+
+// ───────────────────────── T-0041: id e criado_em no fuso de Manaus ─────────────────────────
+
+/** Recado com o criado_em escolhido (o recado() acima fixa -04:00). */
+const recadoEm = ({ id, de, para, criadoEm, respondeA = 'null', tipo = 'pedido', titulo = 'Assunto' }) =>
+  recado({ id, de, para, tipo, respondeA, titulo }).replace(/^criado_em: .*$/m, `criado_em: ${criadoEm}`);
+const RE_ID_MANAUS = /^R-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-/;
+const RE_CRIADO_MANAUS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}-04:00$/;
+
+/** O cabeçalho do recado novo está em Manaus: criado_em -04:00, o id com a mesma hora local e o instante perto de agora. */
+function conferirCarimboDeManaus(texto, antes, depois) {
+  const id = texto.match(/^id: (\S+)$/m)[1];
+  const criado = texto.match(/^criado_em: (\S+)$/m)[1];
+  assert.match(criado, RE_CRIADO_MANAUS, texto);
+  const [, a, mes, d, h, mi, se] = id.match(RE_ID_MANAUS);
+  assert.equal(criado.slice(0, 19), `${a}-${mes}-${d}T${h}:${mi}:${se}`, 'o id usa a mesma hora de Manaus do criado_em');
+  const t = Date.parse(criado);
+  assert.ok(t >= Math.floor(antes / 1000) * 1000 && t <= depois, `instante real ${criado} entre o antes e o depois do envio`);
+  return { id, criado };
+}
+
+test('T-0041: carimboDeManaus dá o id e o criado_em em -04:00 (offset fixo, igual ao Intl America/Manaus)', () => {
+  assert.deepEqual(FUSO_DOS_RECADOS, { nome: 'America/Manaus', offset: '-04:00', minutos: -240 });
+  assert.deepEqual(carimboDeManaus(new Date('2026-11-27T18:00:00Z')), { iso: '2026-11-27T14:00:00-04:00', compacto: '20261127-140000' });
+  // virada do dia: 02h30 UTC ainda é a véspera em Manaus
+  assert.deepEqual(carimboDeManaus(new Date('2026-11-28T02:30:05Z')), { iso: '2026-11-27T22:30:05-04:00', compacto: '20261127-223005' });
+  const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Manaus', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+  for (const u of ['2026-01-15T12:00:00Z', '2026-07-15T03:59:59Z', '2026-11-27T17:28:09Z', '2027-02-20T23:00:00Z', '2030-10-01T00:00:00Z']) {
+    const d = new Date(u);
+    const c = carimboDeManaus(d);
+    assert.equal(Date.parse(c.iso), d.getTime(), `o criado_em volta ao mesmo instante (${u})`);
+    const p = Object.fromEntries(fmt.formatToParts(d).map((x) => [x.type, x.value]));
+    assert.equal(c.iso.slice(0, 19), `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}`, `bate com o Intl America/Manaus (${u})`);
+  }
+  // o carimbo não depende do fuso da máquina
+  const r = execFileSync(process.execPath, ['--input-type=module', '-e',
+    `import { carimboDeManaus } from ${JSON.stringify(new URL('./coord-lib.mjs', import.meta.url).href)}; console.log(carimboDeManaus(new Date('2026-11-27T18:00:00Z')).iso);`],
+  { env: { ...process.env, TZ: 'Asia/Tokyo' }, encoding: 'utf8' });
+  assert.equal(r.trim(), '2026-11-27T14:00:00-04:00');
+});
+
+test('T-0041: compararRecados ordena pelo instante real (UTC), não pelo texto do id; sem criado_em vai para o fim', () => {
+  const antigo = { meta: { id: 'R-20261127-170000-x', criado_em: '2026-11-27T17:00:00+00:00' } }; // 13h em Manaus
+  const novo = { meta: { id: 'R-20261127-140000-y', criado_em: '2026-11-27T14:00:00-04:00' } }; // 18h UTC
+  assert.ok(novo.meta.id < antigo.meta.id, 'pelo texto do id, o novo viria antes');
+  assert.ok(instanteDoRecado(novo.meta) > instanteDoRecado(antigo.meta));
+  assert.deepEqual([novo, antigo].sort(compararRecados).map((r) => r.meta.id), ['R-20261127-170000-x', 'R-20261127-140000-y']);
+  const mesmoInstante = { meta: { id: 'R-20261127-130000-z', criado_em: '2026-11-27T13:00:00-04:00' } }; // = 17h UTC
+  const semData = { meta: { id: 'R-20261101-000000-w' } };
+  assert.deepEqual([semData, novo, mesmoInstante, antigo].sort(compararRecados).map((r) => r.meta.id),
+    ['R-20261127-130000-z', 'R-20261127-170000-x', 'R-20261127-140000-y', 'R-20261101-000000-w'], 'empate pelo id; sem criado_em no fim');
+});
+
+test('T-0041: CLI local — enviar grava em -04:00; caixa, pendencias, ler e fio na ordem real com antigos (UTC); lido; nada antigo muda', async () => {
+  const dir = repoDeCodigo({ marca: false });
+  const env = { BAP_RECADOS: 'local' }; // nunca o clone real de recados
+  // pelo texto do id, o novo (14h Manaus = 18h UTC) viria antes do antigo (17h UTC = 13h Manaus)
+  const antigos = {
+    'R-20261120-170000-catalogo-grafico': recadoEm({ id: 'R-20261120-170000-catalogo-grafico', de: 'catalogo-grafico', para: 'gerente-projetos', criadoEm: '2026-11-20T17:00:00+00:00', titulo: 'Antigo em UTC' }),
+    'R-20261120-140000-testes': recadoEm({ id: 'R-20261120-140000-testes', de: 'testes', para: 'gerente-projetos', criadoEm: '2026-11-20T14:00:00-04:00', respondeA: 'R-20261120-170000-catalogo-grafico', titulo: 'Novo em Manaus' }),
+  };
+  const pasta = join(dir, '.coord', 'recados', 'gerente-projetos');
+  mkdirSync(pasta, { recursive: true });
+  for (const [id, t] of Object.entries(antigos)) writeFileSync(join(pasta, `${id}.md`), t);
+
+  const antes = Date.now();
+  let r = await rodar(dir, ['enviar', '--de', 'po', '--para', 'gerente-projetos', '--tipo', 'pergunta', '--responde-a', 'R-20261120-170000-catalogo-grafico', '--tarefa', 'T-0041', '--assunto', 'Enviado agora', '--corpo', 'a | b | c'], env);
+  const depois = Date.now();
+  assert.equal(r.codigo, 0, r.tudo);
+  const idNovo = r.saida.match(/Recado (R-\S+) enviado/)[1];
+  const texto = readFileSync(join(pasta, `${idNovo}.md`), 'utf8');
+  conferirCarimboDeManaus(texto, antes, depois);
+  assert.match(idNovo, /^R-\d{8}-\d{6}-po$/);
+
+  const ordem = (saida, ids) => ids.map((i) => saida.indexOf(i));
+  const crescente = (v) => v.every((x, i) => x >= 0 && (i === 0 || x > v[i - 1]));
+  const esperado = ['R-20261120-170000-catalogo-grafico', 'R-20261120-140000-testes', idNovo];
+  r = await rodar(dir, ['caixa', 'gerente-projetos'], env);
+  assert.equal(r.codigo, 0, r.tudo);
+  assert.ok(crescente(ordem(r.saida, esperado)), `caixa na ordem real:\n${r.saida}`);
+  r = await rodar(dir, ['pendencias'], env);
+  assert.ok(crescente(ordem(r.saida, esperado)), `pendencias na ordem real:\n${r.saida}`);
+  r = await rodar(dir, ['fio', 'R-20261120-170000-catalogo-grafico'], env);
+  assert.ok(crescente(ordem(r.saida, ['2026-11-20T17:00:00+00:00', '2026-11-20T14:00:00-04:00', texto.match(/^criado_em: (\S+)$/m)[1]])), `fio na ordem real:\n${r.saida}`);
+  for (const id of Object.keys(antigos)) {
+    r = await rodar(dir, ['ler', id], env);
+    assert.equal(r.saida, `${antigos[id]}\n`);
+  }
+  r = await rodar(dir, ['lido', 'gerente-projetos', 'R-20261120-140000-testes'], env);
+  assert.equal(r.codigo, 0, r.tudo);
+  assert.equal(readFileSync(join(dir, '.coord', 'lidos', 'gerente-projetos.txt'), 'utf8'), 'R-20261120-140000-testes\n', 'lidos só com o id, sem carimbo');
+  for (const [id, t] of Object.entries(antigos)) assert.equal(readFileSync(join(pasta, `${id}.md`), 'utf8'), t, `${id} não muda`);
+  assert.deepEqual(readdirSync(pasta).sort(), [...Object.keys(antigos), idNovo].map((i) => `${i}.md`).sort());
+});
+
+test('T-0041: CLI com clone (de mentira) — a ponte do po e o lido gravam em -04:00 e os recados antigos do clone não mudam', async () => {
+  const raiz = pastaTemp('coord-t0041-clone-');
+  const g = (cwd, ...a) => execFileSync('git', a, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  const origem = join(raiz, 'origem.git');
+  g(raiz, 'init', '-q', '--bare', '-b', 'main', origem);
+  const clone = join(raiz, 'bapajudacatalogo-recados');
+  g(raiz, 'clone', '-q', origem, clone);
+  g(clone, 'checkout', '-q', '-B', 'main');
+  const antigo = recadoEm({ id: 'R-20261120-170000-catalogo-grafico', de: 'catalogo-grafico', para: 'gerente-projetos', criadoEm: '2026-11-20T17:00:00+00:00', titulo: 'Antigo em UTC' });
+  mkdirSync(join(clone, 'recados', 'gerente-projetos'), { recursive: true });
+  mkdirSync(join(clone, 'lidos'));
+  writeFileSync(join(clone, 'recados', 'gerente-projetos', 'R-20261120-170000-catalogo-grafico.md'), antigo);
+  writeFileSync(join(clone, 'lidos', 'po.txt'), 'R-1\n');
+  g(clone, 'add', '-A');
+  g(clone, '-c', 'user.name=t', '-c', 'user.email=t@t.invalid', 'commit', '-q', '-m', 'inicial');
+  g(clone, 'push', '-q', 'origin', 'HEAD:main');
+  const dir = repoDeCodigo();
+  const env = { BAP_RECADOS_CLONE: clone, BAP_AGENTE: 'po' };
+
+  const antes = Date.now();
+  let r = await rodar(dir, ['enviar', '--de', 'alexandre', '--ponte', '--para', 'gerente-projetos', '--tipo', 'pedido', '--tarefa', 'T-0041', '--assunto', 'Pela ponte', '--corpo', 'texto do Alexandre'], env);
+  const depois = Date.now();
+  assert.equal(r.codigo, 0, r.tudo);
+  assert.match(r.saida, new RegExp(`git push no main do clone ${clone.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
+  const id = r.saida.match(/Recado (R-\S+) enviado/)[1];
+  assert.match(id, /^R-\d{8}-\d{6}-alexandre$/);
+  const texto = g(origem, 'show', `main:recados/gerente-projetos/${id}.md`);
+  conferirCarimboDeManaus(texto, antes, depois);
+  assert.match(texto, /^via: po$/m);
+  assert.equal(g(origem, 'log', '-1', '--format=%ae', 'main').trim(), 'po@bapajuda.invalid');
+
+  r = await rodar(dir, ['caixa', 'gerente-projetos'], env);
+  assert.ok(r.saida.indexOf('R-20261120-170000-catalogo-grafico') < r.saida.indexOf(id), r.saida);
+  r = await rodar(dir, ['lido', 'po', id], env);
+  assert.equal(r.codigo, 0, r.tudo);
+  assert.equal(g(origem, 'show', 'main:lidos/po.txt'), `R-1\n${id}\n`);
+  assert.equal(g(origem, 'show', 'main:recados/gerente-projetos/R-20261120-170000-catalogo-grafico.md'), antigo, 'o recado antigo não muda');
+  assert.equal(g(origem, 'diff', '--name-status', 'main~2', 'main').trim().split('\n').sort().join('\n'),
+    [`A\trecados/gerente-projetos/${id}.md`, 'M\tlidos/po.txt'].sort().join('\n'), 'só o recado novo e o lidos');
+});
+
+test('T-0041: guarda-merge aceita a autorização do po com id e criado_em em Manaus (não olha hora nem ordem)', () => {
+  const id = `R-${carimboDeManaus(new Date('2026-11-27T18:00:00Z')).compacto}-po`;
+  const texto = recadoEm({ id, de: 'po', para: 'gerente-projetos', criadoEm: '2026-11-27T14:00:00-04:00', titulo: `autorizo o merge do PR #41 no commit ${SHA_9}` });
+  assert.equal(id, 'R-20261127-140000-po');
+  assert.deepEqual(autorizacoesDeMerge([{ nome: `${id}.md`, texto }]), [{ pr: 41, sha: SHA_9, id, de: 'po' }]);
 });
