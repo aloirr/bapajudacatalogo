@@ -2180,13 +2180,14 @@
   // v30 (decisão 2a): o produto sem aplicação visível (sem tabela e sem texto, ou com todos os veículos ocultos, "vo")
   // mostra o aviso na página, na janela e no cartão
   const AVISO_SEM_APL = "Aplicação em revisão; consulte o vendedor.";
-  // o texto da aplicação no cartão: no produto "vo" (com tabela), o resumo dos modelos do "ve" visível, por marca ("Ford –
-  // Escort / Verona / Royale · Fiat – Palio"), porque o texto cita os veículos ocultos (parecer de UX da v30, ponto 6)
+  // o texto da aplicação no cartão: no produto "vo" (com tabela), o resumo dos modelos do "ve" visível, por marca ("FORD -
+  // Escort / Verona / Royale · FIAT - Palio", a marca como nos outros cartões: MC-0052), porque o texto cita os veículos
+  // ocultos (parecer de UX da v30, ponto 6)
   const aplCartao = (p) => {
     if (!p.vo) return p.a;
     const porMarca = new Map();
-    for (const [f, m] of p.ve || []) { const k = marcaTela(f); if (!porMarca.has(k)) porMarca.set(k, []); if (!porMarca.get(k).includes(m)) porMarca.get(k).push(m); }
-    return [...porMarca].map(([f, ms]) => f + " – " + ms.join(" / ")).join(" · ");
+    for (const [f, m] of p.ve || []) { const k = String(f).toUpperCase(); if (!porMarca.has(k)) porMarca.set(k, []); if (!porMarca.get(k).includes(m)) porMarca.get(k).push(m); }
+    return [...porMarca].map(([f, ms]) => f + " - " + ms.join(" / ")).join(" · ");
   };
   const semAplicacao = (p) => !tabelaDe(p).length && (!p.a || !!p.vo);
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
