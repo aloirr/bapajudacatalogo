@@ -322,7 +322,7 @@
       marcas.add(vm);
       // os modelos de alguma linha sem o motor em litros (as de antes da Fraga): só eles, na Versão, são "outro modelo"
       // (versaoLivre; T-0040: o "310", o "G420" e o "4X4" que só a Fraga traz não apagam a Versão)
-      if (c.length >= 2 && !/\d[.,]\d+\s*L\b/i.test(ver || "")) semMotor.add(c);
+      if (c.length >= 2 && cilDaVersao(ver) === null) semMotor.add(c);
       // T-0040: as palavras do nome do modelo com mais de uma palavra ("CG 160 TITAN": CG e TITAN), com 3 letras ou mais
       for (const w of norm(m).split(/[^A-Z0-9]+/)) if (w.length >= 3 && /^[A-Z]+$/.test(w) && w !== c) {
         if (!palavras.has(w)) palavras.set(w, new Map());
@@ -1244,10 +1244,11 @@
   const temVeiculo = (e, vm, vmo) => veDe(e).some((x) => x[0] === vm && (!vmo || x[1] === vmo))
     || (!!vmo && temPalavra(e.apl, vmo) && tabelaDe(e.p).some((r) => norm(r[0]) === vm && norm(r[1]) === vmo));
   const marcasDe = (e) => { const ve = veDe(e); return ve ? [...new Set(ve.map((x) => x[0]))] : norm(e.p.mo).split(/\s*[\/,]\s*/).filter(Boolean); };
-  // T-0040: mais a cilindrada das versões do "ve" da marca, do modelo e do ano escolhidos (veDoVeiculo; "EA111 1.6 L 8V")
-  // (a de moto, abaixo de 1.0 L, não entra: a Fraga arredonda; cilDaVersao)
-  const motoresDe = (e, v) => [...new Set([...(e.apl.match(/\b\d[.,]\d\b/g) || []),
-    ...((veDe(e) && v ? veDoVeiculo(e, v).map((x) => x[2]).join(" ") : "").match(/(?<![\d.])[1-9][.,]\d(?=\s*L\b)/g) || [])].map((m) => m.replace(",", ".")))];
+  // T-0040: mais a cilindrada das versões do "ve" da marca, do modelo e do ano escolhidos (veDoVeiculo; "EA111 1.6 L 8V");
+  // o texto e o "ve" pela mesma regra (cilDe e cilDaVersao: a de moto abaixo de 1.0 L não entra)
+  const motoresDe = (e, v) => { const moto = ehMoto(e.p);
+    return [...new Set([...cilDe(e.apl, moto), ...(veDe(e) && v ? veDoVeiculo(e, v).flatMap((x) => cilsDe(cilDaVersao(x[2], moto))) : [])]
+      .map((c) => c.split(" ")[0]).filter((c) => /^\d\.\d$/.test(c)))]; };
   // as linhas do "ve" da marca, do modelo (se escolhido) e do ano (se escolhido; a linha sem ano fica: o ano dela vem do texto)
   const veDoVeiculo = (e, v) => veDe(e).filter((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo) && (!v.va || ((f) => !f || (v.va >= f[0] && v.va <= f[1]))(faixaVe(x))));
   const anoServe = (e, ano) => casaAno(e, ano) !== 0; // o ano da base (an) primeiro, depois a aplicação (T-0011); sem ano: serve
@@ -1695,7 +1696,7 @@
       const fora = fx.filter(([de, ate], i) => !fx.some(([d2, a2], j) => j !== i && d2 <= de && ate <= a2 && (d2 < de || ate < a2)));
       // o ano do "ve" manda na linha dele; o "an" vale para a linha sem ano no "ve" (T-0040: VEL7503 Strada FIASA 1998–2003)
       const ano = anoDoVe(x) || anoBase || [...new Set(fora.sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(fmtFaixa))].join(SEP_FAIXAS);
-      const r = [marcaTela(fab), mod, cil, versaoSemBarra(ver), ano];
+      const r = [marcaTela(fab), mod, cil, versaoDoVe(ver), ano];
       if (faixaVe(x)) r.comAnoVe = true; // a linha do "ve" com ano (cobreVeiculo: a versão dela não precisa estar no texto)
       return r;
     });
@@ -1706,7 +1707,9 @@
   const cilsDe = (c) => String(c || "").split(" / ").filter(Boolean);
   // a VERSAO como a tela mostra: o " | " cru vira " · " (MC-0049)
   const versaoSemBarra = (v) => String(v || "").replace(/\s*\|\s*/g, " · ");
-  const cilHtml = (c) => String(c).split(" / ").map((x) => `<span class="cil">${esc(x)}</span>`).join(" / ");
+  // a VERSAO do "ve" na tabela: sem o motor em litros, que vai para a Cilindrada (cilDaVersao: "DS 11 15 11 L 12V" fica "DS 11 15")
+  const versaoDoVe = (v) => versaoSemBarra(v).replace(RX_CIL_VER, " ").replace(/\s+/g, " ").trim();
+  const cilHtml = (c) => cilsDe(c).map((x) => `<span class="cil">${esc(x)}</span>`).join(" / ");
   function tabelaVeiculos(linhas) {
     if (!linhas.length) return "";
     const traco = '<span aria-label="não informado">—</span>';
@@ -1721,18 +1724,21 @@
   // Cilindradas do texto, com a válvula quando vem junto ("2.0 L 16V" → "2.0 16V", "1.8 8v" → "1.8 8V"): a coluna
   // Cilindrada da tabela mostra as duas (decisão do gerente sobre o RD-0174)
   const RX_CIL = /\b(\d[.,]\d)\b(?:\s*L\b)?(?:\s*(\d{1,2})\s?V\b)?/gi;
-  // A cilindrada da versão do "ve" ("EA111 1.6 L 8V": "1.6 8V"), ou null quando a versão não traz litros (vale a do
-  // texto). Abaixo de 1.0 L (moto, T-0040): com duas casas, em cm³ ("0.16 L 2V": "160 cm³ 2V"); com uma casa a Fraga
-  // arredonda ("0.2 L" no KTM EXC 250) e o valor não é seguro: só as válvulas ("2V") ou nada ("—")
-  const RX_CIL_VER = /(?<![\d.])(\d)[.,](\d+)\s*L\b(?:\s*(\d{1,2})\s?V\b)?/gi;
-  const cilDaVersao = (v) => {
+  // Uma cilindrada como a tela mostra (T-0040), a regra única da versão do "ve" (cilDaVersao) e do texto (cilDe): "1.6"
+  // com as válvulas ("1.6 8V"). Na moto (LINHA MOTO), abaixo de 1.0 L: com duas casas, em cm³ ("0.16 L 2V": "160 cm³
+  // 2V"); com uma casa a Fraga arredonda ("0.2 L" no KTM EXC 250) e o valor não é seguro: só as válvulas ("2V") ou nada
+  // ("—"). Fora da moto, como antes ("Vivio 0.7 L 8V": "0.7 8V")
+  let CIL_MOTO = false; // o produto da tabela que está sendo montada é de moto (tabelaDe)
+  const umaCil = (i, d = "0", vv, moto) => { const val = vv ? " " + vv + "V" : "";
+    return +i >= 1 || !moto ? i + "." + d[0] + val : d.length >= 2 ? Math.round(+("0." + d) * 1000) + " cm³" + val : val.trim(); };
+  // a cilindrada da versão do "ve" ("EA111 1.6 L 8V": "1.6 8V"; "DS 11 11 L 12V": "11.0 12V"), ou null quando a versão
+  // não traz litros (vale a do texto)
+  const RX_CIL_VER = /(?<![\d.])(\d{1,2})(?:[.,](\d+))?\s*L\b(?:\s*(\d{1,2})\s?V\b)?/gi;
+  const cilDaVersao = (v, moto = CIL_MOTO) => {
     const ms = [...String(v || "").matchAll(RX_CIL_VER)];
-    if (!ms.length) return null;
-    return ms.map(([, i, d, vv]) => { const val = vv ? " " + vv + "V" : "";
-      return +i >= 1 ? i + "." + d[0] + val : d.length >= 2 ? Math.round(+("0." + d) * 1000) + " cm³" + val : val.trim(); }).filter(Boolean).join(" / ");
+    return ms.length ? ms.map(([, i, d, vv]) => umaCil(i, d, vv, moto)).filter(Boolean).join(" / ") : null;
   };
-  // abaixo de 1.0 (moto: "DT 200 0.2 L", T-0040) o valor não é seguro: só as válvulas, ou nada
-  const cilDe = (t) => [...String(t || "").matchAll(RX_CIL)].map((m) => (m[1][0] === "0" ? (m[2] ? m[2] + "V" : "") : m[1].replace(",", ".") + (m[2] ? " " + m[2] + "V" : ""))).filter(Boolean);
+  const cilDe = (t, moto = CIL_MOTO) => [...String(t || "").matchAll(RX_CIL)].map((m) => { const [i, d] = m[1].split(/[.,]/); return umaCil(i, d, m[2], moto); }).filter(Boolean);
   // Ano da aplicação: "2011", "01/1979", "01/01/2012". O pedaço só de ano: "2011 até 2014", "2009>", "2007–2012",
   // "2014 em Diante", "até 2009", "- 12/2020", "01/01/2012 A 31/12/2015", "2000–2003 / 2002>", "(2009>)" e a lista
   // "2012, 2013, 2014". "1924–1979 até 2026" (modelo de caminhão na frente) não é só ano. O ANO_APL fica no começo,
@@ -1944,7 +1950,7 @@
     const x = versaoSemCil(v, p);
     // a Versão de mais de uma palavra, com letra, igual a uma versão do "ve" do próprio modelo fica, mesmo longa ou com
     // número de outro modelo (T-0040: "AP 1600 SOHC L4", "E-TORQ SOHC L4 · COM TAMPA …" da VEICULOS)
-    if (/[A-Z]/i.test(x) && x.includes(" ") && (p.ve || []).some((y) => y[2] && compacto(y[1]) === compacto(r[1]) && compacto(versaoSemCil(versaoSemBarra(y[2]), p)) === compacto(x))) return siglas(x);
+    if (/[A-Z]/i.test(x) && x.includes(" ") && (p.ve || []).some((y) => y[2] && compacto(y[1]) === compacto(r[1]) && compacto(versaoSemCil(versaoDoVe(y[2]), p)) === compacto(x))) return siglas(x);
     if (/^(?:tod[oa]s(?:\s+os\s+modelos)?|e|ou)$/i.test(x) || x.length > 60 || compacto(x) === compacto(p.a)) return "";
     // outro modelo: pelo nome ("Grand Siena") ou só de número ("605", "Alfa 145"), menos as versões do próprio
     // modelo no "ve" ("Cargo 1218")
@@ -1965,6 +1971,7 @@
     const k = chaveApl;
     const locais = [...new Map(tab.map((r) => [k(r[1]) + "|" + marcaDe(r[0]), [r[1], marcaDe(r[0])]])).values()];
     const marcasTab = [...new Set(tab.map((r) => marcaDe(r[0])))];
+    const ehLocal = (w) => locais.some(([m]) => k(m) === k(String(w).trim()));
     const cheia = new Set(); // as linhas que já receberam dado (cada uma recebe uma vez)
     // a linha r recebe o dado da nova n: mesma marca e modelo; em cilindrada, versão e ano, r vazia, igual ou (cilindrada) contida
     const cabe = (r, n) => k(r[0]) === k(n[0]) && k(r[1]) === k(n[1]) && [2, 3, 4].every((c) => !r[c] || k(r[c]) === k(n[c]) || (c === 2 && cilsDe(r[2]).every((x) => cilsDe(n[2]).includes(x))));
@@ -2048,8 +2055,9 @@
       function umVeiculo(v, lista) {
         const cob = linhaCoberta(v, tab);
         if (cob) { ultimas = cob; return ""; }
-        if (marcaDe(v)) { vmAqui = marcaDe(v); return "marca"; }
-        const mi0 = rxMarcaIni().exec(v), vmi = mi0 ? marcaDe(mi0[1]) : "", mi = vmi ? mi0 : null, vm = vmi || vmAqui || vmBloco || vmSem;
+        // o nome que é modelo do próprio produto não vira marca (T-0040: "Volare" é modelo do Marcopolo e, na Fraga, marca)
+        if (marcaDe(v) && !ehLocal(v)) { vmAqui = marcaDe(v); return "marca"; }
+        const mi0 = rxMarcaIni().exec(v), vmi = mi0 && !ehLocal(mi0[1]) ? marcaDe(mi0[1]) : "", mi = vmi ? mi0 : null, vm = vmi || vmAqui || vmBloco || vmSem;
         const { mods, resto } = modelosDoVeiculo((mi ? v.slice(mi[0].length) : v), vm, modelos, ultimas && ultimas[ultimas.length - 1]);
         // sem modelo: detalhe do veículo de antes (B11, T-0018: "Motores 1.0 / 1.3", "Dianteiro - Esq"). Com ano, o pedaço
         // só de ano ("Palio 1.8R · 11/2005–12/2010") e o detalhe que não cita outro modelo dão o ano à coluna Ano do
@@ -2061,7 +2069,7 @@
           const outro = donos.some((r) => modelos.some(([m]) => compacto(m).length >= 2 && k(m) !== k(r[1]) && rxPalavra(k(m)).test(k(v))));
           // na linha do "ve" com ano, o detalhe entra sem o ano ("Com Buchas / Sem Pivô"), menos o que cita um número de
           // modelo ("1634 (1938–1944)" é outro caminhão; numModelo)
-          const numModelo = (r, d) => r.comAnoVe && /\b\d{3,4}\b/.test(d);
+          const numModelo = (r, d) => r.comAnoVe && /\b(?!(?:19|20)\d{2}\b)\d{3,4}\b/.test(d); // o ano ("1977") não é número de modelo
           if (fx.length && !outro) donos.forEach((r) => { somaAno(r, fx); const d = comRestr(v.trim(), semAno, p); if (d && !numModelo(r, d)) comDetalhe(r, d); });
           else donos.forEach((r) => { if (!numModelo(r, v)) comDetalhe(r, v.trim()); });
           return outro ? "outro" : "";
@@ -2118,11 +2126,9 @@
     }
     tab = tab.filter((r) => r[3] !== null);
     tab = tab.filter((r, i) => !tab.slice(0, i).some((x) => x.every((c, j) => k(c) === k(r[j]))));
-    // T-0040: a linha do "ve" com ano nunca sai por estar contida numa do texto; a do texto do mesmo veículo (marca,
-    // modelo, versão e cilindrada vazia ou igual) sai, porque o ano do "ve" manda (CXD13065: "Up 2014–2021", não "2014+")
+    // T-0040: a linha do "ve" com ano nunca sai por estar contida numa do texto (a coberta por ela sai no semRepetida)
     const contida = (r, o) => r !== o && !r.comAnoVe && mesmo(r, o) && k(r[3]) === k(o[3]) && !!o[4] && (!r[4] || faixaDentro(r, o));
     tab = tab.filter((r, i) => !tab.some((o, j) => j !== i && contida(r, o) && !(contida(o, r) && j > i)));
-    tab = tab.filter((o) => o.comAnoVe || !tab.some((r) => r !== o && r.comAnoVe && mesmo(o, r) && k(r[3]) === k(o[3])));
     const ordem = new Map();
     tab.forEach((r, i) => { for (const c of [k(r[0]), k(r[0]) + "|" + k(r[1])]) if (!ordem.has(c)) ordem.set(c, i); });
     const chave = (r) => [ordem.get(k(r[0])), ordem.get(k(r[0]) + "|" + k(r[1]))];
@@ -2136,14 +2142,20 @@
     const rs = [...t.matchAll(RX_RESTR), ...t.matchAll(RX_CONDICAO)].map((m) => limparRestr(m[0], p));
     return [...new Set(rs.filter((x) => x && !naTab.includes(compacto(x))))];
   };
-  // RD-0678 e RD-0686 (T-0040): a linha sem versão e sem cilindrada não aparece quando outra linha do "ve" com ano, da
-  // mesma marca e do mesmo modelo, com versão ou cilindrada, tem uma faixa que contém a dela ("Elba 1989–1996" e "Elba
-  // SEVEL 1.6 8V 1989–1996"; "Saveiro (08/2022)" e "Saveiro 1.6 8V EA111 VHT 2009–2022"). Vale depois do texto, que dá o
-  // ano a essa linha. Só a tela: a busca e o filtro continuam com o veículo e o ano (a outra linha cobre)
-  const semRepetida = (tab) => tab.filter((r) => { const f = !r[2] && !r[3] && faixaDaCelula(r[4]);
-    return !f || !tab.some((o) => o !== r && o.comAnoVe && (o[2] || o[3]) && chaveApl(o[0]) === chaveApl(r[0]) && chaveApl(o[1]) === chaveApl(r[1])
-      && ((g) => g && g[0] <= f[0] && f[1] <= g[1])(faixaDaCelula(o[4]))); });
-  const tabelaDe = (p) => { if (!TABELA.has(p)) { const tv = linhasVeiculos(p); TABELA.set(p, semRepetida(tv.length && p.a ? juntarNaTabela(p, tv) : tv)); } return TABELA.get(p); };
+  // A linha coberta por uma linha do "ve" com ano, da mesma marca e do mesmo modelo, não aparece (T-0040; só a tela: a
+  // busca e o filtro continuam com o veículo e o ano, porque a outra linha cobre):
+  // - a do texto com a mesma versão e a cilindrada vazia ou igual: o ano do "ve" manda (CXD13065: "Up 2014–2021", não "2014+");
+  // - a sem versão e sem cilindrada cuja faixa está dentro da dela, vinda do "ve" ou do texto (RD-0678 e RD-0686: "Elba
+  //   1989–1996" e "Elba SEVEL 1.6 8V 1989–1996"; "Saveiro (08/2022)" e "Saveiro 1.6 8V EA111 VHT 2009–2022").
+  // Roda depois do texto, que dá o ano à linha
+  const semRepetida = (tab) => { const k = chaveApl; return tab.filter((r) => { const f = !r[2] && !r[3] && faixaDaCelula(r[4]);
+    return !tab.some((o) => o !== r && o.comAnoVe && k(o[0]) === k(r[0]) && k(o[1]) === k(r[1])
+      && ((!r.comAnoVe && (!r[2] || k(r[2]) === k(o[2])) && k(r[3]) === k(o[3]))
+        || (f && (o[2] || o[3]) && ((g) => g && g[0] <= f[0] && f[1] <= g[1])(faixaDaCelula(o[4]))))); }); };
+  const tabelaDe = (p) => {
+    if (!TABELA.has(p)) { CIL_MOTO = ehMoto(p); const tv = linhasVeiculos(p); TABELA.set(p, semRepetida(tv.length && p.a ? juntarNaTabela(p, tv) : tv)); CIL_MOTO = false; }
+    return TABELA.get(p);
+  };
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
