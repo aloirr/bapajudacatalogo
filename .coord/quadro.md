@@ -1,6 +1,6 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 27/11/2026 14:30 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 27/11/2026 14:19 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
@@ -42,8 +42,8 @@ Atualizado em 27/11/2026 14:30 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0038](tarefas/T-0038.md) | Onboarding do Vendedor atualizado, com os 10 passos da visita | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, web-site, testes | CONCLUÍDA (no ar em 25/11 10:50) | #209, #210, #211, #212 |
 | [T-0033](tarefas/T-0033.md) | Busca por veículo com ano (só o ano que bate) e fim do bloco "Outros veículos e detalhes" | web-site | catalogo-dados, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 26/11 18:03) | #217, #225, #219, #220, #221 |
 | [T-0039](tarefas/T-0039.md) | Busca "filtro titan": palavra inteira e moto primeiro | web-site | testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 26/11 18:03) | #222, #225, #223, #224, #226 |
-| [T-0037](tarefas/T-0037.md) | Veículos do texto da APLICACAO para a aba VEICULOS (base v29), com as pendências da T-0033 e da T-0039 | catalogo-dados | web-site, testes | NA FILA (não entrou na v29 nem na v30) | — |
-| [T-0040](tarefas/T-0040.md) | Ano inicial e final em 100% das aplicações: Fraga (v29), pesquisa (v30) e site sem veículo sem ano | catalogo-dados | web-site, testes, designer-ux, design-de-marca, revisor-codigo, corretor-redundancias | CONCLUÍDA (no ar em 27/11 ~14:20) | #228, #230, #229, #231, #232, #233, #235; pareceres: a numerar |
+| [T-0037](tarefas/T-0037.md) | Veículos do texto da APLICACAO para a aba VEICULOS (base v29), com as pendências da T-0033 e da T-0039 | catalogo-dados | web-site, testes | NA FILA (junto com a T-0040) | — |
+| [T-0040](tarefas/T-0040.md) | Ano inicial e final em 100% das aplicações: Fraga (v29), pesquisa (v30) e site sem veículo sem ano | catalogo-dados | web-site, testes, designer-ux, design-de-marca, revisor-codigo, corretor-redundancias | CONCLUÍDA (no ar em 27/11 ~14:20) | #228, #230, #229, #231, #232, #233, #235; pareceres #236, #237, #238 |
 | [T-0041](tarefas/T-0041.md) | Recados novos com id e criado_em no fuso de Manaus (-04:00) | alexandre | gerente-projetos, testes, revisor-codigo, corretor-redundancias | CONCLUÍDA (13535e6) | #234 |
 
 ## Fila
