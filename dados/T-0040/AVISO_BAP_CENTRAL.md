@@ -21,4 +21,4 @@ A BAP Central lê a base unificada (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`
 
 ## Situação
 
-A v29 está no branch `catalogo-dados/T-0040-v29`, **pendente do aprovado do Alexandre** (simulação cf9db10). Só vale depois do merge no `main`.
+A v29 foi aprovada em R-20261127-132222-alexandre (simulação cf9db10). Vale a partir do merge no `main`.
