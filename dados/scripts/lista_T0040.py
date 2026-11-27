@@ -30,7 +30,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from base_comum import BASE, RAIZ, sha  # noqa: E402
+from base_comum import BASE, INTERNO, RAIZ, sha  # noqa: E402
 from simular_T0040 import AD, ORIGEM, tipo_ano  # noqa: E402
 
 JSON = RAIZ / "site" / "data" / "produtos.json"
@@ -40,7 +40,6 @@ COLS_CONF = ["id_linha", "codigo_bap", "descricao", "montadora", "modelo", "vers
              "faixa_fraga", "referencias_cruzadas"]
 COLS = ["id_linha", "codigo_bap", "descricao", "montadora", "modelo", "versao", "motor", "ano_atual", "tipo",
         "referencias_cruzadas"]
-INTERNO = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|R\$|BAP BOX|CUSTO|FORNECEDOR|RANKING|ANTERIOR", re.I)
 
 
 def txt(v):
