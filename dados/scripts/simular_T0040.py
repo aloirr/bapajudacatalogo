@@ -155,7 +155,9 @@ def somar(antigas: list, fraga_cod: dict, vers_cod: dict, trocar: set):
        grupos da Fraga entram como linhas somadas. ORIGEM continua "automático";
     2. cada grupo da Fraga: se há linha atual com ano completo do mesmo código + montadora + modelo e do mesmo motor
        ou versão, e as faixas se encostam, não entra: a atual fica, com a faixa junta (mínimo e máximo; "juntou" se
-       a faixa cresceu, "já coberta" se não); faixas que não se encostam: o grupo entra como linha nova;
+       a faixa cresceu, "já coberta" se não); faixas que não se encostam: o grupo entra como linha nova. O grupo da
+       Fraga sem motor (VERSAO vazia) dentro da faixa de uma linha atual também sem VERSAO não entra (é a mesma
+       linha: revisor, AMT7586/7/8 PEUGEOT 208 2021–2025);
     3. os outros grupos entram como linha nova (ORIGEM "Fraga T-0040"), logo depois da última linha do código (os
        códigos sem linha, no fim).
     casos: [código, linha da v28 (ou ""), caso, montadora, modelo, VERSAO, ano antes, ano depois, detalhe].
@@ -207,7 +209,8 @@ def somar(antigas: list, fraga_cod: dict, vers_cod: dict, trocar: set):
                 r = linhas[n]
                 if (chave(r[1]), chave(r[2])) != (chave(g[1]), chave(g[2])) or tipo_ano(r[4], r[5]) != "completa":
                     continue
-                if mesmo_motor_ou_versao(r, g, vers[i]) and encostam(r[4], r[5], g[4], g[5]):
+                if (mesmo_motor_ou_versao(r, g, vers[i]) and encostam(r[4], r[5], g[4], g[5])) or \
+                        (not limpo(g[3]) and not limpo(r[3]) and r[4] <= g[4] and g[5] <= r[5]):
                     cobre = n
                     break
             if cobre is None:
