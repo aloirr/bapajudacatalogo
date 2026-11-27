@@ -525,6 +525,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - #230 (`testes/T-0040`, `6bd5b93`): RD-0701 (segura) e RD-0702 (fila, depois do #229). VOLTA PARA AJUSTE.
 - #230 no `aedfb33`: RD-0701 corrigido. LIBERADO (fila: RD-0702).
 - #231 (`testes/T-0040-rd0702`, `4bb9a9c`): RD-0702 corrigido. LIBERADO.
+- #231 no `40ea5ae` (só texto do `ve:formato`): LIBERADO.
 
 ### T-0033, ano na busca e fim do "Outros veículos e detalhes", 25/11/2026 (antes dos PRs)
 - RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
