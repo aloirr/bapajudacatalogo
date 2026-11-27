@@ -1996,7 +1996,7 @@
     // mesmo modelo (ou da mesma marca), e sem as duas, no fim
     function poeLinha(n) {
       const r = tab.find((x) => x.every((c, j) => k(c) === k(n[j]))) || tab.find((x) => !cheia.has(x) && cabe(x, n));
-      if (r) { [2, 3, 4].forEach((c) => { if (n[c]) r[c] = n[c]; }); cheia.add(r); return r; }
+      if (r) { if (r.comAnoVe && r[2] && n[2] && k(n[2]) !== k(r[2])) r.juntou = true; [2, 3, 4].forEach((c) => { if (n[c]) r[c] = n[c]; }); cheia.add(r); return r; }
       let ix = -1;
       tab.forEach((x, j) => { if (k(x[1]) === k(n[1]) && k(x[0]) === k(n[0])) ix = j; });
       if (ix < 0) tab.forEach((x, j) => { if (k(x[0]) === k(n[0])) ix = j; });
@@ -2095,7 +2095,13 @@
           // "150 cv", "1200 kg") é medida, não modelo
           const serieNum = donos.some((x) => /^\d{3,4}$/.test(String(x[3]).trim()));
           const numModelo = (r, d) => r.comAnoVe && [...String(d).matchAll(RX_NUM_MODELO)].some((m) => serieNum || numerosDeModelo().has(m[0]));
-          if (fx.length && !outro) donos.forEach((r) => { somaAno(r, fx); const d = comRestr(v.trim(), semAno, p); if (d && !numModelo(r, d)) comDetalhe(r, d); });
+          // o detalhe com ano fora da faixa da linha do "ve" com ano que recebeu as cilindradas do texto (juntou) é outra
+          // versão do veículo: vai numa linha nova, com o ano dele ("Golf 1999–2005 1.6 / 1.9, GTI 1999–2009 1.6 / 1.9": a
+          // linha do GTI, KHC12809)
+          const foraDaFaixa = (r) => r.juntou && ((g) => !g || fx.some(([de, ate]) => de < g[0] || ate > g[1]))(faixaDaCelula(r[4]));
+          if (fx.length && !outro) donos.forEach((r) => { const d = comRestr(v.trim(), semAno, p);
+            if (d && !numModelo(r, d) && foraDaFaixa(r)) { poeLinha([r[0], r[1], r[2], d, fmtFaixas(fx)]); return; }
+            somaAno(r, fx); if (d && !numModelo(r, d)) comDetalhe(r, d); });
           else donos.forEach((r) => { if (!numModelo(r, v)) comDetalhe(r, v.trim()); });
           return outro ? "outro" : "";
         }
@@ -2152,7 +2158,10 @@
     tab = tab.filter((r) => r[3] !== null);
     tab = tab.filter((r, i) => !tab.slice(0, i).some((x) => x.every((c, j) => k(c) === k(r[j]))));
     // T-0040: a linha do "ve" com ano nunca sai por estar contida numa do texto (a coberta por ela sai no semRepetida)
-    const contida = (r, o) => r !== o && !r.comAnoVe && mesmo(r, o) && k(r[3]) === k(o[3]) && !!o[4] && (!r[4] || faixaDentro(r, o));
+    // a do texto cuja cilindrada está entre as da outra também sai ("Royale 1.8 · 1993–1995" ao lado de "Royale 1.8 / 2.0 ·
+    // 1992–1996", KHC12589)
+    const cilDentro = (r, o) => !r[2] || k(r[2]) === k(o[2]) || cilsDe(r[2]).every((x) => cilsDe(o[2]).includes(x));
+    const contida = (r, o) => r !== o && !r.comAnoVe && k(r[0]) === k(o[0]) && k(r[1]) === k(o[1]) && cilDentro(r, o) && k(r[3]) === k(o[3]) && !!o[4] && (!r[4] || faixaDentro(r, o));
     tab = tab.filter((r, i) => !tab.some((o, j) => j !== i && contida(r, o) && !(contida(o, r) && j > i)));
     const ordem = new Map();
     tab.forEach((r, i) => { for (const c of [k(r[0]), k(r[0]) + "|" + k(r[1])]) if (!ordem.has(c)) ordem.set(c, i); });
