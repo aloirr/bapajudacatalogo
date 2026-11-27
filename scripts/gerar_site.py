@@ -12,7 +12,7 @@ Uso (na raiz do repositório bapajudacatalogo):
   nova que a original não é refeita. Sem foto, o site mostra o logo e "Foto em breve".
 - Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (desde a v17, T-0017). Só as
   linhas SITUACAO = separado; as duvidosas ficam fora até a revisão. Sem a aba, o JSON sai como antes.
-  No produto com veículos da Fraga (T-0040), cada veículo leva ANO_INICIO e ANO_FIM e o produto leva "vt": 1.
+  Desde a T-0040, a linha com ANO_INICIO ou ANO_FIM leva os anos: [fab, mod, ver, ini, fim].
 - Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
   ou de importação, fornecedor, o nome de cada um dos FORNECEDORES e o da concorrência fora da marca da referência
   cruzada), o script PARA e não grava (ver TRAVA abaixo).
@@ -285,11 +285,10 @@ def montadora_de(extras: list[list[str]], aplicacao: str) -> str:
 
 
 # Aba VEICULOS (desde a v17, T-0017): uma linha por produto x veículo. Vão para o site fabricante, modelo e versão das
-# linhas SITUACAO = separado. No produto com veículos da Fraga (ORIGEM "Fraga ...", T-0040), também o ANO_INICIO e o
-# ANO_FIM de cada linha ([fab, mod, ver, ini, fim]; versão vazia = "", ano ausente = 0) e o sinal "vt": 1 no produto
-# (o site monta a tabela e a busca por veículo só pelo "ve"). ORIGEM, SITUACAO, MOTIVO, CILINDRADA e ANO_DUVIDA não vão.
+# linhas SITUACAO = separado e, desde a T-0040, o ANO_INICIO e o ANO_FIM da linha que tem ano ([fab, mod, ver, ini, fim];
+# versão vazia = "", ano ausente = 0; sem os anos quando o ANO_DUVIDA está preenchido). ORIGEM, SITUACAO, MOTIVO,
+# CILINDRADA e ANO_DUVIDA não vão.
 VE_SITUACAO = "separado"
-RX_ORIGEM_FRAGA = re.compile(r"^FRAGA\b", re.I)
 
 
 def ano_ve(v) -> int:
@@ -301,11 +300,11 @@ def ano_ve(v) -> int:
     return n if 1900 <= n <= 2100 else 0
 
 
-def veiculos_de(wb) -> tuple[dict[str, list[list]], set[str]]:
-    """({CODIGO: [[fabricante, modelo, versao?], ...]}, {códigos com veículo da Fraga}), sem repetir e na ordem da
-    aba. No código da Fraga, cada linha leva os anos: [fabricante, modelo, versao, ini, fim]. Sem a aba: ({}, set())."""
+def veiculos_de(wb) -> dict[str, list[list]]:
+    """{CODIGO: [[fabricante, modelo, versao?], [fabricante, modelo, versao, ini, fim], ...]}, sem repetir e na ordem
+    da aba; a linha com ano leva os anos. Sem a aba VEICULOS: {}."""
     if "VEICULOS" not in wb.sheetnames:
-        return {}, set()
+        return {}
     linhas = wb["VEICULOS"].iter_rows(values_only=True)
     cab = [limpar(c).upper() for c in next(linhas, ())]
     pos = {c: i for i, c in enumerate(cab)}
@@ -321,8 +320,7 @@ def veiculos_de(wb) -> tuple[dict[str, list[list]], set[str]]:
         i = pos.get(c)
         return ano_ve(r[i]) if i is not None and i < len(r) and r[i] is not None else 0
 
-    lidas: dict[str, list[tuple[str, str, str, int, int]]] = {}
-    fraga: set[str] = set()
+    saida: dict[str, list[list]] = {}
     vistos: set[tuple[str, str, str, str, int, int]] = set()
     sem_modelo = 0
     for r in linhas:
@@ -333,28 +331,17 @@ def veiculos_de(wb) -> tuple[dict[str, list[list]], set[str]]:
         if not fab or not mod:
             sem_modelo += 1                      # separado sem fabricante ou modelo não serve ao filtro
             continue
-        if RX_ORIGEM_FRAGA.search(g(r, "ORIGEM")):
-            fraga.add(cod)
-        ini, fim = a(r, "ANO_INICIO"), a(r, "ANO_FIM")
+        # o ano que a base marca como duvidoso (ANO_DUVIDA: "herdado" da lista com vírgula, "ano solto") não vai: as
+        # decisões da T-0033 (o ano da lista é só do último; o ano solto não é faixa) continuam valendo pelo texto
+        ini, fim = (0, 0) if g(r, "ANO_DUVIDA") else (a(r, "ANO_INICIO"), a(r, "ANO_FIM"))
         chave = (cod, fab, mod, ver, ini, fim)
         if chave in vistos:
             continue
         vistos.add(chave)
-        lidas.setdefault(cod, []).append((fab, mod, ver, ini, fim))
+        saida.setdefault(cod, []).append([fab, mod, ver, ini, fim] if ini or fim else [fab, mod, ver] if ver else [fab, mod])
     if sem_modelo:
         print(f"  [AVISO] VEICULOS: {sem_modelo} linhas 'separado' sem fabricante ou modelo ficaram fora do 've'")
-    saida: dict[str, list[list]] = {}
-    for cod, ls in lidas.items():
-        if cod in fraga:
-            saida[cod] = [list(x) for x in ls]
-        else:                                    # fora da Fraga, como antes da T-0040: sem anos e sem repetir
-            sai, ja = [], set()
-            for fab, mod, ver, _, _ in ls:
-                if (fab, mod, ver) not in ja:
-                    ja.add((fab, mod, ver))
-                    sai.append([fab, mod, ver] if ver else [fab, mod])
-            saida[cod] = sai
-    return saida, fraga
+    return saida
 
 
 def ler_base(caminho: Path) -> list[dict]:
@@ -407,12 +394,10 @@ def ler_base(caminho: Path) -> list[dict]:
         ss = sistemas_de(p["p"], p["si"], p["d"], p["de"], dict(pares).get("POSICAO", ""))
         if ss != sistema_base(p["si"]):
             p["ss"] = ss
-    ve, fraga = veiculos_de(wb)
+    ve = veiculos_de(wb)
     for p in produtos:
         if p["c"] in ve:
             p["ve"] = ve[p["c"]]
-            if p["c"] in fraga:
-                p["vt"] = 1
     return produtos
 
 
@@ -548,9 +533,9 @@ def main():
     com_ve = sum(1 for p in produtos if "ve" in p)
     if com_ve:
         print(f"  veículos: {com_ve} produtos com 've' ({sum(len(p['ve']) for p in produtos if 've' in p)} veículos)")
-        com_vt = sum(1 for p in produtos if p.get("vt"))
-        if com_vt:
-            print(f"  veículos com ano (vt, T-0040): {com_vt} produtos")
+        com_ano = sum(1 for p in produtos for v in p.get("ve", []) if len(v) == 5)
+        if com_ano:
+            print(f"  veículos com ano (T-0040): {com_ano}")
     dados = {"gerado_em": datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"), "fonte": Path(a.base).name,
              "total": len(produtos), "sc": SIS_COMPAT, "produtos": produtos}
     texto = json.dumps(dados, ensure_ascii=False, separators=(",", ":"))
