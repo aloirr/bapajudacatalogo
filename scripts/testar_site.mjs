@@ -179,7 +179,7 @@ function palavrasSinais(v) {
 // "ve" (T-0017, v17): veículos da aba VEICULOS, lista de [FABRICANTE, MODELO] ou [FABRICANTE, MODELO, VERSAO], textos não vazios
 // "ss" (T-0018, R-20261121-200058): sistema da peça para o "Leve também", opcional, lista de textos não vazios
 // "ve" com ano (T-0040, Fraga soma): a linha da aba VEICULOS que tem ano vai como [FABRICANTE, MODELO, VERSAO, ANO_INICIO,
-// ANO_FIM], com a versão em texto (pode ser "") e os anos inteiros (0 quando faltam); sem ano, como antes. Os dois no mesmo produto
+// ANO_FIM], com a versão em texto (pode ser "") e os anos inteiros (0 na ponta que falta, ao menos um ano); sem ano, como antes. Os dois no mesmo produto
 const CAMPOS = new Set(["c", "d", "a", "r", "x", "mo", "p", "ca", "si", "fa", "li", "po", "la", "de", "oj", "an", "i", "ve", "ss"]);
 // lista não vazia de textos não vazios (formato do "ve" e do "ss")
 const textosOk = (l) => Array.isArray(l) && l.length > 0 && l.every((t) => typeof t === "string" && t.trim());
@@ -368,7 +368,7 @@ function testarJson(arqJson) {
     if (!ok) veRuim.push(`${p.c}: ${cortar(JSON.stringify(Array.isArray(p.ve) ? p.ve.find((x) => !veOk(x)) : p.ve), 60)}`);
     else { nVe += p.ve.length; nAno += p.ve.filter((x) => x.length === 5).length; }
   }
-  if (veRuim.length) falha("campos", N_CAMPOS, "ve:formato", `"ve" fora do formato [fabricante, modelo, versão?] ou [fabricante, modelo, versão, início, fim] (anos inteiros, 0 quando faltam) em ${veRuim.length} produto(s), ex.: ${veRuim.slice(0, 3).join("; ")}`);
+  if (veRuim.length) falha("campos", N_CAMPOS, "ve:formato", `"ve" fora do formato [fabricante, modelo, versão?] ou [fabricante, modelo, versão, início, fim] (anos inteiros, 0 na ponta que falta, ao menos um ano) em ${veRuim.length} produto(s), ex.: ${veRuim.slice(0, 3).join("; ")}`);
   // formato do "ss" (T-0018): quando existe, lista de textos não vazios (ex.: ["CÂMBIO E DIFERENCIAL"])
   const ssRuim = [];
   let comSs = 0;
