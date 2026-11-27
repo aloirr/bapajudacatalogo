@@ -4,10 +4,10 @@
 #
 # Uso (no branch catalogo-dados/T-0040-v30, com a árvore limpa e o origin/main ainda na v29):
 #   bash dados/scripts/aprovar_v30.sh R-AAAAMMDD-HHMMSS-<autor>
+# Rodou uma vez (660a591). A BASE_simulada_v30.xlsx saiu nesse commit: para gravar de novo, use direto o
+#   python3 dados/scripts/base_v30.py --refazer --autorizacao "<recado>"
 # Faz:
-#   1. python3 dados/scripts/base_v30.py --refazer --autorizacao "<recado>"  (a base volta à v29 do origin/main, a
-#      pesquisa é aplicada de novo e a base e a v30 são gravadas, iguais à BASE_simulada_v30.xlsx fora o texto
-#      "pendente do aprovado do Alexandre" -> "aprovado em <recado>" no LOG_CORRECOES e no LEIA-ME);
+#   1. python3 dados/scripts/base_v30.py --refazer --autorizacao "<recado>" (ver o docstring do base_v30.py);
 #   2. git rm da dados/T-0040/v30/BASE_simulada_v30.xlsx (a antes_depois_v30.xlsx fica como registro);
 #   3. commit com os trailers. O push fica para quem roda: git push origin catalogo-dados/T-0040-v30
 # A pesquisa é lida do commit d3e4b8d (branch po/T-0040-anos) pelo git show; sem ele, use
