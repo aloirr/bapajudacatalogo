@@ -217,9 +217,10 @@ def texto_novo_difere(p: Path, wb, ult: int, leia_n: int) -> list[str]:
     """O texto das linhas novas do LOG_CORRECOES e do LEIA-ME da base salva em p contra o que o script escreveu
     em wb."""
     esperado, achado = linhas_novas(wb, ult, leia_n), linhas_novas(openpyxl.load_workbook(p), ult, leia_n)
-    return [f"{aba}: o texto das linhas novas não é o que o script escreve "
-            f"({sum(x != y for x, y in zip(achado[aba], esperado[aba]))} diferentes, {len(achado[aba])} x "
-            f"{len(esperado[aba])} linhas)" for aba in esperado if achado[aba] != esperado[aba]]
+    return [f"{nome_aba}: o texto das linhas novas não é o que o script escreve "
+            f"({sum(x != y for x, y in zip(achado[nome_aba], esperado[nome_aba]))} diferentes, "
+            f"{len(achado[nome_aba])} x {len(esperado[nome_aba])} linhas)"
+            for nome_aba in esperado if achado[nome_aba] != esperado[nome_aba]]
 
 
 def refazer(anterior: int, nova: int) -> None:

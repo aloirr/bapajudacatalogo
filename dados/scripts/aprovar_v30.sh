@@ -4,8 +4,7 @@
 #
 # Uso (no branch catalogo-dados/T-0040-v30, com a árvore limpa e o origin/main ainda na v29):
 #   bash dados/scripts/aprovar_v30.sh R-AAAAMMDD-HHMMSS-<autor>
-# Rodou uma vez (660a591). A BASE_simulada_v30.xlsx saiu nesse commit: para gravar de novo, use direto o
-#   python3 dados/scripts/base_v30.py --refazer --autorizacao "<recado>"
+# Rodou uma vez (660a591). A BASE_simulada_v30.xlsx saiu nesse commit: para gravar de novo, use direto o passo 1.
 # Faz:
 #   1. python3 dados/scripts/base_v30.py --refazer --autorizacao "<recado>" (ver o docstring do base_v30.py);
 #   2. git rm da dados/T-0040/v30/BASE_simulada_v30.xlsx (a antes_depois_v30.xlsx fica como registro);

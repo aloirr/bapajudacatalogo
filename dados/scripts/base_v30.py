@@ -36,11 +36,9 @@ antes da regra (item 17). Na linha aplicada:
 Só ANO_INICIO, ANO_FIM, SITUACAO, MOTIVO e ANO_DUVIDA (e a VERSAO das 3 linhas do JUH70025) mudam. ORIGEM e
 CILINDRADA ficam; a APLICACAO (digitada) não muda.
 
-AUTORIZAÇÃO: o padrão é a SIMULAÇÃO (nada muda na base real nem em dados/versoes): grava dados/T-0040/v30/
-BASE_simulada_v30.xlsx e antes_depois_v30.xlsx, com "pendente do aprovado do Alexandre" no LOG_CORRECOES e no LEIA-ME.
-Depois do aprovado: --refazer --autorizacao "R-…" volta a base à v29 do origin/main, aplica de novo e grava a base, a
-cópia dados/versoes/..._v30.xlsx e a antes_depois_v30.xlsx, com "aprovado em R-…". --conferir --autorizacao "R-…" só
-compara a base de hoje com a v29 aplicada de novo (saída 0 = igual).
+AUTORIZAÇÃO: a simulação não mexe na base nem em dados/versoes; grava a dados/T-0040/v30/BASE_simulada_v30.xlsx e a
+antes_depois_v30.xlsx com "pendente do aprovado do Alexandre". O --refazer parte da v29 do origin/main e grava a base,
+a v30 e a antes_depois com "aprovado em R-…". O --conferir sai 0 quando a base é a v29 com a regra aplicada.
 
 Uso: python3 dados/scripts/base_v30.py                                   (simulação)
      python3 dados/scripts/base_v30.py --refazer --autorizacao "R-…"     (depois do aprovado)
@@ -214,7 +212,7 @@ def contar(V: list[tuple], site: set[str]) -> dict:
     fica = {cod(r) for r in visiveis if id(r) not in ids_ocultas}
     return {"aba": Counter(tipo_ano(r[I_INI], r[I_FIM]) for r in V),
             "site": Counter(tipo_ano(r[I_INI], r[I_FIM]) for r in visiveis),
-            "prod_com_oculta": len({cod(r) for r in oculta}),
+            "ocultas": len(oculta), "prod_com_oculta": len({cod(r) for r in oculta}),
             "prod_com_linha": len(com_linha), "sem_visivel": com_linha - fica,
             "prod_site_sem_linha": len(site - com_linha)}
 
@@ -234,9 +232,9 @@ def extra(v: tuple, d: dict) -> str:
 
 def suposicoes(linhas: list) -> list[str]:
     """[SUPOSIÇÃO] das linhas do item 17 que, com o 2026, viram conflito novo (regra 9) e ficam (item 10)."""
-    return [f"[SUPOSIÇÃO] {cod(v)} {veiculo(v)}: com o ano final da pesquisa {x['ano_final']} -> "
-            f"{FIM_2027[cod(v)][1]} (item 17), o ano atual ({ano(v)}) fica fora da faixa {x['ano_inicial']}–"
-            f"{FIM_2027[cod(v)][1]}: é conflito novo pela regra 9 e fica como está (item 10)."
+    return [f"[SUPOSIÇÃO] {cod(v)} {veiculo(v)}: o ano atual ({ano(v)}) fica fora da faixa {x['ano_inicial']}–"
+            f"{FIM_2027[cod(v)][1]} (já com o {FIM_2027[cod(v)][1]}): é conflito novo pela regra 9 e fica como está "
+            f"(item 10)."
             for i, v, x, d in linhas if d["acao"] == "divergencia" and cod(v) in FIM_2027 and "item 17" in d["regra"]]
 
 
@@ -319,6 +317,7 @@ def montar(wb, pesq: list[dict], fraga: dict[int, tuple], autorizacao: str) -> d
 
 
 def leia_me(autorizacao: str, n: Counter, acoes: Counter, sup: list[str]) -> list[tuple]:
+    sem_mot = "sem MOTIVO" if n["mot"] == n["sit"] else f"{n['mot']} sem MOTIVO"
     return [
         ("BASE BAP UNIFICADA v30 (27/11/2026)", None),
         ("VEICULOS (anos da pesquisa)", f"Os anos da pesquisa na internet da lista dados/T-0040/pendentes_internet.csv "
@@ -328,16 +327,17 @@ def leia_me(autorizacao: str, n: Counter, acoes: Counter, sup: list[str]) -> lis
                                         f"{acoes['manter']} mantidas (no LOG como ANO_MANTIDO); "
                                         f"{acoes['divergencia']} não aplicadas (divergência ou conflito, ficam para "
                                         f"nova pesquisa). Nas aplicadas, {n['sit']} linhas marcadas na revisão da P12 "
-                                        f"passam a 'separado', sem MOTIVO ({n['mot']}), e {n['duv']} têm o ANO_DUVIDA "
-                                        f"limpo (a faixa final é a pesquisada). Nenhuma linha entra ou sai (T-0040)."),
+                                        f"passam a 'separado', {sem_mot}, e {n['duv']} têm o ANO_DUVIDA limpo (a "
+                                        f"faixa final é a pesquisada). Nenhuma linha entra ou sai (T-0040)."),
         ("Regra do ano", "Linha sem ano recebe a faixa. Linha só com um ano: fora de conflito, só a ponta que falta "
                          "(o ano atual fica, se cabe na faixa pesquisada); em conflito com a Fraga, a faixa pesquisada "
                          "entra inteira se concorda com o ano atual ou com a Fraga (cruza ou se encosta, até 1 ano). "
                          "usar_fraga: a faixa da Fraga. INT16501: o ano final 2027 da pesquisa passa a 2026. Na "
                          "linha aplicada, a marcada na revisão da P12 passa a 'separado' (volta ao site) e o MOTIVO "
                          "sai (o texto de antes fica no LOG); o ANO_DUVIDA sai quando a faixa final é igual à "
-                         "pesquisada. ORIGEM e CILINDRADA ficam (R-20261127-150417-alexandre)."),
-        *(("INT16501 (item 17)", s) for s in sup),
+                         "pesquisada. ORIGEM e CILINDRADA ficam (R-20261127-150417-alexandre; itens 13 e 14 na "
+                         "leitura do po, R-20261127-154004-po)."),
+        *(("Item 17", s) for s in sup),
         ("JUH70025", "As 3 linhas VOLKSWAGEN Gol da regra GOL da v29 recebem a VERSAO '1.6 L', '1.8 L' e '2.0 L'."),
         ("APLICACAO", "O texto da APLICACAO na PRODUTOS não muda (campo digitado)."),
         ("Formato", f"Mesmas abas e colunas da v29 (VEICULOS com 11 colunas). Uma linha por código e tipo no "
@@ -424,7 +424,8 @@ def antes_depois(r: dict, pesq: list[dict], lista_sa: list[dict], prods: dict, s
     for rot, k in (("aba VEICULOS inteira", "aba"), ("linhas que o site mostra hoje (separado, no site)", "site")):
         resumo += [(f"{rot}: {t}", c0[k][t], c1[k][t]) for t in ("sem_ano", "so_inicial", "so_final", "completa")]
         resumo += [(f"{rot}: total", sum(c0[k].values()), sum(c1[k].values()))]
-    resumo += [("1a: produtos com ao menos 1 linha oculta", c0["prod_com_oculta"], c1["prod_com_oculta"]),
+    resumo += [("1a: linhas que ficariam ocultas (sem ano; fora FLU15001/FLU15002)", c0["ocultas"], c1["ocultas"]),
+               ("1a: produtos com ao menos 1 linha oculta", c0["prod_com_oculta"], c1["prod_com_oculta"]),
                ("1a: produtos do site com linha de veículo hoje", c0["prod_com_linha"], c1["prod_com_linha"]),
                ("1a: produtos que ficariam sem nenhuma linha visível", len(c0["sem_visivel"]),
                 len(c1["sem_visivel"])),
@@ -432,12 +433,11 @@ def antes_depois(r: dict, pesq: list[dict], lista_sa: list[dict], prods: dict, s
                 len(c1["sem_visivel"] & cods_sa)),
                ("Produtos do site sem nenhuma linha de veículo (já hoje)", c0["prod_site_sem_linha"],
                 c1["prod_site_sem_linha"]),
-               ("2a (contagem da base, não a do aviso): produtos do site sem linha de veículo ou sem linha visível; a "
-                "conta dos produtos com o aviso é a do site (PR do web-site)",
+               ("2a: produtos do site sem linha de veículo ou sem linha visível (conta da base; a do aviso é a do "
+                "site, PR do web-site)",
                 c0["prod_site_sem_linha"] + len(c0["sem_visivel"]), c1["prod_site_sem_linha"] + len(c1["sem_visivel"])),
                ("Produtos no site (total do gerar_site; a PRODUTOS não muda)", total, total), ("", "", ""),
                ("SEM_APLICACAO: produtos na lista", len(sa), ""), ("SEM_APLICACAO: batem com a base", sa_bate, ""),
-               ("SEM_APLICACAO: não batem", len(sa) - sa_bate, ""),
                ("SEM_APLICACAO: ganham ano na v30", sum(1 for s in sa if isinstance(s[7], int) and s[7] > 0), "")]
 
     ap, dv = [], []
@@ -462,7 +462,7 @@ def antes_depois(r: dict, pesq: list[dict], lista_sa: list[dict], prods: dict, s
                    limpo(v[I_MOT]), limpo(v[I_MOT]), limpo(v[I_DUV]), limpo(v[I_DUV])])
     nr = Counter((motivo_nr(x), x["em_conflito"] or "não") for x in pesq if x["decisao"] == "nao_resolvido")
     return {"resumo": resumo, "ap": ap, "dv": dv, "nr": sorted(nr.items(), key=lambda t: -t[1]), "sa": sa,
-            "sa_bate": sa_bate}
+            "sa_bate": sa_bate, "sup": r["sup"]}
 
 
 # os pontos da aba PONTOS_ALEXANDRE, com o número do pacote R-20261127-144829-gerente-projetos (1 = site; 9 a 20 = base)
@@ -496,22 +496,31 @@ PONTOS = [
     "20. JUH70025: as 3 linhas Gol ganham a VERSAO '1.6 L', '1.8 L' e '2.0 L'; as linhas Gol duvidosas de antes "
     "ficam. Confirma?",
 ]
-# as respostas do R-20261127-150417-alexandre, na ordem dos PONTOS
+# as respostas literais do R-20261127-150417-alexandre, na ordem dos PONTOS
 RESPOSTAS = [
-    "Aprovada.",
-    "Ficam como estão e vão para nova pesquisa depois.",
-    "Ficam como estão.",
-    "Entra como veio.",
-    "Passa a 'separado' e volta ao site; o MOTIVO sai com a marca, como na v26.",
-    "Limpar quando a pesquisa confirmou a faixa: a faixa final é igual à pesquisada.",
-    "Vale igual à de fabricante.",
-    "Também entram no LOG_CORRECOES (ANO_MANTIDO).",
+    "Regra de conflito (sem ano recebe a faixa; um ano só ganha a ponta que falta se couber; no conflito, a pesquisa "
+    "decide quando concorda com um lado): aprovada.",
+    "Os 85 conflitos novos: ficam como estão e vão para nova pesquisa depois.",
+    "Os 6 conflitos sem resolução: ficam como estão.",
+    "Faixa até 2025/2026: entra como veio.",
+    "Linha duvidosa que ganhou ano: passa a \"separado\" e volta ao site.",
+    "ANO_DUVIDA: limpar a marca quando a pesquisa confirmou a faixa.",
+    "Fonte de loja: vale igual à de fabricante.",
+    "As \"manter_atual\" também entram no LOG_CORRECOES.",
     "Ocultar só as linhas sem ano nenhum.",
-    "Passa a 2026: Nivus e T-Cross entram; [SUPOSIÇÃO] o Taos vira conflito novo pela regra 9 e fica (item 10).",
-    "Entram como vieram.",
-    "Vale a conta do site.",
-    "Confirmado.",
+    "INT16501 (Nivus, T-Cross, Taos) com ano final 2027: passa a 2026.",
+    "Faixas de um ano só (60) e de mais de 30 anos (33): entram como vieram.",
+    "\"Sem aplicação\": vale a conta do site (199 produtos com o aviso).",
+    "JUH70025 com \"1.6 L\", \"1.8 L\" e \"2.0 L\" na VERSAO do Gol: confirmado.",
 ]
+# a observação do time, na ordem dos PONTOS; os itens 13 e 14 seguem a leitura do po (R-20261127-154004-po), ao lado
+# do R-20261127-150417-alexandre
+OBS_PO = "leitura do po (R-20261127-154004-po): "
+OBSERVACOES = {4: OBS_PO + "a linha aplicada marcada passa a 'separado' e o MOTIVO sai com a marca, como na v26.",
+               5: OBS_PO + "'confirmou a faixa' = a faixa final é igual à pesquisada; quando o ano atual ficou e a "
+                           "pesquisa diz outro ano, a marca fica.",
+               7: "Linha ANO_MANTIDO no LOG, sem célula mudada.",
+               9: "Nivus e T-Cross entram com 2026."}  # + a [SUPOSIÇÃO] do Taos (suposicoes())
 
 
 def gravar_ad(res: dict) -> None:
@@ -527,7 +536,10 @@ def gravar_ad(res: dict) -> None:
     aba(wb, "NAO_RESOLVIDO", ["motivo", "em_conflito", "linhas"], [(m, c, n) for (m, c), n in res["nr"]])
     aba(wb, "SEM_APLICACAO", ["codigo_bap", "descricao (lista)", "motivo (lista)", "bate com a base", "o que difere",
                               "APLICACAO vazia na base", "linhas VEICULOS v29", "linhas com ano v30"], res["sa"])
-    aba(wb, "PONTOS_ALEXANDRE", ["ponto", "resposta (R-20261127-150417-alexandre)"], list(zip(PONTOS, RESPOSTAS)))
+    obs = [" ".join([OBSERVACOES.get(i, "")] + (res["sup"] if i == 9 else [])).strip() for i in range(len(PONTOS))]
+    aba(wb, "PONTOS_ALEXANDRE", ["ponto", "resposta (R-20261127-150417-alexandre)",
+                                 "observação do time (itens 13 e 14: R-20261127-154004-po)"],
+        list(zip(PONTOS, RESPOSTAS, obs)))
     for ws in wb.worksheets:
         for row in ws.iter_rows():
             for c in row:
