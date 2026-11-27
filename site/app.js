@@ -2128,18 +2128,22 @@
     }
     return arrumar(p, tab);
   }
-  // O fim da tabela: o "an" da base vale primeiro (toda linha com ele); a Versão da tela (versaoTela); sai a linha
+  // O fim da tabela: o "an" da base vale primeiro (a linha sem ano, ou com ano fora dele, fica com ele; a linha com o ano
+  // do texto dentro do "an" fica com o dela: T-0043, item 13, "Idea 1.8 L 16V 2010–2015" do VEL7520 não vira o
+  // "2004–2020" do produto inteiro); a Versão da tela (versaoTela); sai a linha
   // idêntica a uma de antes (TER55228) e a do mesmo modelo e versão cuja faixa está dentro da de outra, com a mesma
   // cilindrada ou sem ela (R2 UX: a cópia sem ano sai; ROL0015E); as linhas do mesmo modelo juntas, dentro da marca,
   // na ordem em que a marca e o modelo aparecem (U2)
   const NAO_SERVE = "Não serve"; // a Versão do modelo excluído (arrumar) e a lista do celular (tabelaVeiculos)
   function arrumar(p, tab) {
     const k = chaveApl, base = anoDaBase(p), fx = (r) => faixasDaCelula(r[4]).map(faixaDaCelula).filter(Boolean);
+    const fb = faixaDaCelula(base); // toda faixa da célula dentro do "an" (a que não se lê não cabe)
+    const cabeNaBase = (r) => !!fb && !!r[4] && fx(r).length === faixasDaCelula(r[4]).length && fx(r).every(([a, b]) => fb[0] <= a && b <= fb[1]);
     // a linha que antes ficava sem Versão e agora só tem a restrição (T-0033) não vira veículo novo: a Versão dela vai
     // para a linha do mesmo modelo, sem Versão, que a contém (como a cópia que saía antes)
     const soRestr = new Set();
     for (const r of tab) {
-      if (base && !r.comAnoVe) r[4] = base;
+      if (base && !r.comAnoVe && !cabeNaBase(r)) r[4] = base;
       const antes = versaoLivre(versaoSemDetalhe(r[3]), r, p);
       r[3] = versaoTela(r[3], r, p);
       if (r[3] && !antes) soRestr.add(r);
