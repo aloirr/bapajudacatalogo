@@ -132,7 +132,8 @@
         // referência com a marca na frente ("TRW 16900255S" → "TRW16900255S")
         mcods: [...new Set((p.r || []).filter((x) => normCod(x.m)).flatMap((x) => partes(x).filter((c) => c.length >= 3).map((c) => normCod(x.m) + c)))],
         eans: (p.x || []).filter(([k]) => k === "Código de barras").map(([, v]) => normCod(v)).filter(Boolean), // EAN: x["Código de barras"]
-        faixas: faixasNoTexto(textoDeAno(p.a || "", true), true),            // anos da aplicação (a leitura de antes: textoDeAno)
+        // anos da aplicação (a leitura de antes: textoDeAno); no produto "vt" (T-0040), os anos do "ve" (faixasDoVe)
+        faixas: p.vt ? faixasDoVe(p) : faixasNoTexto(textoDeAno(p.a || "", true), true),
       };
       // montadora com o outro nome ("vw gol" acha o Gol da VOLKSWAGEN, como a antiga aba Veículo): vale a montadora
       // do campo mo e também a escrita como palavra na aplicação ou na descrição ("VOLKSWAGEN GOL 1.6")
@@ -299,8 +300,9 @@
       t, limpo, pc: normCod(t), ano: anoOk(n) ? n : 0, pedaco: !multi || t.split("-").every(grupoDeCodigo),
       agulha: t.split("-").reduce((x, y) => (y.length > x.length ? y : x), ""), // teste rápido antes da regex
       rx: palavra(t),
-      // T-0039 1a: nome de modelo de algum "ve" (TITAN) também não vale pelo começo: "titan" não casa "titanium"
-      rxIni: limpo.length >= 4 && /[A-Z]/.test(limpo) && !ehVeiculo(limpo) && !indiceVe().porCompacto.has(limpo) ? palavra(t, true) : null,
+      // T-0039 1a: nome de modelo de algum "ve" (TITAN) também não vale pelo começo: "titan" não casa "titanium"; a
+      // palavra do nome de um modelo de moto também não (T-0040: o "TITAN" de "CG 160 TITAN"; motoModelos)
+      rxIni: limpo.length >= 4 && /[A-Z]/.test(limpo) && !ehVeiculo(limpo) && !indiceVe().porCompacto.has(limpo) && !motoModelos().has(limpo) ? palavra(t, true) : null,
       rxApl: null, // com os derivados, montado na 1ª vez que precisa
     };
   }
@@ -314,10 +316,15 @@
   let INDICE_VE = null;
   function indiceVe() {
     if (INDICE_VE) return INDICE_VE;
-    const marcas = new Set(), porMarca = new Map(), porCompacto = new Map();
+    const marcas = new Set(), porMarca = new Map(), porCompacto = new Map(), palavras = new Map();
     for (const p of BASE.produtos) for (const [f, m] of p.ve || []) {
       const vm = norm(f), c = compacto(m);
       marcas.add(vm);
+      // T-0040: as palavras do nome do modelo com mais de uma palavra ("CG 160 TITAN": CG e TITAN), com 3 letras ou mais
+      for (const w of norm(m).split(/[^A-Z0-9]+/)) if (w.length >= 3 && /^[A-Z]+$/.test(w) && w !== c) {
+        if (!palavras.has(w)) palavras.set(w, new Map());
+        palavras.get(w).set(vm + "|" + norm(m), [vm, norm(m)]);
+      }
       if (c.length < 2) continue;
       if (!porMarca.has(vm)) porMarca.set(vm, new Set());
       porMarca.get(vm).add(m);
@@ -327,7 +334,7 @@
     }
     const pc = new Map([...porCompacto].map(([c, mm]) => [c, [...mm.values()]]));
     const numericos = new Set([...porMarca.values()].flatMap((ms) => [...ms]).map(compacto).filter((c) => /^\d+$/.test(c)));
-    INDICE_VE = { marcas, numericos, porMarca: new Map([...porMarca].map(([vm, ms]) => [vm, [...ms].sort((a, b) => b.length - a.length)])), porCompacto: pc,
+    INDICE_VE = { marcas, numericos, palavras: new Map([...palavras].map(([w, mm]) => [w, [...mm.values()]])), porMarca: new Map([...porMarca].map(([vm, ms]) => [vm, [...ms].sort((a, b) => b.length - a.length)])), porCompacto: pc,
       todos: [...new Set([...pc.values()].flat().map(([, mo]) => mo))] };
     return INDICE_VE;
   }
@@ -360,8 +367,15 @@
     for (const e of motos) for (const [f, m] of e.p.ve || []) { marcas.add(norm(f)); modelos.add(compacto(m)); }
     const apl = motos.map((e) => e.apl).join(" ; ");
     const naApl = (m) => rxModeloTxt(m).test(apl);
-    MOTO_MODELOS = new Set([...indiceVe().porCompacto].filter(([c, pares]) => /[A-Z]/.test(c) && (modelos.has(c) || naApl(c))
+    const { porCompacto, palavras } = indiceVe();
+    MOTO_MODELOS = new Set([...porCompacto].filter(([c, pares]) => /[A-Z]/.test(c) && (modelos.has(c) || naApl(c))
       && pares.some(([vm]) => marcas.has(vm) || naApl(vm))).map(([c]) => c));
+    // T-0040: a palavra do nome de um modelo de moto ("TITAN" de "CG 160 TITAN", na VEICULOS da Fraga) também é modelo
+    // de moto, menos a que é modelo de outra montadora (o "CARGO" do Ford Cargo) e a que está na descrição de uma peça
+    // que não é de moto (o "START" da bateria "Start-Stop")
+    const descOutras = INDICE.filter((e) => !ehMoto(e.p)).map((e) => e.desc).join(" | ");
+    for (const [w, pares] of palavras) if (pares.some(([vm, mo]) => marcas.has(vm) && MOTO_MODELOS.has(compacto(mo)))
+      && !(porCompacto.get(w) || []).some(([vm]) => !marcas.has(vm)) && !rxPalavra(w).test(descOutras)) MOTO_MODELOS.add(w);
     return MOTO_MODELOS;
   }
   // a busca tem um modelo de moto: a palavra, ou até 3 palavras vizinhas juntas ("c g" = CG)
@@ -544,7 +558,7 @@
       let alguma = 0;
       for (const r of out) alguma |= r[3];
       cs.palavras.forEach((t, i) => { if (!(alguma & (1 << Math.min(i, 30)))) lista.faltam.push(t); });
-      lista.semTipo = cs.vd && semTipoNoVeiculo(lista.faltam, cs.vd);
+      lista.semTipo = cs.vd && semTipoNoVeiculo(lista.faltam, cs.vd, cs.palavras);
     }
     return lista;
   }
@@ -552,9 +566,14 @@
   // T-0033 (opção a do Alexandre): modelo e ano digitados com um tipo de peça (as palavras que não casaram) e nenhuma
   // peça desse tipo serve no modelo e ano: o nome do tipo, como está no PRODUTO (p) ou na FAMILIA (fa) do produto, para
   // o aviso acima da lista. Sem produto desse tipo, ou com um que sirva, null.
-  function semTipoNoVeiculo(faltam, vd) {
+  // O tipo são todas as palavras digitadas fora do veículo (modelo, marca e ano), não só as que faltaram (T-0040:
+  // em "bomba combustivel polo 2026", a Bomba D'Água que serve no Polo 2026 casa o "bomba", e o tipo continua "bomba
+  // combustivel")
+  function semTipoNoVeiculo(faltam, vd, palavras) {
     if (!faltam.length) return null;
-    const nomes = new Map(), doTipo = (x) => x && faltam.every((w) => temPalavra(norm(x), w));
+    const { marcas } = indiceVe(), doVeiculo = new Set([String(vd.ano), ...Object.entries(APELIDOS).flatMap(([k, v]) => [k, ...v.split(" ")]), ...vd.mods.flatMap(([vm, mo]) => [vm, compacto(mo), ...norm(mo).split(/[^A-Z0-9]+/)])]);
+    const tipo = palavras.filter((w) => !doVeiculo.has(w.replace(/-/g, "")) && !marcas.has(w));
+    const nomes = new Map(), doTipo = (x) => x && tipo.every((w) => temPalavra(norm(x), w));
     for (const e of INDICE) {
       const nome = doTipo(e.p.p) ? e.p.p : doTipo(e.p.fa) ? e.p.fa : "";
       if (!nome) continue;
@@ -1209,9 +1228,13 @@
   // montagem pela aplicação. O ano continua vindo do an e da aplicação.
   // Com o campo "ve" no JSON (detectado uma vez em carregar(): TEM_VE), produto SEM "ve" fica fora do filtro e das
   // contagens (os duvidosos e os sem veículo; R-20261120-123130). A montagem pela aplicação só vale no JSON antigo.
-  const veDe = (e) => (Array.isArray(e.p.ve) && e.p.ve.length ? e.p.ve.map((x) => [norm(x[0]), norm(x[1]), norm(x[2] || "")]) : null);
+  // T-0040: o "ve" do produto "vt" traz ANO_INICIO e ANO_FIM ([fab, mod, ver, ini, fim]; 0 = sem o ano)
+  const veDe = (e) => (Array.isArray(e.p.ve) && e.p.ve.length ? e.p.ve.map((x) => [norm(x[0]), norm(x[1]), norm(x[2] || ""), +x[3] || 0, +x[4] || 0]) : null);
   const marcasDe = (e) => { const ve = veDe(e); return ve ? [...new Set(ve.map((x) => x[0]))] : norm(e.p.mo).split(/\s*[\/,]\s*/).filter(Boolean); };
-  const motoresDe = (e) => [...new Set((e.apl.match(/\b\d[.,]\d\b/g) || []).map((m) => m.replace(",", ".")))];
+  // no produto "vt" (T-0040), a cilindrada das versões do "ve" da marca, do modelo e do ano escolhidos (veDoVeiculo)
+  const motoresDe = (e, v) => [...new Set(((e.p.vt ? veDoVeiculo(e, v).map((x) => x[2]).join(" ") : e.apl).match(/\b\d[.,]\d\b/g) || []).map((m) => m.replace(",", ".")))];
+  // as linhas do "ve" da marca, do modelo (se escolhido) e do ano (se escolhido; a linha sem ano não serve no ano)
+  const veDoVeiculo = (e, v) => veDe(e).filter((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo) && (!v.va || (x[3] || x[4]) && v.va >= (x[3] || SEM_INICIO) && v.va <= (x[4] || SEM_FIM)));
   const anoServe = (e, ano) => casaAno(e, ano) !== 0; // o ano da base (an) primeiro, depois a aplicação (T-0011); sem ano: serve
   // T-0033 (R-20261124-152047-po: "se nao tiver o ano batendo com a aplicação, então nao retorne na pesquisa"): com o
   // ano escolhido, o produto com "ve" só entra se uma linha da tabela da aplicação (tabelaDe) da marca e do modelo
@@ -1220,6 +1243,11 @@
   const faixaDaCelula = (f) => { const m = /^(?:até (\d{4})|(\d{4})(–?)(\d{4})?)$/.exec(f); return !m ? null : m[1] ? [SEM_INICIO, +m[1]] : [+m[2], m[4] ? +m[4] : m[3] ? SEM_FIM : +m[2]]; };
   // o ano da base (ANO_INICIO e ANO_FIM, campo "an") vale primeiro: "2006–", "até 2010", "1996–2003" ou ""
   const anoDaBase = (p) => (p.an && (p.an[0] || p.an[1]) ? fmtFaixa([p.an[0] || SEM_INICIO, p.an[1] || SEM_FIM]) : "");
+  // T-0040: a faixa de um veículo do "ve" (ANO_INICIO e ANO_FIM da VEICULOS; 0 = sem o ano), ou null; e a célula Ano dele
+  const faixaVe = (x) => (+x[3] || +x[4] ? [+x[3] || SEM_INICIO, +x[4] || SEM_FIM] : null);
+  const anoDoVe = (x) => { const f = faixaVe(x); return f ? fmtFaixa(f) : ""; };
+  // as faixas do produto "vt" para a busca de texto sem modelo ("bce3001 2001"; casaAno): as do "ve"
+  function faixasDoVe(p) { return (p.ve || []).map(faixaVe).filter(Boolean); }
   // Rede de segurança: além da tabela, vale o ano que o texto da aplicação dá direto ao modelo do "ve" (anosNoTexto).
   // Sem ano no trecho, o modelo não ganha ano por aqui (BCE3001: "Polo – todos," fica sem ano e fora de Polo 2026).
   // Com o "an", só ele vale (a rede não dá ano fora do "an"). Feito uma vez por produto.
@@ -1258,9 +1286,11 @@
   function anosNoTexto(p) {
     if (ANOS_TEXTO.has(p)) return ANOS_TEXTO.get(p);
     const out = new Map();
-    if (!anoDaBase(p)) {
+    // T-0040: no produto "vt", nada vem do texto; nos outros, o modelo que já tem ano no "ve" também não
+    if (!anoDaBase(p) && !p.vt) {
+      const comAno = new Set(p.ve.filter(faixaVe).map((x) => norm(x[0]) + "|" + norm(x[1])));
       const porModelo = anosPorModelo(p.a, [...new Set(p.ve.map((x) => x[1]))]);
-      for (const [fab, mo] of p.ve) if (porModelo.has(mo)) { const k = norm(fab) + "|" + norm(mo); if (!out.has(k)) out.set(k, porModelo.get(mo)); }
+      for (const [fab, mo] of p.ve) if (porModelo.has(mo)) { const k = norm(fab) + "|" + norm(mo); if (!out.has(k) && !comAno.has(k)) out.set(k, porModelo.get(mo)); }
     }
     ANOS_TEXTO.set(p, out);
     return out;
@@ -1278,7 +1308,7 @@
     const hits = ve ? ve.filter((x) => x[0] === v.vm && (!v.vmo || x[1] === v.vmo)) : null;
     if (ve ? !hits.length : !daMarca(e, v.vm) || (v.vmo && !temPalavra(e.apl, v.vmo))) return false;
     if (v.va && !serveNoAno(e, v)) return false;
-    if (v.vmt) { const m = motoresDe(e); if (m.length && !m.includes(v.vmt)) return false; }
+    if (v.vmt) { const m = motoresDe(e, v); if (m.length && !m.includes(v.vmt)) return false; }
     if (v.vv && hits) { const vs = hits.map((x) => x[2]).filter(Boolean); if (vs.length && !vs.includes(v.vv)) return false; }
     return true;
   }
@@ -1321,11 +1351,11 @@
       for (const [de, ate] of fx) for (let a = Math.max(1980, de || 1980); a <= Math.min(ANO_HOJE, ate || ANO_HOJE); a++) vistos.add(a);
       for (const a of vistos) anos.set(a, (anos.get(a) || 0) + 1);
       if (!v.va || !serveNoAno(e, v)) continue;
-      const ms = motoresDe(e); // Motor: a cilindrada da aplicação
+      const ms = motoresDe(e, v); // Motor: a cilindrada da aplicação (no "vt", a do "ve")
       if (!ms.length) semMotor++;
       for (const m of ms) motores.set(m, (motores.get(m) || 0) + 1);
       if (v.vmt && ms.length && !ms.includes(v.vmt)) continue;
-      const vs = ve ? [...new Set(ve.filter((x) => x[0] === v.vm && x[1] === v.vmo && x[2]).map((x) => x[2]))] : []; // Versão: o "ve"
+      const vs = ve ? [...new Set((e.p.vt ? veDoVeiculo(e, v) : ve.filter((x) => x[0] === v.vm && x[1] === v.vmo)).filter((x) => x[2]).map((x) => x[2]))] : []; // Versão: o "ve" (no "vt", também do ano)
       if (!vs.length) semVersao++;
       for (const x of vs) versoes.set(x, (versoes.get(x) || 0) + 1);
     }
@@ -1549,8 +1579,16 @@
   const rxMarcaAntes = () => RX_MARCA_ANTES || (RX_MARCA_ANTES = new RegExp(String.raw`(?:^|[^A-Z0-9])(?:${altMarcas()})\s+$`));
   // a marca no meio do pedaço ("Atego - 2005 em Diante Mercedes-Benz 1418 Atego") começa outro veículo
   const rxMarcaNoMeio = () => RX_MARCA_MEIO || (RX_MARCA_MEIO = new RegExp(String.raw`\s+(?=(?:${altMarcas()})(?![A-Z0-9]))`));
+  // T-0040: a tabela do produto "vt" (veículos da Fraga) sai só do "ve", sem o texto da aplicação: a Cilindrada sai da
+  // versão ("EA111 VHT 1.6 L 8V SOHC L4": "1.6 8V" e a Versão "EA111 VHT SOHC L4") e o Ano, do "an" ou do "ve"
+  function linhasDoVe(p) {
+    const anoBase = anoDaBase(p), vistas = new Set();
+    return p.ve.map((x) => [marcaTela(x[0]), x[1], cilDe(x[2]).join(" / "), x[2] ? limparVersao(x[2]) : "", anoBase || anoDoVe(x)])
+      .filter((r) => { const k = r.join("|"); return !vistas.has(k) && vistas.add(k); });
+  }
   function linhasVeiculos(p) {
     if (!Array.isArray(p.ve) || !p.ve.length) return [];
+    if (p.vt) return linhasDoVe(p);
     const apl = String(p.a || ""), up = semAcento(apl).toUpperCase();
     const modelos = [...new Set(p.ve.map((x) => norm(x[1])).filter(Boolean))];
     const achar = (m, de) => { const r = rxPalavra(m, "g"); r.lastIndex = de; const x = r.exec(up); return x ? x.index + x[1].length : -1; };
@@ -1625,7 +1663,8 @@
     // só faixa de verdade; o "2014 até" sem o ano final (o texto ou o trecho cortado) não é faixa sem fim: a faixa
     // aberta só vem do ">" ou do "em diante" (decisão do gerente no PR #54)
     const faixasDe = (t) => faixasDoTexto(String(t).replace(/((?:19|20)\d{2})\s*at[ée](?![\s·]*\d)/gi, "$1")).filter(([de, ate]) => de !== ate);
-    const linhas = p.ve.map(([fab, mod, ver]) => {
+    const linhas = p.ve.map((x) => {
+      const [fab, mod, ver] = x;
       const m = norm(mod), vs = versoesDe(m);
       let t = trecho.get(m) || "", repetido = false;
       const cheio = t;
@@ -1646,7 +1685,7 @@
       const fx = n1 > 1 ? puras : repetido && puras.length ? puras : f1;
       // a faixa inteira dentro de outra da célula não aparece ("2013–2021, 2014–2017" fica "2013–2021"); a sem fim fica por último
       const fora = fx.filter(([de, ate], i) => !fx.some(([d2, a2], j) => j !== i && d2 <= de && ate <= a2 && (d2 < de || ate < a2)));
-      const ano = anoBase || [...new Set(fora.sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(fmtFaixa))].join(SEP_FAIXAS);
+      const ano = anoBase || anoDoVe(x) || [...new Set(fora.sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(fmtFaixa))].join(SEP_FAIXAS);
       return [marcaTela(fab), mod, cil, ver || "", ano];
     });
     return linhas;
@@ -2047,7 +2086,7 @@
     const rs = [...t.matchAll(RX_RESTR), ...t.matchAll(RX_CONDICAO)].map((m) => limparRestr(m[0], p));
     return [...new Set(rs.filter((x) => x && !naTab.includes(compacto(x))))];
   };
-  const tabelaDe = (p) => { if (!TABELA.has(p)) { const tv = linhasVeiculos(p); TABELA.set(p, tv.length && p.a ? juntarNaTabela(p, tv) : tv); } return TABELA.get(p); };
+  const tabelaDe = (p) => { if (!TABELA.has(p)) { const tv = linhasVeiculos(p); TABELA.set(p, tv.length && p.a && !p.vt ? juntarNaTabela(p, tv) : tv); } return TABELA.get(p); };
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
@@ -2065,9 +2104,11 @@
     // com o campo "ve": a aplicação vira tabela (R-20261120-130900), com o que o texto tem a mais (T-0033: juntarNaTabela);
     // no PDF, o texto inteiro vai embaixo da tabela, em letra pequena ("Aplicação completa"), para as restrições ("exc. Si")
     // não sumirem do material do cliente
-    const tab = tabelaVeiculos(tabelaDe(p)), fora = tab ? restricoesFora(p, tabelaDe(p)) : [];
+    // T-0040: no produto "vt" a tabela é só a VEICULOS; o texto antigo não entra (nem as restrições dele nem, no PDF,
+    // a "Aplicação completa")
+    const tab = tabelaVeiculos(tabelaDe(p)), fora = tab && !p.vt ? restricoesFora(p, tabelaDe(p)) : [];
     const miolo = tab
-      ? tab + (fora.length ? `<p class="restr-fora"><b>${fora.length > 1 ? "Restrições" : "Restrição"} da aplicação:</b> ${esc(fora.join(" · "))}</p>` : "") + (p.a ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
+      ? tab + (fora.length ? `<p class="restr-fora"><b>${fora.length > 1 ? "Restrições" : "Restrição"} da aplicação:</b> ${esc(fora.join(" · "))}</p>` : "") + (p.a && !p.vt ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
       : p.a ? aplicacoes : "";
     const secApl = miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
     const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
