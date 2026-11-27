@@ -2193,13 +2193,21 @@
   //   1989–1996" e "Elba SEVEL 1.6 8V 1989–1996"; "Saveiro (08/2022)" e "Saveiro 1.6 8V EA111 VHT 2009–2022").
   // - a do texto que junta várias cilindradas, todas já nas linhas do "ve" com ano do mesmo modelo, e cuja versão é só número (v30,
   //   JUH70025: "Gol 1.6 / 1.8 / 2.0 · 88 / 10.94" ao lado de "Gol 1.6", "Gol 1.8" e "Gol 2.0" da VEICULOS).
+  // - a do texto com a mesma cilindrada, a versão vazia ou só com pedaços (" · ") da versão dela e toda faixa dentro da
+  //   dela (T-0043, pergunta 20: "L 9.7 10V · 1976–1987" ao lado de "L 9.7 10V 2219 · OM 355/5 SOHV L5 · 1976–1987" e
+  //   "LK 6.0 12V 1418 E · 1989–1993" ao lado de "LK 6.0 12V 1418 E · OM 366 A SOHV L6 · 1989–1993", ROL559/552A).
   // Roda depois do texto, que dá o ano à linha
+  const pedacos = (v) => String(v || "").split(" · ").map(chaveApl).filter(Boolean);
+  const versaoCabe = (v, w) => pedacos(v).every((x) => pedacos(w).includes(x));
+  const anosDentro = (r, o) => { const g = faixaDaCelula(o[4]), fs = faixasDaCelula(r[4]).map(faixaDaCelula);
+    return !!g && fs.length > 0 && fs.every((f) => f && g[0] <= f[0] && f[1] <= g[1]); };
   const semRepetida = (tab) => { const k = chaveApl; return tab.filter((r) => { const f = !r[2] && !r[3] && faixaDaCelula(r[4]);
     const doModelo = tab.filter((o) => o !== r && o.comAnoVe && k(o[0]) === k(r[0]) && k(o[1]) === k(r[1]));
     if (!r.comAnoVe && cilsDe(r[2]).length > 1 && r[3] && !/[A-Za-zÀ-ÿ]/.test(r[3]) && cilsDe(r[2]).every((c) => doModelo.some((o) => cilsDe(o[2]).includes(c)))) return false;
     return !tab.some((o) => o !== r && o.comAnoVe && k(o[0]) === k(r[0]) && k(o[1]) === k(r[1])
       && ((!r.comAnoVe && (!r[2] || k(r[2]) === k(o[2])) && k(r[3]) === k(o[3]))
-        || (f && (o[2] || o[3]) && ((g) => g && g[0] <= f[0] && f[1] <= g[1])(faixaDaCelula(o[4]))))); }); };
+        || (f && (o[2] || o[3]) && ((g) => g && g[0] <= f[0] && f[1] <= g[1])(faixaDaCelula(o[4])))
+        || (!r.comAnoVe && r[2] && k(r[2]) === k(o[2]) && versaoCabe(r[3], o[3]) && anosDentro(r, o)))); }); };
   const tabelaDe = (p) => {
     if (!TABELA.has(p)) {
       CIL_MOTO = ehMoto(p);
