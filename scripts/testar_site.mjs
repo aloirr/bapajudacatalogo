@@ -437,7 +437,7 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
   detalhe("casos", "casos do JSON", `código ${COD}; referência ${refTrw ? "TRW " + refTrw.c : "?"}${refNak ? " e " + refNak.m + " " + refNak.c : ""}; veículo VOLKSWAGEN/Gol/2018; diretriz AMT7005 (KYB 441126), CL14 e EAN ${ean || "?"} (TER551011); ` +
     `geral "amortecedor dianteiro Onix" e "15W40"; produto com foto ${comFoto ? comFoto.c : "?"}; amostra ${amostra.join(", ")}`);
 
-  const VT = { n: prods.reduce((n, p) => n + (p.ve || []).filter((x) => x.length === 5).length, 0), txt: [] }; // T-0040: veículos com ano no "ve" e o que os casos acharam
+  const VT = { n: prods.reduce((n, p) => n + (p.ve || []).filter((x) => x.length === 5).length, 0), txt: [] }, N_VT = "veículo com ano (Fraga, T-0040)"; // T-0040: veículos com ano no "ve" e o que os casos acharam
   const TELAS = new Set(), FILTROS = new Set(), JANELAS = new Set(); // o que foi detectado (T-0014), nas 2 larguras
   const CARTOES = [], FILTRO_SI = {}, CAMPOS_TELA = {}, MV = [];
   const FILTRO_SI_CASO = comFoto && comFoto.si; // o sistema do produto com foto (AMT7115: SUSPENSÃO)
@@ -750,7 +750,6 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         conferirConsole("busca-aviso-tipo");
       }
       detalhe("avisotipo", N_AVT, avt.join("; "));
-
 
       // código exato em 1º (decisão 4a): código BAP e EAN
       const exatos = [["CL14", "CL14"]];
@@ -1070,7 +1069,6 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
         // BCE3001 continua em Ford › Ka (linha sem ano) e não aparece em Volkswagen › Polo › 2026 (Polo sem ano, T-0033);
         // VEL7507 tem Yamaha e KTM: aparece em Yamaha › RD e a tabela da aplicação tem as duas marcas. Só com ano no "ve"
         // (base com a Fraga). As listas mostram as 60 marcas com mais produtos: marca de caso fora delas vira aviso
-        const N_VT = "veículo com ano (Fraga, T-0040)";
         if (m0.faixa && m0.n === 5 && VT.n) {
           const casosVt = [
             ["CXD13062", [/^\s*Volkswagen\b/i, /^\s*Gol\b/i, /^\s*2015\b/], true],
@@ -1757,7 +1755,6 @@ async function testarSite(base, ctxJson, dirPrints, entrar = null) {
     detalhe("cartoes", "cartões da lista", `"amortecedor": ${CARTOES.join("; ")}; 4 na 1ª linha em 1366 e 1536 (fA2), 5 em 1920 (a partir de 1680), 2 no celular; texto do cartão >= 12 px; 1ª e 2ª linha com a mesma altura e o "+ Detalhes" no mesmo y; código sobre a foto (canto inferior direito, nem botão nem link), no rótulo do link e no alt; no máximo 2 referências à vista; "+ Detalhes"`);
   }
   // T-0040: sem ano no "ve" (base sem a Fraga), os casos não se aplicam; com ano, têm de ter rodado
-  const N_VT = "veículo com ano (Fraga, T-0040)";
   teste("fraga", N_VT);
   if (VT.n && !VT.txt.length) falha("fraga", N_VT, "nao-rodou", `o JSON tem ${fmt(VT.n)} veículos com ano no "ve", mas os casos da Fraga não rodaram`);
   detalhe("fraga", N_VT, VT.n ? `${fmt(VT.n)} veículos com ano no "ve"; ` + VT.txt.join("; ") : 'sem ano no "ve": os casos da Fraga não se aplicam');
