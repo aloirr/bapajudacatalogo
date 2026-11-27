@@ -52,6 +52,7 @@ Antes de entregar o PDF completo, confira:
 - OFEREÇA JUNTO só com item real; sem item, "—".
 - Nome da empresa: sempre "BAP AUTOPARTS".
 - Catálogo interno (impresso e digital): aviso de uso interno em todas as páginas.
+- **MENOS É MAIS (T-0045, seção do `CLAUDE.md`):** siga a regra em todas as páginas dos PDFs. Mudança de layout vai antes como simulação.
 
 ## Material para cliente (portfólio, Kit Filtros, apresentações)
 

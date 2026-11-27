@@ -86,6 +86,7 @@ Você cuida **só da marca**. Excesso e repetição são do `corretor-redundanci
 
 **E. Aplicações**
 - Site (topo, hero, cartões, página do produto, rodapé), capa e páginas dos PDFs, Linha Moto, portfólio, Kit Filtros e apresentações com a mesma identidade.
+- **MENOS É MAIS (T-0045, seção do `CLAUDE.md`):** revise a marca e os tamanhos padrão em toda tela e página de PDF. Segure a que deixe faixa lateral vazia com conteúdo que caberia ali, ou que fuja dos tamanhos padrão.
 - **Sem preço e sem estoque** em nenhum material para cliente. Se aparecer, segure e avise o `gerente-projetos` na hora (o dono é o `web-site` ou o `catalogo-grafico`).
 
 **F. Tom de voz da marca**
