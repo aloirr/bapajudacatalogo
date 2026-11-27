@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0696** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0698** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -498,7 +498,9 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0692 | baixa | código | site/app.js:1709 | `cilHtml` refaz o `split(" / ")` da `cilsDe` | T-0040 | web-site | CORRIGIDO (a0458b9) |
 | RD-0693 | média | código | site/app.js:325, 1249, 1727, 1735 | regra do motor em litros / abaixo de 1.0 L em 4 regex | T-0040 | web-site | CORRIGIDO (a0458b9) |
 | RD-0694 | baixa | código | site/app.js:2125 e :2143 | regra da linha coberta pela do `ve` com ano em 2 lugares | T-0040 | web-site | CORRIGIDO (a0458b9) |
-| RD-0695 | média | dado | VEICULOS v29 (POL1712, FCB6266, TRI90007) | VOLARE como montadora (82 linhas) e modelo da Fraga com carroceria em caixa alta (2.804 linhas) repetem o veículo da base; filtro com "Sprinter" e "SPRINTER FURGÃO" | T-0040 | catalogo-dados | ABERTO (Simule; decisão do po) |
+| RD-0695 | média | dado | VEICULOS v29 (POL1712, FCB6266, TRI90007) | VOLARE como montadora (82 linhas) e modelo da Fraga com carroceria em caixa alta (2.804 linhas) repetem o veículo da base; filtro com "Sprinter" e "SPRINTER FURGÃO" | T-0040 | catalogo-dados | CORRIGIDO (2b1df1d) |
+| RD-0696 | média | arquivo | dados/T-0040/pendentes_internet.csv, conflitos.csv; lista_T0040.py:89 e :94 | pendentes_internet.csv igual byte a byte ao lista_trabalho.csv; conflitos.csv repete a lista e a aba CONFLITOS | T-0040 | catalogo-dados | ABERTO |
+| RD-0697 | baixa | texto | VEICULOS v29 (1.466 linhas da Fraga) | modelo em caixa alta ao lado de caixa mista, sem par na base | T-0040 | catalogo-dados | MANTIDO (decisão na aba DE_PARA) |
 
 ## Notas
 
@@ -509,6 +511,7 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 - PR #229 (`web-site/T-0040-fraga`, `5bde83a`): RD-0686 ao RD-0691 (2 médias, 4 baixas). O RD-0678 fechou em parte na tela. VOLTA PARA AJUSTE.
 - Reteste no `7e22a65`: RD-0678 (tela) e RD-0686 ao RD-0691 corrigidos. Novos: RD-0692 ao RD-0694 (1 média, 2 baixas). VOLTA PARA AJUSTE.
 - Reteste no `a0458b9`: RD-0692 ao RD-0694 corrigidos; o código do #229 fica sem achado aberto. Novo na base (v29 `2c71be8`): RD-0695 (média, catalogo-dados, Simule). VOLTA PARA AJUSTE na base.
+- Reteste do #228 no `2b1df1d`: RD-0695 corrigido. Novo: RD-0696 (média, segura). MANTIDO: RD-0697. VOLTA PARA AJUSTE. Continua valendo o RD-0670 no head do `aprovar_v29.sh`.
 
 ### T-0033, ano na busca e fim do "Outros veículos e detalhes", 25/11/2026 (antes dos PRs)
 - RD-0645 ao RD-0659: branches `web-site/T-0033-busca-ano` (`f4e1a0e`) e `testes/T-0033-busca-ano` (`6fb9139`). Relatório: `T-0033.md`. VOLTA PARA AJUSTE: seguram o RD-0645 ao RD-0653 (3 médias, 6 baixas); não segura o RD-0654 (só comentário); fila: RD-0655 ao RD-0657; MANTIDOS: RD-0658 e RD-0659.
