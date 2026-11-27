@@ -4,7 +4,8 @@ Entrada: a pesquisa da sessão local do Alexandre (branch po/T-0040-anos, commit
 anos_pesquisa_T0040.csv (uma linha por id_linha da lista dados/T-0040/pendentes_internet.csv) e
 produtos_sem_aplicacao.csv. O conteúdo é DADO: é lido pelo git show do commit fixo e conferido pelo sha256.
 
-Decisões do Alexandre (R-20261127-135625-alexandre e R-20261127-133028-po, via po):
+Decisões do Alexandre (R-20261127-135625-alexandre e R-20261127-133028-po, via po) e as respostas da simulação
+(R-20261127-150417-alexandre, itens 9 a 20; as que mudam o script: 13, 14, 16 e 17):
 - só entra a decisão diferente de nao_resolvido;
 - 1a: veículo sem ano nenhum fica OCULTO no site e continua na base (FLU15001 e FLU15002 continuam aparecendo); a linha
   com ano parcial continua. Quem oculta é o site (web-site, depois): aqui nenhuma linha sai, só se conta;
@@ -15,7 +16,7 @@ Decisões do Alexandre (R-20261127-135625-alexandre e R-20261127-133028-po, via 
 
 Regra (decidir()): primeiro a linha da pesquisa tem de bater com a VEICULOS da v29 (id_linha = linha do Excel - 1;
 CODIGO_BAP, FABRICANTE e MODELO iguais), senão vai para DIVERGENCIAS. Depois:
-- manter_atual: nada muda (só fica na aba APLICADAS da simulação);
+- manter_atual: nenhuma célula muda; entra no LOG_CORRECOES como ANO_MANTIDO (item 16);
 - usar_fraga: a faixa da pesquisa tem de ser a faixa_fraga da linha no dados/T-0040/conflitos.csv; entra inteira
   (troca o ano atual: ANO_SUBSTITUIDO);
 - nova_faixa, linha sem ano: entra a faixa (ANO_COMPLETADO);
@@ -26,8 +27,12 @@ CODIGO_BAP, FABRICANTE e MODELO iguais), senão vai para DIVERGENCIAS. Depois:
     conflito se concorda com um dos lados (o ano atual cabe na faixa pesquisada, ou a faixa pesquisada cruza ou se
     encosta na da Fraga, até 1 ano). Resolvido, entra a faixa pesquisada inteira (ANO_SUBSTITUIDO se o ano atual
     mudou; ANO_COMPLETADO se ficou). Sem concordar com nenhum lado, vai para DIVERGENCIAS.
-O ano tem de ser inteiro de 1900 a 2026 e o início <= fim. Só ANO_INICIO, ANO_FIM (e a VERSAO das 3 linhas do
-JUH70025) mudam. ORIGEM, SITUACAO, MOTIVO, CILINDRADA e ANO_DUVIDA ficam; a APLICACAO (digitada) não muda.
+O ano tem de ser inteiro de 1900 a 2026 e o início <= fim; só no INT16501, o ano final 2027 da pesquisa passa a 2026
+antes da regra (item 17). Na linha aplicada (o ano veio da faixa da pesquisa, que confirmou a faixa):
+- SITUACAO marcada na revisão da P12 passa a "separado" e volta ao site (item 13; só tira a marca, nunca põe);
+- ANO_DUVIDA é limpo (item 14).
+Só ANO_INICIO, ANO_FIM, SITUACAO e ANO_DUVIDA (e a VERSAO das 3 linhas do JUH70025) mudam. ORIGEM, MOTIVO e
+CILINDRADA ficam; a APLICACAO (digitada) não muda. Os itens 9, 10, 11, 12, 15, 18, 19 e 20 já eram a regra.
 
 AUTORIZAÇÃO: o padrão é a SIMULAÇÃO (nada muda na base real nem em dados/versoes): grava dados/T-0040/v30/
 BASE_simulada_v30.xlsx e antes_depois_v30.xlsx, com "pendente do aprovado do Alexandre" no LOG_CORRECOES e no LEIA-ME.
@@ -55,8 +60,8 @@ import openpyxl
 from openpyxl.styles import Font
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from base_comum import (BASE, CAB_VEICULOS, RAIZ, acrescentar_leia_me, acrescentar_log, comparar,  # noqa: E402
-                        conferir_cabecalho, contar_duvidoso, gravar, limpo, linhas_novas, parar, sha, versao)
+from base_comum import (BASE, CAB_VEICULOS, RAIZ, acrescentar_leia_me, acrescentar_log, antes_log,  # noqa: E402
+                        comparar, conferir_cabecalho, contar_duvidoso, gravar, limpo, linhas_novas, parar, sha, versao)
 from simular_T0040 import ano, encostam, tipo_ano  # noqa: E402
 
 TAREFA, DATA = "T-0040", "27/11/2026"
@@ -73,11 +78,14 @@ UNIVERSAIS = {"FLU15001", "FLU15002"}                 # 1a: continuam aparecendo
 ANO_MIN, ANO_MAX = 1900, 2026                         # decisão 4 (26/11): em produção = 2026
 # JUH70025: (CILINDRADA, ANO_INICIO, ANO_FIM) da linha Gol da regra GOL da v29 -> VERSAO
 JUH = {("1.6", 1994, None): "1.6 L", ("1.8", 1982, None): "1.8 L", ("2.0", 1988, 1994): "2.0 L"}
-I_VER, I_INI, I_FIM = (CAB_VEICULOS.index(c) for c in ("VERSAO", "ANO_INICIO", "ANO_FIM"))
+I_VER, I_INI, I_FIM, I_SIT, I_DUV = (CAB_VEICULOS.index(c) for c in ("VERSAO", "ANO_INICIO", "ANO_FIM", "SITUACAO",
+                                                                      "ANO_DUVIDA"))
+SEPARADO, MARCA_P12 = "separado", "duvidoso"          # item 13: a marca da P12 só sai (nunca é escrita)
+FIM_2027 = {"INT16501": (2027, 2026)}                 # item 17: o ano final 2027 da pesquisa passa a 2026
 INTERNO = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|R\$|BAP BOX|CUSTO|FORNECEDOR|RANKING", re.I)
 REGRA = ("pesquisa T-0040: nova_faixa completa a linha sem ano ou a ponta que falta (o ano atual fica, se cabe na "
          "faixa); em conflito, a faixa entra inteira se concorda com o ano atual ou com a Fraga; usar_fraga = faixa da "
-         "Fraga")
+         "Fraga; a linha aplicada passa a 'separado' e o ANO_DUVIDA é limpo")
 
 
 # ---------------------------------------------------------------- entrada
@@ -108,9 +116,16 @@ def inteiro(s: str):
 # ---------------------------------------------------------------- regra
 def decidir(v: tuple, x: dict, fraga: tuple | None) -> dict:
     """O que a linha da pesquisa faz na linha v da VEICULOS: {acao, regra, ini, fim, tipo}.
-    acao: aplicar | manter | divergencia."""
+    acao: aplicar | manter | divergencia. A nota do item 17 (2027 -> 2026) vai no fim da regra."""
+    d = _decidir(v, x, fraga)
+    return {**d, "regra": d["regra"] + d.pop("nota", "")}
+
+
+def _decidir(v: tuple, x: dict, fraga: tuple | None) -> dict:
+    nota = ""
+
     def div(motivo):
-        return {"acao": "divergencia", "regra": motivo, "ini": a0, "fim": a1, "tipo": None}
+        return {"acao": "divergencia", "regra": motivo, "ini": a0, "fim": a1, "tipo": None, "nota": nota}
 
     a0, a1 = v[I_INI], v[I_FIM]
     if (limpo(v[0]).upper(), limpo(v[1]), limpo(v[2])) != (x["codigo_bap"].upper(), x["montadora"], x["modelo"]):
@@ -118,6 +133,9 @@ def decidir(v: tuple, x: dict, fraga: tuple | None) -> dict:
     if x["decisao"] == "manter_atual":
         return {"acao": "manter", "regra": "manter_atual: sem mudança", "ini": a0, "fim": a1, "tipo": None}
     y0, y1 = inteiro(x["ano_inicial"]), inteiro(x["ano_final"])
+    de_para = FIM_2027.get(x["codigo_bap"].upper())
+    if de_para and y1 == de_para[0]:
+        y1, nota = de_para[1], f"; ano final {de_para[0]} da pesquisa -> {de_para[1]} (item 17)"
     if y0 is None or y1 is None or not ANO_MIN <= y0 <= y1 <= ANO_MAX:
         return div(f"ano da pesquisa inválido ou incompleto ({x['ano_inicial']}–{x['ano_final']})")
     t = tipo_ano(a0, a1)
@@ -130,12 +148,12 @@ def decidir(v: tuple, x: dict, fraga: tuple | None) -> dict:
         if not conflito or (y0, y1) != fraga:
             return div(f"usar_fraga: a faixa {y0}–{y1} não é a da Fraga no conflitos.csv ({fraga})")
         return {"acao": "aplicar", "regra": "usar_fraga: faixa da Fraga (conflitos.csv)", "ini": y0, "fim": y1,
-                "tipo": "ANO_SUBSTITUIDO"}
+                "tipo": "ANO_SUBSTITUIDO", "nota": nota}
     if x["decisao"] != "nova_faixa":
         return div(f"decisão desconhecida: {x['decisao']}")
     if t == "sem_ano":
         return {"acao": "aplicar", "regra": "nova_faixa: linha sem ano recebe a faixa", "ini": y0, "fim": y1,
-                "tipo": "ANO_COMPLETADO"}
+                "tipo": "ANO_COMPLETADO", "nota": nota}
     atual = a0 if t == "so_inicial" else a1
     cabe = y0 <= atual <= y1
     if not conflito:
@@ -144,14 +162,15 @@ def decidir(v: tuple, x: dict, fraga: tuple | None) -> dict:
                        f"(em_conflito vazio)")
         ini, fim = (a0, y1) if t == "so_inicial" else (y0, a1)
         return {"acao": "aplicar", "regra": "nova_faixa: completa só a ponta que falta (o ano atual cabe na faixa)",
-                "ini": ini, "fim": fim, "tipo": "ANO_COMPLETADO"}
+                "ini": ini, "fim": fim, "tipo": "ANO_COMPLETADO", "nota": nota}
     if not (cabe or encostam(y0, y1, *fraga)):
         return div(f"conflito sem resolução: a faixa pesquisada {y0}–{y1} não concorda com o ano atual ({ano(v)}) "
                    f"nem com a Fraga ({fraga[0]}–{fraga[1]})")       # fica; a Fraga já entrou somada na v29
     lado = "o ano atual" if cabe else "a Fraga"
     return {"acao": "aplicar", "regra": f"nova_faixa em conflito: resolvido (concorda com {lado}); entra a faixa "
                                         f"inteira", "ini": y0, "fim": y1,
-            "tipo": "ANO_COMPLETADO" if atual == (y0 if t == "so_inicial" else y1) else "ANO_SUBSTITUIDO"}
+            "tipo": "ANO_COMPLETADO" if atual == (y0 if t == "so_inicial" else y1) else "ANO_SUBSTITUIDO",
+            "nota": nota}
 
 
 def linhas_juh(V: list[tuple]) -> dict[int, str]:
@@ -197,6 +216,17 @@ def contar(V: list[tuple], site: set[str]) -> dict:
 
 
 # ---------------------------------------------------------------- simulação
+def veiculo(v: tuple) -> str:
+    """FABRICANTE MODELO [VERSAO] [CILINDRADA] da linha, como no LOG."""
+    return " ".join(limpo(c) for c in (v[1], v[2], v[3], v[9]) if limpo(c))
+
+
+def extra(v: tuple, d: dict) -> str:
+    """O que mais muda na linha aplicada (itens 13 e 14), sem escrever a marca da P12 (R-20261120-213300)."""
+    return "".join([f"; SITUACAO {antes_log(v[I_SIT])} -> '{SEPARADO}'" if d.get("sit") else "",
+                    f"; ANO_DUVIDA {antes_log(v[I_DUV])} -> vazio" if d.get("duv") else ""])
+
+
 def montar(wb, pesq: list[dict], fraga: dict[int, tuple], autorizacao: str) -> dict:
     """Aplica a regra no wb (a v29 carregada) e devolve o que a simulação mostra e o comparar confere."""
     ws = wb["VEICULOS"]
@@ -222,14 +252,19 @@ def montar(wb, pesq: list[dict], fraga: dict[int, tuple], autorizacao: str) -> d
 
     celulas, mud = set(), defaultdict(lambda: defaultdict(list))
     for i, v, x, d in linhas:
+        if d["acao"] == "manter":                     # item 16: só o registro no LOG
+            mud[limpo(v[0]).upper()]["ANO_MANTIDO"].append((v, d, x))
         if d["acao"] != "aplicar":
             continue
-        for c, val in ((I_INI, d["ini"]), (I_FIM, d["fim"])):
-            if v[c] != val:
-                ws.cell(i + 1, c + 1).value = val
-                celulas.add((i + 1, c + 1))
         if (v[I_INI], v[I_FIM]) == (d["ini"], d["fim"]):
             parar([f"id_linha {i}: a regra mandou aplicar e nada mudou"])
+        sit = limpo(v[I_SIT]).lower() == MARCA_P12    # item 13: a marca sai, a linha volta ao site
+        d["sit"], d["duv"] = sit, v[I_DUV] is not None   # item 14: a pesquisa confirmou a faixa
+        for c, val, muda in ((I_INI, d["ini"], v[I_INI] != d["ini"]), (I_FIM, d["fim"], v[I_FIM] != d["fim"]),
+                             (I_SIT, SEPARADO, sit), (I_DUV, None, d["duv"])):
+            if muda:
+                ws.cell(i + 1, c + 1).value = val
+                celulas.add((i + 1, c + 1))
         mud[limpo(v[0]).upper()][d["tipo"]].append((v, d, x))
     for j, ver in juh.items():
         ws.cell(j + 2, I_VER + 1).value = ver
@@ -245,9 +280,13 @@ def montar(wb, pesq: list[dict], fraga: dict[int, tuple], autorizacao: str) -> d
                 quais = "; ".join(f"Gol {limpo(v[9])} {ano(v)}: VERSAO vazia -> '{d['versao']}'" for v, d, _ in itens)
                 txt = (f"VEICULOS: {len(itens)} linha(s) VOLKSWAGEN Gol da regra GOL da v29 com a cilindrada na "
                        f"VERSAO ({quais}), para a tela não trocar a cilindrada (pendência combinada com o po).")
+            elif tipo == "ANO_MANTIDO":
+                quais = "; ".join(f"{veiculo(v)} {ano(v)} (manter_atual; pesquisa {x['ano_inicial']}–"
+                                  f"{x['ano_final']}; fonte: {x['fonte_url']})" for v, d, x in itens)
+                txt = (f"VEICULOS: {len(itens)} linha(s) com o ano atual mantido pela pesquisa ({quais}); nenhuma "
+                       f"célula muda (registro pedido no item 16 do R-20261127-150417-alexandre).")
             else:
-                quais = "; ".join(f"{limpo(v[1])} {limpo(v[2])}{' ' + limpo(v[3]) if limpo(v[3]) else ''}"
-                                  f"{' ' + limpo(v[9]) if limpo(v[9]) else ''} {ano(v)} -> {d['ini']}–{d['fim']} "
+                quais = "; ".join(f"{veiculo(v)} {ano(v)} -> {d['ini']}–{d['fim']}{extra(v, d)} "
                                   f"({x['decisao']}; fonte: {x['fonte_url']})" for v, d, x in itens)
                 acao = "completada(s)" if tipo == "ANO_COMPLETADO" else "com o ano atual trocado"
                 txt = f"VEICULOS: {len(itens)} linha(s) {acao} pelos anos da pesquisa ({quais}); ({REGRA})."
@@ -256,6 +295,8 @@ def montar(wb, pesq: list[dict], fraga: dict[int, tuple], autorizacao: str) -> d
                 parar([f"{cod} {tipo}: observação do LOG com {len(obs)} caracteres"])
             log.append([tipo, "VEICULOS", cod, None, obs])
     n = Counter(d["tipo"] for *_, d in linhas if d["acao"] == "aplicar")
+    n.update(SITUACAO=sum(d.get("sit", False) for *_, d in linhas), ANO_DUVIDA=sum(d.get("duv", False)
+                                                                                   for *_, d in linhas))
     ult = acrescentar_log(wb, log)
     leia_n = acrescentar_leia_me(wb, leia_me(autorizacao, n, Counter(d["acao"] for *_, d in linhas)))
     return {"linhas": linhas, "V": V, "juh": juh, "celulas": celulas, "ult": ult, "leia_n": leia_n, "log": log}
@@ -268,17 +309,22 @@ def leia_me(autorizacao: str, n: Counter, acoes: Counter) -> list[tuple]:
                                         f"(pesquisa {PESQ_COMMIT[:7]}, só a decisão diferente de nao_resolvido): "
                                         f"{n['ANO_COMPLETADO']} linhas com o ano completado e {n['ANO_SUBSTITUIDO']} "
                                         f"com o ano atual trocado (conflito resolvido ou faixa da Fraga); "
-                                        f"{acoes['manter']} mantidas; {acoes['divergencia']} não aplicadas "
-                                        f"(divergência ou conflito). Nenhuma linha entra ou sai (T-0040)."),
+                                        f"{acoes['manter']} mantidas (no LOG como ANO_MANTIDO); "
+                                        f"{acoes['divergencia']} não aplicadas (divergência ou conflito, ficam para "
+                                        f"nova pesquisa). Nas aplicadas, {n['SITUACAO']} linhas marcadas na revisão "
+                                        f"da P12 passam a 'separado' e {n['ANO_DUVIDA']} têm o ANO_DUVIDA limpo. "
+                                        f"Nenhuma linha entra ou sai (T-0040)."),
         ("Regra do ano", "Linha sem ano recebe a faixa. Linha só com um ano: fora de conflito, só a ponta que falta "
                          "(o ano atual fica, se cabe na faixa pesquisada); em conflito com a Fraga, a faixa pesquisada "
                          "entra inteira se concorda com o ano atual ou com a Fraga (cruza ou se encosta, até 1 ano). "
-                         "usar_fraga: a faixa da Fraga. ORIGEM, SITUACAO e ANO_DUVIDA ficam."),
+                         "usar_fraga: a faixa da Fraga. INT16501: o ano final 2027 da pesquisa passa a 2026. Na "
+                         "linha aplicada, a SITUACAO passa a 'separado' (volta ao site) e o ANO_DUVIDA é limpo. "
+                         "ORIGEM, MOTIVO e CILINDRADA ficam (R-20261127-150417-alexandre)."),
         ("JUH70025", "As 3 linhas VOLKSWAGEN Gol da regra GOL da v29 recebem a VERSAO '1.6 L', '1.8 L' e '2.0 L'."),
         ("APLICACAO", "O texto da APLICACAO na PRODUTOS não muda (campo digitado)."),
         ("Formato", f"Mesmas abas e colunas da v29 (VEICULOS com 11 colunas). Uma linha por código e tipo no "
-                    f"LOG_CORRECOES (ANO_COMPLETADO, ANO_SUBSTITUIDO, CORRECAO_VEICULO), com a fonte_url. Simulação "
-                    f"em dados/T-0040/v30/. Autorização: {autorizacao}."),
+                    f"LOG_CORRECOES (ANO_COMPLETADO, ANO_SUBSTITUIDO, ANO_MANTIDO, CORRECAO_VEICULO), com a "
+                    f"fonte_url. Simulação em dados/T-0040/v30/. Autorização: {autorizacao}."),
         (None, None),
     ]
 
@@ -374,7 +420,9 @@ def antes_depois(r: dict, pesq: list[dict], lista_sa: list[dict], prods: dict, s
     resumo = [("Pesquisa (linhas)", len(pesq), ""), *((f"  decisao = {k}", v, "") for k, v in sorted(dec.items())),
               ("Linhas aplicadas", acoes["aplicar"], ""),
               ("  ANO_COMPLETADO", tipos["ANO_COMPLETADO"], ""), ("  ANO_SUBSTITUIDO", tipos["ANO_SUBSTITUIDO"], ""),
-              ("Linhas mantidas (manter_atual)", acoes["manter"], ""),
+              ("  SITUACAO marcada na P12 -> 'separado' (item 13)", sum(d.get("sit", False) for *_, d in linhas), ""),
+              ("  ANO_DUVIDA limpo (item 14)", sum(d.get("duv", False) for *_, d in linhas), ""),
+              ("Linhas mantidas (manter_atual; no LOG como ANO_MANTIDO, item 16)", acoes["manter"], ""),
               ("Linhas não aplicadas (DIVERGENCIAS)", acoes["divergencia"], ""),
               *((f"  regra: {k}", v, "") for k, v in sorted(regras.items())),
               ("JUH70025: linhas Gol com VERSAO", len(r["juh"]), ""), ("", "", ""),
@@ -409,13 +457,15 @@ def antes_depois(r: dict, pesq: list[dict], lista_sa: list[dict], prods: dict, s
             dv.append(lin + [x["tipo_fonte"], x["fonte_url"], x["observacao"]])
         else:
             ap.append(lin + [f"{d['ini'] if d['ini'] is not None else '?'}–{d['fim'] if d['fim'] is not None else '?'}"
-                             if d["acao"] == "aplicar" else "(sem mudança)", d["tipo"] or "", x["tipo_fonte"],
-                             x["fonte_url"], x["observacao"]])
+                             if d["acao"] == "aplicar" else "(sem mudança)", d["tipo"] or "ANO_MANTIDO",
+                             x["tipo_fonte"], x["fonte_url"], x["observacao"],
+                             SEPARADO if d.get("sit") else limpo(v[I_SIT]), limpo(v[I_DUV]),
+                             "" if d.get("duv") else limpo(v[I_DUV])])
     for j, ver in r["juh"].items():
         v = V0[j]
         ap.append([j + 1, j + 2, limpo(v[0]), limpo(v[1]), limpo(v[2]), "(vazio) -> " + ver, limpo(v[9]), limpo(v[7]),
                    "pendência po", "", "", ano(v), "", "VERSAO da linha Gol da regra GOL da v29", ano(v),
-                   "CORRECAO_VEICULO", "", "", ""])
+                   "CORRECAO_VEICULO", "", "", "", limpo(v[I_SIT]), limpo(v[I_DUV]), limpo(v[I_DUV])])
     nr = Counter((motivo_nr(x), x["em_conflito"] or "não") for x in pesq if x["decisao"] == "nao_resolvido")
     return {"resumo": resumo, "ap": ap, "dv": dv, "nr": sorted(nr.items(), key=lambda t: -t[1]), "sa": sa,
             "c0": c0, "c1": c1, "sa_bate": sa_bate, "acoes": acoes, "tipos": tipos, "regras": regras}
@@ -453,18 +503,37 @@ PONTOS = [
 ]
 
 
+# as respostas do Alexandre (itens 9 a 20 do R-20261127-144829-gerente-projetos), na ordem dos PONTOS
+RESPOSTAS = [
+    "9. Aprovada.",
+    "10. Ficam como estão e vão para nova pesquisa depois.",
+    "11. Ficam como estão.",
+    "12. Entra como veio.",
+    "13. Passa a 'separado' e volta ao site (aplicado na linha que ganhou ano).",
+    "14. Limpar quando a pesquisa confirmou a faixa (aplicado na linha que ganhou ano).",
+    "15. Vale igual à de fabricante.",
+    "16. Também entram no LOG_CORRECOES (ANO_MANTIDO).",
+    "1 (site): ocultar só as linhas sem ano nenhum; 19: vale a conta do site.",
+    "17. Passa a 2026 (aplicado nas linhas do INT16501).",
+    "18. Entram como vieram.",
+    "19. Vale a conta do site (199 produtos com o aviso).",
+    "20. Confirmado.",
+]
+
+
 def gravar_ad(res: dict) -> None:
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
     aba(wb, "RESUMO", ["ITEM", "ANTES / VALOR", "DEPOIS"], res["resumo"])
     base = ["id_linha", "linha_excel", "CODIGO_BAP", "FABRICANTE", "MODELO", "VERSAO", "CILINDRADA", "SITUACAO",
             "decisao", "em_conflito", "faixa_fraga", "ano_antes", "ano_pesquisa", "regra"]
-    aba(wb, "APLICADAS", base + ["ano_depois", "tipo_LOG", "tipo_fonte", "fonte_url", "observacao"], res["ap"])
+    aba(wb, "APLICADAS", base + ["ano_depois", "tipo_LOG", "tipo_fonte", "fonte_url", "observacao",
+                                 "SITUACAO_depois", "ANO_DUVIDA_antes", "ANO_DUVIDA_depois"], res["ap"])
     aba(wb, "DIVERGENCIAS", base + ["tipo_fonte", "fonte_url", "observacao"], res["dv"])
     aba(wb, "NAO_RESOLVIDO", ["motivo", "em_conflito", "linhas"], [(m, c, n) for (m, c), n in res["nr"]])
     aba(wb, "SEM_APLICACAO", ["codigo_bap", "descricao (lista)", "motivo (lista)", "bate com a base", "o que difere",
                               "APLICACAO vazia na base", "linhas VEICULOS v29", "linhas com ano v30"], res["sa"])
-    aba(wb, "PONTOS_ALEXANDRE", ["ponto"], [(p,) for p in PONTOS])
+    aba(wb, "PONTOS_ALEXANDRE", ["ponto", "resposta (R-20261127-150417-alexandre)"], list(zip(PONTOS, RESPOSTAS)))
     for ws in wb.worksheets:
         for row in ws.iter_rows():
             for c in row:
