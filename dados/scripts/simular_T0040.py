@@ -20,6 +20,16 @@ MONOCILÍNDRICO1"); está no CSV da Fraga, não no agrupamento. Só no motor, o 
 (SUFIXO_1); no modelo e na versão ("X1", "A1", "G1", "L1H1") o "1" faz parte do nome e fica. A aba SUFIXO_1 da
 antes_depois lista as linhas da Fraga corrigidas, e a PONTOS_ALEXANDRE, o que o Alexandre precisa ver.
 
+Limpeza dos complementos da VERSAO (design-de-marca, MC-0048 a MC-0050, 27/11/2026), por regra (obs_limpas):
+- sai o "CATALOGO NÃO INFORMA ANO/MODELO" (a coluna Ano já mostra "—"; o ANO_DUVIDA continua dizendo);
+- " | " vira " · ";
+- a observação em caixa alta, como as outras ("Exceto Locker / ..." -> "EXCETO LOCKER / ...");
+- sai a observação que é um pedaço (separado por " - ") de outra do mesmo grupo
+  ("SEM AR CONDICIONADO - COM DIREÇÃO HIDRÁULICA · SEM AR CONDICIONADO" -> "SEM AR CONDICIONADO - COM DIREÇÃO
+  HIDRÁULICA").
+A aba LIMPEZA da antes_depois mostra cada linha da VEICULOS que mudou. Complementos com ano ou com outro veículo
+("A PARTIR DE 02 / 1995 - ATÉ 07 / 1998", "FORD - C 60") ficam como estão e vão para a PONTOS_ALEXANDRE.
+
 Saída (dados/T-0040/simulacao/): BASE_simulada_v29.xlsx (cópia da v28 com a VEICULOS nova) e antes_depois.xlsx.
 A base real é conferida pelo sha256 antes e depois (e tem de ser a v28).
 
@@ -53,6 +63,25 @@ DUVIDOSAS = {"UNIVERSAL": "a Fraga diz montadora UNIVERSAL (não é veículo do 
              "SEM APLICAÇÃO NO CATÁLOGO": "a Fraga diz SEM APLICAÇÃO NO CATÁLOGO (não é veículo do filtro)"}
 APELIDO_FAB = {"ASIAMOTORS": "ASIA", "EFFAMOTORS": "EFFA"}
 SUFIXO_1 = re.compile(r"(?<=[A-Za-zÀ-ÿ])1$")      # "MONOCILÍNDRICO1" -> "MONOCILÍNDRICO" (só no motor)
+
+
+def motor_limpo(m: str) -> str:
+    """O motor da Fraga sem o "- " do começo e sem o "1" grudado no fim."""
+    return SUFIXO_1.sub("", re.sub(r"^-\s*", "", m).strip())
+
+
+SEM_ANO = "CATALOGO NÃO INFORMA ANO/MODELO"
+ANO_NO_TEXTO = re.compile(r"\b(19|20)\d{2}\b")
+
+
+def obs_limpas(obs: list[str]) -> list[str]:
+    """As observações do grupo como entram na VERSAO (MC-0048 a MC-0050)."""
+    o2 = [o.replace(" | ", " · ").upper() for o in obs if o.upper() != SEM_ANO]
+    o2 = list(dict.fromkeys(o2))
+    partes = {p.strip() for o in o2 for p in o.split(" - ") if " - " in o}
+    return [o for o in o2 if " - " in o or o not in partes]
+
+
 # pontos conferidos na Fraga (testes, 27/11/2026): código -> o que o Alexandre precisa saber
 PONTOS = {
     "FAC6194": "Perde o modelo 'Titan Tractor': na Fraga ele é versão do Constellation ('19-320 E TITAN TRACTOR', "
@@ -138,7 +167,7 @@ def main():
     grupos: dict[tuple, dict] = {}
     for r in bap:
         cod = r["codigo_bap"].upper()
-        motor = SUFIXO_1.sub("", re.sub(r"^-\s*", "", r["motor"]).strip())
+        motor = motor_limpo(r["motor"])
         k = (cod, chave(r["montadora"]), chave(r["modelo"]), chave(motor))
         g = grupos.setdefault(k, {"cod": cod, "fab": fab_de(r["montadora"]), "mod": mod_de(r["montadora"], r["modelo"]),
                                   "motor": motor, "ai": [], "af": [], "obs": [], "vers": []})
@@ -150,11 +179,13 @@ def main():
         if r["versao"] and r["versao"] not in g["vers"]:
             g["vers"].append(r["versao"])
     novas_por_cod: dict[str, list[list]] = defaultdict(list)
+    bruta: dict[tuple[str, int], str] = {}          # a VERSAO sem a limpeza, para a aba LIMPEZA
     for g in sorted(grupos.values(), key=lambda g: (g["cod"], chave(g["fab"]), chave(g["mod"]), min(g["ai"]),
                                                     chave(g["motor"]))):
         moto = prod[g["cod"]].get("LINHA", "").upper() == "MOTO"
         cil = re.search(r"(\d+\.\d+)\s*L\b", g["motor"])
-        ver = " · ".join([g["motor"]] + g["obs"])
+        ver = " · ".join([g["motor"]] + obs_limpas(g["obs"]))
+        bruta[(g["cod"], len(novas_por_cod[g["cod"]]))] = " · ".join([g["motor"]] + g["obs"])
         duv = DUVIDOSAS.get(g["fab"].upper())
         novas_por_cod[g["cod"]].append([
             g["cod"], g["fab"], g["mod"], ver, min(g["ai"]), max(g["af"]), ORIGEM,
@@ -294,15 +325,30 @@ def main():
                         "LINHAS_VEICULOS_HOJE", "SEPARADAS", "DUVIDOSAS", "ANOS_HOJE", "APLICACAO (300 primeiros)"],
         lnao)
     suf = [[r["codigo_bap"].upper(), r["montadora"], r["modelo"], r["versao"], r["motor"],
-            SUFIXO_1.sub("", re.sub(r"^-\s*", "", r["motor"]).strip()), r["ano_inicial"], r["ano_final"]]
+            motor_limpo(r["motor"]), r["ano_inicial"], r["ano_final"]]
            for r in bap if SUFIXO_1.search(r["motor"].strip())]
     aba("SUFIXO_1", ["CODIGO_BAP", "MONTADORA", "MODELO", "VERSAO_FRAGA", "MOTOR_NA_FRAGA", "MOTOR_NA_VEICULOS",
                      "ANO_INICIAL", "ANO_FINAL"], suf)
+    lim = [[cod, r[1], r[2], bruta[(cod, i)], r[3]] for cod in trocar for i, r in enumerate(novas_por_cod[cod])
+           if bruta[(cod, i)] != r[3]]
+    aba("LIMPEZA", ["CODIGO_BAP", "FABRICANTE", "MODELO", "VERSAO_SEM_LIMPEZA", "VERSAO_NA_VEICULOS"], lim)
     pontos = []
     for cod, txt in PONTOS.items():
         an, de = antes_cod.get(cod, []), novas_por_cod.get(cod, [])
         pontos.append([cod, prod[cod].get("DESCRICAO"), "; ".join(f"{limpo(r[1])} {limpo(r[2])}" for r in an),
                        "; ".join(sorted({f"{r[1]} {r[2]}" for r in de})), cont_csv[cod], txt])
+    # complementos com ano ou com outro veículo: ficam como estão; o Alexandre decide
+    marcas = set(fab_base) | {chave(r["montadora"]) for r in bap}
+    comp = defaultdict(set)
+    for cod in trocar:
+        for r in novas_por_cod[cod]:
+            for o in limpo(r[3]).split(" · ")[1:]:
+                if ANO_NO_TEXTO.search(o) or chave(re.split(r"[\s-]", o)[0]) in marcas:
+                    comp[(cod, o)].add(f"{r[1]} {r[2]}")
+    for (cod, o), vs in sorted(comp.items()):
+        pontos.append([cod, prod[cod].get("DESCRICAO"), "", "; ".join(sorted(vs)), cont_csv[cod],
+                       f"Complemento da Fraga com ano ou outro veículo, mantido na VERSAO como veio: '{o}'. "
+                       "Não foi mexido (fora do pedido): decidir se vira ano, outra linha ou sai."])
     aba("PONTOS_ALEXANDRE", ["CODIGO_BAP", "DESCRICAO", "VEICULOS_ANTES (montadora modelo)",
                              "VEICULOS_DEPOIS (montadora modelo)", "LINHAS_DA_FRAGA", "O_QUE_A_FRAGA_TEM"], pontos)
     for w in out.worksheets:
