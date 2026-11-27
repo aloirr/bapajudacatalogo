@@ -1,5 +1,19 @@
 # T-0040 · Lista de trabalho dos anos: como usar
 
+## Situação na v30 (27/11/2026)
+
+A lista abaixo é a da **v29**: foi a entrada da pesquisa na internet (d3e4b8d, branch `po/T-0040-anos`). A **v30**
+aplicou essa pesquisa na VEICULOS (`dados/scripts/base_v30.py`, aprovada em R-20261127-150417-alexandre). O antes e
+depois linha a linha está em `v30/antes_depois_v30.xlsx`, e o aviso para a BAP Central em `AVISO_BAP_CENTRAL.md`.
+
+- 1.117 linhas da lista receberam o ano: 930 completadas e 187 com o ano trocado. As 300 marcadas na revisão da P12
+  passaram a `separado`, sem MOTIVO. O ANO_DUVIDA saiu em 90, as que ficaram com a faixa igual à da pesquisa.
+- 24 ficaram com o ano atual (`manter_atual`, LOG `ANO_MANTIDO`).
+- 92 não entraram e ficam para nova pesquisa: 86 conflitos novos (o ano atual fica fora da faixa pesquisada; o Taos
+  do INT16501 é um deles) e 6 conflitos sem resolução (aba DIVERGENCIAS).
+- 2.941 não foram resolvidas na pesquisa e ficam como estão.
+- O `id_linha` continua valendo na v30: nenhuma linha entrou ou saiu da VEICULOS.
+
 Arquivo: `pendentes_internet.csv` (a lista de trabalho; até o RD-0696 se chamava `lista_trabalho.csv`, com o mesmo
 conteúdo) (UTF-8, separador `;`), uma linha por aplicação (produto × veículo) da aba VEICULOS
 da base **v29** (refeita em 27/11/2026: 4.174 linhas, antes 7.293 na v28). Saíram as 3.119 linhas que receberam o ano
