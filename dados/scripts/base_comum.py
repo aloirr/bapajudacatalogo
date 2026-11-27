@@ -9,7 +9,9 @@ cada célula (RD-0247; o base_v22.py fica como rodou). Da v24 em diante, as linh
 VEICULOS): acrescentar_linhas grava e o comparar confere (novas_no_fim). Da v26 em diante, também antes_log,
 linhas_por_codigo e conferir_cabecalho (RD-0272; os base_v22 a base_v25 ficam como rodaram). Da v27 em diante, também
 o gerar_site_copia e o contar_duvidoso das simulações (RD-0310; o simular_v26.py fica como rodou). Da v28 em diante,
-também o conferir_antes e o escrever (RD-0545; os base_v22 a base_v27 ficam como rodaram).
+também o conferir_antes e o escrever (RD-0545; os base_v22 a base_v27 ficam como rodaram). Da v30 em diante, também
+o refazer, o texto_novo_difere (que o rodar usa), a aba das planilhas antes_depois e o INTERNO (RD-0703 e RD-0704; o
+base_v29.py e o simular_T0040.py ficam como rodaram).
 """
 from __future__ import annotations
 
@@ -26,6 +28,7 @@ from copy import copy
 from pathlib import Path
 
 import openpyxl
+from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 
 RAIZ = Path(__file__).resolve().parents[2]
@@ -35,6 +38,8 @@ CAB_LOG = ["TIPO", "ABA", "CODIGO_ANTES_OU_NOVO", "CODIGO_REFERENCIA", "OBSERVAC
 CAB_VEICULOS = ["CODIGO_BAP", "FABRICANTE", "MODELO", "VERSAO", "ANO_INICIO", "ANO_FIM", "ORIGEM", "SITUACAO", "MOTIVO",
                 "CILINDRADA", "ANO_DUVIDA"]
 VAZIO = "(vazio)"                     # como a simulação mostra a célula vazia
+# dado interno que não sai em planilha nem em lista (preço, estoque, fornecedor e o histórico "| ANTERIOR")
+INTERNO = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|R\$|BAP BOX|CUSTO|FORNECEDOR|RANKING|ANTERIOR", re.I)
 
 
 def versao(n: int) -> Path:
@@ -208,6 +213,40 @@ def linhas_novas(wb, log_ult: int, leia_n: int) -> dict[str, list[tuple]]:
             "LEIA-ME": [tuple(c.value for c in r) for r in lm.iter_rows(min_row=1, max_row=leia_n, max_col=2)]}
 
 
+def texto_novo_difere(p: Path, wb, ult: int, leia_n: int) -> list[str]:
+    """O texto das linhas novas do LOG_CORRECOES e do LEIA-ME da base salva em p contra o que o script escreveu
+    em wb."""
+    esperado, achado = linhas_novas(wb, ult, leia_n), linhas_novas(openpyxl.load_workbook(p), ult, leia_n)
+    return [f"{nome_aba}: o texto das linhas novas não é o que o script escreve "
+            f"({sum(x != y for x, y in zip(achado[nome_aba], esperado[nome_aba]))} diferentes, "
+            f"{len(achado[nome_aba])} x {len(esperado[nome_aba])} linhas)"
+            for nome_aba in esperado if achado[nome_aba] != esperado[nome_aba]]
+
+
+def refazer(anterior: int, nova: int) -> None:
+    """Volta a base à v<anterior> do origin/main (a v<nova> de dados/versoes sai), para gravar a v<nova> de novo."""
+    b = subprocess.run(["git", "-C", str(RAIZ), "show", "origin/main:dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx"],
+                       capture_output=True, check=True).stdout
+    BASE.write_bytes(b)
+    if sha(BASE) != sha(versao(anterior)):
+        raise SystemExit(f"[PARADO] a base do origin/main não é a v{anterior}: o main mudou, refaça a simulação")
+    versao(nova).unlink(missing_ok=True)
+    print(f"  --refazer: base de volta à v{anterior} do origin/main ({sha(BASE)}); a v{nova} de versoes saiu")
+
+
+def aba(wb, nome: str, cab: list[str], linhas: list) -> None:
+    """Uma aba nova da planilha antes_depois: cabeçalho em negrito, congelado e com filtro."""
+    ws = wb.create_sheet(nome)
+    ws.append(cab)
+    for c in ws[1]:
+        c.font = Font(bold=True)
+    for lin in linhas:
+        ws.append(list(lin))
+    ws.freeze_panes = "A2"
+    if linhas:
+        ws.auto_filter.ref = ws.dimensions
+
+
 def comparar(novo: Path, velho: Path, celulas: dict[str, set], log_ult: int, rotulo: str,
              colunas_novas: dict[str, list[str]] | None = None, leia_n: int = 0,
              removidas: dict[str, set[int]] | None = None, novas_no_fim: dict[str, int] | None = None) -> list[str]:
@@ -326,12 +365,7 @@ def rodar(anterior: int, nova: int, ler, aplicar, conferir_extra=None,
 
     def diferencas(p: Path, wb, celulas, ult, leia_n, extra) -> list[str]:
         dif = comparar(p, va, celulas, ult, f"v{anterior}", colunas_novas, leia_n, removidas, novas_no_fim)
-        esperado, achado = linhas_novas(wb, ult, leia_n), linhas_novas(openpyxl.load_workbook(p), ult, leia_n)
-        for aba in esperado:
-            if achado[aba] != esperado[aba]:
-                n = sum(x != y for x, y in zip(achado[aba], esperado[aba]))
-                dif.append(f"{aba}: o texto das linhas novas não é o que o script escreve ({n} diferentes, "
-                           f"{len(achado[aba])} x {len(esperado[aba])} linhas)")
+        dif += texto_novo_difere(p, wb, ult, leia_n)
         return dif + (conferir_extra(p, extra) if conferir_extra else [])
 
     if arg.conferir:

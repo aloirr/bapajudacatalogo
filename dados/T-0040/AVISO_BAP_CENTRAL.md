@@ -1,24 +1,22 @@
-# Aviso para a BAP Central · base v29 (T-0040)
+# Aviso para a BAP Central · base v30 (T-0040)
 
-A BAP Central lê a base unificada (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`). Na v29 a aba VEICULOS ganha um **valor novo** e mais que dobra de tamanho; abas e colunas ficam iguais (abaixo).
+A BAP Central lê a base unificada (`dados/BASE_BAP_UNIFICADA_PRODUTOS_BAP.xlsx`). A v30 aplica na aba VEICULOS os anos da pesquisa na internet (pesquisa d3e4b8d, branch `po/T-0040-anos`).
 
 ## O que muda
 
-- **VEICULOS, coluna ORIGEM:** valor novo **`Fraga T-0040`** nas 23.602 linhas que entram da Fraga. As 17.296 linhas da v28 continuam todas, com `automático`, na mesma ordem; as da Fraga entram logo depois da última linha de cada código.
-  - Quem filtra ou valida a ORIGEM por uma lista fechada de valores tem de aceitar o novo.
-- **VEICULOS, anos das linhas `automático`:** 3.119 linhas sem ano completo receberam o ano inicial e o final da Fraga, e 913 tiveram a faixa aumentada (juntada com a da Fraga). A ORIGEM delas continua `automático`; a fonte do ano está no LOG_CORRECOES. Outras 472 linhas sem ano completo ficaram como estavam, porque o ano delas conflita com a faixa da Fraga.
-- **VEICULOS, tamanho:** de 17.296 para 40.902 linhas de dados (4 delas são as linhas VOLKSWAGEN Gol do JUH70025 e do SFR30017, ORIGEM `automático`, no fim da aba; LOG `VEICULO_NOVO`, tipo que já existe).
-- **Regras da soma:** a linha atual que tem VERSAO ou CILINDRADA absorve a Fraga do mesmo motor quando a faixa cabe ou se encosta (até 1 ano de distância: 2005–2010 e 2011–2014 viram 2005–2014); a linha atual sem VERSAO e sem CILINDRADA não absorve, e a Fraga entra ao lado, com o motor. Por isso pode haver, no mesmo código, uma linha `automático` sem versão e linhas `Fraga T-0040` do mesmo modelo com o motor.
-  - Nas linhas da Fraga, a VERSAO traz o motor e, quando houver, a observação (ex.: `EA111 VHT 1.6 L 8V SOHC L4 · DIANT`).
-- **VEICULOS, grafia das linhas da Fraga:** montadora e modelo seguem a da base. VOLARE vira `MARCOPOLO` / `Volare`; o modelo da Fraga que começa por um modelo da base da mesma montadora vira o da base ("SPRINTER FURGÃO" → `Sprinter`), e o resto vai para o começo da VERSAO. O que não casa fica como veio da Fraga.
-- **LOG_CORRECOES, coluna TIPO:** valores novos **`VEICULO_SOMADO`**, **`ANO_COMPLETADO`** e **`FAIXA_JUNTADA`** (uma linha por código e tipo).
+- **VEICULOS, anos:** 1.117 linhas recebem o ano da pesquisa (ANO_INICIO e ANO_FIM). 930 delas tinham o ano incompleto e foram completadas; nas outras 187, o ano atual foi trocado (conflito resolvido ou faixa da Fraga).
+- **VEICULOS, SITUACAO e MOTIVO:** 300 linhas que ganharam ano passam de `duvidoso` para `separado`, com o MOTIVO vazio, como toda linha `separado` (como na v26). O texto de antes do MOTIVO está no LOG_CORRECOES.
+  - Fica menos `duvidoso`: 5.697 → 5.397.
+- **VEICULOS, ANO_DUVIDA:** 90 linhas ficam com o ANO_DUVIDA vazio, porque a faixa final é igual à da pesquisa.
+- **VEICULOS, VERSAO do JUH70025:** as 3 linhas VOLKSWAGEN Gol do JUH70025 (ORIGEM `automático`) passam de VERSAO vazia para `1.6 L`, `1.8 L` e `2.0 L`, uma por cilindrada.
+- **LOG_CORRECOES, coluna TIPO:** dois valores novos, **`ANO_SUBSTITUIDO`** (o ano atual foi trocado pelo da pesquisa) e **`ANO_MANTIDO`**. O `ANO_MANTIDO` é só uma linha de registro: a pesquisa confirmou o ano atual e **nenhuma célula muda**. Também entram linhas `ANO_COMPLETADO` e `CORRECAO_VEICULO`, TIPOs que já existem. Fica uma linha por código e tipo: 440 linhas novas.
 
 ## O que não muda
 
-- As abas, a ordem delas e as colunas: a VEICULOS continua com as mesmas 11 colunas, na mesma ordem (CODIGO_BAP, FABRICANTE, MODELO, VERSAO, ANO_INICIO, ANO_FIM, ORIGEM, SITUACAO, MOTIVO, CILINDRADA, ANO_DUVIDA).
+- As abas, a ordem delas, as colunas e o número de linhas: a VEICULOS continua com 40.902 linhas de dados e as mesmas 11 colunas, na mesma ordem (CODIGO_BAP, FABRICANTE, MODELO, VERSAO, ANO_INICIO, ANO_FIM, ORIGEM, SITUACAO, MOTIVO, CILINDRADA, ANO_DUVIDA). Só o LOG_CORRECOES (440 linhas, acima) e o LEIA-ME (8 no topo) ganham linhas.
 - A aba PRODUTOS não muda (as 5 primeiras colunas e o texto da APLICACAO ficam como estavam).
-- Os valores da SITUACAO continuam `separado` e `duvidoso`.
+- Os valores da SITUACAO (`separado` e `duvidoso`), a ORIGEM e a CILINDRADA da VEICULOS.
 
 ## Situação
 
-A v29 foi aprovada em R-20261127-132222-alexandre (simulação cf9db10). Vale a partir do merge no `main`.
+A v30 foi aprovada em R-20261127-150417-alexandre (itens 13 e 14 na leitura do po, R-20261127-154004-po) e vale a partir do merge no `main`. A v29 (soma da Fraga, ORIGEM `Fraga T-0040`) está no aviso do histórico do Git deste arquivo.
