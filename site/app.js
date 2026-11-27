@@ -638,7 +638,7 @@
       <div class="corpo">
         <a class="item-link" href="${href}"><span class="cod vh">${esc(p.c)}</span><span class="vh"> · </span>
         <span class="desc" title="${esc(anoMaisTxt(p.d))}">${anoMaisHtml(p.d)}</span></a>
-        <span class="apl"${p.a ? ` title="${esc(anoMaisTxt(p.a))}"` : ""}>${anoMaisHtml(p.a)}</span>
+        ${semAplicacao(p) ? `<span class="apl">${AVISO_SEM_APL}</span>` : `<span class="apl"${p.a ? ` title="${esc(anoMaisTxt(p.a))}"` : ""}>${anoMaisHtml(p.a)}</span>`}
         <div class="item-pe">${refsHtml(p)}
           <a class="bt bt-claro bt-detalhes" href="${href}">+ Detalhes<span class="vh"> do ${esc(p.c)}</span></a></div>
       </div></article>`;
@@ -2168,10 +2168,19 @@
   const tabelaDe = (p) => {
     if (!TABELA.has(p)) {
       CIL_MOTO = ehMoto(p);
-      try { const tv = linhasVeiculos(p); TABELA.set(p, semRepetida(tv.length && p.a ? juntarNaTabela(p, tv) : tv)); } finally { CIL_MOTO = false; }
+      try {
+        const tv = linhasVeiculos(p), tab = semRepetida(tv.length && p.a ? juntarNaTabela(p, tv) : tv);
+        // v30 (decisão 1a): no produto com veículo oculto ("vo", sem ano na VEICULOS), a linha sem ano que o texto traria
+        // de volta também não aparece
+        TABELA.set(p, p.vo ? tab.filter((r) => r[4]) : tab);
+      } finally { CIL_MOTO = false; }
     }
     return TABELA.get(p);
   };
+  // v30 (decisão 2a): o produto sem aplicação visível (sem tabela e sem texto, ou com todos os veículos ocultos, "vo")
+  // mostra o aviso na página, na janela e no cartão
+  const AVISO_SEM_APL = "Aplicação em revisão; consulte o vendedor.";
+  const semAplicacao = (p) => !tabelaDe(p).length && (!p.a || !!p.vo);
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
@@ -2191,9 +2200,10 @@
     // não sumirem do material do cliente
     const tab = tabelaVeiculos(tabelaDe(p)), fora = tab ? restricoesFora(p, tabelaDe(p)) : [];
     const miolo = tab
-      ? tab + (fora.length ? `<p class="restr-fora"><b>${fora.length > 1 ? "Restrições" : "Restrição"} da aplicação:</b> ${esc(fora.join(" · "))}</p>` : "") + (p.a ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
+      ? tab + (fora.length ? `<p class="restr-fora"><b>${fora.length > 1 ? "Restrições" : "Restrição"} da aplicação:</b> ${esc(fora.join(" · "))}</p>` : "") + (p.a && !p.vo ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
       : p.a ? aplicacoes : "";
-    const secApl = miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
+    const secApl = semAplicacao(p) ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}><div class="aviso">${AVISO_SEM_APL}</div></section>`
+      : miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
     const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
     const secFicha = ficha.length ? `<section class="secao"><${H2} class="secao-tit">Ficha técnica</${H2}><table class="t"><tbody>${ficha.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</tbody></table></section>` : "";
     const dados = secApl && (secRefs || secFicha)

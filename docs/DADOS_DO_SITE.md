@@ -19,6 +19,7 @@
 | `i` | foto em `site/img/` |
 | `gerado_em` | data e hora da geração, em hora de Manaus (`America/Manaus`; sem os dados de fuso, UTC−4 fixo). O site mostra "base atualizada em". |
 | `ve` | veículos do filtro "Meu veículo", da aba `VEICULOS` (desde a v17, T-0017): lista de `[FABRICANTE, MODELO, VERSAO]`, a VERSAO só quando existe. Ex.: `[["VOLKSWAGEN","Gol","G5"],["VOLKSWAGEN","Saveiro"]]`. Desde a T-0040, a linha com ano leva os anos (ver "Anos da VEICULOS", abaixo). Ex.: `["VOLKSWAGEN","Gol","EA111 VHT 1.6 L 8V SOHC L4",2008,2018]`. |
+| `vo` | `1` no produto que tem veículo oculto na aba `VEICULOS` (linha sem ano nenhum; v30, decisão 1a do Alexandre, R-20261127-135625). O veículo oculto não vai no `ve`. |
 
 **Campo `ve` (T-0017):**
 
@@ -28,6 +29,11 @@
 - O produto sem linha "separado" não ganha o campo. Se a base não tem a aba `VEICULOS`, nenhum produto ganha o campo e o JSON sai como antes.
 - Da aba `VEICULOS` **não vão** para o site: `ORIGEM`, `SITUACAO`, `MOTIVO`, `CILINDRADA` e `ANO_DUVIDA`. A aba `MODELOS_VEICULO` (dicionário) também não vai.
 - **Anos da VEICULOS (T-0040, R-20261127-053555-po: a Fraga soma à aplicação):** a linha "separado" com ANO_INICIO ou ANO_FIM vai com os anos, `[FABRICANTE, MODELO, VERSAO, ANO_INICIO, ANO_FIM]` (VERSAO vazia = `""`, ano vazio ou fora de 1900–2100 = `0`); a linha sem ano, como antes. Os anos entram na conferência de repetição (o mesmo veículo com outros anos é outra linha). Vale para todas as linhas, da Fraga e as outras; a ORIGEM não vai.
+- **Veículo sem ano oculto (v30, simulação; decisões 1a e 2a do Alexandre, R-20261127-135625):**
+  - a linha da `VEICULOS` sem ano nenhum (sem ANO_INICIO e sem ANO_FIM, ou com o ANO_DUVIDA, que tira os anos) não vai no `ve`: fica oculta do site e continua na base. A linha com ano parcial (só início ou só fim) fica. O produto que tinha uma ganha `"vo": 1`;
+  - no produto `vo`, a tabela não mostra a linha sem ano que o texto da APLICACAO traria de volta, e a ficha impressa não traz a "Aplicação completa" (o texto tem os veículos ocultos). A busca digitada continua lendo o texto ("ka" ainda acha a BCE3001); o filtro "Meu veículo" e as listas usam só o `ve`;
+  - o produto sem aplicação visível (sem tabela e sem texto, ou `vo` com todos os veículos ocultos) mostra "Aplicação em revisão; consulte o vendedor." na seção Aplicação (página e janela) e no cartão;
+  - o produto sem nenhuma linha na `VEICULOS` e com texto (os universais FLU15001 e FLU15002, os óleos "aplicação correta conforme manual") continua com o texto, como antes: a regra é pela base, sem código fixo.
 - **No site, a VEICULOS e o texto somam:**
   - a tabela é a de antes (linhas do `ve` e o que o texto tem a mais, `juntarNaTabela`), com a "Restrição da aplicação" e, na impressão, a "Aplicação completa". Na linha do `ve`: Cilindrada da VERSAO, quando ela traz ("EA111 VHT 1.6 L 8V SOHC L4" dá "1.6 8V"; sem ela, a do texto, como antes); Ano: o ANO_INICIO–ANO_FIM da linha, depois o `an` (ano igual: só ele; sem fim: "2015+"), depois o texto. O " | " cru da VERSAO aparece como " · " (MC-0049); a caixa alta da VERSAO fica como está na base ("· COM FREIO ABS", decisão de marca);
   - a busca por veículo e a digitada com modelo e ano usam essa tabela e a rede de segurança do texto, como antes; a busca com ano e sem modelo ("bce3001 2001") usa as faixas do texto mais as do `ve`;

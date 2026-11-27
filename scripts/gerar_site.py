@@ -12,7 +12,8 @@ Uso (na raiz do repositório bapajudacatalogo):
   nova que a original não é refeita. Sem foto, o site mostra o logo e "Foto em breve".
 - Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (desde a v17, T-0017). Só as
   linhas SITUACAO = separado; as duvidosas ficam fora até a revisão. Sem a aba, o JSON sai como antes.
-  Desde a T-0040, a linha com ANO_INICIO ou ANO_FIM leva os anos: [fab, mod, ver, ini, fim].
+  Desde a T-0040, cada veículo leva os anos: [fab, mod, ver, ini, fim]. Desde a v30, a linha sem ano nenhum fica fora
+  do "ve" (oculta do site, continua na base) e o produto que tinha uma ganha "vo": 1.
 - Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
   ou de importação, fornecedor, o nome de cada um dos FORNECEDORES e o da concorrência fora da marca da referência
   cruzada), o script PARA e não grava (ver TRAVA abaixo).
@@ -300,11 +301,12 @@ def ano_ve(v) -> int:
     return n if 1900 <= n <= 2100 else 0
 
 
-def veiculos_de(wb) -> dict[str, list[list]]:
-    """{CODIGO: [[fabricante, modelo, versao?], [fabricante, modelo, versao, ini, fim], ...]}, sem repetir e na ordem
-    da aba; a linha com ano leva os anos. Sem a aba VEICULOS: {}."""
+def veiculos_de(wb) -> tuple[dict[str, list[list]], set[str]]:
+    """({CODIGO: [[fabricante, modelo, versao, ini, fim], ...]}, {códigos com veículo oculto}), sem repetir e na ordem
+    da aba. A linha sem ano nenhum (sem ANO_INICIO e sem ANO_FIM, ou com o ANO_DUVIDA) não vai: fica oculta do site
+    e continua na base (v30, decisão 1a do Alexandre, R-20261127-135625). Sem a aba VEICULOS: ({}, set())."""
     if "VEICULOS" not in wb.sheetnames:
-        return {}
+        return {}, set()
     linhas = wb["VEICULOS"].iter_rows(values_only=True)
     cab = [limpar(c).upper() for c in next(linhas, ())]
     pos = {c: i for i, c in enumerate(cab)}
@@ -321,6 +323,7 @@ def veiculos_de(wb) -> dict[str, list[list]]:
         return ano_ve(r[i]) if i is not None and i < len(r) and r[i] is not None else 0
 
     saida: dict[str, list[list]] = {}
+    ocultos: set[str] = set()
     vistos: set[tuple[str, str, str, str, int, int]] = set()
     sem_modelo = 0
     for r in linhas:
@@ -334,14 +337,17 @@ def veiculos_de(wb) -> dict[str, list[list]]:
         # o ano que a base marca como duvidoso (ANO_DUVIDA: "herdado" da lista com vírgula, "ano solto") não vai: as
         # decisões da T-0033 (o ano da lista é só do último; o ano solto não é faixa) continuam valendo pelo texto
         ini, fim = (0, 0) if g(r, "ANO_DUVIDA") else (a(r, "ANO_INICIO"), a(r, "ANO_FIM"))
+        if not ini and not fim:                  # sem ano nenhum: oculto do site (a linha com ano parcial fica)
+            ocultos.add(cod)
+            continue
         chave = (cod, fab, mod, ver, ini, fim)
         if chave in vistos:
             continue
         vistos.add(chave)
-        saida.setdefault(cod, []).append([fab, mod, ver, ini, fim] if ini or fim else [fab, mod, ver] if ver else [fab, mod])
+        saida.setdefault(cod, []).append([fab, mod, ver, ini, fim])
     if sem_modelo:
         print(f"  [AVISO] VEICULOS: {sem_modelo} linhas 'separado' sem fabricante ou modelo ficaram fora do 've'")
-    return saida
+    return saida, ocultos
 
 
 def ler_base(caminho: Path) -> list[dict]:
@@ -394,10 +400,12 @@ def ler_base(caminho: Path) -> list[dict]:
         ss = sistemas_de(p["p"], p["si"], p["d"], p["de"], dict(pares).get("POSICAO", ""))
         if ss != sistema_base(p["si"]):
             p["ss"] = ss
-    ve = veiculos_de(wb)
+    ve, ocultos = veiculos_de(wb)
     for p in produtos:
         if p["c"] in ve:
             p["ve"] = ve[p["c"]]
+        if p["c"] in ocultos:
+            p["vo"] = 1                          # tem veículo oculto (sem ano): o site não mostra o texto dele como veículo
     return produtos
 
 
@@ -533,9 +541,7 @@ def main():
     com_ve = sum(1 for p in produtos if "ve" in p)
     if com_ve:
         print(f"  veículos: {com_ve} produtos com 've' ({sum(len(p['ve']) for p in produtos if 've' in p)} veículos)")
-        com_ano = sum(1 for p in produtos for v in p.get("ve", []) if len(v) == 5)
-        if com_ano:
-            print(f"  veículos com ano (T-0040): {com_ano}")
+        print(f"  produtos com veículo oculto (sem ano, v30): {sum(1 for p in produtos if p.get('vo'))}")
     dados = {"gerado_em": datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"), "fonte": Path(a.base).name,
              "total": len(produtos), "sc": SIS_COMPAT, "produtos": produtos}
     texto = json.dumps(dados, ensure_ascii=False, separators=(",", ":"))
