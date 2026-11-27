@@ -58,6 +58,7 @@ O parecer olha o **print real**: o site em **1366 px** e **390 px** (Playwright;
 - Aviso repetido em vários cartões → um aviso só, no topo da lista.
 - Mesmo componente refeito em telas diferentes (ex.: o HTML do "Foto em breve" escrito duas vezes em `fotoHtml`, `site/app.js`); estilo em linha (`style="..."`) repetindo o que uma classe do `site/styles.css` já faz.
 - PDF: a mesma informação no cabeçalho e no rodapé da página; legenda que repete o título da seção.
+- **MENOS É MAIS e botões embaixo e juntos (T-0045, seção do `CLAUDE.md`):** aponte o excesso e a repetição de tela, no site e no PDF. Ex.: coluna estreita com sobra lateral vazia quando há conteúdo para preencher; botão repetido em mais de um lugar.
 
 **D. Código**
 - Duplicação (ex.: `npx jscpd --min-tokens 50 site scripts catalogo_grafico/gerador`) e código, função ou arquivo morto (ex.: `npx knip` no JS; `python -m vulture` no Python), **só leitura** e só se o ambiente deixar instalar [SUPOSIÇÃO: o registro de pacotes está liberado na nuvem; sem ele, use `grep`].

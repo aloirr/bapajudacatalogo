@@ -27,6 +27,7 @@ Você é o dono de `site/`, `scripts/gerar_site.py`, `requirements.txt` e `docs/
 
 - Cores do `:root` em `styles.css`: verde `#62BB47` (`--verde`), verde escuro `#3E8F2B`, escuro `#151515` (`--escuro`), fundo `#F4F5F4`. Cor nova entra como variável no `:root`.
 - Fonte **Poppins** (400, 500, 600, 700).
+- **MENOS É MAIS e botões embaixo e juntos (T-0045, seção do `CLAUDE.md`):** siga as duas regras ao montar cada tela, no computador e no celular. Mudança de layout vai antes como simulação.
 - **Celular primeiro:** em **390 px** não pode haver rolagem para o lado (`document.documentElement.scrollWidth <= 390`). Alvo de toque com pelo menos 44 px.
 - **Acessível:** `lang="pt-BR"`, um `h1` por página, rótulo em todo campo, `alt` em toda imagem, foco visível, navegação por teclado nas abas, contraste AA, `aria-live` no total de resultados.
 - Texto para o cliente: "As fotos são ilustrativas. Confira sempre a aplicação antes da compra."
