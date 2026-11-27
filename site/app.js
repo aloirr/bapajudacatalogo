@@ -638,7 +638,7 @@
       <div class="corpo">
         <a class="item-link" href="${href}"><span class="cod vh">${esc(p.c)}</span><span class="vh"> · </span>
         <span class="desc" title="${esc(anoMaisTxt(p.d))}">${anoMaisHtml(p.d)}</span></a>
-        ${semAplicacao(p) ? `<span class="apl">${AVISO_SEM_APL}</span>` : `<span class="apl"${p.a ? ` title="${esc(anoMaisTxt(p.a))}"` : ""}>${anoMaisHtml(p.a)}</span>`}
+        ${semAplicacao(p) ? `<span class="apl">${AVISO_SEM_APL}</span>` : ((t) => `<span class="apl"${t ? ` title="${esc(anoMaisTxt(t))}"` : ""}>${anoMaisHtml(t)}</span>`)(aplCartao(p))}
         <div class="item-pe">${refsHtml(p)}
           <a class="bt bt-claro bt-detalhes" href="${href}">+ Detalhes<span class="vh"> do ${esc(p.c)}</span></a></div>
       </div></article>`;
@@ -2180,6 +2180,14 @@
   // v30 (decisão 2a): o produto sem aplicação visível (sem tabela e sem texto, ou com todos os veículos ocultos, "vo")
   // mostra o aviso na página, na janela e no cartão
   const AVISO_SEM_APL = "Aplicação em revisão; consulte o vendedor.";
+  // o texto da aplicação no cartão: no produto "vo" (com tabela), o resumo dos modelos do "ve" visível, por marca ("Ford –
+  // Escort / Verona / Royale · Fiat – Palio"), porque o texto cita os veículos ocultos (parecer de UX da v30, ponto 6)
+  const aplCartao = (p) => {
+    if (!p.vo) return p.a;
+    const porMarca = new Map();
+    for (const [f, m] of p.ve || []) { const k = marcaTela(f); if (!porMarca.has(k)) porMarca.set(k, []); if (!porMarca.get(k).includes(m)) porMarca.get(k).push(m); }
+    return [...porMarca].map(([f, ms]) => f + " – " + ms.join(" / ")).join(" · ");
+  };
   const semAplicacao = (p) => !tabelaDe(p).length && (!p.a || !!p.vo);
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
