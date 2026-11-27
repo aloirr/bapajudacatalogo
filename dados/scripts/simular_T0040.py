@@ -15,6 +15,11 @@ Montadora e modelo: a grafia que a base já usa (MERCEDES-BENZ, CITROËN, "Gol")
 espaço/hífen; senão, a da Fraga. Montadora UNIVERSAL, FORA DA FROTA BRASILEIRA, NAO VEICULAR e
 SEM APLICAÇÃO NO CATÁLOGO: SITUACAO duvidoso (fora do filtro), com o MOTIVO.
 
+Correção (testes, 27/11/2026): em 96 linhas da Fraga o motor vem com um "1" grudado no fim ("0.16 L 2V OHC
+MONOCILÍNDRICO1"); está no CSV da Fraga, não no agrupamento. Só no motor, o "1" final grudado em letra sai
+(SUFIXO_1); no modelo e na versão ("X1", "A1", "G1", "L1H1") o "1" faz parte do nome e fica. A aba SUFIXO_1 da
+antes_depois lista as linhas da Fraga corrigidas, e a PONTOS_ALEXANDRE, o que o Alexandre precisa ver.
+
 Saída (dados/T-0040/simulacao/): BASE_simulada_v29.xlsx (cópia da v28 com a VEICULOS nova) e antes_depois.xlsx.
 A base real é conferida pelo sha256 antes e depois (e tem de ser a v28).
 
@@ -47,6 +52,16 @@ DUVIDOSAS = {"UNIVERSAL": "a Fraga diz montadora UNIVERSAL (não é veículo do 
              "NAO VEICULAR": "a Fraga diz NAO VEICULAR (não é veículo do filtro)",
              "SEM APLICAÇÃO NO CATÁLOGO": "a Fraga diz SEM APLICAÇÃO NO CATÁLOGO (não é veículo do filtro)"}
 APELIDO_FAB = {"ASIAMOTORS": "ASIA", "EFFAMOTORS": "EFFA"}
+SUFIXO_1 = re.compile(r"(?<=[A-Za-zÀ-ÿ])1$")      # "MONOCILÍNDRICO1" -> "MONOCILÍNDRICO" (só no motor)
+# pontos conferidos na Fraga (testes, 27/11/2026): código -> o que o Alexandre precisa saber
+PONTOS = {
+    "FAC6194": "Perde o modelo 'Titan Tractor': na Fraga ele é versão do Constellation ('19-320 E TITAN TRACTOR', "
+               "INTERACT 8.3 L, 2005–2012), não modelo. Na v28 o 'Titan Tractor' veio da leitura do texto "
+               "'Constellation 19-320 e Titan Tractor'. Com a Fraga fica Constellation e Worker; a APLICACAO não muda.",
+    "VEL7507": "A Fraga só tem 1 aplicação (KTM EXC 250, 0.2 L). Saem YAMAHA DT e YAMAHA RD (1980–2015), que a "
+               "APLICACAO cita ('Yamaha DT 180, RD 135, Tdr 180'). Pela decisão 1a fica só a da Fraga; se o "
+               "Alexandre quiser manter as da Yamaha, é exceção à 1a.",
+}
 AMOSTRA_FIXA = ["BCE3001", "CXD13062"]
 N_AMOSTRA = 50
 
@@ -123,7 +138,7 @@ def main():
     grupos: dict[tuple, dict] = {}
     for r in bap:
         cod = r["codigo_bap"].upper()
-        motor = re.sub(r"^-\s*", "", r["motor"]).strip()
+        motor = SUFIXO_1.sub("", re.sub(r"^-\s*", "", r["motor"]).strip())
         k = (cod, chave(r["montadora"]), chave(r["modelo"]), chave(motor))
         g = grupos.setdefault(k, {"cod": cod, "fab": fab_de(r["montadora"]), "mod": mod_de(r["montadora"], r["modelo"]),
                                   "motor": motor, "ai": [], "af": [], "obs": [], "vers": []})
@@ -278,6 +293,18 @@ def main():
     aba("NAO_ACHADOS", ["CODIGO_BAP", "DESCRICAO", "PRODUTO", "LINHA", "NO_CATALOGO_DIGITAL", "STATUS_CADASTRO",
                         "LINHAS_VEICULOS_HOJE", "SEPARADAS", "DUVIDOSAS", "ANOS_HOJE", "APLICACAO (300 primeiros)"],
         lnao)
+    suf = [[r["codigo_bap"].upper(), r["montadora"], r["modelo"], r["versao"], r["motor"],
+            SUFIXO_1.sub("", re.sub(r"^-\s*", "", r["motor"]).strip()), r["ano_inicial"], r["ano_final"]]
+           for r in bap if SUFIXO_1.search(r["motor"].strip())]
+    aba("SUFIXO_1", ["CODIGO_BAP", "MONTADORA", "MODELO", "VERSAO_FRAGA", "MOTOR_NA_FRAGA", "MOTOR_NA_VEICULOS",
+                     "ANO_INICIAL", "ANO_FINAL"], suf)
+    pontos = []
+    for cod, txt in PONTOS.items():
+        an, de = antes_cod.get(cod, []), novas_por_cod.get(cod, [])
+        pontos.append([cod, prod[cod].get("DESCRICAO"), "; ".join(f"{limpo(r[1])} {limpo(r[2])}" for r in an),
+                       "; ".join(sorted({f"{r[1]} {r[2]}" for r in de})), cont_csv[cod], txt])
+    aba("PONTOS_ALEXANDRE", ["CODIGO_BAP", "DESCRICAO", "VEICULOS_ANTES (montadora modelo)",
+                             "VEICULOS_DEPOIS (montadora modelo)", "LINHAS_DA_FRAGA", "O_QUE_A_FRAGA_TEM"], pontos)
     for w in out.worksheets:
         for col, larg in zip("ABCDEFGHIJKLMN", (14, 40, 26, 22, 14, 14, 14, 14, 22, 22, 40, 14, 50, 14)):
             w.column_dimensions[col].width = larg
@@ -289,6 +316,7 @@ def main():
     print(f"  VEICULOS: {len(antigas)} linhas antes, {len(nova)} depois")
     print(f"  códigos trocados (bap): {len(trocar)}; linhas da Fraga: {len(bap)} -> {len(grupos)} agrupadas")
     print(f"  por referência: {len(refs)}; não achados: {len(nao)}")
+    print(f"  sufixo '1' tirado do motor: {len(suf)} linhas da Fraga, {len({x[0] for x in suf})} códigos")
     print(f"  códigos que perdem modelo: {sum(1 for l in resumo if l[11])} ({sum(l[11] for l in resumo)} modelos); "
           f"que ganham: {sum(1 for l in resumo if l[13])} ({sum(l[13] for l in resumo)})")
     print(f"  {SIM.relative_to(RAIZ)}\n  {AD.relative_to(RAIZ)}")
