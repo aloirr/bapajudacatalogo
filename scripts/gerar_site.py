@@ -12,8 +12,9 @@ Uso (na raiz do repositório bapajudacatalogo):
   nova que a original não é refeita. Sem foto, o site mostra o logo e "Foto em breve".
 - Veículo do filtro "Meu veículo" (campo "ve"): da aba VEICULOS, quando a base tem essa aba (desde a v17, T-0017). Só as
   linhas SITUACAO = separado; as duvidosas ficam fora até a revisão. Sem a aba, o JSON sai como antes.
-  Desde a T-0040, cada veículo leva os anos: [fab, mod, ver, ini, fim]. Desde a v30, a linha sem ano nenhum fica fora
-  do "ve" (oculta do site, continua na base) e vai, só com marca e modelo, no "vo" do produto.
+  Desde a T-0040, a linha com ANO_INICIO ou ANO_FIM leva os anos: [fab, mod, ver, ini, fim]. Desde a v30, a linha
+  sem ano nenhum na base fica fora do "ve" (oculta do site, continua na base) e vai, só com marca e modelo, no "vo" do
+  produto; a linha com ano duvidoso (ANO_DUVIDA) fica no "ve", sem os anos.
 - Trava: se o JSON sair com palavra de dado interno (estoque, FOB, USD, MOQ, preço, "R$", BAP BOX, custo de compra
   ou de importação, fornecedor, o nome de cada um dos FORNECEDORES e o da concorrência fora da marca da referência
   cruzada), o script PARA e não grava (ver TRAVA abaixo).
@@ -302,9 +303,10 @@ def ano_ve(v) -> int:
 
 
 def veiculos_de(wb) -> tuple[dict[str, list[list]], dict[str, list[list[str]]]]:
-    """({CODIGO: [[fabricante, modelo, versao, ini, fim], ...]}, {CODIGO: [[fabricante, modelo], ...] ocultos}), sem repetir e na ordem
-    da aba. A linha sem ano nenhum (sem ANO_INICIO e sem ANO_FIM, ou com o ANO_DUVIDA) não vai: fica oculta do site
-    e continua na base (v30, decisão 1a do Alexandre, R-20261127-135625). Sem a aba VEICULOS: ({}, {})."""
+    """({CODIGO: [[fabricante, modelo, versao?] ou [fabricante, modelo, versao, ini, fim], ...]}, {CODIGO: [[fabricante,
+    modelo], ...] ocultos}), sem repetir e na ordem da aba; a linha com ano leva os anos. A linha sem ano nenhum na base
+    (sem ANO_INICIO e sem ANO_FIM) não vai no "ve": fica oculta do site e continua na base. A linha com ano duvidoso
+    (ANO_DUVIDA) fica visível, sem os anos (v30, resposta 1b do Alexandre, R-20261127-150417). Sem a aba VEICULOS: ({}, {})."""
     if "VEICULOS" not in wb.sheetnames:
         return {}, {}
     linhas = wb["VEICULOS"].iter_rows(values_only=True)
@@ -334,18 +336,21 @@ def veiculos_de(wb) -> tuple[dict[str, list[list]], dict[str, list[list[str]]]]:
         if not fab or not mod:
             sem_modelo += 1                      # separado sem fabricante ou modelo não serve ao filtro
             continue
-        # o ano que a base marca como duvidoso (ANO_DUVIDA: "herdado" da lista com vírgula, "ano solto") não vai: as
-        # decisões da T-0033 (o ano da lista é só do último; o ano solto não é faixa) continuam valendo pelo texto
-        ini, fim = (0, 0) if g(r, "ANO_DUVIDA") else (a(r, "ANO_INICIO"), a(r, "ANO_FIM"))
-        if not ini and not fim:                  # sem ano nenhum: oculto do site (a linha com ano parcial fica)
+        ini, fim = a(r, "ANO_INICIO"), a(r, "ANO_FIM")
+        if not ini and not fim:                  # sem ano nenhum na base: oculto do site (a linha com ano parcial fica)
             if [fab, mod] not in ocultos.setdefault(cod, []):
                 ocultos[cod].append([fab, mod])  # só marca e modelo, para reconhecer modelo de moto; o site não mostra
             continue
+        # o ano que a base marca como duvidoso (ANO_DUVIDA: "herdado" da lista com vírgula, "ano solto") não vai, mas a
+        # linha fica (resposta 1b): as decisões da T-0033 (o ano da lista é só do último; o ano solto não é faixa)
+        # continuam valendo pelo texto
+        if g(r, "ANO_DUVIDA"):
+            ini = fim = 0
         chave = (cod, fab, mod, ver, ini, fim)
         if chave in vistos:
             continue
         vistos.add(chave)
-        saida.setdefault(cod, []).append([fab, mod, ver, ini, fim])
+        saida.setdefault(cod, []).append([fab, mod, ver, ini, fim] if ini or fim else [fab, mod, ver] if ver else [fab, mod])
     if sem_modelo:
         print(f"  [AVISO] VEICULOS: {sem_modelo} linhas 'separado' sem fabricante ou modelo ficaram fora do 've'")
     return saida, ocultos
@@ -542,6 +547,9 @@ def main():
     com_ve = sum(1 for p in produtos if "ve" in p)
     if com_ve:
         print(f"  veículos: {com_ve} produtos com 've' ({sum(len(p['ve']) for p in produtos if 've' in p)} veículos)")
+        com_ano = sum(1 for p in produtos for v in p.get("ve", []) if len(v) == 5)
+        if com_ano:
+            print(f"  veículos com ano (T-0040): {com_ano}")
         print(f"  produtos com veículo oculto (sem ano, v30): {sum(1 for p in produtos if p.get('vo'))}")
     dados = {"gerado_em": datetime.now(FUSO).strftime("%d/%m/%Y %H:%M"), "fonte": Path(a.base).name,
              "total": len(produtos), "sc": SIS_COMPAT, "produtos": produtos}

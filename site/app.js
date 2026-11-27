@@ -1703,6 +1703,7 @@
       const ano = anoDoVe(x) || anoBase || [...new Set(fora.sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(fmtFaixa))].join(SEP_FAIXAS);
       const r = [marcaTela(fab), mod, cil, versaoDoVe(ver), ano];
       if (faixaVe(x)) r.comAnoVe = true; // a linha do "ve" com ano (cobreVeiculo: a versão dela não precisa estar no texto)
+      r.doVe = true; // a linha do "ve" (tabelaDe: a do "ve" com ano duvidoso aparece mesmo sem ano)
       return r;
     });
     return linhas;
@@ -2185,15 +2186,16 @@
       CIL_MOTO = ehMoto(p);
       try {
         const tv = linhasVeiculos(p), tab = semRepetida(tv.length && p.a ? juntarNaTabela(p, tv) : tv);
-        // v30 (decisão 1a): no produto com veículo oculto ("vo", sem ano na VEICULOS), a linha sem ano que o texto traria
-        // de volta também não aparece
-        TABELA.set(p, p.vo ? tab.filter((r) => r[4]) : tab);
+        // v30 (respostas 1b e 6 do Alexandre, R-20261127-150417): a linha sem ano que vem só do texto não aparece; a do
+        // "ve" fica, mesmo sem ano (a do ano duvidoso, ANO_DUVIDA: "Ford Ka · —" no BCE3001)
+        TABELA.set(p, tab.filter((r) => r[4] || r.doVe));
       } finally { CIL_MOTO = false; }
     }
     return TABELA.get(p);
   };
-  // v30 (decisão 2a): o produto sem aplicação visível (sem tabela e sem texto, ou com todos os veículos ocultos, "vo")
-  // mostra o aviso na página, na janela e no cartão
+  // v30 (respostas 4 e 7): o produto com veículo oculto ("vo") e sem nenhuma linha na tabela mostra o aviso na página,
+  // na janela e no cartão. O produto sem nada na VEICULOS e sem texto (palheta, bateria, roda: o cliente escolhe pela
+  // medida) fica sem a seção, como antes; o que só tem o texto (FLU15001, os óleos "conforme manual"), com o texto
   const AVISO_SEM_APL = "Aplicação em revisão; consulte o vendedor.";
   // o texto da aplicação no cartão: no produto "vo" (com tabela), o resumo dos modelos do "ve" visível, por marca ("FORD -
   // Escort / Verona / Royale · FIAT - Palio", a marca como nos outros cartões: MC-0052), porque o texto cita os veículos
@@ -2204,7 +2206,7 @@
     for (const [f, m] of p.ve || []) { const k = String(f).toUpperCase(); if (!porMarca.has(k)) porMarca.set(k, []); if (!porMarca.get(k).includes(m)) porMarca.get(k).push(m); }
     return [...porMarca].map(([f, ms]) => f + " - " + ms.join(" / ")).join(" · ");
   };
-  const semAplicacao = (p) => !tabelaDe(p).length && (!p.a || !!p.vo);
+  const semAplicacao = (p) => !!p.vo && !tabelaDe(p).length;
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
   function produtoHtml(p, naJanela) {
