@@ -1738,11 +1738,15 @@
   const umaCil = (i, d = "0", vv, moto) => { const val = vv ? " " + vv + "V" : "";
     return +i >= 1 || !moto ? i + "." + d[0] + val : d.length >= 2 ? Math.round(+("0." + d) * 1000) + " cm³" + val : val.trim(); };
   // a cilindrada da versão do "ve" ("EA111 1.6 L 8V": "1.6 8V"; "DS 11 11 L 12V": "11.0 12V"), ou null quando a versão
-  // não traz litros (vale a do texto)
-  const RX_CIL_VER = /(?<![\d.])(\d{1,2})(?:[.,](\d+))?\s*L\b(?:\s*(\d{1,2})\s?V\b)?/gi;
+  // não traz litros (vale a do texto). T-0043 (RD-0738): o número colado numa letra ou num hífen é nome de motor, não litros
+  // ("D2L", "C3L", "M177DE40L" e "F-3L" ficam na Versão; o "40.0" do GLE-Class saía daí); a mesma cilindrada não se repete
+  // na célula, e a sem válvulas sai quando a VERSAO traz a mesma com elas ("2.0 L 2.0 L 16V": "2.0 16V", não "2.0 / 2.0 16V")
+  const RX_CIL_VER = /(?<![\dA-Za-z.-])(\d{1,2})(?:[.,](\d+))?\s*L\b(?:\s*(\d{1,2})\s?V\b)?/gi;
   const cilDaVersao = (v, moto = CIL_MOTO) => {
     const ms = [...String(v || "").matchAll(RX_CIL_VER)];
-    return ms.length ? ms.map(([, i, d, vv]) => umaCil(i, d, vv, moto)).filter(Boolean).join(" / ") : null;
+    if (!ms.length) return null;
+    const cs = [...new Set(ms.map(([, i, d, vv]) => umaCil(i, d, vv, moto)).filter(Boolean))];
+    return cs.filter((c) => !cs.some((o) => o.startsWith(c + " "))).join(" / ");
   };
   const cilDe = (t, moto = CIL_MOTO) => [...String(t || "").matchAll(RX_CIL)].map((m) => { const [i, d] = m[1].split(/[.,]/); return umaCil(i, d, m[2], moto); }).filter(Boolean);
   // Ano da aplicação: "2011", "01/1979", "01/01/2012". O pedaço só de ano: "2011 até 2014", "2009>", "2007–2012",
@@ -1784,7 +1788,8 @@
     // T-0040: a versão da linha do "ve" com ano (o motor da VEICULOS, "SEVEL SOHC L4") não precisa estar no texto
     const casa = tab.filter((r) => { const [, mod, , ver] = r; return v.startsWith(chaveApl(mod)) && rxPalavra(chaveApl(mod)).test(v) && (!ver || r.comAnoVe || rxPalavra(chaveApl(ver)).test(v)); });
     const longo = Math.max(0, ...casa.map((r) => chaveApl(r[1]).length)), rs = casa.filter((r) => chaveApl(r[1]).length === longo);
-    const cils = cilDe(v), cilOk = (r, c) => r[2] === c || (!c.includes(" ") && r[2].split(" ")[0] === c);
+    // a cilindrada do texto é uma das da célula ("A1 1.1 L 16V" na linha "1.0 16V / 1.1 16V" da VEICULOS; T-0043)
+    const cils = cilDe(v), cilOk = (r, c) => cilsDe(r[2]).some((x) => x === c || (!c.includes(" ") && x.split(" ")[0] === c));
     const comAno = anos.length ? rs.filter(temAno) : rs;
     if (!comAno.length || !cils.every((c) => comAno.some((r) => cilOk(r, c)))) return null;
     let u = v.replace(RX_CIL, " ");
