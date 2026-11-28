@@ -173,8 +173,8 @@
   "36": {
    "trocar": [
     [
-     "O motivo cai num destes 5: preço, prazo ou limite, estoque, fornecedor ou sem necessidade.",
-     "O motivo cai num destes 6: prazo ou limite, preço, disponibilidade, aplicação, fornecedor ou sem necessidade."
+     "Escute até o fim. O motivo cai num destes 5: preço, prazo ou limite, estoque, fornecedor ou sem necessidade.",
+     "Escute até o fim: o motivo é um dos 6 da faixa abaixo."
     ],
     [
      "preço · prazo · estoque · fornecedor · sem necessidade",

@@ -59,7 +59,7 @@ Ordem fixa, igual nos 3 originais:
 | Cross-sell | Círculo escuro no centro, com a venda-âncora, e 3 cartões de cada lado com o que vai junto. | `hub` |
 | Fechamento em 3 etapas | 3 cartões (Peça, Não fechou, Você resolve) e faixa escura com os 6 motivos, numa linha (15 pt). O cartão 2 remete à faixa, sem repetir a lista. | `fechamento` |
 | Foto e 2 itens | Foto grande no cartão da esquerda; à direita, um item por linha: foto de 2,1" × 1,9" e o texto ao lado, até a margem (MENOS É MAIS, T-0045). Foto com marca de outro fabricante não entra: no lugar, um desenho (ex.: a cuíca do Freio). | `foto2` |
-| Não fechou | Tabela com Motivo, Responda com prova e Volte ao pedido, mais a faixa ATENÇÃO da alçada. | `tabela` |
+| Não fechou | Tabela com Motivo, Responda com prova e Volte ao pedido: 6 linhas de 0,65 pol., na ordem e com os nomes da faixa, mais a faixa ATENÇÃO da alçada. | `naofechou` |
 | Checklist | 2 colunas de 5 cartões, cada um com um "✓" no círculo verde. | `checklist` |
 | Quiz | 6 faixas, cada uma com o número em escuro num círculo laranja e a pergunta. As respostas ficam só nas notas. | `quiz` |
 | Obrigado | Desenho da capa: "TREINAMENTO X BAP", "Obrigado!", frase e site. | `capa` |
