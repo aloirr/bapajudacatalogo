@@ -265,7 +265,7 @@ main:focus, main:focus-visible { outline: none; }
 html:has(.pagina-produto > .prod-barra) { scroll-padding-bottom: calc(65px + env(safe-area-inset-bottom)); }
 body:has(.pagina-produto > .prod-barra) .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
 /* Aplicação na largura toda e, embaixo, Referências cruzadas e Ficha técnica lado a lado (T-0045, UX-T45-04); com uma
-   só das duas, ela fica na largura toda; abaixo de 664 px de conteúdo, uma embaixo da outra */
+   só das duas, ela fica na largura toda; abaixo de 652 px de conteúdo (2 × 320 + 12 do gap), uma embaixo da outra */
 .prod-dados { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; }
 .col-tab { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 0 12px; align-items: start; }
 .col-apl:empty, .col-tab:empty { display: none; }
@@ -508,6 +508,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .janela-corpo { overflow: visible; padding: 0; }
   .pagina-produto { max-width: none; padding: 0; }
   .produto-conteudo { font-size: 8.5pt; line-height: 1.3; }
+  .item-rel b, .rel-txt span, .restr-fora { font-size: 12px; } /* T-0045: na tela eles usam o --fs-tab; no A4, a letra de antes */
   .so-impressao { display: block; }
   .secao .so-impressao { margin-top: 2mm; } /* "Aplicação completa" afastada da tabela */
   /* f1 (R-20261120-181200): faixa escura com o degradê do site, arredondada e dentro da margem, com o logo branco
