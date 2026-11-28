@@ -143,7 +143,8 @@
       // T-0006: medida da bateria (filtros Amperagem e CCA); a amperagem entra no texto da busca como "60AH" (casador)
       const med = medidaDe(p);
       if (med) { MEDIDA.set(p, med); if (med.ah) e.outros += " | " + med.ah + "AH"; }
-      e.tudo = [e.desc, e.apl, e.marcas, e.outros].join(" | ");
+      e.jun = { desc: juntas(e.desc), apl: juntas(e.apl), outros: juntas(e.outros) }; // T-0043: "C-40" também vale "C40"
+      e.tudo = [e.desc, e.apl, e.marcas, e.outros, e.jun.desc, e.jun.apl, e.jun.outros].join(" | ");
       e.codsTxt = e.cods.concat(e.mcods, e.eans).join(" ");
       INDICE.push(e);
     });
@@ -306,6 +307,35 @@
       rxApl: null, // com os derivados, montado na 1ª vez que precisa
     };
   }
+  // T-0043 (pergunta 47 do Alexandre): o que o texto do produto escreve com hífen ou espaço entre duas palavras vizinhas
+  // também vale junto, para a palavra digitada sem eles: "C-40" e "C 40" = C40, "Pick-Up" e "Pick Up" = PICKUP, "S-10" =
+  // S10. O digitado com hífen ou espaço já casava com as três formas (palavra e as peças de palavras vizinhas). Não
+  // juntam: número com número ("2018 2021", "1 6V"), o pedaço de número com ponto, vírgula ou barra ("1.6" não vira 16,
+  // "01/1980") e, com espaço, o conectivo ("2,3 A 4 TON", "4 E 6") e a letra solta depois de palavra ("GM C-10" não vira
+  // GMC, "K112 CL S" não vira CLS); a letra solta antes de palavra de 3 letras ou mais junta ("T Cross" = TCROSS). Até 3
+  // palavras ("XLX 250 R" = XLX250R). As formas juntas ficam à parte (e.jun): só a busca de texto as vê. Os códigos já
+  // ignoram espaço e hífen (normCod).
+  const SEM_JUNTAR = new Set(["E", "A", "OU", "DE", "DA", "DO", "DAS", "DOS", "EM", "NO", "NA", "NOS", "NAS", "AS", "OS", "COM", "SEM", "ATE", "PARA", "PRA"]);
+  const juntaCom = (x, y, sep) => {
+    if (sep !== "-" && sep !== " ") return false;
+    const a = classe(x[x.length - 1]), b = classe(y[0]);
+    if (a === "0-9" && b === "0-9") return false;
+    if (sep === "-") return true;
+    return !SEM_JUNTAR.has(x) && !SEM_JUNTAR.has(y) && (a !== b || (x.length >= 2 && y.length >= 2) || (x.length === 1 && y.length >= 3));
+  };
+  const num = (c) => /[0-9]/.test(c || "");
+  function juntas(s) {
+    // pedaço de número: o número colado em ponto, vírgula ou barra com outro número ("1.6", "2,3", "01/1980")
+    const ws = [...s.matchAll(/[A-Z0-9]+/g)].map((m) => { const i = m.index, f = i + m[0].length;
+      return { w: m[0], i, f, inteira: !(num(m[0][0]) && /[.,\/]/.test(s[i - 1] || "") && num(s[i - 2])) && !(num(m[0][m[0].length - 1]) && /[.,\/]/.test(s[f] || "") && num(s[f + 1])) }; });
+    const out = new Set();
+    for (let i = 0; i < ws.length; i++) {
+      if (!ws[i].inteira) continue;
+      let c = ws[i].w;
+      for (let j = i + 1; j < Math.min(i + 3, ws.length) && ws[j].inteira && juntaCom(ws[j - 1].w, ws[j].w, s.slice(ws[j - 1].f, ws[j].i)); j++) out.add(c += ws[j].w);
+    }
+    return [...out].join(" | "); // o " | " não deixa duas formas virarem vizinhas ("VF1000F 1000F" não dá F-1000)
+  }
   // A forma compacta do modelo (sem espaço e hífen) e o corpo da regex que acha o nome no texto com espaço ou hífen
   // opcional entre as letras ("C 3" é C3, "H-100" é H100, "F4000" é F-4000)
   const compacto = (m) => norm(m).replace(/[\s-]/g, "");
@@ -434,14 +464,15 @@
       else if (r === -1 && livreAno) txt = 5;
     }
     if (!txt && k.agulha && e.tudo.includes(k.agulha)) { // tudo: teste rápido (todos os campos de texto juntos)
-      const casa = (s) => s.includes(k.agulha) && (k.rx.test(s) || (k.rxIni && k.rxIni.test(s)));
-      if (casa(e.desc)) txt = 50;
-      else if (!k.ano && e.apl.includes(k.agulha)) {
+      // j: as formas juntas do campo (T-0043), só pela palavra inteira
+      const casa = (s, j) => (s.includes(k.agulha) && (k.rx.test(s) || (k.rxIni && k.rxIni.test(s)))) || (!!j && j.includes(k.agulha) && k.rx.test(j));
+      if (casa(e.desc, e.jun.desc)) txt = 50;
+      else if (!k.ano && (e.apl.includes(k.agulha) || e.jun.apl.includes(k.agulha))) {
         if (!k.rxApl) k.rxApl = [k.t].concat(derivados(k.t)).map((x) => palavra(x));
-        if (k.rxApl.some((rx) => rx.test(e.apl))) txt = 40;
+        if (k.rxApl.some((rx) => rx.test(e.apl) || rx.test(e.jun.apl))) txt = 40;
       }
       if (!txt && casa(e.marcas)) txt = 30;
-      if (!txt && casa(e.outros)) txt = 20;
+      if (!txt && casa(e.outros, e.jun.outros)) txt = 20;
     }
     if (txt) parcial = false;
     return nota || txt ? { nota: Math.max(nota, txt), parcial } : null;
@@ -495,7 +526,7 @@
       for (let x = 0; x < agulhas.length; x++) {
         tem[x] = agulhas[x] && e.tudo.includes(agulhas[x]) ? 1 : 0;
         if (tem[x]) algum = true;
-        if (tem[x] && !anoAg[x] && e.apl.includes(agulhas[x])) aplOutra = true;
+        if (tem[x] && !anoAg[x] && (e.apl.includes(agulhas[x]) || e.jun.apl.includes(agulhas[x]))) aplOutra = true;
       }
       for (let i = 0; i < n; i++) for (let x = 0; x < pecas[i].length; x++) {
         const q = pecas[i][x];
