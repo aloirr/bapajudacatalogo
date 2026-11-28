@@ -1362,55 +1362,42 @@
    }
   },
   {
-   "molde": 44,
-   "t": {
-    "0": "MÓDULO 07 · NÃO FECHOU",
-    "1": "Não fechou? Os 5 motivos na mecânica",
-    "10": "ATENÇÃO  |Desconto só dentro da alçada de 15%; acima disso, o Price aprova. Prazo e limite: nunca prometa fora da regra."
-   },
-   "tabela": {
-    "2": [
-     [
-      "Motivo",
-      "Responda com prova",
-      "Volte ao pedido"
-     ],
-     [
-      "Preço",
-      "Compare o custo do serviço refeito, não a etiqueta: a peça certa com o kit evita o carro voltar.",
-      "“Se eu resolver isso, fechamos?”"
-     ]
+   "tipo": "naofechou",
+   "k": "MÓDULO 07 · NÃO FECHOU",
+   "t": "Não fechou? Os 6 motivos na mecânica",
+   "linhas": [
+    [
+     "Prazo ou limite",
+     "Não prometa prazo nem limite fora da regra. Monte um pedido menor com as peças que mais giram.",
+     "“Se eu ajustar o pedido ao seu limite, fechamos?”"
     ],
-    "3": [
-     [
-      "Prazo ou limite",
-      "Não prometa prazo nem limite fora da regra. Monte um pedido menor com as peças que mais giram.",
-      "“Se eu ajustar o pedido ao seu limite, fechamos?”"
-     ]
+    [
+     "Preço",
+     "Compare o custo do serviço refeito, não a etiqueta: a peça certa com o kit evita o carro voltar.",
+     "“Se eu resolver isso, fechamos?”"
     ],
-    "4": [
-     [
-      "Dúvida na aplicação",
-      "Mostre no Catálogo BAP a aplicação, a posição, o lado e as referências cruzadas.",
-      "“Se eu te mostrar que serve, fechamos?”"
-     ]
+    [
+     "Disponibilidade",
+     "Ofereça o equivalente pela referência ou pelo código. Anote a demanda.",
+     "“Se eu te passar o equivalente, fechamos?”"
     ],
-    "5": [
-     [
-      "Já tem fornecedor",
-      "Não peça para trocar tudo. Entre onde ele perde venda: kits, combos e peças que faltam.",
-      "“Começamos por essa linha que falta?”"
-     ]
+    [
+     "Aplicação",
+     "Mostre no Catálogo BAP a aplicação, a posição, o lado e as referências cruzadas.",
+     "“Se eu te mostrar que serve, fechamos?”"
     ],
-    "6": [
-     [
-      "Sem necessidade agora",
-      "Mostre o giro: os sintomas mais comuns da frota da região e as peças que resolvem.",
-      "“Que dia eu volto pra fechar?”"
-     ]
+    [
+     "Fornecedor",
+     "Não peça para trocar tudo. Entre onde ele perde venda: kits, combos e peças que faltam.",
+     "“Começamos por essa linha que falta?”"
+    ],
+    [
+     "Sem necessidade",
+     "Mostre o giro: os sintomas mais comuns da frota da região e as peças que resolvem.",
+     "“Que dia eu volto pra fechar?”"
     ]
-   },
-   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 5 motivos: um faz o cliente, outro o vendedor. Destaque a linha nova da mecânica, a dúvida na aplicação: a resposta é o Catálogo BAP com aplicação, posição, lado e referências cruzadas.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price. Prazo e limite nunca são prometidos fora da regra."
+   ],
+   "notas": "MENSAGEM-CHAVE\nCada objeção tem uma resposta com prova e uma frase que volta ao pedido.\n\nCOMO CONDUZIR\nFaça role-play com os 6 motivos: um faz o cliente, outro o vendedor. Destaque a linha nova da mecânica, a dúvida na aplicação: a resposta é o Catálogo BAP com aplicação, posição, lado e referências cruzadas.\n\nINSIGHT PARA O CAMPO\nA faixa ATENÇÃO é regra: desconto só dentro da alçada de 15%; acima disso, quem aprova é o Price. Prazo e limite nunca são prometidos fora da regra."
   },
   {
    "molde": 45,

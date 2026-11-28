@@ -17,6 +17,7 @@ O deck novo é montado DUPLICANDO os slides do treinamento original de Baterias 
                                                        # de outro slide do original
          "italico": {"4": ["0,2"]},                # na célula, os trechos depois do 1.º ficam em itálico
          "respiro": {"6": 0.08},                   # margem de cima e de baixo das células da tabela (polegadas)
+         "altura_linhas": {"3": [0.65]},           # altura de cada linha da tabela (polegadas; null mantém)
          "notas": "MENSAGEM-CHAVE\\n..."}],
      "negrito_uma_coluna": true,                   # corpo da tabela com negrito só na 1.ª coluna que não é só número
      "nota_base": false}                           # ver Travas
@@ -774,6 +775,13 @@ def montar(nome, saida=None):
                 v = base.expandir(v)
                 base.conferir(v, onde)
                 escrever(tab.cell(i, j).text_frame._txBody, v)
+        for k, alts in spec.get('altura_linhas', {}).items():   # altura de cada linha da tabela (pol.; null mantém)
+            trs = formas[int(k)]._element.findall('.//' + A + 'tr')
+            if len(trs) != len(alts):
+                parar(f'{onde}: a tabela {k} tem {len(trs)} linhas')
+            for tr, h in zip(trs, alts):
+                if h is not None:
+                    tr.set('h', str(int(Inches(h))))
         for k, cels in spec.get('italico', {}).items():
             tab = formas[int(k)].table
             for rc in cels:

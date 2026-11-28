@@ -4,10 +4,23 @@ Baterias (nº do slide) e os índices das formas, os mesmos que a Mecânica Bás
 Comum a todos os tipos de conteúdo: "k" (kicker), "t" (título), "dica" (faixa DICA DE CAMPO), "notas".
 Textos aceitam as macros do treinamento_molde.py ({{cod:...}}, {{oj:...}}, {{prod:...}}, {{n:PRODUTO}}...).
 """
+import copy
 
 DATA = 'Equipe Comercial Externa  ·  Novembro de 2026'
 DICA = 'DICA DE CAMPO  |'
 MOTIVOS = ('prazo ou limite', 'preço', 'disponibilidade', 'aplicação', 'fornecedor', 'sem necessidade')   # RD-0631 (R-20261127-200014-alexandre, item 2): a mesma do Onboarding
+# "Não fechou?" com os 6 motivos da faixa (R-20261127-224247-alexandre, item 5). A 6.ª linha (forma 12) é a cópia da 4.ª,
+# de fundo verde, para as cores seguirem alternadas. As 6 cabem acima da faixa ATENÇÃO com 0,65 pol. (≈47 pt) cada;
+# o cabeçalho fica com a altura do molde.
+_LINHA = 0.65
+_TOPO, _CAB = 1.6, 0.42          # topo da tabela e altura do cabeçalho no molde 44 (pol.)
+NAOFECHOU_6 = {
+    'copiar': [{'formas': [5]}],
+    'mover': {'2': [None, None, None, _CAB + _LINHA],
+              **{str(k): [None, round(_TOPO + _CAB + _LINHA * i, 2), None, _LINHA]
+                 for i, k in enumerate((3, 4, 5, 6, 12), 1)}},
+    'altura_linhas': {'2': [None, _LINHA], **{str(k): [_LINHA] for k in (3, 4, 5, 6, 12)}},
+}
 NOTAS_FECHAMENTO = ('MENSAGEM-CHAVE\nFechar é uma etapa da venda, não um susto no fim. São três frases que todo vendedor '
                     'deve saber de cor.\n\nCOMO CONDUZIR\nLeia as três frases em voz alta e peça para o time repetir. '
                     'Reforce a faixa escura: sem pedido, o motivo é anotado — é assim que a gestão descobre onde perde venda.'
@@ -165,6 +178,12 @@ def expandir(s):
         cab = s.get('cabecalho', ['Motivo', 'Responda com prova', 'Volte ao pedido'])
         linhas = s['linhas']
         o['tabela'] = {'2': [cab, linhas[0]], '3': [linhas[1]], '4': [linhas[2]], '5': [linhas[3]], '6': [linhas[4]]}
+        if tp == 'naofechou':
+            o.update(copy.deepcopy(NAOFECHOU_6))
+            o['tabela']['12'] = [linhas[5]]
+            nomes = [ln[0] for ln in linhas]
+            if nomes != [m[0].upper() + m[1:] for m in MOTIVOS]:
+                raise SystemExit(f'[PARADO] "Não fechou?": as linhas {nomes} fogem da faixa {MOTIVOS}')
         o['t']['10'] = 'ATENÇÃO  |' + s.get('atencao', 'Desconto só dentro da alçada de 15%; acima disso, o Price aprova. '
                                                       'Prazo e limite: nunca prometa fora da regra.')
     elif tp == 'spin':
