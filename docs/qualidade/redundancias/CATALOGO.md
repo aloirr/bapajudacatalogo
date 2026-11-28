@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0745** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`).
+O próximo número livre é o **RD-0760** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`; o RD-0745 ao RD-0752, no `corretor-redundancias/T-0042-v31`).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -541,15 +541,26 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0735 | baixa | código (comentário) | scripts/coord.mjs e JSDoc do `FUSO_DOS_RECADOS` (coord-lib.mjs) | comentários repetindo o JSDoc do `carimboDeManaus` e do `compararRecados` (só comentário) | T-0041 | alexandre | CORRIGIDO (24c82fa; 13535e6, #234) |
 | RD-0736 | baixa | teste (comentário) | scripts/testar_site.mjs:1532 | "itens 1b, 4, 5, 6 e 7" → "itens 1b e 3 a 8" (só comentário; não segura) | T-0040 | testes | ABERTO (próximo PR do testes) |
 | RD-0737 | baixa | código | site/app.js, `cabe` e `contida` | regra "cilindrada vazia, igual ou entre as de o" 2 vezes (vira `cilDentro`) | T-0040 | web-site | CORRIGIDO (4ad26c1; e42f936, #235) |
-| RD-0738 | média | layout (tabela) | tabela da aplicação (Mazda 626, Grand Caravan, GLE-Class "40.0", VW EOS etc.) | 19 linhas repetidas que já vinham do main (lá eram 25; o #235 tira 6) | T-0040 | web-site | ABERTO (dispensado do #235 pelo po, R-20261127-174708-po; tarefa nova, com simulação) |
+| RD-0738 | média | layout (tabela) | tabela da aplicação (Mazda 626, Grand Caravan, GLE-Class "40.0", VW EOS etc.) | 19 linhas repetidas que já vinham do main (lá eram 25; o #235 tira 6) | T-0040 | web-site | CORRIGIDO (fc44b98, T-0043: 0 células da VERSAO com a cilindrada 2 vezes e 0 "40.0" no catálogo inteiro) |
 | RD-0739 | média | doc | docs/ux/pareceres/T-0040.md:5 e :29-36; T-0040-v30.md:68 (#236) | parecer do #229 termina em "resultado: AJUSTAR" (VEL7507 "0.2 2V") sem dizer que o ajuste já está no main (`umaCil`) nem apontar o final (linha "Histórico" → T-0040-v30.md) | T-0040 | designer-ux | CORRIGIDO (cff99b0, #236) |
 | RD-0740 | média | doc | docs/ux/pareceres/T-0040-v30-simulacao.md:29-31 e :3 (#236) | "Pendente com o Alexandre (ponto 7)" velho (decidido no R-20261127-150417-alexandre); LIBERADO do cabeçalho do `b86c820` sem apontar o final | T-0040 | designer-ux | CORRIGIDO (cff99b0, #236) |
 | RD-0741 | média | doc | docs/marca/pareceres/T-0040-v30.md, cabeçalho, "## Parecer" e "Parecer final" (#237) | 3 conclusões que não batem (MC-0051 em aberto no `3b250fe`, encerrado no `4f98fd7`); "MC-0052: fechado" 4 vezes | T-0040 | design-de-marca | CORRIGIDO (a75f377, #237) |
 | RD-0742 | baixa | doc | docs/qualidade/redundancias/T-0040.md:447 e CATALOGO.md:567 (Notas) | como o registro foi feito e a numeração repetidos no T-0040.md, no T-0041.md e nas Notas do catálogo | T-0040 | corretor-redundancias | CORRIGIDO (registro da T-0040, #238) |
 | RD-0743 | baixa | tarefa | .coord/quadro.md:52 (#239) | parágrafo "Fila" repetia a situação e os PRs das linhas da tabela (T-0040, T-0041, T-0033/T-0039, T-0038) | T-0040 | gerente-projetos | CORRIGIDO (45d3e72, #239) |
 | RD-0744 | baixa | tarefa | .coord/tarefas/T-0040.md:84, :25 e :34 (#239) | PRs dos pareceres, "7.214/2.145" e "300/90" ditos 2 vezes | T-0040 | gerente-projetos | CORRIGIDO (45d3e72, #239) |
+| RD-0753 | média | código | site/app.js:2145-2146 (`cabeNaBase`) e :2207-2208 (`anosDentro`) | "toda faixa da célula Ano dentro da faixa g" escrita 2 vezes no mesmo PR | T-0043 | web-site | ABERTO (segura) |
+| RD-0754 | baixa | doc | docs/DADOS_DO_SITE.md:42 e :52 | a cilindrada da linha do `ve` (e a regra do SFR30034) em 2 bullets | T-0043 | web-site | ABERTO (segura) |
+| RD-0755 | baixa | doc | docs/DADOS_DO_SITE.md:69 e :86 | o ano da base (T-0040 e item 13) escrito na tabela e na busca | T-0043 | web-site | ABERTO (segura) |
+| RD-0756 | média | layout (tabela) | ROL559/552A (1366 e 390 px) | 5 linhas do texto com o ano do produto inteiro (1970–1998) ao lado das do `ve` com ano | T-0043 | web-site | ABERTO (simulação própria; não segura o PR) |
+| RD-0757 | média | layout (tabela) | 51 linhas em 28 produtos (FAR6365, CL16, CL22, TAX10658, TER555248, BV12…) | linhas do texto cobertas por uma do `ve` com ano, já no `main` (211 → 51; nenhuma nova) | T-0043 | web-site | ABERTO (não segura se o po dispensar o escopo) |
+| RD-0758 | baixa | texto (célula) | 20 células em 16 produtos (FCB6152 "2.5 / 2.5 8V", JUH70260…) | a mesma cilindrada sem e com válvulas na célula que vem do texto (`cilDe`) | T-0043 | web-site | ABERTO (não segura se o po dispensar o escopo) |
+| RD-0759 | baixa | código (comentário) | site/app.js:1674 e :1690-1692 | a explicação do `ateOutroVeiculo` 2 vezes | T-0043 | web-site | ABERTO (só comentário; próximo PR) |
 
 ## Notas
+
+### T-0043, linhas repetidas da tabela de aplicação, 27/11/2026 (`web-site/T-0043-repetidas`, head `a1d633f`)
+- Relatório: `T-0043.md`. RD-0738 CORRIGIDO. Novos: RD-0753 ao RD-0759. Seguram o RD-0753 (média), o RD-0754 e o RD-0755 (baixas, doc). VOLTA PARA AJUSTE.
+- RD-0756: simulação própria (não segura). RD-0757 e RD-0758 já vinham do `main`: não seguram se o `po` dispensar o escopo. RD-0759: só comentário.
 
 ### T-0040, aplicação da Fraga na VEICULOS (v29), 27/11/2026 (PR #228, rascunho)
 - RD-0670 ao RD-0676: branch `catalogo-dados/T-0040-v29` (`a77a097`). Relatório: `T-0040.md`. VOLTA PARA AJUSTE: seguram o RD-0670 ao RD-0675 (3 médias, 3 baixas); MANTIDO: RD-0676. VEICULOS sem linha repetida.
