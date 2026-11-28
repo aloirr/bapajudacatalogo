@@ -40,6 +40,12 @@ EXTRA_W = 74
 
 def app_w(f):
     return APP_W - (EXTRA_W + GAP if f.get('extra_col') else 0)
+
+
+# UX-T45-14 (MENOS É MAIS, T-0045): a Aplicação que desce APP_L linhas ou mais abaixo de "Leve também" e "Equivale a"
+# vira um "L": as k primeiras linhas na largura da coluna, ao lado delas, e as demais até a margem direita (APP_LARGA).
+APP_L = 3
+APP_LARGA = CW - 2 * PAD - CODE_W - GAP
 YMAX = H - FOOT - 14
 SITE = 'https://www.bapautoparts.com.br'
 LOGO = 'dimg/capa_0.png'
@@ -156,6 +162,30 @@ def para_h(mk, size, lead, width, font='PR', ind=0):
 def lw(s, size, font='PB', ls=0): return pdfmetrics.stringWidth(s, font, size) + ls * len(s)
 
 
+class ParaL(Paragraph):
+    """Aplicação em L (UX-T45-14): as k primeiras linhas na largura pedida no wrap, as demais na `larga`. O texto é
+    alinhado à esquerda, então as linhas largas começam no mesmo x e só vão mais longe."""
+    def __init__(self, text, style, k, larga):
+        self._k, self._larga = k, larga
+        Paragraph.__init__(self, text, style)
+
+    def breakLines(self, width):
+        w0 = width[0] if isinstance(width, (list, tuple)) else width
+        return Paragraph.breakLines(self, [w0] * self._k + [self._larga])
+
+
+def para_h_l(mk, size, lead, width, k, larga):
+    key = ('L', mk, size, lead, width, k, larga)
+    if key not in _pc:
+        _pc[key] = ParaL(mk, ParagraphStyle('m', fontName='PR', fontSize=size, leading=lead), k, larga).wrap(width, 1e6)[1]
+    return _pc[key]
+
+
+def linhas_l(alt_dir):
+    """quantas linhas da Aplicação ficam na coluna: as que cobrem a altura das colunas da direita, com 2 de folga"""
+    return max(1, -int(-(alt_dir + 2) // LEAD))
+
+
 class Doc:
     def __init__(self, path):
         self.c = canvas.Canvas(path, pagesize=(W * S, H * S), initialFontName='PR')
@@ -187,6 +217,13 @@ class Doc:
     def text(self, x, y, w, mk, size, lead, color='ink', font='PR', ind=0):
         p = Paragraph(mk, ParagraphStyle('t', fontName=font, fontSize=size * S, leading=lead * S, textColor=HexColor(C[color]),
                                          firstLineIndent=ind * S))
+        pw, ph = p.wrap(w * S, 1e6); p.drawOn(self.c, self.X(x), self.Y(y) - ph)
+        return ph
+
+    def text_l(self, x, y, w, larga, k, mk, size, lead, color='ink'):
+        """o text da Aplicação em L (UX-T45-14)"""
+        p = ParaL(mk, ParagraphStyle('t', fontName='PR', fontSize=size * S, leading=lead * S, textColor=HexColor(C[color])),
+                  k, larga * S)
         pw, ph = p.wrap(w * S, 1e6); p.drawOn(self.c, self.X(x), self.Y(y) - ph)
         return ph
 
@@ -240,19 +277,34 @@ class Doc:
         self.c.bookmarkPage(key); self.c.addOutlineEntry(title, key, level=level, closed=True)
 
     # -------- blocos
-    def back_button(self, y=15):
-        t = 'VOLTAR AO SUMÁRIO'; w = lw(t, 8.5, 'PB', .8) + 26; x = W - MX - w
-        self.rect(x, y, w, 24, fill='green2', r=12)
-        self.label(x + w / 2, y + 7, t, 8.5, 'black', 'PB', .8, 'center')
-        self.link(x - 4, y - 4, w + 8, 32, 'sumario')
+    # UX-T45-12 (botões embaixo e juntos, T-0045): o "Voltar ao sumário" e o link do site ficam numa barra só, no
+    # rodapé, à esquerda e na mesma altura em todas as páginas (linha, abertura de sistema e sumário). A ação vem
+    # primeiro; no sumário não há o "Voltar" e a barra começa pelo site. O nº da página passa ao canto direito, depois
+    # da observação, porque a barra não cabe à esquerda do centro sem diminuir a letra [SUPOSIÇÃO].
+    BTN = 'VOLTAR AO SUMÁRIO'
 
-    def top(self, right=None, back=True):
+    def barra(self, y0, pg, voltar=True, fundo='black'):
+        escuro = fundo != 'green'                 # na abertura (faixa verde) o botão fica escuro
+        x, yb, hb = MX, y0 + 7, 22
+        if voltar:
+            w = lw(self.BTN, 8.5, 'PB', .8) + 26
+            self.rect(x, yb, w, hb, fill='green2' if escuro else 'black', r=hb / 2)
+            self.label(x + w / 2, yb + (hb - 8.5 * 1.2) / 2 + .4, self.BTN, 8.5, 'black' if escuro else 'green2', 'PB', .8, 'center')
+            self.link(x - 4, yb - 3, w + 8, hb + 6, 'sumario')
+            x += w + 12
+        self.label(x, y0 + 13, SITE_IG, 9.5, 'white', 'PB')
+        self.url(x - 4, yb - 3, lw(SITE_IG.split('  ')[0], 9.5, 'PB') + 8, hb + 6, SITE)
+        xn = W - MX - 30
+        self.label(W - MX, y0 + 12, f'{pg:02d}', 13, 'green2' if escuro else 'white', 'PB', 0, 'right')
+        self.rect(xn - 10, y0 + 11, 1, 18, fill='divider' if escuro else 'gdark')
+        self.label(xn - 20, y0 + 13 + .5, OBS_DISP, 9.5, 'white', 'PB', 0, 'right')
+
+    def top(self, right=None):
         self.rect(0, 0, W, TOP, fill='black')
         self.image(LOGO, MX, 10, 24.7, 34)
         self.rect(MX + 24.7 + 14, 16, 1, 22, fill='divider')
         self.label(MX + 24.7 + 29, 21, DOC_TITULO, 10, 'green2', 'PB', 1.4)
-        if back: self.back_button()
-        elif right: self.label(W - MX, 21, right.upper(), 10, 'lgrey', 'PM', 1.4, 'right')
+        if right: self.label(W - MX, 21, right.upper(), 10, 'lgrey', 'PM', 1.4, 'right')
 
     def legal(self, cy, size=9, color='fgrey'):
         w = lw(LEGAL_B, size, 'PB') + lw(LEGAL_R, size, 'PR')
@@ -260,14 +312,11 @@ class Doc:
         x += self.label(x, cy, LEGAL_B, size, 'white', 'PB')
         self.label(x, cy, LEGAL_R, size, color, 'PR')
 
-    def footer(self, pg):
+    def footer(self, pg, voltar=True):
         y0 = H - FOOT
         self.rect(0, y0, W, FOOT, fill='black'); self.rect(0, y0, W, 3, fill='green')
-        self.label(MX, y0 + 13, SITE_IG, 9.5, 'white', 'PB')
-        self.label(W / 2, y0 + 12, f'{pg:02d}', 13, 'green2', 'PB', 0, 'center')
-        self.label(W - MX, y0 + 13 + .5, OBS_DISP, 9.5, 'white', 'PB', 0, 'right')
+        self.barra(y0, pg, voltar)
         self.legal(y0 + 33)
-        self.url(MX, y0 + 8, 200, 20, SITE)
 
     def end(self): self.c.showPage()
 
@@ -322,7 +371,14 @@ def prep_rows(f, linhas=None):
         aw = app_w(f)
         ex = html.escape(r.get('extra', '') or '—', quote=False) if f.get('extra_col') else ''
         r['_extra_mk'] = ex
-        h = max(ch, para_h(mk, FS, LEAD, aw), para_h(refs, RF, RL, REF_W), para_h(ex, RF, RL, EXTRA_W, 'PM') if ex else 0) + RPAD
+        hd = max(para_h(refs, RF, RL, REF_W), para_h(ex, RF, RL, EXTRA_W, 'PM') if ex else 0)   # colunas da direita
+        ha, k = para_h(mk, FS, LEAD, aw), linhas_l(hd)
+        r['_k'] = None
+        if ha >= (k + APP_L) * LEAD - .5:          # UX-T45-14: desce APP_L linhas ou mais abaixo delas
+            hl = para_h_l(mk, FS, LEAD, aw, k, APP_LARGA)
+            if max(ch, hl, hd) + RPAD <= YMAX - HEAD_Y:   # a linha que ainda passa de uma página fica como antes
+                r['_k'], ha = k, hl
+        h = max(ch, ha, hd) + RPAD
         out.append((r, mk, refs, sm, h))
     return out
 
@@ -417,6 +473,8 @@ def table_page(dc, f, rows, pg, cont, primeira=None):
             c = dc.c; c.saveState(); c.scale(S, S)
             ph = it['para'].wrap(aw, 1e6)[1]
             it['para'].drawOn(c, x + CODE_W + GAP, H - (y + 3.5) - ph); c.restoreState()
+        elif r.get('_k'):
+            dc.text_l(x + CODE_W + GAP, y + 3.5, aw, APP_LARGA, r['_k'], mk, FS, LEAD)
         else:
             dc.text(x + CODE_W + GAP, y + 3.5, aw, mk, FS, LEAD, 'ink')
         xr = x + CODE_W + aw + 2 * GAP
@@ -453,7 +511,7 @@ def capa(dc):
 
 def sumario(dc, entries, pg):
     dc.bookmark('sumario', 'Sumário', 0)
-    dc.top(back=False)                           # o título do catálogo fica só à esquerda da barra (RD-0499)
+    dc.top()                                     # o título do catálogo fica só à esquerda da barra (RD-0499)
     dc.rect(0, TOP, W, HERO, fill='hero'); dc.rect(0, TOP + HERO - 1, W, 1, fill='heroline')
     dc.label(MX, TOP + 26, MARCA, 10, 'gdark', 'PB', 1.6)
     dc.label(MX - 1, TOP + 46, 'Sumário', 40, 'black', 'PB', -.8)
@@ -487,7 +545,7 @@ def sumario(dc, entries, pg):
             dc.link(x, y - 3, colw, RH, e['key'])
             y += RH
         ys[col] = y + 12
-    dc.footer(pg); dc.end()
+    dc.footer(pg, voltar=False); dc.end()
 
 
 def contracapa(dc):
@@ -519,7 +577,6 @@ def pagina_sistema(dc, grupo, key, itens, pg):
     dc.circle(W + 40, 470, 360, 'green'); dc.circle(W + 10, 470, 268, 'green2'); dc.circle(W + 10, 470, 190, 'black')
     dc.image(LOGO, MX, 44, 34 * 1420 / 1955, 34)
     dc.label(MX + 40, 56, DOC_TITULO, 10, 'green2', 'PB', 1.4)
-    dc.back_button(48)
     dc.label(MX, 250, 'SISTEMA' if grupo != 'LINHA MOTO' else 'SEÇÃO', 13, 'green2', 'PB', 2)
     size = 64
     while size > 34 and lw(titulo, size, 'PB', -1) > CW - 40: size -= 2
@@ -537,9 +594,7 @@ def pagina_sistema(dc, grupo, key, itens, pg):
         dc.link(MX, y - 4, 400, 34, k)
         y += 44
     dc.rect(0, H - 56, W, 56, fill='green')
-    dc.label(MX, H - 56 + 13, SITE_IG, 10.5, 'white', 'PB')
-    dc.label(W / 2, H - 56 + 12, f'{pg:02d}', 13, 'white', 'PB', 0, 'center')
-    dc.label(W - MX, H - 56 + 13 + .5, OBS_DISP, 10.5, 'white', 'PB', 0, 'right')
+    dc.barra(H - 56, pg, fundo='green')
     w = lw(LEGAL_B, 8.5, 'PB') + lw(LEGAL_R, 8.5, 'PR'); x = W / 2 - w / 2
     x += dc.label(x, H - 56 + 34, LEGAL_B, 8.5, 'white', 'PB'); dc.label(x, H - 56 + 34, LEGAL_R, 8.5, 'white', 'PR')
     dc.end()

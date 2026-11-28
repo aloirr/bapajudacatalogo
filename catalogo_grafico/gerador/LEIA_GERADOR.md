@@ -58,8 +58,10 @@ Versão de 12/11/2026 (atualizada pelo PC EMPRESA; antes 27/10 pelo PC PESSOAL).
 ## Catálogo online da BAP
 `https://catalogobap.catalogofraga.com.br` → aba CÓDIGO DA PEÇA → Buscar → Ver detalhes: Aplicação Detalhada (montadora, veículo, versão, motor, anos) e Produtos Similares (Tecfil). A nuvem do Cowork não acessa (proxy); usar o navegador do app. Novo código achado lá: acrescentar em `entradas/aplicacoes_site_bap.json` no mesmo formato (`{código: [ref, "MONTADORA§Modelo motor · anos · ...¦MONTADORA§..."]}`).
 
-## Rodapé (27/10)
+## Rodapé (27/10; digital e Linha Moto mudam na T-0045, em simulação)
 Páginas internas dos três catálogos: esquerda "www.bapautoparts.com.br · @bapautoparts", centro o nº da página, direita "Consulte a disponibilidade na sua região." (`digital2.OBS_DISP`, R-20261120-212000-alexandre); embaixo o aviso de uso interno. Capa e contracapa sem a observação.
+- **Digital e Linha Moto (T-0045, UX-T45-12, SIMULAÇÃO até o aprovado):** o "VOLTAR AO SUMÁRIO" sai do alto e vai para a barra do rodapé (`digital2.Doc.barra`), junto com o link do site, à esquerda e na mesma altura em todas as páginas de linha, nas aberturas de sistema e no sumário (no sumário, sem o "Voltar"). O nº da página passa ao canto direito, depois da observação, com um fio entre os dois [SUPOSIÇÃO: a barra não cabe à esquerda do centro sem diminuir a letra]. As aberturas ganham o link do site, que antes só tinham como texto. Os links do sumário e das aberturas (links de linha) ficam onde estavam. O A4 (`print_cat.footer`) não muda.
+- **Aplicação em L (T-0045, UX-T45-14, SIMULAÇÃO até o aprovado):** na tabela do digital e da Linha Moto, a Aplicação que desce `digital2.APP_L` linhas (3) ou mais abaixo de "Leve também" e "Equivale a" fica com as primeiras linhas na coluna, ao lado delas (`linhas_l`), e as demais até a margem direita (`APP_LARGA`, `ParaL`). A linha que ainda passa de uma página continua dividida como antes (`paginate`). Assim a continuação de 1 item volta para a página anterior quando cabe (Linha Moto p8, FLU6240).
 
 ## Regra de sintonia
 Mudou um script: gravar a versão nova **aqui** (mesmo nome) e no OneDrive `catalogo_bap\gerador\`, e anotar no Registro do `agente_catalogo_bap.md` com o nome da conversa.
