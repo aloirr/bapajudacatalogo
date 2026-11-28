@@ -22,11 +22,12 @@
 
   // o aviso do site todo (o catálogo também usa): entra vazio, com role="status", e o texto vem depois (assim o leitor
   // de tela anuncia); com uma janela aberta (showModal), ele entra nela, senão ficaria escondido atrás. Quem fecha a
-  // janela depois de uma ação chama o aviso só depois de fechar
-  function toast(msg) {
+  // janela depois de uma ação chama o aviso só depois de fechar. ancora (opcional): o elemento em que o aviso entra, para
+  // ficar logo acima dele (a barra de botões do produto, T-0045), onde quer que ele esteja na tela
+  function toast(msg, ancora) {
     const t = document.createElement("div");
     t.className = "toast"; t.setAttribute("role", "status");
-    (document.querySelector("dialog[open]") || document.body).appendChild(t);
+    (ancora || document.querySelector("dialog[open]") || document.body).appendChild(t);
     setTimeout(() => { t.textContent = msg; }, 50);
     setTimeout(() => t.remove(), 3200);
   }

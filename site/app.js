@@ -69,7 +69,7 @@
   const MINUSC = new Set(["e", "de", "da", "do", "das", "dos", "com", "sem", "para", "p/", "c/", "s/"]);
   const titulo = (s) => bonito(s);
   const fmt = (n) => Number(n).toLocaleString("pt-BR");
-  const toast = (msg) => window.BAPConta.toast(msg); // o aviso do site todo (conta.js, T-0022)
+  const toast = (msg, ancora) => window.BAPConta.toast(msg, ancora); // o aviso do site todo (conta.js, T-0022)
 
   function lerRota() {
     const h = location.hash.replace(/^#/, "") || "/";
@@ -2273,7 +2273,8 @@
   const semAplicacao = (p) => (!p.a || !!p.vo) && !FAMILIAS_PELA_MEDIDA.has(norm(p.fa)) && !tabelaDe(p).length;
   // Conteúdo do produto (T-0014), igual na página e na janela. Na janela os títulos descem um nível
   // (h2 e h3), porque a lista por trás já tem o h1. A ficha de impressão (A4) sai deste mesmo conteúdo.
-  function produtoHtml(p, naJanela) {
+  // voltar: o rótulo do "Voltar" da página (na janela, o ✕ de cima fecha e não há "Voltar")
+  function produtoHtml(p, naJanela, voltar) {
     const H = naJanela ? "h2" : "h1", H2 = naJanela ? "h3" : "h2", H3 = naJanela ? "h4" : "h3";
     const linhas = linhasAplic(p.a);
     const aplicacoes = linhas.length > 1 && (p.a || "").length > 160 ? ulAplic(linhas) : `<p>${anoMaisHtml(p.a)}</p>`;
@@ -2292,13 +2293,14 @@
     const miolo = tab
       ? tab + (fora.length ? `<p class="restr-fora"><b>${fora.length > 1 ? "Restrições" : "Restrição"} da aplicação:</b> ${esc(fora.join(" · "))}</p>` : "") + (p.a && !p.vo ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
       : p.a && !p.vo ? aplicacoes : ""; // o texto do produto "vo" cita os veículos ocultos
-    const secApl = semAplicacao(p) ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}><div class="aviso">${AVISO_SEM_APL}</div></section>`
-      : miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
-    const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
-    const secFicha = ficha.length ? `<section class="secao"><${H2} class="secao-tit">Ficha técnica</${H2}><table class="t"><tbody>${ficha.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</tbody></table></section>` : "";
-    const dados = secApl && (secRefs || secFicha)
-      ? `<div class="prod-dados"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`
-      : `<div class="prod-dados um"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`;
+    // T-0045 (ajuste aprovado, R-20261127-200014): na tela, o título fica fora da caixa (.secao-t > .secao-caixa); no A4, como antes
+    const secao = (tit, corpo) => `<section class="secao secao-t"><${H2} class="secao-tit">${tit}</${H2}><div class="secao-caixa">${corpo}</div></section>`;
+    const secApl = semAplicacao(p) ? secao("Aplicação", `<div class="aviso">${AVISO_SEM_APL}</div>`)
+      : miolo ? secao("Aplicação", `${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div>`) : "";
+    const secRefs = refs.length ? secao("Referências cruzadas", `<table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table>`) : "";
+    const secFicha = ficha.length ? secao("Ficha técnica", `<table class="t"><tbody>${ficha.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</tbody></table>`) : "";
+    // T-0045 (UX-T45-04): a Aplicação na largura toda e, embaixo, as Referências e a Ficha lado a lado (styles.css)
+    const dados = `<div class="prod-dados"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`;
     return `<div class="so-impressao cab-pdf"><img src="assets/logo_branco.png" alt="bap componentes de qualidade"><span>Ficha do produto · Catálogo BAP</span></div>
       <div class="prod">
         <div class="prod-foto-box"><div class="prod-foto">${fotoZoomHtml(p, true)}</div></div>
@@ -2307,21 +2309,22 @@
             <${H} id="${naJanela ? "janela-tit" : "produto-tit"}">${esc(p.c)}</${H}>
             <div class="desc">${anoMaisHtml(p.d)}</div>
             <div class="selos">${[p.ca, p.li].filter(Boolean).map((s) => `<span class="selo">${esc(titulo(s))}</span>`).join("")}</div>
-            <div class="acoes">
-              <button class="bt bt-mini" type="button" data-copiar="${esc(p.c)}">Copiar código</button>
-              <button class="bt bt-claro bt-mini bt-pdf" type="button">Salvar em PDF</button>
-            </div>
           </div>
           ${secJunto(H2, junto)}
           ${dados}
         </div>
       </div>
+      <div class="prod-barra nao-imprime" role="group" aria-label="Ações do produto">
+        <button class="bt" type="button" data-copiar="${esc(p.c)}">Copiar código</button>
+        <button class="bt bt-claro bt-pdf" type="button">Salvar em PDF</button>
+        ${voltar ? `<button class="bt bt-neutro bt-voltar" type="button"><span aria-hidden="true">←</span><span class="bt-rot">${voltar}</span></button>` : ""}
+      </div>
       <div class="so-impressao rod-pdf">As fotos são ilustrativas.<span class="rodape-confira"> Confira sempre a aplicação antes da compra.</span><br>${esc(link)}${BASE.gerado_em ? " · base atualizada em " + esc(BASE.gerado_em) : ""}</div>`;
   }
   function ligarAcoes(raiz) {
     raiz.querySelector("[data-copiar]").addEventListener("click", (ev) => {
-      const c = ev.currentTarget.dataset.copiar;
-      (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).then(() => toast("Código " + c + " copiado"), () => toast(c));
+      const c = ev.currentTarget.dataset.copiar, barra = ev.currentTarget.closest(".prod-barra"); // o aviso fica acima da barra (T-0045)
+      (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).then(() => toast("Código " + c + " copiado", barra), () => toast(c, barra));
     });
     // "Salvar em PDF": a impressão do navegador, com a folha A4 do styles.css (@media print); o vendedor escolhe
     // "Salvar como PDF". Sem biblioteca e sem servidor.
@@ -2388,10 +2391,9 @@
     const daLista = ROTA_ANTERIOR && ROTA_ANTERIOR.startsWith("#/busca");
     app.innerHTML = `<div class="pagina-produto produto-conteudo">
       <div class="prod-topo nao-imprime">
-        <button class="bt bt-claro bt-voltar" type="button"><span aria-hidden="true">←</span> ${daLista ? "Voltar aos resultados" : "Voltar"}</button>
         <nav class="trilha" aria-label="Você está em"><a href="#/">Início</a>›<a href="#/busca?si=${encodeURIComponent(p.si || "")}">${esc(titulo(p.si || "Produtos"))}</a>${p.fa ? `›<a href="#/busca?si=${encodeURIComponent(p.si || "")}&fa=${encodeURIComponent(p.fa)}">${esc(titulo(p.fa))}</a>` : ""}›<span>${esc(p.c)}</span></nav>
       </div>
-      ${produtoHtml(p, false)}</div>`;
+      ${produtoHtml(p, false, daLista ? "Voltar aos resultados" : "Voltar")}</div>`;
     // Voltar: volta no histórico quando veio de outra tela do catálogo; com o link aberto direto, vai ao início
     app.querySelector(".bt-voltar").addEventListener("click", () => { if (ROTA_ANTERIOR) history.back(); else irPara("/"); });
     ligarAcoes(app);
@@ -2417,6 +2419,7 @@
     else if (pilha[pilha.length - 1] !== location.hash) { pilha.push(location.hash); contarAbertura(p); } // T-0018
     dlg.innerHTML = `<div class="janela-barra nao-imprime"><span>Produto</span><button class="janela-x" type="button" aria-label="Fechar a janela do produto">✕</button></div>
       <div class="janela-corpo produto-conteudo">${produtoHtml(p, true)}</div>`;
+    dlg.appendChild(dlg.querySelector(".prod-barra")); // T-0045: a barra fica no rodapé da janela, fora da rolagem
     dlg.querySelector(".janela-x").addEventListener("click", () => fecharJanela(true));
     ligarAcoes(dlg);
     document.title = tituloProduto(p);
