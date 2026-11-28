@@ -910,7 +910,7 @@
    "tipo": "fechamento",
    "k": "MÓDULO 07 · FECHAMENTO",
    "t": "Fechamento em 3 etapas",
-   "dica": "Suspensão fecha quando o cliente confia na aplicação: mostre código, posição e lado no Catálogo BAP antes de pedir o pedido."
+   "dica": "Suspensão fecha quando o cliente confia na aplicação: mostre código, posição e lado no Catálogo BAP antes de pedir."
   },
   {
    "tipo": "naofechou",

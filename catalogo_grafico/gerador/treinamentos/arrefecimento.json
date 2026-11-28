@@ -419,7 +419,7 @@
      "Para o cliente: sem adaptação."
     ]
    ],
-   "dica": "Pergunte sempre se o carro tem ar-condicionado: a aplicação do eletroventilador muda com ele.",
+   "dica": "Eletroventilador e bomba d'água andam juntos: na base, o {{cod:ELE1004}} (Onix) indica a bomba {{oj:ELE1004}}.",
    "notas": "MENSAGEM-CHAVE\nO eletroventilador muda com o motor, a versão e o ar-condicionado.\n\nCOMO CONDUZIR\nMostre os eletroventiladores BAP e reforce a pergunta do ar-condicionado.\n\nINSIGHT PARA O CAMPO\nNa base, o eletroventilador {{cod:ELE1004}} (Onix) indica a bomba {{oj:ELE1004}}."
   },
   {
@@ -974,7 +974,7 @@
    "tipo": "fechamento",
    "k": "MÓDULO 07 · FECHAMENTO",
    "t": "Fechamento em 3 etapas",
-   "dica": "Arrefecimento fecha quando o cliente entende o risco: mostre o custo de um motor fervido antes de pedir o pedido."
+   "dica": "Arrefecimento fecha quando o cliente entende o risco: mostre o custo de um motor fervido antes de pedir."
   },
   {
    "tipo": "naofechou",

@@ -520,7 +520,7 @@
   {
    "tipo": "foto2",
    "k": "MÓDULO 04 · COMANDO",
-   "t": "Servo e cilindro de embreagem",
+   "t": "Servo de embreagem",
    "img": "capa:cover_20",
    "itens": [
     [
@@ -915,7 +915,7 @@
    "tipo": "fechamento",
    "k": "MÓDULO 07 · FECHAMENTO",
    "t": "Fechamento em 3 etapas",
-   "dica": "Transmissão fecha quando o cliente confia na aplicação: mostre estrias, ABS e lado no Catálogo BAP antes de pedir o pedido."
+   "dica": "Transmissão fecha quando o cliente confia na aplicação: mostre estrias, ABS e lado no Catálogo BAP antes de pedir."
   },
   {
    "tipo": "naofechou",

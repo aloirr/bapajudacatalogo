@@ -7,7 +7,7 @@ O deck novo é montado DUPLICANDO os slides do treinamento original de Baterias 
         {"molde": 7,                                # nº do slide-modelo no original de Baterias
          "t": {"1": "Título", "4": "01  |Motor\\n02  |Arrefecimento"},
          "img": {"3": "desenho:motor_corte"},      # desenho:, foto:CÓDIGO, capa:cover_15, orig:image-6-1.png,
-                                                   # montagem:foto:A+foto:B
+                                                   # montagem:foto:A+foto:B, girar:-30:capa:catraca
          "icone": {"6": "FaWrench"},               # ícone branco tirado dos 3 originais
          "tabela": {"2": [["a", "b", "c"], ...]},  # troca o texto das células, linha a linha
          "mover": {"3": [x, y, w, h]},             # polegadas (null mantém)
@@ -260,6 +260,12 @@ class Imagens:
             p = os.path.join(self.tmp, 'montagem_%d.png' % len(self.usadas))
             tela.save(p)
             self.usadas.append(ref)
+            return p
+        if ref.startswith('girar:'):     # girar:-30:capa:catraca (graus, anti-horário; peça comprida fica mais alta)
+            _, graus, resto = ref.split(':', 2)
+            im = Image.open(self.caminho(resto)).convert('RGBA').rotate(float(graus), expand=True, resample=Image.BICUBIC)
+            p = os.path.join(self.tmp, 'girada_%d.png' % len(self.usadas))
+            aparar(im).save(p)
             return p
         tipo, nome = ref.split(':', 1)
         self.usadas.append(ref)

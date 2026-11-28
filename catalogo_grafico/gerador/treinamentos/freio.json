@@ -584,7 +584,7 @@
    "t": "Freio a ar: cuíca e catraca",
    "img": "desenho:freio_pesado",
    "legenda": [
-    "Cuíca (câmara de ar)",
+    "Cuíca",
     "Haste",
     "Catraca (ajustador)",
     "Eixo do came",
@@ -593,7 +593,21 @@
     "Tambor"
    ],
    "dica": "Na linha pesada, o ar empurra a haste da cuíca; a catraca gira o came S, que abre as sapatas.",
-   "notas": "MENSAGEM-CHAVE\nNo caminhão, o freio é a ar: a cuíca empurra, a catraca transmite e ajusta, o came S abre as sapatas.\n\nCOMO CONDUZIR\nSiga os números: cuíca (1), haste (2), catraca (3), eixo (4), came S (5), sapata (6) e tambor (7).\n\nINSIGHT PARA O CAMPO\nNa base há {{n:Cuíca de Freio}} cuícas e {{n:Catraca de Freio}} catracas ATIVAS: venda de frotista."
+   "notas": "MENSAGEM-CHAVE\nNo caminhão, o freio é a ar: a cuíca empurra, a catraca transmite e ajusta, o came S abre as sapatas.\n\nCOMO CONDUZIR\nSiga os números: cuíca (1), haste (2), catraca (3), eixo (4), came S (5), sapata (6) e tambor (7).\n\nINSIGHT PARA O CAMPO\nNa base há {{n:Cuíca de Freio}} cuícas e {{n:Catraca de Freio}} catracas ATIVAS: venda de frotista.",
+   "mover_extra": {
+    "4": [
+     8.6,
+     null,
+     2.35,
+     null
+    ],
+    "5": [
+     11.0,
+     null,
+     1.73,
+     null
+    ]
+   }
   },
   {
    "tipo": "paineis",
@@ -608,11 +622,25 @@
     [
      "Catraca (ajustador)",
      "Transmite a força e ajusta a folga\nNa base, {{cod:CAF10702}}\nPara o frotista: freio regulado e por igual",
-     "capa:catraca"
+     "girar:-30:capa:catraca"
     ]
    ],
    "dica": "Catraca desregulada deixa o curso da haste grande: o caminhão freia menos. Inspeção periódica é rotina de frota.",
-   "notas": "MENSAGEM-CHAVE\nCuíca e catraca são as peças de giro do freio pesado.\n\nCOMO CONDUZIR\nÀ esquerda, a cuíca; à direita, a catraca. A cuíca tem a parte de serviço e, nas de mola, a de estacionamento.\n\nINSIGHT PARA O CAMPO\nCom o frotista, fale de caminhão parado: a peça certa em mão evita dias sem rodar."
+   "notas": "MENSAGEM-CHAVE\nCuíca e catraca são as peças de giro do freio pesado.\n\nCOMO CONDUZIR\nÀ esquerda, a cuíca; à direita, a catraca. A cuíca tem a parte de serviço e, nas de mola, a de estacionamento.\n\nINSIGHT PARA O CAMPO\nCom o frotista, fale de caminhão parado: a peça certa em mão evita dias sem rodar.",
+   "mover_extra": {
+    "4": [
+     0.85,
+     2.3,
+     3.05,
+     2.7
+    ],
+    "8": [
+     7.03,
+     2.3,
+     3.05,
+     2.7
+    ]
+   }
   },
   {
    "tipo": "secao",
@@ -889,7 +917,7 @@
    "tipo": "fechamento",
    "k": "MÓDULO 07 · FECHAMENTO",
    "t": "Fechamento em 3 etapas",
-   "dica": "Freio fecha quando o cliente confia na aplicação: mostre eixo, lado e ABS no Catálogo BAP antes de pedir o pedido."
+   "dica": "Freio fecha quando o cliente confia na aplicação: mostre eixo, lado e ABS no Catálogo BAP antes de pedir."
   },
   {
    "tipo": "naofechou",

@@ -960,7 +960,7 @@
    "tipo": "fechamento",
    "k": "MÓDULO 07 · FECHAMENTO",
    "t": "Fechamento em 3 etapas",
-   "dica": "Direção fecha quando o cliente confia na aplicação: mostre código, tipo e lado no Catálogo BAP antes de pedir o pedido."
+   "dica": "Direção fecha quando o cliente confia na aplicação: mostre código, tipo e lado no Catálogo BAP antes de pedir."
   },
   {
    "tipo": "naofechou",
