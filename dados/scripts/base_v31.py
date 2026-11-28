@@ -346,7 +346,7 @@ def leia_me(autorizacao: str) -> list[tuple]:
     ]
 
 
-def conferir(p1: Path, p2: Path, wb, r: dict, feitas: dict) -> list[str]:
+def conferir(p1: Path, p2: Path, wb, r: dict, feitas: dict) -> tuple[list[str], dict, dict]:
     """As 2 etapas do docstring do módulo; o valor das linhas novas; o 'duvidoso' não sobe. Devolve dif, d0, d1."""
     dif = comparar(p1, versao(30), {"VEICULOS": r["celulas"]}, r["ult"], "v30", leia_n=r["leia_n"],
                    removidas={"VEICULOS": r["removidas"]})
@@ -375,8 +375,7 @@ def efeito_site(antes: dict, depois: dict) -> list[list]:
     return saida
 
 
-def gravar_ad(r: dict, site: list[list], autorizacao: str, d0: dict, d1: dict, total: tuple) -> None:
-    aprovado = autorizacao != AUTORIZACAO
+def gravar_ad(r: dict, site: list[list], autorizacao: str, aprovado: bool, d0: dict, d1: dict, total: tuple) -> None:
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
     n_tipo = {}
@@ -392,8 +391,7 @@ def gravar_ad(r: dict, site: list[list], autorizacao: str, d0: dict, d1: dict, t
               ("Sem fonte (não mudam)", len(SEM_FONTE), ", ".join(f"{c} ({n})" if n > 1 else c for c, n in Counter(x[0] for x in SEM_FONTE).items())),
               ("É do site (web-site; a base não muda)", len(DO_SITE), ", ".join(x[0] for x in DO_SITE)),
               ("Pontos para o Alexandre", len(PONTOS),
-               f"aprovado: opção a) em todos ({autorizacao.removeprefix('aprovado em ')})" if aprovado
-               else "a simulação mostra a opção a) de todos"),
+               "aprovada a opção a) de todos" if aprovado else "a simulação mostra a opção a) de todos"),
               ("Células com a marca da revisão da P12, PRODUTOS (v30 -> v31)", d0["PRODUTOS"], d1["PRODUTOS"]),
               ("Células com a marca da revisão da P12, VEICULOS (v30 -> v31)", d0["VEICULOS"], d1["VEICULOS"]),
               ("Produtos no site (gerar_site do main, v30 -> v31)", total[0], total[1])]
@@ -447,7 +445,7 @@ def main():
             parar(["a base mudou durante a montagem"])
         g0 = gerar_site_copia(versao(30), Path(tmp) / "gs30")
         g1 = gerar_site_copia(p2, Path(tmp) / "gs31")
-        gravar_ad(r, efeito_site(g0, g1), autorizacao, d0, d1, (g0["total"], g1["total"]))
+        gravar_ad(r, efeito_site(g0, g1), autorizacao, aprovado, d0, d1, (g0["total"], g1["total"]))
         if aprovado:
             gravar(p2, versao(31))
         else:
