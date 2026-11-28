@@ -257,7 +257,11 @@ main:focus, main:focus-visible { outline: none; }
 .janela > .prod-barra { flex: none; padding: 10px 20px; background: var(--branco); }
 /* na página, presa no fim da tela em todas as larguras; no fim do bloco, encosta nele. O foco e as âncoras param
    acima dela (scroll-padding-bottom) e o aviso do "Copiar" sobe para cima dela */
-.pagina-produto > .prod-barra { position: sticky; bottom: 0; z-index: 5; margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--branco); box-shadow: var(--sombra-barra); }
+/* a faixa branca, a linha e a sombra vão de ponta a ponta da tela (::before); os botões ficam alinhados ao conteúdo. O
+   #app corta o que passa da tela (overflow-x: clip, que não quebra o sticky) */
+.pagina-produto > .prod-barra { position: sticky; bottom: 0; z-index: 5; margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top-color: transparent; }
+.pagina-produto > .prod-barra::before { content: ""; position: absolute; inset: -1px -100vmax 0; z-index: -1; background: var(--branco); border-top: 1px solid var(--linha); box-shadow: var(--sombra-barra); }
+#app:has(.pagina-produto > .prod-barra) { overflow-x: clip; }
 html:has(.pagina-produto > .prod-barra) { scroll-padding-bottom: calc(65px + env(safe-area-inset-bottom)); }
 body:has(.pagina-produto > .prod-barra) .toast { bottom: calc(76px + env(safe-area-inset-bottom)); }
 /* Aplicação na largura toda e, embaixo, Referências cruzadas e Ficha técnica lado a lado (T-0045, UX-T45-04); com uma
@@ -343,6 +347,32 @@ table.tab-veiculos th:nth-child(5), table.tab-veiculos td:nth-child(5) { width: 
   .lista-veiculos li { padding: 8px 0; border-bottom: 1px solid var(--linha); font-size: var(--fs-tab); line-height: 1.35; }
   .lista-veiculos li b { display: block; font-weight: 600; color: var(--escuro); }
   .lista-veiculos li > span { display: block; color: var(--texto-2); }
+}
+
+/* tabelas do produto na tela (T-0045, ajuste aprovado no R-20261127-200014, especificação do design-de-marca): o título fora
+   da caixa, o cabeçalho da Aplicação numa faixa --verde-claro que encosta nas bordas da caixa e as linhas alternadas
+   (a 1ª depois do cabeçalho, branca). Só na tela: o A4 (@media print) fica como antes. O "Leve também" não muda */
+@media screen {
+  .secao-t { background: none; border: 0; border-radius: 0; padding: 0; }
+  .secao-t > .secao-tit { margin: 0 0 6px; color: var(--texto); font-size: var(--fs-tab); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .secao-caixa { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; }
+  /* a tabela encosta nas bordas; o resto (texto, restrição e aviso) com o recuo de 14 px */
+  .secao-caixa > :not(.tab-rola, .lista-veiculos, table) { margin-inline: 14px; }
+  .secao-caixa > :not(.tab-rola, .lista-veiculos, table):first-child { margin-top: 12px; }
+  .secao-caixa > :not(.tab-rola, .lista-veiculos, table):last-child { margin-bottom: 12px; }
+  .secao-caixa table.t th, .secao-caixa table.t td { border-bottom: 1px solid var(--linha); }
+  .secao-caixa table.t :is(th, td):first-child { padding-left: 14px; }
+  .secao-caixa table.t :is(th, td):last-child { padding-right: 14px; }
+  .secao-caixa table.t tbody tr:nth-child(odd) { background: var(--branco); }
+  .secao-caixa table.t tbody tr:nth-child(even) { background: var(--fundo); }
+  .secao-caixa > table.t:last-child tbody tr:last-child > * { border-bottom: 0; } /* a borda da caixa fecha a tabela */
+  .secao-caixa table.tab-veiculos thead th { padding-top: 8px; padding-bottom: 8px; background: var(--verde-claro); color: var(--verde-txt); font-size: var(--fs-tab); font-weight: 600; text-transform: none; border-bottom: 2px solid var(--verde-esc); }
+  .aplic li { border-bottom-color: var(--linha); }
+}
+/* celular: a lista no lugar da tabela, sem faixa de cabeçalho, com os itens pares em --fundo */
+@media screen and (max-width: 480px) {
+  .lista-veiculos li { padding: 8px 10px; border-bottom: 1px solid var(--linha); }
+  .lista-veiculos li:nth-child(even) { background: var(--fundo); }
 }
 
 /* rodapé (T-0018 op4e): --escuro, a linha --verde e o padrão de ícones automotivos (SVG inline, traço branco a 7%) */

@@ -2241,10 +2241,12 @@
     const miolo = tab
       ? tab + (fora.length ? `<p class="restr-fora"><b>${fora.length > 1 ? "Restrições" : "Restrição"} da aplicação:</b> ${esc(fora.join(" · "))}</p>` : "") + (p.a && !p.vo ? `<div class="so-impressao"><${H3} class="secao-tit">Aplicação completa</${H3}><div class="aviso">${aplicacoes}</div></div>` : "")
       : p.a && !p.vo ? aplicacoes : ""; // o texto do produto "vo" cita os veículos ocultos
-    const secApl = semAplicacao(p) ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}><div class="aviso">${AVISO_SEM_APL}</div></section>`
-      : miolo ? `<section class="secao"><${H2} class="secao-tit">Aplicação</${H2}>${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div></section>` : "";
-    const secRefs = refs.length ? `<section class="secao"><${H2} class="secao-tit">Referências cruzadas</${H2}><table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table></section>` : "";
-    const secFicha = ficha.length ? `<section class="secao"><${H2} class="secao-tit">Ficha técnica</${H2}><table class="t"><tbody>${ficha.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</tbody></table></section>` : "";
+    // T-0045 (ajuste aprovado, R-20261127-200014): na tela, o título fica fora da caixa (.secao-t > .secao-caixa); no A4, como antes
+    const secao = (tit, corpo) => `<section class="secao secao-t"><${H2} class="secao-tit">${tit}</${H2}><div class="secao-caixa">${corpo}</div></section>`;
+    const secApl = semAplicacao(p) ? secao("Aplicação", `<div class="aviso">${AVISO_SEM_APL}</div>`)
+      : miolo ? secao("Aplicação", `${miolo}<div class="aviso">Confira sempre a aplicação no veículo antes da compra.</div>`) : "";
+    const secRefs = refs.length ? secao("Referências cruzadas", `<table class="t"><tbody>${refs.map((x) => `<tr><th>${esc(x.m || "Referência")}</th><td class="c">${esc(x.c)}</td></tr>`).join("")}</tbody></table>`) : "";
+    const secFicha = ficha.length ? secao("Ficha técnica", `<table class="t"><tbody>${ficha.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</tbody></table>`) : "";
     // T-0045 (UX-T45-04): a Aplicação na largura toda e, embaixo, as Referências e a Ficha lado a lado (styles.css)
     const dados = `<div class="prod-dados"><div class="col-apl">${secApl}</div><div class="col-tab">${secRefs}${secFicha}</div></div>`;
     return `<div class="so-impressao cab-pdf"><img src="assets/logo_branco.png" alt="bap componentes de qualidade"><span>Ficha do produto · Catálogo BAP</span></div>
