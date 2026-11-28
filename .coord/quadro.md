@@ -1,12 +1,12 @@
 # Quadro do time · Catálogo BAP
 
-Atualizado em 27/11/2026 19:48 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
+Atualizado em 27/11/2026 20:52 (Manaus). Como usar: `.coord/README.md`. Uma linha por tarefa; o detalhe fica em `.coord/tarefas/`.
 
 | ID | Tarefa | Dono | Ajudantes | Situação | PR |
 |---|---|---|---|---|---|
 | [T-0001](tarefas/T-0001.md) | Conferir a montagem do repositório (contagens, fotos, site abrindo) | testes | catalogo-dados, web-site | CONCLUÍDA | #2, #3 |
 | [T-0002](tarefas/T-0002.md) | Testes automáticos do site e CI no GitHub Actions | testes | web-site, revisor-codigo | CONCLUÍDA | #9, #10 |
-| [T-0003](tarefas/T-0003.md) | Publicar no Render (Blueprint) e checklist do domínio | web-site | gerente-projetos, testes | CONCLUÍDA em parte (Render no ar; doc e domínio a fazer) | #7 |
+| [T-0003](tarefas/T-0003.md) | Publicar no Render (Blueprint) e checklist do domínio | web-site | gerente-projetos, testes | CONCLUÍDA (guia no #243; domínio fica para depois) | #7, #243 |
 | [T-0004](tarefas/T-0004.md) | Relatório de fotos que faltam e de produtos sem aplicação ou referência | catalogo-dados | testes | CONCLUÍDA | #5 |
 | [T-0005](tarefas/T-0005.md) | Consulta por placa (API PLACAS): desenho e serviço no Render | integracao-placas | web-site, revisor-codigo | CONCLUÍDA (em uso desde 11:29) | #22, #23, #24, #25 |
 | [T-0006](tarefas/T-0006.md) | Proposta de busca por medida (pneus, rolamentos, baterias) | web-site | catalogo-dados, testes | FASE 1 CONCLUÍDA; FASES 2 E 3 NA FILA (depois do merge da v31, com simulação da tela; R-20261127-194728-alexandre) | #157, #162, #163, #167, #168 |
@@ -20,12 +20,12 @@ Atualizado em 27/11/2026 19:48 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0014](tarefas/T-0014.md) | Cartão com as referências, "Salvar em PDF" (A4), produto em janela e foto menor com ampliação | web-site | testes | CONCLUÍDA | #29, #35, #36, #39, #41, #45, #101 |
 | [T-0015](tarefas/T-0015.md) | Três agentes novos: corretor-redundancias, design-de-marca e designer-ux | gerente-projetos | po, revisor-codigo | CONCLUÍDA | #30 |
 | [T-0016](tarefas/T-0016.md) | Guardião com a regra de merge do PO, conferência dos merges pelo GitHub e limpeza do CI e do coord.mjs | alexandre | gerente-projetos, testes, revisor-codigo | CONCLUÍDA | #34, #48 |
-| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | EM ANDAMENTO (v27 e o JSON da v27 no ar) | #32, #33, #37, #38, #50, #54, #55, #59, #60, #63, #67, #71, #75, #76, #78, #79, #82, #83, #86, #87, #88, #89, #90, #91, #92, #93, #96, #98, #104, #106 |
+| [T-0017](tarefas/T-0017.md) | Veículo na base e filtro "Meu veículo" | catalogo-dados | web-site, testes | CONCLUÍDA (coberta pela T-0040 e pela v31) | #32, #33, #37, #38, #50, #54, #55, #59, #60, #63, #67, #71, #75, #76, #78, #79, #82, #83, #86, #87, #88, #89, #90, #91, #92, #93, #96, #98, #104, #106 |
 | [T-0018](tarefas/T-0018.md) | Página inicial nova (opção 4) e contador das peças mais abertas | web-site | integracao-placas, testes | CONCLUÍDA | #42, #43, #45, #46, #49, #50, #52, #53, #56, #57, #58, #62, #65, #66, #74, #81, #95, #97, #101 |
 | [T-0019](tarefas/T-0019.md) | "Leve também" no catálogo gráfico em PDF | catalogo-grafico | design-de-marca | CONCLUÍDA | #40, #47, #51, #61, #64, #70, #77, #84, #90, #94, #99, #100 |
 | [T-0020](tarefas/T-0020.md) | Graphify no projeto para o time todo | alexandre | gerente-projetos, po | CONCLUÍDA | #69 |
 | [T-0021](tarefas/T-0021.md) | Governança: .claude/worktrees/ no .gitignore e commit do designer-ux e do design-de-marca nas suas pastas | alexandre | po, gerente-projetos | CONCLUÍDA | #105 |
-| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | CONCLUÍDA | #108, #110, #111, #114, #117, #118, #119, #120, #121, #123, #124, #125, #126, #127 |
+| [T-0022](tarefas/T-0022.md) | Login e senha para o catálogo, usuários pelo admin e página "Catálogos em PDF" | gerente-projetos | web-site, integracao-placas, catalogo-grafico, testes, designer-ux, design-de-marca | CONCLUÍDA (previews.generation fechado sem mudar o render.yaml) | #108, #110, #111, #114, #117, #118, #119, #120, #121, #123, #124, #125, #126, #127, #243 |
 | [T-0023](tarefas/T-0023.md) | Grafia "BAP AUTOPARTS" no gerador do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | CONCLUÍDA | #122, #128, #129, #130 |
 | [T-0024](tarefas/T-0024.md) | Downloads de todos os materiais na página "Catálogos e materiais" | integracao-placas | web-site, catalogo-grafico, designer-ux, design-de-marca | CONCLUÍDA | #133, #134, #135, #136, #137, #138 |
 | [T-0025](tarefas/T-0025.md) | Repetições e ajustes de marca nos materiais do catálogo gráfico | catalogo-grafico | design-de-marca, designer-ux | CONCLUÍDA | #141, #142, #143 |
@@ -35,38 +35,38 @@ Atualizado em 27/11/2026 19:48 (Manaus). Como usar: `.coord/README.md`. Uma linh
 | [T-0029](tarefas/T-0029.md) | Portfólio 2027, siglas e Linha Pesada só com veículos pesados | catalogo-grafico | designer-ux, design-de-marca, testes | CONCLUÍDA | #179, #180 |
 | [T-0030](tarefas/T-0030.md) | Rótulos "Ah" e "CCA" na ficha da bateria (MC-0016) | web-site | testes, designer-ux, design-de-marca | CONCLUÍDA | #173, #174 |
 | [T-0031](tarefas/T-0031.md) | Aplicações suspeitas da Linha Pesada (base v28) | catalogo-dados | web-site, testes | CONCLUÍDA | #175, #176, #177 |
-| [T-0032](tarefas/T-0032.md) | 7 portfólios por linha, melhorias do Portfólio e treinamentos (Mecânica Básica, 3 atualizados e 10 de sistema) | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes, web-site | ONDA 1 CONCLUÍDA; ONDA 2 EM SIMULAÇÃO (retomada em 27/11 19:48, R-20261127-194728-alexandre) | #185, #186, #187, #188 |
+| [T-0032](tarefas/T-0032.md) | 7 portfólios por linha, melhorias do Portfólio e treinamentos (Mecânica Básica, 3 atualizados e 10 de sistema) | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, testes, web-site | ONDA 1 CONCLUÍDA; ONDA 2 EM SIMULAÇÃO (c793773 com o Alexandre) | #185, #186, #187, #188 |
 | [T-0034](tarefas/T-0034.md) | Aba de estoque (ESTOQUE_BAP.xlsx da BAP Central) para o admin e o bap.vendedor | integracao-placas | web-site, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 24/11 19:27) | #194, #195, #196 |
 | [T-0035](tarefas/T-0035.md) | Filtros por sistema, família e categoria na aba Estoque | web-site | integracao-placas, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 24/11 22:30) | #202, #203, #204 |
 | [T-0036](tarefas/T-0036.md) | Atualizar o estoque a cada 24 horas | integracao-placas | testes | CONCLUÍDA (no ar em 24/11 22:06) | #201 |
 | [T-0038](tarefas/T-0038.md) | Onboarding do Vendedor atualizado, com os 10 passos da visita | catalogo-grafico | designer-ux, design-de-marca, integracao-placas, web-site, testes | CONCLUÍDA (no ar em 25/11 10:50) | #209, #210, #211, #212 |
 | [T-0033](tarefas/T-0033.md) | Busca por veículo com ano (só o ano que bate) e fim do bloco "Outros veículos e detalhes" | web-site | catalogo-dados, testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 26/11 18:03) | #217, #225, #219, #220, #221 |
 | [T-0039](tarefas/T-0039.md) | Busca "filtro titan": palavra inteira e moto primeiro | web-site | testes, designer-ux, design-de-marca | CONCLUÍDA (no ar em 26/11 18:03) | #222, #225, #223, #224, #226 |
-| [T-0037](tarefas/T-0037.md) | Veículos do texto da APLICACAO para a aba VEICULOS (base v29), com as pendências da T-0033 e da T-0039 | catalogo-dados | web-site, testes | NA FILA | — |
+| [T-0037](tarefas/T-0037.md) | Veículos do texto da APLICACAO para a aba VEICULOS: lista A (13 itens) e rolamentos "Motos Honda" | catalogo-dados | web-site, testes | NA FILA (simulação própria depois da v32; rolamentos código a código) | — |
 | [T-0040](tarefas/T-0040.md) | Ano inicial e final em 100% das aplicações: Fraga (v29), pesquisa (v30) e site sem veículo sem ano | catalogo-dados | web-site, testes, designer-ux, design-de-marca, revisor-codigo, corretor-redundancias | CONCLUÍDA (no ar em 27/11 ~14:20) | #228, #230, #229, #231, #232, #233, #235; pareceres #236, #237, #238 |
 | [T-0041](tarefas/T-0041.md) | Recados novos com id e criado_em no fuso de Manaus (-04:00) | alexandre | gerente-projetos, testes, revisor-codigo, corretor-redundancias | CONCLUÍDA (13535e6) | #234 |
-| [T-0042](tarefas/T-0042.md) | Correções pontuais da base (v31) | catalogo-dados | web-site, testes, revisor-codigo, corretor-redundancias | EM ANDAMENTO (simulação f6e8957 aprovada; v31 gravada no branch, c1d7a09; testes e revisões) | — |
-| [T-0043](tarefas/T-0043.md) | Linhas repetidas na tabela de aplicação do site (RD-0738) | web-site | catalogo-dados, testes, designer-ux, design-de-marca, revisor-codigo, corretor-redundancias | EM ANDAMENTO (fc44b98 e 8b24fb5 aprovados; pergunta 20 em simulação; PR único com o JSON da v31) | — |
-| [T-0045](tarefas/T-0045.md) | MENOS É MAIS e botões sempre embaixo e juntos | alexandre (regra); web-site e catalogo-grafico (simulações) | designer-ux, design-de-marca, corretor-redundancias, revisor-codigo, testes | EM ANDAMENTO (regra no main; simulação do site 1023320 em revisão de UX e de marca) | #240 |
-| [T-0046](tarefas/T-0046.md) | Nova pesquisa de anos (o que ficou da T-0040) | catalogo-dados | web-site, testes, revisor-codigo, corretor-redundancias | ABERTA | — |
-| [T-0047](tarefas/T-0047.md) | Base v32: BIE20014, TER552120 e VEL7520 | catalogo-dados | web-site, testes, revisor-codigo, corretor-redundancias | NA FILA (depois do merge da v31) | — |
+| [T-0042](tarefas/T-0042.md) | Correções pontuais da base (v31) | catalogo-dados | web-site, testes, revisor-codigo, corretor-redundancias | CONCLUÍDA (no main, a1e3f0f; o JSON do site vai no PR único da T-0043) | #244 |
+| [T-0043](tarefas/T-0043.md) | Linhas repetidas na tabela de aplicação do site (RD-0738) | web-site | catalogo-dados, testes, designer-ux, design-de-marca, revisor-codigo, corretor-redundancias | EM ANDAMENTO (fc44b98, 8b24fb5 e cc2ff42 aprovados; PR único em revisão, web-site/T-0043-repetidas, a1d633f) | — |
+| [T-0045](tarefas/T-0045.md) | MENOS É MAIS e botões sempre embaixo e juntos | alexandre (regra); web-site e catalogo-grafico (simulações) | designer-ux, design-de-marca, corretor-redundancias, revisor-codigo, testes | EM ANDAMENTO (tela aprovada com ajuste, 31451b9; PR depois do merge da T-0043; PDFs ed98b0d com o Alexandre) | #240 |
+| [T-0046](tarefas/T-0046.md) | Nova pesquisa de anos (o que ficou da T-0040) | catalogo-dados | web-site, testes, revisor-codigo, corretor-redundancias | ABERTA (pela sessão local da Fraga, entregando CSV) | — |
+| [T-0047](tarefas/T-0047.md) | Base v32: BIE20014, TER552120, VEL7520 e ROL84888 | catalogo-dados | web-site, testes, revisor-codigo, corretor-redundancias | EM ANDAMENTO (simulação fe551a3 com o Alexandre, P1 a P6; revisor LIBERADO) | — |
+| [T-0048](tarefas/T-0048.md) | 287 produtos com o veículo só no texto da aplicação, em lotes | catalogo-dados | web-site, testes, revisor-codigo, corretor-redundancias | NA FILA | — |
 
 ## Fila
-Main 68c6dfe (#240).
+Main a1e3f0f (#244).
 
-T-0037 continua na fila. As pendências da T-0040 (fim do T-0040.md) esperam a autorização do Alexandre; parte delas virou a T-0042, a T-0043 e a T-0046. Na fila, do corretor: RD-0630 (baixa) e RD-0631 (alta), em docs/qualidade/redundancias/T-0038.md.
+T-0037 continua na fila: a lista A tem simulação própria depois da v32, e os rolamentos "Motos Honda" vão código a código (decisões 23 e 24 do R-20261127-200014-alexandre). Os 287 produtos com o veículo só no texto viraram a T-0048 (decisão 25). As pendências da T-0040 (fim do T-0040.md) esperam a autorização do Alexandre; parte delas virou a T-0042, a T-0043 e a T-0046. Na fila, do corretor: RD-0630 (baixa), em docs/qualidade/redundancias/T-0038.md; o RD-0631 (alta) vai na simulação da onda 2 da T-0032.
 
 A PAUSA geral de 23/11 (R-20261123-184932-po) acabou: "PAUSA acabou (03:30)" (R-20261127-073132-po, 27/11 03:31). A onda 2 da T-0032 saiu da pausa em 27/11 19:48 (item 0).
 
-0. **T-0032, onda 2: RETOMADA** em 27/11 19:48 (R-20261127-194728-alexandre, item 1), depois da pausa de 23/11 ("Após o termino da Onda 1, pause as atividades. quero economizar token"). Primeiro a simulação, pela MENOS É MAIS e pela regra dos botões; o RD-0631 (opção c, "prazo ou limite, disponibilidade, aplicação, fornecedor") vai junto.
-   - Branch catalogo-grafico/T-0032-onda2b, saída do main com os 2 commits da onda 2 (b209f82 e 7e39340, da branch antiga catalogo-grafico/T-0032-onda2, que fica parada porque ainda carrega a onda 1 antes do squash do #185), sem PR e sem pareceres.
-   - Feito: ajustes nos JSONs e no PADRAO_TREINAMENTO.md (descrições de 1 linha no "Cada peça tem uma função", MC-0028, a regra do ícone laranja), sem regerar.
-   - Falta: as fotos pequenas (Suspensão, slide 21; Freio, slide 26), regerar os 5 decks, conferir que a onda 1 sai idêntica, `graphify update`, testes, pareceres, revisor, corretor e PR.
+0. **T-0032, onda 2: RETOMADA** em 27/11 19:48 (R-20261127-194728-alexandre, item 1), depois da pausa de 23/11 ("Após o termino da Onda 1, pause as atividades. quero economizar token"). Primeiro a simulação, pela MENOS É MAIS e pela regra dos botões; o RD-0631 vai junto, com a lista "prazo ou limite, preço, disponibilidade, aplicação, fornecedor, sem necessidade", que substitui a opção c (R-20261127-200014-alexandre, pergunta 30; item 2).
+   - Branch catalogo-grafico/T-0032-onda2b, saída do main com os 2 commits da onda 2 (b209f82 e 7e39340, da branch antiga catalogo-grafico/T-0032-onda2, que fica parada porque ainda carrega a onda 1 antes do squash do #185), sem PR; head da simulação c793773.
+   - Feito: ajustes nos JSONs e no PADRAO_TREINAMENTO.md (descrições de 1 linha no "Cada peça tem uma função", MC-0028, a regra do ícone laranja); a simulação com os ajustes de UX (c793773) foi ao Alexandre com as perguntas "Não fechou? 5 ou 6 motivos" e "lista nova nos 3 decks da onda 1".
+   - Falta: o aprovado do Alexandre e, depois, as revisões que faltarem e o PR.
    - Também na fila da T-0032: "uso interno" nos 35 slides sem rodapé; RD-0560 a RD-0566 e RD-0574 (com "Simule"); RD-0573 (o título da página nos comentários); Volvo na Linha Pesada (p59 do geral) e FH/Atego no bloco da Volare; 4.419 × "+4.500 itens"; MWM no A4 e no Digital; "Uso interno, não enviar ao cliente." no cartão do catálogo Linha Moto; foto do pneu e do óleo 4T na capa da Moto; "1L" → "1 L".
    - Pareceres de UX e de marca da T-0032 nos branches designer-ux/T-0032-melhorias e design-de-marca/T-0032-melhorias, e os do corretor em corretor-redundancias/T-0030-catalogo e corretor-redundancias/T-0032-catalogo: ainda sem PR (os dois do corretor conflitam no CATALOGO.md).
 
-1. **T-0022, previews.generation no render.yaml (governança, bloco ao PO).**
-2. **Fora da fila, para decidir depois** (parada, decisão 3 do R-20261122-223000-alexandre):
+1. **Fora da fila, para decidir depois** (parada, decisão 3 do R-20261122-223000-alexandre):
    - embreagens pesadas: a medida e as estrias aparecem em DESCRICAO, DETALHE_CATALOGO e APLICACAO (catalogo-dados, com simulação);
    - MC-0012 (tamanho do logo e assinatura): parado (R-20261123-112006-alexandre, 8c);
    - Portfólio, as 12 melhorias de prioridade média e baixa da T-0032 (MELHORIAS_PORTFOLIO.md; R-20261123-162032-po, 8b; o RD-0535 virou a melhoria 5, que é alta e vai na T-0032), entre elas as divisórias com poucos produtos e o selo com uma palavra só;
