@@ -173,18 +173,21 @@
   "36": {
    "trocar": [
     [
-     "prazo ou limite, estoque, fornecedor",
-     "prazo ou limite, falta do modelo, fornecedor"
+     "O motivo cai num destes 5: preço, prazo ou limite, estoque, fornecedor ou sem necessidade.",
+     "O motivo cai num destes 6: prazo ou limite, preço, disponibilidade, aplicação, fornecedor ou sem necessidade."
     ],
     [
-     "prazo · estoque · fornecedor",
-     "prazo · falta do modelo · fornecedor"
+     "preço · prazo · estoque · fornecedor · sem necessidade",
+     "prazo ou limite · preço · disponibilidade · aplicação · fornecedor · sem necessidade"
     ],
     [
-     "prazo ou limite, estoque, já tem fornecedor",
-     "prazo ou limite, falta do modelo, já tem fornecedor"
+     "o motivo cai num de 5 (preço, prazo ou limite, estoque, já tem fornecedor, sem necessidade agora)",
+     "o motivo cai num de 6 (prazo ou limite, preço, disponibilidade, aplicação, fornecedor, sem necessidade)"
     ]
-   ]
+   ],
+   "tamanho": {
+    "21": 15
+   }
   },
   "37": {
    "celulas": {
