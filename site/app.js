@@ -69,7 +69,7 @@
   const MINUSC = new Set(["e", "de", "da", "do", "das", "dos", "com", "sem", "para", "p/", "c/", "s/"]);
   const titulo = (s) => bonito(s);
   const fmt = (n) => Number(n).toLocaleString("pt-BR");
-  const toast = (msg) => window.BAPConta.toast(msg); // o aviso do site todo (conta.js, T-0022)
+  const toast = (msg, ancora) => window.BAPConta.toast(msg, ancora); // o aviso do site todo (conta.js, T-0022)
 
   function lerRota() {
     const h = location.hash.replace(/^#/, "") || "/";
@@ -2292,8 +2292,8 @@
   }
   function ligarAcoes(raiz) {
     raiz.querySelector("[data-copiar]").addEventListener("click", (ev) => {
-      const c = ev.currentTarget.dataset.copiar;
-      (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).then(() => toast("Código " + c + " copiado"), () => toast(c));
+      const c = ev.currentTarget.dataset.copiar, barra = ev.currentTarget.closest(".prod-barra"); // o aviso fica acima da barra (T-0045)
+      (navigator.clipboard ? navigator.clipboard.writeText(c) : Promise.reject()).then(() => toast("Código " + c + " copiado", barra), () => toast(c, barra));
     });
     // "Salvar em PDF": a impressão do navegador, com a folha A4 do styles.css (@media print); o vendedor escolhe
     // "Salvar como PDF". Sem biblioteca e sem servidor.
