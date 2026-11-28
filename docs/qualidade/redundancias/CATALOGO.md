@@ -2,7 +2,7 @@
 
 Situação: `ABERTO`, `EM CORREÇÃO`, `CORRIGIDO` ou `MANTIDO`. Os relatórios de cada PR ficam em `T-nnnn.md`, a varredura do site no ar em `VARREDURA-aaaa-mm-dd.md` e as regras em `GUIA.md`, nesta pasta.
 
-O próximo número livre é o **RD-0769** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`; [SUPOSIÇÃO] o RD-0745 ao RD-0759 estão em outros branches, porque o gerente passou o RD-0760 como o próximo livre na T-0045).
+O próximo número livre é o **RD-0770** (o RD-0541 ao RD-0584 estão nos branches `corretor-redundancias/T-0030-catalogo` e `corretor-redundancias/T-0032-catalogo`; [SUPOSIÇÃO] o RD-0745 ao RD-0759 estão em outros branches, porque o gerente passou o RD-0760 como o próximo livre na T-0045).
 
 [SUPOSIÇÃO] As rodadas até o RD-0119 não deixaram catálogo no repositório. Esta tabela começa no RD-0120 e cresce a partir daqui.
 
@@ -548,20 +548,22 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0742 | baixa | doc | docs/qualidade/redundancias/T-0040.md:447 e CATALOGO.md:567 (Notas) | como o registro foi feito e a numeração repetidos no T-0040.md, no T-0041.md e nas Notas do catálogo | T-0040 | corretor-redundancias | CORRIGIDO (registro da T-0040, #238) |
 | RD-0743 | baixa | tarefa | .coord/quadro.md:52 (#239) | parágrafo "Fila" repetia a situação e os PRs das linhas da tabela (T-0040, T-0041, T-0033/T-0039, T-0038) | T-0040 | gerente-projetos | CORRIGIDO (45d3e72, #239) |
 | RD-0744 | baixa | tarefa | .coord/tarefas/T-0040.md:84, :25 e :34 (#239) | PRs dos pareceres, "7.214/2.145" e "300/90" ditos 2 vezes | T-0040 | gerente-projetos | CORRIGIDO (45d3e72, #239) |
-| RD-0760 | baixa | código | site/styles.css:431 | `.bt-voltar .bt-rot` refaz a receita do `.vh` (5ª cópia; junta ao seletor de `:773`) | T-0045 | web-site | ABERTO |
-| RD-0761 | baixa | código | site/styles.css:26 | token `--fs-sub` declarado e sem uso | T-0045 | web-site | ABERTO |
-| RD-0762 | baixa | código | site/styles.css:231, :246 e :70 | `font-size: var(--fs-txt)` do `.produto-conteudo` e do `.desc` repete os 15 px do `body` (que vira `var(--fs-txt)`) | T-0045 | web-site | ABERTO |
-| RD-0763 | baixa | código | site/styles.css:356, :357 e :369 | 6 declarações sem efeito no bloco das tabelas (maiúsculas e espaçamento do `.secao .secao-tit`, `border-radius: 0`, letra, peso e `text-transform: none` do `thead th`) | T-0045 | web-site | ABERTO |
-| RD-0764 | baixa | código | site/styles.css:373-376 | `@media screen and (max-width: 480px)` repete o de `:344`, com o `border-bottom` igual | T-0045 | web-site | ABERTO |
-| RD-0765 | baixa | código | site/styles.css:657 | `--sb-larg` virou apelido do `--largura` | T-0045 | web-site | ABERTO |
-| RD-0766 | baixa | código | site/styles.css:253 | `padding: 12px 0 0` do `.prod-barra` nunca vale (as 2 barras trocam) | T-0045 | web-site | ABERTO |
-| RD-0767 | baixa | layout | página do produto (1366 e 390 px); site/styles.css:230, :232 | sobras do lugar antigo dos botões: `min-height: 44px` do `.prod-topo` só com a trilha; 40 px + 56 px vazios embaixo da barra (Simule) | T-0045 | web-site | ABERTO |
-| RD-0768 | baixa | código (comentário) | site/styles.css:252 e :258-261 | "presa no fim da tela" dito 2 vezes; 2 comentários colados (só comentário; não segura) | T-0045 | web-site | ABERTO |
+| RD-0760 | baixa | código | site/styles.css:431 | `.bt-voltar .bt-rot` refaz a receita do `.vh` (5ª cópia; junta ao seletor de `:773`) | T-0045 | web-site | CORRIGIDO (c555a6a) |
+| RD-0761 | baixa | código | site/styles.css:26 | token `--fs-sub` declarado e sem uso | T-0045 | web-site | CORRIGIDO (c555a6a) |
+| RD-0762 | baixa | código | site/styles.css:231, :246 e :70 | `font-size: var(--fs-txt)` do `.produto-conteudo` e do `.desc` repete os 15 px do `body` (que vira `var(--fs-txt)`) | T-0045 | web-site | CORRIGIDO (c555a6a) |
+| RD-0763 | baixa | código | site/styles.css:356, :357 e :369 | 6 declarações sem efeito no bloco das tabelas (maiúsculas e espaçamento do `.secao .secao-tit`, `border-radius: 0`, letra, peso e `text-transform: none` do `thead th`) | T-0045 | web-site | CORRIGIDO (c555a6a) |
+| RD-0764 | baixa | código | site/styles.css:373-376 | `@media screen and (max-width: 480px)` repete o de `:344`, com o `border-bottom` igual | T-0045 | web-site | CORRIGIDO (c555a6a) |
+| RD-0765 | baixa | código | site/styles.css:657 | `--sb-larg` virou apelido do `--largura` | T-0045 | web-site | CORRIGIDO (c555a6a) |
+| RD-0766 | baixa | código | site/styles.css:253 | `padding: 12px 0 0` do `.prod-barra` nunca vale (as 2 barras trocam) | T-0045 | web-site | CORRIGIDO (c555a6a) |
+| RD-0767 | baixa | layout | página do produto (1366 e 390 px); site/styles.css:230, :232 | sobras do lugar antigo dos botões: `min-height: 44px` do `.prod-topo` só com a trilha; 40 px + 56 px vazios embaixo da barra (Simule) | T-0045 | web-site | ABERTO (tirado do PR pelo po, R-20261127-213729-po; simulação curta depois do merge) |
+| RD-0768 | baixa | código (comentário) | site/styles.css:252 e :258-261 | "presa no fim da tela" dito 2 vezes; 2 comentários colados (só comentário; não segura) | T-0045 | web-site | CORRIGIDO (c555a6a) |
+| RD-0769 | baixa | código | site/styles.css:532 (@media print) | `font-size: inherit` do `.aplic` no A4 sem efeito: o `.aplic li` já fixa 7.5pt (PDF igual em pixels com inherit, 13 e 30 px) | T-0045 | web-site | ABERTO |
 
 ## Notas
 
 ### T-0045, tela nova do produto (barra de botões, `--largura`, tabelas e `--fs-*`), 28/11/2026 (antes do PR)
 - `web-site/T-0045-sim-site`, head `b518dc7`: RD-0760 ao RD-0768 (9 baixas, sendo o RD-0768 só comentário). Relatório: `T-0045.md`. VOLTA PARA AJUSTE: seguram o RD-0760 ao RD-0767. Nenhum botão repetido, 1 barra por tela, `secao()` e a barra montados 1 vez, sem sobra do `.acoes` e da opB2.
+- Reteste no `010148b` (`b518dc7..010148b`): RD-0760 ao RD-0766 e RD-0768 corrigidos no `c555a6a`; RD-0767 tirado do PR pelo po (R-20261127-213729-po). Novo: RD-0769 (baixa, segura). Aviso do "Copiar" dentro da barra, sem regra repetida. VOLTA PARA AJUSTE.
 
 ### T-0040, aplicação da Fraga na VEICULOS (v29), 27/11/2026 (PR #228, rascunho)
 - RD-0670 ao RD-0676: branch `catalogo-dados/T-0040-v29` (`a77a097`). Relatório: `T-0040.md`. VOLTA PARA AJUSTE: seguram o RD-0670 ao RD-0675 (3 médias, 3 baixas); MANTIDO: RD-0676. VEICULOS sem linha repetida.
