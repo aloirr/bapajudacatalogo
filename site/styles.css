@@ -261,7 +261,7 @@ main:focus, main:focus-visible { outline: none; }
    da tela, com os botões alinhados ao conteúdo; o #app corta o que passa (overflow-x: clip, que não quebra o sticky) */
 .pagina-produto > .prod-barra { position: sticky; bottom: 0; z-index: 5; margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top-color: transparent; }
 .pagina-produto > .prod-barra::before { content: ""; position: absolute; inset: -1px -100vmax 0; z-index: -1; background: var(--branco); border-top: 1px solid var(--linha); box-shadow: var(--sombra-barra); }
-#app:has(.pagina-produto > .prod-barra) { overflow-x: clip; }
+@media screen { #app:has(.pagina-produto > .prod-barra) { overflow-x: clip; } } /* só na tela: o A4 fica como antes */
 html:has(.pagina-produto > .prod-barra) { scroll-padding-bottom: calc(65px + env(safe-area-inset-bottom)); }
 /* Aplicação na largura toda e, embaixo, Referências cruzadas e Ficha técnica lado a lado (T-0045, UX-T45-04); com uma
    só das duas, ela fica na largura toda; abaixo de 652 px de conteúdo (2 × 320 + 12 do gap), uma embaixo da outra */
@@ -529,7 +529,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
   .secao { margin: 0; padding: 2.5mm 3mm; border-radius: 2mm; break-inside: avoid; }
   .col-apl .secao { break-inside: auto; }
   .secao .secao-tit { font-size: 7.5pt; margin-bottom: 1.5mm; }
-  .aplic { columns: 3; column-gap: 6mm; padding-left: 4mm; font-size: inherit; } /* T-0045: a letra de antes no A4 (na tela, o --fs-tab) */
+  .aplic { columns: 3; column-gap: 6mm; padding-left: 4mm; }
   .aplic li { padding: 0; border: 0; font-size: 7.5pt; line-height: 1.3; break-inside: avoid; }
   .aviso { font-size: 7.5pt; }
   table.t { font-size: 7.5pt; line-height: 1.25; }
