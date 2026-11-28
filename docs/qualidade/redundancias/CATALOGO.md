@@ -548,19 +548,20 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0742 | baixa | doc | docs/qualidade/redundancias/T-0040.md:447 e CATALOGO.md:567 (Notas) | como o registro foi feito e a numeração repetidos no T-0040.md, no T-0041.md e nas Notas do catálogo | T-0040 | corretor-redundancias | CORRIGIDO (registro da T-0040, #238) |
 | RD-0743 | baixa | tarefa | .coord/quadro.md:52 (#239) | parágrafo "Fila" repetia a situação e os PRs das linhas da tabela (T-0040, T-0041, T-0033/T-0039, T-0038) | T-0040 | gerente-projetos | CORRIGIDO (45d3e72, #239) |
 | RD-0744 | baixa | tarefa | .coord/tarefas/T-0040.md:84, :25 e :34 (#239) | PRs dos pareceres, "7.214/2.145" e "300/90" ditos 2 vezes | T-0040 | gerente-projetos | CORRIGIDO (45d3e72, #239) |
-| RD-0753 | média | código | site/app.js:2145-2146 (`cabeNaBase`) e :2207-2208 (`anosDentro`) | "toda faixa da célula Ano dentro da faixa g" escrita 2 vezes no mesmo PR | T-0043 | web-site | ABERTO (segura) |
-| RD-0754 | baixa | doc | docs/DADOS_DO_SITE.md:42 e :52 | a cilindrada da linha do `ve` (e a regra do SFR30034) em 2 bullets | T-0043 | web-site | ABERTO (segura) |
-| RD-0755 | baixa | doc | docs/DADOS_DO_SITE.md:69 e :86 | o ano da base (T-0040 e item 13) escrito na tabela e na busca | T-0043 | web-site | ABERTO (segura) |
+| RD-0753 | média | código | site/app.js:2145-2146 (`cabeNaBase`) e :2207-2208 (`anosDentro`) | "toda faixa da célula Ano dentro da faixa g" escrita 2 vezes no mesmo PR | T-0043 | web-site | CORRIGIDO (348a61a, #245) |
+| RD-0754 | baixa | doc | docs/DADOS_DO_SITE.md:42 e :52 | a cilindrada da linha do `ve` (e a regra do SFR30034) em 2 bullets | T-0043 | web-site | CORRIGIDO (348a61a, #245) |
+| RD-0755 | baixa | doc | docs/DADOS_DO_SITE.md:69 e :86 | o ano da base (T-0040 e item 13) escrito na tabela e na busca | T-0043 | web-site | CORRIGIDO (348a61a, #245) |
 | RD-0756 | média | layout (tabela) | ROL559/552A (1366 e 390 px) | 5 linhas do texto com o ano do produto inteiro (1970–1998) ao lado das do `ve` com ano | T-0043 | web-site | ABERTO (simulação própria; não segura o PR) |
-| RD-0757 | média | layout (tabela) | 51 linhas em 28 produtos (FAR6365, CL16, CL22, TAX10658, TER555248, BV12…) | linhas do texto cobertas por uma do `ve` com ano, já no `main` (211 → 51; nenhuma nova) | T-0043 | web-site | ABERTO (não segura se o po dispensar o escopo) |
-| RD-0758 | baixa | texto (célula) | 20 células em 16 produtos (FCB6152 "2.5 / 2.5 8V", JUH70260…) | a mesma cilindrada sem e com válvulas na célula que vem do texto (`cilDe`) | T-0043 | web-site | ABERTO (não segura se o po dispensar o escopo) |
-| RD-0759 | baixa | código (comentário) | site/app.js:1674 e :1690-1692 | a explicação do `ateOutroVeiculo` 2 vezes | T-0043 | web-site | ABERTO (só comentário; próximo PR) |
+| RD-0757 | média | layout (tabela) | 51 linhas em 28 produtos (FAR6365, CL16, CL22, TAX10658, TER555248, BV12…) | linhas do texto cobertas por uma do `ve` com ano, já no `main` (211 → 51; nenhuma nova) | T-0043 | web-site | ABERTO (fora do escopo do #245 pelo po, R-20261127-210729-po; próxima simulação da tabela) |
+| RD-0758 | baixa | texto (célula) | 20 células em 16 produtos (FCB6152 "2.5 / 2.5 8V", JUH70260…) | a mesma cilindrada sem e com válvulas na célula que vem do texto (`cilDe`) | T-0043 | web-site | ABERTO (fora do escopo do #245 pelo po, R-20261127-210729-po; próxima simulação da tabela) |
+| RD-0759 | baixa | código (comentário) | site/app.js:1674 e :1690-1692 | a explicação do `ateOutroVeiculo` 2 vezes | T-0043 | web-site | CORRIGIDO (348a61a, #245) |
 
 ## Notas
 
 ### T-0043, linhas repetidas da tabela de aplicação, 27/11/2026 (`web-site/T-0043-repetidas`, head `a1d633f`)
 - Relatório: `T-0043.md`. RD-0738 CORRIGIDO. Novos: RD-0753 ao RD-0759. Seguram o RD-0753 (média), o RD-0754 e o RD-0755 (baixas, doc). VOLTA PARA AJUSTE.
 - RD-0756: simulação própria (não segura). RD-0757 e RD-0758 já vinham do `main`: não seguram se o `po` dispensar o escopo. RD-0759: só comentário.
+- Reteste no `348a61a` (#245): RD-0753, RD-0754, RD-0755 e RD-0759 corrigidos (tabela igual nos 3.996 produtos); RD-0757 e RD-0758 fora do escopo pelo po (R-20261127-210729-po); RD-0756 na simulação própria. LIBERADO.
 
 ### T-0040, aplicação da Fraga na VEICULOS (v29), 27/11/2026 (PR #228, rascunho)
 - RD-0670 ao RD-0676: branch `catalogo-dados/T-0040-v29` (`a77a097`). Relatório: `T-0040.md`. VOLTA PARA AJUSTE: seguram o RD-0670 ao RD-0675 (3 médias, 3 baixas); MANTIDO: RD-0676. VEICULOS sem linha repetida.
