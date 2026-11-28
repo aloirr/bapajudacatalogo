@@ -226,8 +226,8 @@ main:focus, main:focus-visible { outline: none; }
 .vazio b { color: var(--texto); display: block; font-size: 17px; margin-bottom: 6px; }
 
 /* produto */
-.pagina-produto { max-width: var(--largura); margin: 0 auto; padding: 16px 16px 40px; }
-.prod-topo { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; min-height: 44px; margin-bottom: 10px; }
+.pagina-produto { max-width: var(--largura); margin: 0 auto; padding: 16px 16px 0; } /* embaixo da barra, só o margin-top do .rodape (RD-0767) */
+.prod-topo { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; margin-bottom: 10px; }
 .trilha { font-size: var(--fs-tab); color: var(--texto-2); display: flex; gap: 6px; flex-wrap: wrap; }
 .trilha a { color: var(--texto-2); text-decoration: none; }
 .trilha a:hover { color: var(--verde-txt); }
