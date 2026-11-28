@@ -1,8 +1,10 @@
-"""v32 da base unificada · T-0047 (BIE20014, TER552120, VEL7520 e ROL84888).
+"""v32 da base unificada · T-0047 (BIE20014, BIE20062, TER552120, VEL7520 e ROL84888).
 
 Pedido: R-20261127-192108-alexandre, item 18 (BIE20014 "05 /15 ou", TER552120 com o lado duas vezes na Ficha, VEL7520
 com "Modelos" igual à Aplicação e "Especificacoes" sem acento), aberto pelo po em R-20261127-194205-po (item 2); e
-R-20261127-200014-alexandre, item 4 (ROL84888: os anos do Strada e do Doblò). Regras: cada correção com a fonte; o que
+R-20261127-200014-alexandre, item 4 (ROL84888: os anos do Strada e do Doblò); e R-20261127-224247-alexandre, item 2
+(P1 a P6 aprovados na simulação fe551a3; o BIE20062, com o mesmo "Tucson 05 /15", entra junto, com simulação curta
+só dessa linha: P7). Regras: cada correção com a fonte; o que
 não tem fonte fica listado (SEM_FONTE) e não muda; o que é do site fica listado (DO_SITE) e não muda a base; nada é
 marcado nem escrito como duvidoso (R-20261127-161035-alexandre, item 3; R-20261120-213300).
 
@@ -10,6 +12,7 @@ Mudam só células (nenhuma linha entra nem sai; a numeração é a da v31):
 - PRODUTOS 2282 (BIE20014): a APLICACAO ("05 /15" -> "2005–2015", o resto da célula fica) e as REFERENCIAS_CRUZADAS
   (sai só a repetição ", AXIOS PN: BR10053102707");
 - VEICULOS 21510 (BIE20014 Tucson): sai o ANO_DUVIDA (o ano 2005–2015 já está na linha desde a v20);
+- PRODUTOS 2329 e VEICULOS 21800 (BIE20062): a mesma leitura do Tucson ("05 /15" -> "2005–2015" e sai o ANO_DUVIDA);
 - VEICULOS 6369 e 6371 (ROL84888 Strada e Doblo): o ano do próprio modelo no texto, sem o ANO_DUVIDA "herdado".
 Os itens TER552120 e VEL7520 são do site (gerar_site.py, lista FICHA): a base não muda (DO_SITE).
 Cada mudança leva o ponto da aba PONTOS_ALEXANDRE que a decide; a simulação mostra a opção a) de todos.
@@ -49,14 +52,23 @@ CAB_PRODUTOS = ["CODIGO_BAP", "DESCRICAO", "APLICACAO", "REFERENCIAS_CRUZADAS", 
                 "CATEGORIA", "SISTEMA", "FAMILIA", "LINHA", "NO_CATALOGO_DIGITAL", "STATUS_CADASTRO", "POSICAO", "LADO",
                 "DETALHE_CATALOGO", "DIFERENCIAL", "ITEM_PARECIDO", "OFERECA_JUNTO"]
 CAB = {"PRODUTOS": CAB_PRODUTOS, "VEICULOS": CAB_VEICULOS}
-CODIGOS = ["BIE20014", "TER552120", "VEL7520", "ROL84888"]
+CODIGOS = ["BIE20014", "TER552120", "VEL7520", "ROL84888", "BIE20062"]
 
 # ---------------------------------------------------------------- fontes (citadas em cada mudança e no LOG)
-F_TUC = ("APLICACAO (digitada desde a v8, 'Tucson 05 /15 (dianteira Direita ou Esquerda)', igual até a v31) e VEICULOS "
+F_TUC = ("APLICACAO (digitada desde a v8: 'Tucson 05 /15 (dianteira Direita ou Esquerda)'; 'diant.' desde a v10; o "
+         "'05 /15' igual desde a v8) e VEICULOS "
          "21510 (desde a v20: HYUNDAI Tucson 2005–2015). Na mesma fonte das bieletas (CATALOGO_BAP_AGENTE_PRONTO.xlsx), o "
          "'AA /AA' é ano a ano: 'XSARA 98 /03' (BIE20044), '206 99 /12' (BIE20003), 'SPRINTER 97 /12' (BIE20075), em que o "
          "primeiro número não pode ser mês. Regra de datas do catálogo (docs/legado/agente_catalogo_bap.md): ano com 4 "
          "dígitos, intervalo com '–'. A Fraga não traz o Tucson para o BIE20014 (só o HB20, VEICULOS 21511 e 21512)")
+F_TUC62 = ("APLICACAO (digitada desde a v8: 'Tucson 05 /15 (dianteira Direita ou Esquerda)'; 'diant.' desde a v10; o "
+           "Sportage da KIA acrescentado na v14; o '05 /15' igual desde a v8) e VEICULOS 21800 (desde a v20, então linha "
+           "7989: HYUNDAI Tucson 2005–2015). A mesma leitura do BIE20014 (P1): na mesma fonte das bieletas "
+           "(CATALOGO_BAP_AGENTE_PRONTO.xlsx), o 'AA /AA' é ano a ano ('XSARA 98 /03', BIE20044; '206 99 /12', BIE20003; "
+           "'SPRINTER 97 /12', BIE20075); regra de datas do catálogo: ano com 4 dígitos, intervalo com '–'. A Fraga "
+           "(T-0040, v29) dá a esta peça o Tucson TRASEIRO (VEICULOS 21802 a 21804: 2.0 2004–2019, 2.7 2006–2011, 1.6 "
+           "2016–2026) e o Sportage dianteiro, e não traz o Tucson dianteiro: não confirma nem desmente o '05 /15' e não "
+           "muda a leitura do ano. Só o ano muda; o 'diant.' e o resto da célula ficam")
 F_REF = ("REFERENCIAS_CRUZADAS (digitada desde a v8): 'TRW/AXIOS: BR10053102707' e, no fim do mesmo bloco, "
          "'AXIOS PN: BR10053102707' são o mesmo código da AXIOS. Fica o primeiro (que diz as duas marcas); as outras "
          "referências não mudam")
@@ -65,6 +77,7 @@ F_ROL = ("DETALHE da APLICACAO (digitado desde a v8) e aba ROLAMENTOS_INTEGRADOS
          "faixa do produto inteiro (1996–2021), herdada da lista na v20 (por isso o ANO_DUVIDA 'herdado')")
 
 TUC_ANTES = "Tucson 05 /15 (diant. Direita ou Esquerda)"
+TUC62_ANTES = TUC_ANTES + " ; KIA - Sportage 2.0 L 16V 2004–2019 · Sportage 2.7 L 24V 2004–2011"
 REF_ANTES = ("CROSS REFERENCIAS - PDX PN: 07.10, TRW/AXIOS: BR10053102707, OEM: 548303W300, NAKATA PN: N99150, COFAP PN: "
              "BTC32108, BTC33110, TRW PN: 0, AXIOS PN: BR10053102707; AXIOS: 2681; GRAZZIMETAL: AK 8071A; GRAZZIMETAL: HY "
              "9087A; KIT & CIA: 50440; SAMPEL: SK8238; ZM: 37011810")
@@ -82,6 +95,9 @@ CELULAS: list[tuple] = [
     ("ROL84888", "VEICULOS", 6369, "ANO_DUVIDA", HERDADO, None, F_ROL, "P3"),
     ("ROL84888", "VEICULOS", 6371, "ANO_INICIO", 1996, 2001, F_ROL, "P3"),
     ("ROL84888", "VEICULOS", 6371, "ANO_DUVIDA", HERDADO, None, F_ROL, "P3"),
+    ("BIE20062", "PRODUTOS", 2329, "APLICACAO", TUC62_ANTES, TUC62_ANTES.replace("05 /15", "2005–2015", 1), F_TUC62,
+     "P7"),
+    ("BIE20062", "VEICULOS", 21800, "ANO_DUVIDA", "AA/AA ambíguo ('05 /15' pode ser mês/ano)", None, F_TUC62, "P7"),
 ]
 
 # (código, o que, por que fica, o que falta)
@@ -95,9 +111,11 @@ SEM_FONTE = [
      "a tarefa pede os anos; a cilindrada fica vazia, como hoje", "a decisão de acrescentar (fora da tarefa)"),
     ("BIE20014", "'TRW PN: 0' nas REFERENCIAS_CRUZADAS", "o '0' não é código (o site já não mostra); não há fonte para "
                  "o código TRW", "o código TRW da bieleta"),
-    ("BIE20062", "a APLICACAO tem o mesmo 'Tucson 05 /15 (diant. Direita ou Esquerda)' e a VEICULOS 21800 o mesmo "
-                 "ANO_DUVIDA; a Fraga dá a esta peça o Tucson TRASEIRO (21802 a 21804)",
-     "fora da tarefa (visto de passagem)", "a decisão do P1 vale também para ele? (nova tarefa)"),
+    ("BIE20062", "a posição do Tucson: a APLICACAO diz 'diant.' (desde a v8), o DETALHE_CATALOGO 'Tras. esq.' e a "
+                 "POSICAO 'DIANTEIRO E TRASEIRO'; a Fraga dá a esta peça o Tucson TRASEIRO (VEICULOS 21802 a 21804) e "
+                 "o Sportage dianteiro, sem o Tucson dianteiro (VEICULOS 21800)",
+     "a tarefa é o ano (P7); não há fonte que diga se a peça serve no Tucson dianteiro, e as células são digitadas",
+     "a confirmação da posição no Tucson (catálogo da PDX 21.11 ou da Nakata N99151; nova tarefa)"),
 ]
 
 # (código, o que se perde ou sai repetido na tela, causa no site, o que mudaria no site)
@@ -151,6 +169,14 @@ PONTOS = [
                       "compativeis'). É do site, não da base.",
      "a) o web-site põe o acento em todos esses rótulos da ficha",
      "b) só 'Especificações' e 'Especificação'"),
+    ("P7", "BIE20062", "O BIE20062 tem o mesmo 'Tucson 05 /15 (diant. Direita ou Esquerda)' no texto (desde a v8) e a "
+                       "VEICULOS 21800 o mesmo ANO_DUVIDA (por isso o Tucson dianteiro sai sem ano no site). A Fraga dá "
+                       "a esta peça o Tucson TRASEIRO (21802 a 21804), não o dianteiro: não muda a leitura do ano.",
+     "a) a mesma leitura do P1: a APLICACAO fica 'Tucson 2005–2015 (diant. Direita ou Esquerda) ; KIA - …' (o resto "
+     "não muda) e o ANO_DUVIDA sai da linha 21800 (o Tucson dianteiro 2005–2015 passa a filtrar). Na tabela do site, a "
+     "linha 'Tucson — 05 /15 ou —' sai, sem linha nova: o Tucson 2005–2015 sem motor fica dentro do Tucson 2.0 "
+     "2004–2019 da Fraga, e a tabela não repete a linha coberta (app.js, semRepetida; a busca e o filtro continuam)",
+     "b) não mudar (fica para a nova pesquisa, com a posição)"),
 ]
 
 
@@ -210,8 +236,9 @@ def leia_me(autorizacao: str) -> list[tuple]:
     return [
         (f"BASE BAP UNIFICADA v{NOVA} ({DATA})", None),
         ("Correções pontuais", f"Com fonte ({TAREFA}, R-20261127-192108-alexandre item 18 e R-20261127-200014-alexandre "
-                               f"item 4): {n_p} células na PRODUTOS (BIE20014: APLICACAO e REFERENCIAS_CRUZADAS) e "
-                               f"{len(CELULAS) - n_p} na VEICULOS (BIE20014 Tucson; ROL84888 Strada e Doblo). A fonte "
+                               f"item 4; R-20261127-224247-alexandre item 2): {n_p} células na PRODUTOS (BIE20014: "
+                               f"APLICACAO e REFERENCIAS_CRUZADAS; BIE20062: APLICACAO) e {len(CELULAS) - n_p} na "
+                               f"VEICULOS (BIE20014 e BIE20062 Tucson; ROL84888 Strada e Doblo). A fonte "
                                f"de cada uma está no LOG_CORRECOES."),
         ("Site", "TER552120 e VEL7520: a repetição da Ficha e o rótulo sem acento são do gerar_site.py (web-site); a "
                  "base não muda."),
@@ -252,19 +279,22 @@ def gravar_ad(r: dict, site: list[list], autorizacao: str, aprovado: bool, d0: d
     wb.remove(wb.active)
     rot = f"v{NOVA}" if aprovado else f"v{NOVA} simulada"
     resumo = [("Tarefa", TAREFA, ""),
-              ("Pedido", "R-20261127-192108-alexandre (item 18) e R-20261127-200014-alexandre (item 4)", ""),
+              ("Pedido", "R-20261127-192108-alexandre (item 18), R-20261127-200014-alexandre (item 4) e "
+                         "R-20261127-224247-alexandre (item 2: BIE20062)", ""),
               ("Autorização", autorizacao, ""), ("Base de partida", f"v{ANTERIOR} (sha256 {sha(versao(ANTERIOR))})", ""),
               ("Numeração das linhas", f"a da v{ANTERIOR} (nenhuma linha entra nem sai)", ""),
               ("Códigos olhados", len(CODIGOS), ", ".join(CODIGOS)),
-              ("Células trocadas (PRODUTOS)", sum(x[1] == "PRODUTOS" for x in CELULAS), "BIE20014"),
-              ("Células trocadas (VEICULOS)", sum(x[1] == "VEICULOS" for x in CELULAS), "BIE20014, ROL84888"),
+              ("Células trocadas (PRODUTOS)", sum(x[1] == "PRODUTOS" for x in CELULAS), "BIE20014, BIE20062"),
+              ("Células trocadas (VEICULOS)", sum(x[1] == "VEICULOS" for x in CELULAS), "BIE20014, ROL84888, BIE20062"),
               ("Linhas no LOG_CORRECOES", len(r["log"]), "; ".join(f"{x[0]} {x[2]}" for x in r["log"])),
               ("Linhas no LEIA-ME", r["leia_n"], ""),
               ("TER552120 e VEL7520", "a base não muda", "a causa é o gerar_site.py (aba DO_SITE, web-site)"),
               ("Sem fonte (não mudam)", len(SEM_FONTE), ", ".join(dict.fromkeys(x[0] for x in SEM_FONTE))),
               ("É do site (web-site; a base não muda)", len(DO_SITE), ", ".join(dict.fromkeys(x[0] for x in DO_SITE))),
               ("Pontos para o Alexandre", len(PONTOS),
-               "aprovada a opção a) de todos" if aprovado else "a simulação mostra a opção a) de todos"),
+               "aprovada a opção a) de todos" if aprovado else
+               "P1 a P6: a) aprovada em R-20261127-224247-alexandre (simulação fe551a3); P7 (BIE20062): a simulação "
+               "mostra a opção a), pendente do aprovado"),
               (f"Células com a marca da revisão da P12, PRODUTOS (v{ANTERIOR} -> v{NOVA})", d0["PRODUTOS"], d1["PRODUTOS"]),
               (f"Células com a marca da revisão da P12, VEICULOS (v{ANTERIOR} -> v{NOVA})", d0["VEICULOS"], d1["VEICULOS"]),
               (f"Produtos no site (gerar_site do main, v{ANTERIOR} -> {rot})", total[0], total[1])]
