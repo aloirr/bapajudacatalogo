@@ -19,11 +19,10 @@
   --sombra-janela: 0 20px 60px rgba(21, 21, 21, .35); /* janela do produto */
   --contorno-neutro: inset 0 0 0 1px var(--borda-campo); /* linha neutra (opção A, R-20261120-131800): filtro marcado, etiqueta e item relacionado */
   /* escala única de letra (T-0045, proposta do designer-ux; o "30% menor" da T-0014 entra nela, item 15 do
-     R-20261127-192108): rótulo e título pequeno de seção, cartão e tabela, texto, subtítulo, h1 das telas de trabalho */
+     R-20261127-192108): rótulo e título pequeno de seção, cartão e tabela, texto, h1 das telas de trabalho */
   --fs-rot: 12px;
   --fs-tab: 13px;
   --fs-txt: 15px;
-  --fs-sub: 17px;
   --fs-h1: 20px;
   --sombra-barra: 0 -6px 16px rgba(21, 21, 21, .10); /* barra dos botões do produto presa no fim da tela */
   --zoom-fundo: rgba(21, 21, 21, .92); /* fundo da foto ampliada */
@@ -67,7 +66,7 @@ html { scroll-padding-top: var(--alto-topo); }
 /* o próprio cabeçalho não precisa da folga: focar o menu não faz a página pular (designer-ux) */
 .topo a { scroll-margin-top: calc(-1 * var(--alto-topo)); }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } } /* com reduce, a rolagem vai direto */
-body { margin: 0; font-family: Poppins, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--texto); background: var(--fundo); font-size: 15px; line-height: 1.5; }
+body { margin: 0; font-family: Poppins, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--texto); background: var(--fundo); font-size: var(--fs-txt); line-height: 1.5; }
 img { max-width: 100%; display: block; }
 a { color: var(--verde-txt); }
 button, input, select { font: inherit; }
@@ -228,7 +227,6 @@ main:focus, main:focus-visible { outline: none; }
 
 /* produto */
 .pagina-produto { max-width: var(--largura); margin: 0 auto; padding: 16px 16px 40px; }
-.produto-conteudo { font-size: var(--fs-txt); }
 .prod-topo { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; min-height: 44px; margin-bottom: 10px; }
 .trilha { font-size: var(--fs-tab); color: var(--texto-2); display: flex; gap: 6px; flex-wrap: wrap; }
 .trilha a { color: var(--texto-2); text-decoration: none; }
@@ -243,22 +241,21 @@ main:focus, main:focus-visible { outline: none; }
 .foto-zoom img { transition: transform .15s; }
 .foto-zoom:focus-visible { outline-offset: -3px; } /* dentro da moldura (a .prod-foto corta o que sai) */
 .prod-cab h1, .prod-cab h2 { margin: 0; font-size: var(--fs-h1); letter-spacing: .02em; line-height: 1.2; }
-.prod-info .desc { font-size: var(--fs-txt); font-weight: 500; margin: 2px 0 10px; }
+.prod-info .desc { font-weight: 500; margin: 2px 0 10px; }
 .selos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
 .selo { background: var(--fundo); border: 1px solid var(--linha); border-radius: 999px; padding: 2px 10px; font-size: var(--fs-rot); font-weight: 500; color: var(--texto-2); }
 /* barra do produto (T-0045, UX-T45-01, 02 e 05; R-20261127-192108, item 14, no lugar da opB2 de R-20261120-141100):
    uma barra só, no rodapé do bloco do produto, com os botões juntos: Copiar código (principal), Salvar em PDF
    (secundário) e, por último, o Voltar (neutro; só na página). Na janela, a barra fica no rodapé da janela, fora da
-   rolagem, e o ✕ fica em cima. Na página, presa no fim da tela; no celular, com os botões lado a lado. No PDF não há botões */
-.prod-barra { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 0 0; border-top: 1px solid var(--linha); }
+   rolagem, e o ✕ fica em cima. No celular, os botões lado a lado. No PDF não há botões */
+.prod-barra { display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--linha); }
 .prod-barra .bt { height: 44px; padding: 0 18px; } /* letra de 15 px do .bt (--fs-txt) */
 .bt-neutro { background: var(--branco); border-color: var(--texto-2); color: var(--texto); } /* borda 6,26:1 no branco (MC-0053) */
 .bt-neutro:hover { background: var(--fundo); border-color: var(--texto); color: var(--texto); }
 .janela > .prod-barra { flex: none; padding: 10px 20px; background: var(--branco); }
 /* na página, presa no fim da tela em todas as larguras; no fim do bloco, encosta nele. O foco e as âncoras param
-   acima dela (scroll-padding-bottom) e o aviso do "Copiar" sobe para cima dela */
-/* a faixa branca, a linha e a sombra vão de ponta a ponta da tela (::before); os botões ficam alinhados ao conteúdo. O
-   #app corta o que passa da tela (overflow-x: clip, que não quebra o sticky) */
+   acima dela (scroll-padding-bottom), o aviso do "Copiar" sobe para cima dela e a faixa (::before) vai de ponta a ponta
+   da tela, com os botões alinhados ao conteúdo; o #app corta o que passa (overflow-x: clip, que não quebra o sticky) */
 .pagina-produto > .prod-barra { position: sticky; bottom: 0; z-index: 5; margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top-color: transparent; }
 .pagina-produto > .prod-barra::before { content: ""; position: absolute; inset: -1px -100vmax 0; z-index: -1; background: var(--branco); border-top: 1px solid var(--linha); box-shadow: var(--sombra-barra); }
 #app:has(.pagina-produto > .prod-barra) { overflow-x: clip; }
@@ -344,7 +341,9 @@ table.tab-veiculos th:nth-child(5), table.tab-veiculos td:nth-child(5) { width: 
 @media (max-width: 480px) {
   .tab-rola { display: none; }
   .lista-veiculos { display: block; }
-  .lista-veiculos li { padding: 8px 0; border-bottom: 1px solid var(--linha); font-size: var(--fs-tab); line-height: 1.35; }
+  /* celular: a lista no lugar da tabela, sem faixa de cabeçalho, com os itens pares em --fundo */
+  .lista-veiculos li { padding: 8px 10px; border-bottom: 1px solid var(--linha); font-size: var(--fs-tab); line-height: 1.35; }
+  .lista-veiculos li:nth-child(even) { background: var(--fundo); }
   .lista-veiculos li b { display: block; font-weight: 600; color: var(--escuro); }
   .lista-veiculos li > span { display: block; color: var(--texto-2); }
 }
@@ -353,8 +352,8 @@ table.tab-veiculos th:nth-child(5), table.tab-veiculos td:nth-child(5) { width: 
    da caixa, o cabeçalho da Aplicação numa faixa --verde-claro que encosta nas bordas da caixa e as linhas alternadas
    (a 1ª depois do cabeçalho, branca). Só na tela: o A4 (@media print) fica como antes. O "Leve também" não muda */
 @media screen {
-  .secao-t { background: none; border: 0; border-radius: 0; padding: 0; }
-  .secao-t > .secao-tit { margin: 0 0 6px; color: var(--texto); font-size: var(--fs-tab); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .secao-t { background: none; border: 0; padding: 0; }
+  .secao-t > .secao-tit { margin: 0 0 6px; color: var(--texto); font-size: var(--fs-tab); font-weight: 700; }
   .secao-caixa { background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; }
   /* a tabela encosta nas bordas; o resto (texto, restrição e aviso) com o recuo de 14 px */
   .secao-caixa > :not(.tab-rola, .lista-veiculos, table) { margin-inline: 14px; }
@@ -366,13 +365,8 @@ table.tab-veiculos th:nth-child(5), table.tab-veiculos td:nth-child(5) { width: 
   .secao-caixa table.t tbody tr:nth-child(odd) { background: var(--branco); }
   .secao-caixa table.t tbody tr:nth-child(even) { background: var(--fundo); }
   .secao-caixa > table.t:last-child tbody tr:last-child > * { border-bottom: 0; } /* a borda da caixa fecha a tabela */
-  .secao-caixa table.tab-veiculos thead th { padding-top: 8px; padding-bottom: 8px; background: var(--verde-claro); color: var(--verde-txt); font-size: var(--fs-tab); font-weight: 600; text-transform: none; border-bottom: 2px solid var(--verde-esc); }
+  .secao-caixa table.tab-veiculos thead th { padding-top: 8px; padding-bottom: 8px; background: var(--verde-claro); color: var(--verde-txt); border-bottom: 2px solid var(--verde-esc); }
   .aplic li { border-bottom-color: var(--linha); }
-}
-/* celular: a lista no lugar da tabela, sem faixa de cabeçalho, com os itens pares em --fundo */
-@media screen and (max-width: 480px) {
-  .lista-veiculos li { padding: 8px 10px; border-bottom: 1px solid var(--linha); }
-  .lista-veiculos li:nth-child(even) { background: var(--fundo); }
 }
 
 /* rodapé (T-0018 op4e): --escuro, a linha --verde e o padrão de ícones automotivos (SVG inline, traço branco a 7%) */
@@ -428,7 +422,6 @@ body:has(.produto-conteudo .col-apl > .secao) .rodape-confira { display: none; }
   .prod-barra { gap: 8px; flex-wrap: nowrap; }
   .prod-barra .bt { flex: 1 1 0; min-width: 0; justify-content: center; padding: 0 10px; }
   .prod-barra .bt-voltar { flex: none; width: 44px; padding: 0; }
-  .bt-voltar .bt-rot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   dialog.janela { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border-radius: 0; }
   .janela-corpo { padding: 14px 16px 24px; }
 }
@@ -655,8 +648,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 }
 
 /* ===== Sobre a BAP (T-0018, sobre1): texto do PDF "Empresa", fotos de produtos BAP; o fundo do topo é o da faixa do início ===== */
-.sobre { --sb-larg: var(--largura); }
-.sb-topo-in { max-width: var(--sb-larg); margin: 0 auto; padding: 56px 16px 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: 32px; align-items: center; }
+.sb-topo-in { max-width: var(--largura); margin: 0 auto; padding: 56px 16px 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: 32px; align-items: center; }
 .sb-txt h1 { font-size: clamp(28px, 3.6vw, 44px); line-height: 1.12; margin: 0 0 18px; font-weight: 700; }
 .sb-txt p { margin: 0; color: var(--branco); font-size: 17px; max-width: 520px; }
 .sb-fotos { position: relative; height: 320px; width: 100%; max-width: 540px; justify-self: end; } /* T-0045: a coluna cresceu com o --largura; as fotos, não (sem cobrir os blocos) */
@@ -664,7 +656,7 @@ dialog.painel-c::backdrop { background: var(--veu); }
 .sb-fotos .sf1 { width: 62%; left: 19%; top: 0; z-index: 2; }
 .sb-fotos .sf2 { width: 36%; left: 0; bottom: 0; }
 .sb-fotos .sf3 { width: 36%; right: 0; bottom: 6px; }
-.sb-corpo { max-width: var(--sb-larg); margin: 0 auto; padding: 0 16px 48px; }
+.sb-corpo { max-width: var(--largura); margin: 0 auto; padding: 0 16px 48px; }
 .sb-hist { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: -28px; position: relative; }
 .sb-bloco { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); padding: 24px 24px 26px; border-top: 4px solid var(--verde); }
 .sb-bloco h2 { font-size: 18px; line-height: 1.25; margin: 0 0 10px; color: var(--escuro); }
@@ -771,7 +763,7 @@ svg.seta { flex: none; transition: transform .15s; }
   .logado .marca { min-width: 44px; justify-content: center; } /* sem o texto, o logo continua com 44 px de toque */
   .topo-dir { gap: 6px; }
   .conta-bt { padding: 2px; gap: 0; min-height: 44px; min-width: 44px; justify-content: center; border-radius: 10px; }
-  .conta-bt .conta-nome, .conta-bt .conta-seta { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .bt-voltar .bt-rot, .conta-bt .conta-nome, .conta-bt .conta-seta { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .conta-bt .conta-logo { --conta-logo: 26px; --conta-logo-l: 40px; }
   .conta-menu { position: fixed; left: 12px; right: 12px; top: 68px; width: auto; }
 }
