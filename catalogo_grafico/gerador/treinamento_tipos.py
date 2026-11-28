@@ -174,7 +174,7 @@ def expandir(s):
         _itens(o, s['cards'], [9, 14, 19], [10, 15, 20], [8, 13, 18])
         _dica(o, 24, s)
     elif tp in ('tabela', 'naofechou'):
-        o = _base(s, 44)
+        o = _base(s, s.get('molde', 44))   # no "editar" da onda 1, o slide do próprio original (mesmas formas do 44)
         cab = s.get('cabecalho', ['Motivo', 'Responda com prova', 'Volte ao pedido'])
         linhas = s['linhas']
         o['tabela'] = {'2': [cab, linhas[0]], '3': [linhas[1]], '4': [linhas[2]], '5': [linhas[3]], '6': [linhas[4]]}

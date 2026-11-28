@@ -191,11 +191,40 @@
    }
   },
   "44": {
-   "celulas": {
-    "4": {
-     "0,0": "Falta do modelo"
-    }
-   }
+   "tipo": "naofechou",
+   "t": "Não fechou? Os 6 motivos em baterias",
+   "linhas": [
+    [
+     "Prazo ou limite",
+     "Não prometa prazo nem limite fora da regra. Monte um pedido menor com as amperagens que mais giram.",
+     "“Se eu ajustar o pedido ao seu limite, fechamos?”"
+    ],
+    [
+     "Preço",
+     "Compare o custo por mês de garantia (preço ÷ meses), não a etiqueta. E na BAP o cliente não precisa entregar a sucata.",
+     "“Se eu resolver isso, fechamos?”"
+    ],
+    [
+     "Disponibilidade",
+     "Ofereça a equivalente: mesma caixa, polaridade e tecnologia (SLI pode subir para EFB; AGM só por AGM). Anote a demanda.",
+     "“Se eu te passar a equivalente, fechamos?”"
+    ],
+    [
+     "Aplicação",
+     "Mostre no Catálogo BAP a aplicação, a caixa, a polaridade e as referências cruzadas.",
+     "“Se eu te mostrar que serve, fechamos?”"
+    ],
+    [
+     "Fornecedor",
+     "Não peça para trocar tudo. Entre onde ele perde venda: start-stop, linha pesada ou caixa baixa, com kit terminal junto.",
+     "“Começamos por essa linha que falta?”"
+    ],
+    [
+     "Sem necessidade",
+     "Teste a bateria dos carros da oficina e mostre o giro: onde ele deixa de vender. Deixe catálogo e tabela de aplicação.",
+     "“Que dia eu volto pra fechar?”"
+    ]
+   ]
   },
   "31": {
    "t": {

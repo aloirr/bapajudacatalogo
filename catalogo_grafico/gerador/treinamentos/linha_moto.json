@@ -190,15 +190,38 @@
    }
   },
   "37": {
-   "celulas": {
-    "4": {
-     "0,0": "Falta do modelo"
-    }
-   },
-   "trocar": [
+   "tipo": "naofechou",
+   "t": "Não fechou? Os 6 motivos na linha moto",
+   "linhas": [
     [
-     "câmara (maior estoque BAP)",
-     "câmara (a que mais gira)"
+     "Prazo ou limite",
+     "Não prometa prazo nem limite fora da regra. Monte um pedido menor com os pares que mais giram (90/90-18 + CAR18).",
+     "“Se eu ajustar o pedido ao seu limite, fechamos?”"
+    ],
+    [
+     "Preço",
+     "Pneu com câmara nova: câmara velha fura o pneu novo. Óleo JASO MA: óleo de carro patina a embreagem e sai mais caro.",
+     "“Se eu resolver isso, fechamos?”"
+    ],
+    [
+     "Disponibilidade",
+     "Pneu: mesma medida, carga e velocidade iguais ou maiores. Vela e rolamento: pela referência ou pelo código. Anote a demanda.",
+     "“Se eu te passar o equivalente, fechamos?”"
+    ],
+    [
+     "Aplicação",
+     "Mostre no Catálogo BAP a aplicação, a medida do pneu e as referências cruzadas.",
+     "“Se eu te mostrar que serve, fechamos?”"
+    ],
+    [
+     "Fornecedor",
+     "Não brigue com ele. Entre pela linha em que ele perde venda: câmara (a que mais gira) ou óleo 4T JASO MA, com a amostra.",
+     "“Começamos por essa linha que falta?”"
+    ],
+    [
+     "Sem necessidade",
+     "Olhe o DOT dos pneus parados e o giro da loja: mostre onde ele deixa de vender. Deixe catálogo e amostra.",
+     "“Que dia eu volto pra fechar?”"
     ]
    ]
   },

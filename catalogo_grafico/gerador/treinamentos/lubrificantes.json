@@ -516,11 +516,40 @@
    }
   },
   "40": {
-   "celulas": {
-    "4": {
-     "0,0": "Falta do produto"
-    }
-   }
+   "tipo": "naofechou",
+   "t": "Não fechou? Os 6 motivos em lubrificantes",
+   "linhas": [
+    [
+     "Prazo ou limite",
+     "Não prometa prazo nem limite fora da regra. Monte um pedido menor com as viscosidades de maior giro.",
+     "“Se eu ajustar o pedido ao seu limite, fechamos?”"
+    ],
+    [
+     "Preço",
+     "O SL mais barato sai caro: óleo abaixo da norma do manual encurta a vida do motor e volta como reclamação. Mostre a norma no rótulo.",
+     "“Se eu resolver isso, fechamos?”"
+    ],
+    [
+     "Disponibilidade",
+     "Ofereça a mesma viscosidade com norma igual ou mais recente, nunca anterior. Anote a demanda.",
+     "“Se eu te passar esse, que atende o manual, fechamos?”"
+    ],
+    [
+     "Aplicação",
+     "Mostre no Catálogo BAP a aplicação, a viscosidade e a norma do manual.",
+     "“Se eu te mostrar que serve, fechamos?”"
+    ],
+    [
+     "Fornecedor",
+     "Não brigue com ele. Entre onde ele perde venda: óleo de moto, câmbio, fluidos e filtros, com a ficha técnica.",
+     "“Começamos por essa linha que falta?”"
+    ],
+    [
+     "Sem necessidade",
+     "Volte ao giro: quais viscosidades mais saem e qual ele perde por não ter. Deixe catálogo e ficha técnica.",
+     "“Que dia eu volto pra fechar?”"
+    ]
+   ]
   },
   "22": {
    "mover": {
