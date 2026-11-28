@@ -11,7 +11,8 @@ linhas_por_codigo e conferir_cabecalho (RD-0272; os base_v22 a base_v25 ficam co
 o gerar_site_copia e o contar_duvidoso das simulações (RD-0310; o simular_v26.py fica como rodou). Da v28 em diante,
 também o conferir_antes e o escrever (RD-0545; os base_v22 a base_v27 ficam como rodaram). Da v30 em diante, também
 o refazer, o texto_novo_difere (que o rodar usa), a aba das planilhas antes_depois e o INTERNO (RD-0703 e RD-0704; o
-base_v29.py e o simular_T0040.py ficam como rodaram).
+base_v29.py e o simular_T0040.py ficam como rodaram). Da v31 em diante, também o sem_interno (RD-0746; o
+base_v30.py fica como rodou).
 """
 from __future__ import annotations
 
@@ -40,6 +41,15 @@ CAB_VEICULOS = ["CODIGO_BAP", "FABRICANTE", "MODELO", "VERSAO", "ANO_INICIO", "A
 VAZIO = "(vazio)"                     # como a simulação mostra a célula vazia
 # dado interno que não sai em planilha nem em lista (preço, estoque, fornecedor e o histórico "| ANTERIOR")
 INTERNO = re.compile(r"ESTOQUE|\bFOB\b|\bUSD\b|\bMOQ\b|PRE[CÇ]O|R\$|BAP BOX|CUSTO|FORNECEDOR|RANKING|ANTERIOR", re.I)
+
+
+def sem_interno(wb) -> None:
+    """Para (sem gravar) se alguma célula de texto, em qualquer aba do wb, tem palavra interna (INTERNO)."""
+    for ws in wb.worksheets:
+        for row in ws.iter_rows():
+            for c in row:
+                if isinstance(c.value, str) and INTERNO.search(c.value):
+                    raise SystemExit(f"[PARADO] palavra interna na {ws.title} {c.coordinate}")
 
 
 def versao(n: int) -> Path:
