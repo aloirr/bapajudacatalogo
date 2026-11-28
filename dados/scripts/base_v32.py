@@ -67,8 +67,8 @@ F_TUC62 = ("APLICACAO (digitada desde a v8: 'Tucson 05 /15 (dianteira Direita ou
            "(CATALOGO_BAP_AGENTE_PRONTO.xlsx), o 'AA /AA' é ano a ano ('XSARA 98 /03', BIE20044; '206 99 /12', BIE20003; "
            "'SPRINTER 97 /12', BIE20075); regra de datas do catálogo: ano com 4 dígitos, intervalo com '–'. A Fraga "
            "(T-0040, v29) dá a esta peça o Tucson TRASEIRO (VEICULOS 21802 a 21804: 2.0 2004–2019, 2.7 2006–2011, 1.6 "
-           "2016–2026) e o Sportage dianteiro, e não traz o Tucson dianteiro: não confirma nem desmente o '05 /15' e não "
-           "muda a leitura do ano. Só o ano muda; o 'diant.' e o resto da célula ficam")
+           "2016–2026) e o Sportage (acrescentado na v14, sem posição), e não traz o Tucson dianteiro: não confirma "
+           "nem desmente o '05 /15' e não muda a leitura do ano. Só o ano muda; o 'diant.' e o resto da célula ficam")
 F_REF = ("REFERENCIAS_CRUZADAS (digitada desde a v8): 'TRW/AXIOS: BR10053102707' e, no fim do mesmo bloco, "
          "'AXIOS PN: BR10053102707' são o mesmo código da AXIOS. Fica o primeiro (que diz as duas marcas); as outras "
          "referências não mudam")
@@ -113,7 +113,7 @@ SEM_FONTE = [
                  "o código TRW", "o código TRW da bieleta"),
     ("BIE20062", "a posição do Tucson: a APLICACAO diz 'diant.' (desde a v8), o DETALHE_CATALOGO 'Tras. esq.' e a "
                  "POSICAO 'DIANTEIRO E TRASEIRO'; a Fraga dá a esta peça o Tucson TRASEIRO (VEICULOS 21802 a 21804) e "
-                 "o Sportage dianteiro, sem o Tucson dianteiro (VEICULOS 21800)",
+                 "o Sportage (acrescentado na v14, sem posição), sem o Tucson dianteiro (VEICULOS 21800)",
      "a tarefa é o ano (P7); não há fonte que diga se a peça serve no Tucson dianteiro, e as células são digitadas",
      "a confirmação da posição no Tucson (catálogo da PDX 21.11 ou da Nakata N99151; nova tarefa)"),
 ]
