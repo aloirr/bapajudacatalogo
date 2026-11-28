@@ -1,4 +1,4 @@
-"""v31 da base unificada · T-0042 (correções pontuais da base), SIMULAÇÃO.
+"""v31 da base unificada · T-0042 (correções pontuais da base).
 
 Pedido: R-20261127-161035-alexandre ("25 · BapAjuda, próxima tarefa: b (correções pontuais da base)"). Códigos:
 INT16529, LAM2004, CRU5280, CRU512022, ROL15106/15250, INT16639, INT16652, SFR30034, VEL7520, POL1712 e FCB6266.
@@ -15,9 +15,9 @@ Cada mudança leva o ponto da aba PONTOS_ALEXANDRE que a decide; a simulação m
 A conferência é em duas etapas, com o base_comum.comparar: (1) a base com as CELULAS, as REMOVIDAS, o LOG_CORRECOES e o
 LEIA-ME contra a v30 (removidas); (2) a base final contra a da etapa 1 (novas_no_fim). O "duvidoso" não sobe.
 
-AUTORIZAÇÃO: a simulação não mexe na base nem em dados/versoes; grava a dados/T-0042/v31/BASE_simulada_v31.xlsx e a
-antes_depois_v31.xlsx com "pendente do aprovado do Alexandre". Depois do aprovado (e das respostas dos PONTOS, que
-podem tirar mudanças desta lista), o --refazer parte da v30 do origin/main e grava a base e a v31.
+AUTORIZAÇÃO: sem --refazer, grava só em dados/T-0042/v31/ (BASE_simulada_v31.xlsx e antes_depois_v31.xlsx, com
+"pendente do aprovado do Alexandre"); com --refazer e --autorizacao, parte da v30 do origin/main e grava a base e a v31
+(aprovada em R-20261127-192108-alexandre).
 
 Uso: python3 dados/scripts/base_v31.py                                (simulação)
      python3 dados/scripts/base_v31.py --refazer --autorizacao "R-…"  (depois do aprovado)
@@ -29,14 +29,15 @@ import json
 import re
 import sys
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 import openpyxl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from base_comum import (BASE, CAB_VEICULOS, INTERNO, RAIZ, aba, acrescentar_leia_me, acrescentar_linhas,  # noqa: E402
+from base_comum import (BASE, CAB_VEICULOS, RAIZ, aba, acrescentar_leia_me, acrescentar_linhas,  # noqa: E402
                         acrescentar_log, antes_log, comparar, conferir_cabecalho, contar_duvidoso, gerar_site_copia,
-                        gravar, limpo, parar, refazer, sha, texto_novo_difere, versao)
+                        gravar, limpo, parar, refazer, sem_interno, sha, texto_novo_difere, versao)
 
 TAREFA, DATA = "T-0042", "27/11/2026"
 AUTORIZACAO = "pendente do aprovado do Alexandre"
@@ -207,8 +208,8 @@ PONTOS = [
      "cadastro: Uno, Palio, Siena e Strada 'Fire Flex', Punto 'Motores Fire Flex e T-Jet 1.4 Turbo', Astra, sem "
      "Versão, e Vectra '2.0 Flexpower / GNV', todos 2004–2020 e de volta ao site (as linhas próprias da Fraga ficam); "
      "e as 8 linhas com o ano igual ao texto (Gol, Fox, Bravo, Doblo, Grand Siena, Idea, Linea, Captur) de volta ao "
-     "site (o Gol, linha 35048 da v30, fica sem ano na base (o ANO_DUVIDA 'herdado' dele fica), mas a tela continua "
-     "mostrando 'Gol 1.0 · 2004–2020', que vem do texto da APLICACAO)",
+     "site (o Gol, linha 35048 da v30, fica na base com 2004–2020 e o ANO_DUVIDA 'herdado'; por causa dele, o site não "
+     "manda esse ano ao filtro, e a tela mostra 'Gol 1.0 · 2004–2020', que vem do texto da APLICACAO)",
      "b) só o Palio 'Fire Flex' 2004–2020 de volta ao site; o resto fica como está"),
     ("P4", "ROL15106/15250", "F-4000, F-350, D40 e Daily estão sem ano (ficam ocultos; o site mostra 1978–2012 pelo "
                              "cadastro); o A40 e o C40 do texto e do cadastro não têm linha (o site mostra o A-40 pelo "
@@ -297,7 +298,12 @@ def montar(wb, autorizacao: str) -> dict:
         linha["txt"].append(txt)
         linha["fonte"].append(fonte)
     for (cod, tipo), linhas in sorted(por_tipo.items()):
-        partes = [f"linha {n} ({vei}): {', '.join(x['txt'])}" for (n, vei), x in linhas.items()]
+        txts = [x["txt"] for x in linhas.values()]
+        comuns = [t for t in txts[0] if len(txts) > 1 and all(t in x for x in txts)]   # RD-0745: dito uma vez
+        quais = ", ".join(f"{n} ({vei})" for n, vei in linhas)
+        partes = [f"linhas {quais}: {', '.join(comuns)}"] if comuns else []
+        partes += [f"linha {n}{'' if comuns else f' ({vei})'}: {', '.join(t for t in x['txt'] if t not in comuns)}"
+                   for (n, vei), x in linhas.items() if any(t not in comuns for t in x["txt"])]
         fontes = dict.fromkeys(f for x in linhas.values() for f in x["fonte"])
         log.append([tipo, "VEICULOS", cod, None, f"VEICULOS: {'; '.join(partes)}. Fonte: {' | '.join(fontes)}. {fim}"])
     for cod, fab, mod, ver, ini, fim_ano, fonte, ponto in NOVAS:
@@ -326,7 +332,7 @@ def leia_me(autorizacao: str) -> list[tuple]:
     n_cel = len({(c, n) for c, n, *_ in CELULAS})
     return [
         ("BASE BAP UNIFICADA v31 (27/11/2026)", None),
-        ("VEICULOS (correções pontuais)", f"Correções pontuais com fonte (T-0042, R-20261127-161035-alexandre): "
+        ("VEICULOS (correções pontuais)", f"Com fonte (T-0042, R-20261127-161035-alexandre): "
                                           f"{len(CELULAS)} células em {n_cel} linhas (SFR30034, ROL15106/15250, "
                                           f"VEL7520), {len(REMOVIDAS)} linhas que saem (POL1712 AUDI A6, LAM2004 "
                                           f"VOLKSWAGEN Polo) e {len(NOVAS)} linhas novas no fim da aba (CRU5280, "
@@ -341,7 +347,7 @@ def leia_me(autorizacao: str) -> list[tuple]:
 
 
 def conferir(p1: Path, p2: Path, wb, r: dict, feitas: dict) -> list[str]:
-    """Etapa 1 (p1) contra a v30 e etapa 2 (p2) contra a p1; o valor das linhas novas; o 'duvidoso' não sobe."""
+    """As 2 etapas do docstring do módulo; o valor das linhas novas; o 'duvidoso' não sobe. Devolve dif, d0, d1."""
     dif = comparar(p1, versao(30), {"VEICULOS": r["celulas"]}, r["ult"], "v30", leia_n=r["leia_n"],
                    removidas={"VEICULOS": r["removidas"]})
     dif += texto_novo_difere(p1, wb, r["ult"], r["leia_n"])
@@ -352,7 +358,7 @@ def conferir(p1: Path, p2: Path, wb, r: dict, feitas: dict) -> list[str]:
             for (n, c), v in feitas.items() if salva["VEICULOS"].cell(n, c).value != v]
     d0, d1 = contar_duvidoso(openpyxl.load_workbook(versao(30), read_only=True)), contar_duvidoso(salva)
     dif += [f"{a}: 'duvidoso' subiu ({d0[a]} -> {d1[a]})" for a in d0 if d1[a] > d0[a]]
-    return dif
+    return dif, d0, d1
 
 
 # ---------------------------------------------------------------- efeito no site
@@ -370,6 +376,7 @@ def efeito_site(antes: dict, depois: dict) -> list[list]:
 
 
 def gravar_ad(r: dict, site: list[list], autorizacao: str, d0: dict, d1: dict, total: tuple) -> None:
+    aprovado = autorizacao != AUTORIZACAO
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
     n_tipo = {}
@@ -382,9 +389,11 @@ def gravar_ad(r: dict, site: list[list], autorizacao: str, d0: dict, d1: dict, t
               ("Linhas novas no fim (VEICULOS)", len(NOVAS), ""),
               ("Linhas no LOG_CORRECOES", len(r["log"]), "; ".join(f"{k} {v}" for k, v in sorted(n_tipo.items()))),
               ("Linhas no LEIA-ME", r["leia_n"], ""), ("APLICACAO e outros campos digitados", "não mudam", ""),
-              ("Sem fonte (não mudam)", len(SEM_FONTE), ", ".join(x[0] for x in SEM_FONTE)),
+              ("Sem fonte (não mudam)", len(SEM_FONTE), ", ".join(f"{c} ({n})" if n > 1 else c for c, n in Counter(x[0] for x in SEM_FONTE).items())),
               ("É do site (web-site; a base não muda)", len(DO_SITE), ", ".join(x[0] for x in DO_SITE)),
-              ("Pontos para o Alexandre", len(PONTOS), "a simulação mostra a opção a) de todos"),
+              ("Pontos para o Alexandre", len(PONTOS),
+               f"aprovado: opção a) em todos ({autorizacao.removeprefix('aprovado em ')})" if aprovado
+               else "a simulação mostra a opção a) de todos"),
               ("Células com a marca da revisão da P12, PRODUTOS (v30 -> v31)", d0["PRODUTOS"], d1["PRODUTOS"]),
               ("Células com a marca da revisão da P12, VEICULOS (v30 -> v31)", d0["VEICULOS"], d1["VEICULOS"]),
               ("Produtos no site (gerar_site do main, v30 -> v31)", total[0], total[1])]
@@ -399,12 +408,8 @@ def gravar_ad(r: dict, site: list[list], autorizacao: str, d0: dict, d1: dict, t
     aba(wb, "SEM_FONTE", ["CODIGO_BAP", "O QUE", "POR QUE NÃO MUDA", "O QUE FALTA"], SEM_FONTE)
     aba(wb, "DO_SITE", ["CODIGO_BAP", "O QUE SE PERDE NA TELA", "CAUSA NO SITE (web-site)"], DO_SITE)
     aba(wb, "PONTOS_ALEXANDRE", ["PONTO", "CODIGO_BAP", "PERGUNTA", "OPÇÃO a", "OPÇÃO b"], PONTOS)
-    aba(wb, "EFEITO_SITE", ["CODIGO_BAP", "CAMPO DO JSON", "ANTES (v30)", "DEPOIS (v31 simulada)"], site)
-    for ws in wb.worksheets:
-        for row in ws.iter_rows():
-            for c in row:
-                if isinstance(c.value, str) and INTERNO.search(c.value):
-                    raise SystemExit(f"[PARADO] palavra interna na {ws.title} {c.coordinate}")
+    aba(wb, "EFEITO_SITE", ["CODIGO_BAP", "CAMPO DO JSON", "ANTES (v30)", "DEPOIS (v31)" if aprovado else "DEPOIS (v31 simulada)"], site)
+    sem_interno(wb)
     SAIDA.mkdir(parents=True, exist_ok=True)
     wb.save(AD)
 
@@ -436,13 +441,12 @@ def main():
         wb.save(p1)
         _, feitas = novas(wb)
         wb.save(p2)
-        parar(conferir(p1, p2, wb, r, feitas))
+        dif, d0, d1 = conferir(p1, p2, wb, r, feitas)
+        parar(dif)
         if sha(BASE) != sha_antes:
             parar(["a base mudou durante a montagem"])
         g0 = gerar_site_copia(versao(30), Path(tmp) / "gs30")
         g1 = gerar_site_copia(p2, Path(tmp) / "gs31")
-        d0 = contar_duvidoso(openpyxl.load_workbook(versao(30), read_only=True))
-        d1 = contar_duvidoso(openpyxl.load_workbook(p2, read_only=True))
         gravar_ad(r, efeito_site(g0, g1), autorizacao, d0, d1, (g0["total"], g1["total"]))
         if aprovado:
             gravar(p2, versao(31))
