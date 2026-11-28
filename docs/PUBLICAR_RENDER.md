@@ -13,16 +13,18 @@ São três serviços, todos do mesmo Blueprint (`aloirr/bapajudacatalogo`):
 |---|---|---|
 | `bapajudacatalogo-login` | Serve o catálogo (`site/`) só com login, os usuários do admin e a página "Catálogos em PDF" (T-0022) | https://bapajudacatalogo-login.onrender.com |
 | `bapajudacatalogo` | Endereço antigo: só redireciona para o login. Os links `#/produto/...` continuam valendo | https://bapajudacatalogo.onrender.com |
-| `bapajudacatalogo-placas` | Busca por placa (T-0005): consulta a API PLACAS com a chave guardada no Render | (interno, chamado pelo site) |
+| `bapajudacatalogo-placas` | Busca por placa (T-0005): consulta a API PLACAS com a chave guardada no Render | https://bapajudacatalogo-placas.onrender.com (público, chamado pelo navegador; só aceita a origem do login, `ORIGEM_PERMITIDA`) |
 
 A base `.xlsx` não vai para o ar. O login serve só a pasta `site/` e os PDFs da lista do admin.
 
 ## Como uma mudança chega ao ar
 1. O PR é aprovado pelo po e mergeado no `main` (regra de merge do CLAUDE.md).
-2. O Render publica sozinho a cada merge no `main`. Cada serviço só é refeito quando muda um dos caminhos do `buildFilter` dele, no `render.yaml`.
-3. Os PRs **não** criam prévias no Render: nenhum serviço tem o bloco `previews` (T-0022).
+2. O Render publica sozinho a cada merge no `main`. O redirecionamento e o login só são refeitos quando muda um dos caminhos do `buildFilter` deles, no `render.yaml`. O serviço da placa só é refeito quando muda `servicos/placas/` (`rootDir`).
+3. Os PRs **não** criam prévias no Render (T-0022). O redirecionamento e o login têm `pullRequestPreviewsEnabled: false`. O serviço da placa não tem o campo, e a especificação do Blueprint diz que, sem ele, as prévias do serviço ficam desligadas. Prévia ligada por engano põe no ar mais uma cópia do serviço, com outro endereço: não ligue as prévias no painel (**Previews**, **Pull Request Previews**).
 
 ## Passo a passo no painel (só quando o `render.yaml` mudar)
+[SUPOSIÇÃO: o Blueprint está em sincronização manual. Se estiver em automática, o Render aplica sozinho no merge, e os passos abaixo servem só para conferir.]
+
 1. Entre em https://dashboard.render.com com a conta da BAP.
 2. Abra **Blueprints** e escolha `aloirr/bapajudacatalogo`.
 3. Clique em **Sync** (ou **Manual sync**). O Render mostra o que vai mudar: confira se são só os serviços e os campos que o PR mudou.
