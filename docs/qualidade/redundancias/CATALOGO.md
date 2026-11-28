@@ -555,13 +555,14 @@ Do RD-0134 ao RD-0145, os achados são do parecer do PR #34 (T-0016, governança
 | RD-0749 | baixa | dado | LEIA-ME da v31, linha 2; base_v31.py:329 | rótulo "VEICULOS (correções pontuais)" e o texto "Correções pontuais com fonte…" | T-0042 | catalogo-dados | CORRIGIDO (4e2b982) |
 | RD-0750 | baixa | código (comentário) | dados/scripts/base_v31.py:1, :18-20, :15-16 × :344 | "SIMULAÇÃO" e "respostas dos PONTOS" velhos no docstring; as 2 etapas descritas 2 vezes (só comentário; não segura) | T-0042 | catalogo-dados | CORRIGIDO (4e2b982) |
 | RD-0751 | — | texto (simulação) | antes_depois_v31.xlsx, DO_SITE (SFR30034) × PONTOS_ALEXANDRE (P10) | a tela do Bongo dita nas 2 abas | T-0042 | catalogo-dados | MANTIDO (texto da pergunta respondida pelo Alexandre) |
-| RD-0752 | baixa | texto (simulação) | antes_depois_v31.xlsx, aba RESUMO, "Pontos para o Alexandre"; base_v31.py:393-395 | o recado do aprovado (R-20261127-192108-alexandre) dito também na linha "Autorização", logo acima | T-0042 | catalogo-dados | ABERTO |
+| RD-0752 | baixa | texto (simulação) | antes_depois_v31.xlsx, aba RESUMO, "Pontos para o Alexandre"; base_v31.py:393-395 | o recado do aprovado (R-20261127-192108-alexandre) dito também na linha "Autorização", logo acima | T-0042 | catalogo-dados | CORRIGIDO (6066862) |
 
 ## Notas
 
 ### T-0042, correções pontuais da base (v31), 27/11/2026 (antes do PR)
 - `catalogo-dados/T-0042-v31` no `c1d7a09`: RD-0745 ao RD-0751. Relatório: `T-0042.md`. VOLTA PARA AJUSTE: seguram o RD-0745 e o RD-0746 (média) e o RD-0747 ao RD-0749 (baixa); não segura o RD-0750 (só comentário); MANTIDO: RD-0751. VEICULOS sem linha repetida. A observação do revisor sobre a P3 (Gol "sem ano na base") é exatidão, não redundância.
 - Reteste no `4e2b982` (v31 gravada de novo): RD-0745 ao RD-0750 corrigidos; a VEICULOS e as outras abas iguais às do `c1d7a09`, só 2 linhas do LOG e 1 do LEIA-ME mudam. Novo: RD-0752 (baixa, segura). VOLTA PARA AJUSTE.
+- Reteste no `6066862`: RD-0752 corrigido; a base com os mesmos valores do `4e2b982` (só o arquivo foi gravado de novo). LIBERADO, sem achado em aberto (MANTIDO: RD-0751).
 
 ### T-0040, aplicação da Fraga na VEICULOS (v29), 27/11/2026 (PR #228, rascunho)
 - RD-0670 ao RD-0676: branch `catalogo-dados/T-0040-v29` (`a77a097`). Relatório: `T-0040.md`. VOLTA PARA AJUSTE: seguram o RD-0670 ao RD-0675 (3 médias, 3 baixas); MANTIDO: RD-0676. VEICULOS sem linha repetida.
