@@ -232,9 +232,11 @@ main:focus, main:focus-visible { outline: none; }
 .trilha a { color: var(--texto-2); text-decoration: none; }
 .trilha a:hover { color: var(--verde-txt); }
 /* toque de 44 px nos links da trilha do produto sem aumentar a faixa (RD-0767); no A4 o .prod-topo some.
-   Presa pela base: o bottom -10px é o margin-bottom do .prod-topo (mudam juntos), e a área termina no topo do .prod */
+   Presa pela base: o bottom -10px é o margin-bottom do .prod-topo (mudam juntos). Com a trilha numa linha, a área
+   termina no topo do .prod; quando ela quebra, o código (span) fica por cima da área dos links de cima */
 .prod-topo .trilha a { position: relative; z-index: 1; } /* acima da foto (sticky) no computador */
 .prod-topo .trilha a::after { content: ""; position: absolute; left: -3px; right: -3px; bottom: -10px; height: 44px; }
+.prod-topo .trilha span { position: relative; z-index: 2; }
 /* foto pequena ao lado das informações (T-0014); clicar amplia (dialog.zoom) */
 .prod { display: grid; grid-template-columns: var(--foto-pc) minmax(0, 1fr); gap: 24px; align-items: start; }
 .prod-foto-box { position: sticky; top: var(--alto-topo); }
