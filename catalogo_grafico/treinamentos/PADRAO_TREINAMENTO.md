@@ -31,7 +31,7 @@ Ordem fixa, igual nos 3 originais:
    - argumentos e SPIN;
    - cross-sell;
    - "Fechamento em 3 etapas" (Peça, Não fechou, Você resolve), com os 6 motivos na faixa: prazo ou limite, preço, disponibilidade, aplicação, fornecedor, sem necessidade (RD-0631, R-20261127-200014-alexandre, item 2; a mesma lista em todos os decks, `MOTIVOS` do `treinamento_tipos.py`);
-   - "Não fechou? Os 6 motivos": uma linha por motivo, na ordem e com os nomes da faixa: prazo ou limite, preço, disponibilidade, aplicação, fornecedor, sem necessidade (R-20261127-224247-alexandre, item 5; tipo `naofechou` do `treinamento_tipos.py`, que para se a tabela fugir da faixa). A faixa ATENÇÃO traz a alçada de 15% e diz que, acima dela, o Price aprova.
+   - "Não fechou? Os 6 motivos": uma linha por motivo, na ordem e com os nomes da faixa: prazo ou limite, preço, disponibilidade, aplicação, fornecedor, sem necessidade (R-20261127-224247-alexandre, item 5; tipo `naofechou` do `treinamento_tipos.py`, que para se a tabela fugir da faixa). O motivo Fornecedor começa com "Não peça para trocar tudo." em todos os decks (R-20261128-000107-alexandre, item 114). A faixa ATENÇÃO traz a alçada de 15% e diz que, acima dela, o Price aprova, sem repetir o prazo e o limite da tabela (item 115).
 5. **Fechamento**: checklist do vendedor (10 itens) e teste de conhecimentos (6 perguntas).
 6. **Obrigado** (no desenho da capa): frase-resumo e site.
 

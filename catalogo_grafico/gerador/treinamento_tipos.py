@@ -184,8 +184,8 @@ def expandir(s):
             nomes = [ln[0] for ln in linhas]
             if nomes != [m[0].upper() + m[1:] for m in MOTIVOS]:
                 raise SystemExit(f'[PARADO] "Não fechou?": as linhas {nomes} fogem da faixa {MOTIVOS}')
-        o['t']['10'] = 'ATENÇÃO  |' + s.get('atencao', 'Desconto só dentro da alçada de 15%; acima disso, o Price aprova. '
-                                                      'Prazo e limite: nunca prometa fora da regra.')
+        # Sem repetir o prazo e o limite, que a linha "Prazo ou limite" da tabela já traz (R-20261128-000107-alexandre, item 115).
+        o['t']['10'] = 'ATENÇÃO  |' + s.get('atencao', 'Desconto só dentro da alçada de 15%; acima disso, o Price aprova.')
     elif tp == 'spin':
         o = _base(s, 37)
         for k, (sub, perg) in enumerate(s['spin']):
