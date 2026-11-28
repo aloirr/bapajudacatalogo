@@ -1688,8 +1688,8 @@
         if (x) { t = t.slice(0, x.index + x[1].length); repetido = true; }
       }
       // a cilindrada da versão do "ve" ("EA111 VHT 1.6 L 8V SOHC L4": "1.6 8V", T-0040) ou, sem ela, a do texto (o
-      // "Exceto 2.4" não dá cilindrada), só até o veículo seguinte com ano e cilindrada próprios (T-0043, item 10 da
-      // v31: o "2.7" de "Bongo K-2700 1997> · Pregio 2.7 1997>" é do Pregio, não do K-2700; SFR30034)
+      // "Exceto 2.4" não dá cilindrada; ateOutroVeiculo: o "2.7" de "Bongo K-2700 1997> · Pregio 2.7 1997>" é do Pregio,
+      // SFR30034, T-0043)
       const cv = cilDaVersao(ver), cil = cv !== null ? cv : cilDe((daVersao ? ateOutroVeiculo(t, m) : t).replace(RX_NEGA, " "))[0] || "";
       // só as faixas das entradas puras (doModelo); uma faixa no trecho e nenhuma pura: ela, como antes; várias e nenhuma pura: "—"
       // no trecho cortado no meio de uma palavra ou número no limite dos 120, o ano não lê o último pedaço, que está
@@ -2139,16 +2139,17 @@
   // idêntica a uma de antes (TER55228) e a do mesmo modelo e versão cuja faixa está dentro da de outra, com a mesma
   // cilindrada ou sem ela (R2 UX: a cópia sem ano sai; ROL0015E); as linhas do mesmo modelo juntas, dentro da marca,
   // na ordem em que a marca e o modelo aparecem (U2)
+  // toda faixa da célula Ano dentro da faixa g (a que não se lê não cabe; T-0043: o "an" no arrumar, a linha do "ve" no semRepetida)
+  const anosDentro = (an, g) => { const fs = faixasDaCelula(an).map(faixaDaCelula); return !!g && fs.length > 0 && fs.every((f) => f && g[0] <= f[0] && f[1] <= g[1]); };
   const NAO_SERVE = "Não serve"; // a Versão do modelo excluído (arrumar) e a lista do celular (tabelaVeiculos)
   function arrumar(p, tab) {
     const k = chaveApl, base = anoDaBase(p), fx = (r) => faixasDaCelula(r[4]).map(faixaDaCelula).filter(Boolean);
-    const fb = faixaDaCelula(base); // toda faixa da célula dentro do "an" (a que não se lê não cabe)
-    const cabeNaBase = (r) => !!fb && !!r[4] && fx(r).length === faixasDaCelula(r[4]).length && fx(r).every(([a, b]) => fb[0] <= a && b <= fb[1]);
+    const fb = faixaDaCelula(base);
     // a linha que antes ficava sem Versão e agora só tem a restrição (T-0033) não vira veículo novo: a Versão dela vai
     // para a linha do mesmo modelo, sem Versão, que a contém (como a cópia que saía antes)
     const soRestr = new Set();
     for (const r of tab) {
-      if (base && !r.comAnoVe && !cabeNaBase(r)) r[4] = base;
+      if (base && !r.comAnoVe && !anosDentro(r[4], fb)) r[4] = base;
       const antes = versaoLivre(versaoSemDetalhe(r[3]), r, p);
       r[3] = versaoTela(r[3], r, p);
       if (r[3] && !antes) soRestr.add(r);
@@ -2204,15 +2205,13 @@
   // Roda depois do texto, que dá o ano à linha
   const pedacos = (v) => String(v || "").split(" · ").map(chaveApl).filter(Boolean);
   const versaoCabe = (v, w) => pedacos(v).every((x) => pedacos(w).includes(x));
-  const anosDentro = (r, o) => { const g = faixaDaCelula(o[4]), fs = faixasDaCelula(r[4]).map(faixaDaCelula);
-    return !!g && fs.length > 0 && fs.every((f) => f && g[0] <= f[0] && f[1] <= g[1]); };
   const semRepetida = (tab) => { const k = chaveApl; return tab.filter((r) => { const f = !r[2] && !r[3] && faixaDaCelula(r[4]);
     const doModelo = tab.filter((o) => o !== r && o.comAnoVe && k(o[0]) === k(r[0]) && k(o[1]) === k(r[1]));
     if (!r.comAnoVe && cilsDe(r[2]).length > 1 && r[3] && !/[A-Za-zÀ-ÿ]/.test(r[3]) && cilsDe(r[2]).every((c) => doModelo.some((o) => cilsDe(o[2]).includes(c)))) return false;
     return !tab.some((o) => o !== r && o.comAnoVe && k(o[0]) === k(r[0]) && k(o[1]) === k(r[1])
       && ((!r.comAnoVe && (!r[2] || k(r[2]) === k(o[2])) && k(r[3]) === k(o[3]))
         || (f && (o[2] || o[3]) && ((g) => g && g[0] <= f[0] && f[1] <= g[1])(faixaDaCelula(o[4])))
-        || (!r.comAnoVe && r[2] && k(r[2]) === k(o[2]) && versaoCabe(r[3], o[3]) && anosDentro(r, o)))); }); };
+        || (!r.comAnoVe && r[2] && k(r[2]) === k(o[2]) && versaoCabe(r[3], o[3]) && anosDentro(r[4], faixaDaCelula(o[4]))))); }); };
   const tabelaDe = (p) => {
     if (!TABELA.has(p)) {
       CIL_MOTO = ehMoto(p);
