@@ -7,10 +7,11 @@ Textos aceitam as macros do treinamento_molde.py ({{cod:...}}, {{oj:...}}, {{pro
 
 DATA = 'Equipe Comercial Externa  ·  Novembro de 2026'
 DICA = 'DICA DE CAMPO  |'
+MOTIVOS = ('prazo ou limite', 'preço', 'disponibilidade', 'aplicação', 'fornecedor', 'sem necessidade')   # RD-0631 (R-20261127-200014-alexandre, item 2): a mesma do Onboarding
 NOTAS_FECHAMENTO = ('MENSAGEM-CHAVE\nFechar é uma etapa da venda, não um susto no fim. São três frases que todo vendedor '
                     'deve saber de cor.\n\nCOMO CONDUZIR\nLeia as três frases em voz alta e peça para o time repetir. '
                     'Reforce a faixa escura: sem pedido, o motivo é anotado — é assim que a gestão descobre onde perde venda.'
-                    '\n\nPERGUNTE AO TIME\nNeste sistema, qual dos 5 motivos vocês mais escutam?')
+                    '\n\nPERGUNTE AO TIME\nNeste sistema, qual dos 6 motivos vocês mais escutam?')
 NOTAS_CHECKLIST = ('MENSAGEM-CHAVE\nO checklist resume o treinamento em 12 atitudes. Vale usar antes de cada visita.\n\n'
                    'COMO CONDUZIR\nVolte ao slide “Ao final deste treinamento” e mostre que cada verbo virou um item. '
                    'Peça para cada um marcar o que já faz e escolher um item para começar amanhã.\n\n'
@@ -111,7 +112,9 @@ def expandir(s):
         (ia, da, ca), (ib, db, cb) = s['itens']
         o['img'].update({'4': ia, '7': ib})
         o['t'].update({'5': da, '6': ca, '8': db, '9': cb})
-        o['mover'] = {'4': [6.2, 1.62, 1.6, 0.95], '7': [6.2, 3.71, 1.6, 0.95]}
+        # cada item numa linha: foto de 2,1" x 1,9" e o texto ao lado, até a margem (MENOS É MAIS, T-0045)
+        o['mover'] = {'4': [6.2, 1.66, 2.1, 1.9], '5': [8.5, 1.9, 4.23, 0.85], '6': [8.5, 2.8, 4.23, 0.45],
+                      '7': [6.2, 3.8, 2.1, 1.9], '8': [8.5, 4.04, 4.23, 0.85], '9': [8.5, 4.94, 4.23, 0.45]}
         _dica(o, 13, s)
     elif tp == 'lista4':
         o = _base(s, 12)
@@ -189,10 +192,11 @@ def expandir(s):
             '6': '“Fechamos com esses itens?”',
             '7': 'Direto, logo depois de mostrar a aplicação no catálogo. Não espere o cliente pedir.',
             '12': '“O que falta pra fechar hoje?”',
-            '13': 'Escute até o fim. O motivo cai num destes 5: preço, prazo, aplicação, fornecedor ou sem necessidade.',
+            '13': f'Escute até o fim: o motivo é um dos {len(MOTIVOS)} da faixa abaixo.',
             '18': '“Se eu resolver isso, fechamos?”',
             '19': 'Prenda o cliente antes de resolver. Só resolva o que está dentro da regra.',
-            '21': 'Sem pedido? Anote o motivo:  |preço · prazo · aplicação · fornecedor · sem necessidade'})
+            '21': 'Sem pedido? Anote o motivo:  |' + ' · '.join(MOTIVOS)})
+        o['tamanho'] = {'21': 15}   # a lista dos 6 motivos numa linha só
         _dica(o, 25, s)
         o.setdefault('notas', NOTAS_FECHAMENTO)
     elif tp == 'checklist':

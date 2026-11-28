@@ -1350,13 +1350,16 @@
     "6": "“Fechamos com esses itens?”",
     "7": "Direto, logo depois de mostrar a aplicação no catálogo. Não espere o cliente pedir.",
     "12": "“O que falta pra fechar hoje?”",
-    "13": "Escute até o fim. O motivo cai num destes 5: preço, prazo, aplicação, fornecedor ou sem necessidade.",
+    "13": "Escute até o fim: o motivo é um dos 6 da faixa abaixo.",
     "18": "“Se eu resolver isso, fechamos?”",
     "19": "Prenda o cliente antes de resolver. Só resolva o que está dentro da regra.",
-    "21": "Sem pedido? Anote o motivo:  |preço · prazo · aplicação · fornecedor · sem necessidade",
+    "21": "Sem pedido? Anote o motivo:  |prazo ou limite · preço · disponibilidade · aplicação · fornecedor · sem necessidade",
     "25": "DICA DE CAMPO  |Peça técnica fecha quando o cliente confia na aplicação: mostre o código, a posição e o lado no Catálogo BAP antes de pedir o pedido."
    },
-   "notas": "MENSAGEM-CHAVE\nFechar é uma etapa da venda, não um susto no fim. São três frases que todo vendedor deve saber de cor.\n\nCOMO CONDUZIR\nLeia as três frases em voz alta e peça para o time repetir. Reforce a faixa escura: sem pedido, o motivo é anotado — é assim que a gestão descobre onde está perdendo venda.\n\nPERGUNTE AO TIME\nNa mecânica, qual destes 5 motivos vocês mais escutam? (Em geral, preço e dúvida na aplicação.)"
+   "notas": "MENSAGEM-CHAVE\nFechar é uma etapa da venda, não um susto no fim. São três frases que todo vendedor deve saber de cor.\n\nCOMO CONDUZIR\nLeia as três frases em voz alta e peça para o time repetir. Reforce a faixa escura: sem pedido, o motivo é anotado — é assim que a gestão descobre onde está perdendo venda.\n\nPERGUNTE AO TIME\nNa mecânica, qual destes 6 motivos vocês mais escutam? (Em geral, preço e dúvida na aplicação.)",
+   "tamanho": {
+    "21": 15
+   }
   },
   {
    "molde": 44,

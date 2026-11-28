@@ -832,6 +832,38 @@ def freio_pesado():
     return svg(W, H, ''.join(o))
 
 
+def cuica():
+    """Cuíca dupla (serviço e mola) vista de lado, sem marca: substitui a foto de capa com marca de outro fabricante."""
+    W, H = 1000, 640
+    cy = 330
+    o = []
+    # haste com rosca e garfo, saindo da câmara de serviço
+    o.append(path(f'M110,{cy} L300,{cy}', stroke=C3, sw=22))
+    o.append(''.join(path(f'M{x},{cy - 13} L{x + 8},{cy + 13}', stroke=LINHA, sw=3) for x in range(130, 230, 16)))
+    o.append(rect(60, cy - 34, 60, 68, fill=C2, stroke=LINHA, sw=4, rx=8))
+    o.append(circ(80, cy, 12, fill=BRANCO, stroke=LINHA, sw=4))
+    # 2 prisioneiros de fixação
+    for dy in (-120, 120):
+        o.append(path(f'M250,{cy + dy} L330,{cy + dy}', stroke=LINHA, sw=12))
+    # câmara de serviço (menor), anel central e câmara de mola (maior)
+    o.append(path(f'M330,{cy - 190} L470,{cy - 190} L470,{cy + 190} L330,{cy + 190} C300,{cy + 190} 300,{cy - 190} 330,{cy - 190} Z',
+                  fill=ESC, stroke=ESC, sw=4))
+    o.append(rect(470, cy - 205, 70, 410, fill=C1, stroke=LINHA, sw=4, rx=10))
+    o.append(path(f'M540,{cy - 225} L820,{cy - 225} C890,{cy - 225} 890,{cy + 225} 820,{cy + 225} L540,{cy + 225} Z',
+                  fill=ESC, stroke=ESC, sw=4))
+    # abraçadeiras
+    for x in (478, 532):
+        o.append(path(f'M{x},{cy - 212} L{x},{cy + 212}', stroke=C2, sw=10))
+    o.append(rect(486, cy - 240, 38, 34, fill=C2, stroke=LINHA, sw=3, rx=5))
+    # entradas de ar (serviço e estacionamento)
+    o.append(rect(380, cy - 240, 40, 52, fill=VERDE, stroke=VESC, sw=4, rx=6))
+    o.append(rect(640, cy - 275, 40, 52, fill=VERDE, stroke=VESC, sw=4, rx=6))
+    # tampa da câmara de mola (parafuso de liberação)
+    o.append(circ(890, cy, 26, fill=C2, stroke=LINHA, sw=4))
+    o.append(path(f'M916,{cy} L960,{cy}', stroke=LINHA, sw=12))
+    return svg(W, H, ''.join(o))
+
+
 DESENHOS = {
     'carro_sistemas': carro_sistemas,
     'motor_corte': motor_corte,
@@ -848,6 +880,7 @@ DESENHOS = {
     'amortecedor_corte': amortecedor_corte,
     'abs_sensor': abs_sensor,
     'freio_pesado': freio_pesado,
+    'cuica': cuica,
 }
 
 

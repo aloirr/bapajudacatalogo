@@ -886,18 +886,21 @@
     "6": "“Fechamos com esses itens?”",
     "7": "Direto, logo depois da amostra e das aplicações.",
     "12": "“O que falta pra fechar hoje?”",
-    "13": "Escute até o fim: o motivo é um dos 5 da faixa abaixo.",
+    "13": "Escute até o fim: o motivo é um dos 6 da faixa abaixo.",
     "18": "“Se eu resolver isso, fechamos?”",
     "19": "Só se for algo que você resolve.",
-    "21": "Sem pedido? Anote o motivo:  |preço · prazo ou limite · disponibilidade · já tem fornecedor · sem necessidade",
+    "21": "Sem pedido? Anote o motivo:  |prazo ou limite · preço · disponibilidade · aplicação · fornecedor · sem necessidade",
     "25": "DICA DE CAMPO  |O passo 6 é sem oferta de expositor: o pedido é dos itens que o cliente viu na amostra e nas aplicações."
    },
-   "notas": "MENSAGEM-CHAVE\nFechar é pedir: três frases, e sem pedido o motivo é anotado.\n\nCOMO CONDUZIR\nLeia as três frases em voz alta e peça para o time repetir. A terceira (\"Se eu resolver isso, fechamos?\") é usada só quando o motivo é algo que o vendedor resolve; ela é treinada aqui e na matinal, mas não está no card dos 10 passos. Reforce a faixa escura: os motivos anotados vão para o supervisor.\n\nPERGUNTE AO TIME\nQual dos 5 motivos vocês mais escutam? Como responderiam a ele?",
+   "notas": "MENSAGEM-CHAVE\nFechar é pedir: três frases, e sem pedido o motivo é anotado.\n\nCOMO CONDUZIR\nLeia as três frases em voz alta e peça para o time repetir. A terceira (\"Se eu resolver isso, fechamos?\") é usada só quando o motivo é algo que o vendedor resolve; ela é treinada aqui e na matinal, mas não está no card dos 10 passos. Reforce a faixa escura: os motivos anotados vão para o supervisor.\n\nPERGUNTE AO TIME\nQual dos 6 motivos vocês mais escutam? Como responderiam a ele?",
    "preencher": {
     "15": "tx1"
    },
    "cor_texto": {
     "17": "tx2"
+   },
+   "tamanho": {
+    "21": 15
    }
   },
   {
@@ -1375,11 +1378,11 @@
     "5": "Qual é a pergunta-chave do passo 2 (Apresentar)?",
     "9": "Qual é o \"feito quando\" do passo 5 (Vende quem oferece)?",
     "13": "Quais são as 3 etapas do fechamento, com as falas?",
-    "17": "Sem pedido, quais são os 5 motivos que o vendedor anota?",
+    "17": "Sem pedido, quais são os 6 motivos que o vendedor anota?",
     "21": "No Indicou, ganhou, quando a indicação conta como prospecção?",
     "25": "Em que dia e horário acontece a capacitação contínua do time?"
    },
-   "notas": "MENSAGEM-CHAVE\nO teste fixa os pontos principais. Faça em duplas ou em voz alta, sem consultar.\n\nCOMO CONDUZIR\nLeia uma pergunta por vez e peça a resposta a alguém diferente a cada pergunta.\n\nRESPOSTAS\n1. “Qual produto ou linha tem mais girado essa semana?”\n2. O cliente pegou a amostra.\n3. Peça (“Fechamos com esses itens?”); não fechou (“O que falta pra fechar hoje?”); você resolve (“Se eu resolver isso, fechamos?”).\n4. Preço, prazo ou limite, disponibilidade, já tem fornecedor e sem necessidade.\n5. Só quando o vendedor vai ao indicado e registra no formulário de prospecção.\n6. Na quarta, das 16:00 às 18:00 (pedidos do dia transmitidos antes das 16:00)."
+   "notas": "MENSAGEM-CHAVE\nO teste fixa os pontos principais. Faça em duplas ou em voz alta, sem consultar.\n\nCOMO CONDUZIR\nLeia uma pergunta por vez e peça a resposta a alguém diferente a cada pergunta.\n\nRESPOSTAS\n1. “Qual produto ou linha tem mais girado essa semana?”\n2. O cliente pegou a amostra.\n3. Peça (“Fechamos com esses itens?”); não fechou (“O que falta pra fechar hoje?”); você resolve (“Se eu resolver isso, fechamos?”).\n4. Prazo ou limite, preço, disponibilidade, aplicação, fornecedor e sem necessidade.\n5. Só quando o vendedor vai ao indicado e registra no formulário de prospecção.\n6. Na quarta, das 16:00 às 18:00 (pedidos do dia transmitidos antes das 16:00)."
   },
   {
    "molde": 47,

@@ -30,7 +30,7 @@ Ordem fixa, igual nos 3 originais:
 4. **Último módulo: Vender**. Segue sempre esta sequência:
    - argumentos e SPIN;
    - cross-sell;
-   - "Fechamento em 3 etapas" (Peça, Não fechou, Você resolve);
+   - "Fechamento em 3 etapas" (Peça, Não fechou, Você resolve), com os 6 motivos na faixa: prazo ou limite, preço, disponibilidade, aplicação, fornecedor, sem necessidade (RD-0631, R-20261127-200014-alexandre, item 2; a mesma lista em todos os decks, `MOTIVOS` do `treinamento_tipos.py`);
    - "Não fechou? Os 5 motivos": preço, prazo ou limite, estoque, fornecedor, sem necessidade. A faixa ATENÇÃO traz a alçada de 15% e diz que, acima dela, o Price aprova.
 5. **Fechamento**: checklist do vendedor (10 itens) e teste de conhecimentos (6 perguntas).
 6. **Obrigado** (no desenho da capa): frase-resumo e site.
@@ -57,7 +57,8 @@ Ordem fixa, igual nos 3 originais:
 | Dica de campo | Faixa verde-clara no pé do conteúdo, com lâmpada, "DICA DE CAMPO" em negrito e 1 ou 2 linhas. Uma por slide, no máximo. | `dica` em qualquer conteúdo |
 | Atenção | A mesma faixa, em laranja-claro, com o ícone de alerta laranja e a palavra "ATENÇÃO" em laranja-escuro `#8A3F00`. Uso: regra que não pode ser quebrada (norma, alçada, segurança). | `atencao` |
 | Cross-sell | Círculo escuro no centro, com a venda-âncora, e 3 cartões de cada lado com o que vai junto. | `hub` |
-| Fechamento em 3 etapas | 3 cartões (Peça, Não fechou, Você resolve) e faixa escura com os 5 motivos. | a fazer |
+| Fechamento em 3 etapas | 3 cartões (Peça, Não fechou, Você resolve) e faixa escura com os 6 motivos, numa linha (15 pt). O cartão 2 remete à faixa, sem repetir a lista. | `fechamento` |
+| Foto e 2 itens | Foto grande no cartão da esquerda; à direita, um item por linha: foto de 2,1" × 1,9" e o texto ao lado, até a margem (MENOS É MAIS, T-0045). Foto com marca de outro fabricante não entra: no lugar, um desenho (ex.: a cuíca do Freio). | `foto2` |
 | Não fechou | Tabela com Motivo, Responda com prova e Volte ao pedido, mais a faixa ATENÇÃO da alçada. | `tabela` |
 | Checklist | 2 colunas de 5 cartões, cada um com um "✓" no círculo verde. | `checklist` |
 | Quiz | 6 faixas, cada uma com o número em escuro num círculo laranja e a pergunta. As respostas ficam só nas notas. | `quiz` |

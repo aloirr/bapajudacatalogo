@@ -596,24 +596,23 @@
    "notas": "MENSAGEM-CHAVE\nNo caminhão, o freio é a ar: a cuíca empurra, a catraca transmite e ajusta, o came S abre as sapatas.\n\nCOMO CONDUZIR\nSiga os números: cuíca (1), haste (2), catraca (3), eixo (4), came S (5), sapata (6) e tambor (7).\n\nINSIGHT PARA O CAMPO\nNa base há {{n:Cuíca de Freio}} cuícas e {{n:Catraca de Freio}} catracas ATIVAS: venda de frotista."
   },
   {
-   "tipo": "foto2",
+   "tipo": "paineis",
    "k": "MÓDULO 05 · LINHA PESADA",
    "t": "Cuíca e catraca BAP",
-   "img": "capa:cover_19",
-   "itens": [
+   "paineis": [
     [
-     "capa:cover_19",
-     "Cuíca: a câmara de ar que aciona o freio. Na base, {{cod:CFR9001}}.",
-     "Para o frotista: freio de serviço e estacionamento."
+     "Cuíca (câmara de freio)",
+     "A câmara de ar que aciona o freio\nNa base, {{cod:CFR9001}}\nPara o frotista: freio de serviço e estacionamento",
+     "desenho:cuica"
     ],
     [
-     "capa:catraca",
-     "Catraca: transmite a força e ajusta a folga. Na base, {{cod:CAF10702}}.",
-     "Para o frotista: freio regulado e por igual."
+     "Catraca (ajustador)",
+     "Transmite a força e ajusta a folga\nNa base, {{cod:CAF10702}}\nPara o frotista: freio regulado e por igual",
+     "capa:catraca"
     ]
    ],
    "dica": "Catraca desregulada deixa o curso da haste grande: o caminhão freia menos. Inspeção periódica é rotina de frota.",
-   "notas": "MENSAGEM-CHAVE\nCuíca e catraca são as peças de giro do freio pesado.\n\nCOMO CONDUZIR\nMostre as fotos. A cuíca tem a parte de serviço e, nas de mola, a de estacionamento.\n\nINSIGHT PARA O CAMPO\nCom o frotista, fale de caminhão parado: a peça certa em mão evita dias sem rodar."
+   "notas": "MENSAGEM-CHAVE\nCuíca e catraca são as peças de giro do freio pesado.\n\nCOMO CONDUZIR\nÀ esquerda, a cuíca; à direita, a catraca. A cuíca tem a parte de serviço e, nas de mola, a de estacionamento.\n\nINSIGHT PARA O CAMPO\nCom o frotista, fale de caminhão parado: a peça certa em mão evita dias sem rodar."
   },
   {
    "tipo": "secao",
