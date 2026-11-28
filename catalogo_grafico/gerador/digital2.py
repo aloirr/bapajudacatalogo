@@ -286,14 +286,15 @@ class Doc:
     def barra(self, y0, pg, voltar=True, fundo='black'):
         escuro = fundo != 'green'                 # na abertura (faixa verde) o botão fica escuro
         x, yb, hb = MX, y0 + 7, 22
+        ya, ha = y0 + 4, 34                       # área de toque: 9 mm de altura, até a 2ª linha do rodapé (UX)
         if voltar:
             w = lw(self.BTN, 8.5, 'PB', .8) + 26
             self.rect(x, yb, w, hb, fill='green2' if escuro else 'black', r=hb / 2)
             self.label(x + w / 2, yb + (hb - 8.5 * 1.2) / 2 + .4, self.BTN, 8.5, 'black' if escuro else 'green2', 'PB', .8, 'center')
-            self.link(x - 4, yb - 3, w + 8, hb + 6, 'sumario')
+            self.link(x - 4, ya, w + 4, ha, 'sumario')   # termina na pílula: ~3 mm até o link do site (UX)
             x += w + 12
         self.label(x, y0 + 13, SITE_IG, 9.5, 'white', 'PB')
-        self.url(x - 4, yb - 3, lw(SITE_IG.split('  ')[0], 9.5, 'PB') + 8, hb + 6, SITE)
+        self.url(x, ya, lw(SITE_IG.split('  ')[0], 9.5, 'PB') + 4, ha, SITE)   # começa no texto
         xn = W - MX - 30
         self.label(W - MX, y0 + 12, f'{pg:02d}', 13, 'green2' if escuro else 'white', 'PB', 0, 'right')
         self.rect(xn - 10, y0 + 11, 1, 18, fill='divider' if escuro else 'gdark')
@@ -595,8 +596,7 @@ def pagina_sistema(dc, grupo, key, itens, pg):
         y += 44
     dc.rect(0, H - 56, W, 56, fill='green')
     dc.barra(H - 56, pg, fundo='green')
-    w = lw(LEGAL_B, 8.5, 'PB') + lw(LEGAL_R, 8.5, 'PR'); x = W / 2 - w / 2
-    x += dc.label(x, H - 56 + 34, LEGAL_B, 8.5, 'white', 'PB'); dc.label(x, H - 56 + 34, LEGAL_R, 8.5, 'white', 'PR')
+    dc.legal(H - 56 + 34, 9, 'white')            # aviso no tamanho das outras páginas (MC-0055)
     dc.end()
 
 
