@@ -26,6 +26,27 @@ Catálogo da **BAP AUTOPARTS**. Tudo é em **português do Brasil**: respostas, 
 5. O BAP Ajuda 2.0 (`aloirr/bapajuda2.0`) **não é mexido daqui**: ele vai ser reformulado como aplicativo.
 6. A BAP Central (`aloirr/bapcentral`) só lê a base. Avise o Alexandre quando a base mudar de formato.
 
+## MENOS É MAIS (T-0045)
+Pedido do Alexandre, 27/11/2026 (R-20261127-174951-alexandre), literal: "Crie uma regra para todos os agentes de todos os projetos: "MENOS É MAIS" as paginas precisam ficar totalmente preenchidas horizontalmente antes de ir para baixo. e precisam ter tamanhos padrões em todas as paginas, além de seguiram um padrão de mercado, de marca, de redundancia e design."
+
+Vale para o site (todas as telas, no computador e no celular) e para as páginas dos PDFs do catálogo. Tem quatro partes:
+1. **Sem excesso:** o conteúdo ocupa a largura útil antes de descer. Nada de coluna estreita com sobra lateral vazia quando há conteúdo para preencher.
+2. **Tamanhos padrão:** as mesmas larguras, margens, colunas, tipografia e componentes em todas as páginas.
+3. **Padrão de mercado:** catálogo de autopeças, com tabela, grade e cartões como o setor usa. Nenhuma marca de terceiros é copiada.
+4. **Padrão de marca, de redundância e de design:** a marca BAP (`docs/marca/`), o `corretor-redundancias` e os tokens do `designer-ux` (`docs/ux/`).
+- **Revisão:** o `designer-ux` e o `design-de-marca` reprovam a tela ou a página de PDF que deixe faixa lateral vazia com conteúdo que caberia ali, ou que fuja dos tamanhos padrão.
+- Mudança de layout continua indo antes como simulação (regra 3).
+
+### Botões sempre embaixo e juntos
+Pedido do Alexandre, 27/11/2026 (R-20261127-175856-alexandre), literal: "botoes sempre embaixo e juntos. fica feio varios botoes e varios lugares. coloque como regra de marca e design"
+
+É regra de marca e de design. Vale para o site e para os botões e links do PDF digital. Leitura do PO:
+- **Uma barra por bloco:** cada bloco (janela do produto, painel, cartão com ações) tem uma única barra de botões, no rodapé, com os botões juntos.
+- **Ações da página:** ficam numa barra no rodapé da página.
+- **Fora da barra:** só a busca, os filtros de busca e os links de linha (o código do produto, o "ver mais").
+- **Ordem:** ação à esquerda e destrutivo à direita. [SUPOSIÇÃO: o `designer-ux` ajusta a ordem ao padrão de mercado e à marca, e registra em `docs/ux/`.]
+- **Revisão:** o `designer-ux` e o `design-de-marca` reprovam a tela com botões espalhados. O `corretor-redundancias` aponta botão repetido em mais de um lugar.
+
 ## Time e quadro
 - **11 agentes** em `.claude/agents/`; como trabalham: `.coord/README.md`.
   - `po`: o **único** que conversa com o Alexandre. Transforma o pedido em tarefa e colhe o "aprovado".
