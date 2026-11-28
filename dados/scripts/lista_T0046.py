@@ -54,9 +54,9 @@ COLS = ["id_linha", "codigo_bap", "descricao", "montadora", "modelo", "versao", 
 COLS_VOLTA = ["id_linha", "codigo_bap", "montadora", "modelo", "motor", "ano_inicial", "ano_final", "decisao",
               "fonte_url", "observacao", "tipo_fonte", "em_conflito"]
 
-O4, OCN, OSR, OFF, ONR, ODP = ("4 códigos", "v30 conflito novo", "v30 sem resolução", "fora da Fraga",
-                               "não resolvida", "DE_PARA")
-ORDEM = [O4, OCN, OSR, OFF, ONR, ODP]
+O4, OCN, OSR, OFF, ONR, ODP, OFO = ("4 códigos", "v30 conflito novo", "v30 sem resolução", "fora da Fraga",
+                                    "não resolvida", "DE_PARA", "fora das origens")
+ORDEM = [O4, OCN, OSR, OFF, ONR, ODP]                              # OFO entra por último, com o motivo
 ESPERADO = {OCN: 86, OSR: 6, ONR: 2941, OFF: 483, ODP: 1187}     # números da tarefa (v30)
 FALTA = {"sem_ano": "os dois", "so_inicial": "fim", "so_final": "início"}
 
@@ -189,6 +189,25 @@ def main():
     if not (isinstance(r[4], int) and isinstance(r[5], int) and r[4] > r[5]):
         parar("a Ranger do INT16529 não está mais com a faixa invertida")
 
+    # ---- sem ano completo na v31 e em nenhuma das origens acima: entram como "fora das origens", menos os
+    # universais (R-20261127-225955-alexandre, decisão 108)
+    pesq_ids = {mapa[int(x["id_linha"])] for x in pesq}
+    manter = {mapa[int(x["id_linha"])] for x in pesq if x["decisao"] == "manter_atual"}
+    universal = {c for c, p in prods.items() if txt(p[P["LINHA"]]) == "UNIVERSAL"}
+    novas = set(range(1, len(v31) + 1)) - set(mapa.values())        # as linhas que a v31 pôs
+    fora_lista, extra = [], {}
+    for j, r in enumerate(v31, 1):
+        if j in por_id or tipo_ano(r[4], r[5]) == "completa":
+            continue
+        motivo = ("UNIVERSAL" if r[0] in universal else "manter_atual da T-0040" if j in manter else
+                  "linha nova da v31" if j in novas else "fora da lista da T-0040" if j not in pesq_ids else "outro")
+        if motivo == "outro":
+            parar(f"id {j} ({r[0]}) sem ano completo e sem motivo conhecido")
+        fora_lista.append([j, r[0], txt(r[1]), txt(r[2]), txt(r[3]), ano_atual(r[4], r[5]), motivo,
+                           "fica fora: sem ano (decisão 5 de 26/11)" if motivo == "UNIVERSAL" else "entra na LISTA"])
+        if motivo != "UNIVERSAL":
+            extra[j] = f"{OFO} ({motivo})"
+
     # ---- a LISTA
     def desc_refs(cod: str) -> tuple[str, str]:
         p = site.get(cod)
@@ -197,9 +216,9 @@ def main():
         return desc, refs
 
     lista = []
-    for j in sorted(por_id):
+    for j in sorted(set(por_id) | set(extra)):
         r = v31[j - 1]
-        origem = min(por_id[j], key=ORDEM.index)
+        origem = min(por_id[j], key=ORDEM.index) if j in por_id else extra[j]
         t = tipo_ano(r[4], r[5])
         conflito = origem in (OCN, OSR) or j == ranger or OCN in por_id[j] or OSR in por_id[j]
         desc, refs = desc_refs(r[0])
@@ -221,21 +240,6 @@ def main():
     if len(ids) != len(set(ids)):
         parar("id_linha repetido na LISTA")
 
-    # ---- o que fica fora (sem ano completo na v31 e em nenhuma origem)
-    pesq_ids = {mapa[int(x["id_linha"])] for x in pesq}
-    manter = {mapa[int(x["id_linha"])] for x in pesq if x["decisao"] == "manter_atual"}
-    universal = {c for c, p in prods.items() if txt(p[P["LINHA"]]) == "UNIVERSAL"}
-    novas = set(range(1, len(v31) + 1)) - set(mapa.values())        # as linhas que a v31 pôs
-    fora_lista = []
-    for j, r in enumerate(v31, 1):
-        if j in por_id or tipo_ano(r[4], r[5]) == "completa":
-            continue
-        motivo = ("UNIVERSAL: fica sem ano (decisão 5 de 26/11)" if r[0] in universal else
-                  "manter_atual na pesquisa da T-0040 (a fonte confirmou o ano atual)" if j in manter else
-                  "linha nova da v31 (T-0042), com o ano do texto" if j in novas else
-                  "não estava na lista da T-0040" if j not in pesq_ids else "outro")
-        fora_lista.append([j, r[0], txt(r[1]), txt(r[2]), txt(r[3]), ano_atual(r[4], r[5]), motivo])
-
     resumo = montar_resumo(lista, conta, fora_lista, prods, P, v30, v31)
     gravar(lista, resumo)
     if sha(BASE) != antes:
@@ -248,7 +252,7 @@ def main():
         c = conta[g]
         print(f"  grupo {g}: v30 {c['v30']} | saiu na v31 {len(c['saiu'])} | resolvidas {len(c['resolvidas'])} | "
               f"a pesquisar {c['fica']}")
-    print(f"fora da lista (sem ano completo e sem origem): {len(fora_lista)}")
+    print(f"fora das origens: {len(fora_lista)} ({len(extra)} entram na LISTA)")
     print("sha256 base:", antes, "(sem mudança)")
 
 
@@ -284,6 +288,11 @@ def montar_resumo(lista, conta, fora_lista, prods, P, v30, v31) -> list[list]:
               "Taos do INT16501 (conflito, '2021+'); Ranger do INT16529 (conflito, 2019–2016); TL do INT16652 (sem "
               "ano); FCB6266 Van 310 D e Silverado Conquest (1997+ no texto, sem linha própria); INT16639 Gurgel "
               "BR800, Karmann Ghia, Puma, SP2 e TC e INT16652 Puma, SP2 e TC (no texto, sem linha e sem ano)"])
+    nfo = [l for l in lista if l[9].startswith(OFO)]
+    mot = Counter(l[9][len(OFO) + 2:-1] for l in nfo)
+    R.append([OFO, "", "", "", "", len(nfo), len(nfo),
+              "sem ano completo na v31 e em nenhuma origem acima; entram pela R-20261127-225955-alexandre (decisão "
+              "108), menos os 2 universais. A origem leva o motivo: " + "; ".join(f"{k} {n}" for k, n in mot.items())])
     R.append(["TOTAL", "", "", "", "", "", len(lista), "id_linha vazio = veículo do texto sem linha na VEICULOS"])
     R.append([])
     R.append(["2. Por o_que_falta", "linhas", "códigos"])
@@ -291,14 +300,14 @@ def montar_resumo(lista, conta, fora_lista, prods, P, v30, v31) -> list[list]:
         ls = [l for l in lista if l[8] == k]
         R.append([k, len(ls), len({l[1] for l in ls})])
     R.append([])
-    R.append(["3. Por família (PRODUTOS.FAMILIA)", "linhas", "códigos"] + ORDEM)
+    R.append(["3. Por família (PRODUTOS.FAMILIA)", "linhas", "códigos"] + ORDEM + [OFO])
     fam = defaultdict(list)
     for l in lista:
         fam[txt(prods[l[1]][P["FAMILIA"]]) or "(sem família)"].append(l)
     for f in sorted(fam, key=lambda f: (-len(fam[f]), f)):
         ls = fam[f]
-        oc = Counter(l[9] for l in ls)
-        R.append([f, len(ls), len({l[1] for l in ls})] + [oc.get(o, 0) for o in ORDEM])
+        oc = Counter(OFO if l[9].startswith(OFO) else l[9] for l in ls)
+        R.append([f, len(ls), len({l[1] for l in ls})] + [oc.get(o, 0) for o in ORDEM + [OFO]])
     R.append([])
     R.append(["4. Resolvido ou saído entre a v30 e a v31 (T-0042)", "id_linha v30", "id_linha v31", "código",
               "veículo", "ano na v31", "grupo"])
@@ -312,12 +321,12 @@ def montar_resumo(lista, conta, fora_lista, prods, P, v30, v31) -> list[list]:
                       ano_atual(r[4], r[5]), g])
     R.append(["os 92 da v30 (DIVERGENCIAS)", "", "", "", "nenhum mudou na v31", "", ""])
     R.append([])
-    R.append(["5. Sem ano completo na v31 e fora das origens da tarefa (não entram; decisão do po)", "id_linha v31",
-              "código", "montadora", "modelo", "versão", "ano atual", "motivo"])
+    R.append(["5. Sem ano completo na v31 e fora das origens da tarefa (R-20261127-225955-alexandre)", "id_linha v31",
+              "código", "montadora", "modelo", "versão", "ano atual", "motivo", "na LISTA?"])
     for x in fora_lista:
         R.append([""] + x)
     R.append([])
-    R.append(["6. Códigos fora da Fraga sem linha na VEICULOS (não entram: falta a aplicação)", "códigos"])
+    R.append(["6. Códigos fora da Fraga sem linha na VEICULOS (não entram: vão para a T-0052, de aplicação)", "códigos"])
     sl = conta[OFF]["sem_linha"]
     for k in range(0, len(sl), 10):
         R.append(["", ", ".join(sl[k:k + 10])])
@@ -349,6 +358,9 @@ INSTRUCOES = [
     ("Conflitos", "Os 92 da v30 e a Ranger do INT16529 (2019–2016, faixa invertida). O que a T-0040 achou para cada um "
                   "está na aba DIVERGENCIAS de dados/T-0040/v30/antes_depois_v30.xlsx (faixa pesquisada, faixa da "
                   "Fraga e a URL). O Taos do INT16501 fica '2021' e a Ranger fica como está até a pesquisa."),
+    ("Fora das origens", "As 31 linhas sem ano completo que não estavam em nenhum grupo (R-20261127-225955-alexandre, "
+                         "decisão 108): o motivo vai entre parênteses na origem. Nas 'manter_atual da T-0040', a fonte "
+                         "da T-0040 confirmou o ano que existe; falta a outra ponta."),
     ("id_linha vazio", "Veículo do texto da APLICACAO sem linha na VEICULOS (FCB6266 Van 310 D e Silverado Conquest; "
                        "INT16639 Gurgel BR800, Karmann Ghia, Puma, SP2 e TC; INT16652 Puma, SP2 e TC). Volte com o "
                        "id_linha vazio e com codigo_bap, montadora e modelo iguais aos da lista. Se a montadora certa "
